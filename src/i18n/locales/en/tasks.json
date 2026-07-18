@@ -39,6 +39,13 @@
   "drawer": {
     "label": "Activity",
     "createdAt": "Created on {{date}}",
+    "archivedBanner": {
+      "since": "Archived on {{date}}",
+      "flag": "Archived",
+      "restore": "Restore",
+      "restored": "Task restored.",
+      "restoreFailed": "Restore failed. Please try again."
+    },
     "markDone": "Mark done",
     "tags": "Tags",
     "tabs": {
@@ -69,6 +76,7 @@
     "status": "Status",
     "priority": "Priority",
     "due": "Due date",
+    "dueTime": "Time",
     "assignee": "Assigned to",
     "owner": "Created by",
     "description": "Description"
@@ -109,6 +117,7 @@
     "assigneePlaceholder": "Agency (nobody)",
     "status": "Status",
     "due": "Due date",
+    "dueTime": "Time",
     "priority": "Priority",
     "description": "Description",
     "descriptionPlaceholder": "Enter…",

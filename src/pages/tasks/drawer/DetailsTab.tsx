@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
-import { Field, SelectField, DateField } from '@/components/forms/fields'
+import { Field, SelectField, DateField, TextField } from '@/components/forms/fields'
 import Avatar from '@/components/ui/Avatar'
 import SoftChip from '@/components/ui/SoftChip'
 import RichTextEditor from '@/components/ui/RichTextEditor'
@@ -11,7 +11,8 @@ import type { TaskLookupItem } from '@/context/TaskLookupsContext'
 import { useUsers } from '@/lib/queries'
 import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
-import type { TaskDetail, Task } from '@/types/task'
+import { isTaskOverdue, dueDateTime } from '../data/mapTask'
+import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
 import type { CSSProperties, ReactNode } from 'react'
 
@@ -19,7 +20,6 @@ interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: stri
 
 // Display name for a user record (tolerant of the various shapes /users returns).
 const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || '—'
-const isOverdue = (task: Task): boolean => !!(task.due && !task.statusIsDone && new Date(task.due) < new Date(new Date().toDateString()))
 
 // One read-mode row: muted label left, value right.
 function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
@@ -38,7 +38,7 @@ function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
  */
 export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpdate: (patch: Record<string, unknown>) => void }) {
   const { t } = useTranslation('tasks')
-  const { formatDate } = useDateFormat()
+  const { formatDate, formatDateTime } = useDateFormat()
   const { statuses, types, priorities } = useTaskLookups()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
 
@@ -49,7 +49,7 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
   // Enter edit mode with a draft seeded from the current values.
   const startEdit = () => {
     setDraft({ typeKey: task.typeKey, statusKey: task.statusKey, priorityKey: task.priorityKey,
-      due: task.due || '', assigneeId: task.assigneeId ?? '', description: task.description ?? '' })
+      due: task.due || '', dueTime: task.dueTime || '', assigneeId: task.assigneeId ?? '', description: task.description ?? '' })
     setEditing(true)
   }
   const setD = (k: string, v: unknown) => setDraft(d => ({ ...d, [k]: v }))
@@ -59,7 +59,8 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
     const sel = users.find(u => String(u.id) === String(draft.assigneeId))
     const assignee = sel ? { name: userName(sel), initials: initialsOf(userName(sel)), color: sel.avatar_color ?? null } : null
     onUpdate({ typeKey: draft.typeKey, statusKey: draft.statusKey, priorityKey: draft.priorityKey,
-      due: draft.due || '', description: draft.description, assigneeId: draft.assigneeId || null, assignee })
+      due: draft.due || '', dueTime: draft.dueTime || '', description: draft.description,
+      assigneeId: draft.assigneeId || null, assignee })
     setEditing(false)
   }
 
@@ -81,7 +82,9 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
             <button onClick={() => setEditing(false)} title={t('modal.cancel')} aria-label={t('modal.cancel')}
               style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
           </div>
-        ) : (
+        ) : !task.archived && (
+          // No edit on an ARCHIVED task — the PATCH 404s while soft-deleted (measured:
+          // TaskController::update findOrFail); restore first (mirrors the header gating).
           <button onClick={startEdit} title={t('details.title')} aria-label={t('details.title')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
             <Edit2 size={13} />
@@ -94,7 +97,11 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
           <Field label={t('details.type')}><SelectField value={draft.typeKey as string} onChange={v => setD('typeKey', v)} options={opts(types)} /></Field>
           <Field label={t('details.status')}><SelectField value={draft.statusKey as string} onChange={v => setD('statusKey', v)} options={opts(statuses)} /></Field>
           <Field label={t('details.priority')}><SelectField value={draft.priorityKey as string} onChange={v => setD('priorityKey', v)} options={opts(priorities)} /></Field>
-          <Field label={t('details.due')}><DateField value={draft.due as string} onChange={v => setD('due', v)} /></Field>
+          {/* TASK-DUE-TIME-1: date + optional time-of-day, paired half-row. */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <Field label={t('details.due')}><DateField value={draft.due as string} onChange={v => setD('due', v)} /></Field>
+            <Field label={t('details.dueTime')}><TextField type="time" value={draft.dueTime as string} onChange={v => setD('dueTime', v)} /></Field>
+          </div>
           <Field label={t('details.assignee')}><SelectField value={String(draft.assigneeId)} onChange={v => setD('assigneeId', v)} options={assigneeOpts} /></Field>
           {/* Description = the note body — same rich editor as the candidate profile text. */}
           <Field label={t('details.description')}>
@@ -108,8 +115,9 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
           <Row label={t('details.status')}>{task.statusLabel ? <SoftChip label={task.statusLabel} color={task.statusColor} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
           <Row label={t('details.priority')}>{task.priorityLabel ? <SoftChip label={task.priorityLabel} color={task.priorityColor} dot /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
           <Row label={t('details.due')}>
-            <span style={{ fontSize: 12, color: task.due ? (isOverdue(task) ? 'var(--color-danger)' : 'var(--text)') : 'var(--text-muted)', fontWeight: isOverdue(task) ? 600 : 400 }}>
-              {task.due ? formatDate(task.due) : '—'}
+            <span style={{ fontSize: 12, color: task.due ? (isTaskOverdue(task) ? 'var(--color-danger)' : 'var(--text)') : 'var(--text-muted)', fontWeight: isTaskOverdue(task) ? 600 : 400 }}>
+              {/* TASK-DUE-TIME-1: DD-MM-YYYY HH:mm when a time is set, date-only otherwise. */}
+              {task.due ? (task.dueTime ? formatDateTime(dueDateTime(task.due, task.dueTime)) : formatDate(task.due)) : '—'}
             </span>
           </Row>
           <Row label={t('details.assignee')}>

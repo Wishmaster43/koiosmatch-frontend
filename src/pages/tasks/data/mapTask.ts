@@ -49,13 +49,51 @@ export function mapTask(t: ApiTask = {}): Task {
     } : null,
     owner: { name: owner.name ?? t.owner_name ?? '' },
     due: t.due_date ?? t.due_at ?? '',
+    // TASK-DUE-TIME-1: optional "HH:mm"; '' means the task has no time-of-day set.
+    dueTime: t.due_time ?? '',
     completedAt: t.completed_at ?? '',
     tags: Array.isArray(t.tags) ? t.tags.filter(Boolean) : [],
     links,
     linkLabel: firstLinkLabel(links),
     commentCount: t.comment_count ?? (t.comments?.length ?? 0),
     createdAt: t.created_at ?? '',
+    // Not returned by the API today (measured); the page sets this from which
+    // fetch (active vs ?archived=1) produced the row — kept here for a stable default.
+    archived: Boolean(t.archived),
+    archivedAt: t.deleted_at ?? null,
   }
+}
+
+/**
+ * dueDateTime — combine a date-only `due` ("YYYY-MM-DD") with an optional "HH:mm"
+ * `dueTime` into one Date, for overdue comparisons and DD-MM-YYYY HH:mm display.
+ * Falls back to midnight of the due date when no time is set. Null on a missing/
+ * unparseable date so callers never render "Invalid Date".
+ */
+export function dueDateTime(due?: string, dueTime?: string): Date | null {
+  if (!due) return null
+  // A bare YYYY-MM-DD parses as UTC midnight — anchor it to LOCAL wall-clock time
+  // instead (with the HH:mm, or 00:00), so "today 14:30" means the user's 14:30.
+  const dateOnly = due.slice(0, 10)
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(dateOnly)
+    ? new Date(`${dateOnly}T${dueTime || '00:00'}:00`)
+    : new Date(due)
+  return isNaN(d.getTime()) ? null : d
+}
+
+/**
+ * isTaskOverdue — a task is overdue once its due MOMENT has passed and it isn't
+ * done. Time-aware (TASK-DUE-TIME-1): with a due_time set, "today at 14:00" is
+ * overdue only after 14:00; without one, the legacy day-level rule stands (overdue
+ * only once the whole due DAY has passed — due-today never counts as overdue).
+ */
+export function isTaskOverdue(task: { due?: string | null; dueTime?: string | null; statusIsDone?: boolean }, now: Date = new Date()): boolean {
+  if (!task.due || task.statusIsDone) return false
+  if (task.dueTime) {
+    const at = dueDateTime(task.due, task.dueTime)
+    return at != null && at < now
+  }
+  return new Date(task.due) < new Date(now.toDateString())
 }
 
 /**

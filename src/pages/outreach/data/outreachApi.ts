@@ -20,8 +20,13 @@ export const createCampaign = (body: Record<string, unknown>) =>
 export const updateCampaign = (id: string, body: Record<string, unknown>) =>
   api.patch(`/outreach-campaigns/${id}`, body).then(unwrap)
 
-// Soft-delete (archive) a campaign.
+// Soft-delete (archive) a campaign — per-id route (enkelstuks-sweep: there is no
+// outreach bulk route; the bulk bar fans out over this one).
 export const deleteCampaign = (id: string) => api.delete(`/outreach-campaigns/${id}`)
+
+// Un-archive a campaign (enkelstuks-sweep, BE 9170e40: POST /outreach-campaigns/
+// {id}/restore, gated outreach.update). Returns the fresh campaign detail.
+export const restoreCampaign = (id: string) => api.post(`/outreach-campaigns/${id}/restore`).then(unwrap)
 
 // (Re)fill targets from a pool; idempotent on the backend.
 export const generateTargets = (id: string, poolId?: string) =>

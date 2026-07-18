@@ -76,6 +76,13 @@
   "drawer": {
     "label": "Bellijst",
     "createdAt": "Aangemaakt op {{date}}",
+    "archivedBanner": {
+      "since": "Gearchiveerd op {{date}}",
+      "flag": "Gearchiveerd",
+      "restore": "Herstellen",
+      "restored": "Bellijst hersteld.",
+      "restoreFailed": "Herstellen mislukt. Probeer het opnieuw."
+    },
     "tabs": {
       "targets": "Bellijst",
       "extra": "Extra"

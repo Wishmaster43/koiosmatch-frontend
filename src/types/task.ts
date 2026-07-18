@@ -31,12 +31,19 @@ export interface Task {
   assignee: { name: string; initials: string; color: string | null } | null
   owner: { name: string }
   due: string
+  // TASK-DUE-TIME-1 (BE 3f1274d): optional 24h "HH:mm" time-of-day on the due date.
+  dueTime: string
   completedAt: string
   tags: string[]
   links: TaskLink[]
   linkLabel: string
   commentCount: number
   createdAt: string
+  // Enkelstuks-sweep: soft-delete state. The list resource carries no `deleted_at`/
+  // `archived` field yet (measured — TaskListResource/TaskDetailResource), so this is
+  // derived client-side from which fetch (active vs ?archived=1) produced the row.
+  archived?: boolean
+  archivedAt?: string | null
 }
 
 /** The enriched task model rendered by the drawer tabs. */
@@ -74,8 +81,14 @@ export interface ApiTask {
   owner_name?: string
   due_date?: string
   due_at?: string
+  // TASK-DUE-TIME-1: "HH:mm" (24h), already trimmed to 5 chars by the API resource.
+  due_time?: string
   completed_at?: string
   created_at?: string
+  // Present only when the row came from a soft-deleted-only fetch (never returned
+  // by the backend today — see the Task interface comment above).
+  archived?: boolean
+  deleted_at?: string | null
   tags?: string[]
   links?: Array<{ type?: string; linkable_type?: string; id?: Id; linkable_id?: Id; label?: string; name?: string }>
   comment_count?: number

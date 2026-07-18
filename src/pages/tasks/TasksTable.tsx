@@ -9,11 +9,9 @@ import EntityNameCell from '@/components/ui/EntityNameCell'
 import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { isTaskOverdue, dueDateTime } from './data/mapTask'
 import type { Task } from '@/types/task'
 import type { Id } from '@/types/common'
-
-// A task is overdue when its due date is in the past and it isn't in a done status.
-const isOverdue = (r: Task): boolean => !!(r.due && !r.statusIsDone && new Date(r.due) < new Date(new Date().toDateString()))
 
 const dash = <span style={{ color: 'var(--text-muted)' }}>—</span>
 // Neutral grey fallback (§3A owner-cell convention) when the assignee has no colour.
@@ -52,7 +50,7 @@ export default function TasksTable({
   selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef,
 }: TasksTableProps) {
   const { t } = useTranslation('tasks')
-  const { formatDate } = useDateFormat()
+  const { formatDate, formatDateTime } = useDateFormat()
   // Tenant display settings (Settings → Tasks → Table display). Coloured chips ON by
   // default; off = plain text. One flag per column.
   const settings = useAllSettings()
@@ -87,10 +85,13 @@ export default function TasksTable({
       render: r => r.links.length === 0
         ? dash
         : <EntityNameCell name={r.links[0].label} extra={r.links.length > 1 ? r.links.length - 1 : undefined} /> },
-    // Due date — DD-MM-YYYY, red when overdue.
+    // Due date — DD-MM-YYYY, red when overdue; DD-MM-YYYY HH:mm when a due_time is
+    // set (TASK-DUE-TIME-1) — date-only tasks keep the plain date, never fabricated.
     { key: 'due', header: t('cols.due'), sortable: true, sortValue: r => r.due || '',
       render: r => r.due
-        ? <span style={{ fontSize: 12, color: isOverdue(r) ? 'var(--color-danger)' : 'var(--text-muted)', fontWeight: isOverdue(r) ? 600 : 400 }}>{formatDate(r.due)}</span>
+        ? <span style={{ fontSize: 12, color: isTaskOverdue(r) ? 'var(--color-danger)' : 'var(--text-muted)', fontWeight: isTaskOverdue(r) ? 600 : 400 }}>
+            {r.dueTime ? formatDateTime(dueDateTime(r.due, r.dueTime)) : formatDate(r.due)}
+          </span>
         : dash },
     { key: 'createdAt', header: t('cols.created'), nowrap: true, sortable: true, sortValue: r => r.createdAt || '',
       cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => formatDate(r.createdAt) },

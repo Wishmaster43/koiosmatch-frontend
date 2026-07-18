@@ -23,6 +23,7 @@ import { initialsOf } from '@/lib/initials'
 import { useUsers } from '@/lib/queries'
 import { useOutreachDetail } from './hooks/useOutreachDetail'
 import TargetsTab from './drawer/TargetsTab'
+import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import type { Id } from '@/types/common'
 
 // Campaign status → semantic colour for the header badge (draft calm, done success).
@@ -33,23 +34,32 @@ const STATUS_COLOR: Record<string, string> = {
 interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: string; email?: string }
 const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || '—'
 
-export default function OutreachDrawer({ id, createdAt, onClose, expanded = false, onToggleExpand }: {
+export default function OutreachDrawer({ id, createdAt, archived = false, fallbackName, fallbackStatus, onRestore, onClose, expanded = false, onToggleExpand }: {
   id: string | null
   createdAt?: string
+  // Enkelstuks-sweep: soft-deleted row (client-side flag from the page). The detail
+  // GET 404s while archived (measured: show() has no withTrashed), so the fetch is
+  // skipped and the row's name/status stand in.
+  archived?: boolean
+  fallbackName?: string
+  fallbackStatus?: string
+  // Per-id restore — the page passes this only with outreach.update.
+  onRestore?: (id: string) => void
   onClose: () => void
   expanded?: boolean
   onToggleExpand?: () => void
 }) {
   const { t } = useTranslation('outreach')
   const { formatDateTime } = useDateFormat()
-  const { detail, loading, error, setTargetStatus, setTargetOutcome, setOwner, setCustomFields } = useOutreachDetail(id)
+  // Skip the guaranteed-404 fetch on an archived campaign (hooks before any return).
+  const { detail, loading, error, setTargetStatus, setTargetOutcome, setOwner, setCustomFields } = useOutreachDetail(archived ? null : id)
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   // The Extra tab only shows when the tenant has defined outreach-campaign custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('outreach_campaign')
   if (!id) return null
 
-  const name = detail?.name ?? '…'
-  const st   = (detail?.status as string) ?? 'draft'
+  const name = detail?.name ?? fallbackName ?? '…'
+  const st   = (detail?.status as string) ?? fallbackStatus ?? 'draft'
   const done = (detail?.targets ?? []).filter(tg => tg.status && tg.status !== 'todo').length
   const total = detail?.targets?.length ?? detail?.targets_count ?? 0
 
@@ -101,19 +111,32 @@ export default function OutreachDrawer({ id, createdAt, onClose, expanded = fals
                 {/* Status badge — colour-coded, read-only (was the body StatusPill, §3A(c)). */}
                 <TitleBadge label={t(`status.${st}`, { defaultValue: st })} color={STATUS_COLOR[st] ?? '#94A3B8'} />
               </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.progress', { done, total })}</div>
+              {/* Archived: the targets are not loadable (404), so no fake 0-of-0 progress. */}
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                {archived ? t('drawer.archivedBanner.flag') : t('drawer.progress', { done, total })}
+              </div>
             </>
           )}
           expanded={expanded}
           onToggleExpand={onToggleExpand}
           onClose={onClose}
-          // Standard picker widths (§3A blueprint: Eigenaar ~190).
-          meta={[
+          // Standard picker widths (§3A blueprint: Eigenaar ~190). ARCHIVED: no owner
+          // picker on an inactive record — the PATCH 404s while soft-deleted; restore first.
+          meta={archived ? [] : [
             { key: 'owner', label: t('drawer.owner'), value: String(detail?.owner?.id ?? ''),
               options: ownerOptions, placeholder: t('drawer.selectOwner'),
               onChange: onOwnerChange, menuWidth: 200, width: 190 },
           ]}
-        />
+        >
+          {/* Enkelstuks-sweep: archived state + per-id restore via the ONE shared
+              ArchivedBanner (§3A — extend, never duplicate). Flag-only line: the
+              resource carries no deleted_at (measured, OutreachCampaignResource). */}
+          {archived && (
+            <ArchivedBanner id={id} onRestore={onRestore ? () => onRestore(id) : undefined}
+              message={t('drawer.archivedBanner.flag')}
+              restoreLabel={t('drawer.archivedBanner.restore')} />
+          )}
+        </EntityHeader>
       }
       tabs={tabs}
     />

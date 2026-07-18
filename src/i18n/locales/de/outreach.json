@@ -76,6 +76,13 @@
   "drawer": {
     "label": "Anrufliste",
     "createdAt": "Erstellt am {{date}}",
+    "archivedBanner": {
+      "since": "Archiviert am {{date}}",
+      "flag": "Archiviert",
+      "restore": "Wiederherstellen",
+      "restored": "Anrufliste wiederhergestellt.",
+      "restoreFailed": "Wiederherstellen fehlgeschlagen. Bitte erneut versuchen."
+    },
     "tabs": {
       "targets": "Anrufliste",
       "extra": "Extra"

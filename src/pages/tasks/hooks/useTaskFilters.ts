@@ -6,8 +6,9 @@
  */
 import { useState, useCallback } from 'react'
 import { usePageMemory } from '@/lib/usePageMemory'
+import { isTaskOverdue } from '../data/mapTask'
 
-// Midnight today — the overdue/due-today boundaries.
+// Midnight today — the due-today boundary.
 const todayStart = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d }
 
 // The row fields the predicate reads (structural — the page's Task satisfies it).
@@ -18,6 +19,8 @@ interface FilterableTask {
   assignee?: { name?: string } | null
   statusIsDone?: boolean
   due?: string | null
+  // TASK-DUE-TIME-1: read by isTaskOverdue for the time-aware 'overdue' KPI tile.
+  dueTime?: string
   title?: string
   description?: string
 }
@@ -49,12 +52,13 @@ export function useTaskFilters() {
     if (selectedType.length     && !selectedType.includes(String(x.typeKey)))          return false
     if (selectedAssignee.length && !selectedAssignee.includes(x.assignee?.name ?? '')) return false
     if (query.trim() && !`${x.title ?? ''} ${x.assignee?.name ?? ''} ${x.description ?? ''}`.toLowerCase().includes(query.trim().toLowerCase())) return false
-    // KPI tile predicate (open/overdue/dueToday/completed).
+    // KPI tile predicate (open/overdue/dueToday/completed). Overdue is time-aware
+    // (TASK-DUE-TIME-1): a timed task counts from its due moment, not end of day.
     if (!kpiFilter) return true
     const due = x.due ? new Date(x.due) : null
     if (kpiFilter === 'completed') return Boolean(x.statusIsDone)
     if (kpiFilter === 'open')      return !x.statusIsDone
-    if (kpiFilter === 'overdue')   return !!(due && !x.statusIsDone && due < todayStart())
+    if (kpiFilter === 'overdue')   return isTaskOverdue(x)
     if (kpiFilter === 'dueToday')  return !!(due && !x.statusIsDone && due.toDateString() === todayStart().toDateString())
     return true
   }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter, query])

@@ -76,6 +76,13 @@
   "drawer": {
     "label": "Lista de llamadas",
     "createdAt": "Creado el {{date}}",
+    "archivedBanner": {
+      "since": "Archivada el {{date}}",
+      "flag": "Archivada",
+      "restore": "Restaurar",
+      "restored": "Lista de llamadas restaurada.",
+      "restoreFailed": "Error al restaurar. Inténtalo de nuevo."
+    },
     "tabs": {
       "targets": "Lista de llamadas",
       "extra": "Extra"

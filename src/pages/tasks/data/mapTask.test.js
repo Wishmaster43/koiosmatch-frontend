@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mapTask, mapTaskDetail } from './mapTask'
+import { mapTask, mapTaskDetail, dueDateTime, isTaskOverdue } from './mapTask'
 
 describe('mapTask', () => {
   it('maps a row with nested lookup objects + assignee + links', () => {
@@ -41,6 +41,49 @@ describe('mapTask', () => {
     expect(row.title).toBe('—')
     expect(row.links).toEqual([])
     expect(row.commentCount).toBe(0)
+    expect(row.dueTime).toBe('')
+    expect(row.archived).toBe(false)
+  })
+
+  // TASK-DUE-TIME-1 (BE 3f1274d): due_time is "HH:mm" on the resource, '' when unset.
+  it('maps due_time through and keeps date-only tasks timeless', () => {
+    expect(mapTask({ id: 't5', due_date: '2026-06-30', due_time: '14:30' }).dueTime).toBe('14:30')
+    expect(mapTask({ id: 't6', due_date: '2026-06-30' }).dueTime).toBe('')
+  })
+})
+
+// TASK-DUE-TIME-1 helpers: date+time combination and the time-aware overdue rule.
+describe('dueDateTime', () => {
+  it('combines a due date with an HH:mm time', () => {
+    const d = dueDateTime('2026-06-30', '14:30')
+    expect(d?.getHours()).toBe(14)
+    expect(d?.getMinutes()).toBe(30)
+  })
+
+  it('falls back to midnight without a time and null without a date', () => {
+    expect(dueDateTime('2026-06-30')?.getHours()).toBe(0)
+    expect(dueDateTime('')).toBeNull()
+    expect(dueDateTime(undefined)).toBeNull()
+  })
+})
+
+describe('isTaskOverdue', () => {
+  const noon = new Date('2026-06-30T12:00:00')
+
+  it('date-only: overdue after the due DAY, never on the due day itself', () => {
+    expect(isTaskOverdue({ due: '2026-06-29' }, noon)).toBe(true)
+    expect(isTaskOverdue({ due: '2026-06-30' }, noon)).toBe(false)
+    expect(isTaskOverdue({ due: '2026-07-01' }, noon)).toBe(false)
+  })
+
+  it('timed: overdue from the due MOMENT on the due day', () => {
+    expect(isTaskOverdue({ due: '2026-06-30', dueTime: '09:00' }, noon)).toBe(true)
+    expect(isTaskOverdue({ due: '2026-06-30', dueTime: '14:30' }, noon)).toBe(false)
+  })
+
+  it('a done or dateless task is never overdue', () => {
+    expect(isTaskOverdue({ due: '2026-06-29', statusIsDone: true }, noon)).toBe(false)
+    expect(isTaskOverdue({ due: '' }, noon)).toBe(false)
   })
 })
 

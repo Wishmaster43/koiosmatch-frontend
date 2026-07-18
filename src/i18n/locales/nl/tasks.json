@@ -39,6 +39,13 @@
   "drawer": {
     "label": "Activiteit",
     "createdAt": "Aangemaakt op {{date}}",
+    "archivedBanner": {
+      "since": "Gearchiveerd op {{date}}",
+      "flag": "Gearchiveerd",
+      "restore": "Herstellen",
+      "restored": "Taak hersteld.",
+      "restoreFailed": "Herstellen mislukt. Probeer het opnieuw."
+    },
     "markDone": "Markeer afgerond",
     "tags": "Tags",
     "tabs": {
@@ -69,6 +76,7 @@
     "status": "Status",
     "priority": "Prioriteit",
     "due": "Vervaldatum",
+    "dueTime": "Tijd",
     "assignee": "Toegewezen aan",
     "owner": "Aangemaakt door",
     "description": "Omschrijving"
@@ -109,6 +117,7 @@
     "assigneePlaceholder": "Bureau (niemand)",
     "status": "Status",
     "due": "Einddatum",
+    "dueTime": "Tijd",
     "priority": "Prioriteit",
     "description": "Omschrijving",
     "descriptionPlaceholder": "Invullen",

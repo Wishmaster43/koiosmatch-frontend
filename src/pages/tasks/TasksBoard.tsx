@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import Avatar from '@/components/ui/Avatar'
 import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
+import { isTaskOverdue, dueDateTime } from './data/mapTask'
 import type { Task } from '@/types/task'
 import type { Id } from '@/types/common'
 import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
@@ -11,13 +12,10 @@ import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
 export interface BoardColumn { key: string | number; label: string; color: string }
 type FormatDate = (v?: string | number | Date | null) => string
 
-// A task is overdue when its due date is in the past and it isn't in a done status.
-const isOverdue = (t: Task): boolean => !!(t.due && !t.statusIsDone && new Date(t.due) < new Date(new Date().toDateString()))
-
 // A single draggable task card.
-function BoardCard({ task, onDragStart, onClick, selected, formatDate, bureauLabel }: {
+function BoardCard({ task, onDragStart, onClick, selected, formatDate, formatDateTime, bureauLabel }: {
   task: Task; onDragStart: (e: DragEvent<HTMLDivElement>, id: Id | undefined) => void; onClick: (t: Task) => void
-  selected: boolean; formatDate: FormatDate; bureauLabel: ReactNode
+  selected: boolean; formatDate: FormatDate; formatDateTime: FormatDate; bureauLabel: ReactNode
 }) {
   return (
     <div draggable onDragStart={e => onDragStart(e, task.id)} onClick={() => onClick(task)}
@@ -51,8 +49,11 @@ function BoardCard({ task, onDragStart, onClick, selected, formatDate, bureauLab
           ? <Avatar initials={task.assignee.initials} size={20} color={task.assignee.color} />
           : <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{bureauLabel}</span>}
         {task.due && (
-          <span style={{ fontSize: 11, color: isOverdue(task) ? 'var(--color-danger)' : 'var(--text-muted)',
-            fontWeight: isOverdue(task) ? 600 : 400 }}>{formatDate(task.due)}</span>
+          <span style={{ fontSize: 11, color: isTaskOverdue(task) ? 'var(--color-danger)' : 'var(--text-muted)',
+            fontWeight: isTaskOverdue(task) ? 600 : 400 }}>
+            {/* TASK-DUE-TIME-1: show the time alongside the date when the task has one. */}
+            {task.dueTime ? formatDateTime(dueDateTime(task.due, task.dueTime)) : formatDate(task.due)}
+          </span>
         )}
       </div>
     </div>
@@ -60,7 +61,7 @@ function BoardCard({ task, onDragStart, onClick, selected, formatDate, bureauLab
 }
 
 // A single status column with its cards.
-function BoardColumnView({ column, items, onDragStart, onDrop, onDragOver, onSelect, selectedId, emptyText, formatDate, bureauLabel }: {
+function BoardColumnView({ column, items, onDragStart, onDrop, onDragOver, onSelect, selectedId, emptyText, formatDate, formatDateTime, bureauLabel }: {
   column: BoardColumn; items: Task[]
   onDragStart: (e: DragEvent<HTMLDivElement>, id: Id | undefined) => void
   onDrop: (e: DragEvent<HTMLDivElement>, statusKey: string | number) => void
@@ -69,6 +70,7 @@ function BoardColumnView({ column, items, onDragStart, onDrop, onDragOver, onSel
   selectedId?: Id | null
   emptyText: ReactNode
   formatDate: FormatDate
+  formatDateTime: FormatDate
   bureauLabel: ReactNode
 }) {
   return (
@@ -85,7 +87,7 @@ function BoardColumnView({ column, items, onDragStart, onDrop, onDragOver, onSel
           <div style={{ padding: '24px 12px', fontSize: 12, color: 'var(--text-muted)', textAlign: 'center' }}>{emptyText}</div>
         ) : items.map(task => (
           <BoardCard key={task.id} task={task} onDragStart={onDragStart}
-            onClick={onSelect} selected={task.id === selectedId} formatDate={formatDate} bureauLabel={bureauLabel} />
+            onClick={onSelect} selected={task.id === selectedId} formatDate={formatDate} formatDateTime={formatDateTime} bureauLabel={bureauLabel} />
         ))}
       </div>
     </div>
@@ -103,7 +105,7 @@ export default function TasksBoard({ rows, columns, onMove, onSelect, selectedId
   // Edge-scroll the board while dragging (HTML5 DnD never scrolls itself).
   const { ref: boardScrollRef, onDragOver: boardAutoScroll } = useDragAutoScroll<HTMLDivElement>()
   const { t } = useTranslation('tasks')
-  const { formatDate } = useDateFormat()
+  const { formatDate, formatDateTime } = useDateFormat()
   const dragId = useRef<Id | null>(null)
 
   const handleDragStart = (e: DragEvent<HTMLDivElement>, id: Id | undefined) => { dragId.current = id ?? null; e.dataTransfer.effectAllowed = 'move' }
@@ -121,7 +123,7 @@ export default function TasksBoard({ rows, columns, onMove, onSelect, selectedId
             items={rows.filter(r => r.statusKey === column.key)}
             onDragStart={handleDragStart} onDrop={handleDrop} onDragOver={handleDragOver}
             onSelect={onSelect} selectedId={selectedId} emptyText={t('board.empty')}
-            formatDate={formatDate} bureauLabel={t('bureau')} />
+            formatDate={formatDate} formatDateTime={formatDateTime} bureauLabel={t('bureau')} />
         ))}
       </div>
     </div>

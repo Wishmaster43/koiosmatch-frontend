@@ -14,7 +14,9 @@ import type { Id } from '@/types/common'
 interface EntityRow { id?: Id; name?: string; first_name?: string; last_name?: string; title?: string; email?: string }
 interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: string; email?: string }
 interface TaskForm {
-  type: string; title: string; assigneeId: string; status: string; due: string; priority: string; description: string
+  type: string; title: string; assigneeId: string; status: string; due: string
+  // TASK-DUE-TIME-1: optional "HH:mm" paired with `due`, native <input type="time">.
+  dueTime: string; priority: string; description: string
   candidateId: string; customerId: string; contactId: string
 }
 
@@ -25,7 +27,7 @@ const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].fi
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
   title: 'title', type: 'type', assignee_id: 'assigneeId', status: 'status',
-  due_date: 'due', priority: 'priority', description: 'description',
+  due_date: 'due', due_time: 'dueTime', priority: 'priority', description: 'description',
 }
 
 /**
@@ -44,7 +46,7 @@ export default function AddTaskModal({ onClose, onCreated, initial, extraLinks }
 
   // `initial` pre-fills fields/links when opened from an entity drawer (e.g. the candidate).
   const [form, setForm] = useState<TaskForm>({
-    type: '', title: '', assigneeId: '', status: '', due: '', priority: '', description: '',
+    type: '', title: '', assigneeId: '', status: '', due: '', dueTime: '', priority: '', description: '',
     candidateId: '', customerId: '', contactId: '', ...initial,
   })
   const [errors, setErrors] = useState<Record<string, boolean>>({})
@@ -95,7 +97,7 @@ export default function AddTaskModal({ onClose, onCreated, initial, extraLinks }
     try {
       const body = {
         title: form.title.trim(), type: form.type, status: form.status, priority: form.priority || null,
-        assignee_id: form.assigneeId || null, due_date: form.due || null,
+        assignee_id: form.assigneeId || null, due_date: form.due || null, due_time: form.dueTime || null,
         description: form.description || null, links,
       }
       const r = await api.post('/tasks', body)
@@ -159,9 +161,15 @@ export default function AddTaskModal({ onClose, onCreated, initial, extraLinks }
                 <SelectField value={form.priority} onChange={v => set('priority', v)} options={priorities.map(x => ({ value: x.value, label: x.label }))} />
               </Field>
             </div>
-            <Field label={t('modal.due')}>
-              <DateField value={form.due} onChange={v => set('due', v)} placeholder="dd-mm-jjjj" />
-            </Field>
+            {/* TASK-DUE-TIME-1: date + optional time-of-day, paired half-row. */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <Field label={t('modal.due')}>
+                <DateField value={form.due} onChange={v => set('due', v)} placeholder="dd-mm-jjjj" />
+              </Field>
+              <Field label={t('modal.dueTime')}>
+                <TextField type="time" value={form.dueTime} onChange={v => set('dueTime', v)} />
+              </Field>
+            </div>
             {/* Description = note body — same rich editor as the drawer + candidate profile text. */}
             <Field label={t('modal.description')}>
               <RichTextEditor value={form.description} onChange={v => set('description', v)} />

@@ -24,7 +24,7 @@ import TasksBoard from './TasksBoard'
 import type { BoardColumn } from './TasksBoard'
 import TaskDrawer from './TaskDrawer'
 import AddTaskModal from './AddTaskModal'
-import { mapTask, mapTaskDetail } from './data/mapTask'
+import { mapTask, mapTaskDetail, isTaskOverdue } from './data/mapTask'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
@@ -131,11 +131,14 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
 
   // All tasks decorated with their lookup labels/colours — the basis for KPIs/donuts/view.
   // Archived (soft-deleted) tasks, fetched lazily while the archived toggle is on.
+  // The list resource carries no archived flag (measured: TaskListResource has no
+  // deleted_at), so rows from this onlyTrashed fetch are flagged client-side — the
+  // drawer's archived banner + restore affordance key off it.
   useEffect(() => {
     if (!showArchived) return
     const ctrl = new AbortController()
     api.get('/tasks', { params: { archived: 1 }, signal: ctrl.signal })
-      .then(res => setArchivedTasks(unwrapList<ApiTask>(res).rows.map(mapTask)))
+      .then(res => setArchivedTasks(unwrapList<ApiTask>(res).rows.map(mapTask).map(x => ({ ...x, archived: true }))))
       .catch(err => { if (!isAbortError(err)) setArchivedTasks([]) })
     return () => ctrl.abort()
   }, [showArchived])
@@ -188,8 +191,11 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
     if (selected?.id === task.id) { closeDrawer(); return }
     selectedIdRef.current = task.id ?? null
     setSelected(decorate(task) as TaskDetail); setExpanded(false)
+    // NOTE: for an ARCHIVED task this fetch 404s (BE show() has no withTrashed —
+    // measured, TaskController) so the drawer keeps rendering the light row; the
+    // archived flag from that row must survive the (future) detail replace.
     api.get(`/tasks/${task.id}`)
-      .then(r => { if (selectedIdRef.current === task.id) setSelected(decorate(mapTaskDetail(unwrap(r)))) })
+      .then(r => { if (selectedIdRef.current === task.id) setSelected(decorate({ ...mapTaskDetail(unwrap(r)), archived: task.archived })) })
       .catch(() => {})
   }
   // Open a task drawer when arriving via a cross-entity link ({ open: id }, candidate → task).
@@ -206,7 +212,9 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
     setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...patch } as TaskDetail) : prev))
     const body: Record<string, unknown> = {
       status: patch.statusKey, priority: patch.priorityKey, type: patch.typeKey,
-      due_date: patch.due, description: patch.description, assignee_id: patch.assigneeId,
+      // TASK-DUE-TIME-1: '' (cleared time input) persists as null, never as "".
+      due_date: patch.due, due_time: patch.dueTime === undefined ? undefined : (patch.dueTime || null),
+      description: patch.description, assignee_id: patch.assigneeId,
       tags: patch.tags, custom_fields: patch.customFields,
     }
     Object.keys(body).forEach(k => { if (body[k] === undefined) delete body[k] })
@@ -239,6 +247,22 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
 
   // A new task created in the modal — prepend it to the list.
   const handleCreated = (raw: unknown) => { setTasks(prev => [mapTask(raw as ApiTask), ...prev]); setAddOpen(false) }
+
+  // Enkelstuks-sweep: un-archive ONE task via the per-id route (POST /tasks/{id}/restore,
+  // BE D-3 — never the bulk route for one record). The row moves back to the active
+  // list; the drawer closes (the row leaves the archived view, mirroring candidates).
+  const restoreTask = (id: Id | undefined) => {
+    if (id == null) return
+    const row = archivedTasks.find(x => x.id === id)
+    api.post(`/tasks/${id}/restore`)
+      .then(() => {
+        setArchivedTasks(prev => prev.filter(x => x.id !== id))
+        if (row) setTasks(prev => [{ ...row, archived: false, archivedAt: null }, ...prev])
+        closeDrawer()
+        notifySuccess(t('drawer.archivedBanner.restored'))
+      })
+      .catch(() => notifyError(t('drawer.archivedBanner.restoreFailed')))
+  }
 
   // ── Bulk selection + mutations ──
   const clearSelection = () => setSelectedIds(new Set())
@@ -283,7 +307,8 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
     { key: 'priority', title: t('insights.priority'), data: priorityData, onPick: pickOne(setSelectedPriority), active: selectedPriority.length > 0, onClear: () => setSelectedPriority([]) },
     { key: 'type',     title: t('insights.type'),     data: typeData,     onPick: pickOne(setSelectedType),     active: selectedType.length > 0,     onClear: () => setSelectedType([]) },
   ]
-  const overdue  = all.filter(x => x.due && !x.statusIsDone && new Date(x.due) < todayStart()).length
+  // Overdue is time-aware (TASK-DUE-TIME-1): a timed task counts from its due moment.
+  const overdue  = all.filter(x => isTaskOverdue(x)).length
   const dueToday = all.filter(x => x.due && !x.statusIsDone && new Date(x.due).toDateString() === todayStart().toDateString()).length
   const toggleKpi = (k: string) => setKpiFilter(p => p === k ? null : k)
   const insightKpis: KpiSpec[] = [
@@ -380,6 +405,8 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
         onUpdate={handleUpdate}
         onAddLink={handleAddLink}
         onRemoveLink={handleRemoveLink}
+        // Restore is update-class (reversible, BE gates tasks.update) — same signal as archive.
+        onRestore={canArchive ? restoreTask : undefined}
       />
 
       {/* Add-activity modal */}

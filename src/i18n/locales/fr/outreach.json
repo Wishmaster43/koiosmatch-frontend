@@ -76,6 +76,13 @@
   "drawer": {
     "label": "Liste d'appel",
     "createdAt": "Créé le {{date}}",
+    "archivedBanner": {
+      "since": "Archivée le {{date}}",
+      "flag": "Archivée",
+      "restore": "Restaurer",
+      "restored": "Liste d'appels restaurée.",
+      "restoreFailed": "Échec de la restauration. Veuillez réessayer."
+    },
     "tabs": {
       "targets": "Liste d'appel",
       "extra": "Extra"

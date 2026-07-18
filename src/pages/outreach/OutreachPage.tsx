@@ -17,7 +17,7 @@ import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { useOutreachCampaigns } from './hooks/useOutreachCampaigns'
 import type { Campaign } from './hooks/useOutreachCampaigns'
-import { listCampaigns, updateCampaign, deleteCampaign } from './data/outreachApi'
+import { listCampaigns, updateCampaign, deleteCampaign, restoreCampaign } from './data/outreachApi'
 import OutreachList from './OutreachList'
 import OutreachBoard from './OutreachBoard'
 import OutreachBulkBar from './OutreachBulkBar'
@@ -45,6 +45,8 @@ export default function OutreachPage() {
   const { t } = useTranslation('outreach')
   const auth = useAuth()
   const canArchive = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('outreach.delete') ?? false
+  // Restore is update-class (BE gates the /restore route on outreach.update).
+  const canRestore = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('outreach.update') ?? false
   const { campaigns, loading, error, reload, add, patch, drop } = useOutreachCampaigns()
 
   const [view, setView] = useState<'table' | 'board'>('table')
@@ -67,17 +69,30 @@ export default function OutreachPage() {
   // page has no cross-entity intent today, so there is nothing to pass for it.
   useDrawerUrl({ selectedId: openId, openById: (id) => setOpenId(String(id)), close: () => setOpenId(null) })
 
-  const [archived, setArchived] = useState<Campaign[]>([])
+  // MEASURED seam fix: the BE list param is `include_archived=1` (withTrashed —
+  // active + archived MIXED; the old `archived: 1` was silently ignored, so the
+  // archived view showed the ACTIVE list). The resource carries no deleted_at/
+  // archived field either, so archived-only is derived below by subtracting the
+  // active ids. BE gap (report): an onlyTrashed param + a deleted_at field would
+  // make this exact — and paginated sets larger than one page can miss rows.
+  const [archivedRaw, setArchivedRaw] = useState<Campaign[]>([])
   const [archLoading, setArchLoading] = useState(false)
   const [archError, setArchError] = useState(false)
   useEffect(() => {
     if (!showArchived) return
     setArchLoading(true); setArchError(false)
-    listCampaigns({ archived: 1 })
-      .then((res) => setArchived((res.rows as Campaign[]) ?? []))
+    listCampaigns({ include_archived: 1 })
+      .then((res) => setArchivedRaw((res.rows as Campaign[]) ?? []))
       .catch(() => setArchError(true))
       .finally(() => setArchLoading(false))
   }, [showArchived])
+
+  // Archived-only rows = the mixed withTrashed list minus the active ids, flagged
+  // for the drawer's archived banner (client-side — see the measured gap above).
+  const archived = useMemo(() => {
+    const activeIds = new Set(campaigns.map((c) => c.id))
+    return archivedRaw.filter((c) => !activeIds.has(c.id)).map((c) => ({ ...c, archived: true }))
+  }, [archivedRaw, campaigns])
 
   // Clear the selection whenever the filter/view/archived toggle changes.
   useEffect(() => { setSelectedIds(new Set()) }, [selectedStatus, selectedChannel, kpiTargets, view, showArchived])
@@ -140,7 +155,7 @@ export default function OutreachPage() {
     if (results.some((r) => r.status === 'rejected')) { notifyError(t('bulk.mutateError')); reload() }
     else notifySuccess(t('bulk.done', { count: ids.length }))
   }
-  // Bulk archive (soft-delete via DELETE); drop the rows optimistically.
+  // Bulk archive (soft-delete via the per-id DELETE); drop the rows optimistically.
   const bulkArchive = async () => {
     const ids = [...selectedIds]; if (!ids.length) return
     setSelectedIds(new Set())
@@ -149,6 +164,24 @@ export default function OutreachPage() {
     if (results.some((r) => r.status === 'rejected')) { notifyError(t('bulk.archiveError')); reload() }
     else notifySuccess(t('bulk.done', { count: ids.length }))
   }
+
+  // Enkelstuks-sweep (BE 9170e40): un-archive ONE campaign via the per-id restore.
+  // The response is the fresh detail — prepend it to the active list; the drawer
+  // closes (the row leaves the archived view, mirroring candidates/tasks).
+  const restoreOne = async (id: string) => {
+    try {
+      const restored = await restoreCampaign(id)
+      setArchivedRaw((prev) => prev.filter((c) => c.id !== id))
+      add(restored as Campaign)
+      setOpenId(null)
+      notifySuccess(t('drawer.archivedBanner.restored'))
+    } catch {
+      notifyError(t('drawer.archivedBanner.restoreFailed'))
+    }
+  }
+
+  // The open drawer's row — may live in the active OR the archived list.
+  const openRow = openId ? [...campaigns, ...archived].find(c => String(c.id) === String(openId)) : undefined
 
   // Create view replaces everything (inline, no modal).
   if (creating) {
@@ -222,8 +255,13 @@ export default function OutreachPage() {
           </div>
         )}
       </div>
-      {/* Per-bellijst drill-down (the call list itself) — row click opens it. */}
-      <OutreachDrawer id={openId} createdAt={campaigns.find(c => String(c.id) === String(openId))?.created_at} onClose={() => setOpenId(null)}
+      {/* Per-bellijst drill-down (the call list itself) — row click opens it. An
+          archived row feeds the drawer its banner + name/status fallbacks (the
+          detail GET 404s while soft-deleted — measured, OutreachCampaignController::
+          show has no withTrashed). */}
+      <OutreachDrawer id={openId} createdAt={openRow?.created_at} onClose={() => setOpenId(null)}
+        archived={Boolean(openRow?.archived)} fallbackName={openRow?.name} fallbackStatus={openRow?.status}
+        onRestore={canRestore ? restoreOne : undefined}
         expanded={drawerExpanded} onToggleExpand={() => setDrawerExpanded(e => !e)} />
     </div>
   )

@@ -39,6 +39,13 @@
   "drawer": {
     "label": "Activité",
     "createdAt": "Créé le {{date}}",
+    "archivedBanner": {
+      "since": "Archivée le {{date}}",
+      "flag": "Archivée",
+      "restore": "Restaurer",
+      "restored": "Tâche restaurée.",
+      "restoreFailed": "Échec de la restauration. Veuillez réessayer."
+    },
     "tabs": {
       "details": "Détails",
       "links": "Liens",
@@ -55,6 +62,7 @@
     "status": "Statut",
     "priority": "Priorité",
     "due": "Échéance",
+    "dueTime": "Heure",
     "assignee": "Assignée à",
     "owner": "Responsable",
     "description": "Description"
@@ -95,6 +103,7 @@
     "assigneePlaceholder": "Agence (personne)",
     "status": "Statut",
     "due": "Échéance",
+    "dueTime": "Heure",
     "priority": "Priorité",
     "description": "Description",
     "descriptionPlaceholder": "Saisir…",

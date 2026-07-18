@@ -14,6 +14,7 @@ import DetailsTab from './drawer/DetailsTab'
 import RelatedTasks from './drawer/RelatedTasks'
 import LinksTab from './drawer/LinksTab'
 import TaskChangelogPopover from './drawer/TaskChangelogPopover'
+import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import { initialsOf } from '@/lib/initials'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { TaskDetail } from '@/types/task'
@@ -37,6 +38,8 @@ interface TaskDrawerProps {
   onUpdate: (id: Id | undefined, patch: Record<string, unknown>) => void
   onAddLink: (id: Id | undefined, link: NewLink) => void
   onRemoveLink: (id: Id | undefined, link: { type: string; id: Id | null }) => void
+  // Enkelstuks-sweep: per-id restore — the page passes this only with tasks.update.
+  onRestore?: (id: Id | undefined) => void
 }
 
 /**
@@ -45,9 +48,9 @@ interface TaskDrawerProps {
  * (status / priority / assignee) + a one-click "mark done" quick action, so the most
  * common changes need no edit-mode; the full field edit still lives in DetailsTab.
  */
-export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, onUpdate, onAddLink, onRemoveLink }: TaskDrawerProps) {
+export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, onUpdate, onAddLink, onRemoveLink, onRestore }: TaskDrawerProps) {
   const { t } = useTranslation('tasks')
-  const { formatDateTime } = useDateFormat()
+  const { formatDate, formatDateTime } = useDateFormat()
   const { statuses, priorities, doneStatusValues } = useTaskLookups()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   // The Extra tab only shows when the tenant has defined task custom fields (§3A(f)).
@@ -76,17 +79,21 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   }
 
   // Header meta pickers: quick status / priority / assignee change (no edit-mode).
+  // ARCHIVED: no pickers on an inactive record — every task PATCH 404s while soft-
+  // deleted (measured: TaskController::update findOrFail) — restore first (mirrors
+  // the candidate drawer's archived gating).
   // Standard picker widths (§3A blueprint: Status ~160 + Eigenaar/assignee ~190;
   // priority stays 140 — already conforms).
-  const meta: MetaPicker[] = [
+  const meta: MetaPicker[] = task.archived ? [] : [
     { key: 'status',   label: t('details.status'),   value: String(task.statusKey),        options: statuses.map(s => ({ value: s.value, label: s.label })),   onChange: v => onUpdate(task.id, { statusKey: v }),   menuWidth: 170, width: 160 },
     { key: 'priority', label: t('details.priority'), value: String(task.priorityKey),      options: priorities.map(p => ({ value: p.value, label: p.label })), onChange: v => onUpdate(task.id, { priorityKey: v }), menuWidth: 150, width: 140 },
     { key: 'assignee', label: t('details.assignee'), value: String(task.assigneeId ?? ''), options: assigneeOpts,                                              onChange: onAssignee,                                menuWidth: 200, width: 190 },
   ]
 
-  // "Mark done" quick action — only when a done status exists and the task isn't done.
+  // "Mark done" quick action — only when a done status exists and the task isn't
+  // done; never on an archived task (same 404 gating as the pickers above).
   const doneValue = doneStatusValues[0]
-  const markDone = doneValue != null && !task.statusIsDone
+  const markDone = doneValue != null && !task.statusIsDone && !task.archived
     ? (
       // BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
       <button onClick={() => onUpdate(task.id, { statusKey: doneValue })}
@@ -129,14 +136,24 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
           titleActions={<TaskChangelogPopover task={task} />}
           actions={markDone}
           meta={meta}
-          tags={{
+          // Tag editing is a PATCH too — hidden while archived (404s, see meta above).
+          tags={task.archived ? undefined : {
             items: task.tags ?? [],
             onAdd: (tag: string) => onUpdate(task.id, { tags: [...(task.tags ?? []), tag] }),
             onRemove: (tag: string) => onUpdate(task.id, { tags: (task.tags ?? []).filter(x => x !== tag) }),
             addLabel: t('drawer.tags'),
           }}
           tagsLabel={t('drawer.tags')}
-        />
+        >
+          {/* Enkelstuks-sweep: archived state + per-id restore via the ONE shared
+              ArchivedBanner (§3A — extend, never duplicate). archivedAt is null today
+              (measured: TaskListResource has no deleted_at) → flag-only line. */}
+          {task.archived && (
+            <ArchivedBanner id={task.id} onRestore={onRestore}
+              message={task.archivedAt ? t('drawer.archivedBanner.since', { date: formatDate(task.archivedAt) }) : t('drawer.archivedBanner.flag')}
+              restoreLabel={t('drawer.archivedBanner.restore')} />
+          )}
+        </EntityHeader>
       )}
     />
   )

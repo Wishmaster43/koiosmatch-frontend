@@ -39,6 +39,13 @@
   "drawer": {
     "label": "Aktivität",
     "createdAt": "Erstellt am {{date}}",
+    "archivedBanner": {
+      "since": "Archiviert am {{date}}",
+      "flag": "Archiviert",
+      "restore": "Wiederherstellen",
+      "restored": "Aufgabe wiederhergestellt.",
+      "restoreFailed": "Wiederherstellen fehlgeschlagen. Bitte erneut versuchen."
+    },
     "tabs": {
       "details": "Details",
       "links": "Verknüpfungen",
@@ -55,6 +62,7 @@
     "status": "Status",
     "priority": "Priorität",
     "due": "Fälligkeitsdatum",
+    "dueTime": "Uhrzeit",
     "assignee": "Zugewiesen an",
     "owner": "Inhaber",
     "description": "Beschreibung"
@@ -95,6 +103,7 @@
     "assigneePlaceholder": "Agentur (niemand)",
     "status": "Status",
     "due": "Fälligkeitsdatum",
+    "dueTime": "Uhrzeit",
     "priority": "Priorität",
     "description": "Beschreibung",
     "descriptionPlaceholder": "Eingeben…",
