@@ -32,6 +32,10 @@ export interface RawMatch {
   owner_name?: string
   created_at?: string
   matched_at?: string
+  // MATCH-ARCHIVED-LIST-1: soft-delete state (both list + detail rows now carry it —
+  // see MatchListResource.php).
+  archived?: boolean
+  deleted_at?: string | null
   // Approval workflow (MATCH-APPROVAL-1) — list carries the status; the rejection
   // reason is detail-only (fetched lazily, see useMatchApproval).
   approval_status?: string
@@ -72,9 +76,9 @@ export interface MatchRow {
   approval_rejected_reason?: string
   // Tenant custom-field values (§3B "Eigen velden" — the drawer's gated Extra tab).
   customFieldValues?: Record<string, unknown>
-  // ARCHIVE-1 (sweep 9170e40): purely CLIENT-side — MatchListResource/MatchDetailResource
-  // never send archived/deleted_at (BE gap, see useMatchArchive), so this only reflects a
-  // delete/restore this session just performed, not a page-load/list-level archived state.
+  // MATCH-ARCHIVED-LIST-1 (2026-07-18): server-backed now — MatchListResource carries
+  // `archived`/`deleted_at` on every row (mapped by useMatches), reflecting the true
+  // list-level state, not just a delete/restore this session performed.
   archived?: boolean
   archivedAt?: string | null
   [k: string]: unknown

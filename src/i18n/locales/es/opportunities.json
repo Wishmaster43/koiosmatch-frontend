@@ -127,7 +127,8 @@
   },
   "view": {
     "table": "Vista de lista",
-    "board": "Vista de tablero"
+    "board": "Vista de tablero",
+    "archived": "Archivado"
   },
   "changelog": {
     "loading": "Cargando…",

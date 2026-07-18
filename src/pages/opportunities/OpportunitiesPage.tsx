@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LayoutList, Kanban } from 'lucide-react'
+import { LayoutList, Kanban, Archive } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
@@ -9,6 +9,7 @@ import OpportunitiesInsightsRow from './OpportunitiesInsightsRow'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import ViewSwitch from '@/components/ui/ViewSwitch'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import OpportunitiesTable from './OpportunitiesTable'
 import OpportunitiesBoard from './OpportunitiesBoard'
 import OpportunityDrawer from './OpportunityDrawer'
@@ -44,6 +45,8 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Tenant setting: show the deal magnitude in hours instead of euro (Settings → Kansen).
   const valueInHours = getBoolSetting(useAllSettings(), 'opportunity_value_in_hours', false)
+  // ARCHIVE-1: reveal soft-deleted opportunities alongside the active set.
+  const [showArchived, setShowArchived] = usePageMemory('opps.archived', false)
 
   // Data layer (§3): list + customers + selection + optimistic mutations.
   const {
@@ -51,7 +54,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
     selected, drawerExpanded, setDrawerExpanded,
     selectedIds, toggleRow, toggleAll, clearSelection,
     selectOpportunity, closeDrawer, handleCreated, handleMove, updateOpportunity, reload,
-  } = useOpportunitiesData()
+  } = useOpportunitiesData(showArchived)
 
   // ARCHIVE-1: per-id archive/restore (routes pre-date this sweep; see the hook's
   // own comment). Gated on the SAME permission each route requires server-side —
@@ -79,10 +82,10 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   const [expiringOnly, setExpiringOnly] = useState(false)
   const [dayStart] = useState(() => new Date(new Date().setHours(0, 0, 0, 0)).getTime())
   // Shared clear-all (page memory keeps filters sticky).
-  const anyFilterActive = Boolean(query.trim() || stage.length || owner.length || client.length || expiringOnly)
+  const anyFilterActive = Boolean(query.trim() || stage.length || owner.length || client.length || expiringOnly || showArchived)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
-    setSearchEpoch(e => e + 1); setQuery(''); setStage([]); setOwner([]); setClient([]); setExpiringOnly(false); setPage(1)
+    setSearchEpoch(e => e + 1); setQuery(''); setStage([]); setOwner([]); setClient([]); setExpiringOnly(false); setShowArchived(false); setPage(1)
   }
 
   // Seed filters from a navigation intent (dashboard chart/KPI click). The stage key
@@ -99,7 +102,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
 
   // Reset to the first page + drop the selection whenever a filter changes.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { setPage(1); clearSelection() }, [stage, owner, client, query])
+  useEffect(() => { setPage(1); clearSelection() }, [stage, owner, client, query, showArchived])
 
   // Right-panel filters (stage · owner · client) — options derived from the loaded rows.
   const optionsFrom = (key: 'stage' | 'owner' | 'client') => {
@@ -120,14 +123,13 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
     return () => unregisterFilters('opportunities-page')
   }, [filterGroups, registerFilters, unregisterFilters])
 
-  // Visible rows = the stage/owner/client selection applied client-side. No
-  // archived-only VIEW here (ARCHIVE-1 — see useOpportunitiesData's file comment):
-  // an archived row still drops out of the default view the instant this session
-  // archives it (optimistic `r.archived` patch), it just can't be browsed as a
-  // dedicated list because the backend never tells us which OTHER rows are archived.
+  // Visible rows = the stage/owner/client selection applied client-side.
+  // ARCHIVE-1: archived rows are hidden by default; the showArchived toggle reveals
+  // them ALONGSIDE the active set (mirrors vacancies — the table chip tells them
+  // apart), rather than isolating a dedicated archived-only view.
   const filteredAll = useMemo(() => {
     return rows.filter(r => {
-      if (r.archived) return false
+      if (!showArchived && r.archived) return false
       if (stage.length  && !stage.includes(r.stage))   return false
       if (owner.length  && !owner.includes(r.owner))   return false
       if (client.length && !client.includes(r.client)) return false
@@ -139,11 +141,15 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
       }
       return true
     })
-  }, [rows, stage, owner, client, query, expiringOnly, dayStart])
+  }, [rows, stage, owner, client, query, expiringOnly, dayStart, showArchived])
 
   const totalRows = filteredAll.length
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
   const filtered  = useMemo(() => filteredAll.slice((page - 1) * pageSize, page * pageSize), [filteredAll, page, pageSize])
+  // Board rows never include archived deals: dragging one to a new stage would
+  // PATCH /opportunities/{id}, which 404s once soft-deleted (OpportunityController::
+  // update has no withTrashed()) — the archived-mixed view is table-only.
+  const boardRows = useMemo(() => filteredAll.filter(r => !r.archived), [filteredAll])
 
   return (
     <>
@@ -161,10 +167,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
             onSetStageFilter={setStage}
           />
 
-          {/* Toolbar — add on the LEFT, view toggle on the RIGHT. No archived
-              QuickViewToggle here (ARCHIVE-1): see useOpportunitiesData's file
-              comment — the backend never tells the FE which rows are archived,
-              so a list-level toggle would be a fake affordance. */}
+          {/* Toolbar — add on the LEFT, archived toggle + view toggle on the RIGHT. */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10,
             padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
@@ -186,6 +189,10 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
               </div>
             )}
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+              {/* Archived (soft-deleted) — shared quick-view toggle (§4); reveals rows
+                  alongside the active set (OpportunitiesTable renders the "Gearchiveerd" chip). */}
+              <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+                label={t('view.archived')} color="var(--color-archive)" icon={Archive} />
               <div style={{ display: 'flex', gap: 4 }}>
                 <button onClick={() => setView('table')} title={t('view.table')} aria-label={t('view.table')}
                   style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
@@ -226,7 +233,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
             {
               id: 'board',
               render: () => (
-                <OpportunitiesBoard rows={filteredAll} stages={stages}
+                <OpportunitiesBoard rows={boardRows} stages={stages}
                   onMove={handleMove} selectedId={selected?.id} onSelect={selectOpportunity} />
               ),
             },

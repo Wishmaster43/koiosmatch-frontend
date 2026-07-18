@@ -127,7 +127,8 @@
   },
   "view": {
     "table": "Listenansicht",
-    "board": "Board-Ansicht"
+    "board": "Board-Ansicht",
+    "archived": "Archiviert"
   },
   "changelog": {
     "loading": "Laden…",

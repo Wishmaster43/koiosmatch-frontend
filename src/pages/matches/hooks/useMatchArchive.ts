@@ -7,8 +7,8 @@
  * BE 5970c03) — matches never had a bulk-archive route to begin with. Both routes
  * are gated by matches.update server-side, so the page only wires onArchive/
  * onRestore when the user actually has that permission (never a disabled-but-
- * present affordance). List-level archived VISIBILITY (toggle/chip) is a separate,
- * unsolved backend gap — see the comment on useMatches — this hook only covers the
+ * present affordance). List-level archived VISIBILITY (toggle/chip) is now covered
+ * too (MATCH-ARCHIVED-LIST-1 — see useMatches); this hook only covers the
  * single-record action reachable from an already-open drawer.
  */
 import { useState } from 'react'

@@ -128,7 +128,8 @@
   },
   "view": {
     "matches": "Matches",
-    "board": "Tablero"
+    "board": "Tablero",
+    "archived": "Archivado"
   },
   "board": {
     "empty": "Sin matches"

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useLocale, useDateFormat } from '@/lib/datetime'
 import DataTable from '@/components/ui/DataTable'
 import StatusPill from '@/components/ui/StatusPill'
+import SoftChip from '@/components/ui/SoftChip'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import EntityNameCell from '@/components/ui/EntityNameCell'
@@ -70,6 +71,10 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
     { key: 'stage',  header: t('cols.stage'), sortable: true, sortValue: r => r.stage,
       // Phase axis — round chip (StatusPill), mirrors candidates/applications (Danny 2026-07-14).
       render: r => {
+        // ARCHIVE-1: archive state wins over the stage pill (mirrors VacanciesTable/
+        // MatchesTable) — a soft-deleted row shown via include_archived=1 reads as
+        // "Archived", not its stale stage.
+        if (r.archived) return <SoftChip label={t('view.archived')} color="var(--text-muted)" round />
         if (!r.stage) return <span style={{ color: 'var(--text-muted)' }}>—</span>
         return colorStage ? <StatusPill label={r.stage} color={r.stageColor} /> : <span style={{ color: 'var(--text)', fontSize: 12 }}>{r.stage}</span>
       } },

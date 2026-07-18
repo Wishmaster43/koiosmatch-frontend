@@ -173,8 +173,9 @@ export default function OpportunityDrawer({
           tagsLabel={t('drawer.tags')}
         >
           {/* Archived banner (ARCHIVE-1): since-when + restore, right under the header —
-              purely local state (see the type comment on Opportunity.archived), set the
-              moment this session's own archive/restore call completes. */}
+              server-backed (mapOpportunity reads archived/deleted_at, see the type
+              comment on Opportunity.archived) OR set locally the moment this session's
+              own archive/restore call completes, whichever lands first. */}
           {o.archived && (
             <ArchivedBanner id={o.id}
               message={o.archivedAt ? t('drawer.archivedBanner.since', { date: formatDate(o.archivedAt) }) : t('drawer.archivedBanner.flag')}

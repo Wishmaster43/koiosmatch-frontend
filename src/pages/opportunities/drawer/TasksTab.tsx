@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ListChecks, AlertTriangle, Plus } from 'lucide-react'
 import AddTaskModal from '@/pages/tasks/AddTaskModal'
+import { TaskLookupsProvider } from '@/context/TaskLookupsContext'
 import { useNavigation } from '@/context/NavigationContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useOpportunityTasks } from '../hooks/useOpportunityTasks'
@@ -90,13 +91,17 @@ export default function TasksTab({ opportunity: o }: { opportunity: Opportunity 
         </div>
       )}
 
-      {/* New task pre-linked to this opportunity; reload so the fresh row shows at once. */}
+      {/* New task pre-linked to this opportunity; reload so the fresh row shows at once.
+          AddTaskModal reads useTaskLookups — outside TasksPage that provider is absent
+          (live crash, Danny 18-07, mirrors the candidates fix), so it wraps its own here. */}
       {adding && o?.id != null && (
-        <AddTaskModal
-          extraLinks={[{ type: 'opportunity', id: String(o.id) }]}
-          onClose={() => setAdding(false)}
-          onCreated={() => { setAdding(false); reload() }}
-        />
+        <TaskLookupsProvider>
+          <AddTaskModal
+            extraLinks={[{ type: 'opportunity', id: String(o.id) }]}
+            onClose={() => setAdding(false)}
+            onCreated={() => { setAdding(false); reload() }}
+          />
+        </TaskLookupsProvider>
       )}
     </div>
   )

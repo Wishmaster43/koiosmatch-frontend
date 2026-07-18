@@ -127,7 +127,8 @@
   },
   "view": {
     "table": "Vue liste",
-    "board": "Vue tableau"
+    "board": "Vue tableau",
+    "archived": "Archivé"
   },
   "changelog": {
     "loading": "Chargement…",

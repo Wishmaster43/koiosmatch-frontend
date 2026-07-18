@@ -85,6 +85,18 @@ describe('mapOpportunity', () => {
     expect(row.locationId).toBe('loc-42')
   })
 
+  it('maps archived + deleted_at onto the row (ARCHIVE-1)', () => {
+    const row = mapOpportunity({ id: 'o7', archived: true, deleted_at: '2026-07-10T00:00:00Z' })
+    expect(row.archived).toBe(true)
+    expect(row.archivedAt).toBe('2026-07-10T00:00:00Z')
+  })
+
+  it('defaults archived to false when the resource omits both fields', () => {
+    const row = mapOpportunity({ id: 'o8' })
+    expect(row.archived).toBe(false)
+    expect(row.archivedAt).toBeNull()
+  })
+
   it('never throws on an empty record and fills safe defaults', () => {
     const row = mapOpportunity({})
     expect(row.title).toBe('—')

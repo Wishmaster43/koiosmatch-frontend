@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, LayoutList, Kanban } from 'lucide-react'
+import { Plus, LayoutList, Kanban, Archive } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
@@ -23,6 +23,7 @@ import PaginationBar from '@/components/ui/PaginationBar'
 import ViewSwitch from '@/components/ui/ViewSwitch'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { useMatches } from './hooks/useMatches'
@@ -44,8 +45,10 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // an exact `?ref=` lookup instead of the client-side free-text filter below.
   const trimmedQuery = query.trim()
   const refQuery = isReferenceQuery(trimmedQuery) ? trimmedQuery : null
+  // MATCH-ARCHIVED-LIST-1: reveal soft-deleted matches alongside the active set.
+  const [showArchived, setShowArchived] = usePageMemory('matches.archived', false)
   // Data (fetch + mapping) lives in the hook (§3); the page only derives + renders.
-  const { rows, loading, error, updateMatch, reload } = useMatches(refQuery)
+  const { rows, loading, error, updateMatch, reload } = useMatches(refQuery, showArchived)
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Match statuses drive the board columns + donut (R-1b lookup; the funnel is
   // an APPLICATION axis — the match resource no longer carries a stage).
@@ -123,7 +126,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
 
   // Reset to the first page and clear the selection whenever a filter changes
   // (kept out of the memo — setting state during render can loop).
-  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [stageFilter, ownerFilter, kpiScored, query])
+  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [stageFilter, ownerFilter, kpiScored, query, showArchived])
 
   // Filter the visible rows by donut selection. A reference-number query already
   // narrowed `rows` server-side (exact `?ref=` lookup) — skip the free-text
@@ -139,6 +142,12 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       return true
     })
   }, [rows, stageFilter, ownerFilter, clientFilter, kpiScored, query, refQuery])
+
+  // Board rows never include archived matches: dragging one to a new status would
+  // PATCH /matches/{id}, which 404s once soft-deleted (MatchController::update has
+  // no withTrashed()) — the archived-mixed view is table-only, mirrors the meta
+  // picker/approval actions the drawer already hides for an archived match.
+  const boardRows = useMemo(() => filteredAll.filter(r => !r.archived), [filteredAll])
 
   const totalRows = filteredAll.length
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
@@ -164,11 +173,11 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   ]
 
   // Shared clear-all (page memory keeps filters sticky).
-  const anyFilterActive = Boolean(query.trim() || kpiScored || stageFilter.length || ownerFilter.length || clientFilter.length)
+  const anyFilterActive = Boolean(query.trim() || kpiScored || stageFilter.length || ownerFilter.length || clientFilter.length || showArchived)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setKpiScored(false)
-    setStageFilter([]); setOwnerFilter([]); setClientFilter([])
+    setStageFilter([]); setOwnerFilter([]); setClientFilter([]); setShowArchived(false)
   }
 
   // KPI clicks drive the existing stage filter (chip + clear come for free);
@@ -289,14 +298,12 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
             <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
         </div>
 
-        {/* Right — icon-only view toggle (mirror opportunities). No archived
-            QuickViewToggle here (ARCHIVE-1): MatchController::index never honours
-            include_archived and neither match resource ever serializes archived/
-            deleted_at (grepped app/Http/Controllers/MatchController.php +
-            app/Http/Resources/JobMatch/*.php) — a toggle would always show the
-            identical list, a fake affordance. See useMatches.ts for the full note
-            and the recommended backend fix. */}
+        {/* Right — archived toggle + icon-only view toggle (mirror vacancies/opportunities). */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Archived (soft-deleted) — shared quick-view toggle (§4); reveals rows
+              alongside the active set (MatchesTable renders the "Gearchiveerd" chip). */}
+          <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+            label={t('view.archived')} color="var(--color-archive)" icon={Archive} />
           {/* View toggle — icon-only (label as aria-label + tooltip, §6) */}
           <button onClick={() => setView('table')} title={t('view.matches')} aria-label={t('view.matches')}
             style={{ display: 'flex', padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
@@ -334,7 +341,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
         {
           id: 'board',
           render: () => (
-            <MatchesBoard rows={filteredAll} columns={stageColumns} onMove={handleMove}
+            <MatchesBoard rows={boardRows} columns={stageColumns} onMove={handleMove}
               onSelect={setSelected} selectedId={selected?.id} />
           ),
         },

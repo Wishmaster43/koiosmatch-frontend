@@ -165,8 +165,9 @@ export default function MatchDrawer({
           }
         >
           {/* Archived banner (ARCHIVE-1): since-when + restore, right under the header —
-              purely local state (see the type comment on MatchRow.archived), set the moment
-              this session's own archive/restore call completes. */}
+              server-backed (mapMatch reads archived/deleted_at, see the type comment on
+              MatchRow.archived) OR set locally the moment this session's own archive/
+              restore call completes, whichever lands first. */}
           {match.archived && (
             <ArchivedBanner id={match.id}
               message={match.archivedAt ? t('drawer.archivedBanner.since', { date: formatDate(match.archivedAt) }) : t('drawer.archivedBanner.flag')}

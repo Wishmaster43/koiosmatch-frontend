@@ -5,19 +5,16 @@
  * Lookups (users, stages) are pulled in here too so the page stays presentational.
  * A missing endpoint (404) is an empty list, not an error.
  *
- * ARCHIVE-1 (2026-07-18): this used to also fetch `?include_archived=1` and expose
- * a `showArchived` toggle. Measured: OpportunityController::index DOES honour that
- * param (`$request->boolean('include_archived')` → `withTrashed()`, grepped
- * app/Http/Controllers/OpportunityController.php) — but OpportunityResource never
- * serializes `archived`/`deleted_at` on either the list or the detail row (same
- * resource class serves both). So a fetch with the flag on silently returns active
- * + archived rows MIXED, indistinguishable — the former client-side filter
- * (`r.archived`) was always false, meaning the "Archived" view always rendered
- * ZERO rows. Dropped rather than shipped as a fake toggle (§0/§4); the single-
- * record archive/restore (useOpportunityArchive) is unaffected — see its own
- * comment for the exact BE routes. Recommend backend add the two fields
- * (mirror VacancyListResource/ApplicationListResource/CandidateListResource)
- * to re-enable list-level archived visibility.
+ * ARCHIVE-1 (2026-07-18): re-added `includeArchived` + `?include_archived=1` now
+ * that the backend serializes what the toggle needs — measured against the
+ * delivered code: OpportunityController::index still honours the param
+ * (`withTrashed()`), and OpportunityResource NOW carries `archived` (bool) +
+ * `deleted_at` (ISO8601) on every row (previously the resource silently dropped
+ * both fields, so a mixed active+archived response was indistinguishable — the
+ * former client-side `r.archived` filter was always false). Archived rows ride
+ * ALONGSIDE the active set (mirrors vacancies), not an isolated view — the table
+ * chip (OpportunitiesTable) is what tells them apart. The single-record archive/
+ * restore (useOpportunityArchive) is unaffected — see its own comment for routes.
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -37,7 +34,9 @@ interface PageCustomer { id: Id; name: string }
 // (see useCandidatesData for the full note).
 const EMPTY_OPPORTUNITIES: Opportunity[] = []
 
-export function useOpportunitiesData() {
+// includeArchived (ARCHIVE-1): reveal soft-deleted opportunities alongside the
+// active set (?include_archived=1) — off by default; the page owns the toggle state.
+export function useOpportunitiesData(includeArchived: boolean = false) {
   const { t } = useTranslation()
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { stages, stageMeta } = useOpportunityStages()
@@ -48,14 +47,15 @@ export function useOpportunitiesData() {
   // Opportunities list via React Query (A-3). A missing endpoint (404) is an
   // empty list, not an error. `refetch` doubles as the post-archive/restore
   // reload (useOpportunityArchive) so a just-archived row drops out of view and
-  // a just-restored one comes back — the default query already excludes
-  // soft-deleted rows, so no `include_archived` fetch is needed here (see the
-  // file comment on why the archived-only view was removed).
+  // a just-restored one comes back. The toggle rides in the query key so
+  // flipping it triggers a real refetch instead of silently reusing the cache.
+  const queryKey = ['opportunities', includeArchived] as const
   const { data, isLoading: loading, isError: error, refetch } = useQuery({
-    queryKey: ['opportunities'],
+    queryKey,
     queryFn: async ({ signal }) => {
       try {
-        const r = await api.get('/opportunities', { signal })
+        const params = includeArchived ? { include_archived: 1 } : undefined
+        const r = await api.get('/opportunities', { signal, params })
         return ((unwrapList(r).rows) as ApiOpportunity[]).map(mapOpportunity)
       } catch (e) {
         if ((e as { response?: { status?: number } })?.response?.status === 404) return [] as Opportunity[]
@@ -66,9 +66,9 @@ export function useOpportunitiesData() {
   const rows = data ?? EMPTY_OPPORTUNITIES
   // Keep the setRows(prev => …) API the optimistic mutations use, backed by the query cache.
   const setRows = useCallback((updater: Opportunity[] | ((prev: Opportunity[]) => Opportunity[])) => {
-    queryClient.setQueryData<Opportunity[]>(['opportunities'], prev =>
+    queryClient.setQueryData<Opportunity[]>(queryKey, prev =>
       typeof updater === 'function' ? (updater as (p: Opportunity[]) => Opportunity[])(prev ?? []) : updater)
-  }, [queryClient])
+  }, [queryClient, queryKey])
   const [selected,       setSelected]       = useState<Opportunity | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
@@ -90,6 +90,12 @@ export function useOpportunitiesData() {
   }, [])
 
   // Drawer: select an opportunity, then refresh from the detail endpoint (ref-guarded).
+  // ARCHIVE-1 measured: OpportunityController::show does NOT withTrashed() (unlike
+  // MatchController::show), so this refresh 404s for an archived row — the catch
+  // below is silent because `o` (the list row) already has the SAME shape as the
+  // detail (one OpportunityResource serves both), so the drawer still renders full
+  // data from the list-row fallback. Not blocking, but the field never re-syncs
+  // past this session for an archived row — recommend BE add withTrashed() to show().
   const selectedIdRef = useRef<Id | null>(null)
   const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setDrawerExpanded(false) }
   const selectOpportunity = (o: Opportunity) => {

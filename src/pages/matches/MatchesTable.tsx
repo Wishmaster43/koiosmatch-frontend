@@ -6,6 +6,7 @@ import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import EntityNameCell from '@/components/ui/EntityNameCell'
 import StatusPill from '@/components/ui/StatusPill'
+import SoftChip from '@/components/ui/SoftChip'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import ScorePill from './ScorePill'
@@ -74,6 +75,10 @@ export default function MatchesTable({
     { key: 'stage',   header: t('cols.status'),
       // Status axis (R-1b): resolve label+colour from the lookup; stage fell out of the resource.
       render: r => {
+        // MATCH-ARCHIVED-LIST-1: archive state wins over the status pill (mirrors
+        // VacanciesTable/CandidatesTable) — a soft-deleted row shown via
+        // include_archived=1 reads as "Archived", not its stale status.
+        if (r.archived) return <SoftChip label={t('view.archived')} color="var(--text-muted)" round />
         const m = statusMeta(r.status)
         const label = m?.label ?? r.stage
         const color = m?.color ?? r.stageColor

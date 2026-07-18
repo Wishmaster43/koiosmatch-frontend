@@ -128,7 +128,8 @@
   },
   "view": {
     "matches": "Matches",
-    "board": "Kanban"
+    "board": "Kanban",
+    "archived": "Archivé"
   },
   "board": {
     "empty": "Aucun match"

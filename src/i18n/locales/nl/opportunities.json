@@ -149,6 +149,7 @@
   },
   "view": {
     "table": "Lijstweergave",
-    "board": "Kanbanbord"
+    "board": "Kanbanbord",
+    "archived": "Gearchiveerd"
   }
 }

@@ -3,15 +3,15 @@
  * MatchRow shape the table renders. A missing endpoint (404) is an empty list, not
  * an error. Data logic lives here so MatchesPage stays presentational (§3).
  *
- * ARCHIVE-1 (2026-07-18): this used to accept an `includeArchived` flag and send
- * `?include_archived=1`, mirroring vacancies/applications/opportunities — but
- * MatchController::index never reads that param (no `withTrashed()` on the query,
- * grepped app/Http/Controllers/MatchController.php) and neither MatchListResource
- * nor MatchDetailResource ever serialize `archived`/`deleted_at`. The flag was a
- * no-op: toggling it re-fetched the identical rows every time. Dropped rather than
- * shipped as a fake control (§0/§4) — re-add once the backend adds `include_archived`
- * handling + the archived/deleted_at fields (mirror OpportunityController@index +
- * VacancyListResource/ApplicationListResource).
+ * MATCH-ARCHIVED-LIST-1 (2026-07-18): re-added the `includeArchived` flag now that
+ * the backend actually supports it — measured against the delivered code:
+ * MatchController::index validates `include_archived`/`archived` and applies
+ * `withTrashed()`/`onlyTrashed()` on the query, and MatchListResource (the base
+ * both list + detail rows extend) now serializes `archived` (bool) + `deleted_at`
+ * (ISO8601). Sends `include_archived: 1` (numeric, not a JS boolean — the same
+ * 1/0 convention as vacancies/applications; Laravel's `boolean` rule rejects the
+ * string "true"). Archived rows ride ALONGSIDE the active set (mirrors vacancies),
+ * not an isolated view — the table chip (MatchesTable) is what tells them apart.
  */
 import { useState, useEffect } from 'react'
 import api from '@/lib/api'
@@ -55,6 +55,9 @@ function mapMatch(m: RawMatch): MatchRow {
     approval_rejected_reason: m.approval_rejected_reason ?? '',
     // Tenant custom-field values (§3B "Eigen velden").
     customFieldValues: m.custom_fields ?? {},
+    // MATCH-ARCHIVED-LIST-1: real list-level archive state (MatchListResource).
+    archived:   Boolean(m.archived ?? m.deleted_at),
+    archivedAt: m.deleted_at ?? null,
   }
 }
 
@@ -62,7 +65,9 @@ function mapMatch(m: RawMatch): MatchRow {
 // `ref` (NUMMER-1): an exact case-insensitive reference-number lookup (M-00042) —
 // when set, the super-search on the page detected a reference query, so this
 // fetches a single filtered page instead of the full paginated set.
-export function useMatches(ref: string | null = null) {
+// `includeArchived` (MATCH-ARCHIVED-LIST-1): reveal soft-deleted matches alongside
+// the active set (?include_archived=1) — off by default.
+export function useMatches(ref: string | null = null, includeArchived: boolean = false) {
   const [rows,    setRows]    = useState<MatchRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
@@ -78,12 +83,14 @@ export function useMatches(ref: string | null = null) {
     // Fetch the FULL set: the default 25-row page made every KPI/board undercount
     // (Danny: "84 vs 25" — 25 wás de bug). per_page is server-capped at 100 (422
     // above it), so follow last_page and accumulate; safety cap at 10 pages.
+    // include_archived rides on every page request (numeric 1, not a JS boolean).
     const base: Record<string, unknown> = { per_page: 100 }
+    if (includeArchived) base.include_archived = 1
     const loadAll = async () => {
       // A reference-number query (NUMMER-1) is an exact server-side lookup — one
       // request, no pagination loop; the server ignores other filters when `ref` is set.
       if (ref) {
-        const r = await api.get('/matches', { params: { ref } })
+        const r = await api.get('/matches', { params: includeArchived ? { ref, include_archived: 1 } : { ref } })
         return (r.data?.data ?? []) as RawMatch[]
       }
       const all: RawMatch[] = []
@@ -100,7 +107,7 @@ export function useMatches(ref: string | null = null) {
       .catch(e => { if (alive && e?.response?.status && e.response.status !== 404) setError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [refreshTick, ref])
+  }, [refreshTick, ref, includeArchived])
 
   // Patch one match in place (optimistic board drag / stage change / archive flag).
   const updateMatch = (id: MatchRow['id'], patch: Partial<MatchRow>) =>
