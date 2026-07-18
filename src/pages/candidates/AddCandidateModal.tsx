@@ -12,7 +12,6 @@ import { useAuth } from '@/context/AuthContext'
 import { useCreateCandidate } from './hooks/useCandidateMutations'
 import { useLocations } from '@/lib/useLocations'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
-import api from '@/lib/api'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
@@ -53,7 +52,7 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const { t } = useTranslation(['candidates', 'common'])
   const { phases } = useLookups() as unknown as { phases: LookupOption[] }
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
-  const { user: me } = useAuth() as unknown as { user: { id?: Id } | null }
+  const { user: me } = useAuth() as unknown as { user: { id?: Id; branch_ids?: Array<string | number> } | null }
   const settings = useAllSettings()
   const { genders } = useGenders()
   const { createCandidate, saving } = useCreateCandidate()
@@ -67,9 +66,13 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const [status,    setStatus]    = useState(defaultStatus)
   const [errors,    setErrors]    = useState<Record<string, boolean>>({})
   const [submitErr, setSubmitErr] = useState<string | null>(null)
-  // Punt 10: vestiging-chips — leeg laat de backend de maker-vestigingen auto-koppelen.
+  // Punt 10: vestiging-chips — voorgevuld met de eigen koppelingen uit /auth/me
+  // (ME-BRANCHES-1). Leeg = veld weglaten → de backend koppelt automatisch de
+  // maker-vestigingen (punt 9); een afwijkende keuze gaat expliciet mee in de
+  // create-body en wint volledig (CREATE-BRANCHES-1).
   const locations = useLocations()
-  const [branchIds, setBranchIds] = useState<string[]>([])
+  const seedBranchIds = (me?.branch_ids ?? []).map(String)
+  const [branchIds, setBranchIds] = useState<string[]>(seedBranchIds)
   const [form, setForm] = useState<FormState>({
     firstName: '', middleName: '', lastName: '',
     functionTitle: '',
@@ -128,15 +131,12 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
         phase:               status || 'lead',
         status:              'available',
         candidate_types:     [],
+        // Punt 10: only an explicit, non-empty choice rides along (explicit wins
+        // server-side); empty = omit → auto-assign of the maker's branches.
+        ...(branchIds.length ? { location_ids: branchIds } : {}),
       }
       // Create via the hook; it rethrows so the 422 handling below still runs.
-      const created = await createCandidate(body)
-      // Punt 10: explicitly picked branches attach per id on top of the server's
-      // auto-assign (best effort — the dossier itself is already created).
-      if (branchIds.length && created?.id != null) {
-        await Promise.allSettled(branchIds.map(id => api.post(`/candidates/${created.id}/branches`, { location_id: id })))
-      }
-      onCreated?.(created)
+      onCreated?.(await createCandidate(body))
       onClose()
     } catch (err) {
       // Show field-level errors from 422 validation responses.
