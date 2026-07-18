@@ -15,7 +15,10 @@ import { BTN_H } from '@/config/buttonMetrics'
 import type { ManagedUser } from '@/types/api'
 import { useAssignableRoles } from './hooks/useAssignableRoles'
 import { useRoleBranchTemplate } from './hooks/useRoleBranchTemplate'
-import { roleLabel, BranchChips } from './usersParts'
+import { useLocations } from '@/lib/useLocations'
+import { notifyError } from '@/lib/notify'
+import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+import { roleLabel } from './usersParts'
 
 export default function NewUserModal({ onClose, onCreated }: {
   onClose: () => void
@@ -36,9 +39,19 @@ export default function NewUserModal({ onClose, onCreated }: {
     setForm(f => (f.role ? f : { ...f, role: preferred.name }))
   }, [roles, form.role])
 
-  // The picked role's id drives the branch-template preview below the select.
+  // The picked role's id drives the branch-template seed below the select.
   const selectedRoleId = roles.find(r => r.name === form.role)?.id ?? null
   const { branches: templateBranches, loading: templateLoading } = useRoleBranchTemplate(selectedRoleId)
+
+  // Danny ronde-2 punt 1.1: the branches are CHOOSABLE at creation (1 or more) —
+  // the role template is only the seed. null = follow the template; a manual
+  // toggle diverges; switching role snaps back to the new template.
+  const locations = useLocations()
+  const [chosenBranches, setChosenBranches] = useState<string[] | null>(null)
+  useEffect(() => { setChosenBranches(null) }, [selectedRoleId])
+  const effectiveBranches = chosenBranches ?? templateBranches.map(b => String(b.location_id))
+  const toggleBranch = (id: string) =>
+    setChosenBranches(effectiveBranches.includes(id) ? effectiveBranches.filter(x => x !== id) : [...effectiveBranches, id])
 
   const set = (k: keyof typeof form) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }))
@@ -48,7 +61,14 @@ export default function NewUserModal({ onClose, onCreated }: {
     setSaving(true); setError(null)
     try {
       const res = await api.post('/users', form)
-      onCreated(unwrap(res))
+      const created = unwrap<ManagedUser>(res)
+      // Divergence from the role template → replace-set the chosen branches
+      // (the server already copied the template on create; PUT overrides it).
+      if (chosenBranches !== null) {
+        try { await api.put(`/users/${created.id}/branches`, { location_ids: chosenBranches }) }
+        catch { notifyError(t('branches.saveFailed')) }
+      }
+      onCreated(created)
       onClose()
     } catch (err) {
       const e2 = err as { response?: { data?: { message?: string } } }
@@ -109,8 +129,8 @@ export default function NewUserModal({ onClose, onCreated }: {
             </select>
           </div>
 
-          {/* Role-template preview — which branches this role starts new users with
-              (read-only; copied server-side on create, editable per-user afterwards). */}
+          {/* Vestigingen — seeded from the role template, adjustable before create
+              (Danny ronde-2 punt 1.1: kies er 1 of meerdere bij het aanmaken). */}
           {form.role && (
             <div style={{ marginBottom: 20, padding: '10px 12px', borderRadius: 8, background: 'var(--hover-bg)' }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6,
@@ -120,7 +140,12 @@ export default function NewUserModal({ onClose, onCreated }: {
               {templateLoading ? (
                 <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('branches.loading')}</p>
               ) : (
-                <BranchChips branches={templateBranches} emptyText={t('branches.previewEmpty')} />
+                <ChipMultiSelect
+                  options={locations.map(o => ({ value: String(o.value), label: o.label }))}
+                  selected={effectiveBranches}
+                  onToggle={toggleBranch}
+                  emptyText={t('branches.noLocations')}
+                />
               )}
             </div>
           )}

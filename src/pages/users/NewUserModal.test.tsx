@@ -40,6 +40,10 @@ vi.mock('./hooks/useRoleBranchTemplate', () => ({
     loading: false,
   }),
 }))
+// Ronde-2 punt 1.1: the create-modal branch picker reads the tenant locations.
+vi.mock('@/lib/useLocations', () => ({
+  useLocations: () => [{ value: 'loc-1', label: 'Amsterdam' }, { value: 'loc-2', label: 'Rotterdam' }],
+}))
 
 const noop = () => {}
 
@@ -57,11 +61,13 @@ describe('NewUserModal', () => {
     expect(await screen.findByText('Amsterdam')).toBeInTheDocument()
   })
 
-  it('shows the honest "no starting set" hint for a role with no branches', async () => {
+  it('lets the creator diverge from the template: toggling a branch keeps the choice', async () => {
     const user = userEvent.setup()
     render(<NewUserModal onClose={noop} onCreated={noop} />)
-    await user.selectOptions(screen.getByLabelText('role'), 'backoffice')
-    expect(await screen.findByText('branches.previewEmpty')).toBeInTheDocument()
+    // planner's template pre-selects Amsterdam; Rotterdam is toggleable on top.
+    const rotterdam = await screen.findByRole('button', { name: /Rotterdam/ })
+    await user.click(rotterdam)
+    expect(rotterdam).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('submits the picked role NAME (the API validates by name, not id)', async () => {

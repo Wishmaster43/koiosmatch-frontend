@@ -25,7 +25,7 @@ export default function ChipMultiSelect({ options, selected, onToggle, emptyText
           ? { background: col + '1A', color: col, border: `1px solid ${col}55` }
           : { background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }
         return (
-          <button key={o.value} type="button" onClick={() => onToggle(o.value)}
+          <button key={o.value} type="button" onClick={() => onToggle(o.value)} aria-pressed={active}
             style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', fontWeight: active ? 600 : 400, transition: 'all 0.12s',
               ...(active ? activeStyle : { background: 'var(--surface)', color: 'var(--text-muted)', border: '1px solid var(--border)' }) }}>
             {o.label}

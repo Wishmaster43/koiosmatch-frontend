@@ -53,17 +53,21 @@ export function useCandidateActivity(id?: Id): { items: ActivityEvent[]; loading
 
 export interface BranchOption { value: string; label: string }
 
-interface CustomerLite { name?: string; company_name?: string; id?: Id }
+interface LocationLite { name?: string; id?: Id }
 
-// Customer branches as id-keyed {value,label} options (GET /customers) for the
-// branch link — value is the branch id so membership can persist by id (C-4).
-export function useBranchCustomerOptions(): BranchOption[] {
+// Tenant vestigingen (GET /locations — the settings/company/locations lookup) as
+// id-keyed {value,label} options for the
+// branch link — value is the location id so membership can persist by id (C-4).
+// Danny ronde-2 punt 1: this listed CUSTOMERS (wrong entity — the backend's
+// exists:locations rule 422'd every save); branches ARE the tenant's own
+// vestigingen from settings/company/locations.
+export function useBranchLocationOptions(): BranchOption[] {
   const { data = [] } = useQuery({
-    queryKey: ['customers', 'branch-options'],
+    queryKey: ['locations', 'branch-options'],
     queryFn: async ({ signal }): Promise<BranchOption[]> => {
-      const rows = unwrapList<CustomerLite>(await api.get('/customers', { signal })).rows
+      const rows = unwrapList<LocationLite>(await api.get('/locations', { signal })).rows
       return rows
-        .map(l => { const name = String(l.name ?? l.company_name ?? l.id ?? ''); return { value: String(l.id ?? name), label: name } })
+        .map(l => { const name = String(l.name ?? l.id ?? ''); return { value: String(l.id ?? name), label: name } })
         .filter(o => o.value && o.label)
     },
   })
@@ -75,14 +79,15 @@ export function useBranchCustomerOptions(): BranchOption[] {
 // while the backend endpoint is being (re)built — the options GET soft-fails too.
 export function useCandidateBranches(candidate: Candidate) {
   const { t } = useTranslation('candidates')
-  const options = useBranchCustomerOptions()
+  const options = useBranchLocationOptions()
   const [branches, setBranches] = useState<CandidateBranch[]>(candidate.branches ?? [])
 
   // Membership key: prefer the id, fall back to the name for bare-slug branches.
   const keyOf = (b: CandidateBranch) => String(b.id ?? b.name)
   const selectedIds = branches.map(keyOf)
 
-  // Optimistic add/remove, persisted to the pivot route (body: { branch_id }).
+  // Optimistic add/remove, persisted to the pivot route. Body key is location_id —
+  // the controller validates exists:locations (the old branch_id key 422'd silently).
   const toggle = (id: string) => {
     if (selectedIds.includes(id)) {
       setBranches(prev => prev.filter(b => keyOf(b) !== id))
@@ -90,7 +95,7 @@ export function useCandidateBranches(candidate: Candidate) {
     } else {
       const name = options.find(o => o.value === id)?.label ?? id
       setBranches(prev => [...prev, { id, name }])
-      api.post(`/candidates/${candidate.id}/branches`, { branch_id: id }).catch(() => notifyError(t('common:actionFailed')))
+      api.post(`/candidates/${candidate.id}/branches`, { location_id: id }).catch(() => notifyError(t('common:actionFailed')))
     }
   }
 
