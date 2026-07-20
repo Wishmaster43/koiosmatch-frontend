@@ -43,6 +43,7 @@
     "languages": "Idiomas",
     "vacancies": "Vacantes",
     "customers": "Clientes",
+    "contacts": "Contactos",
     "candidate": "Candidato",
     "applications": "Candidaturas",
     "shared": "Compartido",
@@ -52,6 +53,7 @@
     "outreach": "Listas de llamadas",
     "opportunities": "Oportunidades",
     "custom_fields": "Campos personalizados",
+    "note_types": "Tipos de nota",
     "action_rules": "Reglas de acción"
   },
   "nav": {
@@ -124,7 +126,6 @@
     "department_statuses": "Estados de departamento",
     "contact_statuses": "Estados de contacto",
     "last_contact_types": "Tipo de contacto",
-    "note_types": "Tipos de nota",
     "pools": "Grupos de talento",
     "assessment_criteria": "Criterios de evaluación",
     "usage": "Uso",
@@ -151,6 +152,7 @@
     "candidate_required_fields": "Campos obligatorios",
     "application_display": "Vista de tabla",
     "functions": "Funciones",
+    "contact_functions": "Funciones de contacto",
     "customer_display": "Vista de tabla",
     "vacancy_app_defaults": "Ajustes de candidatura",
     "opportunity_display": "Vista de tabla",
@@ -182,6 +184,13 @@
     "cf_customer_location": "Ubicaciones",
     "cf_customer_department": "Departamentos",
     "cf_customer_contact": "Contactos",
+    "nt_candidate": "Candidatos",
+    "nt_application": "Candidaturas",
+    "nt_match": "Coincidencias",
+    "nt_task": "Tareas",
+    "nt_customer": "Clientes",
+    "nt_contact": "Contactos",
+    "nt_opportunity": "Oportunidades",
     "action_rules": "Reglas de acción"
   },
   "kpis": {
@@ -1294,8 +1303,8 @@
     "add": "Añadir tipo"
   },
   "noteTypes": {
-    "title": "Tipos de nota",
-    "subtitle": "Categorías para notas de candidatos.",
+    "title": "Tipos de nota — {{entity}}",
+    "subtitle": "Categorías para notas de esta sección.",
     "add": "Añadir tipo"
   },
   "poolsSettings": {
@@ -1495,6 +1504,12 @@
     "freeEntry": "Permitir entrada libre",
     "freeEntryHint": "Activado: los reclutadores pueden escribir su propia función (combobox). Desactivado: solo elegir de la lista.",
     "confirmFreeEntry": "¿Seguro? La entrada libre permite funciones fuera de la lista, lo que puede reducir la calidad de los datos."
+  },
+  "contactFunctionsSettings": {
+    "title": "Funciones de contacto",
+    "subtitle": "Gestiona la lista de funciones para los contactos en los clientes (p. ej. Gerente de ubicación, Jefe de equipo).",
+    "add": "Añadir función",
+    "notAvailable": "Aún no disponible — esta lista se activará en cuanto exista la conexión con el backend."
   },
   "customerDisplay": {
     "title": "Vista de tabla",

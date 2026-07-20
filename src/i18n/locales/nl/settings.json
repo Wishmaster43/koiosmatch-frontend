@@ -46,12 +46,14 @@
     "matches": "Matches",
     "outreach": "Bellijsten",
     "customers": "Klanten",
+    "contacts": "Contactpersonen",
     "opportunities": "Kansen",
     "candidate": "Kandidaat",
     "applications": "Sollicitaties",
     "shared": "Gedeeld",
     "whatsapp": "WhatsApp",
     "custom_fields": "Eigen velden",
+    "note_types": "Notitietypes",
     "action_rules": "Actieregels"
   },
   "nav": {
@@ -147,11 +149,11 @@
     "department_statuses": "Afdeling statussen",
     "contact_statuses": "Contactpersoon statussen",
     "last_contact_types": "Contacttype",
-    "note_types": "Notitietypes",
     "document_types": "Documenttypes",
     "candidate_phases": "Fase",
     "candidate_required_fields": "Verplichte velden",
     "functions": "Functies",
+    "contact_functions": "Contactfuncties",
     "customer_display": "Tabelweergave",
     "opportunity_display": "Tabelweergave",
     "dashboards": "Dashboards",
@@ -182,6 +184,13 @@
     "cf_customer_location": "Locaties",
     "cf_customer_department": "Afdelingen",
     "cf_customer_contact": "Contactpersonen",
+    "nt_candidate": "Kandidaten",
+    "nt_application": "Sollicitaties",
+    "nt_match": "Matches",
+    "nt_task": "Taken",
+    "nt_customer": "Klanten",
+    "nt_contact": "Contactpersonen",
+    "nt_opportunity": "Kansen",
     "action_rules": "Actieregels"
   },
   "kpis": {
@@ -1466,8 +1475,8 @@
     "add": "Type toevoegen"
   },
   "noteTypes": {
-    "title": "Notitietypes",
-    "subtitle": "Categorieën voor notities bij kandidaten.",
+    "title": "Notitietypes — {{entity}}",
+    "subtitle": "Categorieën voor notities bij dit onderdeel.",
     "add": "Type toevoegen"
   },
   "documentTypes": {
@@ -1495,6 +1504,12 @@
     "freeEntry": "Vrije invoer toestaan",
     "freeEntryHint": "Aan: recruiters kunnen een eigen functie typen (combobox). Uit: alleen kiezen uit de lijst (strikte dropdown).",
     "confirmFreeEntry": "Weet je het zeker? Vrije invoer laat recruiters functies typen die niet in de lijst staan — dit kan de datakwaliteit verlagen."
+  },
+  "contactFunctionsSettings": {
+    "title": "Contactfuncties",
+    "subtitle": "Beheer de functielijst voor contactpersonen bij klanten (bijv. Locatiemanager, Teamleider).",
+    "add": "Functie toevoegen",
+    "notAvailable": "Nog niet beschikbaar — deze lijst wordt actief zodra de backend-koppeling er is."
   },
   "opportunityDisplay": {
     "title": "Tabelweergave",

@@ -43,6 +43,7 @@
     "languages": "Langues",
     "vacancies": "Postes",
     "customers": "Clients",
+    "contacts": "Contacts",
     "candidate": "Candidat",
     "applications": "Candidatures",
     "shared": "Partagé",
@@ -52,6 +53,7 @@
     "outreach": "Listes d'appels",
     "opportunities": "Opportunités",
     "custom_fields": "Champs personnalisés",
+    "note_types": "Types de note",
     "action_rules": "Règles d'action"
   },
   "nav": {
@@ -124,7 +126,6 @@
     "department_statuses": "Statuts de département",
     "contact_statuses": "Statuts de contact",
     "last_contact_types": "Type de contact",
-    "note_types": "Types de note",
     "pools": "Viviers",
     "assessment_criteria": "Critères d'évaluation",
     "usage": "Utilisation",
@@ -151,6 +152,7 @@
     "candidate_required_fields": "Champs requis",
     "application_display": "Affichage du tableau",
     "functions": "Fonctions",
+    "contact_functions": "Fonctions des contacts",
     "customer_display": "Affichage du tableau",
     "vacancy_app_defaults": "Paramètres de candidature",
     "opportunity_display": "Affichage du tableau",
@@ -182,6 +184,13 @@
     "cf_customer_location": "Sites",
     "cf_customer_department": "Services",
     "cf_customer_contact": "Contacts",
+    "nt_candidate": "Candidats",
+    "nt_application": "Candidatures",
+    "nt_match": "Correspondances",
+    "nt_task": "Tâches",
+    "nt_customer": "Clients",
+    "nt_contact": "Contacts",
+    "nt_opportunity": "Opportunités",
     "action_rules": "Règles d'action"
   },
   "kpis": {
@@ -1294,8 +1303,8 @@
     "add": "Ajouter un type"
   },
   "noteTypes": {
-    "title": "Types de note",
-    "subtitle": "Catégories pour les notes candidats.",
+    "title": "Types de note — {{entity}}",
+    "subtitle": "Catégories pour les notes de cette section.",
     "add": "Ajouter un type"
   },
   "poolsSettings": {
@@ -1495,6 +1504,12 @@
     "freeEntry": "Autoriser la saisie libre",
     "freeEntryHint": "Activé : les recruteurs peuvent saisir leur propre fonction (combobox). Désactivé : choisir uniquement dans la liste.",
     "confirmFreeEntry": "Êtes-vous sûr ? La saisie libre autorise des fonctions hors liste — cela peut réduire la qualité des données."
+  },
+  "contactFunctionsSettings": {
+    "title": "Fonctions des contacts",
+    "subtitle": "Gérez la liste des fonctions pour les contacts chez les clients (ex. Responsable de site, Chef d'équipe).",
+    "add": "Ajouter une fonction",
+    "notAvailable": "Pas encore disponible — cette liste s'active dès que la connexion backend est en place."
   },
   "customerDisplay": {
     "title": "Affichage du tableau",

@@ -19,7 +19,14 @@ import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/
 // enforced op de backend (max één per lookup). Geen modal-veld: een losse
 // DefaultToggle per rij "promoveert" die rij en zet alle andere rijen lokaal terug
 // (optimistisch), zodat de UI de server-singleton weerspiegelt zonder een refetch.
-export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null, flagField = null, numberField = null, defaultField = null, withIcon = false, allowAdd = true, showRank = false }) {
+// entity (optioneel): scopes a shared lookup (e.g. /note-types) to one owning entity —
+// GET reads `?entity=X`, POST/PUT writes send `entity: X` so create/edit stay scoped
+// (mirrors NoteType::ENTITIES on the backend; NOTE-TYPES-2/3).
+// notFoundNotice (optioneel): a lookup requested from the backend but not deployed
+// yet 404s on GET — pass a calm i18n message and the editor shows it instead of an
+// empty list + live CRUD buttons that would silently fail (§3 no fake affordances).
+// Omitted (default), a 404 stays silently swallowed like every other lookup here.
+export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null, flagField = null, numberField = null, defaultField = null, withIcon = false, allowAdd = true, showRank = false, entity = null, notFoundNotice = null }) {
   const { t } = useTranslation('settings')
   const emptyDraft = () => ({ name: '', color: '#3B8FD4', ...(withIcon ? { icon: '' } : {}), ...(extraField ? { [extraField.key]: extraField.default } : {}), ...(numberField ? { [numberField.key]: numberField.default } : {}), ...(flagField ? { [flagField.key]: false } : {}) })
   // Lookups differ in their display field: name (phases/status) vs label/value (genders/languages).
@@ -28,6 +35,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
   const inUse = (i) => Boolean(i.in_use ?? i.is_used ?? i.locked ?? ((i.usage_count ?? i.candidates_count ?? 0) > 0))
   const [items,     setItems]     = useState([])
   const [loading,   setLoading]   = useState(true)
+  const [notFound,  setNotFound]  = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [editing,   setEditing]   = useState(null)   // null = create; item = edit
   const [draft,     setDraft]     = useState(emptyDraft)
@@ -37,8 +45,14 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
   const [settingDefaultId, setSettingDefaultId] = useState(null)
 
   useEffect(() => {
-    api.get(endpoint).then(r => setItems(unwrapList(r).rows)).catch(() => {}).finally(() => setLoading(false))
-  }, [endpoint])
+    api.get(endpoint, entity ? { params: { entity } } : undefined)
+      .then(r => setItems(unwrapList(r).rows))
+      // A 404 means this lookup isn't deployed on the backend yet — surface the calm
+      // notice when the caller opted in; every other/unscoped lookup keeps swallowing
+      // silently as before (its endpoint always exists).
+      .catch(e => { if (notFoundNotice && e?.response?.status === 404) setNotFound(true) })
+      .finally(() => setLoading(false))
+  }, [endpoint, entity, notFoundNotice])
 
   // Open the modal blank (create) or prefilled with an existing item (edit).
   const openCreate = () => { setEditing(null); setDraft(emptyDraft()); setShowModal(true) }
@@ -57,7 +71,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
   const submit = async () => {
     if (!draft.name.trim()) return
     setSaving(true)
-    const body = { ...draft, label: draft.name }
+    const body = { ...draft, label: draft.name, ...(entity ? { entity } : {}) }
     try {
       if (editing) {
         const res = await api.put(`${endpoint}/${editing.id}`, { ...editing, ...body })
@@ -125,6 +139,19 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
       next.splice(target, 0, moved)
       return next
     })
+  }
+
+  // Calm "not available yet" state — no list, no Add button (§3: never a dead
+  // CRUD affordance whose write silently 404s on this tenant/backend).
+  if (notFound) {
+    return (
+      <div style={{ maxWidth: 640 }}>
+        {compact
+          ? <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
+          : <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{title}</h2>}
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{notFoundNotice}</p>
+      </div>
+    )
   }
 
   return (

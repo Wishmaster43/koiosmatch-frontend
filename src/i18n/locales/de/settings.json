@@ -43,6 +43,7 @@
     "languages": "Sprachen",
     "vacancies": "Stellen",
     "customers": "Kunden",
+    "contacts": "Kontaktpersonen",
     "candidate": "Kandidat",
     "applications": "Bewerbungen",
     "shared": "Gemeinsam",
@@ -52,6 +53,7 @@
     "outreach": "Anruflisten",
     "opportunities": "Chancen",
     "custom_fields": "Eigene Felder",
+    "note_types": "Notiztypen",
     "action_rules": "Aktionsregeln"
   },
   "nav": {
@@ -124,7 +126,6 @@
     "department_statuses": "Abteilungsstatus",
     "contact_statuses": "Kontaktstatus",
     "last_contact_types": "Kontakttyp",
-    "note_types": "Notiztypen",
     "pools": "Talentpools",
     "assessment_criteria": "Bewertungskriterien",
     "usage": "Verbrauch",
@@ -151,6 +152,7 @@
     "candidate_required_fields": "Pflichtfelder",
     "application_display": "Tabellenansicht",
     "functions": "Funktionen",
+    "contact_functions": "Kontaktfunktionen",
     "customer_display": "Tabellenanzeige",
     "vacancy_app_defaults": "Bewerbungseinstellungen",
     "opportunity_display": "Tabellenansicht",
@@ -182,6 +184,13 @@
     "cf_customer_location": "Standorte",
     "cf_customer_department": "Abteilungen",
     "cf_customer_contact": "Kontakte",
+    "nt_candidate": "Kandidaten",
+    "nt_application": "Bewerbungen",
+    "nt_match": "Matches",
+    "nt_task": "Aufgaben",
+    "nt_customer": "Kunden",
+    "nt_contact": "Kontakte",
+    "nt_opportunity": "Chancen",
     "action_rules": "Aktionsregeln"
   },
   "kpis": {
@@ -1294,8 +1303,8 @@
     "add": "Typ hinzufügen"
   },
   "noteTypes": {
-    "title": "Notiztypen",
-    "subtitle": "Kategorien für Kandidaten-Notizen.",
+    "title": "Notiztypen — {{entity}}",
+    "subtitle": "Kategorien für Notizen in diesem Bereich.",
     "add": "Typ hinzufügen"
   },
   "poolsSettings": {
@@ -1495,6 +1504,12 @@
     "freeEntry": "Freie Eingabe erlauben",
     "freeEntryHint": "An: Recruiter können eine eigene Funktion eingeben (Combobox). Aus: nur aus der Liste wählen (strikte Auswahl).",
     "confirmFreeEntry": "Bist du sicher? Freie Eingabe erlaubt Funktionen außerhalb der Liste — das kann die Datenqualität senken."
+  },
+  "contactFunctionsSettings": {
+    "title": "Kontaktfunktionen",
+    "subtitle": "Verwalte die Funktionsliste für Kontaktpersonen bei Kunden (z. B. Standortleiter, Teamleiter).",
+    "add": "Funktion hinzufügen",
+    "notAvailable": "Noch nicht verfügbar — diese Liste wird aktiv, sobald die Backend-Anbindung besteht."
   },
   "customerDisplay": {
     "title": "Tabellenanzeige",

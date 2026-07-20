@@ -32,7 +32,8 @@ import CompanySettings from './sections/CompanySettings'
 import LocationsSettings from './sections/LocationsSettings'
 import MemorySettings from './sections/MemorySettings'
 import { ContractFormsSettings, FunnelStagesSettings, CandidateStatusesSettings, CandidatePhasesSettings } from './sections/CandidateLookupsSettings'
-import { LastContactTypesSettings, NoteTypesSettings } from './sections/CandidateCommSettings'
+import { LastContactTypesSettings } from './sections/CandidateCommSettings'
+import NoteTypesSettings from './sections/NoteTypesSettings'
 import { CandidateConversionSettings } from './sections/CandidateConversionSettings'
 import NumberingSettings from './sections/NumberingSettings'
 import { CustomerStatusesSettings, LocationStatusesSettings, DepartmentStatusesSettings, ContactStatusesSettings } from './sections/CustomerSettings'
@@ -41,6 +42,7 @@ import { LanguageListSettings, LanguageLevelSettings } from './sections/Language
 import GenderSettings from './sections/GenderSettings'
 import IndustrySettings from './sections/IndustrySettings'
 import FunctionsSettings from './sections/FunctionsSettings'
+import ContactFunctionsSettings from './sections/ContactFunctionsSettings'
 import { VacancyStatusSettings, VacancyPhaseSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings, VacancyApplicationDefaultsSettings } from './sections/VacancySettings'
 import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
 import MatchTemplatesSettings from './sections/MatchTemplatesSettings'
@@ -129,7 +131,6 @@ export const NAV_GROUPS = [
       { id: 'lang_levels', icon: BarChart2, component: LanguageLevelSettings },
       { id: 'genders', icon: Users, component: GenderSettings },
       { id: 'last_contact_types', icon: MessageCircle, component: LastContactTypesSettings },
-      { id: 'note_types', icon: MessageSquare, component: NoteTypesSettings },
     ],
   },
   {
@@ -164,13 +165,25 @@ export const NAV_GROUPS = [
   },
   {
     // Customer-domain lookups — statuses for the customer and its sub-entities.
+    // contact_statuses moved out to its own `contacts` group below (Danny 2026-07-20,
+    // FUNCTIONS-SPLIT-1) so every contact-person setting lives together.
     key: 'customers', icon: Building2,
     items: [
       { id: 'customer_statuses', icon: Tags, component: CustomerStatusesSettings },
       { id: 'location_statuses', icon: MapPin, component: LocationStatusesSettings },
       { id: 'department_statuses', icon: Building2, component: DepartmentStatusesSettings },
-      { id: 'contact_statuses', icon: Users, component: ContactStatusesSettings },
       { id: 'customer_display', icon: Palette, schema: customerDisplay },
+    ],
+  },
+  {
+    // Contactpersonen — own top-level group (Danny 2026-07-20, FUNCTIONS-SPLIT-1):
+    // the contact function list split off from candidate functions, plus the
+    // contact status lookup relocated from `customers` (component unchanged, only
+    // its registry spot moves) so contact-specific settings live in one place.
+    key: 'contacts', icon: Users,
+    items: [
+      { id: 'contact_functions', icon: Briefcase, component: ContactFunctionsSettings },
+      { id: 'contact_statuses', icon: Users, component: ContactStatusesSettings },
     ],
   },
   {
@@ -246,6 +259,23 @@ export const NAV_GROUPS = [
       { id: 'cf_customer_location', icon: MapPin, render: () => <CustomFieldsSettings entityType="customer_location" /> },
       { id: 'cf_customer_department', icon: Building2, render: () => <CustomFieldsSettings entityType="customer_department" /> },
       { id: 'cf_customer_contact', icon: Users, render: () => <CustomFieldsSettings entityType="customer_contact" /> },
+    ],
+  },
+  {
+    // Notitietypes (NOTE-TYPES-2/3, Danny "ieder zijn eigen" 2026-07-20) — own top-level
+    // group, one NoteTypesSettings(entity) sub-tab per backend NoteType::ENTITIES value,
+    // mirroring the custom_fields group above: one shared editor parameterized by
+    // `entity`, never a per-entity fork. Replaces the old flat cross-entity list that
+    // lived under personalisation.
+    key: 'note_types', icon: MessageSquare,
+    items: [
+      { id: 'nt_candidate', icon: Users, render: () => <NoteTypesSettings entity="candidate" /> },
+      { id: 'nt_application', icon: ClipboardList, render: () => <NoteTypesSettings entity="application" /> },
+      { id: 'nt_match', icon: Sparkles, render: () => <NoteTypesSettings entity="match" /> },
+      { id: 'nt_task', icon: ListChecks, render: () => <NoteTypesSettings entity="task" /> },
+      { id: 'nt_customer', icon: Building2, render: () => <NoteTypesSettings entity="customer" /> },
+      { id: 'nt_contact', icon: Users, render: () => <NoteTypesSettings entity="contact" /> },
+      { id: 'nt_opportunity', icon: Target, render: () => <NoteTypesSettings entity="opportunity" /> },
     ],
   },
   {

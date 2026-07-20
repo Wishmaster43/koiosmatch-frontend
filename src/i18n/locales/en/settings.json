@@ -46,12 +46,14 @@
     "matches": "Matches",
     "outreach": "Call lists",
     "customers": "Customers",
+    "contacts": "Contacts",
     "opportunities": "Opportunities",
     "candidate": "Candidate",
     "applications": "Applications",
     "shared": "Shared",
     "whatsapp": "WhatsApp",
     "custom_fields": "Custom fields",
+    "note_types": "Note types",
     "action_rules": "Action rules"
   },
   "nav": {
@@ -147,11 +149,11 @@
     "department_statuses": "Department statuses",
     "contact_statuses": "Contact statuses",
     "last_contact_types": "Contact type",
-    "note_types": "Note types",
     "document_types": "Document types",
     "candidate_phases": "Phase",
     "candidate_required_fields": "Required fields",
     "functions": "Functions",
+    "contact_functions": "Contact functions",
     "customer_display": "Table display",
     "opportunity_display": "Table display",
     "dashboards": "Dashboards",
@@ -182,6 +184,13 @@
     "cf_customer_location": "Locations",
     "cf_customer_department": "Departments",
     "cf_customer_contact": "Contacts",
+    "nt_candidate": "Candidates",
+    "nt_application": "Applications",
+    "nt_match": "Matches",
+    "nt_task": "Tasks",
+    "nt_customer": "Customers",
+    "nt_contact": "Contacts",
+    "nt_opportunity": "Opportunities",
     "action_rules": "Action rules"
   },
   "kpis": {
@@ -1466,8 +1475,8 @@
     "add": "Add type"
   },
   "noteTypes": {
-    "title": "Note types",
-    "subtitle": "Categories for candidate notes.",
+    "title": "Note types — {{entity}}",
+    "subtitle": "Categories for notes on this entity.",
     "add": "Add type"
   },
   "documentTypes": {
@@ -1495,6 +1504,12 @@
     "freeEntry": "Allow free entry",
     "freeEntryHint": "On: recruiters can type their own function (combobox). Off: pick from the list only (strict dropdown).",
     "confirmFreeEntry": "Are you sure? Free entry lets recruiters type functions that aren’t in the list — this can lower data quality."
+  },
+  "contactFunctionsSettings": {
+    "title": "Contact functions",
+    "subtitle": "Manage the job-title list for customer contact persons (e.g. Location manager, Team lead).",
+    "add": "Add function",
+    "notAvailable": "Not available yet — this list activates once the backend connection is live."
   },
   "opportunityDisplay": {
     "title": "Table display",

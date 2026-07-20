@@ -26,6 +26,7 @@ import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useCustomFields } from '@/lib/useCustomFields'
+import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useConfirm } from '@/hooks/useConfirm'
 import { waDigits } from '@/lib/waDigits'
 import type { Contact, Department } from '@/types/customer'
@@ -51,11 +52,14 @@ export default function ContactDetail({ contact, locations, departments, statuse
   // The Extra sub-tab only shows when the tenant has defined customer_contact custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer_contact')
   const [subTab, setSubTab] = useState<'data' | 'extra'>('data')
+  // Contact function (job title) is a lookup combobox, split from the candidate
+  // function list (FUNCTIONS-SPLIT-1) — never a plain free-text field.
+  const { contactFunctions, allowFreeEntry } = useContactFunctions()
 
   const fields: FieldRow[] = [
     { key: 'firstName', label: t('subModal.firstName'), type: 'text' },
     { key: 'lastName', label: t('subModal.lastName'), type: 'text' },
-    { key: 'role', label: t('contacts.detail.role'), type: 'text' },
+    { key: 'role', label: t('contacts.detail.role'), type: 'creatable', options: contactFunctions, allowCreate: allowFreeEntry },
     { key: 'email', label: t('contacts.detail.email'), type: 'text' },
     { key: 'statusId', label: t('locations.detail.status'), type: 'select', options: statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label })) },
     // Single-value coupling, chip UI (CONTACT-MULTI-1 — see file header).

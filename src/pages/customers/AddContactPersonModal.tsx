@@ -11,6 +11,8 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { X, Users } from 'lucide-react'
 import { Field, TextField, SelectField, CheckboxField } from '@/components/forms/fields'
+import CreatableSelect from '@/components/ui/CreatableSelect'
+import { useContactFunctions } from '@/lib/useContactFunctions'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Contact, Department } from '@/types/customer'
@@ -40,6 +42,9 @@ export default function AddContactPersonModal({
   const { t } = useTranslation(['customers', 'common'])
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const isEdit = Boolean(initial)
+  // Contact function (job title) is a lookup combobox, split from the candidate
+  // function list (FUNCTIONS-SPLIT-1) — never a plain free-text field.
+  const { contactFunctions, allowFreeEntry } = useContactFunctions()
   const [form, setForm] = useState<ContactPayload>({
     firstName: initial?.firstName ?? '',
     lastName: initial?.lastName ?? '',
@@ -129,7 +134,10 @@ export default function AddContactPersonModal({
           {(errors.firstName || errors.lastName) && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: -8 }}>{t('subModal.required')}</div>}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field label={t('subModal.role')}><TextField value={form.role} onChange={v => set('role', v)} /></Field>
+            <Field label={t('subModal.role')}>
+              <CreatableSelect value={form.role} onChange={v => set('role', v)} options={contactFunctions}
+                allowCreate={allowFreeEntry} placeholder={t('common:select')} />
+            </Field>
             <Field label={t('subModal.email')}><TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder="naam@klant.nl" /></Field>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
