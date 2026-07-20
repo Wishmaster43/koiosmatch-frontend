@@ -5,7 +5,8 @@ import { Plus, LayoutList, Kanban, Archive } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import { notify } from '@/lib/notify'
 import { isReferenceQuery } from '@/lib/referenceNumber'
 import InsightsRow from '@/components/insights/InsightsRow'
@@ -26,7 +27,7 @@ import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
-import { useMatches } from './hooks/useMatches'
+import { useMatches, mapMatch } from './hooks/useMatches'
 import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
 import { useMatchArchive } from './hooks/useMatchArchive'
 import { BTN_H } from '@/config/buttonMetrics'
@@ -210,12 +211,23 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // Cross-entity open ({ open: id }): the drawer needs the ROW, so park the id until
   // the rows are loaded, then select the matching one (candidate drawer → match).
   const [pendingOpenId, setPendingOpenId] = useState<Id | null>(null)
+  // Guards the one-shot direct fetch for a deep-link open (see effect below).
+  const fetchingOpenRef = useRef<string | null>(null)
   useOpenFromIntent(intent, (id) => setPendingOpenId(id))
   useEffect(() => {
-    if (pendingOpenId == null || !rows.length) return
+    if (pendingOpenId == null) return
     const row = rows.find(r => String(r.id) === String(pendingOpenId))
-    if (row) { setSelected(row); setPendingOpenId(null) }
-  }, [pendingOpenId, rows])
+    if (row) { setSelected(row); setPendingOpenId(null); return }
+    // Deep-link fallback (Danny 20-07: match-link 'deed niets'): the target may not
+    // be in the loaded page (pagination/filters) — fetch it directly, like the
+    // candidates/vacancies openById paths, instead of silently dropping the open.
+    if (loading || fetchingOpenRef.current === String(pendingOpenId)) return
+    fetchingOpenRef.current = String(pendingOpenId)
+    api.get(`/matches/${pendingOpenId}`, { params: { include_archived: 1 } })
+      .then(r => { setSelected(mapMatch(unwrap(r))); setPendingOpenId(null) })
+      .catch(() => { notifyError(t('page.openNotFound')); setPendingOpenId(null) })
+      .finally(() => { fetchingOpenRef.current = null })
+  }, [pendingOpenId, rows, loading])
   // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
   // through it and a copied link reopens the same match (NAV-BACK-1). Reuses the
   // existing pendingOpenId deferral above instead of a second lookup mechanism.

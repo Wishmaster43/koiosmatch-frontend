@@ -135,7 +135,8 @@
     "empty": "Aucun match"
   },
   "page": {
-    "searchPlaceholder": "Rechercher des matchs"
+    "searchPlaceholder": "Rechercher des matchs",
+    "openNotFound": "Match introuvable — peut-être supprimé."
   },
   "add": {
     "button": "Nouveau match"

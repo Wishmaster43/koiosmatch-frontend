@@ -135,7 +135,8 @@
     "empty": "Sin matches"
   },
   "page": {
-    "searchPlaceholder": "Buscar coincidencias"
+    "searchPlaceholder": "Buscar coincidencias",
+    "openNotFound": "Match no encontrado — puede haber sido eliminado."
   },
   "add": {
     "button": "Nuevo match"

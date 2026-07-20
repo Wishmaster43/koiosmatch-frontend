@@ -19,7 +19,7 @@ import { initialsOf } from '@/lib/initials'
 import type { RawMatch, MatchRow } from '@/types/match'
 
 // Map a raw API match → the flat shape the table renders (snake_case-tolerant).
-function mapMatch(m: RawMatch): MatchRow {
+export function mapMatch(m: RawMatch): MatchRow {
   const cand = m.candidate ?? {}
   const joined = [cand.first_name, cand.last_name].filter(Boolean).join(' ')
   const name = m.candidate_name ?? cand.name ?? (joined || '—')

@@ -135,7 +135,8 @@
     "empty": "Geen matches"
   },
   "page": {
-    "searchPlaceholder": "Zoek naar matches"
+    "searchPlaceholder": "Zoek naar matches",
+    "openNotFound": "Match niet gevonden — mogelijk verwijderd."
   },
   "add": {
     "button": "Nieuwe match"
