@@ -70,11 +70,12 @@ export function buildCandidateInsights({
     { key: 'intake',     label: t('kpi.intake'),           value: counts.intake,     sub: t('kpi.intakeSub'),           color: 'var(--color-violet)',
       onClick: () => toggleAttention('intakePlanned'), active: attentionFilter === 'intakePlanned' },
     // Actieve gesprekken = het CONV-COUNT-1-serveraggregaat (echte WhatsApp-
-    // conversaties ≤14 dgn, niet geëscaleerd). BEWUST niet klikbaar: er bestaat
-    // (nog) geen ?active_conversations-lijstfilter — de oude lastContactAt-
-    // proxyfilter zou een lijst tonen die niet bij de teller past (Danny 20-07:
-    // 'klopt niet'). Klik komt terug met CONV-FILTER-1 (tile = list-doctrine).
-    { key: 'conversations', label: t('analytics.conversations'), value: counts.activeConv, color: 'var(--color-success)' },
+    // conversaties ≤14 dgn, niet geëscaleerd). De klik filtert via de ECHTE
+    // conversatie-ids (interim /conversations-fetch in CandidatesPage tot het
+    // ?active_conversations-lijstfilter er is) — teller en lijst delen dus één
+    // definitie, nooit meer de lastContactAt-proxy.
+    { key: 'conversations', label: t('analytics.conversations'), value: counts.activeConv, color: 'var(--color-success)',
+      onClick: () => toggleAttention('activeConv'), active: attentionFilter === 'activeConv' },
     { key: 'tasks', label: t('kpi.tasks'), value: counts.tasks, sub: t('kpi.tasksSub'), color: TASKS_ACCENT,
       onClick: () => toggleAttention('hasTasks'), active: attentionFilter === 'hasTasks' },
   ]

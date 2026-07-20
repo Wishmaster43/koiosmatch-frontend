@@ -13,6 +13,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useGenders } from '@/lib/useGenders'
 import { useUsers } from '@/lib/queries'
+import api from '@/lib/api'
 import CandidateDrawerJs from './CandidateDrawer'
 import CandidateLifecycleModals from './CandidateLifecycleModals'
 import AddCandidateModal from './AddCandidateModal'
@@ -91,6 +92,12 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
 
   // 14-day window for the "actieve gesprekken" card filter — captured once (pure render).
   const [convCutoff] = useState(() => Date.now() - 14 * 86400000)
+  // Interim CONV-FILTER-1 (Danny 20-07 'doet nu niets'): until the server grows a
+  // ?active_conversations list param, clicking the tile fetches the REAL active-
+  // conversation candidate-ids once (same definition as the stats aggregate:
+  // last message ≤14 dgn, not escalated) and filters the loaded rows by id —
+  // never the old lastContactAt proxy that mismatched the counter.
+  const [activeConvIds, setActiveConvIds] = useState<Set<string> | null>(null)
   // "Not contacted > N months" threshold — tenant setting (Settings → KPI's → Candidates), default 6.
   const settings = useAllSettings()
   const staleMonths = getNumberSetting(settings, 'no_contact_alert_months', 6)
@@ -109,6 +116,24 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     dateRange, setDateRange, geoFilter, geoHint, applyGeo, clearGeo,
     anyFilterActive, clearAllFilters, searchEpoch, filterParams, filterKey,
   } = useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius, setMapCenter, setMapRadius })
+
+  // Interim-fetch voor de gesprekken-tegel (zie comment bij activeConvIds boven).
+  useEffect(() => {
+    if (attentionFilter !== 'activeConv' || activeConvIds) return
+    let alive = true
+    api.get('/conversations', { params: { per_page: 200 } })
+      .then((r: { data?: unknown }) => {
+        if (!alive) return
+        const payload = r.data as { data?: unknown[] } | unknown[] | undefined
+        const rows = (Array.isArray(payload) ? payload : payload?.data ?? []) as Array<{ candidate?: { id?: Id }; candidate_id?: Id; last_message_at?: string; escalated?: boolean }>
+        setActiveConvIds(new Set(rows
+          .filter(x => !x.escalated && x.last_message_at && new Date(x.last_message_at).getTime() > convCutoff)
+          .map(x => String(x.candidate?.id ?? x.candidate_id ?? ''))
+          .filter(Boolean)))
+      })
+      .catch(() => { if (alive) setActiveConvIds(new Set()) })
+    return () => { alive = false }
+  }, [attentionFilter, activeConvIds, convCutoff])
 
   // Seed filters from a navigation intent (e.g. a dashboard KPI/chart click).
   useEffect(() => {
@@ -210,9 +235,9 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     // predicate → it's server-side only (the no_followup param), so don't page-filter it here.
     if (attentionFilter === 'stale6m')        return base.filter(c => isStale(c, staleMonths))
     if (attentionFilter === 'neverContacted') return base.filter(isNeverContacted)
-    if (attentionFilter === 'activeConv')     return base.filter(c => c.lastContactAt && new Date(c.lastContactAt).getTime() > convCutoff)
+    if (attentionFilter === 'activeConv')     return activeConvIds ? base.filter(c => activeConvIds.has(String(c.id))) : base
     return base
-  }, [candidates, attentionFilter, showArchived, showTrash, staleMonths])
+  }, [candidates, attentionFilter, showArchived, showTrash, staleMonths, activeConvIds])
 
   // Drawer open/close + single-record lifecycle mutations (§0.3 split → hook).
   const {
