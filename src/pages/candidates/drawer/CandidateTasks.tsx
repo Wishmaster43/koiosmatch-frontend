@@ -85,10 +85,14 @@ export default function CandidateTasks({ candidateId }: { candidateId: Id }) {
       {label}
     </button>
   )
+  // Chips links, de +knop rechts (Danny 20-07) — full-width action row in the
+  // titleless SectionCard header.
   const addAction = (
-    <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-      {viewChip('open', t('drawer.tasksOpen'))}
-      {viewChip('history', t('drawer.tasksHistory'))}
+    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 6 }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        {viewChip('open', t('drawer.tasksOpen'))}
+        {viewChip('history', t('drawer.tasksHistory'))}
+      </span>
       <DrawerAddButton onClick={() => setAdding(true)} disabled={taskRuleBlocked}
         title={taskRuleBlocked ? taskRuleDecision?.message ?? undefined : undefined}
         label={t('drawer.newTask')} />
