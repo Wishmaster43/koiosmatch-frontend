@@ -69,10 +69,12 @@ export function buildCandidateInsights({
     // "system/AI-ish accent" token whose own doc comment already names "intake" (§4).
     { key: 'intake',     label: t('kpi.intake'),           value: counts.intake,     sub: t('kpi.intakeSub'),           color: 'var(--color-violet)',
       onClick: () => toggleAttention('intakePlanned'), active: attentionFilter === 'intakePlanned' },
-    // "Actieve gesprekken" = contact in de laatste 14 dagen; the card filters the LIST
-    // to exactly those candidates (Danny 2026-07-06 — no WhatsApp jump).
-    { key: 'conversations', label: t('analytics.conversations'), value: counts.activeConv, color: 'var(--color-success)',
-      onClick: () => toggleAttention('activeConv'), active: attentionFilter === 'activeConv' },
+    // Actieve gesprekken = het CONV-COUNT-1-serveraggregaat (echte WhatsApp-
+    // conversaties ≤14 dgn, niet geëscaleerd). BEWUST niet klikbaar: er bestaat
+    // (nog) geen ?active_conversations-lijstfilter — de oude lastContactAt-
+    // proxyfilter zou een lijst tonen die niet bij de teller past (Danny 20-07:
+    // 'klopt niet'). Klik komt terug met CONV-FILTER-1 (tile = list-doctrine).
+    { key: 'conversations', label: t('analytics.conversations'), value: counts.activeConv, color: 'var(--color-success)' },
     { key: 'tasks', label: t('kpi.tasks'), value: counts.tasks, sub: t('kpi.tasksSub'), color: TASKS_ACCENT,
       onClick: () => toggleAttention('hasTasks'), active: attentionFilter === 'hasTasks' },
   ]

@@ -122,7 +122,7 @@
     "stale6mSub": "no contact for a while",
     "noFollowup": "No follow-up",
     "noFollowupSub": "new, no contact",
-    "conversations": "Recent contact (14d)",
+    "conversations": "Active conversations",
     "neverContacted": "Never contacted",
     "neverContactedSub": "no contact moment yet",
     "staleMonths": "Not contacted > {{months}} mo",

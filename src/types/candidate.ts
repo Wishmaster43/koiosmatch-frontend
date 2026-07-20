@@ -30,7 +30,7 @@ export interface CandidateStats {
   by_status?: Array<{ value?: string; status?: string; count?: number }>
   by_funnel?: Array<{ value?: string; funnel_type?: string; label?: string; color?: string; count?: number }>
   by_owner?: Array<{ id?: Id; owner_id?: Id; name?: string; count?: number }>
-  attention?: { stale_6m?: number; never_contacted?: number; tasks?: number; no_followup_planned?: number; missing_appointment?: number; intake_planned?: number }
+  attention?: { stale_6m?: number; never_contacted?: number; tasks?: number; no_followup_planned?: number; missing_appointment?: number; intake_planned?: number; active_conversations?: number }
   // Server-side filter options: every value in use across the tenant.
   sources?: string[]
   function_titles?: string[]
