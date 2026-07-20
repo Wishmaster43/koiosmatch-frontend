@@ -113,7 +113,9 @@
       "scheduled": "Scheduled",
       "scheduledDesc": "Automatically on a schedule",
       "event": "Event",
-      "eventDesc": "On an event in Koios Match"
+      "eventDesc": "On an event in Koios Match",
+      "webhook": "Own AI agent",
+      "webhookDesc": "Starts via an AI agent's own webhook"
     },
     "eventLabel": "Event",
     "eventHint": "Choose the event that should start this workflow.",
@@ -155,8 +157,15 @@
       "weeklyAt": "{{days}} {{time}}",
       "monthlyAt": "Day {{day}} of the month {{time}}",
       "quarterlyAt": "Every quarter {{time}}",
-      "yearlyAt": "Yearly {{month}} {{day}} {{time}}"
-    }
+      "yearlyAt": "Yearly {{month}} {{day}} {{time}}",
+      "webhook": "Webhook",
+      "webhookAgent": "Webhook: {{agent}}"
+    },
+    "agentLabel": "AI agent",
+    "agentHint": "Choose the AI agent whose own webhook should start this workflow.",
+    "agentSelect": "Choose an AI agent…",
+    "agentEmpty": "No AI agents yet. Create one in AI settings first.",
+    "agentLoading": "Loading AI agents…"
   },
   "modules": {
     "advanced_parser": "Advanced parser",
@@ -221,7 +230,8 @@
     "vacancies": "Vacancies",
     "wait": "Wait until date",
     "webhook": "Webhook Trigger",
-    "whatsapp_send": "Send WhatsApp"
+    "whatsapp_send": "Send WhatsApp",
+    "facebook_send": "Facebook feedback"
   },
   "status": {
     "active": "Active",
@@ -269,13 +279,6 @@
     "versions": "{{count}} version(s)",
     "loading": "Loading…",
     "emptyStart": "Nothing yet. Click + to start.",
-    "strength": {
-      "high": "High",
-      "medium": "Medium",
-      "fast": "Fast",
-      "reasoning": "Reasoning"
-    },
-    "customApi": "Custom (own API)",
     "field": {
       "name": "Name",
       "content": "Content"
@@ -292,7 +295,6 @@
       "newAgent": "New agent",
       "fallback": "Agent",
       "namePlaceholder": "E.g. Yessy AI",
-      "model": "Model",
       "apiEndpoint": "API Endpoint",
       "apiKey": "API Key",
       "prompt": "Instruction (Prompt)",
@@ -303,7 +305,22 @@
       "useKnowledge": "Use general knowledge base",
       "maxHistory": "Max. conversation history",
       "confirmDelete": "Delete agent \"{{name}}\"?",
-      "selectOrNew": "Select an agent or click +"
+      "selectOrNew": "Select an agent or click +",
+      "webhookLabel": "Webhook URL",
+      "webhookEmpty": "No webhook configured",
+      "webhookCopy": "Copy webhook URL",
+      "webhookCopied": "Webhook URL copied",
+      "customApiSection": "Custom API (optional)",
+      "interviewFlow": {
+        "empty": "No interview flow linked",
+        "active": "Active",
+        "inactive": "Inactive",
+        "introLabel": "Intro message",
+        "showPrompt": "Show system prompt",
+        "hidePrompt": "Hide system prompt",
+        "statusesLabel": "Statuses",
+        "outputFieldsLabel": "Dossier fields"
+      }
     },
     "tabs": {
       "agents": "Agents",
@@ -374,7 +391,8 @@
     "intus": "Intus",
     "flow": "Flow control",
     "text": "Text & Parsing",
-    "other": "Other"
+    "other": "Other",
+    "facebook": "Facebook"
   },
   "canvas": {
     "filterTitle": "Set filter",
@@ -697,7 +715,8 @@
     "WhatsApp Sturen": "Send WhatsApp",
     "WhatsApp-toestemming": "WhatsApp consent",
     "Zoeken": "Search",
-    "Zoekopdracht": "Search query"
+    "Zoekopdracht": "Search query",
+    "Terug te melden gebeurtenis": "Event to report back"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (multiple bundles)",
@@ -950,7 +969,11 @@
   },
   "triggers": {
     "events": {
-      "candidate_birthday": "Candidate birthday"
+      "candidate_birthday": "Candidate birthday",
+      "application_stage_changed": "Application stage changed",
+      "match_created": "Match created",
+      "appointment_upcoming": "Appointment upcoming",
+      "facebook_lead_received": "Facebook lead received"
     }
   }
 }

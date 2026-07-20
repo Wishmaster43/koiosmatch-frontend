@@ -222,6 +222,36 @@ describe('useWorkflowEditor · handleSave payload (denormalized per trigger)', (
     expect(payload.trigger_config).toEqual({ webhook_id: 'wh1' })
   })
 
+  // AI-AGENTS-3: a webhook trigger's AI-agent flavor carries { agent } in
+  // trigger_config, checked BEFORE the legacy webhook_id flavor (both share the
+  // 'Webhook' trigger label) so the new flow never falls through to an empty config.
+  it('Webhook trigger (AI-agent flavor): trigger_config carries the agent name set via setScheduleConfig', async () => {
+    const { result, onSave } = setup(
+      [{ id: 'n1', type: 'candidates', config: {}, position: { x: 0, y: 0 } }],
+      { trigger: 'Webhook' },
+    )
+    await waitFor(() => expect(result.current.nodesWithFirst).toHaveLength(1))
+    act(() => result.current.setScheduleConfig({ schedule_type: 'webhook', agent: 'Michelle' }))
+    act(() => result.current.handleSave())
+    const [payload] = onSave.mock.calls[0]
+    expect(payload.trigger_config).toEqual({ agent: 'Michelle' })
+  })
+
+  // Reload seeding: the backend persists trigger_config.agent FLAT (no nested
+  // `schedule` key) — an immediate re-save right after loading (no ScheduleModal
+  // reopen in between) must still preserve the binding instead of silently
+  // wiping it, the exact class of bug this whole branch order guards against.
+  it('Webhook trigger (AI-agent flavor): a reloaded workflow keeps trigger_config.agent on an immediate re-save', async () => {
+    const { result, onSave } = setup(
+      [{ id: 'n1', type: 'candidates', config: {}, position: { x: 0, y: 0 } }],
+      { trigger: 'Webhook', trigger_config: { agent: 'Michelle' } },
+    )
+    await waitFor(() => expect(result.current.nodesWithFirst).toHaveLength(1))
+    act(() => result.current.handleSave())
+    const [payload] = onSave.mock.calls[0]
+    expect(payload.trigger_config).toEqual({ agent: 'Michelle' })
+  })
+
   it('Scheduled trigger: trigger_config carries the live schedule config set via setScheduleConfig', async () => {
     const { result, onSave } = setup(
       [{ id: 'n1', type: 'candidates', config: {}, position: { x: 0, y: 0 } }],

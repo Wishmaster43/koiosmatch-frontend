@@ -109,7 +109,9 @@
       "scheduled": "Geplant",
       "scheduledDesc": "Automatisch nach Zeitplan",
       "event": "Ereignis",
-      "eventDesc": "Bei einem Ereignis in Koios Match"
+      "eventDesc": "Bei einem Ereignis in Koios Match",
+      "webhook": "Eigener KI-Agent",
+      "webhookDesc": "Startet über den eigenen Webhook eines KI-Agenten"
     },
     "eventLabel": "Ereignis",
     "eventHint": "Wähle das Ereignis, das diesen Workflow starten soll.",
@@ -151,8 +153,15 @@
       "weeklyAt": "{{days}} {{time}}",
       "monthlyAt": "Tag {{day}} des Monats {{time}}",
       "quarterlyAt": "Jedes Quartal {{time}}",
-      "yearlyAt": "Jährlich {{month}} {{day}} {{time}}"
-    }
+      "yearlyAt": "Jährlich {{month}} {{day}} {{time}}",
+      "webhook": "Webhook",
+      "webhookAgent": "Webhook: {{agent}}"
+    },
+    "agentLabel": "KI-Agent",
+    "agentHint": "Wähle den KI-Agenten, dessen eigener Webhook diesen Workflow starten soll.",
+    "agentSelect": "KI-Agent wählen…",
+    "agentEmpty": "Noch keine KI-Agenten. Lege zuerst einen in den KI-Einstellungen an.",
+    "agentLoading": "KI-Agenten werden geladen…"
   },
   "modules": {
     "advanced_parser": "Erweiterter Parser",
@@ -217,7 +226,8 @@
     "vacancies": "Stellen",
     "wait": "Warten bis Datum",
     "webhook": "Webhook-Trigger",
-    "whatsapp_send": "WhatsApp senden"
+    "whatsapp_send": "WhatsApp senden",
+    "facebook_send": "Facebook-Rückmeldung"
   },
   "status": {
     "active": "Aktiv",
@@ -265,13 +275,6 @@
     "versions": "{{count}} Version(en)",
     "loading": "Wird geladen…",
     "emptyStart": "Noch nichts. Klicken Sie auf +, um zu starten.",
-    "strength": {
-      "high": "Hoch",
-      "medium": "Mittel",
-      "fast": "Schnell",
-      "reasoning": "Logik"
-    },
-    "customApi": "Custom (eigene API)",
     "field": {
       "name": "Name",
       "content": "Inhalt"
@@ -288,7 +291,6 @@
       "newAgent": "Neuer Agent",
       "fallback": "Agent",
       "namePlaceholder": "z. B. Yessy AI",
-      "model": "Modell",
       "apiEndpoint": "API-Endpunkt",
       "apiKey": "API-Schlüssel",
       "prompt": "Anweisung (Prompt)",
@@ -299,7 +301,22 @@
       "useKnowledge": "Allgemeine Wissensdatenbank verwenden",
       "maxHistory": "Max. Konversationsverlauf",
       "confirmDelete": "Agent „{{name}}\" löschen?",
-      "selectOrNew": "Wählen Sie einen Agenten oder klicken Sie +"
+      "selectOrNew": "Wählen Sie einen Agenten oder klicken Sie +",
+      "webhookLabel": "Webhook-URL",
+      "webhookEmpty": "Kein Webhook konfiguriert",
+      "webhookCopy": "Webhook-URL kopieren",
+      "webhookCopied": "Webhook-URL kopiert",
+      "customApiSection": "Benutzerdefinierte API (optional)",
+      "interviewFlow": {
+        "empty": "Kein Interviewablauf verknüpft",
+        "active": "Aktiv",
+        "inactive": "Inaktiv",
+        "introLabel": "Einleitungsnachricht",
+        "showPrompt": "Systemprompt anzeigen",
+        "hidePrompt": "Systemprompt ausblenden",
+        "statusesLabel": "Status",
+        "outputFieldsLabel": "Dossierfelder"
+      }
     },
     "tabs": {
       "agents": "Agenten",
@@ -374,7 +391,8 @@
     "intus": "Intus",
     "flow": "Flow-Steuerung",
     "text": "Text & Parsing",
-    "other": "Sonstige"
+    "other": "Sonstige",
+    "facebook": "Facebook"
   },
   "canvas": {
     "filterTitle": "Filter festlegen",
@@ -697,7 +715,8 @@
     "WhatsApp Sturen": "WhatsApp senden",
     "WhatsApp-toestemming": "WhatsApp-Einwilligung",
     "Zoeken": "Suchen",
-    "Zoekopdracht": "Suchanfrage"
+    "Zoekopdracht": "Suchanfrage",
+    "Terug te melden gebeurtenis": "Zurückzumeldendes Ereignis"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (mehrere Bundles)",
@@ -950,7 +969,11 @@
   },
   "triggers": {
     "events": {
-      "candidate_birthday": "Geburtstag Kandidat"
+      "candidate_birthday": "Geburtstag Kandidat",
+      "application_stage_changed": "Bewerbungsphase geändert",
+      "match_created": "Match erstellt",
+      "appointment_upcoming": "Termin steht bevor",
+      "facebook_lead_received": "Facebook-Lead erhalten"
     }
   }
 }

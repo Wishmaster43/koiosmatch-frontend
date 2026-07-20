@@ -2,16 +2,24 @@
  * Workflow event-trigger catalogue (BIRTHDAY-FLOW-2). A workflow with
  * `trigger_type: 'event'` fires on a backend domain event carried as
  * `trigger_config.event` (verified against WorkflowDispatcher::dispatch +
- * DispatchBirthdayEvents in koiosmatch-api — the dotted key, e.g.
- * `candidate.birthday`, is what the backend compares literally).
+ * DispatchBirthdayEvents/DispatchAppointmentConfirmations/ProcessFacebookLeadJob
+ * in koiosmatch-api — the dotted key, e.g. `candidate.birthday`, is what the
+ * backend compares literally).
  *
  * There is no `/workflows/events` catalogue endpoint yet (checked
  * WorkflowController + routes/api/tenant/workflows.php, 2026-07-20), so this
- * is a seed fallback — grow it as backend-Claude ships more dispatch points
- * (e.g. application.stage_changed, match.created, match.start already exist
- * as template-only events but are not general-purpose picker options yet).
+ * mirrors the full vocabulary `TriggerModule::configSchema()` publishes
+ * server-side (verified 2026-07-20, commits 4449103/de09f81) — grow it again
+ * the moment backend-Claude ships another dispatch point (match.start is
+ * template-only today, not a general-purpose picker option yet).
  */
-export const WORKFLOW_EVENT_KEYS = ['candidate.birthday'] as const
+export const WORKFLOW_EVENT_KEYS = [
+  'application.stage_changed',
+  'match.created',
+  'candidate.birthday',
+  'appointment.upcoming',
+  'facebook.lead_received',
+] as const
 
 export type WorkflowEventKey = (typeof WORKFLOW_EVENT_KEYS)[number]
 

@@ -47,7 +47,17 @@ export function normalizeWorkflow(wf: RawWorkflow): Workflow {
 // Vertaal frontend trigger string → trigger_type + trigger_config
 function parseTrigger(trigger?: string, config?: Record<string, unknown>): { trigger_type: string; trigger_config: Record<string, unknown> } {
   if (!trigger || trigger === 'Handmatig') return { trigger_type: 'manual', trigger_config: {} }
-  if (trigger.toLowerCase().includes('webhook')) return { trigger_type: 'webhook', trigger_config: {} }
+  // Webhook trigger: two flavors share trigger_type 'webhook' — an AI-agent's own
+  // inbound webhook (AI-AGENTS-3, config.agent) or the legacy generic inbound
+  // webhook resource (config.webhook_id). Keep whichever the editor set — dropping
+  // both to {} unconditionally here was the exact fall-through bug that already
+  // hit the Event branch once (see below); never repeat it for webhook either.
+  if (trigger.toLowerCase().includes('webhook')) {
+    return {
+      trigger_type: 'webhook',
+      trigger_config: config?.agent ? { agent: config.agent } : config?.webhook_id ? { webhook_id: config.webhook_id } : {},
+    }
+  }
   // Event trigger (BIRTHDAY-FLOW-2): keep the editor's { event } config verbatim —
   // falling through to the scheduled-regex would silently ship trigger_type 'scheduled'.
   if (trigger.toLowerCase() === 'event') return { trigger_type: 'event', trigger_config: { event: config?.event ?? null } }

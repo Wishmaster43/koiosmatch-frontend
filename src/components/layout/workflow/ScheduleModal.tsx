@@ -6,14 +6,16 @@
  * All visible text runs through i18n (workflows:scheduleModal.*); day/month names
  * come from Intl (locale-aware) so there are no hardcoded NL arrays.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
-import { X, CalendarDays, Play, Zap, Bell } from 'lucide-react'
+import { X, CalendarDays, Play, Zap, Bell, Webhook } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { unwrapList } from '@/lib/api'
 import type { ScheduleConfig } from '@/types/workflow'
+import type { AiAgent } from '@/types/ai'
 import { WORKFLOW_EVENT_KEYS, eventKeyToI18nKey } from './eventCatalog'
 
 // ── Schedule helpers ──────────────────────────────────────────────────────────
@@ -30,6 +32,12 @@ export function scheduleLabel(t: TFunction, locale: string, trigger?: string, cf
   if (trigger === 'Event') {
     const eventKey = String(cfg?.event ?? WORKFLOW_EVENT_KEYS[0])
     return t('scheduleModal.label.event', { event: t(`triggers.events.${eventKeyToI18nKey(eventKey)}`) })
+  }
+  // Webhook trigger (AI-AGENTS-3): the new agent-coupled flavor names its agent;
+  // the legacy generic-webhook flavor (webhook_id, no agent picker here yet)
+  // falls back to a plain "Webhook" label instead of misreading as "Gepland".
+  if (trigger === 'Webhook') {
+    return cfg?.agent ? t('scheduleModal.label.webhookAgent', { agent: cfg.agent }) : t('scheduleModal.label.webhook')
   }
   if (!cfg) return t('scheduleModal.label.scheduled')
   const ty = cfg.schedule_type
@@ -58,11 +66,17 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
   const { t, i18n } = useTranslation('workflows')
   const locale = i18n.language
   const [type,     setType]     = useState(
-    trigger === 'Handmatig' ? 'manual' : trigger === 'Direct' ? 'instant' : trigger === 'Event' ? 'event' : 'scheduled',
+    trigger === 'Handmatig' ? 'manual' : trigger === 'Direct' ? 'instant'
+      : trigger === 'Event' ? 'event' : trigger === 'Webhook' ? 'webhook' : 'scheduled',
   )
   const [sType,    setSType]    = useState(scheduleConfig?.schedule_type ?? 'daily')
   // Event trigger: the selected domain-event key (seeded from the catalogue fallback).
   const [eventKey, setEventKey] = useState(String(scheduleConfig?.event ?? WORKFLOW_EVENT_KEYS[0]))
+  // Webhook trigger, AI-agent flavor (AI-AGENTS-3): the agent NAME this workflow's
+  // own webhook is coupled to (backend matches trigger_config.agent by name).
+  const [agentName, setAgentName] = useState(String(scheduleConfig?.agent ?? ''))
+  const [agents,        setAgents]        = useState<AiAgent[]>([])
+  const [agentsLoading, setAgentsLoading] = useState(true)
   const [intVal,   setIntVal]   = useState<number | string>(scheduleConfig?.interval_value ?? 15)
   const [intUnit,  setIntUnit]  = useState(scheduleConfig?.interval_unit  ?? 'minutes')
   const [time,     setTime]     = useState(scheduleConfig?.time ?? '08:00')
@@ -76,11 +90,29 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
   const removeTime = (i: number)  => setTimes(ts => ts.filter((_, j) => j !== i))
   const updateTime = (i: number, v: string) => setTimes(ts => ts.map((t, j) => j === i ? v : t))
 
+  // Load the tenant's AI agents once the webhook tab is opened — each agent has
+  // its own inbound webhook (AI-AGENTS-3); no reusable agents hook/context exists
+  // yet (checked src/hooks, src/context, 2026-07-20), so this mirrors the same
+  // lazy-import fetch idiom as WebhookSelectField/FaqSelectField in fieldControls.tsx.
+  useEffect(() => {
+    if (type !== 'webhook') return
+    let alive = true
+    setAgentsLoading(true)
+    import('@/lib/api').then(m => m.default.get('/ai/agents'))
+      .then(r => { if (alive) setAgents(unwrapList<AiAgent>(r).rows) })
+      .catch(() => { if (alive) setAgents([]) })
+      .finally(() => { if (alive) setAgentsLoading(false) })
+    return () => { alive = false }
+  }, [type])
+
   const handleSave = () => {
     if (type === 'manual')  { onSave('Handmatig', null); return }
     if (type === 'instant') { onSave('Direct', null); return }
     // Event trigger: carries the chosen event key, no schedule fields.
     if (type === 'event')   { onSave('Event', { schedule_type: 'event', event: eventKey }); return }
+    // Webhook trigger (AI-agent flavor): carries only the chosen agent's name —
+    // the backend couples this workflow to that agent's own inbound webhook.
+    if (type === 'webhook') { onSave('Webhook', { schedule_type: 'webhook', agent: agentName }); return }
     const cfg: ScheduleConfig = { schedule_type: sType }
     if (sType === 'interval') { cfg.interval_value = +intVal; cfg.interval_unit = intUnit }
     else if (sType === 'daily')     { cfg.times = times }
@@ -99,7 +131,7 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
     <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)' }}
       onClick={onClose}>
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('scheduleModal.title')} tabIndex={-1}
-        style={{ width: 480, background: 'var(--surface)', borderRadius: 16, boxShadow: '0 8px 40px rgba(0,0,0,0.2)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}
+        style={{ width: 560, background: 'var(--surface)', borderRadius: 16, boxShadow: '0 8px 40px rgba(0,0,0,0.2)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}>
 
         {/* Header */}
@@ -114,12 +146,15 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
         <div style={{ overflowY: 'auto', flex: 1, padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
 
           {/* Trigger type selector */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: 8 }}>
             {[
               { id: 'manual',    label: t('scheduleModal.trigger.manual'),    desc: t('scheduleModal.trigger.manualDesc'),    Icon: Play },
               { id: 'instant',   label: t('scheduleModal.trigger.instant'),   desc: t('scheduleModal.trigger.instantDesc'),   Icon: Zap },
               { id: 'scheduled', label: t('scheduleModal.trigger.scheduled'), desc: t('scheduleModal.trigger.scheduledDesc'), Icon: CalendarDays },
               { id: 'event',     label: t('scheduleModal.trigger.event'),     desc: t('scheduleModal.trigger.eventDesc'),     Icon: Bell },
+              // AI-AGENTS-3: fifth trigger type — this workflow starts on ONE AI
+              // agent's own inbound webhook (config key `agent`, matched by name).
+              { id: 'webhook',   label: t('scheduleModal.trigger.webhook'),   desc: t('scheduleModal.trigger.webhookDesc'),   Icon: Webhook },
             ].map(({ id, label, desc, Icon: Ic }: { id: string; label: string; desc: string; Icon: LucideIcon }) => (
               <button key={id} type="button" onClick={() => setType(id)}
                 style={{
@@ -145,6 +180,26 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
                 ))}
               </select>
               <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>{t('scheduleModal.eventHint')}</p>
+            </div>
+          )}
+
+          {/* Webhook (AI-agent) picker — one agent, one own webhook (AI-AGENTS-3) */}
+          {type === 'webhook' && (
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>{t('scheduleModal.agentLabel')}</label>
+              {agentsLoading ? (
+                <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('scheduleModal.agentLoading')}</p>
+              ) : agents.length === 0 ? (
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', padding: '6px 10px', border: '1px solid var(--border)', borderRadius: 8 }}>
+                  {t('scheduleModal.agentEmpty')}
+                </p>
+              ) : (
+                <select value={agentName} onChange={e => setAgentName(e.target.value)} aria-label={t('scheduleModal.agentLabel')} style={selectStyle}>
+                  <option value="">{t('scheduleModal.agentSelect')}</option>
+                  {agents.map(a => <option key={a.id} value={a.name}>{a.name}</option>)}
+                </select>
+              )}
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>{t('scheduleModal.agentHint')}</p>
             </div>
           )}
 

@@ -1,8 +1,9 @@
 /**
  * AgentTestPanel — live chat interface to test the AI agent directly from
- * the config panel. The agent is defined inline (model + instructions live in
- * the block's own config), so we POST that config to /ai/agents/test and show
- * the response in a chat UI with token + latency stats.
+ * the config panel. The agent is defined inline (instructions live in the
+ * block's own config — MODEL-1: no per-step model anymore, one company-wide
+ * model runs every AI step), so we POST that config to /ai/agents/test and
+ * show the response in a chat UI with token + latency stats.
  */
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'

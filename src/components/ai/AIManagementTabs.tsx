@@ -10,7 +10,9 @@ import { Check } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { interactive } from '@/lib/a11y'
 import { notifyError } from '@/lib/notify'
-import { MODELS, inputStyle, Field, TextEditor, SideList, ListRow } from './management/shared'
+import Avatar from '@/components/ui/Avatar'
+import { initialsOf } from '@/lib/initials'
+import { inputStyle, Field, TextEditor, SideList, ListRow } from './management/shared'
 import type { Version } from './management/shared'
 import { AgentForm } from './management/AgentForm'
 import type { AiAgent, AiItem } from '@/types/ai'
@@ -58,14 +60,13 @@ export function AgentsTab() {
     <SideList
       title={t('ai.tabs.agents')} items={agents} selected={selected}
       onSelect={setSelected} onNew={() => setSelected({ _new: true })} loading={loading}
-      renderItem={(a, active) => {
-        const m = MODELS.find(x => x.value === a.model)
-        return (
-          <ListRow key={a.id} item={a} active={active} onSelect={setSelected}
-            label={a.name} sublabel={m ? `${m.provider} — ${m.label}` : undefined}
-            onDelete={onDelete} />
-        )
-      }}>
+      renderItem={(a, active) => (
+        // AI-AGENTS-2: show the linked recruiter/manager user, not a model (removed — MODEL-1).
+        <ListRow key={a.id} item={a} active={active} onSelect={setSelected}
+          label={a.name} sublabel={a.user?.name}
+          leading={a.user ? <Avatar initials={initialsOf(a.user.name)} size={22} soft /> : undefined}
+          onDelete={onDelete} />
+      )}>
       {selected
         ? <AgentForm agent={selected._new ? null : selected} prompts={prompts} faqs={faqs} onSaved={onSaved} onDelete={onDelete} />
         : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 180, fontSize: 12, color: 'var(--text-muted)' }}>

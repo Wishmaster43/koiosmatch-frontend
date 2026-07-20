@@ -112,6 +112,11 @@ export interface ScheduleConfig {
   times?: string[]
   days_of_week?: number[]
   day_of_month?: number
+  // Event trigger (BIRTHDAY-FLOW-2): the chosen domain-event key.
+  event?: string
+  // Webhook trigger, AI-agent flavor (AI-AGENTS-3): the agent name this
+  // workflow's own webhook is coupled to (backend matches by NAME, not id).
+  agent?: string
   month?: number
   [k: string]: unknown
 }

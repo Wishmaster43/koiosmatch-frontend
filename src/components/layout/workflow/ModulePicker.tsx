@@ -15,7 +15,7 @@ import { categorySlug } from './moduleI18n'
 // One [type, meta] pair from the module registry (used by the picker rows).
 type ModuleMetaEntry = [string, (typeof MODULE_META)[string]]
 
-const CATEGORY_ORDER = ['Alle', 'Triggers', 'Kandidaten', 'Sollicitaties', 'Vacatures', 'Matches', 'Kansen', 'Taken', 'Klanten', 'Planning', 'Communicatie', 'AI', 'ShiftManager', 'HelloFlex', 'Intus', 'Flow beheer', 'Tekst & Parsing']
+const CATEGORY_ORDER = ['Alle', 'Triggers', 'Kandidaten', 'Sollicitaties', 'Vacatures', 'Matches', 'Kansen', 'Taken', 'Klanten', 'Planning', 'Communicatie', 'AI', 'ShiftManager', 'HelloFlex', 'Intus', 'Facebook', 'Flow beheer', 'Tekst & Parsing']
 
 export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
   insertAfterEdgeId: string | null

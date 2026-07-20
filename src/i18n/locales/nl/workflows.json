@@ -150,7 +150,9 @@
       "scheduled": "Gepland",
       "scheduledDesc": "Automatisch op een schema",
       "event": "Gebeurtenis",
-      "eventDesc": "Bij een gebeurtenis in Koios Match"
+      "eventDesc": "Bij een gebeurtenis in Koios Match",
+      "webhook": "Eigen AI-agent",
+      "webhookDesc": "Start via de eigen webhook van een AI-agent"
     },
     "eventLabel": "Gebeurtenis",
     "eventHint": "Kies de gebeurtenis die deze workflow moet starten.",
@@ -192,8 +194,15 @@
       "weeklyAt": "{{days}} {{time}}",
       "monthlyAt": "Dag {{day}} v/d maand {{time}}",
       "quarterlyAt": "Elk kwartaal {{time}}",
-      "yearlyAt": "Jaarlijks {{month}} {{day}} {{time}}"
-    }
+      "yearlyAt": "Jaarlijks {{month}} {{day}} {{time}}",
+      "webhook": "Webhook",
+      "webhookAgent": "Webhook: {{agent}}"
+    },
+    "agentLabel": "AI-agent",
+    "agentHint": "Kies de AI-agent van wie de eigen webhook deze workflow moet starten.",
+    "agentSelect": "Kies een AI-agent…",
+    "agentEmpty": "Nog geen AI-agents. Maak er eerst een aan bij AI-instellingen.",
+    "agentLoading": "AI-agents ophalen…"
   },
   "modules": {
     "advanced_parser": "Geavanceerde verwerker",
@@ -258,7 +267,8 @@
     "vacancies": "Vacatures",
     "wait": "Wachten tot datum",
     "webhook": "Webhook Trigger",
-    "whatsapp_send": "WhatsApp Sturen"
+    "whatsapp_send": "WhatsApp Sturen",
+    "facebook_send": "Facebook terugkoppeling"
   },
   "categories": {
     "all": "Alle",
@@ -278,7 +288,8 @@
     "intus": "Intus",
     "flow": "Flow beheer",
     "text": "Tekst & Parsing",
-    "other": "Overig"
+    "other": "Overig",
+    "facebook": "Facebook"
   },
   "status": {
     "active": "Actief",
@@ -326,13 +337,6 @@
     "versions": "{{count}} versie(s)",
     "loading": "Laden…",
     "emptyStart": "Nog niets. Klik + om te starten.",
-    "strength": {
-      "high": "Hoog",
-      "medium": "Gemiddeld",
-      "fast": "Snel",
-      "reasoning": "Redeneren"
-    },
-    "customApi": "Custom (eigen API)",
     "field": {
       "name": "Naam",
       "content": "Inhoud"
@@ -349,7 +353,6 @@
       "newAgent": "Nieuwe agent",
       "fallback": "Agent",
       "namePlaceholder": "Bijv. Yessy AI",
-      "model": "Model",
       "apiEndpoint": "API Endpoint",
       "apiKey": "API Key",
       "prompt": "Instructie (Prompt)",
@@ -360,7 +363,22 @@
       "useKnowledge": "Algemene kennisbank gebruiken",
       "maxHistory": "Max. conversatiehistorie",
       "confirmDelete": "Agent \"{{name}}\" verwijderen?",
-      "selectOrNew": "Selecteer een agent of klik +"
+      "selectOrNew": "Selecteer een agent of klik +",
+      "webhookLabel": "Webhook-URL",
+      "webhookEmpty": "Geen webhook geconfigureerd",
+      "webhookCopy": "Kopieer webhook-URL",
+      "webhookCopied": "Webhook-URL gekopieerd",
+      "customApiSection": "Aangepaste API (optioneel)",
+      "interviewFlow": {
+        "empty": "Geen interviewopzet gekoppeld",
+        "active": "Actief",
+        "inactive": "Inactief",
+        "introLabel": "Introductiebericht",
+        "showPrompt": "Toon systeemprompt",
+        "hidePrompt": "Verberg systeemprompt",
+        "statusesLabel": "Statussen",
+        "outputFieldsLabel": "Dossiervelden"
+      }
     },
     "tabs": {
       "agents": "Agents",
@@ -734,7 +752,8 @@
     "WhatsApp Sturen": "WhatsApp Sturen",
     "WhatsApp-toestemming": "WhatsApp-toestemming",
     "Zoeken": "Zoeken",
-    "Zoekopdracht": "Zoekopdracht"
+    "Zoekopdracht": "Zoekopdracht",
+    "Terug te melden gebeurtenis": "Terug te melden gebeurtenis"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (meerdere bundles)",
@@ -950,7 +969,11 @@
   },
   "triggers": {
     "events": {
-      "candidate_birthday": "Verjaardag kandidaat"
+      "candidate_birthday": "Verjaardag kandidaat",
+      "application_stage_changed": "Sollicitatiefase gewijzigd",
+      "match_created": "Match aangemaakt",
+      "appointment_upcoming": "Afspraak nadert",
+      "facebook_lead_received": "Facebook-lead ontvangen"
     }
   }
 }

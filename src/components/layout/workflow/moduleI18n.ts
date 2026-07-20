@@ -7,7 +7,7 @@ export const CATEGORY_SLUG: Record<string, string> = {
   'Alle': 'all', 'Triggers': 'triggers', 'Kandidaten': 'candidates', 'Sollicitaties': 'applications',
   'Vacatures': 'vacancies', 'Matches': 'matches', 'Kansen': 'opportunities', 'Taken': 'tasks',
   'Klanten': 'customers', 'Planning': 'planning', 'Communicatie': 'communication', 'AI': 'ai',
-  'ShiftManager': 'shiftmanager', 'HelloFlex': 'helloflex', 'Intus': 'intus', 'Flow beheer': 'flow',
+  'ShiftManager': 'shiftmanager', 'HelloFlex': 'helloflex', 'Intus': 'intus', 'Facebook': 'facebook', 'Flow beheer': 'flow',
   'Tekst & Parsing': 'text', 'Overig': 'other',
 }
 

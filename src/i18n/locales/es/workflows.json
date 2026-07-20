@@ -109,7 +109,9 @@
       "scheduled": "Programado",
       "scheduledDesc": "Automáticamente según un horario",
       "event": "Evento",
-      "eventDesc": "Ante un evento en Koios Match"
+      "eventDesc": "Ante un evento en Koios Match",
+      "webhook": "Agente de IA propio",
+      "webhookDesc": "Se inicia mediante el webhook propio de un agente de IA"
     },
     "eventLabel": "Evento",
     "eventHint": "Elige el evento que debe iniciar este flujo de trabajo.",
@@ -151,8 +153,15 @@
       "weeklyAt": "{{days}} {{time}}",
       "monthlyAt": "Día {{day}} del mes {{time}}",
       "quarterlyAt": "Cada trimestre {{time}}",
-      "yearlyAt": "Anual {{month}} {{day}} {{time}}"
-    }
+      "yearlyAt": "Anual {{month}} {{day}} {{time}}",
+      "webhook": "Webhook",
+      "webhookAgent": "Webhook: {{agent}}"
+    },
+    "agentLabel": "Agente de IA",
+    "agentHint": "Elige el agente de IA cuyo webhook propio debe iniciar este flujo de trabajo.",
+    "agentSelect": "Elige un agente de IA…",
+    "agentEmpty": "Todavía no hay agentes de IA. Crea uno primero en la configuración de IA.",
+    "agentLoading": "Cargando agentes de IA…"
   },
   "modules": {
     "advanced_parser": "Analizador avanzado",
@@ -217,7 +226,8 @@
     "vacancies": "Vacantes",
     "wait": "Esperar hasta fecha",
     "webhook": "Disparador Webhook",
-    "whatsapp_send": "Enviar WhatsApp"
+    "whatsapp_send": "Enviar WhatsApp",
+    "facebook_send": "Retroalimentación de Facebook"
   },
   "status": {
     "active": "Activo",
@@ -265,13 +275,6 @@
     "versions": "{{count}} versión(es)",
     "loading": "Cargando…",
     "emptyStart": "Nada todavía. Haz clic en + para empezar.",
-    "strength": {
-      "high": "Alto",
-      "medium": "Medio",
-      "fast": "Rápido",
-      "reasoning": "Razonamiento"
-    },
-    "customApi": "Custom (API propia)",
     "field": {
       "name": "Nombre",
       "content": "Contenido"
@@ -288,7 +291,6 @@
       "newAgent": "Nuevo agente",
       "fallback": "Agente",
       "namePlaceholder": "Ej. Yessy AI",
-      "model": "Modelo",
       "apiEndpoint": "Endpoint de API",
       "apiKey": "Clave API",
       "prompt": "Instrucción (Prompt)",
@@ -299,7 +301,22 @@
       "useKnowledge": "Usar base de conocimiento general",
       "maxHistory": "Máx. historial de conversación",
       "confirmDelete": "¿Eliminar el agente \"{{name}}\"?",
-      "selectOrNew": "Selecciona un agente o haz clic en +"
+      "selectOrNew": "Selecciona un agente o haz clic en +",
+      "webhookLabel": "URL del webhook",
+      "webhookEmpty": "Ningún webhook configurado",
+      "webhookCopy": "Copiar URL del webhook",
+      "webhookCopied": "URL del webhook copiada",
+      "customApiSection": "API personalizada (opcional)",
+      "interviewFlow": {
+        "empty": "Ningún flujo de entrevista vinculado",
+        "active": "Activo",
+        "inactive": "Inactivo",
+        "introLabel": "Mensaje de introducción",
+        "showPrompt": "Mostrar prompt del sistema",
+        "hidePrompt": "Ocultar prompt del sistema",
+        "statusesLabel": "Estados",
+        "outputFieldsLabel": "Campos del expediente"
+      }
     },
     "tabs": {
       "agents": "Agentes",
@@ -374,7 +391,8 @@
     "intus": "Intus",
     "flow": "Control de flujo",
     "text": "Texto y Análisis",
-    "other": "Otro"
+    "other": "Otro",
+    "facebook": "Facebook"
   },
   "canvas": {
     "filterTitle": "Configurar filtro",
@@ -697,7 +715,8 @@
     "WhatsApp Sturen": "Enviar WhatsApp",
     "WhatsApp-toestemming": "Consentimiento de WhatsApp",
     "Zoeken": "Buscar",
-    "Zoekopdracht": "Consulta de búsqueda"
+    "Zoekopdracht": "Consulta de búsqueda",
+    "Terug te melden gebeurtenis": "Evento a notificar"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (varios bundles)",
@@ -950,7 +969,11 @@
   },
   "triggers": {
     "events": {
-      "candidate_birthday": "Cumpleaños del candidato"
+      "candidate_birthday": "Cumpleaños del candidato",
+      "application_stage_changed": "Etapa de solicitud cambiada",
+      "match_created": "Match creado",
+      "appointment_upcoming": "Cita próxima",
+      "facebook_lead_received": "Lead de Facebook recibido"
     }
   }
 }

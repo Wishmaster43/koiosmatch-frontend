@@ -21,23 +21,11 @@ export default {
       placeholder: 'Bijv. Yessy AI',
       hint:        'Geef dit agent-blok een herkenbare naam in de workflow.',
     },
-    {
-      key:      'model',
-      label:    'Model',
-      type:     'select',
-      tab:      'standaard',
-      required: true,
-      default:  'claude-sonnet-4-6',
-      options: [
-        { value: 'claude-sonnet-4-6',  label: 'Claude Sonnet 4 (Aanbevolen)' },
-        { value: 'claude-opus-4-8',    label: 'Claude Opus 4' },
-        { value: 'claude-haiku-4-5',   label: 'Claude Haiku 4 (Snel & goedkoop)' },
-        { value: 'gpt-4o',             label: 'GPT-4o' },
-        { value: 'gpt-4o-mini',        label: 'GPT-4o Mini' },
-        { value: 'gemini-2.5-pro',     label: 'Gemini 2.5 Pro' },
-        { value: 'gemini-2.5-flash',   label: 'Gemini 2.5 Flash' },
-      ],
-    },
+    // MODEL-1 (2026-07-20): the backend no longer accepts/returns a per-step
+    // model — one company-wide model (Settings → Policy::defaultModel) runs
+    // every AI step. A workflow saved before this change may still carry a
+    // stale `model` key in its config; that key is simply never read/written
+    // here anymore, so it stays inert instead of crashing (defensive-ignore).
     {
       key:         'instructions',
       label:       'Instructies',

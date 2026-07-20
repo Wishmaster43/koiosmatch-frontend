@@ -61,4 +61,20 @@ describe('computeWorkflowSnapshot', () => {
     const other    = computeWorkflowSnapshot(nodes, [], 'wf', 'Event', { event: 'match.created' } as never, null, 'draft')
     expect(other).not.toBe(birthday)
   })
+
+  // AI-AGENTS-3: a Webhook trigger's AI-agent flavor participates in the dirty-check
+  // via scheduleConfig.agent, checked BEFORE the legacy webhookId param — both share
+  // the 'Webhook' trigger label, so the agent flavor must never be shadowed by it.
+  it('changes when the agent changes on a Webhook (AI-agent) trigger', () => {
+    const nodes: FlowNode[] = [node('a')]
+    const michelle = computeWorkflowSnapshot(nodes, [], 'wf', 'Webhook', { agent: 'Michelle' } as never, null, 'draft')
+    const kees     = computeWorkflowSnapshot(nodes, [], 'wf', 'Webhook', { agent: 'Kees' } as never, null, 'draft')
+    expect(kees).not.toBe(michelle)
+  })
+
+  it('prefers scheduleConfig.agent over the legacy webhookId param on a Webhook trigger', () => {
+    const nodes: FlowNode[] = [node('a')]
+    const s = computeWorkflowSnapshot(nodes, [], 'wf', 'Webhook', { agent: 'Michelle' } as never, 'wh1', 'draft')
+    expect(JSON.parse(s).trigger_config).toEqual({ agent: 'Michelle' })
+  })
 })

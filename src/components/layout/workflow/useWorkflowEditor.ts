@@ -79,7 +79,12 @@ export function computeWorkflowSnapshot(
 ): string {
   const steps = flowToSteps(nodes, edges)
   let triggerConfig: Record<string, unknown> | undefined
-  if (trigger === 'Webhook' && webhookId) triggerConfig = { webhook_id: webhookId }
+  // AI-AGENTS-3: a webhook trigger set via the ScheduleModal's agent picker carries
+  // scheduleConfig.agent — checked BEFORE the legacy webhook_id flavor (both share
+  // the 'Webhook' trigger label) so the new flow never falls through and silently
+  // loses its config, the exact fall-through bug the Event branch once had.
+  if (trigger === 'Webhook' && scheduleConfig?.agent) triggerConfig = { agent: scheduleConfig.agent }
+  else if (trigger === 'Webhook' && webhookId) triggerConfig = { webhook_id: webhookId }
   else if (trigger === 'Scheduled' && scheduleConfig) triggerConfig = { schedule: scheduleConfig }
   // Event trigger (BIRTHDAY-FLOW-2): trigger_config carries only the event key,
   // matching the backend contract (Workflow::trigger_config['event']).
@@ -107,12 +112,23 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Trigger config is opaque on the workflow; narrow it to the two shapes we read.
-  const triggerConfig = workflow.trigger_config as { schedule?: ScheduleConfig | null; webhook_id?: string | number | null } | undefined
+  // Trigger config is opaque on the workflow; narrow it to the shapes we read.
+  const triggerConfig = workflow.trigger_config as {
+    schedule?: ScheduleConfig | null; webhook_id?: string | number | null; event?: string; agent?: string
+  } | undefined
+
+  // Reload seeding: the backend persists 'event'/'agent' flat on trigger_config (not
+  // nested under 'schedule'), so a reloaded Event/Webhook(agent) trigger rebuilds its
+  // ScheduleConfig here — otherwise a same-page reload + immediate re-save would wipe
+  // the binding (nextTriggerConfig falls through to undefined; the exact class of bug
+  // this whole trigger_config branch order guards against).
+  const initialScheduleConfig: ScheduleConfig | null = triggerConfig?.schedule
+    ?? (triggerConfig?.event ? { schedule_type: 'event', event: triggerConfig.event } : null)
+    ?? (triggerConfig?.agent ? { schedule_type: 'webhook', agent: triggerConfig.agent } : null)
 
   const [name,           setName]           = useState(workflow.name)
   const [trigger,        setTrigger]        = useState(workflow.trigger)
-  const [scheduleConfig, setScheduleConfig] = useState<ScheduleConfig | null>(triggerConfig?.schedule ?? null)
+  const [scheduleConfig, setScheduleConfig] = useState<ScheduleConfig | null>(initialScheduleConfig)
   const [webhookId]                         = useState<string | number | null>(triggerConfig?.webhook_id ?? null)
   const [, setWebhooks]                      = useState<unknown[]>([])
 
@@ -121,7 +137,7 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   // reads as dirty from a round-trip shape mismatch. Updated after every save.
   const savedSnapshotRef = useRef(
     computeWorkflowSnapshot(initFlow.nodes, initFlow.edges, workflow.name, workflow.trigger,
-      triggerConfig?.schedule ?? null, triggerConfig?.webhook_id ?? null, workflow.status || 'draft'),
+      initialScheduleConfig, triggerConfig?.webhook_id ?? null, workflow.status || 'draft'),
   )
   const [status,         setStatus]         = useState(workflow.status || 'draft')
   const [saved,          setSaved]          = useState(false)
@@ -331,7 +347,9 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   const handleSave = useCallback((closeAfter = false) => {
     const steps = flowToSteps(nodes, edges)
     let nextTriggerConfig: Record<string, unknown> | undefined = undefined
-    if (trigger === 'Webhook' && webhookId) nextTriggerConfig = { webhook_id: webhookId }
+    // Same branch order as computeWorkflowSnapshot — agent flavor first (see there).
+    if (trigger === 'Webhook' && scheduleConfig?.agent) nextTriggerConfig = { agent: scheduleConfig.agent }
+    else if (trigger === 'Webhook' && webhookId) nextTriggerConfig = { webhook_id: webhookId }
     else if (trigger === 'Scheduled' && scheduleConfig) nextTriggerConfig = { schedule: scheduleConfig }
     // Event trigger (BIRTHDAY-FLOW-2): trigger_config carries only the event key,
     // matching the backend contract (Workflow::trigger_config['event']).

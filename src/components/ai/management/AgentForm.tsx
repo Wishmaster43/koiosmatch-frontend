@@ -4,15 +4,19 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Brain, Check, MessageSquare, Send, Trash2 } from 'lucide-react'
+import { Brain, Check, ChevronDown, MessageSquare, Send, Trash2 } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { interactive } from '@/lib/a11y'
-import { MODELS, STRENGTH_COLORS, inputStyle, Field, Badge, SaveBar } from './shared'
+import Avatar from '@/components/ui/Avatar'
+import { initialsOf } from '@/lib/initials'
+import { inputStyle, Field, CopyableValue, SaveBar } from './shared'
+import { InterviewFlowSection } from './InterviewFlowSection'
 import type { AiAgent, AiItem, ChatMessage } from '@/types/ai'
 
-// The agent edit-form's local state.
+// The agent edit-form's local state. No `model` field (MODEL-1): the company-wide
+// model from Settings is used everywhere, never chosen per agent.
 interface AgentFormState {
-  name: string; model: string; custom_endpoint: string; custom_api_key: string
+  name: string; custom_endpoint: string; custom_api_key: string
   prompt_id: string | number; faq_ids: Array<string | number>; use_knowledge: boolean; max_history: number
 }
 
@@ -115,7 +119,6 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
   const isNew = !agent?.id
   const [form, setForm] = useState<AgentFormState>({
     name:            agent?.name            ?? '',
-    model:           agent?.model           ?? 'gpt-4o-mini',
     custom_endpoint: agent?.custom_endpoint ?? '',
     custom_api_key:  agent?.custom_api_key  ?? '',
     prompt_id:       agent?.prompt_id       ?? '',
@@ -123,9 +126,12 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
     use_knowledge:   agent?.use_knowledge   ?? false,
     max_history:     agent?.max_history     ?? 10,
   })
-  const [saving,   setSaving]   = useState(false)
-  const [saved,    setSaved]    = useState(false)
-  const [chatOpen, setChatOpen] = useState(false)
+  const [saving,      setSaving]      = useState(false)
+  const [saved,       setSaved]       = useState(false)
+  const [chatOpen,    setChatOpen]    = useState(false)
+  // Custom API override is an optional, rarely-used disclosure (calm by default) —
+  // pre-opened only when a value is already configured.
+  const [showCustomApi, setShowCustomApi] = useState(!!agent?.custom_endpoint)
 
   const set = <K extends keyof AgentFormState>(k: K, v: AgentFormState[K]) => setForm(f => ({ ...f, [k]: v }))
 
@@ -143,8 +149,6 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
 
   const toggleFaq = (id: string | number) => set('faq_ids', form.faq_ids.includes(id) ? form.faq_ids.filter(x => x !== id) : [...form.faq_ids, id])
 
-  const selectedModel = MODELS.find(m => m.value === form.model)
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
       {/* Header row */}
@@ -155,14 +159,11 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
           </div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{isNew ? t('ai.agent.newAgent') : form.name || t('ai.agent.fallback')}</div>
-            {selectedModel && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 1 }}>
-                <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{selectedModel.provider}</span>
-                {selectedModel.strength && (
-                  <Badge label={t(`ai.strength.${selectedModel.strength}`)}
-                    color={STRENGTH_COLORS[selectedModel.strength]}
-                    bg={STRENGTH_COLORS[selectedModel.strength] + '18'} />
-                )}
+            {/* AI-AGENTS-2: the agent mirrors this recruiter/manager user — same Avatar as elsewhere */}
+            {agent?.user && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
+                <Avatar initials={initialsOf(agent.user.name)} size={14} soft />
+                <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{agent.user.name}</span>
               </div>
             )}
           </div>
@@ -197,32 +198,15 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
             <input value={form.name} onChange={e => set('name', e.target.value)} style={inputStyle} placeholder={t('ai.agent.namePlaceholder')} />
           </Field>
 
-          <Field label={t('ai.agent.model')}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
-              {MODELS.map(m => (
-                <div key={m.value} {...interactive(() => set('model', m.value))}
-                  style={{ padding: '7px 9px', borderRadius: 8, cursor: 'pointer', transition: 'all 0.12s',
-                    border: `1.5px solid ${form.model === m.value ? 'var(--color-primary)' : 'var(--border)'}`,
-                    background: form.model === m.value ? 'var(--color-primary-bg)' : 'var(--bg)' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: form.model === m.value ? 'var(--color-primary)' : 'var(--text)' }}>
-                    {m.label}
-                  </div>
-                  <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>{m.provider}</div>
-                </div>
-              ))}
-            </div>
-          </Field>
+          {/* AI-AGENTS-3: the interview design this agent carries — display-only,
+              no flow-list endpoint exists yet to make interview_flow_id pickable. */}
+          <InterviewFlowSection flow={agent?.interview_flow} />
 
-          {form.model === 'custom' && (
-            <>
-              <Field label={t('ai.agent.apiEndpoint')}>
-                <input value={form.custom_endpoint} onChange={e => set('custom_endpoint', e.target.value)} style={inputStyle} placeholder="https://api.mijnmodel.nl/v1/chat" />
-              </Field>
-              <Field label={t('ai.agent.apiKey')}>
-                <input type="password" value={form.custom_api_key} onChange={e => set('custom_api_key', e.target.value)} style={inputStyle} placeholder="sk-..." />
-              </Field>
-            </>
-          )}
+          <Field label={t('ai.agent.webhookLabel')}>
+            {agent?.webhook_url
+              ? <CopyableValue value={agent.webhook_url} copyLabel={t('ai.agent.webhookCopy')} copiedMessage={t('ai.agent.webhookCopied')} />
+              : <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('ai.agent.webhookEmpty')}</p>}
+          </Field>
 
           <Field label={t('ai.agent.prompt')}>
             <select value={form.prompt_id} onChange={e => set('prompt_id', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
@@ -264,6 +248,27 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
             <input type="number" min={1} max={50} value={form.max_history}
               onChange={e => set('max_history', Number(e.target.value))} style={{ ...inputStyle, width: 80 }} />
           </Field>
+
+          {/* Custom API override — rare BYO-endpoint escape hatch; collapsed by
+              default (calm by default), no longer gated behind a model picker. */}
+          <div style={{ marginBottom: 13 }}>
+            <button type="button" onClick={() => setShowCustomApi(o => !o)}
+              style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
+                textTransform: 'uppercase', letterSpacing: '0.04em', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+              {t('ai.agent.customApiSection')}
+              <ChevronDown size={10} style={{ transform: showCustomApi ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+            </button>
+            {showCustomApi && (
+              <div style={{ marginTop: 8 }}>
+                <Field label={t('ai.agent.apiEndpoint')}>
+                  <input value={form.custom_endpoint} onChange={e => set('custom_endpoint', e.target.value)} style={inputStyle} placeholder="https://api.mijnmodel.nl/v1/chat" />
+                </Field>
+                <Field label={t('ai.agent.apiKey')}>
+                  <input type="password" value={form.custom_api_key} onChange={e => set('custom_api_key', e.target.value)} style={inputStyle} placeholder="sk-..." />
+                </Field>
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>

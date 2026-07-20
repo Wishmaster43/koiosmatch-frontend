@@ -151,3 +151,29 @@ describe('denormalizeWorkflow · event trigger', () => {
     expect(out.trigger_config).toMatchObject({ event: 'candidate.birthday' })
   })
 })
+
+// AI-AGENTS-3: a webhook trigger must round-trip its config too — dropping it to
+// {} unconditionally (the code before this fix) silently unbinds a live workflow
+// from its AI agent (or its legacy webhook resource) on the very next save.
+describe('denormalizeWorkflow · webhook trigger (request body)', () => {
+  it('ships trigger_type webhook with the editor-built agent config (AI-agent flavor)', () => {
+    const wf = { name: 'AI Recruiter', trigger: 'Webhook', trigger_config: { agent: 'Michelle' }, status: 'active', steps: [] }
+    const out = denormalizeWorkflow(wf as never)
+    expect(out.trigger_type).toBe('webhook')
+    expect(out.trigger_config).toMatchObject({ agent: 'Michelle' })
+  })
+
+  it('falls back to webhook_id when no agent is set (legacy generic-webhook flavor)', () => {
+    const wf = { name: 'Legacy', trigger: 'Webhook', trigger_config: { webhook_id: 'wh1' }, status: 'active', steps: [] }
+    const out = denormalizeWorkflow(wf as never)
+    expect(out.trigger_type).toBe('webhook')
+    expect(out.trigger_config).toMatchObject({ webhook_id: 'wh1' })
+  })
+
+  it('ships an empty trigger_config when neither agent nor webhook_id is set yet', () => {
+    const wf = { name: 'Fresh', trigger: 'Webhook', status: 'active', steps: [] }
+    const out = denormalizeWorkflow(wf as never)
+    expect(out.trigger_type).toBe('webhook')
+    expect(out.trigger_config).toEqual({})
+  })
+})

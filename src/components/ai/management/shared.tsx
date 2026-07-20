@@ -6,31 +6,13 @@
 import { useState, useId, cloneElement, isValidElement } from 'react'
 import type { CSSProperties, ReactNode, ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, ChevronDown, Clock, Plus, RefreshCw, Save, Trash2 } from 'lucide-react'
+import { Check, ChevronDown, Clock, Copy, Plus, RefreshCw, Save, Trash2 } from 'lucide-react'
 import { interactive } from '@/lib/a11y'
 import { useDateFormat } from '@/lib/datetime'
+import { notifySuccess } from '@/lib/notify'
 
-// One selectable AI model.
-export interface Model { value: string; label: string; provider: string; strength: string | null }
 // One saved version of a prompt/agent config.
 export interface Version { version?: number; created_at?: string; body?: string; content?: string; [k: string]: unknown }
-
-export const MODELS: Model[] = [
-  { value: 'gpt-4o',            label: 'GPT-4o',            provider: 'OpenAI',    strength: 'high' },
-  { value: 'gpt-4o-mini',       label: 'GPT-4o Mini',       provider: 'OpenAI',    strength: 'medium' },
-  { value: 'gpt-4-turbo',       label: 'GPT-4 Turbo',       provider: 'OpenAI',    strength: 'high' },
-  { value: 'o1-mini',           label: 'o1 Mini',           provider: 'OpenAI',    strength: 'reasoning' },
-  { value: 'o1',                label: 'o1',                provider: 'OpenAI',    strength: 'reasoning' },
-  { value: 'claude-opus-4-8',   label: 'Claude Opus 4',     provider: 'Anthropic', strength: 'high' },
-  { value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4',   provider: 'Anthropic', strength: 'medium' },
-  { value: 'claude-haiku-4-5',  label: 'Claude Haiku 4',    provider: 'Anthropic', strength: 'fast' },
-  { value: 'gemini-2.5-pro',    label: 'Gemini 2.5 Pro',    provider: 'Google',    strength: 'high' },
-  { value: 'gemini-2.5-flash',  label: 'Gemini 2.5 Flash',  provider: 'Google',    strength: 'medium' },
-  { value: 'custom',            label: 'Custom (eigen API)', provider: 'Custom',    strength: null },
-]
-
-// Strength → colour; label = t('ai.strength.<key>').
-export const STRENGTH_COLORS: Record<string, string> = { high: '#7C3AED', medium: '#0369A1', fast: '#16A34A', reasoning: '#D97706' }
 
 export const inputStyle: CSSProperties = {
   width: '100%', padding: '7px 10px', fontSize: 13, borderRadius: 8,
@@ -79,6 +61,30 @@ export function SaveBar({ saving, saved, onSave }: { saving?: boolean; saved?: b
           ? <RefreshCw size={11} style={{ animation: 'spin 1s linear infinite' }} />
           : <Save size={11} />}
         {t('common:save')}
+      </button>
+    </div>
+  )
+}
+
+// CopyableValue — a read-only value (webhook URL, …) + click-to-copy icon, JetBrains
+// Mono per §4. Mirrors ReferenceNumberChip's copy pattern but stays generic since this
+// screen's value isn't a reference number.
+export function CopyableValue({ value, copyLabel, copiedMessage }: { value: string; copyLabel: string; copiedMessage: string }) {
+  const [copied, setCopied] = useState(false)
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopied(true)
+      notifySuccess(copiedMessage)
+      setTimeout(() => setCopied(false), 2000)
+    } catch { /* clipboard API unavailable (older browser/permissions) — no-op */ }
+  }
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <code style={{ flex: 1, fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text)', wordBreak: 'break-all' }}>{value}</code>
+      <button type="button" onClick={copy} title={copyLabel} aria-label={copyLabel}
+        style={{ display: 'flex', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, flexShrink: 0 }}>
+        {copied ? <Check size={12} color="var(--color-success)" /> : <Copy size={12} />}
       </button>
     </div>
   )
@@ -168,17 +174,18 @@ export function SideList<T extends { id?: string | number }>({ title, items, sel
   )
 }
 
-export function ListRow<T>({ item, active, onSelect, label, sublabel, onDelete }: {
-  item: T; active?: boolean; onSelect: (item: T) => void; label?: ReactNode; sublabel?: ReactNode; onDelete?: (item: T) => void
+export function ListRow<T>({ item, active, onSelect, label, sublabel, leading, onDelete }: {
+  item: T; active?: boolean; onSelect: (item: T) => void; label?: ReactNode; sublabel?: ReactNode; leading?: ReactNode; onDelete?: (item: T) => void
 }) {
   return (
     <div {...interactive(() => onSelect(item))}
-      style={{ padding: '8px 11px', cursor: 'pointer', fontSize: 12,
+      style={{ padding: '8px 11px', cursor: 'pointer', fontSize: 12, gap: 8,
         background: active ? 'var(--color-primary-bg)' : 'transparent',
         borderBottom: '1px solid var(--border)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
       onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'var(--hover-bg)' }}
       onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}>
+      {leading}
       <div style={{ flex: 1, overflow: 'hidden' }}>
         <div style={{ fontWeight: 500, color: active ? 'var(--color-primary)' : 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</div>
         {sublabel && <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>{sublabel}</div>}
