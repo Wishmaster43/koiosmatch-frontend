@@ -168,9 +168,14 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
             ...(desired_rate_min !== undefined ? { desiredRateMin: desired_rate_min } : {}),
             ...(desired_rate_max !== undefined ? { desiredRateMax: desired_rate_max } : {}) })
         }}
-        onTypesChange={(types: string[]) => onUpdate?.(c.id, { candidateTypes: types })} />
+        onTypesChange={(types: string[]) => onUpdate?.(c.id, { candidateTypes: types })}
+        // "Potlood op de statuswissel" (Danny 2026-07-20): reopen the status modal
+        // PREFILLED to fix a sick-note reason or return date — only offered when the
+        // current status actually carries one (flag-driven, see useCandidateStatus).
+        onEditStatus={status.canEditStatusReason ? status.openStatusEdit : undefined} />
       case 'administration': return <ZzpTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { zzp: p })} />
-      case 'communication':  return <CommunicationTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { consent: p })} />
+      case 'communication':  return <CommunicationTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { consent: p })}
+        onEditStatusEvent={status.canEditStatusReason ? status.openStatusEdit : undefined} />
       case 'documents':      return <DocumentsSection c={c} />
       case 'statistics':     return <StatisticsTab c={c} onJump={setTab} />
       // §3A(f): tenant custom fields live on their OWN gated tab (Danny 16-07,

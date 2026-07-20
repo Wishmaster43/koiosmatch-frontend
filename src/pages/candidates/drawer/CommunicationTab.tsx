@@ -20,7 +20,11 @@ const NotesTab = NotesTabJs as unknown as ComponentType<AnyProps>
  * Toestemmingen · Taken · Notities · Tijdlijn · Conversaties. Each section renders
  * on its own; NotesTab is reused per-section via its show* flags (no duplication).
  */
-export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?: (consent: Record<string, unknown>) => void }) {
+export default function CommunicationTab({ c, onSave, onEditStatusEvent }: { c: Candidate; onSave?: (consent: Record<string, unknown>) => void
+  // Optional (Danny 2026-07-20, job A): forwarded to the shared NotesTab so the
+  // Tijdlijn "Statuswissel" row gets an edit pencil — only when the host (CandidateDrawer)
+  // resolves the current status as reason/date-carrying. Additive prop, see NotesTab.
+  onEditStatusEvent?: () => void }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   // Note categories from the tenant lookup (seed fallback until /note-types lands).
@@ -67,6 +71,8 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
     timeline: c.timeline ?? [], systemNotes,
     noteTypes: writableTypes, chipTypes: allNoteTypes, channels, authorInitials: c.ownerInitials, timelineName: c.name,
     timelineInitials: c.initials,
+    // Job A pencil on the "Statuswissel" timeline row — see the prop comment above.
+    onEditStatusEvent,
     labels: {
       // No section titles (Danny addendum 4): notes/timeline/conversations each
       // render as the SOLE visible NotesTab section for their own sub-tab, whose
@@ -87,6 +93,7 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
       conversationsEmpty: t('sections.conversationsEmpty'),
       notePlaceholder: (typeLabel: string) => t('communication.notePlaceholder', { type: typeLabel }),
       openChangelog: t('drawer.changelog'),
+      editStatusEvent: t('drawer.editStatusReason'),
     },
   }
 

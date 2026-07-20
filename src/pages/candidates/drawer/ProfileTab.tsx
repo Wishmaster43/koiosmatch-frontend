@@ -11,6 +11,7 @@ import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
+import { waDigits } from '@/lib/waDigits'
 import type { Candidate } from '@/types/candidate'
 
 type AnyProps = Record<string, unknown>
@@ -23,18 +24,6 @@ const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
 type ProfileKey = 'gender' | 'nationality' | 'dob' | 'placeOfBirth' | 'email' | 'phone' | 'mobile'
   | 'street' | 'houseNumber' | 'houseNumberSuffix' | 'postalCode' | 'city' | 'province' | 'linkedin'
 type ProfileForm = Record<ProfileKey, string>
-
-// wa.me needs bare E.164 digits (job 29): strip everything but digits, then turn a
-// Dutch national-format leading "0" into the "31" country code (measured: candidate
-// phones arrive either as "+31612345678" or "0612345678" — never anything stranger
-// in this dataset). Returns '' for anything too short to be a real MSISDN so a
-// corrupted/partial value never renders a dead WhatsApp link.
-// eslint-disable-next-line react-refresh/only-export-components -- pure helper exported for unit testing only (see ProfileTab.test.tsx); no runtime cost outside dev HMR.
-export function waDigits(phone: string): string {
-  const digits = phone.replace(/\D/g, '')
-  const withCountryCode = digits.startsWith('0') ? `31${digits.slice(1)}` : digits
-  return withCountryCode.length >= 8 ? withCountryCode : ''
-}
 
 function LinkedinIcon({ size = 12, color = '#0A66C2' }: { size?: number; color?: string }) {
   return (

@@ -79,6 +79,35 @@ describe('PreferencesTab · sub-tabs (kandidaten-ronde-2, punt D)', () => {
   })
 })
 
+// "Potlood op de statuswissel" (Danny 2026-07-20, job A): the status banner gets
+// an edit pencil that reopens the prefilled status modal — only when the host
+// (CandidateDrawer) passes onEditStatus; additive prop, zero behaviour change
+// for a candidate whose statusWindow banner isn't showing at all.
+describe('PreferencesTab · status edit pencil (Danny 2026-07-20)', () => {
+  const sickCandidate = (): Candidate => ({
+    id: 1, candidateTypes: [], preferences: {}, zzp: {}, archived: false,
+    status: 'sick', statusChangedAt: '2026-07-01T00:00:00.000Z', statusReturnDate: '2026-08-01T00:00:00.000Z',
+  } as unknown as Candidate)
+
+  it('shows the pencil next to the status banner when onEditStatus is passed', () => {
+    render(<PreferencesTab c={sickCandidate()} onEditStatus={vi.fn()} />)
+    expect(screen.getByTitle('drawer.editStatusReason')).toBeInTheDocument()
+  })
+
+  it('calls onEditStatus when the pencil is clicked', async () => {
+    const user = userEvent.setup()
+    const onEditStatus = vi.fn()
+    render(<PreferencesTab c={sickCandidate()} onEditStatus={onEditStatus} />)
+    await user.click(screen.getByTitle('drawer.editStatusReason'))
+    expect(onEditStatus).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders no pencil when onEditStatus is not passed (additive prop)', () => {
+    render(<PreferencesTab c={sickCandidate()} />)
+    expect(screen.queryByTitle('drawer.editStatusReason')).toBeNull()
+  })
+})
+
 describe('ZzpTab · sub-tabs (kandidaten-ronde-2, punt E)', () => {
   it('renders Bedrijf · Facturatie, defaulting to Bedrijf', () => {
     render(<ZzpTab c={candidate()} />)

@@ -26,20 +26,10 @@ import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useCustomFields } from '@/lib/useCustomFields'
+import { waDigits } from '@/lib/waDigits'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
-
-// wa.me needs bare E.164 digits — local copy of the candidate ProfileTab helper
-// (src/pages/candidates/drawer/ProfileTab.tsx's `waDigits`). This task's file
-// boundary is scoped to pages/candidates + pages/customers only, so the pure
-// helper can't be hoisted to a shared lib in this pass — flagged as a follow-up
-// extraction (e.g. src/lib/phone.ts) once both entities agree on the contract.
-function waDigits(phone: string): string {
-  const digits = phone.replace(/\D/g, '')
-  const withCountryCode = digits.startsWith('0') ? `31${digits.slice(1)}` : digits
-  return withCountryCode.length >= 8 ? withCountryCode : ''
-}
 
 const inputStyle: CSSProperties = { width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }
 const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }

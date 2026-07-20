@@ -39,7 +39,7 @@ const CreatableSelect = CreatableSelectJs as unknown as ComponentType<Record<str
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
   first_name: 'firstName', last_name: 'lastName', middle_name: 'middleName',
-  email: 'email', phone: 'phone', function_title: 'functionTitle',
+  email: 'email', phone: 'phone', mobile: 'mobile', function_title: 'functionTitle',
   date_of_birth: 'dateOfBirth', gender: 'gender',
   street: 'street', house_number: 'houseNumber',
   house_number_suffix: 'houseNumberSuffix', postal_code: 'postalCode',
@@ -53,7 +53,7 @@ interface AppUser { id: Id; name?: string; firstname?: string; lastname?: string
 
 interface FormState {
   firstName: string; middleName: string; lastName: string; functionTitle: string
-  email: string; phone: string; dateOfBirth: string; gender: string
+  email: string; phone: string; mobile: string; dateOfBirth: string; gender: string
   street: string; houseNumber: string; houseNumberSuffix: string; postalCode: string; city: string; province: string
   ownerId: string | number
 }
@@ -105,7 +105,7 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const [form, setForm] = useState<FormState>({
     firstName: '', middleName: '', lastName: '',
     functionTitle: '',
-    email: '', phone: '',
+    email: '', phone: '', mobile: '',
     dateOfBirth: '', gender: '',
     street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', city: '', province: '',
     // Owner defaults to the logged-in user; recruiter can change it.
@@ -149,6 +149,10 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
         function_title:      form.functionTitle.trim() || null,
         email:               form.email || null,
         phone:               form.phone || null,
+        // Split field (BE 2026-07-20): mobile is validated separately from the
+        // landline `phone` on CandidateProfileRequest — same body key the drawer's
+        // buildCandidatePatch already maps (candidatesShared.ts).
+        mobile:              form.mobile || null,
         date_of_birth:       form.dateOfBirth || null,
         gender:              form.gender || null,
         street:              form.street || null,
@@ -295,16 +299,21 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
                   </div>
                 </div>
 
-                {/* ── Contact — email + phone (half-width card, so stacked) ── */}
+                {/* ── Contact — email, then phone/mobile paired (job B P1-follow-up) ── */}
                 <div>
                   <div style={cardHead}>{t('modal.fields.cardContact')}</div>
                   <div style={cardBox}>
                     <Field label={t('modal.fields.email')} required={isReq('email')}>
                       <TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder={t('modal.fields.emailPlaceholder')} error={errors.email} />
                     </Field>
-                    <Field label={t('modal.fields.phone')} required={isReq('phone')}>
-                      <TextField type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder={t('modal.fields.phonePlaceholder')} error={errors.phone} />
-                    </Field>
+                    <div style={row('1fr 1fr')}>
+                      <Field label={t('modal.fields.phone')} required={isReq('phone')}>
+                        <TextField type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder={t('modal.fields.phonePlaceholder')} error={errors.phone} />
+                      </Field>
+                      <Field label={t('modal.fields.mobile')}>
+                        <TextField type="tel" value={form.mobile} onChange={v => set('mobile', v)} placeholder={t('modal.fields.mobilePlaceholder')} />
+                      </Field>
+                    </div>
                   </div>
                 </div>
 

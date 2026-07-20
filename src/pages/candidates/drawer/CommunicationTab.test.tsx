@@ -5,7 +5,7 @@
  * that's out of scope here — stubbed to a marker so the Taken sub-tab is only
  * checked for presence, not its internals (those are CandidateTasks.test.tsx's job).
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CommunicationTab from './CommunicationTab'
@@ -14,7 +14,13 @@ import type { Candidate } from '@/types/candidate'
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, locale: 'nl-NL' }) }))
 vi.mock('@/lib/useNoteTypes', () => ({ useNoteTypes: () => ({ types: [], writableTypes: [] }), SYSTEM_NOTE_TYPES: new Set() }))
 vi.mock('@/lib/useLastContactTypes', () => ({ useLastContactTypes: () => ({ types: [] }) }))
-vi.mock('@/pages/candidates/hooks/useCandidateNotes', () => ({ useCandidateNotes: () => ({ notes: [], addNote: vi.fn(), editNote: vi.fn() }) }))
+// Mutable per-test notes list (vi.hoisted so the mock factory below can read it) —
+// the status-change pencil tests need a system note in the list; every other test
+// keeps the original empty list.
+const { notesState } = vi.hoisted(() => ({ notesState: { notes: [] as unknown[] } }))
+vi.mock('@/pages/candidates/hooks/useCandidateNotes', () => ({
+  useCandidateNotes: () => ({ notes: notesState.notes, addNote: vi.fn(), editNote: vi.fn() }),
+}))
 vi.mock('./CandidateTasks', () => ({ default: () => <div data-testid="candidate-tasks-stub" /> }))
 
 const candidate = (consent: Record<string, unknown> = {}): Candidate =>
@@ -109,5 +115,49 @@ describe('CommunicationTab · optimistic consent date (Danny punt F)', () => {
     render(<CommunicationTab c={candidate({ whatsapp_opt_in: true })} />)
     await openConsent(user)
     expect(screen.queryByText(/consentGivenAt/)).toBeNull()
+  })
+})
+
+// "Potlood op de statuswissel" (Danny 2026-07-20, job A): the Tijdlijn's
+// "Statuswissel" system-note row gets an edit pencil, forwarded to the shared
+// NotesTab's onEditStatusEvent — only when CandidateDrawer passes it down.
+describe('CommunicationTab · status-change timeline pencil (Danny 2026-07-20)', () => {
+  const goToTimeline = (user: ReturnType<typeof userEvent.setup>) =>
+    user.click(screen.getByRole('tab', { name: 'sections.timeline' }))
+
+  beforeEach(() => {
+    notesState.notes = [{ type: 'status_change', text: 'Ziek sinds 01-07', is_system: true, created_at: '2026-07-01T00:00:00.000Z' }]
+  })
+  afterEach(() => { notesState.notes = [] })
+
+  it('shows the pencil on the Statuswissel row when onEditStatusEvent is passed', async () => {
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate()} onEditStatusEvent={vi.fn()} />)
+    await goToTimeline(user)
+    expect(screen.getByTitle('drawer.editStatusReason')).toBeInTheDocument()
+  })
+
+  it('calls onEditStatusEvent when the pencil is clicked', async () => {
+    const user = userEvent.setup()
+    const onEditStatusEvent = vi.fn()
+    render(<CommunicationTab c={candidate()} onEditStatusEvent={onEditStatusEvent} />)
+    await goToTimeline(user)
+    await user.click(screen.getByTitle('drawer.editStatusReason'))
+    expect(onEditStatusEvent).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders no pencil when onEditStatusEvent is not passed (additive prop, zero behaviour change)', async () => {
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate()} />)
+    await goToTimeline(user)
+    expect(screen.queryByTitle('drawer.editStatusReason')).toBeNull()
+  })
+
+  it('never adds the pencil to a lifecycle system note — only "status_change" is editable in place', async () => {
+    const user = userEvent.setup()
+    notesState.notes = [{ type: 'lifecycle', text: 'Gearchiveerd', is_system: true, created_at: '2026-07-01T00:00:00.000Z' }]
+    render(<CommunicationTab c={candidate()} onEditStatusEvent={vi.fn()} />)
+    await goToTimeline(user)
+    expect(screen.queryByTitle('drawer.editStatusReason')).toBeNull()
   })
 })

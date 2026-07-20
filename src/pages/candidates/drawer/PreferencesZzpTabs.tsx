@@ -13,6 +13,7 @@
 import { useState } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Edit2 } from 'lucide-react'
 import EditableFieldTableJs from '@/components/forms/EditableFieldTable'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { useLookups } from '@/context/LookupsContext'
@@ -33,7 +34,12 @@ const toArray = (v: unknown): string[] =>
 // Weekday slugs in ISO order; labels come from Intl so they stay locale-correct.
 const DAY_SLUGS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
-export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onSave?: (v: Record<string, unknown>) => void; onTypesChange?: (types: string[]) => void }) {
+export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: Candidate; onSave?: (v: Record<string, unknown>) => void; onTypesChange?: (types: string[]) => void
+  // Optional (Danny 2026-07-20, job A): reopens the status modal prefilled to edit
+  // the current status's reason/return date. Only passed when the host (CandidateDrawer)
+  // resolves the current status as reason/date-carrying — additive, no behaviour change
+  // for callers that omit it.
+  onEditStatus?: () => void }) {
   const { t } = useTranslation('candidates')
   const { locale, formatDate } = useDateFormat()
   const { functions, allowFreeEntry } = useFunctions() as { functions: string[]; allowFreeEntry: boolean }
@@ -158,7 +164,15 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
           borderRadius: 8, color: statusMeta(c.status).color,
           background: `color-mix(in srgb, ${statusMeta(c.status).color} 10%, transparent)`,
           border: `1px solid color-mix(in srgb, ${statusMeta(c.status).color} 30%, transparent)` }}>
-          {statusWindow}
+          <span style={{ flex: 1 }}>{statusWindow}</span>
+          {/* Edit pencil (Danny 2026-07-20): reopen the status modal PREFILLED to fix
+              a sick-note reason or change the return date — the status itself is untouched. */}
+          {onEditStatus && (
+            <button onClick={onEditStatus} title={t('drawer.editStatusReason')} aria-label={t('drawer.editStatusReason')}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, display: 'flex', color: 'inherit', opacity: 0.85, flexShrink: 0 }}>
+              <Edit2 size={13} />
+            </button>
+          )}
         </div>
       )}
       <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />

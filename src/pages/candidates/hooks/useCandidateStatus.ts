@@ -97,6 +97,14 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
   const showStatus = !!currentPhase && !isEntryPhase
   // Flags of the CURRENT status (§3B) — drive the prefilled reason/date edit path.
   const statusFlags = statuses.find(s => s.value === currentStatus) as StatusFlags
+  // Whether an "edit reason/date" pencil should show anywhere in the drawer (the
+  // Voorkeuren status banner + the Tijdlijn statuswissel row): flag-driven, never
+  // slug-hardcoded — true when the lookup requires a reason/date for this status,
+  // OR the candidate already carries a value worth editing (Danny 2026-07-20).
+  const canEditStatusReason = Boolean(
+    statusFlags?.requires_reason || statusFlags?.expects_return_date || statusFlags?.is_blacklist ||
+    c?.statusReason || c?.statusReturnDate || c?.blacklistReason,
+  )
 
   // Edit the reason/return date of the CURRENT status: reopen the prompt prefilled.
   const openStatusEdit = () => {
@@ -143,9 +151,13 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
     const prefPatch = statusModal.date
       ? { preferences: { ...((c.preferences as Record<string, unknown>) ?? {}), available_from: statusModal.date } }
       : {}
-    // N-1: the status note is written CENTRALLY by the backend guard on this PATCH.
-    onUpdate?.(c.id, { status: statusModal.target, ...reasonPatch, statusReturnDate: statusModal.date || null,
-      ...prefPatch, ...(changed ? { statusChangedAt: new Date().toISOString() } : {}) })
+    // Editing the CURRENT status (banner pencil / timeline pencil, Danny 2026-07-20:
+    // "potlood op de statuswissel") only touches reason/date — omit `status` and
+    // `statusChangedAt` from the patch so an unchanged status never re-fires as a
+    // "status changed" signal. N-1: the status note is written CENTRALLY by the
+    // backend guard on an ACTUAL status-changing PATCH.
+    onUpdate?.(c.id, { ...(changed ? { status: statusModal.target, statusChangedAt: new Date().toISOString() } : {}),
+      ...reasonPatch, statusReturnDate: statusModal.date || null, ...prefPatch })
     setStatusModal(null)
   }
 
@@ -161,7 +173,7 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
 
   return {
     statuses, currentPhase, phaseInfo, nextPhase, isEntryPhase, converting, doConvert,
-    currentStatus, showStatus, openStatusEdit, changeStatus,
+    currentStatus, showStatus, openStatusEdit, canEditStatusReason, changeStatus,
     statusModal, setStatusModal, confirmStatus,
     matchPrompt, setMatchPrompt, matchChoice, setMatchChoice,
     newMatchVacancyId, setNewMatchVacancyId, vacancyOptions, creatingMatch, confirmPlacedMatch,

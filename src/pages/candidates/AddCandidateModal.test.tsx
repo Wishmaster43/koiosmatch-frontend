@@ -104,7 +104,7 @@ describe('AddCandidateModal · submit body unchanged by the layout rework', () =
     await user.click(screen.getByRole('button', { name: 'modal.create' }))
     expect(createCandidate).toHaveBeenCalledWith({
       first_name: 'Jan', middle_name: null, last_name: 'Jansen', function_title: null,
-      email: null, phone: null, date_of_birth: null, gender: null,
+      email: null, phone: null, mobile: null, date_of_birth: null, gender: null,
       street: null, house_number: null, house_number_suffix: null, postal_code: null,
       city: null, province: null, owner_id: 'u1',
       phase: 'lead', status: 'available', candidate_types: [],
@@ -122,5 +122,25 @@ describe('AddCandidateModal · submit body unchanged by the layout rework', () =
     await user.click(screen.getByRole('button', { name: 'modal.create' }))
     expect(createCandidate).toHaveBeenCalledTimes(1)
     expect(createCandidate.mock.calls[0][0]).not.toHaveProperty('location_ids')
+  })
+})
+
+// Job B (P1 follow-up, 2026-07-20): Mobiel sits paired next to Telefoon in the
+// Contact card and rides along in the create body as its own `mobile` key.
+describe('AddCandidateModal · Mobiel field (job B)', () => {
+  it('renders a Mobiel field next to Telefoon in the Contact card', () => {
+    render(<AddCandidateModal onClose={noop} />)
+    expect(screen.getByPlaceholderText('modal.fields.phonePlaceholder')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('modal.fields.mobilePlaceholder')).toBeInTheDocument()
+  })
+
+  it('POSTs the mobile value under its own `mobile` body key', async () => {
+    const user = userEvent.setup()
+    render(<AddCandidateModal onClose={noop} onCreated={noop} />)
+    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
+    await user.type(screen.getByPlaceholderText('modal.fields.mobilePlaceholder'), '0612345678')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+    expect(createCandidate.mock.calls[0][0]).toMatchObject({ mobile: '0612345678' })
   })
 })

@@ -23,6 +23,8 @@ interface NotesLabels {
   notesEmpty?: ReactNode; timeline?: ReactNode; timelineEmpty?: ReactNode
   conversations?: ReactNode; conversationsEmpty?: ReactNode
   notePlaceholder?: (typeLabel: string) => string
+  // Tooltip/aria-label for the optional "edit status event" pencil (see onEditStatusEvent below).
+  editStatusEvent?: string
 }
 interface NotePayload { type: string; title: string; body: string; channel?: string }
 
@@ -55,12 +57,18 @@ interface NotesTabProps {
   showNotes?: boolean
   showTimeline?: boolean
   showConversations?: boolean
+  // Optional (Danny 2026-07-20, job A "potlood op de statuswissel"): when the host
+  // passes this, the "Statuswissel" system-event row gets an edit pencil that calls
+  // back into the host's status-edit entry point (candidates' CommunicationTab is
+  // the only current caller). Hosts that omit it — every other entity/tab — render
+  // no pencil at all; zero behaviour change for them (additive prop).
+  onEditStatusEvent?: () => void
 }
 
 export default function NotesTab({
   notes = [], systemNotes = [], timeline = [], noteTypes = [], chipTypes, channels = [], labels = {}, editorLabels,
   authorInitials, timelineName, timelineInitials, onAddNote, onEditNote,
-  showNotes = true, showTimeline = true, showConversations = true,
+  showNotes = true, showTimeline = true, showConversations = true, onEditStatusEvent,
 }: NotesTabProps) {
   const [adding, setAdding]   = useState(false)
   const [editingIdx, setEditingIdx] = useState<number | null>(null)   // null = new; index = editing
@@ -125,11 +133,15 @@ export default function NotesTab({
     return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 99, marginRight: 6, ...soft }}>{Icon && <Icon size={10} />}{ch?.label ?? value}</span>
   }
 
-  // Calm one-line system-event row (status/phase change): History icon, chip, no pencil.
-  // The icon is a BUTTON that opens the record changelog (Danny 13/7) — decoupled
-  // via a window event so this shared tab needs no drawer-specific wiring.
+  // Calm one-line system-event row (status/phase change): History icon, chip, no pencil
+  // by default. The icon is a BUTTON that opens the record changelog (Danny 13/7) —
+  // decoupled via a window event so this shared tab needs no drawer-specific wiring.
   const systemRow = (n: NoteItem, key: string | number) => {
     const who = noteAuthor(n)
+    // Only the "Statuswissel" event (n.type === 'status_change') is editable in place —
+    // never a 'lifecycle' event (archived/restored) — and only when the host actually
+    // passed the callback (see onEditStatusEvent on the props for why).
+    const canEditStatus = Boolean(onEditStatusEvent) && n.type === 'status_change'
     return (
       <div key={key} style={{ display: 'flex', gap: 8, marginBottom: 10, alignItems: 'center' }}>
         <button onClick={() => window.dispatchEvent(new CustomEvent('km:open-changelog'))}
@@ -142,6 +154,12 @@ export default function NotesTab({
           <SafeHtml style={{ fontSize: 12, color: 'var(--text)', flex: 1, minWidth: 0 }} html={n.text ?? n.body ?? ''} />
           <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{who ? `${who} · ` : ''}{noteWhen(n)}</span>
         </div>
+        {canEditStatus && (
+          <button onClick={onEditStatusEvent} title={labels.editStatusEvent} aria-label={labels.editStatusEvent}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex', flexShrink: 0 }}>
+            <Edit2 size={13} />
+          </button>
+        )}
       </div>
     )
   }
