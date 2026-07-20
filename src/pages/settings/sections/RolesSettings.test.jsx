@@ -125,6 +125,7 @@ describe('RolesSettings — end-to-end toggle through the matrix', () => {
       if (url === '/roles') return Promise.resolve({ data: [role] })
       if (url === '/permissions') return Promise.resolve({ data: {
         candidates: [{ name: 'candidates.view' }, { name: 'candidates.create' }, { name: 'candidates.update' }, { name: 'candidates.delete' }],
+        sync: [{ name: 'sync.refresh' }],
       } })
       if (url === '/roles/icons') return Promise.reject(new Error('404'))
       if (url === '/roles/r1/branches') return Promise.resolve({ data: [] })
@@ -141,5 +142,7 @@ describe('RolesSettings — end-to-end toggle through the matrix', () => {
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith(
       '/roles/r1/permissions', { permissions: ['candidates.view', 'candidates.create'] }))
+    // Retired group (SYNC-RETIRE-1): the BE still returns sync until removal — never rendered.
+    expect(screen.queryByTitle('sync.refresh')).not.toBeInTheDocument()
   })
 })

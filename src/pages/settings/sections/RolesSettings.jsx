@@ -160,8 +160,10 @@ function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }) {
     setSaving(false)
   }
 
-  // Filter out the `module` group — managed separately in the Modules tab.
-  const groups = Object.entries(permissions).filter(([g]) => g !== 'module')
+  // Filter out the `module` group (managed in the Modules tab) and the retired
+  // `sync` group — the daily 05:00 cron replaced manual sync for tenant roles
+  // (Danny 2026-07-20 "kan weg"); BE removal of sync.refresh tracked as SYNC-RETIRE-1.
+  const groups = Object.entries(permissions).filter(([g]) => g !== 'module' && g !== 'sync')
 
   return (
     <div>

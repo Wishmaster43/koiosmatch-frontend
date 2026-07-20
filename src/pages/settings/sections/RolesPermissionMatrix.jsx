@@ -21,7 +21,6 @@ const GROUP_MODULE_PAGE = {
   reports:   'reports',
   whatsapp:  'whatsapp',
   workflows: 'aiagents',
-  sync:      'shiftmanager',
 }
 
 // The four CRUD verbs get a dedicated column; every other action (offer, manage,
