@@ -305,6 +305,7 @@
     "taskFor": "for {{name}}",
     "taskCreatedBy": "created by {{name}}",
     "taskOpen": "Open task",
+    "taskEdit": "Edit task",
     "tasksOpen": "Open",
     "tasksHistory": "History",
     "returnDateUnknownHint": "Leave empty = not yet known",
@@ -922,6 +923,24 @@
       "syncSuccess": "Sync completed",
       "syncFailed": "Sync failed",
       "lastSynced": "Last synced: {{date}}"
+    }
+  },
+  "conversations": {
+    "active": "Active chat",
+    "inactive": "No active conversation",
+    "loading": "Loading conversations…",
+    "error": "Could not load conversations",
+    "openThread": "Open conversation",
+    "escalated": "Escalated",
+    "escalatedHint": "An escalated chat has been taken over by a staff member.",
+    "loadingMessages": "Loading messages…",
+    "noMessages": "No messages in this conversation",
+    "purpose": {
+      "manual": "Manual",
+      "birthday": "Birthday",
+      "appointment_confirm": "Appointment confirmation",
+      "six_month_check": "Six-month check",
+      "interview": "Interview"
     }
   }
 }

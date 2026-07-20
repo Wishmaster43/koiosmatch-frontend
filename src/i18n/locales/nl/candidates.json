@@ -305,6 +305,7 @@
     "taskFor": "voor {{name}}",
     "taskCreatedBy": "aangemaakt door {{name}}",
     "taskOpen": "Taak openen",
+    "taskEdit": "Taak bewerken",
     "tasksOpen": "Open",
     "tasksHistory": "Historie",
     "returnDateUnknownHint": "Leeg laten = nog onbekend",
@@ -922,6 +923,24 @@
       "syncSuccess": "Synchronisatie geslaagd",
       "syncFailed": "Synchroniseren mislukt",
       "lastSynced": "Laatst gesynchroniseerd: {{date}}"
+    }
+  },
+  "conversations": {
+    "active": "Actief gesprek",
+    "inactive": "Geen actieve conversatie",
+    "loading": "Conversaties laden…",
+    "error": "Kon de conversaties niet laden",
+    "openThread": "Gesprek openen",
+    "escalated": "Geëscaleerd",
+    "escalatedHint": "Een geëscaleerd gesprek is overgenomen door een medewerker.",
+    "loadingMessages": "Berichten laden…",
+    "noMessages": "Geen berichten in dit gesprek",
+    "purpose": {
+      "manual": "Handmatig",
+      "birthday": "Verjaardag",
+      "appointment_confirm": "Afspraakbevestiging",
+      "six_month_check": "Halfjaarcheck",
+      "interview": "Interview"
     }
   }
 }

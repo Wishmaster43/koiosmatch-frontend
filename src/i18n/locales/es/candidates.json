@@ -298,6 +298,7 @@
     "taskFor": "para {{name}}",
     "taskCreatedBy": "creada por {{name}}",
     "taskOpen": "Abrir tarea",
+    "taskEdit": "Editar tarea",
     "tasksOpen": "Abiertas",
     "tasksHistory": "Historial",
     "returnDateUnknownHint": "Dejar vacío = aún desconocido",
@@ -922,6 +923,24 @@
       "syncSuccess": "Sincronización completada",
       "syncFailed": "Error al sincronizar",
       "lastSynced": "Última sincronización: {{date}}"
+    }
+  },
+  "conversations": {
+    "active": "Conversación activa",
+    "inactive": "Sin conversación activa",
+    "loading": "Cargando conversaciones…",
+    "error": "No se pudieron cargar las conversaciones",
+    "openThread": "Abrir conversación",
+    "escalated": "Escalado",
+    "escalatedHint": "Un chat escalado ha sido asumido por un empleado.",
+    "loadingMessages": "Cargando mensajes…",
+    "noMessages": "No hay mensajes en esta conversación",
+    "purpose": {
+      "manual": "Manual",
+      "birthday": "Cumpleaños",
+      "appointment_confirm": "Confirmación de cita",
+      "six_month_check": "Revisión semestral",
+      "interview": "Entrevista"
     }
   }
 }

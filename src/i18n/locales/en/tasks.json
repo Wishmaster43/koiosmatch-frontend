@@ -109,6 +109,8 @@
   },
   "modal": {
     "title": "Add activity",
+    "editTitle": "Edit task",
+    "loadingTask": "Loading task…",
     "type": "Activity type",
     "typePlaceholder": "Choose type",
     "titleLabel": "Title",
@@ -131,6 +133,7 @@
     "contact": "Contact",
     "contactPlaceholder": "Select contact",
     "create": "Create",
+    "save": "Save",
     "saving": "Saving…",
     "cancel": "Cancel",
     "required": "Required"

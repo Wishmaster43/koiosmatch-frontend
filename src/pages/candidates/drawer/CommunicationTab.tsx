@@ -6,6 +6,7 @@ import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import SectionCard from '@/components/ui/SectionCard'
 import CandidateTasks from './CandidateTasks'
+import ConversationsSection from './ConversationsSection'
 import { useNoteTypes, SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import { useCandidateNotes } from '@/pages/candidates/hooks/useCandidateNotes'
@@ -139,7 +140,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent }: { c: 
       {/* Notes / timeline / conversations — one NotesTab section per sub-tab. */}
       {subTab === 'notes'         && <NotesTab {...notesProps} showTimeline={false} showConversations={false} />}
       {subTab === 'timeline'      && <NotesTab {...notesProps} showNotes={false} showConversations={false} />}
-      {subTab === 'conversations' && <NotesTab {...notesProps} showNotes={false} showTimeline={false} />}
+      {subTab === 'conversations' && <ConversationsSection candidateId={c.id} />}
     </div>
   )
 }

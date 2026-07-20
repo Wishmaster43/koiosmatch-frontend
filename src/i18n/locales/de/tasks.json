@@ -95,6 +95,8 @@
   },
   "modal": {
     "title": "Aktivität hinzufügen",
+    "editTitle": "Aufgabe bearbeiten",
+    "loadingTask": "Aufgabe wird geladen…",
     "type": "Aktivitätstyp",
     "typePlaceholder": "Typ wählen",
     "titleLabel": "Titel",
@@ -117,6 +119,7 @@
     "contact": "Kontakt",
     "contactPlaceholder": "Kontakt auswählen",
     "create": "Erstellen",
+    "save": "Speichern",
     "saving": "Wird gespeichert…",
     "cancel": "Abbrechen",
     "required": "Erforderlich"

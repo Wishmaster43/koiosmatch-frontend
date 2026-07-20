@@ -109,6 +109,8 @@
   },
   "modal": {
     "title": "Activiteit toevoegen",
+    "editTitle": "Taak bewerken",
+    "loadingTask": "Taak laden…",
     "type": "Activiteit type",
     "typePlaceholder": "Kies type",
     "titleLabel": "Titel",
@@ -131,6 +133,7 @@
     "contact": "Contactpersoon",
     "contactPlaceholder": "Selecteer contactpersoon",
     "create": "Registreren",
+    "save": "Opslaan",
     "saving": "Opslaan…",
     "cancel": "Annuleren",
     "required": "Verplicht"

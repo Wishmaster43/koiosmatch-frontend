@@ -1,28 +1,34 @@
 /**
  * CandidateTasks — the candidate's open tasks as a Communicatie sub-tab (Danny
  * 2026-07-03: "door wie, wanneer gemaakt, prio ect alles"). Each row shows title,
- * status + priority chips, due date, assignee and the created-by/at line; clicking
- * a row jumps to the Taken page (open intent) and "+ Taak" creates a task that is
- * pre-linked to this candidate. Data via GET /tasks?candidate={id} (TASKS-1).
+ * status + priority chips, due date, assignee and the created-by/at line; "+ Taak"
+ * creates a task that is pre-linked to this candidate. Data via GET
+ * /tasks?candidate={id} (TASKS-1).
+ *
+ * Row actions (Danny 20-07) mirror the Sollicitaties sub-tab pattern exactly: the
+ * title is the shared `EntityLink` (name = in-app open via the nav context, its
+ * trailing icon = the same record in a NEW BROWSER TAB via the #tasks?open={id}
+ * deep link — both built into that one component, never hand-rolled here), and a
+ * pencil at the row's bottom-right opens the shared modal in EDIT mode.
  *
  * AXIS-MATRIX-2 (CMFE audit R1): wires the shared action-rule preflight for
- * `task.create` (mirrors MatchPlacementModal's match.create). The actual create
- * form is the shared AddTaskModal (owned outside this file's scope, reused by
+ * `task.create` (mirrors MatchPlacementModal's match.create). The actual create/
+ * edit form is the shared AddTaskModal (owned outside this file's scope, reused by
  * every entity — never forked here), so this component is the only choke point
- * available to gate it: a warn cell shows the banner but leaves "+ Taak" enabled
- * (proceed allowed, e.g. an administrative task on a blacklisted candidate); a
- * block cell (an archived candidate) additionally disables "+ Taak" itself —
- * the calm explanation replaces opening a modal whose submit would just 422.
+ * available to gate creation: a warn cell shows the banner but leaves "+ Taak"
+ * enabled (proceed allowed, e.g. an administrative task on a blacklisted
+ * candidate); a block cell (an archived candidate) additionally disables "+ Taak"
+ * itself — the calm explanation replaces opening a modal whose submit would just 422.
  */
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ListChecks } from 'lucide-react'
+import { ListChecks, Pencil } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import SectionCard from '@/components/ui/SectionCard'
+import EntityLink from '@/components/ui/EntityLink'
 import DrawerAddButton from './DrawerAddButton'
 import AddTaskModal from '@/pages/tasks/AddTaskModal'
 import { TaskLookupsProvider } from '@/context/TaskLookupsContext'
-import { useNavigation } from '@/context/NavigationContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrules'
 import type { Id } from '@/types/common'
@@ -42,11 +48,12 @@ const personName = (v: TaskRow['assignee']): string => (typeof v === 'object' ? 
 export default function CandidateTasks({ candidateId }: { candidateId: Id }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
-  const { openEntity } = useNavigation()
   const [tasks, setTasks] = useState<TaskRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [adding, setAdding] = useState(false)
+  // The task being edited (pencil on a row) — set → the shared modal opens in edit mode.
+  const [editingId, setEditingId] = useState<Id | null>(null)
   // Open vs Historie (Danny 2026-07-04: "tabje history met alle oude taken").
   const [view, setView] = useState<'open' | 'history'>('open')
 
@@ -124,27 +131,36 @@ export default function CandidateTasks({ candidateId }: { candidateId: Id }) {
           task.created_at ? formatDate(task.created_at) : null,
         ].filter(Boolean).join(' · ')
         return (
-          <button key={task.id} onClick={() => openEntity('tasks', task.id)} title={t('drawer.taskOpen')}
-            style={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%', textAlign: 'left', padding: '7px 10px', marginBottom: 6,
-              border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)', cursor: 'pointer' }}>
+          // Plain row (not a button, Danny 20-07): the title's own EntityLink handles
+          // in-app open + new-tab, and the pencil is a sibling action — mirrors the
+          // Sollicitaties row (WorkTab), never a whole-row click target.
+          <div key={task.id}
+            style={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%', padding: '7px 10px', marginBottom: 6,
+              border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
               <ListChecks size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-              <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {task.title ?? '—'}
+              <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 500 }}>
+                <EntityLink page="tasks" id={task.id} title={t('drawer.taskOpen')}>{task.title ?? '—'}</EntityLink>
               </span>
               {task.due_date && <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{formatDate(task.due_date)}</span>}
               {chip(task.status)}
               {chip(task.priority)}
             </span>
-            {/* Meta line: for whom (assignee) + created by/at — the "alles" Danny asked for. */}
-            {(assignee || createdLine) && (
-              <span style={{ display: 'flex', gap: 6, fontSize: 11, color: 'var(--text-muted)', paddingLeft: 21, flexWrap: 'wrap' }}>
-                {assignee && <span>{t('drawer.taskFor', { name: assignee })}</span>}
-                {assignee && createdLine && <span>·</span>}
-                {createdLine && <span>{createdLine}</span>}
-              </span>
-            )}
-          </button>
+            {/* Meta line: for whom (assignee) + created by/at (the "alles" Danny asked
+                for), and the edit pencil pinned bottom-right — always rendered so the
+                pencil has one stable spot even on a row with no assignee/creator line. */}
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-muted)', paddingLeft: 21, flexWrap: 'wrap' }}>
+              {assignee && <span>{t('drawer.taskFor', { name: assignee })}</span>}
+              {assignee && createdLine && <span>·</span>}
+              {createdLine && <span>{createdLine}</span>}
+              <button onClick={() => setEditingId(task.id)} title={t('drawer.taskEdit')} aria-label={t('drawer.taskEdit')}
+                style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2 }}
+                onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-primary)' }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)' }}>
+                <Pencil size={12} />
+              </button>
+            </span>
+          </div>
         )
       })}
       {/* New task, pre-linked to this candidate; reload so the fresh row shows at once.
@@ -156,6 +172,16 @@ export default function CandidateTasks({ candidateId }: { candidateId: Id }) {
             initial={{ candidateId: String(candidateId) }}
             onClose={() => setAdding(false)}
             onCreated={() => { setAdding(false); load() }}
+          />
+        </TaskLookupsProvider>
+      )}
+      {/* Edit an existing task (pencil) — same provider-wrap requirement as "+ Taak". */}
+      {editingId != null && (
+        <TaskLookupsProvider>
+          <AddTaskModal
+            editId={editingId}
+            onClose={() => setEditingId(null)}
+            onSaved={() => { setEditingId(null); load() }}
           />
         </TaskLookupsProvider>
       )}

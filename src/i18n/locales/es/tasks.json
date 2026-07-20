@@ -95,6 +95,8 @@
   },
   "modal": {
     "title": "Añadir actividad",
+    "editTitle": "Editar tarea",
+    "loadingTask": "Cargando tarea…",
     "type": "Tipo de actividad",
     "typePlaceholder": "Elegir tipo",
     "titleLabel": "Título",
@@ -117,6 +119,7 @@
     "contact": "Contacto",
     "contactPlaceholder": "Seleccionar contacto",
     "create": "Crear",
+    "save": "Guardar",
     "saving": "Guardando…",
     "cancel": "Cancelar",
     "required": "Obligatorio"
