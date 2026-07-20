@@ -569,7 +569,8 @@
     "pools": "Talentpools",
     "poolAdd": "Zu Pool hinzufügen",
     "poolsEmpty": "Noch keine Pools eingerichtet.",
-    "poolKoios": "Von Koios vorgeschlagen"
+    "poolKoios": "Von Koios vorgeschlagen",
+    "branchEmpty": "Noch keine Niederlassung verknüpft."
   },
   "preferences": {
     "title": "Präferenzen",

@@ -39,10 +39,16 @@ interface AddableSectionProps {
   // Transform the stored item into edit-form initial values (derive checkbox
   // state like noExpiry/current that isn't stored on the item itself).
   editInitial?: (item: RelItem) => RelItem
+  // Opt-in override for the "+" trigger (candidates' DrawerAddButton reference
+  // style, 2026-07 consistency sweep) — receives the same setAdding(true) the
+  // default AddButton uses. Omit to keep the plain-link default for any other
+  // future caller (AddableSection is candidates-only today, but this stays
+  // additive/non-breaking rather than forking the component).
+  renderAddButton?: (onClick: () => void) => ReactNode
 }
 
 export default function AddableSection({
-  title, items = [], fields, onAdd, onEdit, onRemove, emptyText, renderItem, layout = 'list', addLabel, editInitial,
+  title, items = [], fields, onAdd, onEdit, onRemove, emptyText, renderItem, layout = 'list', addLabel, editInitial, renderAddButton,
 }: AddableSectionProps) {
   const { t } = useTranslation('common')
   const [adding,     setAdding]     = useState(false)
@@ -80,7 +86,13 @@ export default function AddableSection({
   return (
     <SectionCard
       title={title}
-      action={!adding && <AddButton onClick={() => setAdding(true)} label={addLabel} />}
+      action={!adding && (
+        // marginLeft: auto pushes the single flex child fully right even when
+        // `title` is null (SectionCard's row would otherwise sit it at flex-start).
+        renderAddButton
+          ? <div style={{ marginLeft: 'auto' }}>{renderAddButton(() => setAdding(true))}</div>
+          : <AddButton onClick={() => setAdding(true)} label={addLabel} />
+      )}
     >
       {adding && (
         <AddForm fields={fields} onSave={(v: RelItem) => { onAdd(v); setAdding(false) }} onCancel={() => setAdding(false)} />

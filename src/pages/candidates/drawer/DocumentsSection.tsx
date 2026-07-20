@@ -1,13 +1,14 @@
 import { useState, useRef } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Plus, X, FileText, Pencil, Eye } from 'lucide-react'
+import { Search, X, FileText, Pencil, Eye } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { sectionBlock } from './constants'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
 import { useDateFormat } from '@/lib/datetime'
 import DocPreviewModal from './DocPreviewModal'
+import DrawerAddButton from './DrawerAddButton'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -86,10 +87,7 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
               style={{ border: 'none', outline: 'none', fontSize: 11, color: 'var(--text)', background: 'none', width: 110 }} />
             {docSearch && <button onClick={() => setDocSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={11} /></button>}
           </div>
-          <button onClick={() => fileRef.current?.click()}
-            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
-            <Plus size={11} /> {t('common:add')}
-          </button>
+          <DrawerAddButton onClick={() => fileRef.current?.click()} label={t('common:add')} />
         </div>
       </div>
       <div style={sectionBlock}>

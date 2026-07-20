@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ExternalLink, Plus, CalendarPlus, Calendar, Clock, User, Building2, Video, Phone, Pencil } from 'lucide-react'
+import { ExternalLink, CalendarPlus, Calendar, Clock, User, Building2, Video, Phone, Pencil } from 'lucide-react'
 import MatchesTab from './MatchesTab'
 import PoolsSection from './PoolsSection'
+import DrawerAddButton from './DrawerAddButton'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
@@ -90,9 +91,6 @@ export default function WorkTab({ c }: { c: Candidate }) {
   const pages = Math.max(1, Math.ceil(apps.length / PER))
   const slice = apps.slice((page - 1) * PER, page * PER)
 
-  // Shared soft-button style for the header actions (now split across sub-tabs).
-  const actionBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px', fontSize: 11.5, fontWeight: 500, borderRadius: 6, cursor: 'pointer', color: 'var(--color-primary)', background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)' }
-
   // House sub-tab bar (Danny kandidaten-ronde-2, punt C): Sollicitaties · Matches ·
   // Talentenpools, sorted ALPHABETICALLY BY TRANSLATED LABEL (computed at render
   // time so the order still reads correctly once another locale reorders them) —
@@ -113,7 +111,7 @@ export default function WorkTab({ c }: { c: Candidate }) {
       {subTab === 'matches' && (
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 6 }}>
-            <button onClick={() => setModal('match')} style={actionBtn}><Plus size={12} /> {t('work.addMatch')}</button>
+            <DrawerAddButton onClick={() => setModal('match')} label={t('work.addMatch')} />
           </div>
           <MatchesTab c={c} />
         </div>
@@ -125,12 +123,13 @@ export default function WorkTab({ c }: { c: Candidate }) {
       {subTab === 'applications' && (
       <div>
         {/* No "Sollicitaties" label here (Danny addendum 4) — the sub-tab bar
-            above already says it; just the count + the two actions remain. */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{apps.length}</span>
+            above already says it. The leftover count used to sit on the left
+            (Danny consistency sweep 2026-07: "kan weg links") — only the two
+            right-aligned actions remain now. */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 6 }}>
           <div style={{ display: 'flex', gap: 6 }}>
-            <button onClick={() => setModal('apply')} style={actionBtn}><Plus size={12} /> {t('work.addApplication')}</button>
-            <button onClick={() => setModal('intake')} style={actionBtn}><CalendarPlus size={12} /> {t('work.planIntake')}</button>
+            <DrawerAddButton onClick={() => setModal('apply')} label={t('work.addApplication')} />
+            <DrawerAddButton onClick={() => setModal('intake')} icon={CalendarPlus} label={t('work.planIntake')} />
           </div>
         </div>
         <div style={sectionBlock}>

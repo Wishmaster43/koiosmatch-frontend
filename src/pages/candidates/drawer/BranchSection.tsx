@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import SearchSelect from '@/components/ui/SearchSelect'
+import DrawerAddButton from './DrawerAddButton'
 import { useCandidateBranches } from '../hooks/useCandidateDrawerData'
 import { sectionBlock } from './constants'
 import type { Candidate } from '@/types/candidate'
@@ -16,10 +17,17 @@ export default function BranchSection({ c }: { c: Candidate }) {
 
   return (
     <div>
-      <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 6 }}>{t('sections.branch')}</div>
+      {/* Header row (Danny consistency-sweep clarification): section label left,
+          the reference-style "+" trigger OUTSIDE the card top-right — the popover
+          anchors right so it stays inside the drawer. */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+        <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('sections.branch')}</div>
+        <SearchSelect triggerLabel={t('sections.branchLink')} options={options} selected={selectedIds} onToggle={toggle}
+          menuAlign="right" renderTrigger={(toggleOpen: () => void) => <DrawerAddButton onClick={toggleOpen} label={t('sections.branchLink')} />} />
+      </div>
       <div style={sectionBlock}>
-      {branches.length > 0 && (
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+      {branches.length > 0 ? (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {branches.map((b, i) => {
             const id = String(b.id ?? b.name ?? i)
             return (
@@ -32,9 +40,9 @@ export default function BranchSection({ c }: { c: Candidate }) {
             )
           })}
         </div>
+      ) : (
+        <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('sections.branchEmpty')}</span>
       )}
-      {/* Shared searchable multi-select — toggles branch membership by id (DUP-1). */}
-      <SearchSelect triggerLabel={t('sections.branchLink')} options={options} selected={selectedIds} onToggle={toggle} />
       </div>
     </div>
   )

@@ -576,7 +576,8 @@
     "timeline": "Tijdlijn",
     "timelineEmpty": "Nog geen activiteiten.",
     "conversations": "Conversaties",
-    "conversationsEmpty": "Nog geen conversaties."
+    "conversationsEmpty": "Nog geen conversaties.",
+    "branchEmpty": "Nog geen vestiging gekoppeld."
   },
   "preferences": {
     "title": "Voorkeuren",

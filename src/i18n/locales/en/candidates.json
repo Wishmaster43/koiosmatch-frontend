@@ -576,7 +576,8 @@
     "timeline": "Timeline",
     "timelineEmpty": "No activity yet.",
     "conversations": "Conversations",
-    "conversationsEmpty": "No conversations yet."
+    "conversationsEmpty": "No conversations yet.",
+    "branchEmpty": "No branch linked yet."
   },
   "preferences": {
     "title": "Preferences",

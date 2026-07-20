@@ -23,10 +23,17 @@ interface SearchSelectProps {
   searchable?: boolean
   width?: number
   onSearch?: (query: string) => void
+  // Opt-in trigger override (candidates' DrawerAddButton reference style, 2026-07
+  // consistency sweep) — receives the open/close toggle. Omitted = the default
+  // ghost "+" button below, so existing callers are untouched.
+  renderTrigger?: (toggle: () => void) => ReactNode
+  // Anchor the dropdown to the trigger's right edge for right-aligned triggers
+  // (keeps the menu inside the drawer). Default 'left' = current behaviour.
+  menuAlign?: 'left' | 'right'
 }
 
 export default function SearchSelect({
-  triggerLabel, options = [], selected = [], onToggle, searchable = true, width = 280, onSearch,
+  triggerLabel, options = [], selected = [], onToggle, searchable = true, width = 280, onSearch, renderTrigger, menuAlign = 'left',
 }: SearchSelectProps) {
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
@@ -54,14 +61,18 @@ export default function SearchSelect({
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <button onClick={() => setOpen(o => !o)}
-        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', fontSize: 11, fontWeight: 500,
-          border: '1px dashed var(--border)', borderRadius: 7, background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
-        <Plus size={11} /> {triggerLabel}
-      </button>
+      {renderTrigger
+        ? renderTrigger(() => setOpen(o => !o))
+        : (
+          <button onClick={() => setOpen(o => !o)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', fontSize: 11, fontWeight: 500,
+              border: '1px dashed var(--border)', borderRadius: 7, background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+            <Plus size={11} /> {triggerLabel}
+          </button>
+        )}
       {open && (
         // minWidth + viewport cap: the menu grows with long option labels instead of truncating.
-        <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 200, marginTop: 4, minWidth: width, maxWidth: 'min(420px, 90vw)',
+        <div style={{ position: 'absolute', top: '100%', ...(menuAlign === 'right' ? { right: 0 } : { left: 0 }), zIndex: 200, marginTop: 4, minWidth: width, maxWidth: 'min(420px, 90vw)',
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
           boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden' }}>
           {searchable && (

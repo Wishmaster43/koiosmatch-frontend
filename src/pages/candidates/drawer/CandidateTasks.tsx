@@ -16,9 +16,10 @@
  */
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Plus } from 'lucide-react'
+import { ListChecks } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import SectionCard from '@/components/ui/SectionCard'
+import DrawerAddButton from './DrawerAddButton'
 import AddTaskModal from '@/pages/tasks/AddTaskModal'
 import { TaskLookupsProvider } from '@/context/TaskLookupsContext'
 import { useNavigation } from '@/context/NavigationContext'
@@ -88,11 +89,9 @@ export default function CandidateTasks({ candidateId }: { candidateId: Id }) {
     <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
       {viewChip('open', t('drawer.tasksOpen'))}
       {viewChip('history', t('drawer.tasksHistory'))}
-      <button onClick={() => setAdding(true)} disabled={taskRuleBlocked} title={taskRuleBlocked ? taskRuleDecision?.message ?? undefined : undefined}
-        style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, background: 'none', border: 'none',
-          color: taskRuleBlocked ? 'var(--text-muted)' : 'var(--color-primary)', cursor: taskRuleBlocked ? 'not-allowed' : 'pointer', opacity: taskRuleBlocked ? 0.6 : 1 }}>
-        <Plus size={11} /> {t('drawer.newTask')}
-      </button>
+      <DrawerAddButton onClick={() => setAdding(true)} disabled={taskRuleBlocked}
+        title={taskRuleBlocked ? taskRuleDecision?.message ?? undefined : undefined}
+        label={t('drawer.newTask')} />
     </span>
   )
 

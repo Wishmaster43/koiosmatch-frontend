@@ -569,7 +569,8 @@
     "pools": "Viviers",
     "poolAdd": "Ajouter à un vivier",
     "poolsEmpty": "Aucun vivier configuré pour le moment.",
-    "poolKoios": "Suggéré par Koios"
+    "poolKoios": "Suggéré par Koios",
+    "branchEmpty": "Aucune agence rattachée."
   },
   "preferences": {
     "title": "Préférences",

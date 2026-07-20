@@ -569,7 +569,8 @@
     "pools": "Grupos de talento",
     "poolAdd": "Añadir a un grupo",
     "poolsEmpty": "Aún no hay grupos configurados.",
-    "poolKoios": "Sugerido por Koios"
+    "poolKoios": "Sugerido por Koios",
+    "branchEmpty": "Aún no hay sede vinculada."
   },
   "preferences": {
     "title": "Preferencias",

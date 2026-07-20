@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X, Plus, Trash2 } from 'lucide-react'
+import { Edit2, Save, X, Trash2 } from 'lucide-react'
 import { useLanguageLookups } from '@/lib/useLanguageLookups'
+import DrawerAddButton from './DrawerAddButton'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -41,7 +42,12 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
       {/* No section title (Danny addendum 4): this only renders inside the
           Achtergrond → Talen sub-tab, whose bar already says "Talen" — mirrors
           ProfileTab's own "no section title, it would duplicate the tab label". */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 6 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6, marginBottom: 6 }}>
+        {/* "+ Taal" moved here from a bottom-left dashed link (Danny consistency-sweep
+            2nd addendum, 2026-07): top-right, same reference style as + Match / the
+            Ervaring add-button — only while editing, since rows aren't addable read-only.
+            The save/✕ icons stay exactly where they were. */}
+        {editing && <DrawerAddButton onClick={addRow} label={t('addFields.language')} />}
         {editing ? (
           <div style={{ display: 'flex', gap: 4 }}>
             <button onClick={save} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
@@ -75,11 +81,6 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
                 </button>
               </div>
             ))}
-            <button onClick={addRow}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', fontSize: 11, fontWeight: 500,
-                border: '1px dashed var(--border)', borderRadius: 7, background: 'none', color: 'var(--text-muted)', cursor: 'pointer', alignSelf: 'flex-start' }}>
-              <Plus size={11} /> {t('addFields.language')}
-            </button>
           </div>
         ) : view.length === 0 ? (
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('sections.languagesEmpty')}</span>
