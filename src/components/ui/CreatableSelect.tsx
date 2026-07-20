@@ -6,20 +6,24 @@
  * One stored value (a string) regardless of mode — no second field. Closes on
  * outside click. Styling matches SelectMenu so pickers look consistent.
  *
- * Flip + clamp (Danny screenshot, kandidaten-ronde-2): a field near the bottom of
- * a scrollable panel (e.g. the province/country row in AddCandidateModal's Adres
- * card) rendered a downward popover that got clipped by the modal's own
- * `overflow: hidden` and effectively disappeared. Placement (flip up when there's
- * more room above than below, clamp to the available space) is the ONE shared
- * `useDropdownPlacement` hook (also used by SearchSelect) — never a second copy
- * of this math. The option list itself always keeps its own `overflow-y: auto`
- * sized to match, so every item (however long the list) stays scrollable and
- * selectable, never truncated off past the clamp.
+ * PORTAL (Danny, live: the drawer's Profiel-tab province/country picker still
+ * rendered "incomplete", cut off): a field near the bottom of a scrollable panel
+ * used to render a downward popover that got clipped by that panel's own
+ * `overflow` ancestor — flipping up did NOT help there, because it still flips
+ * INSIDE the same clipped box, and neither does z-index (an overflow ancestor
+ * clips regardless of stacking order). The popover now renders through
+ * `createPortal` into `document.body`, escaping every overflow ancestor
+ * entirely, positioned with `position: fixed` off the anchor's own measured
+ * rect (`useDropdownPlacement`, shared with SearchSelect — CLAUDE.md §11: never
+ * a second copy of this math). The option list keeps its own `overflow-y: auto`
+ * sized to match the clamp, so every item (however long the list) stays
+ * scrollable and selectable, never truncated off.
  */
 import { useState, useRef, useEffect } from 'react'
 import type { CSSProperties } from 'react'
+import { createPortal } from 'react-dom'
 import { ChevronDown, Check, Plus } from 'lucide-react'
-import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT } from '@/lib/useDropdownPlacement'
+import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_Z_INDEX } from '@/lib/useDropdownPlacement'
 
 interface CreatableOption {
   value: string
@@ -42,14 +46,23 @@ export default function CreatableSelect({
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const ref = useRef<HTMLDivElement>(null)
+  // The portalled popover lives outside `ref`'s DOM subtree — its own ref must
+  // ALSO count as "inside" for the outside-click check below, or picking an
+  // option (a click that lands inside the portal, not inside `ref`) would
+  // immediately self-close before the click handler even runs.
+  const menuRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  // Shared flip + clamp placement (see the module doc comment above).
-  const { openUp, maxHeight: menuMaxHeight } = useDropdownPlacement(ref, open)
+  // Shared flip + clamp + rect placement (see the module doc comment above).
+  const { openUp, maxHeight: menuMaxHeight, rect } = useDropdownPlacement(ref, open)
 
   // Close on outside click; focus the search box when opening.
   useEffect(() => {
     if (!open) return
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    const h = (e: MouseEvent) => {
+      const target = e.target as Node
+      if (ref.current?.contains(target) || menuRef.current?.contains(target)) return
+      setOpen(false)
+    }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [open])
@@ -77,9 +90,16 @@ export default function CreatableSelect({
         </span>
         <ChevronDown size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
       </button>
-      {open && (
-        <div style={{ position: 'absolute', left: 0, zIndex: 200, minWidth: menuWidth, maxHeight: menuMaxHeight,
-          ...(openUp ? { bottom: '100%', marginBottom: 4 } : { top: '100%', marginTop: 4 }),
+      {open && createPortal(
+        <div ref={menuRef} style={{
+          position: 'fixed', zIndex: DROPDOWN_PORTAL_Z_INDEX, minWidth: menuWidth, maxHeight: menuMaxHeight,
+          // Hidden until the first measurement lands (see useDropdownPlacement's
+          // doc comment) — never painted at an unpositioned (0,0) spot.
+          visibility: rect ? 'visible' : 'hidden',
+          left: rect ? rect.left : 0,
+          ...(rect
+            ? (openUp ? { bottom: window.innerHeight - rect.top + 4 } : { top: rect.bottom + 4 })
+            : {}),
           background: 'white', border: '1px solid var(--border)', borderRadius: 8,
           boxShadow: '0 4px 16px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
           {/* Search / type-to-create */}
@@ -114,7 +134,8 @@ export default function CreatableSelect({
               <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>—</div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   )

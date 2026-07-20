@@ -5,18 +5,26 @@
  * drawer (link branch, add driving licence). Multi-select by default: clicking an
  * option toggles it in `selected` via `onToggle`. Closes on outside click.
  *
- * Flip + clamp (Danny screenshot, kandidaten-ronde-2 — the "+ Vestiging" branches
- * picker at the bottom of AddCandidateModal rendered a downward popover that got
- * clipped by the modal's own `overflow: hidden`): placement is the ONE shared
- * `useDropdownPlacement` hook (also used by CreatableSelect) — never a second
- * copy of this math. The option list keeps its own `overflow-y: auto` sized to
- * match, so every item stays scrollable and selectable, never truncated off.
+ * PORTAL (Danny, live: the drawer's Profiel-tab picker rendered "incomplete",
+ * cut off, and the +Kandidaat modal's "+ Vestiging" picker hit the same thing at
+ * the bottom of the form): a downward popover used to get clipped by whichever
+ * `overflow` ancestor it sat inside (a drawer's scroll container OR the modal's
+ * own `overflow: hidden`) — flipping up did not help there, since it still flips
+ * INSIDE the same clipped box, and z-index does not help either (an overflow
+ * ancestor clips regardless of stacking order). The popover now renders through
+ * `createPortal` into `document.body`, escaping every overflow ancestor
+ * entirely, positioned with `position: fixed` off the anchor's own measured
+ * rect (`useDropdownPlacement`, shared with CreatableSelect — CLAUDE.md §11:
+ * never a second copy of this math). The option list keeps its own
+ * `overflow-y: auto` sized to match, so every item stays scrollable and
+ * selectable, never truncated off.
  */
 import { useState, useRef, useEffect } from 'react'
 import type { ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { Plus, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT } from '@/lib/useDropdownPlacement'
+import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_Z_INDEX } from '@/lib/useDropdownPlacement'
 
 interface SearchSelectOption {
   value: string
@@ -47,12 +55,21 @@ export default function SearchSelect({
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const ref = useRef<HTMLDivElement>(null)
-  // Shared flip + clamp placement (see the module doc comment above).
-  const { openUp, maxHeight: menuMaxHeight } = useDropdownPlacement(ref, open)
+  // The portalled popover lives outside `ref`'s DOM subtree — its own ref must
+  // ALSO count as "inside" for the outside-click check below, or toggling an
+  // option (a click that lands inside the portal, not inside `ref`) would
+  // immediately self-close before the click handler even runs.
+  const menuRef = useRef<HTMLDivElement>(null)
+  // Shared flip + clamp + rect placement (see the module doc comment above).
+  const { openUp, maxHeight: menuMaxHeight, rect } = useDropdownPlacement(ref, open)
 
   useEffect(() => {
     if (!open) return
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    const h = (e: MouseEvent) => {
+      const target = e.target as Node
+      if (ref.current?.contains(target) || menuRef.current?.contains(target)) return
+      setOpen(false)
+    }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [open])
@@ -80,11 +97,23 @@ export default function SearchSelect({
             <Plus size={11} /> {triggerLabel}
           </button>
         )}
-      {open && (
+      {open && createPortal(
         // minWidth + viewport cap: the menu grows with long option labels instead of
         // truncating. Flips upward + clamps to the available space (see doc comment).
-        <div style={{ position: 'absolute', ...(openUp ? { bottom: '100%', marginBottom: 4 } : { top: '100%', marginTop: 4 }),
-          ...(menuAlign === 'right' ? { right: 0 } : { left: 0 }), zIndex: 200, minWidth: width, maxWidth: 'min(420px, 90vw)', maxHeight: menuMaxHeight,
+        <div ref={menuRef} style={{
+          position: 'fixed', zIndex: DROPDOWN_PORTAL_Z_INDEX, minWidth: width, maxWidth: 'min(420px, 90vw)', maxHeight: menuMaxHeight,
+          // Hidden until the first measurement lands — never painted at an
+          // unpositioned (0,0) spot (see useDropdownPlacement's doc comment).
+          visibility: rect ? 'visible' : 'hidden',
+          ...(rect
+            ? {
+                ...(openUp ? { bottom: window.innerHeight - rect.top + 4 } : { top: rect.bottom + 4 }),
+                // Right-aligned: fix the popover's RIGHT edge at the anchor's right
+                // edge (viewport coords) instead of its left edge — keeps a
+                // right-aligned trigger's menu from running off the right side.
+                ...(menuAlign === 'right' ? { right: window.innerWidth - rect.right } : { left: rect.left }),
+              }
+            : { left: 0 }),
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
           boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden' }}>
           {searchable && (
@@ -110,7 +139,8 @@ export default function SearchSelect({
               )
             })}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   )
