@@ -25,7 +25,8 @@
     "name": "Naam",
     "email": "E-mail",
     "phone": "Telefoon",
-    "role": "Rol"
+    "role": "Rol",
+    "branches": "Vestigingen"
   },
   "roles": {
     "super_admin": "Super admin",

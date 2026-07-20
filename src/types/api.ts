@@ -50,8 +50,16 @@ export interface User {
 }
 
 /** A user row in the tenant user-management page (User + its settable icon colour). */
+/** One branch link as GET /users/{id}/branches returns it (name resolved server-side). */
+export interface UserBranchLink {
+  location_id: string | number
+  name?: string | null
+}
+
 export interface ManagedUser extends User {
   avatar_color?: string | null
+  // Merged in by useUsersData (interim per-user fetch — USERS-BRANCHES-LIST-1).
+  branches?: UserBranchLink[]
 }
 
 /** Normalised list shape returned by unwrapList() — see lib/api. */

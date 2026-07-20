@@ -25,7 +25,8 @@
     "name": "Name",
     "email": "Email",
     "phone": "Phone",
-    "role": "Role"
+    "role": "Role",
+    "branches": "Branches"
   },
   "roles": {
     "super_admin": "Super admin",

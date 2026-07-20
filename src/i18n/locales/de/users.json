@@ -25,7 +25,8 @@
     "name": "Name",
     "email": "E-Mail",
     "phone": "Telefon",
-    "role": "Rolle"
+    "role": "Rolle",
+    "branches": "Niederlassungen"
   },
   "roles": {
     "super_admin": "Super-Admin",

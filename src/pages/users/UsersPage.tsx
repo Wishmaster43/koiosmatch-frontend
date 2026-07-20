@@ -98,6 +98,23 @@ export default function UsersPage() {
     { key: 'role', header: t('cols.role'), render: u => isSuperAdminUser(u)
       ? <RoleBadge role="super_admin" />
       : <RoleSelector user={u} availableRoles={roles} onChanged={updateUser} /> },
+    // Branches — read-only soft chips (Danny 20-07: show the linked set, edit stays in the user dialog).
+    { key: 'branches', header: t('cols.branches'), render: u => {
+      const branches = u.branches ?? []
+      if (!branches.length) return <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>—</span>
+      return (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+          {branches.map(b => (
+            <span key={b.location_id} style={{ fontSize: 11, fontWeight: 500, padding: '1px 8px', borderRadius: 99,
+              whiteSpace: 'nowrap', color: 'var(--color-primary)',
+              background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)' }}>
+              {b.name ?? '—'}
+            </span>
+          ))}
+        </div>
+      )
+    } },
   ]
 
   return (
