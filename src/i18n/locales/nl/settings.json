@@ -93,6 +93,7 @@
     "apikeys": "API-keys",
     "webhooks": "Webhooks",
     "importeren": "Importeren",
+    "export": "Exporteren",
     "billing_plans": "Planbeheer",
     "billing_pay": "Betaling & opwaarderen",
     "billing_auto": "Automatisch opwaarderen",
@@ -118,6 +119,7 @@
     "automatch": "Automatch-regels",
     "planning_board": "Planbord-weergave",
     "koios": "Koios AI",
+    "facebook_leads": "Facebook Leads",
     "numbering": "Nummering",
     "mod_shiftmanager": "Shiftmanager",
     "mod_helloflex": "HelloFlex",
@@ -803,8 +805,45 @@
       "desc": "Stel automatisch opwaarderen in."
     },
     "usage": {
-      "title": "Gebruik",
-      "desc": "Bekijk je verbruiksoverzicht."
+      "title": "Gebruik & limieten",
+      "desc": "Overzicht van je actuele verbruik deze periode.",
+      "periodToday": "Vandaag",
+      "periodMonth": "Deze maand",
+      "plan": {
+        "title": "Abonnement & credits",
+        "notice": "Huidig plan, credit-voortgangsbalk, resetdatum en kredietsaldo zijn nog niet beschikbaar — er bestaat nog geen backend-model voor abonnementen of credits."
+      },
+      "ai": {
+        "title": "AI-verbruik (Koios)",
+        "calls": "AI-calls",
+        "tokens": "Tokens",
+        "cost": "Kosten",
+        "forecastLine": "Gemiddeld {{avg}} per dag (laatste 7 dagen) → geschat {{projected}} deze maand.",
+        "colActivity": "Activiteit",
+        "colCalls": "Calls",
+        "colTokens": "Tokens",
+        "colCost": "Kosten",
+        "empty": "Nog geen AI-verbruik in deze periode.",
+        "loadError": "AI-verbruik laden is mislukt.",
+        "unavailable": "AI is niet actief voor deze tenant."
+      },
+      "whatsapp": {
+        "title": "WhatsApp-verbruik",
+        "subtitle": "Deze maand.",
+        "numbers": "Actieve nummers",
+        "messages": "Berichten",
+        "cost": "Kosten",
+        "colNumber": "Nummer",
+        "colMessages": "Berichten",
+        "colCost": "Kosten",
+        "empty": "Nog geen WhatsApp-verbruik deze maand.",
+        "loadError": "WhatsApp-verbruik laden is mislukt.",
+        "unavailable": "Je hebt geen rechten om dit te bekijken."
+      },
+      "daily": {
+        "title": "Dagelijks verbruik",
+        "notice": "Een daggrafiek per categorie (Totaal · AI · Leads · Telefoongesprekken · WhatsApp) is nog niet beschikbaar — de backend levert nu alleen totalen per periode, geen cijfers per dag."
+      }
     },
     "invoices": {
       "title": "Facturen",
@@ -1053,6 +1092,55 @@
     "doneTitle": "Import klaar!",
     "doneDesc": "Je gegevens zijn succesvol geïmporteerd.",
     "newImport": "Nieuw importeren"
+  },
+  "facebookLeads": {
+    "title": "Facebook Leads",
+    "subtitle": "Koppel de Facebook Leads-app van deze klant — inkomende leads komen automatisch binnen als kandidaat.",
+    "verifyToken": "Verify token",
+    "verifyTokenPlaceholder": "Token uit de Facebook-app-instellingen",
+    "appSecret": "App secret",
+    "appSecretPlaceholder": "App secret uit de Facebook-app",
+    "accessToken": "Access token",
+    "accessTokenPlaceholder": "Page access token",
+    "secretSet": "✓ ingesteld",
+    "showSecret": "Toon waarde",
+    "hideSecret": "Verberg waarde",
+    "secretKeepPlaceholder": "Laat leeg om de huidige waarde te behouden",
+    "datasetId": "Dataset-ID",
+    "datasetIdPlaceholder": "Conversions API dataset-ID",
+    "webhookUrl": "Webhook-URL (plak deze in de Facebook-app)",
+    "copyUrl": "Kopieer URL",
+    "saveError": "Opslaan is mislukt."
+  },
+  "export": {
+    "title": "Exporteren",
+    "subtitle": "Exporteer je gegevens als CSV — dezelfde kolommen als de tabel, alleen records waar je toegang toe hebt.",
+    "button": "Exporteer CSV",
+    "noPermission": "Je hebt geen rechten om dit te exporteren.",
+    "rateLimited": "Te veel exports achter elkaar. Probeer het over een minuut opnieuw.",
+    "error": "Exporteren is mislukt. Probeer het later opnieuw.",
+    "entities": {
+      "candidates": {
+        "title": "Kandidaten",
+        "desc": "Alle kandidaatgegevens, exclusief verwijderde of geanonimiseerde records."
+      },
+      "applications": {
+        "title": "Sollicitaties",
+        "desc": "Sollicitaties met fase, kandidaat en vacature."
+      },
+      "vacancies": {
+        "title": "Vacatures",
+        "desc": "Vacatures met status, klant en functie."
+      },
+      "leads": {
+        "title": "Leads",
+        "desc": "Kandidaten in de fase Lead (nog geen sollicitatie)."
+      },
+      "customers": {
+        "title": "Klanten",
+        "desc": "Klantgegevens met locaties en contactpersonen."
+      }
+    }
   },
   "apps": {
     "notOnPkg3Title": "Tenant zit nog niet op Pakket 3",

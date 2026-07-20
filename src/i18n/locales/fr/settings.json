@@ -90,6 +90,7 @@
     "apikeys": "Clés API",
     "webhooks": "Webhooks",
     "importeren": "Importer",
+    "export": "Exporter",
     "billing_plans": "Forfait",
     "billing_pay": "Paiement & recharge",
     "billing_auto": "Recharge automatique",
@@ -110,6 +111,7 @@
     "automatch": "Règles de correspondance",
     "planning_board": "Tableau de planification",
     "koios": "Koios AI",
+    "facebook_leads": "Facebook Leads",
     "numbering": "Numérotation",
     "mod_shiftmanager": "Shiftmanager",
     "mod_helloflex": "HelloFlex",
@@ -601,8 +603,45 @@
       "desc": "Configurez la recharge automatique."
     },
     "usage": {
-      "title": "Utilisation",
-      "desc": "Consultez votre aperçu d'utilisation."
+      "title": "Utilisation & limites",
+      "desc": "Aperçu de votre utilisation actuelle sur cette période.",
+      "periodToday": "Aujourd'hui",
+      "periodMonth": "Ce mois-ci",
+      "plan": {
+        "title": "Forfait & crédits",
+        "notice": "Le forfait actuel, la barre de progression des crédits, la date de réinitialisation et le solde de crédits ne sont pas encore disponibles — il n'existe pas encore de modèle backend pour les forfaits ou les crédits."
+      },
+      "ai": {
+        "title": "Utilisation IA (Koios)",
+        "calls": "Appels IA",
+        "tokens": "Jetons",
+        "cost": "Coût",
+        "forecastLine": "Moyenne de {{avg}} par jour (7 derniers jours) → estimation {{projected}} ce mois-ci.",
+        "colActivity": "Activité",
+        "colCalls": "Appels",
+        "colTokens": "Jetons",
+        "colCost": "Coût",
+        "empty": "Aucune utilisation IA pour cette période.",
+        "loadError": "Échec du chargement de l'utilisation IA.",
+        "unavailable": "L'IA n'est pas active pour ce client."
+      },
+      "whatsapp": {
+        "title": "Utilisation WhatsApp",
+        "subtitle": "Ce mois-ci.",
+        "numbers": "Numéros actifs",
+        "messages": "Messages",
+        "cost": "Coût",
+        "colNumber": "Numéro",
+        "colMessages": "Messages",
+        "colCost": "Coût",
+        "empty": "Aucune utilisation WhatsApp ce mois-ci.",
+        "loadError": "Échec du chargement de l'utilisation WhatsApp.",
+        "unavailable": "Vous n'avez pas les droits pour consulter ceci."
+      },
+      "daily": {
+        "title": "Utilisation quotidienne",
+        "notice": "Un graphique quotidien par catégorie (Total · IA · Leads · Appels téléphoniques · WhatsApp) n'est pas encore disponible — le backend ne renvoie actuellement que des totaux par période, pas de chiffres par jour."
+      }
     },
     "invoices": {
       "title": "Factures",
@@ -851,6 +890,55 @@
     "doneTitle": "Import terminé !",
     "doneDesc": "Vos données ont été importées avec succès.",
     "newImport": "Nouvel import"
+  },
+  "facebookLeads": {
+    "title": "Facebook Leads",
+    "subtitle": "Connectez l'app Facebook Leads de ce client — les leads entrants arrivent automatiquement comme candidat.",
+    "verifyToken": "Jeton de vérification",
+    "verifyTokenPlaceholder": "Jeton des paramètres de l'app Facebook",
+    "appSecret": "Secret de l'app",
+    "appSecretPlaceholder": "Secret de l'app Facebook",
+    "accessToken": "Jeton d'accès",
+    "accessTokenPlaceholder": "Jeton d'accès de la page",
+    "secretSet": "✓ défini",
+    "showSecret": "Afficher la valeur",
+    "hideSecret": "Masquer la valeur",
+    "secretKeepPlaceholder": "Laissez vide pour conserver la valeur actuelle",
+    "datasetId": "ID du dataset",
+    "datasetIdPlaceholder": "ID du dataset Conversions API",
+    "webhookUrl": "URL du webhook (à coller dans l'app Facebook)",
+    "copyUrl": "Copier l'URL",
+    "saveError": "L'enregistrement a échoué."
+  },
+  "export": {
+    "title": "Exporter",
+    "subtitle": "Exportez vos données en CSV — les mêmes colonnes que le tableau, uniquement les enregistrements auxquels vous avez accès.",
+    "button": "Exporter en CSV",
+    "noPermission": "Vous n'avez pas les droits pour exporter ces données.",
+    "rateLimited": "Trop d'exports d'affilée. Réessayez dans une minute.",
+    "error": "L'export a échoué. Veuillez réessayer plus tard.",
+    "entities": {
+      "candidates": {
+        "title": "Candidats",
+        "desc": "Toutes les données des candidats, hors enregistrements supprimés ou anonymisés."
+      },
+      "applications": {
+        "title": "Candidatures",
+        "desc": "Candidatures avec étape, candidat et offre d'emploi."
+      },
+      "vacancies": {
+        "title": "Offres d'emploi",
+        "desc": "Offres d'emploi avec statut, client et fonction."
+      },
+      "leads": {
+        "title": "Leads",
+        "desc": "Candidats en phase Lead (pas encore de candidature)."
+      },
+      "customers": {
+        "title": "Clients",
+        "desc": "Données clients avec sites et contacts."
+      }
+    }
   },
   "apps": {
     "notOnPkg3Title": "Le tenant n'est pas encore sur le Forfait 3",

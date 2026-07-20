@@ -18,8 +18,8 @@
 import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays, Car,
   ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Hash, Key, LayoutGrid,
-  ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Phone, Scale, Shield, SlidersHorizontal, Sparkles, Star,
-  Boxes, Store, Tags, Target, UserCheck, Users, Webhook, XCircle,
+  ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Megaphone, Package, Palette, Phone, Scale, Shield, SlidersHorizontal, Sparkles, Star,
+  Boxes, Store, Tags, Target, Upload, UserCheck, Users, Webhook, XCircle,
 } from 'lucide-react'
 import CustomFieldsSettings from './sections/CustomFieldsSettings'
 
@@ -67,6 +67,8 @@ import TenantUsageSettings from './sections/TenantUsageSettings'
 import JobQueueSettings from './sections/jobs'
 import WhatsAppSettings from './sections/WhatsAppSettings'
 import ImporterenSettings from './sections/ImporterenSettings'
+import ExportSettings from './sections/ExportSettings'
+import FacebookLeadsSettings from './sections/FacebookLeadsSettings'
 import ApiKeysSettings from './sections/apikeys'
 import EmailLog from './sections/EmailLog'
 import WhatsAppLog from './sections/WhatsAppLog'
@@ -75,7 +77,8 @@ import KoiosSettings from './sections/koios'
 import NotificationsSettings from './sections/NotificationsSettings'
 // Planning settings — gated on the 'plan' module (requiresPage: 'planning'); hidden until it is on.
 import { ShiftTypesSettings, AvailabilitySettings, AutoMatchSettings, PlanningBoardSettings } from './sections/PlanningSettings'
-import { GebruikSettings, FacturenSettings } from './sections/BillingSettings'
+import { FacturenSettings } from './sections/BillingSettings'
+import GebruikSettings from './sections/GebruikSettings'
 
 import {
   kpisLeads, kpisCandidates, kpisApplications, kpisCustomers, kpisLocations,
@@ -344,7 +347,11 @@ export const NAV_GROUPS = [
       { id: 'apikeys', icon: Key, component: ApiKeysSettings },
       { id: 'webhooks', icon: Webhook, component: WebhooksSettings },
       { id: 'importeren', icon: Download, component: ImporterenSettings },
+      // Exporteren (EXPORT-CSV-1) — mirrors the Importeren item right above it.
+      { id: 'export', icon: Upload, component: ExportSettings },
       { id: 'koios', icon: Sparkles, component: KoiosSettings },
+      // Facebook Leads (FB-LEADS-1) — per-tenant Leads-app credentials + webhook URL.
+      { id: 'facebook_leads', icon: Megaphone, component: FacebookLeadsSettings },
     ],
   },
   {

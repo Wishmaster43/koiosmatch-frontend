@@ -90,6 +90,7 @@
     "apikeys": "Claves API",
     "webhooks": "Webhooks",
     "importeren": "Importar",
+    "export": "Exportar",
     "billing_plans": "Plan",
     "billing_pay": "Pago y recarga",
     "billing_auto": "Recarga automática",
@@ -110,6 +111,7 @@
     "automatch": "Reglas de coincidencia",
     "planning_board": "Tablero de planificación",
     "koios": "Koios AI",
+    "facebook_leads": "Facebook Leads",
     "numbering": "Numeración",
     "mod_shiftmanager": "Shiftmanager",
     "mod_helloflex": "HelloFlex",
@@ -601,8 +603,45 @@
       "desc": "Configura la recarga automática."
     },
     "usage": {
-      "title": "Uso",
-      "desc": "Consulta tu resumen de uso."
+      "title": "Uso y límites",
+      "desc": "Resumen de tu uso actual en este periodo.",
+      "periodToday": "Hoy",
+      "periodMonth": "Este mes",
+      "plan": {
+        "title": "Plan y créditos",
+        "notice": "El plan actual, la barra de progreso de créditos, la fecha de reinicio y el saldo de créditos aún no están disponibles — todavía no existe un modelo de backend para planes o créditos."
+      },
+      "ai": {
+        "title": "Uso de IA (Koios)",
+        "calls": "Llamadas de IA",
+        "tokens": "Tokens",
+        "cost": "Coste",
+        "forecastLine": "Media de {{avg}} por día (últimos 7 días) → previsión de {{projected}} este mes.",
+        "colActivity": "Actividad",
+        "colCalls": "Llamadas",
+        "colTokens": "Tokens",
+        "colCost": "Coste",
+        "empty": "Todavía no hay uso de IA en este periodo.",
+        "loadError": "Error al cargar el uso de IA.",
+        "unavailable": "La IA no está activa para este cliente."
+      },
+      "whatsapp": {
+        "title": "Uso de WhatsApp",
+        "subtitle": "Este mes.",
+        "numbers": "Números activos",
+        "messages": "Mensajes",
+        "cost": "Coste",
+        "colNumber": "Número",
+        "colMessages": "Mensajes",
+        "colCost": "Coste",
+        "empty": "Todavía no hay uso de WhatsApp este mes.",
+        "loadError": "Error al cargar el uso de WhatsApp.",
+        "unavailable": "No tienes permiso para ver esto."
+      },
+      "daily": {
+        "title": "Uso diario",
+        "notice": "Un gráfico diario por categoría (Total · IA · Leads · Llamadas telefónicas · WhatsApp) aún no está disponible — el backend solo devuelve totales por periodo, sin cifras por día."
+      }
     },
     "invoices": {
       "title": "Facturas",
@@ -851,6 +890,55 @@
     "doneTitle": "¡Importación completa!",
     "doneDesc": "Tus datos se importaron correctamente.",
     "newImport": "Nueva importación"
+  },
+  "facebookLeads": {
+    "title": "Facebook Leads",
+    "subtitle": "Conecta la app Facebook Leads de este cliente — los leads entrantes llegan automáticamente como candidato.",
+    "verifyToken": "Token de verificación",
+    "verifyTokenPlaceholder": "Token de la configuración de la app de Facebook",
+    "appSecret": "Secreto de la app",
+    "appSecretPlaceholder": "Secreto de la app de Facebook",
+    "accessToken": "Token de acceso",
+    "accessTokenPlaceholder": "Token de acceso de la página",
+    "secretSet": "✓ configurado",
+    "showSecret": "Mostrar valor",
+    "hideSecret": "Ocultar valor",
+    "secretKeepPlaceholder": "Déjalo vacío para mantener el valor actual",
+    "datasetId": "ID del dataset",
+    "datasetIdPlaceholder": "ID del dataset de Conversions API",
+    "webhookUrl": "URL del webhook (pégala en la app de Facebook)",
+    "copyUrl": "Copiar URL",
+    "saveError": "Error al guardar."
+  },
+  "export": {
+    "title": "Exportar",
+    "subtitle": "Exporta tus datos como CSV — las mismas columnas que la tabla, solo los registros a los que tienes acceso.",
+    "button": "Exportar CSV",
+    "noPermission": "No tienes permiso para exportar esto.",
+    "rateLimited": "Demasiadas exportaciones seguidas. Inténtalo de nuevo dentro de un minuto.",
+    "error": "Error al exportar. Inténtalo de nuevo más tarde.",
+    "entities": {
+      "candidates": {
+        "title": "Candidatos",
+        "desc": "Todos los datos de candidatos, excluyendo registros eliminados o anonimizados."
+      },
+      "applications": {
+        "title": "Solicitudes",
+        "desc": "Solicitudes con fase, candidato y vacante."
+      },
+      "vacancies": {
+        "title": "Vacantes",
+        "desc": "Vacantes con estado, cliente y función."
+      },
+      "leads": {
+        "title": "Leads",
+        "desc": "Candidatos en fase Lead (todavía sin solicitud)."
+      },
+      "customers": {
+        "title": "Clientes",
+        "desc": "Datos de clientes con ubicaciones y contactos."
+      }
+    }
   },
   "apps": {
     "notOnPkg3Title": "El tenant aún no está en el Paquete 3",

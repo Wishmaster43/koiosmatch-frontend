@@ -93,6 +93,7 @@
     "apikeys": "API keys",
     "webhooks": "Webhooks",
     "importeren": "Import",
+    "export": "Export",
     "billing_plans": "Plan",
     "billing_pay": "Payment & top-up",
     "billing_auto": "Auto top-up",
@@ -118,6 +119,7 @@
     "automatch": "Auto-match rules",
     "planning_board": "Planning board",
     "koios": "Koios AI",
+    "facebook_leads": "Facebook Leads",
     "numbering": "Numbering",
     "mod_shiftmanager": "Shiftmanager",
     "mod_helloflex": "HelloFlex",
@@ -803,8 +805,45 @@
       "desc": "Set up automatic top-up."
     },
     "usage": {
-      "title": "Usage",
-      "desc": "View your usage overview."
+      "title": "Usage & limits",
+      "desc": "Overview of your current usage this period.",
+      "periodToday": "Today",
+      "periodMonth": "This month",
+      "plan": {
+        "title": "Plan & credits",
+        "notice": "Current plan, credit progress bar, reset date and credit balance are not available yet — there is no backend model for plans or credits yet."
+      },
+      "ai": {
+        "title": "AI usage (Koios)",
+        "calls": "AI calls",
+        "tokens": "Tokens",
+        "cost": "Cost",
+        "forecastLine": "Averaging {{avg}} per day (last 7 days) → projected {{projected}} this month.",
+        "colActivity": "Activity",
+        "colCalls": "Calls",
+        "colTokens": "Tokens",
+        "colCost": "Cost",
+        "empty": "No AI usage yet in this period.",
+        "loadError": "Failed to load AI usage.",
+        "unavailable": "AI is not active for this tenant."
+      },
+      "whatsapp": {
+        "title": "WhatsApp usage",
+        "subtitle": "This month.",
+        "numbers": "Active numbers",
+        "messages": "Messages",
+        "cost": "Cost",
+        "colNumber": "Number",
+        "colMessages": "Messages",
+        "colCost": "Cost",
+        "empty": "No WhatsApp usage yet this month.",
+        "loadError": "Failed to load WhatsApp usage.",
+        "unavailable": "You don't have permission to view this."
+      },
+      "daily": {
+        "title": "Daily usage",
+        "notice": "A daily breakdown per category (Total · AI · Leads · Phone calls · WhatsApp) is not available yet — the backend currently only returns period totals, no per-day figures."
+      }
     },
     "invoices": {
       "title": "Invoices",
@@ -1053,6 +1092,55 @@
     "doneTitle": "Import complete!",
     "doneDesc": "Your data was imported successfully.",
     "newImport": "New import"
+  },
+  "facebookLeads": {
+    "title": "Facebook Leads",
+    "subtitle": "Connect this customer's Facebook Leads app — incoming leads arrive automatically as a candidate.",
+    "verifyToken": "Verify token",
+    "verifyTokenPlaceholder": "Token from the Facebook app settings",
+    "appSecret": "App secret",
+    "appSecretPlaceholder": "App secret from the Facebook app",
+    "accessToken": "Access token",
+    "accessTokenPlaceholder": "Page access token",
+    "secretSet": "✓ set",
+    "showSecret": "Show value",
+    "hideSecret": "Hide value",
+    "secretKeepPlaceholder": "Leave empty to keep the current value",
+    "datasetId": "Dataset ID",
+    "datasetIdPlaceholder": "Conversions API dataset ID",
+    "webhookUrl": "Webhook URL (paste this into the Facebook app)",
+    "copyUrl": "Copy URL",
+    "saveError": "Saving failed."
+  },
+  "export": {
+    "title": "Export",
+    "subtitle": "Export your data as CSV — the same columns as the table, only records you have access to.",
+    "button": "Export CSV",
+    "noPermission": "You don't have permission to export this.",
+    "rateLimited": "Too many exports in a row. Please try again in a minute.",
+    "error": "Export failed. Please try again later.",
+    "entities": {
+      "candidates": {
+        "title": "Candidates",
+        "desc": "All candidate data, excluding deleted or anonymised records."
+      },
+      "applications": {
+        "title": "Applications",
+        "desc": "Applications with stage, candidate and vacancy."
+      },
+      "vacancies": {
+        "title": "Vacancies",
+        "desc": "Vacancies with status, customer and function."
+      },
+      "leads": {
+        "title": "Leads",
+        "desc": "Candidates in the Lead phase (no application yet)."
+      },
+      "customers": {
+        "title": "Customers",
+        "desc": "Customer data with locations and contacts."
+      }
+    }
   },
   "apps": {
     "notOnPkg3Title": "Tenant is not on Package 3 yet",
