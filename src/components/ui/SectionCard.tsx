@@ -26,8 +26,10 @@ interface SectionCardProps {
 export default function SectionCard({ title, action, children, style }: SectionCardProps) {
   return (
     <div>
+      {/* No title → the action alone must still sit RIGHT (space-between would
+          park a single child at flex-start — Danny 20-07, '+ Nieuwe taak links'). */}
       {(title || action) && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: title ? 'space-between' : 'flex-end', marginBottom: 6 }}>
           {title && <span style={sectionTitle}>{title}</span>}
           {action}
         </div>

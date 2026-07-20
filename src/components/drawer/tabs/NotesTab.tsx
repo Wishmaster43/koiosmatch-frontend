@@ -5,7 +5,8 @@
  */
 import { useState } from 'react'
 import type { CSSProperties, ReactNode, ComponentType } from 'react'
-import { Plus, Edit2, Save, X, Mail, PhoneCall, MessageCircle, Building2, Video, FileText, History } from 'lucide-react'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import { Edit2, Save, X, Mail, PhoneCall, MessageCircle, Building2, Video, FileText, History } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import SafeHtml from '@/components/ui/SafeHtml'
 import RichTextEditor from '@/components/ui/RichTextEditor'
@@ -152,11 +153,9 @@ export default function NotesTab({
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
           <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{labels.notes}</span>
-          {!adding && (
-            <button onClick={() => setAdding(true)} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
-              <Plus size={11} /> {labels.newNote}
-            </button>
-          )}
+          {/* Shared reference-style add button (Danny 20-07: notitie-knop had geen
+              achtergrondkleur) — one look on every entity's notes tab. */}
+          {!adding && <DrawerAddButton onClick={() => setAdding(true)} label={labels.newNote} />}
         </div>
         <div style={sectionBlock}>
         {adding && (
