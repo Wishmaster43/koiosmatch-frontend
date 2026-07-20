@@ -19,7 +19,7 @@ import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays, Car,
   ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Hash, Key, LayoutGrid,
   ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Phone, Scale, Shield, SlidersHorizontal, Sparkles, Star,
-  Store, Tags, Target, UserCheck, Users, Webhook, XCircle,
+  Boxes, Store, Tags, Target, UserCheck, Users, Webhook, XCircle,
 } from 'lucide-react'
 import CustomFieldsSettings from './sections/CustomFieldsSettings'
 
@@ -311,14 +311,22 @@ export const NAV_GROUPS = [
   {
     key: 'integrations', icon: Store,
     items: [
-      // SM-MODULE-TABS-1 (Danny 2026-07-16): visible when EITHER the 'sm' reporting
-      // module OR the ShiftManager app/koppeling is on (not requiresPage — that ANDs
-      // with just the module). See SettingsPage's requiresModuleOrApp filter.
-      { id: 'mod_shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings, requiresModuleOrApp: { module: 'sm', app: 'shiftmanager' } },
       { id: 'apikeys', icon: Key, component: ApiKeysSettings },
       { id: 'webhooks', icon: Webhook, component: WebhooksSettings },
       { id: 'importeren', icon: Download, component: ImporterenSettings },
       { id: 'koios', icon: Sparkles, component: KoiosSettings },
+    ],
+  },
+  {
+    // Modules (Danny 2026-07-20): add-on module settings under the SAME name the
+    // super-admin Modules tab uses ("Losse modules"). The group auto-hides when no
+    // item passes its gate (SettingsPage drops empty groups) — so it only shows
+    // with ShiftManager-rapportage and/or HelloFlex on. The old app-only gate is
+    // gone with the manual Sync tab (SYNC-RETIRE-1): module-only via requiresPage.
+    // HelloFlex settings land here once its credentials flow ships (wacht Danny).
+    key: 'modules', icon: Boxes,
+    items: [
+      { id: 'mod_shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings, requiresPage: 'shiftmanager' },
     ],
   },
   {

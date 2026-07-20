@@ -4,7 +4,7 @@
  * a small SelectMenu picker first (never guesses which account — same rule as the
  * workflow sm_* modules' own connection_id field). Gated on the `sync.refresh`
  * permission, disabled (not hidden) with a tooltip when missing — mirrors the existing
- * Settings → Sync pattern (SyncSettings.jsx) rather than inventing a second convention;
+ * retired Settings → Sync pattern rather than inventing a second convention;
  * the backend re-checks the permission + the connection regardless (§7).
  */
 import { useState } from 'react'
