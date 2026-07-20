@@ -43,11 +43,11 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
           Achtergrond → Talen sub-tab, whose bar already says "Talen" — mirrors
           ProfileTab's own "no section title, it would duplicate the tab label". */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6, marginBottom: 6 }}>
-        {/* "+ Taal" moved here from a bottom-left dashed link (Danny consistency-sweep
-            2nd addendum, 2026-07): top-right, same reference style as + Match / the
-            Ervaring add-button — only while editing, since rows aren't addable read-only.
-            The save/✕ icons stay exactly where they were. */}
-        {editing && <DrawerAddButton onClick={addRow} label={t('addFields.language')} />}
+        {/* "+ Taal" top-right, same reference style as + Match / Ervaring — ALWAYS
+            visible (Danny 20-07: net als de andere secties): outside edit mode a
+            click enters edit AND adds the fresh row in one go. Save/✕ stay put. */}
+        <DrawerAddButton label={t('addFields.language')}
+          onClick={() => { if (!editing) { setRows([...initial(), { language: '', spoken: '', written: '' }]); setEditing(true) } else addRow() }} />
         {editing ? (
           <div style={{ display: 'flex', gap: 4 }}>
             <button onClick={save} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
