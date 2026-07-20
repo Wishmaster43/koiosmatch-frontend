@@ -106,7 +106,7 @@ describe('AddCandidateModal · submit body unchanged by the layout rework', () =
       first_name: 'Jan', middle_name: null, last_name: 'Jansen', function_title: null,
       email: null, phone: null, mobile: null, date_of_birth: null, gender: null,
       street: null, house_number: null, house_number_suffix: null, postal_code: null,
-      city: null, province: null, owner_id: 'u1',
+      city: null, province: null, country: null, owner_id: 'u1',
       phase: 'lead', status: 'available', candidate_types: [],
       location_ids: ['b1'],
     })

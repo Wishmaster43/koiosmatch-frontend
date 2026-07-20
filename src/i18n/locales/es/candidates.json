@@ -177,6 +177,7 @@
       "gender": "Sexo",
       "city": "Ciudad",
       "province": "Provincia",
+      "country": "País",
       "emailPlaceholder": "nombre@ejemplo.es",
       "phonePlaceholder": "+31 6 12345678",
       "mobilePlaceholder": "+31 6 12345678",
@@ -226,6 +227,7 @@
       "zzp": "Autónomo",
       "communication": "Comunicación",
       "documents": "Documentos",
+      "integrations": "Integraciones",
       "statistics": "Estadísticas",
       "changelog": "Registro de cambios",
       "extra": "Extra"
@@ -325,6 +327,7 @@
     "whatsapp": "Abrir en WhatsApp",
     "address": "Dirección",
     "province": "Provincia",
+    "country": "País",
     "linkedin": "LinkedIn",
     "summary": "Resumen",
     "selectDate": "Seleccionar una fecha",
@@ -460,6 +463,8 @@
     "contactType": "Tipo de contacto",
     "memberSince": "Creado el",
     "branch": "Sucursal",
+    "createdBy": "Creado por",
+    "source": "Origen",
     "recentActivity": "Actividad reciente",
     "noActivity": "Aún no hay actividad."
   },
@@ -893,5 +898,30 @@
     "done": "Candidatos fusionados.",
     "errForbidden": "No tienes permiso para fusionar candidatos.",
     "errFailed": "Error al fusionar. Inténtalo de nuevo."
+  },
+  "integrations": {
+    "pdok": {
+      "name": "PDOK",
+      "alt": "Logo de PDOK",
+      "linked": "Vinculado",
+      "notGeocoded": "Aún no geocodificado",
+      "autoInfo": "Las coordenadas se actualizan automáticamente en cuanto cambia la dirección."
+    },
+    "helloflex": {
+      "name": "HelloFlex",
+      "alt": "Logo de HelloFlex",
+      "notAvailable": "Integración aún no disponible — llegará con la configuración de HelloFlex."
+    },
+    "shiftmanager": {
+      "name": "Shiftmanager",
+      "alt": "Logo de Shiftmanager",
+      "notLinked": "No vinculado a Shiftmanager",
+      "externalId": "Id externo",
+      "syncNow": "Sincronizar ahora",
+      "syncing": "Sincronizando…",
+      "syncSuccess": "Sincronización completada",
+      "syncFailed": "Error al sincronizar",
+      "lastSynced": "Última sincronización: {{date}}"
+    }
   }
 }

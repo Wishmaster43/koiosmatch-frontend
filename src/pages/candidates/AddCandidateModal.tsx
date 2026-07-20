@@ -7,12 +7,14 @@
  * provincie are searchable comboboxen mirroring the drill-down, and Esc closes
  * via the house focus trap. State keys, validation, submit body and 422
  * handling are unchanged.
+ *
+ * Thin container (refactor 2026-07-20): each titled card is a presentational
+ * component under `addmodal/` (props in, callbacks out); this file owns state,
+ * validation and the submit/422 logic.
  */
 import { useState, useEffect } from 'react'
-import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, UserPlus } from 'lucide-react'
-import { Field as FieldJs, TextField as TextFieldJs, SelectField as SelectFieldJs } from '@/components/forms/fields'
+import { UserPlus } from 'lucide-react'
 import { useLookups } from '@/context/LookupsContext'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { useUsers } from '@/lib/queries'
@@ -20,21 +22,18 @@ import { useGenders } from '@/lib/useGenders'
 import { useAuth } from '@/context/AuthContext'
 import { useCreateCandidate } from './hooks/useCandidateMutations'
 import { useLocations } from '@/lib/useLocations'
-import SearchSelect from '@/components/ui/SearchSelect'
-import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import { useFunctions } from '@/lib/useFunctions'
 import { useProvinces } from './hooks/useProvinces'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
-
-// Shared form fields are still untyped JS — declare the props this modal uses (typed boundary).
-const Field = FieldJs as ComponentType<{ label?: ReactNode; required?: boolean; children?: ReactNode }>
-const TextField = TextFieldJs as ComponentType<{ value?: string; onChange?: (v: string) => void; placeholder?: string; type?: string; error?: boolean; style?: CSSProperties }>
-const SelectField = SelectFieldJs as ComponentType<{ value?: string; onChange?: (v: string) => void; placeholder?: string; options?: Array<{ value: string; label: string } | string> }>
-// Searchable combobox (drill-down pattern) — still untyped JS, same cast as ProfileTab.
-const CreatableSelect = CreatableSelectJs as unknown as ComponentType<Record<string, unknown>>
+import ModalHeader from './addmodal/ModalHeader'
+import PersonalCard from './addmodal/PersonalCard'
+import ContactCard from './addmodal/ContactCard'
+import WorkCard from './addmodal/WorkCard'
+import AddressCard from './addmodal/AddressCard'
+import BranchesCard from './addmodal/BranchesCard'
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
@@ -43,7 +42,7 @@ const API_TO_FORM: Record<string, string> = {
   date_of_birth: 'dateOfBirth', gender: 'gender',
   street: 'street', house_number: 'houseNumber',
   house_number_suffix: 'houseNumberSuffix', postal_code: 'postalCode',
-  city: 'city', province: 'province', owner_id: 'ownerId',
+  city: 'city', province: 'province', country: 'country', owner_id: 'ownerId',
 }
 
 // Lifecycle states that make sense when CREATING a candidate (not matched/inactive/etc.).
@@ -51,20 +50,15 @@ const CREATE_STATUSES = ['lead', 'candidate']
 
 interface AppUser { id: Id; name?: string; firstname?: string; lastname?: string; [k: string]: unknown }
 
-interface FormState {
+// Exported so the addmodal/ card components share this exact shape (type-only import).
+export interface FormState {
   firstName: string; middleName: string; lastName: string; functionTitle: string
   email: string; phone: string; mobile: string; dateOfBirth: string; gender: string
   street: string; houseNumber: string; houseNumberSuffix: string; postalCode: string; city: string; province: string
+  // COUNTRY-1: home-address country (ISO-2 code, empty until picked).
+  country: string
   ownerId: string | number
 }
-
-
-// Card chrome — mirrors the drill-down ProfileTab exactly (11px uppercase muted
-// heading above a bordered surface card) so the modal reads as the same system (§3A).
-const cardHead: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
-const cardBox: CSSProperties = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, display: 'flex', flexDirection: 'column', gap: 12 }
-// One-line field pairing (§3A: short fields two-up) — a grid row with the given column spec.
-const row = (cols: string): CSSProperties => ({ display: 'grid', gridTemplateColumns: cols, gap: 12 })
 
 interface AddCandidateModalProps {
   onClose: () => void
@@ -81,7 +75,6 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   // Zoekbare comboboxen (Danny r2): functietitel uit de functies-lookup (free-entry-
   // toggle bepaalt of typen een nieuwe waarde mag opleveren), provincies uit de lookup.
   const { functions, allowFreeEntry } = useFunctions() as { functions: Array<string | { value: string; label: string }>; allowFreeEntry: boolean }
-  const { provinces } = useProvinces()
   // Esc sluit + tab-trap + focus-restore (huispatroon).
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { createCandidate, saving } = useCreateCandidate()
@@ -107,13 +100,23 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
     functionTitle: '',
     email: '', phone: '', mobile: '',
     dateOfBirth: '', gender: '',
-    street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', city: '', province: '',
+    street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', city: '', province: '', country: '',
     // Owner defaults to the logged-in user; recruiter can change it.
     ownerId: me?.id ?? '',
   })
 
   // Once the real statuses arrive from the API, default to Lead if nothing chosen.
   useEffect(() => { if (!status && phases.length) setStatus(defaultStatus()) }, [phases]) // eslint-disable-line
+
+  // Province list CASCADES on the picked country (Danny addendum) — its own cache
+  // slot per country (useProvinces), so switching country never leaks another
+  // country's list in. If the country changes and the currently filled province no
+  // longer exists in the new list, clear it rather than silently keep a mismatch.
+  const { provinces } = useProvinces(form.country)
+  useEffect(() => {
+    if (form.province && !provinces.includes(form.province)) setForm(f => ({ ...f, province: '' }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved province list changing, not every form edit
+  }, [provinces])
 
   const set = (k: keyof FormState, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -161,6 +164,8 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
         postal_code:         form.postalCode || null,
         city:                form.city || null,
         province:            form.province || null,
+        // COUNTRY-1: only rides along when actually picked (mirrors every other optional field).
+        country:             form.country || null,
         owner_id:            form.ownerId || null,
         phase:               status || 'lead',
         status:              'available',
@@ -220,37 +225,8 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
             the header (Danny r2: de linkerkolom verspilde ~260px aan twee knoppen) ── */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
 
-          <div style={{ padding: '18px 24px 14px', borderBottom: '1px solid var(--border)',
-            display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>
-                {selectedStatus ? `${t('modal.newPrefix')} — ${statusLabel}` : t('modal.candidateData')}
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                {status ? t('modal.fillRequired') : t('modal.statusPanelHint')}
-              </div>
-            </div>
-            {/* Phase choice — two compact pills, same colour semantics as the old cards. */}
-            <div style={{ display: 'flex', gap: 8, marginLeft: 'auto', flexShrink: 0 }}>
-              {pickStatuses.map(s => {
-                const active = status === s.value
-                return (
-                  <button key={s.value} onClick={() => { setStatus(s.value); setErrors({}) }} aria-pressed={active}
-                    style={{ display: 'flex', alignItems: 'center', gap: 8, height: BTN_H, padding: '0 14px',
-                      borderRadius: 999, cursor: 'pointer', transition: 'all 0.15s',
-                      border: `1.5px solid ${active ? s.color : 'var(--border)'}`,
-                      background: active ? s.color + '14' : 'var(--surface)' }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: s.color, flexShrink: 0 }} />
-                    <span style={{ fontSize: 13, fontWeight: active ? 600 : 500, color: active ? s.color : 'var(--text)' }}>{s.label}</span>
-                  </button>
-                )
-              })}
-            </div>
-            <button onClick={onClose} aria-label={t('common:close')}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
-              <X size={18} />
-            </button>
-          </div>
+          <ModalHeader status={status} pickStatuses={pickStatuses} selectedStatus={selectedStatus} statusLabel={statusLabel}
+            onSelectStatus={v => { setStatus(v); setErrors({}) }} onClose={onClose} />
 
           <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
             {!status ? (
@@ -268,132 +244,13 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
             ) : (
               // Two-column grid of titled cards (Optie A) — Persoonlijk/Adres span both
               // columns (their paired rows need the width); Contact/Werk sit side by side.
+              // Each card is a presentational component under addmodal/ (§refactor 2026-07-20).
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, alignItems: 'start' }}>
-
-                {/* ── Persoonlijk — name row + birthdate/gender pair ── */}
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <div style={cardHead}>{t('modal.fields.cardPersonal')}</div>
-                  <div style={cardBox}>
-                    <div style={row('2fr 1fr 2fr')}>
-                      <Field label={t('modal.fields.firstName')} required={isReq('firstName')}>
-                        <TextField value={form.firstName} onChange={v => set('firstName', v)} placeholder={t('modal.fields.firstName')} error={errors.firstName} />
-                        {errors.firstName && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('common:required')}</div>}
-                      </Field>
-                      <Field label={t('modal.fields.middleName')}>
-                        <TextField value={form.middleName} onChange={v => set('middleName', v)} placeholder="van" />
-                      </Field>
-                      <Field label={t('modal.fields.lastName')} required={isReq('lastName')}>
-                        <TextField value={form.lastName} onChange={v => set('lastName', v)} placeholder={t('modal.fields.lastName')} error={errors.lastName} />
-                        {errors.lastName && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('common:required')}</div>}
-                      </Field>
-                    </div>
-                    <div style={row('1fr 1fr')}>
-                      <Field label={t('modal.fields.dob')} required={isReq('dateOfBirth')}>
-                        <TextField type="date" value={form.dateOfBirth} onChange={v => set('dateOfBirth', v)} error={errors.dateOfBirth} />
-                      </Field>
-                      <Field label={t('modal.fields.gender')} required={isReq('gender')}>
-                        <CreatableSelect value={form.gender || null} onChange={(v: string) => set('gender', v)} allowCreate={false}
-                          placeholder={t('common:select')} options={genderOptions} menuWidth={220} />
-                      </Field>
-                    </div>
-                  </div>
-                </div>
-
-                {/* ── Contact — email, then phone/mobile paired (job B P1-follow-up) ── */}
-                <div>
-                  <div style={cardHead}>{t('modal.fields.cardContact')}</div>
-                  <div style={cardBox}>
-                    <Field label={t('modal.fields.email')} required={isReq('email')}>
-                      <TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder={t('modal.fields.emailPlaceholder')} error={errors.email} />
-                    </Field>
-                    <div style={row('1fr 1fr')}>
-                      <Field label={t('modal.fields.phone')} required={isReq('phone')}>
-                        <TextField type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder={t('modal.fields.phonePlaceholder')} error={errors.phone} />
-                      </Field>
-                      <Field label={t('modal.fields.mobile')}>
-                        <TextField type="tel" value={form.mobile} onChange={v => set('mobile', v)} placeholder={t('modal.fields.mobilePlaceholder')} />
-                      </Field>
-                    </div>
-                  </div>
-                </div>
-
-                {/* ── Werk — function + owner ── */}
-                <div>
-                  <div style={cardHead}>{t('modal.fields.cardWork')}</div>
-                  <div style={cardBox}>
-                    <Field label={t('modal.fields.functionTitle')} required={isReq('functionTitle')}>
-                      <CreatableSelect value={form.functionTitle || null} onChange={(v: string) => set('functionTitle', v)} allowCreate={allowFreeEntry}
-                      placeholder={t('modal.fields.functionPlaceholder')} options={functions} menuWidth={280} />
-                    </Field>
-                    <Field label={t('modal.fields.owner')}>
-                      <SelectField value={String(form.ownerId)} onChange={v => set('ownerId', v)}
-                        placeholder={t('common:select')} options={ownerOptions} />
-                    </Field>
-                  </div>
-                </div>
-
-                {/* ── Adres — altijd open (Danny r2: popup groter, geen inklap) ── */}
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <div style={cardHead}>{t('modal.fields.cardAddress')}</div>
-                  <div style={cardBox}>
-                    <div style={row('2fr 1fr 1fr')}>
-                      <Field label={t('modal.fields.street')} required={isReq('street')}>
-                        <TextField value={form.street} onChange={v => set('street', v)} placeholder={t('modal.fields.streetPlaceholder')} error={errors.street} />
-                      </Field>
-                      <Field label={t('modal.fields.houseNumber')}>
-                        <TextField value={form.houseNumber} onChange={v => set('houseNumber', v)} />
-                      </Field>
-                      <Field label={t('modal.fields.houseNumberSuffix')}>
-                        <TextField value={form.houseNumberSuffix} onChange={v => set('houseNumberSuffix', v)} />
-                      </Field>
-                    </div>
-                    <div style={row('1fr 2fr')}>
-                      <Field label={t('modal.fields.postalCode')} required={isReq('postalCode')}>
-                        <TextField value={form.postalCode} onChange={v => set('postalCode', v)} error={errors.postalCode} />
-                      </Field>
-                      <Field label={t('modal.fields.city')} required={isReq('city')}>
-                        <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('modal.fields.cityPlaceholder')} error={errors.city} />
-                      </Field>
-                    </div>
-                    <div style={row('1fr 1fr')}>
-                      <Field label={t('modal.fields.province')}>
-                        <CreatableSelect value={form.province || null} onChange={(v: string) => set('province', v)} allowCreate={false}
-                          placeholder={t('common:select')} options={provinces} menuWidth={260} />
-                      </Field>
-                      <div />
-                    </div>
-                  </div>
-                </div>
-
-                {/* ── Vestigingen — eigen kader onder Adres (Danny r2): chips met ×,
-                    toevoegen via de zoekbare SearchSelect (drill-down-patroon). ── */}
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <div style={cardHead}>{t('modal.fields.branches')}</div>
-                  <div style={cardBox}>
-                    {branchIds.length > 0 && (
-                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                        {branchIds.map(id => (
-                          <span key={id} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '3px 8px',
-                            borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
-                            {locations.find(o => String(o.value) === id)?.label ?? id}
-                            <button type="button" onClick={() => setBranchIds(p => p.filter(x => x !== id))} aria-label={t('common:remove')}
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    <div>
-                      <SearchSelect triggerLabel={t('modal.fields.branchesAdd')}
-                        options={locations.map(o => ({ value: String(o.value), label: o.label }))}
-                        selected={branchIds}
-                        onToggle={(id: string) => setBranchIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])} />
-                      {branchIds.length === 0 && locations.length > 0 && (
-                        <p style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', margin: '6px 0 0' }}>{t('modal.fields.branchesAutoHint')}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
+                <PersonalCard form={form} errors={errors} set={set} isReq={isReq} genderOptions={genderOptions} />
+                <ContactCard form={form} errors={errors} set={set} isReq={isReq} />
+                <WorkCard form={form} set={set} isReq={isReq} allowFreeEntry={allowFreeEntry} functions={functions} ownerOptions={ownerOptions} />
+                <AddressCard form={form} errors={errors} set={set} isReq={isReq} provinces={provinces} />
+                <BranchesCard branchIds={branchIds} setBranchIds={setBranchIds} locations={locations} />
               </div>
             )}
           </div>

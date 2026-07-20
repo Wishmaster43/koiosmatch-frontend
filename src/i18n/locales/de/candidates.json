@@ -177,6 +177,7 @@
       "gender": "Geschlecht",
       "city": "Wohnort",
       "province": "Provinz",
+      "country": "Land",
       "emailPlaceholder": "name@beispiel.de",
       "phonePlaceholder": "+31 6 12345678",
       "mobilePlaceholder": "+31 6 12345678",
@@ -226,6 +227,7 @@
       "zzp": "Freiberufler",
       "communication": "Kommunikation",
       "documents": "Dokumente",
+      "integrations": "Integrationen",
       "statistics": "Statistiken",
       "changelog": "Änderungsprotokoll",
       "extra": "Extra"
@@ -325,6 +327,7 @@
     "whatsapp": "In WhatsApp öffnen",
     "address": "Adresse",
     "province": "Provinz",
+    "country": "Land",
     "linkedin": "LinkedIn",
     "summary": "Zusammenfassung",
     "selectDate": "Datum auswählen",
@@ -460,6 +463,8 @@
     "contactType": "Kontaktart",
     "memberSince": "Erstellt am",
     "branch": "Niederlassung",
+    "createdBy": "Erstellt von",
+    "source": "Quelle",
     "recentActivity": "Letzte Aktivität",
     "noActivity": "Noch keine Aktivitäten."
   },
@@ -893,5 +898,30 @@
     "done": "Kandidaten zusammengeführt.",
     "errForbidden": "Du darfst keine Kandidaten zusammenführen.",
     "errFailed": "Zusammenführen fehlgeschlagen. Bitte erneut versuchen."
+  },
+  "integrations": {
+    "pdok": {
+      "name": "PDOK",
+      "alt": "PDOK-Logo",
+      "linked": "Verknüpft",
+      "notGeocoded": "Noch nicht geocodiert",
+      "autoInfo": "Koordinaten werden automatisch aktualisiert, sobald sich die Adresse ändert."
+    },
+    "helloflex": {
+      "name": "HelloFlex",
+      "alt": "HelloFlex-Logo",
+      "notAvailable": "Integration noch nicht verfügbar — folgt mit der HelloFlex-Einrichtung."
+    },
+    "shiftmanager": {
+      "name": "Shiftmanager",
+      "alt": "Shiftmanager-Logo",
+      "notLinked": "Nicht mit Shiftmanager verknüpft",
+      "externalId": "Externe ID",
+      "syncNow": "Jetzt synchronisieren",
+      "syncing": "Synchronisieren…",
+      "syncSuccess": "Synchronisierung abgeschlossen",
+      "syncFailed": "Synchronisierung fehlgeschlagen",
+      "lastSynced": "Zuletzt synchronisiert: {{date}}"
+    }
   }
 }

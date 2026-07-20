@@ -27,6 +27,7 @@ import PlanningPanel from './drawer/PlanningPanel'
 import { PreferencesTab, ZzpTab } from './drawer/PreferencesZzpTabs'
 import CommunicationTab from './drawer/CommunicationTab'
 import DocumentsSection from './drawer/DocumentsSection'
+import IntegrationsTab from './drawer/IntegrationsTab'
 import StatisticsTab from './drawer/StatisticsTab'
 import ChangelogPopover from './drawer/ChangelogPopover'
 import MergeCandidateModal from './drawer/MergeCandidateModal'
@@ -59,6 +60,7 @@ const TABS = [
   { id: 'administration', tKey: 'zzp'           },
   { id: 'communication',  tKey: 'communication' },
   { id: 'documents',      tKey: 'documents'     },
+  { id: 'integrations',   tKey: 'integrations'  },
   { id: 'statistics',     tKey: 'statistics'    },
 ]
 
@@ -177,6 +179,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       case 'communication':  return <CommunicationTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { consent: p })}
         onEditStatusEvent={status.canEditStatusReason ? status.openStatusEdit : undefined} />
       case 'documents':      return <DocumentsSection c={c} />
+      case 'integrations':   return <IntegrationsTab c={c} />
       case 'statistics':     return <StatisticsTab c={c} onJump={setTab} />
       // §3A(f): tenant custom fields live on their OWN gated tab (Danny 16-07,
       // punt 28 — they were buried as a section at the bottom of Profiel).

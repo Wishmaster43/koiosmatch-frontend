@@ -110,3 +110,21 @@ describe('mapCandidate — pools / consent / address', () => {
     expect(mapCandidate({}).address).toBe('-')
   })
 })
+
+// CREATED-BY-SOURCE-1 (Danny: "wil ik ook zien aangemaakt door wie en de bron") —
+// the Statistieken tab needs both fields; verify the mapper actually forwards them.
+describe('mapCandidate — createdBy / source (CREATED-BY-SOURCE-1)', () => {
+  it('maps the created_by {id,name} object', () => {
+    const r = mapCandidate({ created_by: { id: 7, name: 'Bente de Jong' } })
+    expect(r.createdBy).toEqual({ id: 7, name: 'Bente de Jong' })
+  })
+  it('is null on a legacy row without a stamped creator', () => {
+    expect(mapCandidate({}).createdBy).toBeNull()
+  })
+  it('maps the acquisition source', () => {
+    expect(mapCandidate({ source: 'indeed' }).source).toBe('indeed')
+  })
+  it('is null when no source was recorded', () => {
+    expect(mapCandidate({}).source).toBeNull()
+  })
+})

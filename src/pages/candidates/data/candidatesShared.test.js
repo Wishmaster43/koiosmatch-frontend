@@ -114,4 +114,11 @@ describe('buildCandidatePatch', () => {
       .toEqual({ phone: '0301234567', mobile: '0612345678' })
     expect(buildCandidatePatch({ mobile: '0612345678' })).toEqual({ mobile: '0612345678' })
   })
+  // COUNTRY-1: home-address country rides straight through as its ISO-2 code;
+  // an explicit clear ('') must send null, never an empty string, so the backend
+  // actually unsets the column instead of storing a blank string.
+  it('maps country (ISO-2 code), sending null when cleared', () => {
+    expect(buildCandidatePatch({ country: 'NL' })).toEqual({ country: 'NL' })
+    expect(buildCandidatePatch({ country: '' })).toEqual({ country: null })
+  })
 })

@@ -144,6 +144,8 @@ export interface Candidate {
   source?: string | null
   client: string
   created: string
+  // CREATED-BY-SOURCE-1: who created this dossier — a CENTRAL user; null on legacy rows.
+  createdBy: { id: string | number; name: string } | null
   email: string
   phone: string
   // Split from `phone` (BE 2026-07-20): phone stays the landline/"vast" number,
@@ -151,6 +153,10 @@ export interface Candidate {
   // no existing Candidate-shaped literal (tests/dummy data) breaks on this add.
   mobile?: string
   street: string
+  // COUNTRY-1: home-address country (empty until filled).
+  country: string
+  // KOPPELINGEN-TAB: the Shiftmanager backoffice link, mapped from backoffice_links.
+  shiftmanagerLink: { status?: string | null; externalId?: string | null; lastSyncedAt?: string | null } | null
   houseNumber: string
   houseNumberSuffix: string
   postalCode: string
@@ -294,10 +300,15 @@ export interface ApiCandidate {
   client_name?: string
   created_at?: string
   created?: string
+  // CREATED-BY-SOURCE-1: acquisition channel + who created this dossier (a CENTRAL user).
+  source?: string | null
+  created_by?: { id?: string | number; name?: string } | null
   email?: string
   phone?: string
   mobile?: string
   street?: string
+  country?: string
+  backoffice_links?: Array<{ system?: string; status?: string | null; external_id?: string | null; last_synced_at?: string | null }>
   house_number?: string
   house_number_suffix?: string
   house_number_addition?: string

@@ -5,10 +5,21 @@
  *
  * One stored value (a string) regardless of mode — no second field. Closes on
  * outside click. Styling matches SelectMenu so pickers look consistent.
+ *
+ * Flip + clamp (Danny screenshot, kandidaten-ronde-2): a field near the bottom of
+ * a scrollable panel (e.g. the province/country row in AddCandidateModal's Adres
+ * card) rendered a downward popover that got clipped by the modal's own
+ * `overflow: hidden` and effectively disappeared. Placement (flip up when there's
+ * more room above than below, clamp to the available space) is the ONE shared
+ * `useDropdownPlacement` hook (also used by SearchSelect) — never a second copy
+ * of this math. The option list itself always keeps its own `overflow-y: auto`
+ * sized to match, so every item (however long the list) stays scrollable and
+ * selectable, never truncated off past the clamp.
  */
 import { useState, useRef, useEffect } from 'react'
 import type { CSSProperties } from 'react'
 import { ChevronDown, Check, Plus } from 'lucide-react'
+import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT } from '@/lib/useDropdownPlacement'
 
 interface CreatableOption {
   value: string
@@ -32,6 +43,8 @@ export default function CreatableSelect({
   const [query, setQuery] = useState('')
   const ref = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  // Shared flip + clamp placement (see the module doc comment above).
+  const { openUp, maxHeight: menuMaxHeight } = useDropdownPlacement(ref, open)
 
   // Close on outside click; focus the search box when opening.
   useEffect(() => {
@@ -65,7 +78,8 @@ export default function CreatableSelect({
         <ChevronDown size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
       </button>
       {open && (
-        <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 200, marginTop: 4, minWidth: menuWidth,
+        <div style={{ position: 'absolute', left: 0, zIndex: 200, minWidth: menuWidth, maxHeight: menuMaxHeight,
+          ...(openUp ? { bottom: '100%', marginBottom: 4 } : { top: '100%', marginTop: 4 }),
           background: 'white', border: '1px solid var(--border)', borderRadius: 8,
           boxShadow: '0 4px 16px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
           {/* Search / type-to-create */}
@@ -76,7 +90,7 @@ export default function CreatableSelect({
               style={{ width: '100%', boxSizing: 'border-box', padding: '6px 8px', fontSize: 12,
                 border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
           </div>
-          <div style={{ maxHeight: 220, overflowY: 'auto' }}>
+          <div style={{ maxHeight: menuMaxHeight - DROPDOWN_SEARCH_ROW_HEIGHT, overflowY: 'auto' }}>
             {filtered.map(o => (
               <button key={o.value} type="button" onClick={() => pick(o.value)}
                 style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px',

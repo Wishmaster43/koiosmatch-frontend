@@ -117,12 +117,21 @@ export function mapCandidate(c: ApiCandidate): Candidate {
       : (c.last_contact_by as string | null | undefined)) ?? (c.last_contact as { by?: string } | undefined)?.by ?? null,
     client:          c.client?.name ?? c.customer?.name ?? c.client_name ?? '',
     created:         c.created_at ?? c.created ?? '',
+    // CREATED-BY-SOURCE-1: who created this dossier (Statistieken tab) — a CENTRAL
+    // user {id,name}; graceful null on legacy rows without a stamped creator.
+    createdBy:       c.created_by ? { id: c.created_by.id ?? '', name: c.created_by.name ?? '' } : null,
     email:           c.email ?? '-',
     // Split fields (BE 2026-07-20): `phone` is the landline/"vast" number,
     // `mobile` the separate mobile number — no longer merged into one UI field
     // (ProfileTab renders them with distinct call/WhatsApp affordances).
     phone:           c.phone ?? '-',
     mobile:          c.mobile ?? '-',
+    // COUNTRY-1 + KOPPELINGEN-TAB: country and the SM backoffice link (drawer cards).
+    country:         c.country ?? '',
+    shiftmanagerLink: (() => {
+      const l = (c.backoffice_links ?? []).find(x => x?.system === 'shiftmanager')
+      return l ? { status: l.status ?? null, externalId: l.external_id ?? null, lastSyncedAt: l.last_synced_at ?? null } : null
+    })(),
     // Detail address parts (list only sends `address`/`city`).
     street:          c.street ?? '',
     houseNumber:     c.house_number ?? '',

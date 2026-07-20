@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X, Trash2, Cake, MessageCircle, Mail, Phone } from 'lucide-react'
@@ -7,6 +7,7 @@ import { useDateFormat, calcAge, daysUntilBirthday } from '@/lib/datetime'
 import { useGenders } from '@/lib/useGenders'
 import { useNationalities } from '@/lib/useNationalities'
 import { useProvinces } from '../hooks/useProvinces'
+import { getCountryOptions, getCountryName } from '@/lib/countries'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
@@ -22,7 +23,7 @@ const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
 
 // The editable profile fields — all string-valued and present on Candidate.
 type ProfileKey = 'gender' | 'nationality' | 'dob' | 'placeOfBirth' | 'email' | 'phone' | 'mobile'
-  | 'street' | 'houseNumber' | 'houseNumberSuffix' | 'postalCode' | 'city' | 'province' | 'linkedin'
+  | 'street' | 'houseNumber' | 'houseNumberSuffix' | 'postalCode' | 'city' | 'province' | 'country' | 'linkedin'
 type ProfileForm = Record<ProfileKey, string>
 
 function LinkedinIcon({ size = 12, color = '#0A66C2' }: { size?: number; color?: string }) {
@@ -38,18 +39,20 @@ function LinkedinIcon({ size = 12, color = '#0A66C2' }: { size?: number; color?:
  * Fields use label-above layout (consistent with the rest of the app) and pair
  * short fields into two columns to keep the panel calm and scannable. */
 export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candidate; onEditSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number }) {
-  const { t } = useTranslation('candidates')
+  const { t, i18n } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   // Gender + nationality + province come from tenant lookups (CFG-1 / PROVINCES-1),
   // never hardcoded lists — each hook keeps a seed fallback for an empty/offline API.
   const { genders } = useGenders()
   const { nationalities } = useNationalities()
-  const { provinces } = useProvinces()
+  // COUNTRY-1: fixed ISO-3166 code list, localized to the current UI language —
+  // never a tenant lookup (mirrors province's own non-tenant NL_PROVINCES list).
+  const countryOptions = getCountryOptions(i18n.language)
   const emptyForm = (): ProfileForm => ({
     gender: c.gender ?? '', nationality: c.nationality ?? '', dob: c.dob ?? '', placeOfBirth: c.placeOfBirth ?? '',
     email: c.email ?? '', phone: c.phone ?? '', mobile: c.mobile ?? '',
     street: c.street ?? '', houseNumber: c.houseNumber ?? '', houseNumberSuffix: c.houseNumberSuffix ?? '',
-    postalCode: c.postalCode ?? '', city: c.city ?? '', province: c.province ?? '',
+    postalCode: c.postalCode ?? '', city: c.city ?? '', province: c.province ?? '', country: c.country ?? '',
     linkedin: c.linkedin ?? '',
   })
   const [editing,        setEditing]        = useState(false)
@@ -62,6 +65,16 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
   const [summary, setSummary] = useState(c.summary ?? '')
   const [errors,  setErrors]  = useState<Partial<Record<ProfileKey, boolean>>>({})
   const setF = (k: ProfileKey, v: string) => { setForm(p => ({ ...p, [k]: v })); if (errors[k]) setErrors(e => ({ ...e, [k]: false })) }
+
+  // Province list CASCADES on the picked country (Danny addendum) — its own cache
+  // slot per country (useProvinces), so switching country never leaks another
+  // country's list in. If the country changes and the currently filled province no
+  // longer exists in the new list, clear it rather than silently keep a mismatch.
+  const { provinces } = useProvinces(form.country)
+  useEffect(() => {
+    if (form.province && !provinces.includes(form.province)) setF('province', '')
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved province list changing, not every form edit
+  }, [provinces])
 
   // Required fields for this candidate's phase (Settings → Verplichte velden). Only
   // the profile-owned fields are enforced here (name/function live in the header).
@@ -136,6 +149,13 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
       <CreatableSelect value={form.province || null} onChange={(v: string) => setF('province', v)} allowCreate={false}
         placeholder={t('common:select')} style={inputStyle}
         options={provinces.map((p: string) => ({ value: p, label: p }))} />
+    )
+    // Country — pick-only searchable dropdown over the fixed ISO code list (Danny:
+    // "moet een zoekbare dropdown"), same pattern as province/nationality above.
+    if (key === 'country') return (
+      <CreatableSelect value={form.country || null} onChange={(v: string) => setF('country', v)} allowCreate={false}
+        placeholder={t('common:select')} style={inputStyle}
+        options={countryOptions} />
     )
     if (key === 'dob') return (
       <DatePicker
@@ -246,6 +266,12 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
       const label = genders.find(g => g.value === v || g.label === v)?.label ?? v
       return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{label || '-'}</span>
     }
+    // Country stores the ISO-2 code; resolve the localized display name (never the
+    // bare code) via Intl.DisplayNames, re-evaluated per viewer language.
+    if (key === 'country') {
+      const label = v ? getCountryName(String(v), i18n.language) : ''
+      return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{label || '-'}</span>
+    }
     return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{v || '-'}</span>
   }
 
@@ -313,6 +339,7 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
             {field('placeOfBirth', t('profile.placeOfBirth'))}
             {addressRow()}
             {field('province', t('profile.province'))}
+            {field('country', t('profile.country'))}
           </>)}
           {card(t('profile.groupContact'), <>
             {field('email', t('profile.email'))}

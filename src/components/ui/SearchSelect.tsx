@@ -4,11 +4,19 @@
  * Replaces the duplicated open-dropdown-with-search-and-checkmarks blocks in the
  * drawer (link branch, add driving licence). Multi-select by default: clicking an
  * option toggles it in `selected` via `onToggle`. Closes on outside click.
+ *
+ * Flip + clamp (Danny screenshot, kandidaten-ronde-2 — the "+ Vestiging" branches
+ * picker at the bottom of AddCandidateModal rendered a downward popover that got
+ * clipped by the modal's own `overflow: hidden`): placement is the ONE shared
+ * `useDropdownPlacement` hook (also used by CreatableSelect) — never a second
+ * copy of this math. The option list keeps its own `overflow-y: auto` sized to
+ * match, so every item stays scrollable and selectable, never truncated off.
  */
 import { useState, useRef, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { Plus, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT } from '@/lib/useDropdownPlacement'
 
 interface SearchSelectOption {
   value: string
@@ -39,6 +47,8 @@ export default function SearchSelect({
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const ref = useRef<HTMLDivElement>(null)
+  // Shared flip + clamp placement (see the module doc comment above).
+  const { openUp, maxHeight: menuMaxHeight } = useDropdownPlacement(ref, open)
 
   useEffect(() => {
     if (!open) return
@@ -71,8 +81,10 @@ export default function SearchSelect({
           </button>
         )}
       {open && (
-        // minWidth + viewport cap: the menu grows with long option labels instead of truncating.
-        <div style={{ position: 'absolute', top: '100%', ...(menuAlign === 'right' ? { right: 0 } : { left: 0 }), zIndex: 200, marginTop: 4, minWidth: width, maxWidth: 'min(420px, 90vw)',
+        // minWidth + viewport cap: the menu grows with long option labels instead of
+        // truncating. Flips upward + clamps to the available space (see doc comment).
+        <div style={{ position: 'absolute', ...(openUp ? { bottom: '100%', marginBottom: 4 } : { top: '100%', marginTop: 4 }),
+          ...(menuAlign === 'right' ? { right: 0 } : { left: 0 }), zIndex: 200, minWidth: width, maxWidth: 'min(420px, 90vw)', maxHeight: menuMaxHeight,
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
           boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden' }}>
           {searchable && (
@@ -81,7 +93,7 @@ export default function SearchSelect({
                 style={{ width: '100%', border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none' }} />
             </div>
           )}
-          <div style={{ maxHeight: 200, overflowY: 'auto' }}>
+          <div style={{ maxHeight: menuMaxHeight - (searchable ? DROPDOWN_SEARCH_ROW_HEIGHT : 0), overflowY: 'auto' }}>
             {shown.length === 0 && (
               <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{t('noResults')}</div>
             )}

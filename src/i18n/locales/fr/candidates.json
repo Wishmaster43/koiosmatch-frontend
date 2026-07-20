@@ -177,6 +177,7 @@
       "gender": "Sexe",
       "city": "Ville",
       "province": "Province",
+      "country": "Pays",
       "emailPlaceholder": "nom@exemple.fr",
       "phonePlaceholder": "+31 6 12345678",
       "mobilePlaceholder": "+31 6 12345678",
@@ -226,6 +227,7 @@
       "zzp": "Indépendant",
       "communication": "Communication",
       "documents": "Documents",
+      "integrations": "Intégrations",
       "statistics": "Statistiques",
       "changelog": "Journal",
       "extra": "Extra"
@@ -325,6 +327,7 @@
     "whatsapp": "Ouvrir dans WhatsApp",
     "address": "Adresse",
     "province": "Province",
+    "country": "Pays",
     "linkedin": "LinkedIn",
     "summary": "Résumé",
     "selectDate": "Sélectionner une date",
@@ -460,6 +463,8 @@
     "contactType": "Type de contact",
     "memberSince": "Créé le",
     "branch": "Agence",
+    "createdBy": "Créé par",
+    "source": "Source",
     "recentActivity": "Activité récente",
     "noActivity": "Aucune activité."
   },
@@ -893,5 +898,30 @@
     "done": "Candidats fusionnés.",
     "errForbidden": "Vous n'êtes pas autorisé à fusionner des candidats.",
     "errFailed": "Échec de la fusion. Veuillez réessayer."
+  },
+  "integrations": {
+    "pdok": {
+      "name": "PDOK",
+      "alt": "Logo PDOK",
+      "linked": "Connecté",
+      "notGeocoded": "Pas encore géocodé",
+      "autoInfo": "Les coordonnées se mettent à jour automatiquement dès que l'adresse change."
+    },
+    "helloflex": {
+      "name": "HelloFlex",
+      "alt": "Logo HelloFlex",
+      "notAvailable": "Intégration pas encore disponible — arrive avec la mise en place HelloFlex."
+    },
+    "shiftmanager": {
+      "name": "Shiftmanager",
+      "alt": "Logo Shiftmanager",
+      "notLinked": "Non connecté à Shiftmanager",
+      "externalId": "Identifiant externe",
+      "syncNow": "Synchroniser maintenant",
+      "syncing": "Synchronisation…",
+      "syncSuccess": "Synchronisation réussie",
+      "syncFailed": "Échec de la synchronisation",
+      "lastSynced": "Dernière synchronisation : {{date}}"
+    }
   }
 }

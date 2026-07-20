@@ -83,6 +83,8 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   if ('postalCode'        in patch) body.postcode          = patch.postalCode
   if ('city'              in patch) body.city              = patch.city
   if ('province'          in patch) body.province          = patch.province
+  // COUNTRY-1: home-address country (ISO-2 code); '' clears it (never send an empty string).
+  if ('country'           in patch) body.country           = patch.country === '' ? null : patch.country
   if ('linkedin'          in patch) body.linkedin_slug     = patch.linkedin
   if ('summary'           in patch) body.summary           = patch.summary
   if ('languages'         in patch) body.languages         = patch.languages

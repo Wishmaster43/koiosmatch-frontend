@@ -9,6 +9,11 @@ import type { Candidate } from '@/types/candidate'
 // StatsTab is still untyped JS — declare the props this tab passes.
 const StatsTab = StatsTabJs as ComponentType<{ kpisTitle?: unknown; kpis?: unknown[]; overview?: unknown; activity?: unknown }>
 
+// Empty-state value: an italic muted em-dash (§4 — italic reserved for
+// secondary/placeholder text, never data) for the two fields below that may be
+// unset on legacy rows (no stamped creator / no acquisition channel recorded).
+const emptyValue = <span style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>—</span>
+
 /** Statistics tab — maps the candidate onto the generic StatsTab. */
 export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (tab: string) => void }) {
   const { t } = useTranslation('candidates')
@@ -36,6 +41,9 @@ export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (t
           [t('statistics.contactType'), c.lastContactType ? lastContactLabel(c.lastContactType) : '-'],
           [t('statistics.memberSince'), c.created ? formatDate(c.created) : '-'],
           [t('statistics.branch'),      (c.branches ?? []).map(b => b.name).filter(Boolean).join(', ') || '-'],
+          // CREATED-BY-SOURCE-1 (Danny: "wil ik ook zien aangemaakt door wie en de bron").
+          [t('statistics.createdBy'),   c.createdBy?.name || emptyValue],
+          [t('statistics.source'),      c.source || emptyValue],
         ],
       }}
     />

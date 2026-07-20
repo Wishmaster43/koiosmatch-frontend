@@ -184,6 +184,7 @@
       "gender": "Gender",
       "city": "City",
       "province": "Province",
+      "country": "Country",
       "emailPlaceholder": "name@example.com",
       "phonePlaceholder": "+31 6 12345678",
       "mobilePlaceholder": "+31 6 12345678",
@@ -233,6 +234,7 @@
       "zzp": "Freelance",
       "communication": "Communication",
       "documents": "Documents",
+      "integrations": "Integrations",
       "statistics": "Statistics",
       "changelog": "Changelog",
       "extra": "Extra"
@@ -337,6 +339,7 @@
     "postalCode": "Postal code",
     "city": "City",
     "province": "Province",
+    "country": "Country",
     "linkedin": "LinkedIn",
     "summary": "Profile text",
     "selectDate": "Select a date",
@@ -467,6 +470,8 @@
     "contactType": "Contact type",
     "memberSince": "Created on",
     "branch": "Branch",
+    "createdBy": "Created by",
+    "source": "Source",
     "recentActivity": "Recent activity",
     "noActivity": "No activity yet."
   },
@@ -893,5 +898,30 @@
     "done": "Candidates merged.",
     "errForbidden": "You are not allowed to merge candidates.",
     "errFailed": "Merge failed. Please try again."
+  },
+  "integrations": {
+    "pdok": {
+      "name": "PDOK",
+      "alt": "PDOK logo",
+      "linked": "Linked",
+      "notGeocoded": "Not yet geocoded",
+      "autoInfo": "Coordinates update automatically whenever the address changes."
+    },
+    "helloflex": {
+      "name": "HelloFlex",
+      "alt": "HelloFlex logo",
+      "notAvailable": "Integration not available yet — coming with the HelloFlex setup."
+    },
+    "shiftmanager": {
+      "name": "Shiftmanager",
+      "alt": "Shiftmanager logo",
+      "notLinked": "Not linked to Shiftmanager",
+      "externalId": "External id",
+      "syncNow": "Sync now",
+      "syncing": "Syncing…",
+      "syncSuccess": "Sync completed",
+      "syncFailed": "Sync failed",
+      "lastSynced": "Last synced: {{date}}"
+    }
   }
 }

@@ -184,6 +184,7 @@
       "gender": "Geslacht",
       "city": "Woonplaats",
       "province": "Provincie",
+      "country": "Land",
       "emailPlaceholder": "naam@voorbeeld.nl",
       "phonePlaceholder": "+31 6 12345678",
       "mobilePlaceholder": "+31 6 12345678",
@@ -233,6 +234,7 @@
       "zzp": "ZZP",
       "communication": "Communicatie",
       "documents": "Documenten",
+      "integrations": "Koppelingen",
       "statistics": "Statistieken",
       "changelog": "Wijzigingslog",
       "extra": "Extra"
@@ -337,6 +339,7 @@
     "postalCode": "Postcode",
     "city": "Plaats",
     "province": "Provincie",
+    "country": "Land",
     "linkedin": "LinkedIn",
     "summary": "Profieltekst",
     "selectDate": "Selecteer een datum",
@@ -467,6 +470,8 @@
     "contactType": "Soort contact",
     "memberSince": "Aangemaakt op",
     "branch": "Vestiging",
+    "createdBy": "Aangemaakt door",
+    "source": "Bron",
     "recentActivity": "Recente activiteit",
     "noActivity": "Nog geen activiteiten."
   },
@@ -893,5 +898,30 @@
     "done": "Kandidaten samengevoegd.",
     "errForbidden": "Je hebt geen rechten om kandidaten samen te voegen.",
     "errFailed": "Samenvoegen mislukt. Probeer het opnieuw."
+  },
+  "integrations": {
+    "pdok": {
+      "name": "PDOK",
+      "alt": "PDOK-logo",
+      "linked": "Gekoppeld",
+      "notGeocoded": "Nog niet gegeocodeerd",
+      "autoInfo": "Coördinaten worden automatisch bijgewerkt zodra het adres wijzigt."
+    },
+    "helloflex": {
+      "name": "HelloFlex",
+      "alt": "HelloFlex-logo",
+      "notAvailable": "Koppeling nog niet beschikbaar — volgt met de HelloFlex-inrichting."
+    },
+    "shiftmanager": {
+      "name": "Shiftmanager",
+      "alt": "Shiftmanager-logo",
+      "notLinked": "Niet gekoppeld aan Shiftmanager",
+      "externalId": "Extern id",
+      "syncNow": "Nu synchroniseren",
+      "syncing": "Synchroniseren…",
+      "syncSuccess": "Synchronisatie geslaagd",
+      "syncFailed": "Synchroniseren mislukt",
+      "lastSynced": "Laatst gesynchroniseerd: {{date}}"
+    }
   }
 }
