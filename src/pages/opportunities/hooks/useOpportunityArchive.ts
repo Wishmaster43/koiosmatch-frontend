@@ -15,6 +15,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { notify } from '@/lib/notify'
+import { useConfirm } from '@/hooks/useConfirm'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
 
@@ -32,22 +33,24 @@ export function useOpportunityArchive({ onPatch, onReload }: Args) {
   const { t } = useTranslation('opportunities')
   const [archiving, setArchiving] = useState(false)
   const [restoring, setRestoring] = useState(false)
+  const { confirm, dialog } = useConfirm()
 
   // DELETE /opportunities/{id} — reversible soft-delete, no extra guard server-side.
-  const archiveOpportunity = async (id: Id | undefined) => {
+  const archiveOpportunity = (id: Id | undefined) => {
     if (id == null || archiving) return
-    if (!window.confirm(t('drawer.archiveConfirm'))) return
-    setArchiving(true)
-    try {
-      await api.delete(`/opportunities/${id}`)
-      onPatch(id, { archived: true, archivedAt: new Date().toISOString() })
-      onReload()
-      notify('success', t('drawer.archived'))
-    } catch {
-      notify('error', t('drawer.archiveFailed'))
-    } finally {
-      setArchiving(false)
-    }
+    confirm(t('drawer.archiveConfirm'), async () => {
+      setArchiving(true)
+      try {
+        await api.delete(`/opportunities/${id}`)
+        onPatch(id, { archived: true, archivedAt: new Date().toISOString() })
+        onReload()
+        notify('success', t('drawer.archived'))
+      } catch {
+        notify('error', t('drawer.archiveFailed'))
+      } finally {
+        setArchiving(false)
+      }
+    }, { danger: true })
   }
 
   // POST /opportunities/{id}/restore — un-archive. The response is only
@@ -68,5 +71,5 @@ export function useOpportunityArchive({ onPatch, onReload }: Args) {
     }
   }
 
-  return { archiveOpportunity, restoreOpportunity, archiving, restoring }
+  return { archiveOpportunity, restoreOpportunity, archiving, restoring, dialog }
 }

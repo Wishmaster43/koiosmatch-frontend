@@ -15,6 +15,7 @@ import type { NodeTypes, EdgeTypes } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { X, Save, Play, Loader2, Plus, Zap, List, Clock, Workflow as WorkflowIcon, History } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useConfirm } from '@/hooks/useConfirm'
 import { MODULE_META } from '@/modules/index'
 import { ScheduleModal, scheduleLabel } from './workflow/ScheduleModal'
 import { StopRunButton } from './workflow/runControl'
@@ -48,12 +49,15 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
     insertModule, updateNodeConfig, deleteNode, handleSave, handleRun, isDirty,
   } = useWorkflowEditor({ workflow, onSave, initialRunId })
   const { t, i18n } = useTranslation('workflows')
+  const { confirm, dialog } = useConfirm()
 
   // Dirty-check guard (item 19): closing (X) with unsaved changes used to discard
-  // them silently — confirm first. A native beforeunload guard covers the tab
-  // close/refresh/navigate-away case the in-app confirm can't catch.
+  // them silently — confirm first (via the shared ConfirmDialog). A native
+  // beforeunload guard covers the tab close/refresh/navigate-away case the
+  // in-app confirm can't catch.
   const confirmClose = () => {
-    if (!isDirty() || window.confirm(t('editor.unsavedConfirm'))) onClose()
+    if (!isDirty()) { onClose(); return }
+    confirm(t('editor.unsavedConfirm'), onClose)
   }
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
@@ -338,6 +342,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
             onClose={() => setOutputState(null)}
           />
         )}
+        {dialog}
       </div>
     </NodeRunContext.Provider>
     </EdgeFilterContext.Provider>

@@ -19,8 +19,8 @@ export function useUsersData() {
   const [error,   setError]   = useState<string | null>(null)
 
   // Load users + roles once; super_admin/tenant_admin are not user-assignable here.
+  // Branch links arrive ON the list rows (USERS-BRANCHES-LIST-1) — no per-user calls.
   useEffect(() => {
-    let cancelled = false
     Promise.all([api.get('/users'), api.get('/roles')])
       .then(([usersRes, rolesRes]) => {
         const list = unwrapList<ManagedUser>(usersRes).rows
@@ -28,19 +28,9 @@ export function useUsersData() {
         setUsers(rows)
         const roleList = rolesRes.data ?? []
         setRoles(roleList.filter((r: AvailableRole) => r.name !== 'super_admin' && r.name !== 'tenant_admin'))
-        // INTERIM (USERS-BRANCHES-LIST-1): the list response carries no branch links yet,
-        // so fetch each user's set once and merge it in for the read-only column. Central
-        // accounts 404 on the tenant check — treated as "no branches". One eager-load on
-        // the backend list resource replaces this whole block.
-        Promise.all(rows.map(u => u.id
-          ? api.get(`/users/${u.id}/branches`)
-              .then(r => ({ ...u, branches: unwrapList(r).rows as ManagedUser['branches'] }), () => u)
-          : Promise.resolve(u),
-        )).then(merged => { if (!cancelled) setUsers(merged) })
       })
       .catch(err => setError(err?.response?.status === 403 ? t('noAccess') : t('loadError')))
       .finally(() => setLoading(false))
-    return () => { cancelled = true }
   }, [])
 
   // Optimistically set a user's icon colour (PATCH /users/{id}); revert on failure.

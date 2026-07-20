@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { Pencil, Trash2 } from 'lucide-react'
 import { AddButton } from '@/components/forms/fields'
 import SoftChip from '@/components/ui/SoftChip'
+import { useConfirm } from '@/hooks/useConfirm'
 import AddDepartmentModal from '../AddDepartmentModal'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
 import type { Department } from '@/types/customer'
@@ -32,10 +33,11 @@ interface Props {
 export default function LocationDepartments({ locationId, locationName, departments, locations, statuses, onAdd, onUpdate, onRemove }: Props) {
   const { t } = useTranslation('customers')
   const [modal, setModal] = useState<'add' | Department | null>(null)
+  const { confirm, dialog } = useConfirm()
   const rows = departments.filter(d => String(d.locationId) === String(locationId))
 
   // Delete asks for confirmation; a 409 (still in use) fails soft via the hook's own toast.
-  const remove = (d: Department) => { if (window.confirm(t('departments.deleteConfirm'))) onRemove(d.id as Id) }
+  const remove = (d: Department) => confirm(t('departments.deleteConfirm'), () => onRemove(d.id as Id), { danger: true })
 
   return (
     <div>
@@ -73,6 +75,7 @@ export default function LocationDepartments({ locationId, locationName, departme
           onClose={() => setModal(null)}
         />
       )}
+      {dialog}
     </div>
   )
 }

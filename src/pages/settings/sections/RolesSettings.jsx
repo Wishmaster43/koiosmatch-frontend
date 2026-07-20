@@ -15,6 +15,7 @@ import { PermissionMatrix } from './RolesPermissionMatrix'
 import { roleIconEl, ROLE_ICON_NAMES } from '@/lib/roleIcons'
 import RoleChip from '@/components/ui/RoleChip'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+import { useConfirm } from '@/hooks/useConfirm'
 import { useLocations } from '@/lib/useLocations'
 import { DASHBOARD_TYPES } from '@/pages/dashboard/templates'
 import { BTN_H } from '@/config/buttonMetrics'
@@ -238,6 +239,7 @@ export default function RolesSettings() {
   const [creating,    setCreating]    = useState(false)
   const [deleting,    setDeleting]    = useState(null)
   const [editRole,    setEditRole]    = useState(null)
+  const { confirm, dialog } = useConfirm()
 
   useEffect(() => {
     Promise.all([api.get('/roles'), api.get('/permissions')])
@@ -261,15 +263,16 @@ export default function RolesSettings() {
     setCreating(false)
   }
 
-  const deleteRole = async (role) => {
-    if (!confirm(t('roles.confirmDelete', { name: role.name }))) return
-    setDeleting(role.id)
-    try {
-      await api.delete(`/roles/${role.id}`)
-      setRoles(prev => prev.filter(r => r.id !== role.id))
-      if (editRole?.id === role.id) setEditRole(null)
-    } catch { /* noop */ }
-    setDeleting(null)
+  const deleteRole = (role) => {
+    confirm(t('roles.confirmDelete', { name: role.name }), async () => {
+      setDeleting(role.id)
+      try {
+        await api.delete(`/roles/${role.id}`)
+        setRoles(prev => prev.filter(r => r.id !== role.id))
+        if (editRole?.id === role.id) setEditRole(null)
+      } catch { /* noop */ }
+      setDeleting(null)
+    }, { danger: true })
   }
 
   const handleUpdate = (updated) => {
@@ -355,6 +358,7 @@ export default function RolesSettings() {
           <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: '20px 0' }}>{t('roles.empty')}</p>
         )}
       </div>
+      {dialog}
     </div>
   )
 }

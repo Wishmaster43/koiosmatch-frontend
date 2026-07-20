@@ -22,6 +22,7 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import SoftChip from '@/components/ui/SoftChip'
 import SectionCard from '@/components/ui/SectionCard'
+import { useConfirm } from '@/hooks/useConfirm'
 import AddOpportunityModal from '@/pages/opportunities/AddOpportunityModal'
 import { mapOpportunity } from '@/pages/opportunities/data/mapOpportunity'
 import type { Opportunity } from '@/types/opportunity'
@@ -70,11 +71,13 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
   // Edit pencil per row (Danny 2026-07-14): reuses AddOpportunityModal in edit
   // mode (mirrors AddLocationModal doubling as create+edit) — no separate form.
   const [editingOpp, setEditingOpp] = useState<Opportunity | null>(null)
+  const { confirm, dialog } = useConfirm()
   const rows = raw.map(mapOpportunity)
 
   const remove = (o: Opportunity) => {
-    if (!window.confirm(t('opportunities.deleteConfirm'))) return
-    api.delete(`/opportunities/${o.id}`).then(() => reload()).catch(() => notifyError(t('opportunities.deleteFailed')))
+    confirm(t('opportunities.deleteConfirm'), () => {
+      api.delete(`/opportunities/${o.id}`).then(() => reload()).catch(() => notifyError(t('opportunities.deleteFailed')))
+    }, { danger: true })
   }
 
   const columns: Column<Opportunity>[] = [
@@ -135,6 +138,7 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
           onCreated={() => reload()} onClose={() => setEditingOpp(null)}
         />
       )}
+      {dialog}
     </div>
   )
 }

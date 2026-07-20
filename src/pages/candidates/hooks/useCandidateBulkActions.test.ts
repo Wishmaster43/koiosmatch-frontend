@@ -177,11 +177,12 @@ describe('useCandidateBulkActions · bulkSetStage (funnel-stage, job 35/42)', ()
 
 describe('useCandidateBulkActions · runBulkArchive (job 42 — partial archive)', () => {
   it('warns instead of a bare success when the server archives fewer than the whole selection', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     post.mockResolvedValue({ data: { archived: [1] } }) // id 2 comes back un-archived (e.g. already archived)
     const r = harness([cand({ id: 1, stage: '', status: 'available' }), cand({ id: 2, stage: '', status: 'available' })])
     act(() => r.result.current.setSelectedIds(new Set([1, 2])))
     await act(async () => { await r.result.current.actions.bulkArchive() })
+    // Confirm via the staged ConfirmDialog (replaces window.confirm).
+    act(() => r.result.current.actions.dialog.props.onConfirm())
     await waitFor(() => expect(notify).toHaveBeenCalledWith('warning', 'bulk.partialResult'))
   })
 })
@@ -216,22 +217,23 @@ describe('useCandidateBulkActions · note / phase / consent', () => {
 
 describe('useCandidateBulkActions · bulkArchive (guard)', () => {
   it('archives straight away (after confirm) when none of the selection is risky — no pre-check fetch', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     post.mockResolvedValue({ data: { archived: [1] } })
     const r = harness([cand({ id: 1, stage: '', status: 'available' })])
     act(() => r.result.current.setSelectedIds(new Set([1])))
     await act(async () => { await r.result.current.actions.bulkArchive() })
     expect(get).not.toHaveBeenCalled()
+    // Confirm via the staged ConfirmDialog (replaces window.confirm).
+    act(() => r.result.current.actions.dialog.props.onConfirm())
     await waitFor(() => expect(notify).toHaveBeenCalledWith('success', expect.any(String)))
     expect(r.result.current.candidates).toHaveLength(0)
     expect(r.result.current.total).toBe(0)
   })
 
   it('does nothing when the confirm dialog is cancelled', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
     const r = harness([cand({ id: 1, stage: '', status: 'available' })])
     act(() => r.result.current.setSelectedIds(new Set([1])))
     await act(async () => { await r.result.current.actions.bulkArchive() })
+    act(() => r.result.current.actions.dialog.props.onCancel())
     expect(post).not.toHaveBeenCalled()
     expect(r.result.current.candidates).toHaveLength(1)
   })
@@ -273,13 +275,13 @@ describe('useCandidateBulkActions · bulkArchive (guard)', () => {
   })
 
   it('a 409 with a forward-compat `live` payload on the real call re-opens the guard (safety net for a missed pre-check)', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     post.mockRejectedValue({ response: { status: 409, data: { live: { applications: [{ id: 'a1' }], matches: [] } } } })
     // Row-level pre-filter says "safe" (empty stage, not placed) — the 409 is the last line of defence.
     const r = harness([cand({ id: 1, stage: '', status: 'available' })])
     act(() => r.result.current.setSelectedIds(new Set([1])))
     await act(async () => { await r.result.current.actions.bulkArchive() })
-    expect(r.result.current.actions.bulkArchiveGuard).toMatchObject({ ids: [1] })
+    act(() => r.result.current.actions.dialog.props.onConfirm())
+    await waitFor(() => expect(r.result.current.actions.bulkArchiveGuard).toMatchObject({ ids: [1] }))
     expect(r.result.current.candidates).toHaveLength(1) // not removed — still blocked
   })
 })
@@ -296,13 +298,13 @@ describe('useCandidateBulkActions · bulkSetStatus (AXIS-MATRIX-2 N2 bulk prefli
       if (url === '/candidates/bulk/status') return Promise.resolve({ data: { updated: [1, 2] } })
       return Promise.reject(new Error('unexpected ' + url))
     })
-    const confirmSpy = vi.spyOn(window, 'confirm')
     const r = harness([cand({ id: 1, status: 'available' }), cand({ id: 2, status: 'available' })])
     act(() => r.result.current.setSelectedIds(new Set([1, 2])))
     await act(async () => { r.result.current.actions.bulkSetStatus('placed', 'Geplaatst') })
     await waitFor(() => expect(post).toHaveBeenCalledWith('/candidates/bulk/status', { candidate_ids: [1, 2], status: 'placed' }))
     expect(post).toHaveBeenCalledWith('/action-rules/preflight-bulk', { action: 'candidate.status_set', candidate_ids: [1, 2] })
-    expect(confirmSpy).not.toHaveBeenCalled()
+    // No confirm staged — the shared ConfirmDialog never opens (replaces window.confirm spy).
+    expect(r.result.current.actions.dialog.props.open).toBe(false)
   })
 
   it('confirms with the skip summary, then proceeds with the full selection once accepted', async () => {
@@ -314,11 +316,12 @@ describe('useCandidateBulkActions · bulkSetStatus (AXIS-MATRIX-2 N2 bulk prefli
       if (url === '/candidates/bulk/status') return Promise.resolve({ data: { updated: [1, 2] } })
       return Promise.reject(new Error('unexpected ' + url))
     })
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true)
     const r = harness([cand({ id: 1 }), cand({ id: 2 }), cand({ id: 3 })])
     act(() => r.result.current.setSelectedIds(new Set([1, 2, 3])))
     await act(async () => { r.result.current.actions.bulkSetStatus('placed', 'Geplaatst') })
-    expect(confirmSpy).toHaveBeenCalledWith('bulk.statusBlockedConfirm')
+    // Staged via the shared ConfirmDialog (replaces window.confirm) — assert the message, then confirm.
+    expect(r.result.current.actions.dialog.props.message).toBe('bulk.statusBlockedConfirm')
+    act(() => r.result.current.actions.dialog.props.onConfirm())
     await waitFor(() => expect(post).toHaveBeenCalledWith('/candidates/bulk/status', { candidate_ids: [1, 2, 3], status: 'placed' }))
   })
 
@@ -330,10 +333,10 @@ describe('useCandidateBulkActions · bulkSetStatus (AXIS-MATRIX-2 N2 bulk prefli
       })
       return Promise.reject(new Error('unexpected ' + url))
     })
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
     const r = harness([cand({ id: 1 }), cand({ id: 2 })])
     act(() => r.result.current.setSelectedIds(new Set([1, 2])))
     await act(async () => { r.result.current.actions.bulkSetStatus('placed', 'Geplaatst') })
+    act(() => r.result.current.actions.dialog.props.onCancel())
     expect(post).not.toHaveBeenCalledWith('/candidates/bulk/status', expect.anything())
   })
 
@@ -345,12 +348,11 @@ describe('useCandidateBulkActions · bulkSetStatus (AXIS-MATRIX-2 N2 bulk prefli
       })
       return Promise.reject(new Error('unexpected ' + url))
     })
-    const confirmSpy = vi.spyOn(window, 'confirm')
     const r = harness([cand({ id: 1 })])
     act(() => r.result.current.setSelectedIds(new Set([1])))
     await act(async () => { r.result.current.actions.bulkSetStatus('placed', 'Geplaatst') })
     await waitFor(() => expect(notify).toHaveBeenCalledWith('warning', 'bulk.statusAllBlocked'))
-    expect(confirmSpy).not.toHaveBeenCalled()
+    expect(r.result.current.actions.dialog.props.open).toBe(false)
     expect(post).not.toHaveBeenCalledWith('/candidates/bulk/status', expect.anything())
   })
 

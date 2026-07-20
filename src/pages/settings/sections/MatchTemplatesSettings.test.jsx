@@ -20,6 +20,8 @@ vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() })
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+// Same, for the shared ConfirmDialog's own labels (common namespace).
+const ct = (key, opts) => i18n.t(key, { ns: 'common', ...opts })
 
 const template = (over = {}) => ({
   id: 't1', name: 'Senior profile',
@@ -75,7 +77,6 @@ describe('MatchTemplatesSettings', () => {
         : Promise.resolve({ data: { data: [] } }))
     api.patch.mockResolvedValue({ data: { data: template({ linked_vacancies_count: 1 }) } })
     api.post.mockResolvedValue({ data: { applied: ['v1'], skipped: [] } })
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
 
     const user = userEvent.setup()
     render(<MatchTemplatesSettings />)
@@ -84,7 +85,8 @@ describe('MatchTemplatesSettings', () => {
     await user.click(await screen.findByRole('button', { name: st('common.save') }))
 
     await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/settings/match-weight-templates/t1', expect.any(Object)))
-    expect(window.confirm).toHaveBeenCalled()
+    // Confirm the apply-to-linked-vacancies prompt via the shared ConfirmDialog.
+    await user.click(await screen.findByRole('button', { name: ct('confirm') }))
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings/match-weight-templates/t1/apply', { all_linked: true }))
   })
 
@@ -94,7 +96,6 @@ describe('MatchTemplatesSettings', () => {
         ? Promise.resolve({ data: { data: [template({ linked_vacancies_count: 1 })] } })
         : Promise.resolve({ data: { data: [] } }))
     api.patch.mockResolvedValue({ data: { data: template({ linked_vacancies_count: 1 }) } })
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
 
     const user = userEvent.setup()
     render(<MatchTemplatesSettings />)
@@ -103,7 +104,8 @@ describe('MatchTemplatesSettings', () => {
     await user.click(await screen.findByRole('button', { name: st('common.save') }))
 
     await waitFor(() => expect(api.patch).toHaveBeenCalledTimes(1))
-    expect(window.confirm).toHaveBeenCalled()
+    // Decline the apply-to-linked-vacancies prompt via the shared ConfirmDialog.
+    await user.click(await screen.findByRole('button', { name: ct('cancel') }))
     expect(api.post).not.toHaveBeenCalled()
   })
 
@@ -113,13 +115,14 @@ describe('MatchTemplatesSettings', () => {
         ? Promise.resolve({ data: { data: [template({ linked_vacancies_count: 0 })] } })
         : Promise.resolve({ data: { data: [] } }))
     api.delete.mockRejectedValue({ response: { status: 409 } })
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
 
     const user = userEvent.setup()
     render(<MatchTemplatesSettings />)
     await waitFor(() => expect(screen.getByText('Senior profile')).toBeInTheDocument())
     await user.click(screen.getByRole('button', { name: `${st('common.edit')}: Senior profile` }))
     await user.click(await screen.findByRole('button', { name: st('matchTemplatesSettings.delete') }))
+    // Confirm the delete via the shared ConfirmDialog.
+    await user.click(await screen.findByRole('button', { name: ct('confirm') }))
 
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/settings/match-weight-templates/t1'))
     // Row survives the 409 (never silently removed) — its name is still on screen.

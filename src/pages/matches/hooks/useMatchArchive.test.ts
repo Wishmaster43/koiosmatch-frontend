@@ -29,25 +29,26 @@ function harness() {
 
 beforeEach(() => {
   del.mockReset(); post.mockReset(); vi.mocked(notify).mockClear()
-  vi.spyOn(window, 'confirm').mockReturnValue(true)
 })
 
 describe('useMatchArchive · archiveMatch', () => {
   it('calls the per-id DELETE route (never bulk-with-one-id)', async () => {
     del.mockResolvedValue({})
     const { hook, onPatch, onReload } = harness()
-    await act(async () => { await hook.result.current.archiveMatch('m1') })
-    expect(del).toHaveBeenCalledWith('/matches/m1')
+    act(() => { hook.result.current.archiveMatch('m1') })
+    // Confirm via the shared ConfirmDialog (replaces window.confirm).
+    act(() => { hook.result.current.dialog.props.onConfirm() })
+    await waitFor(() => expect(del).toHaveBeenCalledWith('/matches/m1'))
     expect(del).not.toHaveBeenCalledWith(expect.stringContaining('bulk'))
-    expect(onPatch).toHaveBeenCalledWith('m1', expect.objectContaining({ archived: true }))
+    await waitFor(() => expect(onPatch).toHaveBeenCalledWith('m1', expect.objectContaining({ archived: true })))
     expect(onReload).toHaveBeenCalled()
     expect(notify).toHaveBeenCalledWith('success', expect.any(String))
   })
 
   it('does nothing when the confirm dialog is cancelled', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
     const { hook, onPatch } = harness()
-    await act(async () => { await hook.result.current.archiveMatch('m1') })
+    act(() => { hook.result.current.archiveMatch('m1') })
+    act(() => { hook.result.current.dialog.props.onCancel() })
     expect(del).not.toHaveBeenCalled()
     expect(onPatch).not.toHaveBeenCalled()
   })
@@ -55,16 +56,18 @@ describe('useMatchArchive · archiveMatch', () => {
   it('surfaces the active-contract message on a 409 (never the generic error)', async () => {
     del.mockRejectedValue({ response: { status: 409 } })
     const { hook, onPatch } = harness()
-    await act(async () => { await hook.result.current.archiveMatch('m1') })
-    expect(notify).toHaveBeenCalledWith('error', 'drawer.archiveBlockedActiveContract')
+    act(() => { hook.result.current.archiveMatch('m1') })
+    act(() => { hook.result.current.dialog.props.onConfirm() })
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('error', 'drawer.archiveBlockedActiveContract'))
     expect(onPatch).not.toHaveBeenCalled()
   })
 
   it('surfaces the generic failure message on any other error', async () => {
     del.mockRejectedValue({ response: { status: 500 } })
     const { hook } = harness()
-    await act(async () => { await hook.result.current.archiveMatch('m1') })
-    expect(notify).toHaveBeenCalledWith('error', 'drawer.archiveFailed')
+    act(() => { hook.result.current.archiveMatch('m1') })
+    act(() => { hook.result.current.dialog.props.onConfirm() })
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('error', 'drawer.archiveFailed'))
   })
 })
 

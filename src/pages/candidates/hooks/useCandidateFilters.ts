@@ -118,6 +118,8 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
     if (attentionFilter === 'noFollowup')     p.no_followup = 1
     if (attentionFilter === 'hasTasks')       p.has_open_tasks = 1
     if (attentionFilter === 'intakePlanned')  p.intake_planned = 1
+    // CONV-FILTER-1: the active-conversations tile filters server-side (tile = list).
+    if (attentionFilter === 'activeConv')     p.active_conversations = 1
     // Period-click date range; set last so it wins over stale6m if both target last_contact.
     if (dateRange) p[dateRange.param] = [dateRange.from, dateRange.to]
     return p

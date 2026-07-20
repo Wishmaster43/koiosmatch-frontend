@@ -21,6 +21,7 @@ import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SectionCard from '@/components/ui/SectionCard'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
+import { useConfirm } from '@/hooks/useConfirm'
 import LocationDepartments from './LocationDepartments'
 import LocationContacts from './LocationContacts'
 import PlanningSummary from './PlanningSummary'
@@ -56,6 +57,7 @@ export default function LocationDetail({
   onSave, onDelete, onAddDepartment, onUpdateDepartment, onRemoveDepartment, onAddContact, onUpdateContact, close,
 }: Props) {
   const { t } = useTranslation('customers')
+  const { confirm, dialog } = useConfirm()
   const auth = useAuth()
   const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
   // The Extra sub-tab only shows when the tenant has defined customer_location custom fields (§3A(f)).
@@ -116,7 +118,7 @@ export default function LocationDetail({
     })
   }
 
-  const remove = () => { if (window.confirm(t('locations.detail.confirmDelete'))) { onDelete(l.id as Id); close() } }
+  const remove = () => confirm(t('locations.detail.confirmDelete'), () => { onDelete(l.id as Id); close() }, { danger: true })
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -170,6 +172,7 @@ export default function LocationDetail({
           <PlanningSummary customerId={customerId ?? ''} params={{ location_id: l.id }} />
         </SectionCard>
       )}
+      {dialog}
     </div>
   )
 }

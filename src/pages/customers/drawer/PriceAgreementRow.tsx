@@ -13,6 +13,7 @@ import { useCao } from '@/lib/useCao'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from '@/components/ui/SectionCard'
 import SafeHtml from '@/components/ui/SafeHtml'
+import { useConfirm } from '@/hooks/useConfirm'
 import PriceAgreementForm, { draftFromAgreement, draftToPayload } from './PriceAgreementForm'
 import type { PriceAgreementDraft } from './PriceAgreementForm'
 import type { PriceAgreement, PriceAgreementPayload } from '../hooks/usePriceAgreements'
@@ -43,10 +44,11 @@ export default function PriceAgreementRow({ agreement, onSave, onDelete }: {
   const { colorOf } = useCao()
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<PriceAgreementDraft>(() => draftFromAgreement(agreement))
+  const { confirm, dialog } = useConfirm()
 
   const startEdit = () => { setDraft(draftFromAgreement(agreement)); setEditing(true) }
   const save = () => { onSave(agreement.id, draftToPayload(draft)); setEditing(false) }
-  const remove = () => { if (window.confirm(t('priceAgreements.confirmDelete'))) onDelete(agreement.id) }
+  const remove = () => confirm(t('priceAgreements.confirmDelete'), () => onDelete(agreement.id), { danger: true })
 
   const caoColor = agreement.cao ? (colorOf(agreement.cao) ?? '#6B7280') : undefined
   const margin = (agreement.purchaseRate != null && agreement.saleRate != null) ? agreement.saleRate - agreement.purchaseRate : null
@@ -98,6 +100,7 @@ export default function PriceAgreementRow({ agreement, onSave, onDelete }: {
 
       {/* Remarks is rich-text HTML (RichTextEditor in the form above) — sanitised render, never raw. */}
       {agreement.remarks && <SafeHtml html={agreement.remarks} style={{ fontSize: 12, color: 'var(--text-muted)' }} />}
+      {dialog}
     </div>
   )
 }

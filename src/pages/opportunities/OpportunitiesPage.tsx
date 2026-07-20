@@ -59,7 +59,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   // ARCHIVE-1: per-id archive/restore (routes pre-date this sweep; see the hook's
   // own comment). Gated on the SAME permission each route requires server-side —
   // opportunities.delete for the trash icon, opportunities.update for restore.
-  const { archiveOpportunity, restoreOpportunity } = useOpportunityArchive({ onPatch: updateOpportunity, onReload: reload })
+  const { archiveOpportunity, restoreOpportunity, dialog: archiveConfirmDialog } = useOpportunityArchive({ onPatch: updateOpportunity, onReload: reload })
 
   // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
   // through it and a copied link reopens the same opportunity (NAV-BACK-1 —
@@ -255,6 +255,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
           onArchive={hasPermission('opportunities.delete') ? archiveOpportunity : undefined}
           onRestore={hasPermission('opportunities.update') ? restoreOpportunity : undefined}
         />
+        {archiveConfirmDialog}
       </div>
     </>
   )

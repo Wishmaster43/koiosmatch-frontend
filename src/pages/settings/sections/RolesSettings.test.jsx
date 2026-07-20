@@ -70,8 +70,11 @@ describe('PermissionMatrix — CRUD grid + Other column', () => {
     const user = userEvent.setup()
     render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={onToggle} />)
 
-    const cell = screen.getByTitle('candidates.create')
-    await user.click(cell.querySelector('button'))
+    // The toggle itself carries the accessible name now (a11y fix: aria-label/title
+    // moved off the wrapper div straight onto the button) — select it by role/name.
+    const toggle = screen.getByRole('button', { name: `${st('roles.groups.candidates')} — ${st('roles.actions.create')}` })
+    expect(toggle).toHaveAttribute('aria-label')
+    await user.click(toggle)
     expect(onToggle).toHaveBeenCalledWith('candidates.create')
   })
 
@@ -81,8 +84,8 @@ describe('PermissionMatrix — CRUD grid + Other column', () => {
     const user = userEvent.setup()
     render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={onToggle} />)
 
-    const cell = screen.getByTitle('shifts.offer')
-    await user.click(cell.querySelector('button'))
+    const toggle = screen.getByRole('button', { name: `${st('roles.groups.shifts')} — ${st('roles.actions.offer')}` })
+    await user.click(toggle)
     expect(onToggle).toHaveBeenCalledWith('shifts.offer')
   })
 })
@@ -137,8 +140,10 @@ describe('RolesSettings — end-to-end toggle through the matrix', () => {
     render(<RolesSettings />)
 
     await user.click(await screen.findByRole('button', { name: st('roles.edit') }))
-    const cell = await screen.findByTitle('candidates.create')
-    await user.click(cell.querySelector('button'))
+    // Title/aria-label now sit directly on the toggle button (no wrapper div) —
+    // find it by its accessible name and click it directly.
+    const toggle = await screen.findByTitle('candidates.create')
+    await user.click(toggle)
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith(
       '/roles/r1/permissions', { permissions: ['candidates.view', 'candidates.create'] }))

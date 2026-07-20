@@ -29,25 +29,26 @@ function harness() {
 
 beforeEach(() => {
   del.mockReset(); post.mockReset(); vi.mocked(notify).mockClear()
-  vi.spyOn(window, 'confirm').mockReturnValue(true)
 })
 
 describe('useOpportunityArchive · archiveOpportunity', () => {
   it('calls the per-id DELETE route (never bulk/archive with one id)', async () => {
     del.mockResolvedValue({})
     const { hook, onPatch, onReload } = harness()
-    await act(async () => { await hook.result.current.archiveOpportunity('o1') })
-    expect(del).toHaveBeenCalledWith('/opportunities/o1')
+    act(() => { hook.result.current.archiveOpportunity('o1') })
+    // Confirm via the shared ConfirmDialog (replaces window.confirm).
+    act(() => { hook.result.current.dialog.props.onConfirm() })
+    await waitFor(() => expect(del).toHaveBeenCalledWith('/opportunities/o1'))
     expect(del).not.toHaveBeenCalledWith(expect.stringContaining('bulk'))
-    expect(onPatch).toHaveBeenCalledWith('o1', expect.objectContaining({ archived: true }))
+    await waitFor(() => expect(onPatch).toHaveBeenCalledWith('o1', expect.objectContaining({ archived: true })))
     expect(onReload).toHaveBeenCalled()
     expect(notify).toHaveBeenCalledWith('success', expect.any(String))
   })
 
   it('does nothing when the confirm dialog is cancelled', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
     const { hook, onPatch } = harness()
-    await act(async () => { await hook.result.current.archiveOpportunity('o1') })
+    act(() => { hook.result.current.archiveOpportunity('o1') })
+    act(() => { hook.result.current.dialog.props.onCancel() })
     expect(del).not.toHaveBeenCalled()
     expect(onPatch).not.toHaveBeenCalled()
   })
@@ -55,9 +56,10 @@ describe('useOpportunityArchive · archiveOpportunity', () => {
   it('surfaces a failure toast when the delete call rejects', async () => {
     del.mockRejectedValue({ response: { status: 500 } })
     const { hook, onPatch } = harness()
-    await act(async () => { await hook.result.current.archiveOpportunity('o1') })
+    act(() => { hook.result.current.archiveOpportunity('o1') })
+    act(() => { hook.result.current.dialog.props.onConfirm() })
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('error', expect.any(String)))
     expect(onPatch).not.toHaveBeenCalled()
-    expect(notify).toHaveBeenCalledWith('error', expect.any(String))
   })
 })
 

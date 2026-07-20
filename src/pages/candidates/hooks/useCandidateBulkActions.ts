@@ -15,6 +15,7 @@ import type { TFunction } from 'i18next'
 import api from '@/lib/api'
 import { metaOf, initialsOf } from '../data/candidatesShared'
 import { needsLiveCheck, fetchLiveBlockers, liveFromError } from '../data/archiveGuard'
+import { useConfirm } from '@/hooks/useConfirm'
 import type { BlockingApplication, BlockingMatch } from '../data/archiveGuard'
 import type { Candidate, CandidatePool } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
@@ -72,6 +73,7 @@ interface BulkMutateArgs {
 export function useCandidateBulkActions({
   candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t, funnelTypes, candidateTypes,
 }: UseCandidateBulkActionsParams) {
+  const { confirm, dialog } = useConfirm()
   // ── Bulk selection ──
   const toggleRow = (id: Id) => setSelectedIds(prev => {
     const next = new Set(prev)
@@ -294,8 +296,7 @@ export function useCandidateBulkActions({
       })
       return
     }
-    if (!window.confirm(t('bulk.archiveConfirm', { count: ids.length }))) return
-    runBulkArchive(ids)
+    confirm(t('bulk.archiveConfirm', { count: ids.length }), () => runBulkArchive(ids), { danger: true })
   }
 
   // The modal's primary action: every blocker resolved → run the real bulk archive.
@@ -355,7 +356,7 @@ export function useCandidateBulkActions({
           .map(g => `${g.count} ${axisConditionLabel(g.condition)}`).join(', ')
         const proceed = total - blocked
         if (proceed <= 0) { notify('warning', t('bulk.statusAllBlocked', { total, reasons })); return }
-        if (window.confirm(t('bulk.statusBlockedConfirm', { blocked, total, reasons, proceed }))) runBulkSetStatus(status, label)
+        confirm(t('bulk.statusBlockedConfirm', { blocked, total, reasons, proceed }), () => runBulkSetStatus(status, label))
       })
       // The preflight is a courtesy preview, not a gate — a network hiccup or a
       // permission read-gap must never block the actual (still server-enforced) action.
@@ -395,5 +396,6 @@ export function useCandidateBulkActions({
     selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive,
     bulkArchiveGuard, setBulkArchiveGuard, resolveBulkArchiveGuard,
     bulkMergeTarget, bulkMergePrompt, resolveBulkMerge,
+    dialog,
   }
 }

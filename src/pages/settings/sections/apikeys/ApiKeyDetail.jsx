@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Check, Copy, Key, MoreHorizontal, Power, RefreshCw, Trash2 } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import ActionMenu from '@/components/ui/ActionMenu'
+import { useConfirm } from '@/hooks/useConfirm'
 import { getApiKey, updateApiKey, deleteApiKey, regenerateApiKey } from './apiKeysApi'
 import ApiKeyGeneralTab from './ApiKeyGeneralTab'
 import ApiKeyAccessTab from './ApiKeyAccessTab'
@@ -23,6 +24,7 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
   const [tab, setTab]         = useState('general')
   const [secret, setSecret]   = useState(null)   // one-time secret after regenerate
   const [copied, setCopied]   = useState(false)
+  const { confirm, dialog } = useConfirm()
 
   // Fetch full detail (scopes/ips/contact); fall back to the list row on failure.
   useEffect(() => {
@@ -56,9 +58,10 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
     const next = (apiKey?.status ?? 'active') === 'active' ? 'disabled' : 'active'
     applyUpdate({ status: next }).catch(() => {})
   }
-  const remove = async () => {
-    if (!window.confirm(t('apiKeys.deleteConfirm', { name: apiKey?.friendly_name ?? '' }))) return
-    try { await deleteApiKey(keyId); onDelete?.(keyId) } catch { /* noop */ }
+  const remove = () => {
+    confirm(t('apiKeys.deleteConfirm', { name: apiKey?.friendly_name ?? '' }), async () => {
+      try { await deleteApiKey(keyId); onDelete?.(keyId) } catch { /* noop */ }
+    }, { danger: true })
   }
   const copySecret = () => { navigator.clipboard.writeText(secret ?? ''); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
@@ -126,6 +129,7 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
       {tab === 'general'
         ? <ApiKeyGeneralTab apiKey={apiKey} onSave={applyUpdate} />
         : <ApiKeyAccessTab scopes={apiKey.scopes ?? {}} onSave={(scopes) => applyUpdate({ scopes })} />}
+      {dialog}
     </div>
   )
 }

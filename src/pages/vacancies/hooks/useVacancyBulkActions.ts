@@ -10,6 +10,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import api from '@/lib/api'
 import { initialsOf, subsetOf } from '../data/vacanciesShared'
+import { useConfirm } from '@/hooks/useConfirm'
 import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -31,6 +32,7 @@ interface UseVacancyBulkActionsArgs {
 interface BulkMutateArgs { url: string; body: Record<string, unknown>; patch: Record<string, unknown>; keys: string[]; onSuccess: (n: number) => void }
 
 export function useVacancyBulkActions({ vacancies, setVacancies, setTotal, selectedIds, setSelectedIds, notify, t, statusMeta }: UseVacancyBulkActionsArgs) {
+  const { confirm, dialog } = useConfirm()
   // ── Bulk selection ──
   const toggleRow = (id: Id) => setSelectedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next })
   const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => { const next = new Set(prev); ids.forEach(id => { if (allSelected) next.delete(id); else next.add(id) }); return next })
@@ -106,17 +108,18 @@ export function useVacancyBulkActions({ vacancies, setVacancies, setTotal, selec
   const bulkArchive = () => {
     const ids = [...selectedIds]
     if (!ids.length) return
-    if (!window.confirm(t('bulk.archiveConfirm', { count: ids.length }))) return
-    api.post('/vacancies/bulk/archive', { vacancy_ids: ids })
-      .then(res => {
-        const archived: Id[] = Array.isArray(res.data?.archived) ? res.data.archived : ids
-        const set = new Set(archived)
-        setVacancies(prev => prev.filter(v => !set.has(v.id!)))
-        setTotal(tt => Math.max(0, tt - archived.length))
-        notify('success', t('bulk.archived', { count: archived.length }))
-      })
-      .catch(() => notify('error', t('bulk.archiveError')))
-    setSelectedIds(new Set())
+    confirm(t('bulk.archiveConfirm', { count: ids.length }), () => {
+      api.post('/vacancies/bulk/archive', { vacancy_ids: ids })
+        .then(res => {
+          const archived: Id[] = Array.isArray(res.data?.archived) ? res.data.archived : ids
+          const set = new Set(archived)
+          setVacancies(prev => prev.filter(v => !set.has(v.id!)))
+          setTotal(tt => Math.max(0, tt - archived.length))
+          notify('success', t('bulk.archived', { count: archived.length }))
+        })
+        .catch(() => notify('error', t('bulk.archiveError')))
+      setSelectedIds(new Set())
+    }, { danger: true })
   }
 
   // Union of tags across the selected vacancies — the "remove tag" option list.
@@ -126,5 +129,5 @@ export function useVacancyBulkActions({ vacancies, setVacancies, setTotal, selec
     return [...set]
   }, [vacancies, selectedIds])
 
-  return { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkSetClient, bulkPublish, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags }
+  return { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkSetClient, bulkPublish, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags, dialog }
 }

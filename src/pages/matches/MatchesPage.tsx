@@ -243,7 +243,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
 
   // ARCHIVE-1: per-id archive/restore (enkelstuks-sweep, BE 9170e40) — gated on
   // matches.update, the same permission the DELETE/restore routes themselves require.
-  const { archiveMatch, restoreMatch } = useMatchArchive({ onPatch: patchRow, onReload: reload })
+  const { archiveMatch, restoreMatch, dialog: archiveConfirmDialog } = useMatchArchive({ onPatch: patchRow, onReload: reload })
   const canArchive = hasPermission('matches.update')
 
   // View toggle: table ⇄ board (planboard). Board columns = the tenant match
@@ -381,6 +381,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       {/* Direct-match creation: the full placement form (rate proposal, contract,
           cost center) with a candidate picker; refetch so server-derived fields land. */}
       {addOpen && <MatchPlacementModal onClose={() => setAddOpen(false)} onCreated={reload} />}
+      {archiveConfirmDialog}
     </div>
   )
 }

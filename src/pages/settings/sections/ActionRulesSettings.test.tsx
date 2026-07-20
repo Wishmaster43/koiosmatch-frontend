@@ -26,6 +26,8 @@ vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() })
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
+// Same, for the shared ConfirmDialog's own labels (common namespace).
+const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
 
 // The full seed-default matrix, exactly as `GET /action-rules` would return it for a
 // tenant with no overrides yet — built from the same catalog mirror the component uses.
@@ -209,13 +211,13 @@ describe('ActionRulesSettings', () => {
     const overridden = fullDefaultMatrix().map((r) =>
       r.action === 'application.create' && r.condition === 'blacklist' ? { ...r, effect: 'allow' } : r)
     ;(api.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: { data: overridden } })
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     const user = userEvent.setup()
     render(<ActionRulesSettings />)
     await waitFor(() => expect(screen.getByText(st('actionRules.title'))).toBeInTheDocument())
 
     await user.click(screen.getByRole('button', { name: st('actionRules.saveBar.resetAll') }))
-    expect(window.confirm).toHaveBeenCalled()
+    // Confirm via the shared ConfirmDialog (replaces window.confirm).
+    await user.click(await screen.findByRole('button', { name: ct('confirm') }))
 
     const actionLabel = st('actionRules.actions.application_create')
     const conditionLabel = st('actionRules.conditions.blacklist')

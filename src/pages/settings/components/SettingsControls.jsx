@@ -42,9 +42,13 @@ export function ColorSwatch({ color, onChange }) {
 }
 
 // Small pill toggle (used by Roles permissions and notification preferences).
-export function PermissionToggle({ checked, onChange }) {
+// Forwards aria-label/title/rest props straight onto the button so callers can
+// give it an accessible name (e.g. the permission matrix's "<group> — <action>")
+// without a wrapping element — additive, existing callers without these props
+// are unaffected.
+export function PermissionToggle({ checked, onChange, ...rest }) {
   return (
-    <button onClick={onChange}
+    <button {...rest} onClick={onChange}
       style={{ width: 32, height: 18, borderRadius: 999, border: 'none', cursor: 'pointer',
                background: checked ? 'var(--color-primary)' : '#E5E7EB', position: 'relative',
                transition: 'background 0.15s', flexShrink: 0 }}>

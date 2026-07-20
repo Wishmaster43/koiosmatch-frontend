@@ -21,6 +21,7 @@ import { AlertTriangle } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import SubTabBar from '@/components/drawer/SubTabBar'
+import { useConfirm } from '@/hooks/useConfirm'
 import type { ActionRuleMatrixRow, Effect } from './actionrules/types'
 import { cellKey } from './actionrules/types'
 import {
@@ -48,6 +49,7 @@ export default function ActionRulesSettings() {
   const [savedOk, setSavedOk] = useState(false)
   const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null)
   const [activeTab, setActiveTab] = useState<MatrixTab>('candidate')
+  const { confirm, dialog } = useConfirm()
 
   // Switching tabs drops any open cell-detail selection — it belongs to a grid that's
   // about to be hidden, so keeping it open would show stale detail for an invisible cell.
@@ -98,14 +100,15 @@ export default function ActionRulesSettings() {
 
   // Revert every non-locked cell to its catalog default — confirm-gated (bulk, silent-discard risk).
   const resetAll = () => {
-    if (!window.confirm(t('actionRules.saveBar.confirmResetAll'))) return
-    setDraft((prev) => {
-      const next = { ...prev }
-      Object.keys(next).forEach((key) => {
-        const [action, condition] = key.split('|')
-        if (!isLockedCell(action, condition)) next[key] = defaultEffectFor(action, condition)
+    confirm(t('actionRules.saveBar.confirmResetAll'), () => {
+      setDraft((prev) => {
+        const next = { ...prev }
+        Object.keys(next).forEach((key) => {
+          const [action, condition] = key.split('|')
+          if (!isLockedCell(action, condition)) next[key] = defaultEffectFor(action, condition)
+        })
+        return next
       })
-      return next
     })
   }
 
@@ -212,6 +215,7 @@ export default function ActionRulesSettings() {
           onCycle={cycle} onSelectDetail={(action, condition) => setSelectedCell({ action, condition })}
         />
       )}
+      {dialog}
     </div>
   )
 }

@@ -26,6 +26,7 @@ import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useCustomFields } from '@/lib/useCustomFields'
+import { useConfirm } from '@/hooks/useConfirm'
 import { waDigits } from '@/lib/waDigits'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
@@ -45,6 +46,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
   close: () => void
 }) {
   const { t } = useTranslation('customers')
+  const { confirm, dialog } = useConfirm()
   const [editing, setEditing] = useState(false)
   // The Extra sub-tab only shows when the tenant has defined customer_contact custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer_contact')
@@ -87,7 +89,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
     setEditing(false)
   }
 
-  const remove = () => { if (window.confirm(t('contacts.deleteConfirm'))) { onDelete(contact.id as Id); close() } }
+  const remove = () => confirm(t('contacts.deleteConfirm'), () => { onDelete(contact.id as Id); close() }, { danger: true })
 
   // Phone numbers — own small self-contained edit block (pencil → save/cancel),
   // same pattern as the candidate ProfileTab's contact card (mobile → WhatsApp,
@@ -187,6 +189,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
         <CustomFieldsTab entityType="customer_contact" values={contact.customFields ?? {}}
           onSave={patch => onSave(contact.id as Id, { customFields: { ...contact.customFields, ...patch } })} />
       )}
+      {dialog}
     </div>
   )
 }

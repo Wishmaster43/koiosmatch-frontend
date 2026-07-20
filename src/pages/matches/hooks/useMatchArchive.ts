@@ -15,6 +15,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { notify } from '@/lib/notify'
+import { useConfirm } from '@/hooks/useConfirm'
 import type { MatchRow } from '@/types/match'
 
 interface Args {
@@ -29,25 +30,27 @@ export function useMatchArchive({ onPatch, onReload }: Args) {
   const { t } = useTranslation('matches')
   const [archiving, setArchiving] = useState(false)
   const [restoring, setRestoring] = useState(false)
+  const { confirm, dialog } = useConfirm()
 
   // DELETE /matches/{id} — reversible soft-delete. The backend refuses with 409
   // while the placement's HelloFlex contract is still active (end it first) —
   // surfaced as its own message rather than the generic failure toast.
-  const archiveMatch = async (id: MatchRow['id']) => {
+  const archiveMatch = (id: MatchRow['id']) => {
     if (id == null || archiving) return
-    if (!window.confirm(t('drawer.archiveConfirm'))) return
-    setArchiving(true)
-    try {
-      await api.delete(`/matches/${id}`)
-      onPatch(id, { archived: true, archivedAt: new Date().toISOString() })
-      onReload()
-      notify('success', t('drawer.archived'))
-    } catch (e) {
-      const status = (e as { response?: { status?: number } })?.response?.status
-      notify('error', status === 409 ? t('drawer.archiveBlockedActiveContract') : t('drawer.archiveFailed'))
-    } finally {
-      setArchiving(false)
-    }
+    confirm(t('drawer.archiveConfirm'), async () => {
+      setArchiving(true)
+      try {
+        await api.delete(`/matches/${id}`)
+        onPatch(id, { archived: true, archivedAt: new Date().toISOString() })
+        onReload()
+        notify('success', t('drawer.archived'))
+      } catch (e) {
+        const status = (e as { response?: { status?: number } })?.response?.status
+        notify('error', status === 409 ? t('drawer.archiveBlockedActiveContract') : t('drawer.archiveFailed'))
+      } finally {
+        setArchiving(false)
+      }
+    }, { danger: true })
   }
 
   // POST /matches/{id}/restore — un-archive. The response carries the fresh
@@ -69,5 +72,5 @@ export function useMatchArchive({ onPatch, onReload }: Args) {
     }
   }
 
-  return { archiveMatch, restoreMatch, archiving, restoring }
+  return { archiveMatch, restoreMatch, archiving, restoring, dialog }
 }

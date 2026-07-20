@@ -125,7 +125,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
     selected, detail, drawerExpanded, setDrawerExpanded, drawerTab,
     closeDrawer, selectCustomer, updateCustomer, handleCreate, addNote,
   } = useCustomerRecord({ setCustomers, setTotal, users, t })
-  const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags } =
+  const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags, dialog: bulkConfirmDialog } =
     useCustomerBulkActions({ customers, setCustomers, setTotal, selectedIds, setSelectedIds, notify, statusMeta, t })
 
   // Open a customer drawer when arriving via a cross-entity link (intent).
@@ -354,6 +354,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
           contactStatuses={contactStatuses}
           initialTab={drawerTab}
         />
+        {bulkConfirmDialog}
       </div>
     </>
   )

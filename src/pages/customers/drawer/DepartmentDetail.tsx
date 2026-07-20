@@ -22,6 +22,7 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import EditableRichTextField from './EditableRichTextField'
 import { useCustomFields } from '@/lib/useCustomFields'
+import { useConfirm } from '@/hooks/useConfirm'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
@@ -38,6 +39,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   close: () => void
 }) {
   const { t } = useTranslation('customers')
+  const { confirm, dialog } = useConfirm()
   // The Extra sub-tab only shows when the tenant has defined customer_department custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer_department')
   // Sub-tabs (short labels, Danny 2026-07-14) — default Gegevens.
@@ -63,7 +65,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   }
   const saveDescription = (html: string) => onSave(department.id as Id, { description: html })
 
-  const remove = () => { if (window.confirm(t('departments.deleteConfirm'))) { onDelete(department.id as Id); close() } }
+  const remove = () => confirm(t('departments.deleteConfirm'), () => { onDelete(department.id as Id); close() }, { danger: true })
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -116,6 +118,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
             )}
         </SectionCard>
       )}
+      {dialog}
     </div>
   )
 }

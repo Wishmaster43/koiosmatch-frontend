@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 import { SettingCard, SettingRow, Toggle } from '../components/SettingsKit'
 import { useAllSettings, getBoolSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import { useConfirm } from '@/hooks/useConfirm'
 
 /**
  * FunctionsSettings — the tenant job-function list (/functions) plus the field-mode
@@ -24,13 +25,17 @@ export default function FunctionsSettings() {
   // an already-persisted tenant value (getBoolSetting only falls back when unset).
   const freeEntry = getBoolSetting(settings, 'functions_allow_free_entry', false)
   const [busy, setBusy] = useState(false)
+  const { confirm, dialog } = useConfirm()
 
   // Persist the mode; confirm before loosening to free-text (data-quality choice).
-  const onToggle = async (next) => {
+  const onToggle = (next) => {
     if (busy) return
-    if (next && !window.confirm(t('functionsSettings.confirmFreeEntry'))) return
-    setBusy(true)
-    try { await saveSettingsKeys({ functions_allow_free_entry: next }) } finally { setBusy(false) }
+    const persist = async () => {
+      setBusy(true)
+      try { await saveSettingsKeys({ functions_allow_free_entry: next }) } finally { setBusy(false) }
+    }
+    if (next) confirm(t('functionsSettings.confirmFreeEntry'), persist)
+    else persist()
   }
 
   return (
@@ -50,6 +55,7 @@ export default function FunctionsSettings() {
           withColor={false}
         />
       </div>
+      {dialog}
     </div>
   )
 }

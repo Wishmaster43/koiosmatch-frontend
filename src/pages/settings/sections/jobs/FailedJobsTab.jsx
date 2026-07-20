@@ -1,14 +1,15 @@
 /**
  * FailedJobsTab — Taakbeheer → Mislukt: the failure log with per-row retry/forget
  * and the two bulk interventions (retry-all, flush). Both bulk actions are
- * destructive/irreversible, so each is gated behind a native confirm() naming
+ * destructive/irreversible, so each is gated behind the shared ConfirmDialog naming
  * the exact count — mirrors the confirm pattern used for API-key/webhook delete
- * elsewhere in Settings (no custom modal component exists for this yet).
+ * elsewhere in Settings.
  */
 import { useTranslation } from 'react-i18next'
 import { RefreshCw, Trash2, X } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import { formatDT } from '@/components/reports/runFormat'
+import { useConfirm } from '@/hooks/useConfirm'
 import { useFailedJobs } from './useFailedJobs'
 import { BTN_H } from '@/config/buttonMetrics'
 
@@ -19,10 +20,11 @@ export default function FailedJobsTab() {
     retry, forget, retryAll, flush, busyId, bulkBusy, actionError, setActionError,
     truncated,
   } = useFailedJobs()
+  const { confirm, dialog } = useConfirm()
 
   // Bulk actions are irreversible — confirm with the exact count before firing.
-  const confirmRetryAll = () => { if (window.confirm(t('jobs.retryAllConfirm', { count: result.total }))) retryAll() }
-  const confirmFlush = () => { if (window.confirm(t('jobs.flushConfirm', { count: result.total }))) flush() }
+  const confirmRetryAll = () => confirm(t('jobs.retryAllConfirm', { count: result.total }), retryAll)
+  const confirmFlush = () => confirm(t('jobs.flushConfirm', { count: result.total }), flush, { danger: true })
 
   const columns = [
     { key: 'queue', header: t('jobs.col.queue'), nowrap: true },
@@ -40,7 +42,7 @@ export default function FailedJobsTab() {
               border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
             {t('jobs.retry')}
           </button>
-          <button type="button" disabled={busyId === r.uuid} onClick={() => { if (window.confirm(t('jobs.forgetConfirm'))) forget(r.uuid) }}
+          <button type="button" disabled={busyId === r.uuid} onClick={() => confirm(t('jobs.forgetConfirm'), () => forget(r.uuid), { danger: true })}
             style={{ fontSize: 12, fontWeight: 500, padding: '4px 10px', borderRadius: 7, cursor: busyId === r.uuid ? 'wait' : 'pointer',
               border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}>
             {t('jobs.forget')}
@@ -112,6 +114,7 @@ export default function FailedJobsTab() {
           </button>
         </div>
       )}
+      {dialog}
     </div>
   )
 }

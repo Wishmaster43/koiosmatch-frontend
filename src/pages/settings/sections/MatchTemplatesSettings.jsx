@@ -4,6 +4,7 @@ import { Plus, Trash2, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-reac
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import Slider from '@/components/ui/Slider'
+import { useConfirm } from '@/hooks/useConfirm'
 
 // The six scoring dimensions (mirrors the backend App\Enums\MatchDimension, single
 // source of truth there, and the vacancy Matching tab's picker). Duplicated here on
@@ -60,6 +61,7 @@ export default function MatchTemplatesSettings() {
   const [saving, setSaving] = useState(null) // 'new' | template id | null
   const [editForms, setEditForms] = useState({})
   const [newForm, setNewForm] = useState({ name: '', weights: buildWeights(), employment_type_id: '', function_title: '' })
+  const { confirm, dialog } = useConfirm()
 
   // Load templates + the optional employment-type lookup for the default-assignment
   // picker (a template can auto-default to a new vacancy's type/function — read-only
@@ -116,10 +118,12 @@ export default function MatchTemplatesSettings() {
       setTemplates(p => p.map(x => x.id === tpl.id ? updated : x))
       setExpanded(null)
       const linked = updated.linked_vacancies_count ?? 0
-      if (linked > 0 && window.confirm(t('matchTemplatesSettings.applyPrompt', { count: linked }))) {
-        const applyRes = await api.post(`/settings/match-weight-templates/${tpl.id}/apply`, { all_linked: true })
-        const { applied = [], skipped = [] } = applyRes.data ?? {}
-        notifySuccess(t('matchTemplatesSettings.applyResult', { applied: applied.length, skipped: skipped.length }))
+      if (linked > 0) {
+        confirm(t('matchTemplatesSettings.applyPrompt', { count: linked }), async () => {
+          const applyRes = await api.post(`/settings/match-weight-templates/${tpl.id}/apply`, { all_linked: true })
+          const { applied = [], skipped = [] } = applyRes.data ?? {}
+          notifySuccess(t('matchTemplatesSettings.applyResult', { applied: applied.length, skipped: skipped.length }))
+        })
       }
     } catch {
       notifyError(t('matchTemplatesSettings.saveFailed'))
@@ -127,22 +131,23 @@ export default function MatchTemplatesSettings() {
   }
 
   // Delete — blocked while linked (409); the row is flagged so the disabled state sticks.
-  const handleDelete = async (tpl) => {
+  const handleDelete = (tpl) => {
     if ((tpl.linked_vacancies_count ?? 0) > 0) return
-    if (!window.confirm(t('matchTemplatesSettings.confirmDelete', { name: tpl.name }))) return
-    setSaving(tpl.id)
-    try {
-      await api.delete(`/settings/match-weight-templates/${tpl.id}`)
-      setTemplates(p => p.filter(x => x.id !== tpl.id))
-      if (expanded === tpl.id) setExpanded(null)
-    } catch (e) {
-      if (e?.response?.status === 409) {
-        setTemplates(p => p.map(x => x.id === tpl.id ? { ...x, linked_vacancies_count: Math.max(1, x.linked_vacancies_count ?? 1) } : x))
-        notifyError(t('matchTemplatesSettings.deleteBlocked'))
-      } else {
-        notifyError(t('matchTemplatesSettings.saveFailed'))
-      }
-    } finally { setSaving(null) }
+    confirm(t('matchTemplatesSettings.confirmDelete', { name: tpl.name }), async () => {
+      setSaving(tpl.id)
+      try {
+        await api.delete(`/settings/match-weight-templates/${tpl.id}`)
+        setTemplates(p => p.filter(x => x.id !== tpl.id))
+        if (expanded === tpl.id) setExpanded(null)
+      } catch (e) {
+        if (e?.response?.status === 409) {
+          setTemplates(p => p.map(x => x.id === tpl.id ? { ...x, linked_vacancies_count: Math.max(1, x.linked_vacancies_count ?? 1) } : x))
+          notifyError(t('matchTemplatesSettings.deleteBlocked'))
+        } else {
+          notifyError(t('matchTemplatesSettings.saveFailed'))
+        }
+      } finally { setSaving(null) }
+    }, { danger: true })
   }
 
   // One slider editor, shared by the create card and every edit card.
@@ -309,6 +314,7 @@ export default function MatchTemplatesSettings() {
           <Plus size={14} /> {t('matchTemplatesSettings.add')}
         </button>
       )}
+      {dialog}
     </div>
   )
 }

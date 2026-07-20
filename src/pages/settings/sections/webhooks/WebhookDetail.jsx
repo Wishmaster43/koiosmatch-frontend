@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Check, Copy, MoreHorizontal, Pencil, Power, RefreshCw, Save, Trash2, Webhook, X } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import ActionMenu from '@/components/ui/ActionMenu'
+import { useConfirm } from '@/hooks/useConfirm'
 import { getSubscription, updateSubscription, deleteSubscription, regenerateSecret } from './webhooksApi'
 import EventCatalog from './EventCatalog'
 import { BTN_H } from '@/config/buttonMetrics'
@@ -24,6 +25,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
   const [savedEv, setSavedEv]   = useState(false)
   const [secret, setSecret]   = useState(null)
   const [copied, setCopied]   = useState(false)
+  const { confirm, dialog } = useConfirm()
 
   // Fetch full detail; fall back to the list row on failure.
   useEffect(() => {
@@ -63,9 +65,10 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
   // Header actions.
   const regenerate = async () => { try { const res = await regenerateSecret(subId); setSecret(res?.secret ?? null) } catch { /* noop */ } }
   const toggleStatus = () => applyUpdate({ status: (sub?.status ?? 'active') === 'active' ? 'disabled' : 'active' }).catch(() => {})
-  const remove = async () => {
-    if (!window.confirm(t('webhooks.outgoing.deleteConfirm', { name: sub?.name ?? '' }))) return
-    try { await deleteSubscription(subId); onDelete?.(subId) } catch { /* noop */ }
+  const remove = () => {
+    confirm(t('webhooks.outgoing.deleteConfirm', { name: sub?.name ?? '' }), async () => {
+      try { await deleteSubscription(subId); onDelete?.(subId) } catch { /* noop */ }
+    }, { danger: true })
   }
   const copySecret = () => { navigator.clipboard.writeText(secret ?? ''); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
@@ -156,6 +159,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
         </div>
         <EventCatalog value={events} onChange={setEvents} />
       </div>
+      {dialog}
     </div>
   )
 }

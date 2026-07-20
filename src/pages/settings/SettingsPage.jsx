@@ -18,6 +18,7 @@ import { Search } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
 import { canAccessPage } from '@/lib/access'
+import { useConfirm } from '@/hooks/useConfirm'
 import { NAV_GROUPS } from './registry'
 import { SettingsDirtyContext } from './lib/settingsDirty'
 import SettingItem from './components/SettingItem'
@@ -99,14 +100,21 @@ export default function SettingsPage() {
   // Dirty-guard: migrated sections report through this; we confirm before leaving.
   const dirtyRef = useRef(false)
   const dirtyCtx = useMemo(() => ({ report: (d) => { dirtyRef.current = d } }), [])
-  const confirmLeave = () =>
-    !dirtyRef.current || window.confirm(t('common.unsavedConfirm'))
+  const { confirm, dialog } = useConfirm()
 
-  const goTo = (groupKey, tabId, { guard = true } = {}) => {
-    if (guard && !confirmLeave()) return false
+  // Apply the actual navigation — shared by the guarded and unguarded paths.
+  const applyNav = (groupKey, tabId) => {
     dirtyRef.current = false
     setCategory(groupKey)
     setTab(tabId)
+  }
+
+  const goTo = (groupKey, tabId, { guard = true } = {}) => {
+    if (guard && dirtyRef.current) {
+      confirm(t('common.unsavedConfirm'), () => applyNav(groupKey, tabId))
+      return false
+    }
+    applyNav(groupKey, tabId)
     return true
   }
   const selectCategory = (groupKey) => {
@@ -232,6 +240,7 @@ export default function SettingsPage() {
 
         <SettingsSearch open={searchOpen} onClose={() => setSearchOpen(false)}
           groups={visibleGroups} onSelect={(g, id) => goTo(g, id)} />
+        {dialog}
       </div>
     </SettingsDirtyContext.Provider>
   )

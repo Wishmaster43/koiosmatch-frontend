@@ -70,10 +70,9 @@ export function buildCandidateInsights({
     { key: 'intake',     label: t('kpi.intake'),           value: counts.intake,     sub: t('kpi.intakeSub'),           color: 'var(--color-violet)',
       onClick: () => toggleAttention('intakePlanned'), active: attentionFilter === 'intakePlanned' },
     // Actieve gesprekken = het CONV-COUNT-1-serveraggregaat (echte WhatsApp-
-    // conversaties ≤14 dgn, niet geëscaleerd). De klik filtert via de ECHTE
-    // conversatie-ids (interim /conversations-fetch in CandidatesPage tot het
-    // ?active_conversations-lijstfilter er is) — teller en lijst delen dus één
-    // definitie, nooit meer de lastContactAt-proxy.
+    // conversaties ≤14 dgn, niet geëscaleerd). De klik filtert server-side via
+    // ?active_conversations (CONV-FILTER-1) — dezelfde subquery als de teller,
+    // dus teller en lijst delen één definitie.
     { key: 'conversations', label: t('analytics.conversations'), value: counts.activeConv, color: 'var(--color-success)',
       onClick: () => toggleAttention('activeConv'), active: attentionFilter === 'activeConv' },
     { key: 'tasks', label: t('kpi.tasks'), value: counts.tasks, sub: t('kpi.tasksSub'), color: TASKS_ACCENT,

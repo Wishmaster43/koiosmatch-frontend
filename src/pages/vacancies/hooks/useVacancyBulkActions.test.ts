@@ -69,21 +69,22 @@ const tagsOf = (r: { result: { current: { vacancies: Array<Record<string, unknow
 
 describe('useVacancyBulkActions · archive + tag removal', () => {
   it('archives on confirm: drops confirmed rows and lowers the total', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     post.mockResolvedValue({ data: { archived: [1] } })
     const r = harness()
     act(() => r.result.current.setSelectedIds(new Set([1, 2])))
     act(() => r.result.current.actions.bulkArchive())
+    // Confirm via the staged ConfirmDialog (replaces window.confirm).
+    act(() => r.result.current.actions.dialog.props.onConfirm())
     await waitFor(() => expect(notify).toHaveBeenCalledWith('success', 'bulk.archived'))
     expect(r.result.current.vacancies.map(v => v.id)).toEqual([2]) // only id1 archived
     expect(r.result.current.total).toBe(1)
   })
 
   it('does nothing when archive is cancelled', () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
     const r = harness()
     act(() => r.result.current.setSelectedIds(new Set([1, 2])))
     act(() => r.result.current.actions.bulkArchive())
+    act(() => r.result.current.actions.dialog.props.onCancel())
     expect(post).not.toHaveBeenCalled()
     expect(r.result.current.vacancies).toHaveLength(2)
   })

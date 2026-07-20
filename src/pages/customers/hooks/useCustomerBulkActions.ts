@@ -10,6 +10,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import api from '@/lib/api'
 import { initialsOf } from '@/lib/initials'
+import { useConfirm } from '@/hooks/useConfirm'
 import type { Customer } from '@/types/customer'
 import type { Id } from '@/types/common'
 
@@ -31,6 +32,7 @@ const subsetOf = (obj: Record<string, unknown>, keys: string[]): Record<string, 
   keys.reduce<Record<string, unknown>>((a, k) => { a[k] = obj[k]; return a }, {})
 
 export function useCustomerBulkActions({ customers, setCustomers, setTotal, selectedIds, setSelectedIds, notify, statusMeta, t }: Args) {
+  const { confirm, dialog } = useConfirm()
   const toggleRow = (id: Id) => setSelectedIds(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n })
   const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => { const n = new Set(prev); ids.forEach(id => { if (allSelected) n.delete(id); else n.add(id) }); return n })
 
@@ -89,14 +91,15 @@ export function useCustomerBulkActions({ customers, setCustomers, setTotal, sele
   }
   const bulkArchive = () => {
     const ids = [...selectedIds]; if (!ids.length) return
-    if (!window.confirm(t('bulk.archiveConfirm', { count: ids.length }))) return
-    api.post('/customers/bulk/archive', { customer_ids: ids })
-      .then(res => { const archived: Id[] = Array.isArray(res.data?.archived) ? res.data.archived : ids; const set = new Set(archived)
-        setCustomers(prev => prev.filter(c => !set.has(c.id!))); setTotal(tt => Math.max(0, tt - archived.length))
-        notify('success', t('bulk.archived', { count: archived.length })) })
-      .catch(() => notify('error', t('bulk.archiveError')))
-    setSelectedIds(new Set())
+    confirm(t('bulk.archiveConfirm', { count: ids.length }), () => {
+      api.post('/customers/bulk/archive', { customer_ids: ids })
+        .then(res => { const archived: Id[] = Array.isArray(res.data?.archived) ? res.data.archived : ids; const set = new Set(archived)
+          setCustomers(prev => prev.filter(c => !set.has(c.id!))); setTotal(tt => Math.max(0, tt - archived.length))
+          notify('success', t('bulk.archived', { count: archived.length })) })
+        .catch(() => notify('error', t('bulk.archiveError')))
+      setSelectedIds(new Set())
+    }, { danger: true })
   }
 
-  return { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags }
+  return { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags, dialog }
 }

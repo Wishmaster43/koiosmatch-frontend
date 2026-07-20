@@ -177,7 +177,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // ── Bulk actions ──
-  const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkSetClient, bulkPublish, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags } =
+  const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkSetClient, bulkPublish, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags, dialog: bulkConfirmDialog } =
     useVacancyBulkActions({ vacancies, setVacancies, setTotal, selectedIds, setSelectedIds, notify, t, statusMeta: statusMetaSafe })
 
   // ── Insights strip: 4 donuts + funnel-phase KPI cards ──
@@ -341,6 +341,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
           onRestore={hasPermission('vacancies.update') ? restoreVacancy : undefined}
           users={users}
         />
+        {bulkConfirmDialog}
       </div>
     </>
   )

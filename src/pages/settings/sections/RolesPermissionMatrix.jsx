@@ -80,9 +80,9 @@ export function PermissionMatrix({ groups, hasPermission, onToggle }) {
                   return (
                     <td key={action} style={{ padding: '8px 10px', textAlign: 'center' }}>
                       {perm ? (
-                        <div role="group" title={perm.name} aria-label={`${groupLabel(group)} — ${actionLabel(action)}`}
-                          style={{ display: 'inline-flex' }}>
-                          <PermissionToggle checked={hasPermission(perm.name)} onChange={() => onToggle(perm.name)} />
+                        <div style={{ display: 'inline-flex' }}>
+                          <PermissionToggle checked={hasPermission(perm.name)} onChange={() => onToggle(perm.name)}
+                            title={perm.name} aria-label={`${groupLabel(group)} — ${actionLabel(action)}`} />
                         </div>
                       ) : <span aria-hidden="true" style={{ color: 'var(--text-muted)' }}>—</span>}
                     </td>
@@ -96,11 +96,10 @@ export function PermissionMatrix({ groups, hasPermission, onToggle }) {
                       {otherPerms.map(perm => {
                         const action = perm.name.split('.')[1] ?? perm.name
                         return (
-                          <div key={perm.name} role="group" title={perm.name}
-                            aria-label={`${groupLabel(group)} — ${otherLabel(action)}`}
-                            style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <div key={perm.name} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{otherLabel(action)}</span>
-                            <PermissionToggle checked={hasPermission(perm.name)} onChange={() => onToggle(perm.name)} />
+                            <PermissionToggle checked={hasPermission(perm.name)} onChange={() => onToggle(perm.name)}
+                              title={perm.name} aria-label={`${groupLabel(group)} — ${otherLabel(action)}`} />
                           </div>
                         )
                       })}
