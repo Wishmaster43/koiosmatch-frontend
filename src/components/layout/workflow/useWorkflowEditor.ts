@@ -81,6 +81,9 @@ export function computeWorkflowSnapshot(
   let triggerConfig: Record<string, unknown> | undefined
   if (trigger === 'Webhook' && webhookId) triggerConfig = { webhook_id: webhookId }
   else if (trigger === 'Scheduled' && scheduleConfig) triggerConfig = { schedule: scheduleConfig }
+  // Event trigger (BIRTHDAY-FLOW-2): trigger_config carries only the event key,
+  // matching the backend contract (Workflow::trigger_config['event']).
+  else if (trigger === 'Event' && scheduleConfig?.event) triggerConfig = { event: scheduleConfig.event }
   return JSON.stringify({ name, trigger, trigger_config: triggerConfig, status, steps })
 }
 
@@ -330,6 +333,9 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     let nextTriggerConfig: Record<string, unknown> | undefined = undefined
     if (trigger === 'Webhook' && webhookId) nextTriggerConfig = { webhook_id: webhookId }
     else if (trigger === 'Scheduled' && scheduleConfig) nextTriggerConfig = { schedule: scheduleConfig }
+    // Event trigger (BIRTHDAY-FLOW-2): trigger_config carries only the event key,
+    // matching the backend contract (Workflow::trigger_config['event']).
+    else if (trigger === 'Event' && scheduleConfig?.event) nextTriggerConfig = { event: scheduleConfig.event }
     onSave({ ...workflow, name, trigger, trigger_config: nextTriggerConfig, status, steps }, closeAfter)
     // A save just persisted the current state — it's the new dirty-check baseline.
     savedSnapshotRef.current = computeWorkflowSnapshot(nodes, edges, name, trigger, scheduleConfig, webhookId, status)

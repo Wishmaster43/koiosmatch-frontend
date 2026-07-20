@@ -45,9 +45,12 @@ export function normalizeWorkflow(wf: RawWorkflow): Workflow {
 }
 
 // Vertaal frontend trigger string → trigger_type + trigger_config
-function parseTrigger(trigger?: string): { trigger_type: string; trigger_config: Record<string, unknown> } {
+function parseTrigger(trigger?: string, config?: Record<string, unknown>): { trigger_type: string; trigger_config: Record<string, unknown> } {
   if (!trigger || trigger === 'Handmatig') return { trigger_type: 'manual', trigger_config: {} }
   if (trigger.toLowerCase().includes('webhook')) return { trigger_type: 'webhook', trigger_config: {} }
+  // Event trigger (BIRTHDAY-FLOW-2): keep the editor's { event } config verbatim —
+  // falling through to the scheduled-regex would silently ship trigger_type 'scheduled'.
+  if (trigger.toLowerCase() === 'event') return { trigger_type: 'event', trigger_config: { event: config?.event ?? null } }
   // "Dagelijks 08:00", "Elk uur", "Maandag 07:00" → scheduled
   const timeMatch = trigger.match(/(\d{2}:\d{2})/)
   return {
@@ -58,7 +61,7 @@ function parseTrigger(trigger?: string): { trigger_type: string; trigger_config:
 
 // Vertaal frontend formaat → backend formaat voor opslaan
 export function denormalizeWorkflow(wf: Workflow) {
-  const { trigger_type, trigger_config } = parseTrigger(wf.trigger)
+  const { trigger_type, trigger_config } = parseTrigger(wf.trigger, (wf as { trigger_config?: Record<string, unknown> }).trigger_config)
   return {
     name:           wf.name,
     trigger_type,

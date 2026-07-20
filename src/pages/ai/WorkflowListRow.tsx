@@ -10,7 +10,7 @@ import { useState } from 'react'
 import type { MouseEvent } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { AlertCircle, CheckCircle, Clock, HelpCircle, Loader2, MoreHorizontal, MousePointerClick, Play, Webhook, Zap } from 'lucide-react'
+import { AlertCircle, CheckCircle, Clock, HelpCircle, Loader2, MoreHorizontal, MousePointerClick, Play, Webhook, Zap, Bell } from 'lucide-react'
 import { interactive } from '@/lib/a11y'
 import { useDateFormat } from '@/lib/datetime'
 import { MODULE_META } from '@/modules/index'
@@ -81,6 +81,7 @@ function StepIconStack({ steps }: { steps: WorkflowStep[] }) {
 function triggerMeta(triggerType?: string): { Icon: LucideIcon; key: string } {
   if (triggerType === 'scheduled') return { Icon: Clock, key: 'list.triggerScheduled' }
   if (triggerType === 'webhook') return { Icon: Webhook, key: 'list.triggerWebhook' }
+  if (triggerType === 'event') return { Icon: Bell, key: 'list.triggerEvent' }
   return { Icon: MousePointerClick, key: 'list.triggerManual' }
 }
 

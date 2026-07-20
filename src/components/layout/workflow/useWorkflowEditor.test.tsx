@@ -233,6 +233,21 @@ describe('useWorkflowEditor · handleSave payload (denormalized per trigger)', (
     const [payload] = onSave.mock.calls[0]
     expect(payload.trigger_config).toEqual({ schedule: { schedule_type: 'daily', time: '08:00' } })
   })
+
+  // BIRTHDAY-FLOW-2: an Event trigger's payload must carry ONLY { event: <key> } in
+  // trigger_config — the exact shape WorkflowDispatcher::dispatch reads on the backend
+  // (Workflow::trigger_config['event']), never nested under a `schedule` key.
+  it('Event trigger: trigger_config carries only the event key set via setScheduleConfig', async () => {
+    const { result, onSave } = setup(
+      [{ id: 'n1', type: 'candidates', config: {}, position: { x: 0, y: 0 } }],
+      { trigger: 'Event' },
+    )
+    await waitFor(() => expect(result.current.nodesWithFirst).toHaveLength(1))
+    act(() => result.current.setScheduleConfig({ schedule_type: 'event', event: 'candidate.birthday' }))
+    act(() => result.current.handleSave())
+    const [payload] = onSave.mock.calls[0]
+    expect(payload.trigger_config).toEqual({ event: 'candidate.birthday' })
+  })
 })
 
 describe('useWorkflowEditor · isDirty (dirty-check baseline)', () => {

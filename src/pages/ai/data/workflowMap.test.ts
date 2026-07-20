@@ -140,3 +140,14 @@ describe('denormalizeWorkflow', () => {
     expect(payload).not.toHaveProperty('folder_id')
   })
 })
+
+// BIRTHDAY-FLOW-2: an Event trigger must round-trip as trigger_type 'event' with
+// its { event } config intact — never fall through to the scheduled-regex branch.
+describe('denormalizeWorkflow · event trigger', () => {
+  it('ships trigger_type event with the editor-built event key', () => {
+    const wf = { name: 'Bday', trigger: 'Event', trigger_config: { event: 'candidate.birthday' }, status: 'active', steps: [] }
+    const out = denormalizeWorkflow(wf as never)
+    expect(out.trigger_type).toBe('event')
+    expect(out.trigger_config).toMatchObject({ event: 'candidate.birthday' })
+  })
+})

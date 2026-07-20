@@ -52,4 +52,13 @@ describe('computeWorkflowSnapshot', () => {
     const b = computeWorkflowSnapshot(nodes, [], 'wf', 'Manual', { time: '20:00' } as never, null, 'draft')
     expect(a).toBe(b)
   })
+
+  // BIRTHDAY-FLOW-2: an Event trigger's event key participates in the dirty-check
+  // exactly like a Scheduled trigger's schedule config does.
+  it('changes when the event key changes on an Event trigger', () => {
+    const nodes: FlowNode[] = [node('a')]
+    const birthday = computeWorkflowSnapshot(nodes, [], 'wf', 'Event', { event: 'candidate.birthday' } as never, null, 'draft')
+    const other    = computeWorkflowSnapshot(nodes, [], 'wf', 'Event', { event: 'match.created' } as never, null, 'draft')
+    expect(other).not.toBe(birthday)
+  })
 })

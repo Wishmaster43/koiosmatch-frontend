@@ -107,8 +107,12 @@
       "instant": "Immédiat",
       "instantDesc": "Dès l'arrivée des données",
       "scheduled": "Planifié",
-      "scheduledDesc": "Automatiquement selon un calendrier"
+      "scheduledDesc": "Automatiquement selon un calendrier",
+      "event": "Événement",
+      "eventDesc": "Lors d'un événement dans Koios Match"
     },
+    "eventLabel": "Événement",
+    "eventHint": "Choisissez l'événement qui doit démarrer ce workflow.",
     "frequency": "Fréquence",
     "freq": {
       "interval": "Intervalle",
@@ -139,6 +143,7 @@
       "manual": "Manuel",
       "instant": "Immédiat",
       "scheduled": "Planifié",
+      "event": "Sur événement : {{event}}",
       "everyN": "Tous les {{n}} {{unit}}",
       "unitMin": "min",
       "unitHour": "h",
@@ -225,6 +230,7 @@
     "triggerScheduled": "Planifié",
     "triggerWebhook": "Webhook",
     "triggerManual": "Manuel",
+    "triggerEvent": "Événement",
     "setActive": "Activer",
     "setInactive": "Désactiver",
     "editWorkflow": "Modifier le workflow"
@@ -941,5 +947,10 @@
     "Welk veld uit de vorige module bevat de array om over te itereren": "Quel champ du module précédent contient le tableau à parcourir.",
     "Welk veld wordt gebruikt als identifier in de volgende module": "Quel champ sert d’identifiant dans le module suivant.",
     "Wordt voor de instructies ingevoegd Gebruik dit voor tenant-brede regels": "Inséré avant les instructions. À utiliser pour des règles valables pour tout le tenant."
+  },
+  "triggers": {
+    "events": {
+      "candidate_birthday": "Anniversaire du candidat"
+    }
   }
 }

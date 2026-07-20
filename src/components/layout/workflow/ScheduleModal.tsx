@@ -10,10 +10,11 @@ import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
-import { X, CalendarDays, Play, Zap } from 'lucide-react'
+import { X, CalendarDays, Play, Zap, Bell } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ScheduleConfig } from '@/types/workflow'
+import { WORKFLOW_EVENT_KEYS, eventKeyToI18nKey } from './eventCatalog'
 
 // ── Schedule helpers ──────────────────────────────────────────────────────────
 
@@ -25,6 +26,11 @@ const monthName = (locale: string, m: number) => new Date(Date.UTC(2024, m, 1)).
 export function scheduleLabel(t: TFunction, locale: string, trigger?: string, cfg?: ScheduleConfig | null) {
   if (!trigger || trigger === 'Handmatig') return t('scheduleModal.label.manual')
   if (trigger === 'Direct') return t('scheduleModal.label.instant')
+  // Event trigger: show the tenant-facing event name, not the raw dotted key.
+  if (trigger === 'Event') {
+    const eventKey = String(cfg?.event ?? WORKFLOW_EVENT_KEYS[0])
+    return t('scheduleModal.label.event', { event: t(`triggers.events.${eventKeyToI18nKey(eventKey)}`) })
+  }
   if (!cfg) return t('scheduleModal.label.scheduled')
   const ty = cfg.schedule_type
   if (ty === 'interval') {
@@ -51,8 +57,12 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
 }) {
   const { t, i18n } = useTranslation('workflows')
   const locale = i18n.language
-  const [type,     setType]     = useState(trigger === 'Handmatig' ? 'manual' : trigger === 'Direct' ? 'instant' : 'scheduled')
+  const [type,     setType]     = useState(
+    trigger === 'Handmatig' ? 'manual' : trigger === 'Direct' ? 'instant' : trigger === 'Event' ? 'event' : 'scheduled',
+  )
   const [sType,    setSType]    = useState(scheduleConfig?.schedule_type ?? 'daily')
+  // Event trigger: the selected domain-event key (seeded from the catalogue fallback).
+  const [eventKey, setEventKey] = useState(String(scheduleConfig?.event ?? WORKFLOW_EVENT_KEYS[0]))
   const [intVal,   setIntVal]   = useState<number | string>(scheduleConfig?.interval_value ?? 15)
   const [intUnit,  setIntUnit]  = useState(scheduleConfig?.interval_unit  ?? 'minutes')
   const [time,     setTime]     = useState(scheduleConfig?.time ?? '08:00')
@@ -69,6 +79,8 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
   const handleSave = () => {
     if (type === 'manual')  { onSave('Handmatig', null); return }
     if (type === 'instant') { onSave('Direct', null); return }
+    // Event trigger: carries the chosen event key, no schedule fields.
+    if (type === 'event')   { onSave('Event', { schedule_type: 'event', event: eventKey }); return }
     const cfg: ScheduleConfig = { schedule_type: sType }
     if (sType === 'interval') { cfg.interval_value = +intVal; cfg.interval_unit = intUnit }
     else if (sType === 'daily')     { cfg.times = times }
@@ -102,11 +114,12 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
         <div style={{ overflowY: 'auto', flex: 1, padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
 
           {/* Trigger type selector */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8 }}>
             {[
               { id: 'manual',    label: t('scheduleModal.trigger.manual'),    desc: t('scheduleModal.trigger.manualDesc'),    Icon: Play },
               { id: 'instant',   label: t('scheduleModal.trigger.instant'),   desc: t('scheduleModal.trigger.instantDesc'),   Icon: Zap },
               { id: 'scheduled', label: t('scheduleModal.trigger.scheduled'), desc: t('scheduleModal.trigger.scheduledDesc'), Icon: CalendarDays },
+              { id: 'event',     label: t('scheduleModal.trigger.event'),     desc: t('scheduleModal.trigger.eventDesc'),     Icon: Bell },
             ].map(({ id, label, desc, Icon: Ic }: { id: string; label: string; desc: string; Icon: LucideIcon }) => (
               <button key={id} type="button" onClick={() => setType(id)}
                 style={{
@@ -121,6 +134,19 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
               </button>
             ))}
           </div>
+
+          {/* Event picker — the event catalogue seed (BIRTHDAY-FLOW-2); grows with the BE catalogue */}
+          {type === 'event' && (
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>{t('scheduleModal.eventLabel')}</label>
+              <select value={eventKey} onChange={e => setEventKey(e.target.value)} aria-label={t('scheduleModal.eventLabel')} style={selectStyle}>
+                {WORKFLOW_EVENT_KEYS.map(key => (
+                  <option key={key} value={key}>{t(`triggers.events.${eventKeyToI18nKey(key)}`)}</option>
+                ))}
+              </select>
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>{t('scheduleModal.eventHint')}</p>
+            </div>
+          )}
 
           {/* Schedule type */}
           {type === 'scheduled' && (

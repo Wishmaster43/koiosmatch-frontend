@@ -111,8 +111,12 @@
       "instant": "Instant",
       "instantDesc": "As soon as data arrives",
       "scheduled": "Scheduled",
-      "scheduledDesc": "Automatically on a schedule"
+      "scheduledDesc": "Automatically on a schedule",
+      "event": "Event",
+      "eventDesc": "On an event in Koios Match"
     },
+    "eventLabel": "Event",
+    "eventHint": "Choose the event that should start this workflow.",
     "frequency": "Frequency",
     "freq": {
       "interval": "Interval",
@@ -143,6 +147,7 @@
       "manual": "Manual",
       "instant": "Instant",
       "scheduled": "Scheduled",
+      "event": "On event: {{event}}",
       "everyN": "Every {{n}} {{unit}}",
       "unitMin": "min",
       "unitHour": "hr",
@@ -229,6 +234,7 @@
     "triggerScheduled": "Scheduled",
     "triggerWebhook": "Webhook",
     "triggerManual": "Manual",
+    "triggerEvent": "Event",
     "setActive": "Set to active",
     "setInactive": "Set to inactive",
     "editWorkflow": "Edit workflow"
@@ -941,5 +947,10 @@
     "Welk veld uit de vorige module bevat de array om over te itereren": "Which field from the previous module holds the array to iterate over.",
     "Welk veld wordt gebruikt als identifier in de volgende module": "Which field is used as the identifier in the next module.",
     "Wordt voor de instructies ingevoegd Gebruik dit voor tenant-brede regels": "Inserted before the instructions. Use this for tenant-wide rules."
+  },
+  "triggers": {
+    "events": {
+      "candidate_birthday": "Candidate birthday"
+    }
   }
 }
