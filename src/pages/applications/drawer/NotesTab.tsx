@@ -16,8 +16,8 @@ interface Note { type?: string; title?: string; author?: string; text?: string; 
  */
 export default function NotesTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('applications')
-  // Note categories from the tenant lookup (seed fallback until /note-types lands).
-  const { writableTypes: noteTypes } = useNoteTypes()
+  // Note categories from the tenant lookup, scoped to 'application' (NOTE-TYPES-2/3).
+  const { writableTypes: noteTypes } = useNoteTypes('application')
   const [notes, setNotes] = useState<Note[]>((a.notes ?? []) as Note[])
 
   // Author avatar initials — the owning recruiter, else a Koios fallback.

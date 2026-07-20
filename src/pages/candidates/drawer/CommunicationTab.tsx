@@ -27,8 +27,8 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent }: { c: 
   onEditStatusEvent?: () => void }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
-  // Note categories from the tenant lookup (seed fallback until /note-types lands).
-  const { types: allNoteTypes, writableTypes } = useNoteTypes()
+  // Note categories from the tenant lookup, scoped to 'candidate' (NOTE-TYPES-2/3).
+  const { types: allNoteTypes, writableTypes } = useNoteTypes('candidate')
   // Contact channels (last_contact_types) — picking one on a note stamps last_contact_at/_type/_by.
   const { types: channels } = useLastContactTypes()
   // Notes persist via the API (G-1) — add/edit/delete hit /candidates/{id}/notes.

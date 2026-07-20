@@ -71,3 +71,53 @@ describe('StatusListEditor — defaultField singleton', () => {
     expect(screen.getByText('Intake').closest('div')).toBeTruthy()
   })
 })
+
+// NOTE-TYPES-2/3: the `entity` prop scopes a shared lookup (note-types) to one owning
+// entity — asserting the actual GET/POST request (not just that a callback fired) so a
+// regression that drops the entity scope on either side shows up here (§13).
+describe('StatusListEditor — entity scoping (note types)', () => {
+  it('GETs the list with ?entity=candidate when an entity prop is passed', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    render(<StatusListEditor title="Notitietypes" subtitle="" endpoint="/note-types" addLabel="Type toevoegen"
+      withColor={false} entity="candidate" />)
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/note-types', { params: { entity: 'candidate' } }))
+  })
+
+  it('omits the params object entirely when no entity prop is passed (unscoped lookups unaffected)', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    render(<StatusListEditor title="Contacttypes" subtitle="" endpoint="/last-contact-types" addLabel="Type toevoegen" withColor={false} />)
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/last-contact-types', undefined))
+  })
+
+  it('creating a new item POSTs the entity in the body, scoping it to that entity', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    api.post.mockResolvedValue({ data: { id: 'n1', name: 'Intake' } })
+    const user = userEvent.setup()
+    render(<StatusListEditor title="Notitietypes" subtitle="" endpoint="/note-types" addLabel="Type toevoegen"
+      withColor={false} entity="candidate" />)
+
+    await user.click(screen.getByRole('button', { name: 'Type toevoegen' }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'Intake')
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/note-types', expect.objectContaining({ entity: 'candidate', name: 'Intake' })))
+  })
+
+  it('editing an existing item PUTs the entity along with the update', async () => {
+    api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Intake' })] })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    // withSave=false: the toolbar's own "Opslaan" (reorder) button would otherwise
+    // collide with the modal's identically-labelled submit button in this query.
+    render(<StatusListEditor title="Notitietypes" subtitle="" endpoint="/note-types" addLabel="Type toevoegen"
+      withColor={false} withSave={false} entity="candidate" />)
+
+    await screen.findByText('Intake')
+    await user.click(screen.getByRole('button', { name: st('statusList.edit') }))
+    await user.click(screen.getByRole('button', { name: st('common.save') }))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/note-types/t1', expect.objectContaining({ entity: 'candidate' })))
+  })
+})

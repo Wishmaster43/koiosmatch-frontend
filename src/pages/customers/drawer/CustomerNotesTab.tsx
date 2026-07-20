@@ -48,9 +48,9 @@ interface Props {
 
 export default function CustomerNotesTab({ customerId, customerName, customerInitials, authorInitials, notes, onAddNote }: Props) {
   const { t } = useTranslation('customers')
-  // Note categories from the tenant lookup (mirrors CommunicationTab); writable
-  // list for the composer, the full list for chip-label resolution.
-  const { writableTypes: noteTypes, types: chipTypes } = useNoteTypes()
+  // Note categories from the tenant lookup, scoped to 'customer' (NOTE-TYPES-2/3);
+  // writable list for the composer, the full list for chip-label resolution.
+  const { writableTypes: noteTypes, types: chipTypes } = useNoteTypes('customer')
   const [subTab, setSubTab] = useState('notes')
   const [timeline, setTimeline] = useState<TimelineEntry[]>([])
 

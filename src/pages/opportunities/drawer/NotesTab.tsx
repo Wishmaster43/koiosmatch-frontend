@@ -11,7 +11,8 @@ import type { Opportunity } from '@/types/opportunity'
  */
 export default function NotesTab({ opportunity: o }: { opportunity: Opportunity }) {
   const { t } = useTranslation(['opportunities', 'common'])
-  const { writableTypes: noteTypes } = useNoteTypes()
+  // Note categories from the tenant lookup, scoped to 'opportunity' (NOTE-TYPES-2/3).
+  const { writableTypes: noteTypes } = useNoteTypes('opportunity')
   const { items: notes, addNote } = useOpportunityNotes(o?.id)
 
   return (

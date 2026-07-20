@@ -15,15 +15,6 @@ export function LastContactTypesSettings() {
   )
 }
 
-/** Note types — categorisation of candidate notes. Tenant-maintainable lookup,
- * backed by /note-types (C-21). */
-export function NoteTypesSettings() {
-  const { t } = useTranslation('settings')
-  return (
-    <div style={{ maxWidth: 640 }}>
-      <StatusListEditor withColor={false}
-        title={t('noteTypes.title')} subtitle={t('noteTypes.subtitle')}
-        endpoint="/note-types" addLabel={t('noteTypes.add')} />
-    </div>
-  )
-}
+// Note types moved to their own per-entity settings group (NOTE-TYPES-2/3, Danny
+// "ieder zijn eigen" 2026-07-20) — see ./NoteTypesSettings.jsx + registry.jsx's
+// `note_types` group, one sub-tab per backend NoteType::ENTITIES value.
