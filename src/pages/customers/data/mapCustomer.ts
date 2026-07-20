@@ -57,7 +57,10 @@ export function mapContact(p: ApiContact = {}): Contact {
     name: p.name ?? [p.first_name, p.last_name].filter(Boolean).join(' ') ?? '—',
     role: p.function ?? p.role ?? '',
     email: p.email ?? '',
+    // Split fields (BE 2026-07-20): phone stays the landline/"vast" number; mobile
+    // is the new separate mobile number the WhatsApp shortcut uses.
     phone: p.phone ?? '',
+    mobile: p.mobile ?? '',
     isPrimary: Boolean(p.is_primary ?? p.isPrimary),
     locationId: p.customer_location_id ?? p.location_id ?? p.locationId ?? null,
     locationName: p.location_name ?? p.location?.name ?? locations[0]?.name ?? '',

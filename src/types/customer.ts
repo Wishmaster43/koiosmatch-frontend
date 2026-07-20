@@ -14,6 +14,9 @@ export interface Contact {
   role: string
   email: string
   phone: string
+  // Split from `phone` (BE 2026-07-20): phone stays the landline/"vast" number,
+  // mobile is the separate mobile number the WhatsApp shortcut uses.
+  mobile: string
   isPrimary: boolean
   // Derived PRIMARY link (first of the full set below) — kept for the single-value
   // pickers/filters (e.g. LocationContacts' "belongs to this location" scoping).
@@ -148,6 +151,8 @@ export interface ApiStatusRef { value?: string; label?: string; color?: string }
 /** Raw API contact (read defensively). CustomerContactResource sends first_name/last_name + a composed `name`. */
 export interface ApiContact {
   id?: Id; first_name?: string; last_name?: string; name?: string; function?: string; role?: string; email?: string; phone?: string
+  // Split from `phone` (BE 2026-07-20): the mobile number (CustomerContactResource `mobile`).
+  mobile?: string
   is_primary?: unknown; isPrimary?: unknown
   // The BE field is `customer_location_id` / `customer_department_id`; location_id/locationId tolerated for older payloads.
   customer_location_id?: Id; location_id?: Id; locationId?: Id; location_name?: string; location?: { name?: string }

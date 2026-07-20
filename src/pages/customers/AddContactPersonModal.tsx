@@ -20,7 +20,7 @@ interface OptionRow { id: Id; name: string }
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
-  first_name: 'firstName', last_name: 'lastName', email: 'email', phone: 'phone',
+  first_name: 'firstName', last_name: 'lastName', email: 'email', phone: 'phone', mobile: 'mobile',
   function: 'role', customer_location_id: 'locationId', customer_department_id: 'departmentId',
   status_id: 'statusId', is_primary: 'isPrimary',
 }
@@ -45,6 +45,7 @@ export default function AddContactPersonModal({
     lastName: initial?.lastName ?? '',
     email: initial?.email ?? '',
     phone: initial?.phone ?? '',
+    mobile: initial?.mobile ?? '',
     role: initial?.role ?? '',
     locationId: initial?.locationId ?? lockLocationId ?? null,
     departmentId: initial?.departmentId ?? null,
@@ -131,7 +132,10 @@ export default function AddContactPersonModal({
             <Field label={t('subModal.role')}><TextField value={form.role} onChange={v => set('role', v)} /></Field>
             <Field label={t('subModal.email')}><TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder="naam@klant.nl" /></Field>
           </div>
-          <Field label={t('subModal.phone')}><TextField value={form.phone} onChange={v => set('phone', v)} /></Field>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <Field label={t('subModal.mobile')}><TextField value={form.mobile} onChange={v => set('mobile', v)} /></Field>
+            <Field label={t('subModal.phone')}><TextField value={form.phone} onChange={v => set('phone', v)} /></Field>
+          </div>
 
           {showLocationPicker && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>

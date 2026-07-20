@@ -146,6 +146,10 @@ export interface Candidate {
   created: string
   email: string
   phone: string
+  // Split from `phone` (BE 2026-07-20): phone stays the landline/"vast" number,
+  // mobile is the separate mobile number the WhatsApp shortcut uses. Optional so
+  // no existing Candidate-shaped literal (tests/dummy data) breaks on this add.
+  mobile?: string
   street: string
   houseNumber: string
   houseNumberSuffix: string

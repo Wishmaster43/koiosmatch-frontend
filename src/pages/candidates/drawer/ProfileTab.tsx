@@ -20,7 +20,7 @@ const SafeHtml = SafeHtmlJs as unknown as ComponentType<AnyProps>
 const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
 
 // The editable profile fields — all string-valued and present on Candidate.
-type ProfileKey = 'gender' | 'nationality' | 'dob' | 'placeOfBirth' | 'email' | 'phone'
+type ProfileKey = 'gender' | 'nationality' | 'dob' | 'placeOfBirth' | 'email' | 'phone' | 'mobile'
   | 'street' | 'houseNumber' | 'houseNumberSuffix' | 'postalCode' | 'city' | 'province' | 'linkedin'
 type ProfileForm = Record<ProfileKey, string>
 
@@ -58,7 +58,7 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
   const { provinces } = useProvinces()
   const emptyForm = (): ProfileForm => ({
     gender: c.gender ?? '', nationality: c.nationality ?? '', dob: c.dob ?? '', placeOfBirth: c.placeOfBirth ?? '',
-    email: c.email ?? '', phone: c.phone ?? '',
+    email: c.email ?? '', phone: c.phone ?? '', mobile: c.mobile ?? '',
     street: c.street ?? '', houseNumber: c.houseNumber ?? '', houseNumberSuffix: c.houseNumberSuffix ?? '',
     postalCode: c.postalCode ?? '', city: c.city ?? '', province: c.province ?? '',
     linkedin: c.linkedin ?? '',
@@ -77,10 +77,10 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
   // Required fields for this candidate's phase (Settings → Verplichte velden). Only
   // the profile-owned fields are enforced here (name/function live in the header).
   const settings = useAllSettings()
-  // Punt 49: what the phone ICON does — 'tel' (OS dialer; default) or 'whatsapp'
-  // (open the WhatsApp chat, audio call is one tap there). Stored as a plain
-  // string in the settings blob; a PBX option follows the centrale decision.
-  const phoneAction = String(settings?.phone_click_action ?? 'tel')
+  // Punt 49's tenant-configurable phone_click_action ('tel' vs 'whatsapp') is now
+  // moot: since the mobile/landline split (BE 2026-07-20) each field has ONE fixed
+  // affordance — mobile → WhatsApp (only a mobile number can receive it), landline
+  // → dial — so the ambiguity that setting resolved no longer exists on this field.
   // Email/phone are NOT required by default (Danny 2026-07-16, job 3) — a Lead/early
   // Kandidaat may only have a name + function on file yet. Tenants can still opt them
   // back in via Settings → Verplichte velden (CandidateRequiredFieldsSettings), which
@@ -221,22 +221,11 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
         </a>
       </span>
     )
-    if (key === 'phone' && v) return (
+    // Mobile → WhatsApp only (BE 2026-07-20 split): a mobile number is the one
+    // that can hold a WhatsApp conversation — the value itself still dials via tel:.
+    if (key === 'mobile' && v) return (
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
         <a href={`tel:${String(v).replace(/\s/g, '')}`} style={{ fontSize: 12, color: 'var(--color-info)', textDecoration: 'none' }}>{v}</a>
-        {/* Phone action icon (Danny punt 49): the CLICK ACTION is a tenant setting —
-            'tel' (default; on a phone this dials via the OS) or 'whatsapp' (opens the
-            WhatsApp conversation, where an audio call is one tap). A PBX/centrale
-            option lands once that integration is chosen (BE ticket). */}
-        <a href={phoneAction === 'whatsapp' && waDigits(v) ? `https://wa.me/${waDigits(v)}` : `tel:${String(v).replace(/\s/g, '')}`}
-          {...(phoneAction === 'whatsapp' ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-          title={t('profile.callPhone')} aria-label={t('profile.callPhone')}
-          style={{ display: 'inline-flex', color: 'var(--text-muted)' }}
-          onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-info)' }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)' }}>
-          <Phone size={13} />
-        </a>
-        {/* WhatsApp shortcut (Danny 2026-07-16, job 29) — muted, turns green on hover. */}
         {waDigits(v) && (
           <a href={`https://wa.me/${waDigits(v)}`} target="_blank" rel="noopener noreferrer"
             title={t('profile.whatsapp')} aria-label={t('profile.whatsapp')}
@@ -246,6 +235,21 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
             <MessageCircle size={13} />
           </a>
         )}
+      </span>
+    )
+    // Landline ("vast") → dial only (BE 2026-07-20 split): no WhatsApp icon here —
+    // a landline can't receive WhatsApp, so the old tenant-configurable toggle
+    // (Danny punt 49) is superseded by this fixed per-field mapping.
+    if (key === 'phone' && v) return (
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        <a href={`tel:${String(v).replace(/\s/g, '')}`} style={{ fontSize: 12, color: 'var(--color-info)', textDecoration: 'none' }}>{v}</a>
+        <a href={`tel:${String(v).replace(/\s/g, '')}`}
+          title={t('profile.callPhone')} aria-label={t('profile.callPhone')}
+          style={{ display: 'inline-flex', color: 'var(--text-muted)' }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-info)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)' }}>
+          <Phone size={13} />
+        </a>
       </span>
     )
     // Gender stores a slug/label; resolve the display label from the /genders lookup.
@@ -323,6 +327,7 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
           </>)}
           {card(t('profile.groupContact'), <>
             {field('email', t('profile.email'))}
+            {field('mobile', t('profile.mobile'))}
             {field('phone', t('profile.phone'))}
             {field('linkedin', t('profile.linkedin'))}
           </>)}

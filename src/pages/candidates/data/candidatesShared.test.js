@@ -107,4 +107,11 @@ describe('buildCandidatePatch', () => {
     expect(buildCandidatePatch({})).toEqual({})
     expect(buildCandidatePatch({ city: 'Utrecht' })).toEqual({ city: 'Utrecht' })
   })
+  // BE 2026-07-20: mobile is validated separately from phone (CandidateProfileRequest
+  // `mobile`) — both must reach the API body under their own key, independently.
+  it('maps phone and mobile as independent keys (split fields)', () => {
+    expect(buildCandidatePatch({ phone: '0301234567', mobile: '0612345678' }))
+      .toEqual({ phone: '0301234567', mobile: '0612345678' })
+    expect(buildCandidatePatch({ mobile: '0612345678' })).toEqual({ mobile: '0612345678' })
+  })
 })

@@ -30,6 +30,34 @@ describe('waDigits', () => {
   })
 })
 
+// BE 2026-07-20: phone (landline) and mobile are now independent fields, each
+// with exactly ONE fixed shortcut icon — mobile → WhatsApp (wa.me), landline →
+// dial (tel:). No more tenant-configurable phone_click_action ambiguity.
+describe('ProfileTab · mobile/phone split render (2026-07-20)', () => {
+  const candidate = { id: 1, phone: '0301234567', mobile: '0612345678' } as unknown as Candidate
+
+  it('renders the mobile value with only a WhatsApp shortcut (wa.me)', () => {
+    render(<ProfileTab c={candidate} />)
+    const wa = screen.getByTitle('Open in WhatsApp')
+    expect(wa.getAttribute('href')).toBe('https://wa.me/31612345678')
+    // The landline never gets a WhatsApp icon (only one "Open in WhatsApp" title on the page).
+    expect(screen.getAllByTitle('Open in WhatsApp')).toHaveLength(1)
+  })
+
+  it('renders the landline value with only a call shortcut (tel:), no WhatsApp icon', () => {
+    render(<ProfileTab c={candidate} />)
+    const call = screen.getByTitle('Bellen')
+    expect(call.getAttribute('href')).toBe('tel:0301234567')
+    expect(screen.getAllByTitle('Bellen')).toHaveLength(1)
+  })
+
+  it('hides the WhatsApp icon for a mobile value too short to be a real MSISDN', () => {
+    const c = { id: 1, phone: '', mobile: '0612' } as unknown as Candidate
+    render(<ProfileTab c={c} />)
+    expect(screen.queryByTitle('Open in WhatsApp')).toBeNull()
+  })
+})
+
 // Kandidaten-ronde-2, punt A: Geslacht/Nationaliteit/Provincie become searchable
 // (type-to-filter) dropdowns instead of a plain native <select>.
 describe('ProfileTab · searchable dropdowns (kandidaten-ronde-2, punt A)', () => {

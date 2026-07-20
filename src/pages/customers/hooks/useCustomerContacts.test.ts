@@ -36,8 +36,9 @@ const mockPatch = api.patch as unknown as ReturnType<typeof vi.fn>
 beforeEach(() => { mockGet.mockReset(); mockPost.mockReset(); mockPatch.mockReset() })
 
 // A full payload — every ContactPayload field populated, to exercise the whole toApi map.
+// BE 2026-07-20: `mobile` is now a separate field from the landline `phone`.
 const fullPayload: ContactPayload = {
-  firstName: 'Anna', lastName: 'Bakker', email: 'anna@bakker.nl', phone: '0612345678', role: 'Manager',
+  firstName: 'Anna', lastName: 'Bakker', email: 'anna@bakker.nl', phone: '0301234567', mobile: '0612345678', role: 'Manager',
   locationId: 'loc1', departmentId: 'dep1', statusId: 'st1', isPrimary: true, customFields: { badge: 'vip' },
 }
 
@@ -73,7 +74,7 @@ describe('useCustomerContacts · create payload mapping (toApi)', () => {
     await act(async () => { await result.current.add(fullPayload) })
 
     expect(mockPost).toHaveBeenCalledWith('/customers/cust1/contacts', {
-      first_name: 'Anna', last_name: 'Bakker', email: 'anna@bakker.nl', phone: '0612345678', function: 'Manager',
+      first_name: 'Anna', last_name: 'Bakker', email: 'anna@bakker.nl', phone: '0301234567', mobile: '0612345678', function: 'Manager',
       customer_location_id: 'loc1', customer_department_id: 'dep1', status_id: 'st1', is_primary: true,
       custom_fields: { badge: 'vip' },
     })
@@ -131,5 +132,31 @@ describe('useCustomerContacts · update payload mapping (toApi, partial)', () =>
     await act(async () => { await result.current.update('c1', { role: 'Teamlead', isPrimary: false }) })
 
     expect(mockPatch).toHaveBeenCalledWith('/customers/cust1/contacts/c1', { function: 'Teamlead', is_primary: false })
+  })
+
+  // BE 2026-07-20: mobile is its OWN patch key, independent of phone — the
+  // ContactDetail numbers card can save just one of the two without touching the other.
+  it('maps a mobile-only partial update to its own key, without touching phone', async () => {
+    mockGet.mockResolvedValue({ data: { data: [{ id: 'c1', first_name: 'A', last_name: 'B', phone: '0301234567' }] } })
+    mockPatch.mockResolvedValue({ data: { data: { id: 'c1', mobile: '0687654321' } } })
+    const { result } = renderHook(() => useCustomerContacts('cust1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.update('c1', { mobile: '0687654321' }) })
+
+    expect(mockPatch).toHaveBeenCalledWith('/customers/cust1/contacts/c1', { mobile: '0687654321' })
+  })
+})
+
+describe('useCustomerContacts · mobile passthrough on mapContact (BE 2026-07-20)', () => {
+  it('maps the API mobile field onto the contact, independent of phone', async () => {
+    mockGet.mockResolvedValue({ data: { data: [
+      { id: 'c1', first_name: 'Jill', last_name: 'A', phone: '0301234567', mobile: '0612345678' },
+    ] } })
+    const { result } = renderHook(() => useCustomerContacts('cust1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    expect(result.current.contacts[0].phone).toBe('0301234567')
+    expect(result.current.contacts[0].mobile).toBe('0612345678')
   })
 })

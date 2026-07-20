@@ -74,6 +74,9 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   if ('placeOfBirth'      in patch) body.place_of_birth    = patch.placeOfBirth
   if ('email'             in patch) body.email             = patch.email
   if ('phone'             in patch) body.phone             = patch.phone
+  // Split field (BE 2026-07-20): mobile is validated separately on
+  // CandidateProfileRequest (`mobile`), distinct from the landline `phone`.
+  if ('mobile'            in patch) body.mobile            = patch.mobile
   if ('street'            in patch) body.street            = patch.street
   if ('houseNumber'       in patch) body.house_number      = patch.houseNumber
   if ('houseNumberSuffix' in patch) body.house_number_suffix = patch.houseNumberSuffix

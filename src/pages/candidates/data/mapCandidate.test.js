@@ -79,6 +79,20 @@ describe('mapCandidate — relations newest-first', () => {
   })
 })
 
+describe('mapCandidate — phone / mobile split (BE 2026-07-20)', () => {
+  it('maps phone and mobile as independent fields (no more merging)', () => {
+    const r = mapCandidate({ phone: '0301234567', mobile: '0612345678' })
+    expect(r.phone).toBe('0301234567')
+    expect(r.mobile).toBe('0612345678')
+  })
+  it('defaults each to "-" independently when absent (mobile no longer falls back into phone)', () => {
+    expect(mapCandidate({ phone: '0301234567' }).mobile).toBe('-')
+    expect(mapCandidate({ mobile: '0612345678' }).phone).toBe('-')
+    expect(mapCandidate({}).phone).toBe('-')
+    expect(mapCandidate({}).mobile).toBe('-')
+  })
+})
+
 describe('mapCandidate — pools / consent / address', () => {
   it('normalises pools (object passthrough, string → {name})', () => {
     expect(mapCandidate({ pools: [{ id: 1, name: 'Zorg' }, 'Flex'] }).pools)

@@ -86,7 +86,9 @@ export default function ContactsTab({ contacts = [], locations = [], departments
       render: p => chipList(resolvedDepartments(p), '#8B5CF6') },
     { key: 'role',  header: t('contacts.col.role'),  cellStyle: muted, sortable: true, sortValue: p => p.role,  render: p => p.role || '—' },
     { key: 'email', header: t('contacts.col.email'), cellStyle: muted, sortable: true, sortValue: p => p.email, render: p => p.email || '—' },
-    { key: 'phone', header: t('contacts.col.phone'), nowrap: true, cellStyle: muted, sortable: true, sortValue: p => p.phone, render: p => p.phone || '—' },
+    // Single column, sensible fallback (BE 2026-07-20 split): prefer the mobile
+    // number, fall back to the landline — one column stays one column.
+    { key: 'phone', header: t('contacts.col.phone'), nowrap: true, cellStyle: muted, sortable: true, sortValue: p => p.mobile || p.phone, render: p => p.mobile || p.phone || '—' },
   ]
 
   const renderDetail = (p: Contact, close: () => void) => (

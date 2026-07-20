@@ -25,6 +25,8 @@ export interface ContactPayload {
   lastName: string
   email: string
   phone: string
+  // Split from `phone` (BE 2026-07-20): the separate mobile number (WhatsApp shortcut).
+  mobile: string
   role: string
   locationId: Id | null
   departmentId: Id | null
@@ -54,6 +56,7 @@ const toApi = (p: Partial<ContactPayload>) => ({
   ...(p.lastName !== undefined ? { last_name: p.lastName } : {}),
   ...(p.email !== undefined ? { email: p.email } : {}),
   ...(p.phone !== undefined ? { phone: p.phone } : {}),
+  ...(p.mobile !== undefined ? { mobile: p.mobile } : {}),
   ...(p.role !== undefined ? { function: p.role } : {}),
   ...(p.locationId !== undefined ? { customer_location_id: p.locationId || null } : {}),
   ...(p.departmentId !== undefined ? { customer_department_id: p.departmentId || null } : {}),

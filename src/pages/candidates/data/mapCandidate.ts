@@ -118,7 +118,11 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     client:          c.client?.name ?? c.customer?.name ?? c.client_name ?? '',
     created:         c.created_at ?? c.created ?? '',
     email:           c.email ?? '-',
-    phone:           c.phone ?? c.mobile ?? '-',
+    // Split fields (BE 2026-07-20): `phone` is the landline/"vast" number,
+    // `mobile` the separate mobile number — no longer merged into one UI field
+    // (ProfileTab renders them with distinct call/WhatsApp affordances).
+    phone:           c.phone ?? '-',
+    mobile:          c.mobile ?? '-',
     // Detail address parts (list only sends `address`/`city`).
     street:          c.street ?? '',
     houseNumber:     c.house_number ?? '',

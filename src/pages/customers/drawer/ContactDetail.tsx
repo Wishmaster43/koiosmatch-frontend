@@ -1,7 +1,7 @@
 /**
  * ContactDetail — the Contactpersonen-tab drill-down. Full edit via the shared
  * EditableFieldTable house pattern (pencil → save/cancel): name, function, email,
- * phone, status, primary toggle, and the location/department coupling.
+ * status, primary toggle, and the location/department coupling.
  *
  * CONTACT-MULTI-1: the backend supports only ONE location + ONE department per
  * contact (customer_location_id / customer_department_id). Danny wants multi
@@ -9,10 +9,18 @@
  * picker (not a plain <select>) — so flipping to multi later is a prop change on
  * EditableFieldTable, not a rebuild. Never silently drop a second value; there is
  * nowhere on the backend to put it yet (filed as a BE gap in the delivery report).
+ *
+ * Phone numbers (BE 2026-07-20 split — mobile is now a separate field from the
+ * landline `phone`) get their OWN small card below the main table, NOT a plain
+ * EditableFieldTable row: they need per-field icon affordances (mobile → WhatsApp,
+ * landline → dial), which EditableFieldTable's generic 'text' type can't render.
+ * This mirrors the candidate ProfileTab's own contact-card pattern (one edit
+ * toggle per self-contained block, same as its separate summary-text editor).
  */
 import { useState } from 'react'
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Edit2, Save, X, Phone, MessageCircle } from 'lucide-react'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SubTabBar from '@/components/drawer/SubTabBar'
@@ -21,6 +29,21 @@ import { useCustomFields } from '@/lib/useCustomFields'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
+
+// wa.me needs bare E.164 digits — local copy of the candidate ProfileTab helper
+// (src/pages/candidates/drawer/ProfileTab.tsx's `waDigits`). This task's file
+// boundary is scoped to pages/candidates + pages/customers only, so the pure
+// helper can't be hoisted to a shared lib in this pass — flagged as a follow-up
+// extraction (e.g. src/lib/phone.ts) once both entities agree on the contract.
+function waDigits(phone: string): string {
+  const digits = phone.replace(/\D/g, '')
+  const withCountryCode = digits.startsWith('0') ? `31${digits.slice(1)}` : digits
+  return withCountryCode.length >= 8 ? withCountryCode : ''
+}
+
+const inputStyle: CSSProperties = { width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }
+const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
+const cardStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
 
 export default function ContactDetail({ contact, locations, departments, statuses, onSave, onDelete, close }: {
   contact: Contact
@@ -42,7 +65,6 @@ export default function ContactDetail({ contact, locations, departments, statuse
     { key: 'lastName', label: t('subModal.lastName'), type: 'text' },
     { key: 'role', label: t('contacts.detail.role'), type: 'text' },
     { key: 'email', label: t('contacts.detail.email'), type: 'text' },
-    { key: 'phone', label: t('contacts.detail.phone'), type: 'text' },
     { key: 'statusId', label: t('locations.detail.status'), type: 'select', options: statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label })) },
     // Single-value coupling, chip UI (CONTACT-MULTI-1 — see file header).
     { key: 'locationId', label: t('contacts.detail.location'), type: 'chip-select',
@@ -57,7 +79,6 @@ export default function ContactDetail({ contact, locations, departments, statuse
     lastName: contact.lastName,
     role: contact.role,
     email: contact.email,
-    phone: contact.phone,
     statusId: contact.statusId != null ? String(contact.statusId) : '',
     locationId: contact.locationId != null ? String(contact.locationId) : '',
     departmentId: contact.departmentId != null ? String(contact.departmentId) : '',
@@ -67,7 +88,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
   const save = (v: Record<string, unknown>) => {
     onSave(contact.id as Id, {
       firstName: v.firstName as string, lastName: v.lastName as string,
-      role: v.role as string, email: v.email as string, phone: v.phone as string,
+      role: v.role as string, email: v.email as string,
       statusId: (v.statusId as string) || null,
       locationId: (v.locationId as string) || null,
       departmentId: (v.departmentId as string) || null,
@@ -77,6 +98,53 @@ export default function ContactDetail({ contact, locations, departments, statuse
   }
 
   const remove = () => { if (window.confirm(t('contacts.deleteConfirm'))) { onDelete(contact.id as Id); close() } }
+
+  // Phone numbers — own small self-contained edit block (pencil → save/cancel),
+  // same pattern as the candidate ProfileTab's contact card (mobile → WhatsApp,
+  // landline → dial; see file header for why this can't live in EditableFieldTable).
+  const [numbersEditing, setNumbersEditing] = useState(false)
+  const [numbersForm, setNumbersForm] = useState({ mobile: contact.mobile ?? '', phone: contact.phone ?? '' })
+  const startNumbersEdit = () => { setNumbersForm({ mobile: contact.mobile ?? '', phone: contact.phone ?? '' }); setNumbersEditing(true) }
+  const saveNumbers = () => { onSave(contact.id as Id, { mobile: numbersForm.mobile, phone: numbersForm.phone }); setNumbersEditing(false) }
+  const cancelNumbers = () => { setNumbersForm({ mobile: contact.mobile ?? '', phone: contact.phone ?? '' }); setNumbersEditing(false) }
+
+  // One number row: label-left, value-right — a tel: link + the field's ONE fixed
+  // shortcut icon (WhatsApp for mobile, dial for landline) while not editing.
+  const numberRow = (key: 'mobile' | 'phone', label: string) => {
+    const v = contact[key]
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26, padding: '0 12px', height: 38 }}>
+        <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{label}</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {numbersEditing ? (
+            <input value={numbersForm[key]} onChange={e => setNumbersForm(f => ({ ...f, [key]: e.target.value }))} style={inputStyle} />
+          ) : v ? (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <a href={`tel:${String(v).replace(/\s/g, '')}`} style={{ fontSize: 12, color: 'var(--color-info)', textDecoration: 'none' }}>{v}</a>
+              {key === 'mobile' && waDigits(v) && (
+                <a href={`https://wa.me/${waDigits(v)}`} target="_blank" rel="noopener noreferrer"
+                  title={t('contacts.detail.whatsapp')} aria-label={t('contacts.detail.whatsapp')}
+                  style={{ display: 'inline-flex', color: 'var(--text-muted)' }}
+                  onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-success)' }}
+                  onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)' }}>
+                  <MessageCircle size={13} />
+                </a>
+              )}
+              {key === 'phone' && (
+                <a href={`tel:${String(v).replace(/\s/g, '')}`}
+                  title={t('contacts.detail.callPhone')} aria-label={t('contacts.detail.callPhone')}
+                  style={{ display: 'inline-flex', color: 'var(--text-muted)' }}
+                  onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-info)' }}
+                  onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)' }}>
+                  <Phone size={13} />
+                </a>
+              )}
+            </span>
+          ) : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -101,8 +169,28 @@ export default function ContactDetail({ contact, locations, departments, statuse
       )}
 
       {subTab === 'data' && (
-        <EditableFieldTable title={t('contacts.detail.infoTitle')} fields={fields} value={values} onSave={save}
-          editing={editing} onStartEdit={() => setEditing(true)} onCancel={() => setEditing(false)} labelWidth={130} />
+        <>
+          <EditableFieldTable title={t('contacts.detail.infoTitle')} fields={fields} value={values} onSave={save}
+            editing={editing} onStartEdit={() => setEditing(true)} onCancel={() => setEditing(false)} labelWidth={130} />
+
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('contacts.detail.numbersTitle')}</span>
+              {numbersEditing ? (
+                <div style={{ display: 'flex', gap: 4 }}>
+                  <button onClick={saveNumbers} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+                  <button onClick={cancelNumbers} title={t('common:cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+                </div>
+              ) : (
+                <button onClick={startNumbersEdit} title={t('common:edit')} style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
+              )}
+            </div>
+            <div style={{ ...cardStyle, padding: '4px 0' }}>
+              {numberRow('mobile', t('contacts.detail.mobile'))}
+              {numberRow('phone', t('contacts.detail.phone'))}
+            </div>
+          </div>
+        </>
       )}
 
       {subTab === 'extra' && customFieldDefs.length > 0 && (
