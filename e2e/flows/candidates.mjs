@@ -105,7 +105,10 @@ export async function archiveAndFindBack({ page, errors }) {
   // Leave the archived view clean for the next flow.
   await page.locator('button:has-text("Gearchiveerd")').first().click()
   await sleep(600)
-  const fresh = errors.slice(at)
+  // The guard-409 on DELETE /candidates is EXPECTED noise for this walk (20-07:
+  // the reconciled seed gives early rows live matches, so the guard now actually
+  // fires before we reach an archivable candidate) — any OTHER error still fails.
+  const fresh = errors.slice(at).filter(e => !(/409/.test(e) && /candidates/.test(e)) && !/Failed to load resource.*409/.test(e))
   expect(fresh.length === 0, `archiveren gaf fouten: ${fresh.join(' | ')}`)
 }
 

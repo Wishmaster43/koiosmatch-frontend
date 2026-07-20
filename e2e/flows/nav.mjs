@@ -38,14 +38,20 @@ export async function drillDowns({ page, errors }) {
     await row.waitFor({ timeout: 10000 }).catch(() => {})
     if (!(await row.count())) { failures.push(`${nav}: geen rijen`); continue }
     await row.click()
-    await sleep(1200)
     // A drawer/panel appeared with a heading + some body text beyond the table itself.
-    const drawerText = await page.evaluate(() => {
-      // The drawers render as a right panel; take the last major section's text length.
-      const candidates = [...document.querySelectorAll('div')].filter(d => d.offsetWidth > 300 && d.offsetWidth < 900 && d.offsetHeight > 400)
-      const el = candidates.at(-1)
-      return el ? el.innerText.length : 0
-    })
+    // POLL instead of one fixed sleep (20-07: under full machine load the drawer's
+    // data render can outlast 1200ms — Kansen/Bellijsten alternately read as empty
+    // while being fine in isolation; a red here must mean genuinely broken).
+    let drawerText = 0
+    for (let tries = 0; tries < 20 && drawerText < 80; tries++) {
+      await sleep(400)
+      drawerText = await page.evaluate(() => {
+        // The drawers render as a right panel; take the last major section's text length.
+        const candidates = [...document.querySelectorAll('div')].filter(d => d.offsetWidth > 300 && d.offsetWidth < 900 && d.offsetHeight > 400)
+        const el = candidates.at(-1)
+        return el ? el.innerText.length : 0
+      })
+    }
     if (drawerText < 80) failures.push(`${nav}: drawer leeg/niet geopend (${drawerText} tekens)`)
     const fresh = errors.slice(at)
     if (fresh.length) failures.push(`${nav}: ${fresh.join(' | ')}`)
