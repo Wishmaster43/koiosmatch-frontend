@@ -1,15 +1,17 @@
 /**
  * RolesSettings — list of roles → click a role to open its permission detail.
- * Detail shows the role's appearance (colour + icon picker) plus collapsible
- * permission groups with a toggle per permission. The `module` group is hidden —
- * module access is managed in the Modules tab. Labels via t('roles.*').
+ * Detail shows the role's appearance (colour + icon picker) plus a rights matrix
+ * (rows = permission groups, columns = CRUD verbs + "Other") in RolesPermissionMatrix.
+ * The `module` group is hidden — module access is managed in the Modules tab.
+ * Labels via t('roles.*').
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, ChevronDown, ChevronRight, Plus, RefreshCw, Trash2 } from 'lucide-react'
+import { ArrowLeft, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
-import { PermissionToggle, ColorSwatch } from '../components/SettingsControls'
+import { ColorSwatch } from '../components/SettingsControls'
+import { PermissionMatrix } from './RolesPermissionMatrix'
 import { roleIconEl, ROLE_ICON_NAMES } from '@/lib/roleIcons'
 import RoleChip from '@/components/ui/RoleChip'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
@@ -119,14 +121,11 @@ function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }) {
   const [editName,  setEditName]    = useState(false)
   const [draftName, setDraftName]   = useState(role.name)
   const [saving,    setSaving]      = useState(false)
-  const [collapsed, setCollapsed]   = useState({})
 
   const color    = localRole.color || '#6B7280'
   const iconName = localRole.icon || 'shield'
 
   const hasPermission = (perm) => localRole.permissions?.some(p => p.name === perm)
-  const groupLabel  = (g) => t(`roles.groups.${g}`, { defaultValue: g })
-  const actionLabel = (a) => t(`roles.actions.${a}`, { defaultValue: a })
 
   const togglePermission = async (permName) => {
     const current = localRole.permissions?.map(p => p.name) ?? []
@@ -221,43 +220,8 @@ function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }) {
       {/* Branch template — the starting set new users with this role inherit (§ USERS-ROLES-LOC-1) */}
       <RoleBranchTemplate roleId={localRole.id} />
 
-      {/* Permission groups */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {groups.map(([group, perms]) => {
-          const isOpen = !collapsed[group]
-          return (
-            <div key={group} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-              <button onClick={() => setCollapsed(c => ({ ...c, [group]: !c[group] }))}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px',
-                         background: 'var(--hover-bg)', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-                {isOpen ? <ChevronDown size={13} style={{ color: 'var(--text-muted)' }} /> : <ChevronRight size={13} style={{ color: 'var(--text-muted)' }} />}
-                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', textTransform: 'capitalize' }}>{groupLabel(group)}</span>
-                <span style={{ fontSize: 11, color: '#C4C4CF', marginLeft: 'auto' }}>{t('roles.rightsCount', { count: perms.length })}</span>
-              </button>
-              {isOpen && (
-                <div>
-                  {perms.map((perm, i) => {
-                    const action  = perm.name.split('.')[1] ?? perm.name
-                    const checked = hasPermission(perm.name)
-                    return (
-                      <div key={perm.name}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                 padding: '10px 16px', background: i % 2 ? '#FCFCFD' : 'var(--surface)',
-                                 borderTop: '1px solid var(--hover-bg)' }}>
-                        <div>
-                          <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: checked ? 500 : 400 }}>{actionLabel(action)}</div>
-                          <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{perm.name}</div>
-                        </div>
-                        <PermissionToggle checked={checked} onChange={() => togglePermission(perm.name)} />
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </div>
+      {/* Rights matrix — rows = permission groups, columns = CRUD verbs + "Other" */}
+      <PermissionMatrix groups={groups} hasPermission={hasPermission} onToggle={togglePermission} />
     </div>
   )
 }
