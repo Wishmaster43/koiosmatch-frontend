@@ -96,7 +96,9 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   // was MISSING, so every eigen-velden save silently vanished (Danny 16-07).
   if ('customFields'      in patch) body.custom_fields     = patch.customFields
   if ('custom_fields'     in patch) body.custom_fields     = patch.custom_fields
-  if ('zzp'               in patch) body.zzp               = patch.zzp
+  // ZZP=freelance flip (CMBE aac51b1): the resource now serialises/accepts `freelance`;
+  // the FE keeps its internal `zzp` patch key but writes it under the new API key.
+  if ('zzp'               in patch) body.freelance          = patch.zzp
   // Consent (C-11) → nested `consent` with ONLY the changed opt-in flags; never the
   // `_consent_at` timestamps (server-stamped). Send only the channels that are present.
   if ('consent' in patch) {
