@@ -646,6 +646,8 @@
     "noPreview": "Aucun aperçu disponible pour ce fichier.",
     "previewUnavailable": "Aperçu non disponible.",
     "download": "Télécharger",
+    "loadingPreview": "Chargement de l'aperçu…",
+    "pdfPageLabel": "Page {{page}} sur {{total}}",
     "types": {
       "cv": "CV",
       "id": "Pièce d'identité",

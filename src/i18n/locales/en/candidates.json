@@ -653,6 +653,8 @@
     "noPreview": "No preview available for this file.",
     "previewUnavailable": "Preview not available.",
     "download": "Download",
+    "loadingPreview": "Loading preview…",
+    "pdfPageLabel": "Page {{page}} of {{total}}",
     "types": {
       "cv": "CV",
       "id": "ID",

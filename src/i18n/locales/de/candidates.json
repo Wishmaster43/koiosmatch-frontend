@@ -646,6 +646,8 @@
     "noPreview": "Keine Vorschau für diese Datei verfügbar.",
     "previewUnavailable": "Vorschau nicht verfügbar.",
     "download": "Herunterladen",
+    "loadingPreview": "Vorschau wird geladen…",
+    "pdfPageLabel": "Seite {{page}} von {{total}}",
     "types": {
       "cv": "CV",
       "id": "Ausweis",

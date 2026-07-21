@@ -653,6 +653,8 @@
     "noPreview": "Geen preview beschikbaar voor dit bestand.",
     "previewUnavailable": "Preview niet beschikbaar.",
     "download": "Downloaden",
+    "loadingPreview": "Preview laden…",
+    "pdfPageLabel": "Pagina {{page}} van {{total}}",
     "types": {
       "cv": "CV",
       "id": "ID-bewijs",

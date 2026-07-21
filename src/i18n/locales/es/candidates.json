@@ -646,6 +646,8 @@
     "noPreview": "No hay vista previa disponible para este archivo.",
     "previewUnavailable": "Vista previa no disponible.",
     "download": "Descargar",
+    "loadingPreview": "Cargando vista previa…",
+    "pdfPageLabel": "Página {{page}} de {{total}}",
     "types": {
       "cv": "CV",
       "id": "Identificación",

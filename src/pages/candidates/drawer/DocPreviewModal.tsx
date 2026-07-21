@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, FileText } from 'lucide-react'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import PdfPreview from './PdfPreview'
 
 const isImage = (name = '') => /\.(png|jpe?g|gif|webp|svg)$/i.test(name)
 const isPdf   = (name = '') => /\.pdf$/i.test(name)
@@ -20,9 +22,13 @@ export default function DocPreviewModal({ doc, onClose }: { doc?: CandidateDoc |
   const { labelOf: docTypeLabel, colorOf: docColor } = useDocumentTypes()
   // Hooks run unconditionally (before the `!doc` early return) — Rules of Hooks.
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
+  // A pdf.js render failure falls back to the same download link used for
+  // unsupported file types — never a blank frame.
+  const [pdfFailed, setPdfFailed] = useState(false)
   if (!doc) return null
   const url = doc.objectUrl ?? doc.url
   const typeLabel = docTypeLabel(doc.type)
+  const showPdfPreview = isPdf(doc.name) && !pdfFailed
   return (
     <div onClick={e => e.target === e.currentTarget && onClose()}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 300,
@@ -50,24 +56,13 @@ export default function DocPreviewModal({ doc, onClose }: { doc?: CandidateDoc |
             </div>
           ) : isImage(doc.name) ? (
             <img src={url} alt={doc.name} style={{ maxWidth: '100%', display: 'block', margin: '0 auto' }} />
-          ) : isPdf(doc.name) ? (
-            // AUDIT-3: `doc.url`/`objectUrl` is tenant-uploaded content, so a sandboxed
-            // preview iframe was the goal — but measured live (real Chrome, both a
-            // blob: URL and a plain http: URL) a sandboxed iframe NEVER renders
-            // Chrome's built-in PDF viewer: `sandbox=""` and `sandbox="allow-same-origin"`
-            // both show its broken-document icon (blob) or a blank frame (http) + a
-            // SecurityError touching localStorage; adding allow-scripts/allow-popups/
-            // allow-forms/allow-modals on top changes nothing. This is Chrome refusing
-            // to load its internal PDF viewer plugin inside ANY sandboxed frame,
-            // regardless of which tokens are granted — not a flag we got wrong. Shipping
-            // a sandboxed iframe here would silently break every PDF preview, so this
-            // stays unsandboxed for now (no regression vs. before); the real fix is a
-            // self-hosted, JS-rendered PDF viewer (e.g. pdf.js) that we control and CAN
-            // sandbox properly — flagged as a follow-up, not solved in this wave.
-            // Residual risk is bounded: isPdf()/isImage() gate what reaches an iframe/
-            // <img> at all (never dangerouslySetInnerHTML), and the source is either a
-            // same-origin API asset or a blob: URL we created client-side ourselves.
-            <iframe src={url} title={doc.name} style={{ width: '100%', height: 600, border: 'none' }} />
+          ) : showPdfPreview ? (
+            // AUDIT-3 follow-up done: this used to be an unsandboxed <iframe> (Chrome
+            // refuses its built-in PDF viewer inside ANY sandboxed frame — see git
+            // history for the measured detail). pdf.js now renders every page into a
+            // <canvas> we control client-side — no iframe, no dangerouslySetInnerHTML —
+            // so the dialog no longer needs that unsandboxed escape hatch.
+            <PdfPreview url={url} onError={() => setPdfFailed(true)} />
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300, color: 'var(--text-muted)', fontSize: 13 }}>
               {t('documents.previewUnavailable')} <a href={url} download={doc.name} style={{ marginLeft: 6, color: 'var(--color-primary)' }}>{t('documents.download')}</a>
