@@ -913,7 +913,7 @@
     "helloflex": {
       "name": "HelloFlex",
       "alt": "HelloFlex-Logo",
-      "notAvailable": "Integration noch nicht verfügbar — folgt mit der HelloFlex-Einrichtung."
+      "notLinked": "Nicht mit HelloFlex verknüpft"
     },
     "shiftmanager": {
       "name": "Shiftmanager",
@@ -925,6 +925,17 @@
       "syncSuccess": "Synchronisierung abgeschlossen",
       "syncFailed": "Synchronisierung fehlgeschlagen",
       "lastSynced": "Zuletzt synchronisiert: {{date}}"
+    },
+    "common": {
+      "linkButton": "Verknüpfen",
+      "retry": "Erneut verknüpfen",
+      "linking": "Verknüpfen…",
+      "linkStarted": "Verknüpfung gestartet",
+      "linkFailed": "Verknüpfen fehlgeschlagen",
+      "linkedByOn": "Verknüpft von {{name}} am {{date}}",
+      "statusLinked": "Verknüpft",
+      "statusPending": "In Bearbeitung",
+      "statusFailed": "Fehlgeschlagen"
     }
   },
   "conversations": {

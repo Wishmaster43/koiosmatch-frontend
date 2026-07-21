@@ -75,6 +75,18 @@ export interface CandidateConsent {
   newsletter_consent_at: string | null
 }
 
+/** A resolved backoffice link for ONE system (KOPPELINGEN-META-1): current sync
+ * state plus who/when it was FIRST linked. Shared shape for shiftmanagerLink and
+ * helloflexLink — both systems link through the same generic sync endpoint. */
+export interface CandidateBackofficeLink {
+  status: string | null
+  externalId: string | null
+  lastError: string | null
+  lastSyncedAt: string | null
+  linkedAt: string | null
+  linkedBy: { id: string | number; name: string | null } | null
+}
+
 /** A linked match (read-only on the candidate; the contract lives in HelloFlex). */
 export interface CandidateMatch {
   id?: Id
@@ -155,8 +167,11 @@ export interface Candidate {
   street: string
   // COUNTRY-1: home-address country (empty until filled).
   country: string
-  // KOPPELINGEN-TAB: the Shiftmanager backoffice link, mapped from backoffice_links.
-  shiftmanagerLink: { status?: string | null; externalId?: string | null; lastSyncedAt?: string | null } | null
+  // KOPPELINGEN-TAB: the backoffice links, mapped from backoffice_links[]. Both
+  // systems share the generic sync endpoint (POST /sync/candidates/{id}), so both
+  // get the same resolved shape (KOPPELINGEN-META-1: incl. who/when first linked).
+  shiftmanagerLink: CandidateBackofficeLink | null
+  helloflexLink: CandidateBackofficeLink | null
   houseNumber: string
   houseNumberSuffix: string
   postalCode: string
@@ -308,7 +323,17 @@ export interface ApiCandidate {
   mobile?: string
   street?: string
   country?: string
-  backoffice_links?: Array<{ system?: string; status?: string | null; external_id?: string | null; last_synced_at?: string | null }>
+  // KOPPELINGEN-META-1: `linked_at` + `linked_by` (resolved to {id,name} server-side)
+  // record who/when this system was FIRST linked, alongside the existing sync state.
+  backoffice_links?: Array<{
+    system?: string
+    status?: string | null
+    external_id?: string | null
+    last_error?: string | null
+    last_synced_at?: string | null
+    linked_at?: string | null
+    linked_by?: { id?: string | number; name?: string | null } | null
+  }>
   house_number?: string
   house_number_suffix?: string
   house_number_addition?: string

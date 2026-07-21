@@ -111,6 +111,55 @@ describe('mapCandidate — pools / consent / address', () => {
   })
 })
 
+// KOPPELINGEN-META-1 (backend commit 0375fa9): backoffice_links[] now carries
+// linked_at/linked_by per system alongside the existing sync state — verify both
+// shiftmanagerLink and helloflexLink resolve symmetrically from the same array.
+describe('mapCandidate — backoffice links (KOPPELINGEN-META-1)', () => {
+  it('maps a linked Shiftmanager entry, including linked_at/linked_by', () => {
+    const r = mapCandidate({
+      backoffice_links: [
+        {
+          system: 'shiftmanager', status: 'linked', external_id: '428',
+          last_synced_at: '2026-07-18T09:00:00Z',
+          linked_at: '2026-07-10T08:00:00Z', linked_by: { id: 7, name: 'Bente de Jong' },
+        },
+      ],
+    })
+    expect(r.shiftmanagerLink).toEqual({
+      status: 'linked', externalId: '428', lastError: null, lastSyncedAt: '2026-07-18T09:00:00Z',
+      linkedAt: '2026-07-10T08:00:00Z', linkedBy: { id: 7, name: 'Bente de Jong' },
+    })
+  })
+
+  it('maps a failed HelloFlex entry with last_error and a null linked_by', () => {
+    const r = mapCandidate({
+      backoffice_links: [
+        {
+          system: 'helloflex', status: 'failed', external_id: null,
+          last_error: 'HelloFlex-credentials ontbreken (Settings → Integraties)',
+          linked_at: null, linked_by: null,
+        },
+      ],
+    })
+    expect(r.helloflexLink).toEqual({
+      status: 'failed', externalId: null,
+      lastError: 'HelloFlex-credentials ontbreken (Settings → Integraties)',
+      lastSyncedAt: null, linkedAt: null, linkedBy: null,
+    })
+  })
+
+  it('is null for a system the tenant never attempted', () => {
+    const r = mapCandidate({ backoffice_links: [{ system: 'shiftmanager', status: 'linked', external_id: '1' }] })
+    expect(r.helloflexLink).toBeNull()
+  })
+
+  it('is null for both systems when backoffice_links is absent', () => {
+    const r = mapCandidate({})
+    expect(r.shiftmanagerLink).toBeNull()
+    expect(r.helloflexLink).toBeNull()
+  })
+})
+
 // CREATED-BY-SOURCE-1 (Danny: "wil ik ook zien aangemaakt door wie en de bron") —
 // the Statistieken tab needs both fields; verify the mapper actually forwards them.
 describe('mapCandidate — createdBy / source (CREATED-BY-SOURCE-1)', () => {
