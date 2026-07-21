@@ -948,6 +948,12 @@
     "escalatedHint": "Ein eskaliertes Gespräch wurde von einem Mitarbeiter übernommen.",
     "loadingMessages": "Nachrichten werden geladen…",
     "noMessages": "Keine Nachrichten in diesem Gespräch",
+    "unknownContact": "Unbekannter Kontakt",
+    "delivery": {
+      "sent": "Gesendet",
+      "delivered": "Zugestellt",
+      "read": "Gelesen"
+    },
     "purpose": {
       "manual": "Manuell",
       "birthday": "Geburtstag",

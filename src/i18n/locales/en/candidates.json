@@ -948,6 +948,12 @@
     "escalatedHint": "An escalated chat has been taken over by a staff member.",
     "loadingMessages": "Loading messages…",
     "noMessages": "No messages in this conversation",
+    "unknownContact": "Unknown contact",
+    "delivery": {
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "read": "Read"
+    },
     "purpose": {
       "manual": "Manual",
       "birthday": "Birthday",

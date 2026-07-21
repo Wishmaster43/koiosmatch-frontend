@@ -948,6 +948,12 @@
     "escalatedHint": "Un chat escalado ha sido asumido por un empleado.",
     "loadingMessages": "Cargando mensajes…",
     "noMessages": "No hay mensajes en esta conversación",
+    "unknownContact": "Contacto desconocido",
+    "delivery": {
+      "sent": "Enviado",
+      "delivered": "Entregado",
+      "read": "Leído"
+    },
     "purpose": {
       "manual": "Manual",
       "birthday": "Cumpleaños",

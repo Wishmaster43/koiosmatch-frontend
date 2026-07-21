@@ -948,6 +948,12 @@
     "escalatedHint": "Une conversation escaladée a été reprise par un collaborateur.",
     "loadingMessages": "Chargement des messages…",
     "noMessages": "Aucun message dans cette conversation",
+    "unknownContact": "Contact inconnu",
+    "delivery": {
+      "sent": "Envoyé",
+      "delivered": "Distribué",
+      "read": "Lu"
+    },
     "purpose": {
       "manual": "Manuel",
       "birthday": "Anniversaire",

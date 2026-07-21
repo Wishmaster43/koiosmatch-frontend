@@ -948,6 +948,12 @@
     "escalatedHint": "Een geëscaleerd gesprek is overgenomen door een medewerker.",
     "loadingMessages": "Berichten laden…",
     "noMessages": "Geen berichten in dit gesprek",
+    "unknownContact": "Onbekend contact",
+    "delivery": {
+      "sent": "Verzonden",
+      "delivered": "Afgeleverd",
+      "read": "Gelezen"
+    },
     "purpose": {
       "manual": "Handmatig",
       "birthday": "Verjaardag",
