@@ -160,6 +160,11 @@
       "conditions": "Condiciones",
       "location": "Ubicación"
     },
+    "subtabs": {
+      "general": "General",
+      "profile": "Perfil",
+      "advice": "Consejo Koios"
+    },
     "id": "ID de vacante",
     "startDate": "Fecha de inicio",
     "endDate": "Fecha de fin",

@@ -160,6 +160,11 @@
       "conditions": "Conditions",
       "location": "Lieu"
     },
+    "subtabs": {
+      "general": "Général",
+      "profile": "Profil",
+      "advice": "Conseil Koios"
+    },
     "id": "ID du poste",
     "startDate": "Date de début",
     "endDate": "Date de fin",

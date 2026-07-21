@@ -160,6 +160,11 @@
       "conditions": "Konditionen",
       "location": "Standort"
     },
+    "subtabs": {
+      "general": "Allgemein",
+      "profile": "Profil",
+      "advice": "Koios-Beratung"
+    },
     "id": "Stellen-ID",
     "startDate": "Startdatum",
     "endDate": "Enddatum",

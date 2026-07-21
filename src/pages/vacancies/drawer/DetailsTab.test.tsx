@@ -4,9 +4,13 @@
  * again. The whole form/cascade/lookup hook is stubbed (DetailsTab is pure card/
  * row JSX around it, see useVacancyDetailsForm's own doc comment), so no context
  * providers are needed to mount it.
+ *
+ * Also covers the sub-tab reorg (Danny 21-07): the tab now splits into Algemeen ·
+ * Profiel · Koios-advies via the shared SubTabBar instead of stacking every
+ * section — default sub-tab, and switching shows/hides the right groups.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import DetailsTab from './DetailsTab'
 import type { VacancyDetail } from '@/types/vacancy'
 
@@ -42,5 +46,38 @@ describe('DetailsTab · the AI-agent card is gone (moved to VacancyAgentTab)', (
     expect(screen.queryByText('details.aiAgent.none')).not.toBeInTheDocument()
     // The vacancy DOES carry a linked agent name — it must not leak into this tab.
     expect(screen.queryByText('Kelly')).not.toBeInTheDocument()
+  })
+})
+
+describe('DetailsTab · sub-tab reorg (Algemeen / Profiel / Koios-advies)', () => {
+  it('defaults to Algemeen — general + location groups only', () => {
+    render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
+    expect(screen.getByText('details.groups.general')).toBeInTheDocument()
+    expect(screen.getByText('details.groups.location')).toBeInTheDocument()
+    // Profiel and Koios-advies content stays hidden until picked.
+    expect(screen.queryByText('details.groups.requirements')).not.toBeInTheDocument()
+    expect(screen.queryByText('details.groups.conditions')).not.toBeInTheDocument()
+    expect(screen.queryByText('details.skills')).not.toBeInTheDocument()
+    expect(screen.queryByText('details.description')).not.toBeInTheDocument()
+  })
+
+  it('switching to Profiel shows requirements/conditions/skills/description and hides Algemeen', () => {
+    render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
+    fireEvent.click(screen.getByText('details.subtabs.profile'))
+    expect(screen.getByText('details.groups.requirements')).toBeInTheDocument()
+    expect(screen.getByText('details.groups.conditions')).toBeInTheDocument()
+    expect(screen.getByText('details.skills')).toBeInTheDocument()
+    expect(screen.getByText('details.description')).toBeInTheDocument()
+    expect(screen.queryByText('details.groups.general')).not.toBeInTheDocument()
+    expect(screen.queryByText('details.groups.location')).not.toBeInTheDocument()
+  })
+
+  it('switching to Koios-advies hides both Algemeen and Profiel groups', () => {
+    render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
+    fireEvent.click(screen.getByText('details.subtabs.advice'))
+    expect(screen.queryByText('details.groups.general')).not.toBeInTheDocument()
+    expect(screen.queryByText('details.groups.location')).not.toBeInTheDocument()
+    expect(screen.queryByText('details.groups.requirements')).not.toBeInTheDocument()
+    expect(screen.queryByText('details.groups.conditions')).not.toBeInTheDocument()
   })
 })

@@ -160,6 +160,11 @@
       "requirements": "Requirements",
       "conditions": "Conditions"
     },
+    "subtabs": {
+      "general": "General",
+      "profile": "Profile",
+      "advice": "Koios advice"
+    },
     "id": "Vacancy ID",
     "startDate": "Start date",
     "endDate": "End date",

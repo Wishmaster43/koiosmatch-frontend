@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X, Trash2, Plus } from 'lucide-react'
@@ -6,12 +7,19 @@ import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import EntityLink from '@/components/ui/EntityLink'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+import SubTabBar from '@/components/drawer/SubTabBar'
 import VacancyGenerateFlow from './VacancyGenerateFlow'
 import { buildVacancyAdviceInsights } from './vacancyAiInsights'
 import { useVacancyDetailsForm, composeAddress } from '../hooks/useVacancyDetailsForm'
 import type { TextKey } from '../hooks/useVacancyDetailsForm'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
+
+// Sub-tabs (Danny 21-07): the tab used to stack every section top-to-bottom —
+// split into Algemeen (identity/location) · Profiel (requirements/skills/text) ·
+// Koios-advies (the advisory block), mirroring the candidate CommunicationTab's
+// shared SubTabBar. Default sub-tab is 'general'.
+type DetailsSubTab = 'general' | 'profile' | 'advice'
 
 type AnyProps = Record<string, unknown>
 const RichTextEditor = RichTextEditorJs as unknown as ComponentType<AnyProps>
@@ -45,6 +53,9 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
     descEditing, setDescEditing, descExpanded, setDescExpanded, description, setDescription, saveDesc, cancelDesc,
     descKey, applyGeneratedConcept,
   } = useVacancyDetailsForm(v, onUpdate)
+
+  // Active sub-tab — Algemeen is the default landing view (Danny 21-07).
+  const [subTab, setSubTab] = useState<DetailsSubTab>('general')
 
   // Edit-toggle control block (pencil ↔ save/cancel), reused for the field grid
   // and the description block (each with its own independent editing state).
@@ -87,129 +98,150 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* One edit toggle for the field grid — no duplicate "Details" heading (the tab
-          bar already says it; Danny 2026-07-06). */}
+      {/* One edit toggle for the field grid — stays above the sub-tab bar (not nested
+          inside one sub-tab) because it governs fields spread across BOTH Algemeen
+          (client/location cascade) and Profiel (experience/seniority/salary/hours) —
+          one shared `editing`/`form` state from the hook, unchanged behaviour. */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
         {controls(editing, save, cancel, () => setEditing(true))}
       </div>
 
-      {/* Algemeen — V1: this card's heading ("Algemeen") is now the FIRST heading in
-          the tab content (the tab itself keeps its "Details" id/label, §3A(d)-style
-          separation of tab-chrome vs content). V13: Contractvorm moved in here — it
-          used to float loose above this card. */}
-      {card(t('details.groups.general'), <>
-        {row(t('details.contractType'),
-          types.length === 0 ? dash : (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-              {types.map(val => { const m = typeMeta(val); return (
-                <span key={val} style={{ fontSize: 11, fontWeight: 500, padding: '2px 9px', borderRadius: 999,
-                  background: m.color + '1A', color: m.color, border: `1px solid ${m.color}55` }}>{m.label}</span>
-              ) })}
-            </div>
-          ),
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-            {candidateTypes.map(ct => {
-              const on = types.includes(ct.value)
-              return (
-                <button key={ct.value} type="button" onClick={() => toggleType(ct.value)}
-                  style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', fontWeight: on ? 600 : 400,
-                    background: on ? (ct.color ?? 'var(--color-primary)') + '1A' : 'var(--surface)',
-                    color: on ? (ct.color ?? 'var(--color-primary)') : 'var(--text-muted)',
-                    border: `1px solid ${on ? (ct.color ?? 'var(--color-primary)') + '55' : 'var(--border)'}` }}>{ct.label}</button>
-              )
-            })}
-          </div>)}
-        {row(t('details.id'), <span style={{ color: 'var(--text-muted)' }}>{v.code || '—'}</span>, <span style={{ color: 'var(--text-muted)' }}>{v.code || '—'}</span>)}
-        {/* VAC-DATES-1: the vacancy's own runtime window — start_date AND end_date
-            (validated after_or_equal:start_date server-side), paired half-row like
-            houseNumber/houseNumberSuffix below. */}
-        {row(`${t('details.startDate')} / ${t('details.endDate')}`, dateRange(v.startDate, v.endDate) || dash, twoDates('startDate', 'endDate'))}
-        {/* V3: client — searchable (was a plain <select>). Picking a different client
-            resets the dependent locatie/afdeling/contactpersoon picks below. */}
-        {row(t('drawer.client'),
-          <EntityLink page="customers" id={v.clientId}>{v.clientName || '—'}</EntityLink>,
-          <CreatableSelect value={clientId || null} onChange={handleClientChange} allowCreate={false}
-            placeholder={t('drawer.selectClient')} options={customerOptions.map(c => ({ value: String(c.value), label: c.label }))} />)}
-        {/* V4-V6: locatie → afdeling → contactpersoon — optional, searchable cascade.
-            VAC-CASCADE-1: the backend persists customer_location_id/customer_department_id/
-            contact_id, so read-mode shows the saved name (or a dash) and the edit
-            survives a reload instead of silently evaporating. */}
-        {row(t('details.customerLocation'), cascade.locationName || dash, locationPicker)}
-        {row(t('details.customerDepartment'), cascade.departmentName || dash, departmentPicker)}
-        {row(t('details.contactPerson'), cascade.contactName || dash, contactPicker)}
-        {row(t('details.function'), v.category || dash, select('category', fnOptions))}
-        {row(t('details.preferredIndustry'), v.industry || dash, select('industry', industries.map(i => ({ value: i, label: i }))))}
-      </>)}
+      {/* Sub-tabs (Danny 21-07): Algemeen · Profiel · Koios-advies — same shared
+          SubTabBar as the candidate drawer's sub-tab strips, never a bespoke bar. */}
+      <SubTabBar
+        tabs={[
+          { id: 'general', label: t('details.subtabs.general') },
+          { id: 'profile', label: t('details.subtabs.profile') },
+          { id: 'advice',  label: t('details.subtabs.advice') },
+        ]}
+        active={subTab}
+        onChange={id => setSubTab(id as DetailsSubTab)}
+      />
 
-      {card(t('details.groups.location'), <>
-        {/* V9: address — each field its own labelled row when editing (mirrors the
-            candidate ProfileTab's address convention), instead of three inputs
-            crammed onto one "Adres" row; read mode still shows one composed line. */}
-        {editing ? (
-          <>
-            {row(t('details.street'), null, text('street'))}
-            {row(`${t('details.houseNumber')} / ${t('details.houseNumberSuffix')}`, null, twoInputs('houseNumber', 'houseNumberSuffix', t('details.houseNumber'), t('details.houseNumberSuffix')))}
-            {row(t('details.postalCode'), null, text('postalCode'))}
-            {row(t('details.city'), null, text('city'))}
-          </>
-        ) : (
-          row(t('details.address'), composeAddress(v.street, v.houseNumber, v.houseNumberSuffix, v.postalCode, v.city) || v.location || dash, null)
-        )}
-        {row(t('details.province'), v.province || dash, text('province'))}
-      </>)}
-
-      {card(t('details.groups.requirements'), <>
-        {row(t('details.experience'), pair(v.experienceMin, v.experienceMax, t('details.years')) || dash, twoInputs('experienceMin', 'experienceMax', t('details.experienceFrom'), t('details.experienceTo')))}
-        {row(t('details.seniority'), v.seniority || dash, select('seniority', seniorityLevels.map(s => ({ value: s.value, label: s.label }))))}
-        {row(t('details.education'), v.education || dash, select('education', educationLevels.map(e => ({ value: e.value, label: e.label }))))}
-      </>)}
-
-      {card(t('details.groups.conditions'), <>
-        {row(t('details.salary'), pair(v.salaryMin, v.salaryMax) || v.salary || dash, twoInputs('salaryMin', 'salaryMax', 'min', 'max'))}
-        {row(t('details.hours'), pair(v.hoursMin, v.hoursMax) || v.hours || dash, twoInputs('hoursMin', 'hoursMax', 'min', 'max'))}
-      </>)}
-
-      {/* Required skills — vertical list; quick-add/remove ALWAYS available (saves
-          immediately outside edit-mode, rides the big Save inside it). */}
-      <div>
-        <div style={groupTitle}>{t('details.skills')}</div>
-        {skills.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {skills.map(s => (
-              <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text)', padding: '6px 10px', ...blockStyle }}>
-                <span style={{ flex: 1, minWidth: 0 }}>{s}</span>
-                <button onClick={() => removeSkill(s)} title={t('common:remove')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={13} /></button>
+      {subTab === 'general' && <>
+        {/* Algemeen — V1: this card's heading ("Algemeen") is now the FIRST heading in
+            the tab content (the tab itself keeps its "Details" id/label, §3A(d)-style
+            separation of tab-chrome vs content). V13: Contractvorm moved in here — it
+            used to float loose above this card. */}
+        {card(t('details.groups.general'), <>
+          {row(t('details.contractType'),
+            types.length === 0 ? dash : (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                {types.map(val => { const m = typeMeta(val); return (
+                  <span key={val} style={{ fontSize: 11, fontWeight: 500, padding: '2px 9px', borderRadius: 999,
+                    background: m.color + '1A', color: m.color, border: `1px solid ${m.color}55` }}>{m.label}</span>
+                ) })}
               </div>
-            ))}
-          </div>
-        )}
-        <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-          <input value={newSkill} onChange={e => setNewSkill(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') addSkill() }}
-            placeholder={t('details.addSkill')} style={{ ...inputStyle, flex: 1 }} />
-          <button onClick={addSkill} title={t('details.addSkill')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Plus size={14} /></button>
-        </div>
-      </div>
+            ),
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+              {candidateTypes.map(ct => {
+                const on = types.includes(ct.value)
+                return (
+                  <button key={ct.value} type="button" onClick={() => toggleType(ct.value)}
+                    style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', fontWeight: on ? 600 : 400,
+                      background: on ? (ct.color ?? 'var(--color-primary)') + '1A' : 'var(--surface)',
+                      color: on ? (ct.color ?? 'var(--color-primary)') : 'var(--text-muted)',
+                      border: `1px solid ${on ? (ct.color ?? 'var(--color-primary)') + '55' : 'var(--border)'}` }}>{ct.label}</button>
+                )
+              })}
+            </div>)}
+          {row(t('details.id'), <span style={{ color: 'var(--text-muted)' }}>{v.code || '—'}</span>, <span style={{ color: 'var(--text-muted)' }}>{v.code || '—'}</span>)}
+          {/* VAC-DATES-1: the vacancy's own runtime window — start_date AND end_date
+              (validated after_or_equal:start_date server-side), paired half-row like
+              houseNumber/houseNumberSuffix below. */}
+          {row(`${t('details.startDate')} / ${t('details.endDate')}`, dateRange(v.startDate, v.endDate) || dash, twoDates('startDate', 'endDate'))}
+          {/* V3: client — searchable (was a plain <select>). Picking a different client
+              resets the dependent locatie/afdeling/contactpersoon picks below. */}
+          {row(t('drawer.client'),
+            <EntityLink page="customers" id={v.clientId}>{v.clientName || '—'}</EntityLink>,
+            <CreatableSelect value={clientId || null} onChange={handleClientChange} allowCreate={false}
+              placeholder={t('drawer.selectClient')} options={customerOptions.map(c => ({ value: String(c.value), label: c.label }))} />)}
+          {/* V4-V6: locatie → afdeling → contactpersoon — optional, searchable cascade.
+              VAC-CASCADE-1: the backend persists customer_location_id/customer_department_id/
+              contact_id, so read-mode shows the saved name (or a dash) and the edit
+              survives a reload instead of silently evaporating. */}
+          {row(t('details.customerLocation'), cascade.locationName || dash, locationPicker)}
+          {row(t('details.customerDepartment'), cascade.departmentName || dash, departmentPicker)}
+          {row(t('details.contactPerson'), cascade.contactName || dash, contactPicker)}
+          {row(t('details.function'), v.category || dash, select('category', fnOptions))}
+          {row(t('details.preferredIndustry'), v.industry || dash, select('industry', industries.map(i => ({ value: i, label: i }))))}
+        </>)}
 
-      {/* Description — same rich editor as the candidate profile text (its own toggle). */}
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <span style={groupTitle}>{t('details.description')}</span>
-          {controls(descEditing, saveDesc, cancelDesc, () => setDescEditing(true),
-            descEditing ? <button onClick={() => setDescription('')} title={t('common:remove')} style={{ ...iconBtn, background: 'none', color: 'var(--color-danger)', border: '1px solid var(--border)' }}><Trash2 size={13} /></button> : null)}
+        {card(t('details.groups.location'), <>
+          {/* V9: address — each field its own labelled row when editing (mirrors the
+              candidate ProfileTab's address convention), instead of three inputs
+              crammed onto one "Adres" row; read mode still shows one composed line. */}
+          {editing ? (
+            <>
+              {row(t('details.street'), null, text('street'))}
+              {row(`${t('details.houseNumber')} / ${t('details.houseNumberSuffix')}`, null, twoInputs('houseNumber', 'houseNumberSuffix', t('details.houseNumber'), t('details.houseNumberSuffix')))}
+              {row(t('details.postalCode'), null, text('postalCode'))}
+              {row(t('details.city'), null, text('city'))}
+            </>
+          ) : (
+            row(t('details.address'), composeAddress(v.street, v.houseNumber, v.houseNumberSuffix, v.postalCode, v.city) || v.location || dash, null)
+          )}
+          {row(t('details.province'), v.province || dash, text('province'))}
+        </>)}
+      </>}
+
+      {subTab === 'profile' && <>
+        {card(t('details.groups.requirements'), <>
+          {row(t('details.experience'), pair(v.experienceMin, v.experienceMax, t('details.years')) || dash, twoInputs('experienceMin', 'experienceMax', t('details.experienceFrom'), t('details.experienceTo')))}
+          {row(t('details.seniority'), v.seniority || dash, select('seniority', seniorityLevels.map(s => ({ value: s.value, label: s.label }))))}
+          {row(t('details.education'), v.education || dash, select('education', educationLevels.map(e => ({ value: e.value, label: e.label }))))}
+        </>)}
+
+        {/* Voorwaarden (salary/hours) — not explicitly named in the redesign brief;
+            grouped here rather than under Algemeen/Koios-advies since it describes the
+            job's terms alongside the other function requirements. */}
+        {card(t('details.groups.conditions'), <>
+          {row(t('details.salary'), pair(v.salaryMin, v.salaryMax) || v.salary || dash, twoInputs('salaryMin', 'salaryMax', 'min', 'max'))}
+          {row(t('details.hours'), pair(v.hoursMin, v.hoursMax) || v.hours || dash, twoInputs('hoursMin', 'hoursMax', 'min', 'max'))}
+        </>)}
+
+        {/* Required skills — vertical list; quick-add/remove ALWAYS available (saves
+            immediately outside edit-mode, rides the big Save inside it). */}
+        <div>
+          <div style={groupTitle}>{t('details.skills')}</div>
+          {skills.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {skills.map(s => (
+                <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text)', padding: '6px 10px', ...blockStyle }}>
+                  <span style={{ flex: 1, minWidth: 0 }}>{s}</span>
+                  <button onClick={() => removeSkill(s)} title={t('common:remove')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={13} /></button>
+                </div>
+              ))}
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+            <input value={newSkill} onChange={e => setNewSkill(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') addSkill() }}
+              placeholder={t('details.addSkill')} style={{ ...inputStyle, flex: 1 }} />
+            <button onClick={addSkill} title={t('details.addSkill')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Plus size={14} /></button>
+          </div>
         </div>
-        {/* VACGEN-1 fase 1b: "Genereer met Koios" — resolves the tenant's generation
-            profile, generates a CONCEPT, and only feeds it into this draft on an
-            explicit "Toepassen" (never a silent overwrite of the saved text). */}
-        <VacancyGenerateFlow vacancy={v} onApply={applyGeneratedConcept} />
-        {descEditing
-          ? <RichTextEditor key={descKey} value={description} onChange={setDescription} expanded={descExpanded} onToggleExpand={() => setDescExpanded(x => !x)} />
-          : (v.description
-              ? <div style={{ ...blockStyle, padding: '10px 12px', maxHeight: 220, overflow: 'auto' }}><SafeHtml html={v.description} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} /></div>
-              : <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>—</div>)}
-      </div>
+
+        {/* Description — same rich editor as the candidate profile text (its own toggle). */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+            <span style={groupTitle}>{t('details.description')}</span>
+            {controls(descEditing, saveDesc, cancelDesc, () => setDescEditing(true),
+              descEditing ? <button onClick={() => setDescription('')} title={t('common:remove')} style={{ ...iconBtn, background: 'none', color: 'var(--color-danger)', border: '1px solid var(--border)' }}><Trash2 size={13} /></button> : null)}
+          </div>
+          {/* VACGEN-1 fase 1b: "Genereer met Koios" — resolves the tenant's generation
+              profile, generates a CONCEPT, and only feeds it into this draft on an
+              explicit "Toepassen" (never a silent overwrite of the saved text). */}
+          <VacancyGenerateFlow vacancy={v} onApply={applyGeneratedConcept} />
+          {descEditing
+            ? <RichTextEditor key={descKey} value={description} onChange={setDescription} expanded={descExpanded} onToggleExpand={() => setDescExpanded(x => !x)} />
+            : (v.description
+                ? <div style={{ ...blockStyle, padding: '10px 12px', maxHeight: 220, overflow: 'auto' }}><SafeHtml html={v.description} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} /></div>
+                : <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>—</div>)}
+        </div>
+      </>}
 
       {/* Koios AI advisory — field completeness + open/applications flow (§3A blueprint). */}
-      <KoiosAdviceBlock namespace="vacancies" insights={buildVacancyAdviceInsights(v, t)} />
+      {subTab === 'advice' && <KoiosAdviceBlock namespace="vacancies" insights={buildVacancyAdviceInsights(v, t)} />}
     </div>
   )
 }

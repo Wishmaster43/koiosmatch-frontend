@@ -160,6 +160,11 @@
       "requirements": "Functie-eisen",
       "conditions": "Voorwaarden"
     },
+    "subtabs": {
+      "general": "Algemeen",
+      "profile": "Profiel",
+      "advice": "Koios-advies"
+    },
     "id": "Vacature-ID",
     "startDate": "Startdatum",
     "endDate": "Einddatum",
