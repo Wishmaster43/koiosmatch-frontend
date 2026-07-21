@@ -11,6 +11,7 @@ import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useDateFormat } from '@/lib/datetime'
 import DetailsTab from './drawer/DetailsTab'
+import DescriptionTab from './drawer/DescriptionTab'
 import ApplicantsTab from './drawer/ApplicantsTab'
 import VacancyAgentTab from './drawer/VacancyAgentTab'
 import PublishingTab from './drawer/PublishingTab'
@@ -32,6 +33,9 @@ interface DrawerUser { id: Id; name: string }
 // layout: "Details moet gewoon eerste tabje zijn", the pinned editor crowded the drawer).
 const TABS: { id: string; tKey: string; render: (v: VacancyDetail, onUpdate?: UpdateFn) => ReactNode }[] = [
   { id: 'details',    tKey: 'details',    render: (v, onUpdate) => <DetailsTab vacancy={v} onUpdate={onUpdate} /> },
+  // Beschrijving — its OWN main tab now (Danny 21-07: moved out of Details' sub-tabs,
+  // right after Details so the vacancy text still reads next to the field grid).
+  { id: 'description', tKey: 'description', render: (v, onUpdate) => <DescriptionTab vacancy={v} onUpdate={onUpdate} /> },
   { id: 'applicants', tKey: 'applicants', render: v => <ApplicantsTab vacancy={v} /> },
   { id: 'matching',   tKey: 'matching',   render: (v, onUpdate) => <MatchingTab vacancy={v} onUpdate={onUpdate} /> },
   // VAC-AGENT-1 (Danny 21-07): its own tab — the agent picker + the read-only

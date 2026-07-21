@@ -111,6 +111,7 @@
     "publishedOnChannel": "Gepubliceerd op {{channel}}",
     "tabs": {
       "details": "Details",
+      "description": "Beschrijving",
       "applicants": "Sollicitaties",
       "matching": "Matching",
       "aiagent": "AI-agent",
@@ -159,11 +160,6 @@
       "location": "Locatie",
       "requirements": "Functie-eisen",
       "conditions": "Voorwaarden"
-    },
-    "subtabs": {
-      "general": "Algemeen",
-      "profile": "Profiel",
-      "advice": "Koios-advies"
     },
     "id": "Vacature-ID",
     "startDate": "Startdatum",

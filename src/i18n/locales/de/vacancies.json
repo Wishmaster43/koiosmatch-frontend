@@ -111,6 +111,7 @@
     "publishedOnChannel": "Veröffentlicht auf {{channel}}",
     "tabs": {
       "details": "Details",
+      "description": "Beschreibung",
       "applicants": "Bewerbungen",
       "matching": "Matching",
       "aiagent": "KI-Agent",
@@ -159,11 +160,6 @@
       "requirements": "Anforderungen",
       "conditions": "Konditionen",
       "location": "Standort"
-    },
-    "subtabs": {
-      "general": "Allgemein",
-      "profile": "Profil",
-      "advice": "Koios-Beratung"
     },
     "id": "Stellen-ID",
     "startDate": "Startdatum",

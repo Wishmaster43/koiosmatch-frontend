@@ -111,6 +111,7 @@
     "publishedOnChannel": "Publicada en {{channel}}",
     "tabs": {
       "details": "Detalles",
+      "description": "Descripción",
       "applicants": "Candidaturas",
       "matching": "Matching",
       "aiagent": "Agente IA",
@@ -159,11 +160,6 @@
       "requirements": "Requisitos",
       "conditions": "Condiciones",
       "location": "Ubicación"
-    },
-    "subtabs": {
-      "general": "General",
-      "profile": "Perfil",
-      "advice": "Consejo Koios"
     },
     "id": "ID de vacante",
     "startDate": "Fecha de inicio",

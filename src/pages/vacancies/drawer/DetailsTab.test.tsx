@@ -5,12 +5,15 @@
  * row JSX around it, see useVacancyDetailsForm's own doc comment), so no context
  * providers are needed to mount it.
  *
- * Also covers the sub-tab reorg (Danny 21-07): the tab now splits into Algemeen ·
- * Profiel · Koios-advies via the shared SubTabBar instead of stacking every
- * section — default sub-tab, and switching shows/hides the right groups.
+ * Also covers the flat-layout redesign (Danny 21-07): the sub-tab strip
+ * (Algemeen/Profiel/Koios-advies) is gone — every section now stacks in one flat
+ * scroll (no `role="tablist"`), and the field-edit pencil sits in the Algemeen
+ * card's own title row instead of a separate row above the tab content.
+ * Description moved OUT to its own drawer main-tab (DescriptionTab.test.tsx).
  */
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { vi } from 'vitest'
 import DetailsTab from './DetailsTab'
 import type { VacancyDetail } from '@/types/vacancy'
 
@@ -24,15 +27,11 @@ vi.mock('../hooks/useVacancyDetailsForm', () => ({
     locationPicker: null, departmentPicker: null, contactPicker: null,
     types: [], toggleType: vi.fn(),
     skills: [], newSkill: '', setNewSkill: vi.fn(), addSkill: vi.fn(), removeSkill: vi.fn(),
-    descEditing: false, setDescEditing: vi.fn(), descExpanded: false, setDescExpanded: vi.fn(),
-    description: '', setDescription: vi.fn(), saveDesc: vi.fn(), cancelDesc: vi.fn(),
-    descKey: 0, applyGeneratedConcept: vi.fn(),
   }),
   composeAddress: () => '',
 }))
-// Not under test here — both make their own API/insight calls, irrelevant to this guard.
+// Not under test here — makes its own API/insight calls, irrelevant to this guard.
 vi.mock('@/components/ai/KoiosAdviceBlock', () => ({ default: () => null }))
-vi.mock('./VacancyGenerateFlow', () => ({ default: () => null }))
 
 const vacancy = { id: 'v1', title: 'Verpleegkundige', aiAgentId: 'a1', aiAgentName: 'Kelly' } as unknown as VacancyDetail
 
@@ -49,35 +48,25 @@ describe('DetailsTab · the AI-agent card is gone (moved to VacancyAgentTab)', (
   })
 })
 
-describe('DetailsTab · sub-tab reorg (Algemeen / Profiel / Koios-advies)', () => {
-  it('defaults to Algemeen — general + location groups only', () => {
+describe('DetailsTab · flat layout (Danny 21-07: no sub-tab strip)', () => {
+  it('renders Algemeen, Profiel and Koios-advies all stacked, with no tablist', () => {
     render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
     expect(screen.getByText('details.groups.general')).toBeInTheDocument()
     expect(screen.getByText('details.groups.location')).toBeInTheDocument()
-    // Profiel and Koios-advies content stays hidden until picked.
-    expect(screen.queryByText('details.groups.requirements')).not.toBeInTheDocument()
-    expect(screen.queryByText('details.groups.conditions')).not.toBeInTheDocument()
-    expect(screen.queryByText('details.skills')).not.toBeInTheDocument()
-    expect(screen.queryByText('details.description')).not.toBeInTheDocument()
-  })
-
-  it('switching to Profiel shows requirements/conditions/skills/description and hides Algemeen', () => {
-    render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
-    fireEvent.click(screen.getByText('details.subtabs.profile'))
     expect(screen.getByText('details.groups.requirements')).toBeInTheDocument()
     expect(screen.getByText('details.groups.conditions')).toBeInTheDocument()
     expect(screen.getByText('details.skills')).toBeInTheDocument()
-    expect(screen.getByText('details.description')).toBeInTheDocument()
-    expect(screen.queryByText('details.groups.general')).not.toBeInTheDocument()
-    expect(screen.queryByText('details.groups.location')).not.toBeInTheDocument()
+    // No sub-tab bar left (SubTabBar renders role="tablist").
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
+    // Description moved to its own drawer tab — never rendered here anymore.
+    expect(screen.queryByText('details.description')).not.toBeInTheDocument()
   })
 
-  it('switching to Koios-advies hides both Algemeen and Profiel groups', () => {
+  it('puts the edit pencil in the Algemeen card title row', () => {
     render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
-    fireEvent.click(screen.getByText('details.subtabs.advice'))
-    expect(screen.queryByText('details.groups.general')).not.toBeInTheDocument()
-    expect(screen.queryByText('details.groups.location')).not.toBeInTheDocument()
-    expect(screen.queryByText('details.groups.requirements')).not.toBeInTheDocument()
-    expect(screen.queryByText('details.groups.conditions')).not.toBeInTheDocument()
+    const generalTitle = screen.getByText('details.groups.general')
+    const editButton = screen.getByTitle('common:edit')
+    // Same row wrapper: the title and the pencil share one parent (title-row div).
+    expect(editButton.parentElement).toBe(generalTitle.parentElement)
   })
 })

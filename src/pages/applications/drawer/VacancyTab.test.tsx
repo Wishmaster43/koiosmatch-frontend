@@ -24,6 +24,11 @@ vi.mock('@/pages/vacancies/drawer/DetailsTab', () => ({
     </div>
   ),
 }))
+// Danny 21-07: Beschrijving now renders alongside DetailsTab in this drill-down
+// (its own drawer main-tab on the real vacancy has no equivalent tab bar here).
+vi.mock('@/pages/vacancies/drawer/DescriptionTab', () => ({
+  default: () => <div>description-tab</div>,
+}))
 vi.mock('@/context/VacancyLookupsContext', () => ({ VacancyLookupsProvider: ({ children }: { children: ReactNode }) => <>{children}</> }))
 
 import api from '@/lib/api'
@@ -62,6 +67,14 @@ describe('VacancyTab', () => {
     mockGet.mockResolvedValue({ data: { data: { id: 7, title: 'Verpleegkundige' } } })
     render(<VacancyTab application={app()} />)
     expect(await screen.findByText('details-tab')).toBeInTheDocument()
+  })
+
+  // Danny 21-07: Beschrijving moved to its own drawer main-tab on the real
+  // vacancy — this drill-down has no tab bar, so it must stay visible below Details.
+  it('renders the description tab alongside the details tab', async () => {
+    mockGet.mockResolvedValue({ data: { data: { id: 7, title: 'Verpleegkundige' } } })
+    render(<VacancyTab application={app()} />)
+    expect(await screen.findByText('description-tab')).toBeInTheDocument()
   })
 
   // S20: the reused DetailsTab's onUpdate must actually PATCH /vacancies/{id} —

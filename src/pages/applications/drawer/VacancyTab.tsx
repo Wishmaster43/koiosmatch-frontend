@@ -7,6 +7,7 @@ import { notifyError } from '@/lib/notify'
 import { buildEntityDeepLink } from '@/components/ui/EntityLink'
 import { VacancyLookupsProvider } from '@/context/VacancyLookupsContext'
 import DetailsTab from '@/pages/vacancies/drawer/DetailsTab'
+import DescriptionTab from '@/pages/vacancies/drawer/DescriptionTab'
 import { mapVacancyDetail } from '@/pages/vacancies/data/mapVacancy'
 import { buildVacancyPatch } from '@/pages/vacancies/data/vacanciesShared'
 import VacancyLinkField from './VacancyLinkField'
@@ -127,13 +128,19 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
   // reason (S15); the top affordance both duplicated it and skipped that reason.
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 14 }}>
+      {/* Vacancy NAME left + "Open vacature" right on ONE row — mirrors the Kandidaat
+          tab's [name … Open kandidaat] header so both drill-downs read the same
+          (Danny 21-07: "vacature moet zelfde soort worden … naam van de vacature links"). */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+          {a.vacancyTitle}
+        </span>
         {/* S14/S22: stash the current subtab so browser BACK from the full vacancy
             page reopens THIS application's drawer on the Vacature tab again.
             Danny 21-07: this is an explicit "Open vacancy" AFFORDANCE (not the
             name+trailing-icon EntityLink pattern), so it is a real new-tab anchor
             rather than EntityLink's in-app button wrapped around the icon+label. */}
-        <span onClickCapture={() => { if (a.id != null) rememberReturnTab(a.id, 'vacancy') }}>
+        <span onClickCapture={() => { if (a.id != null) rememberReturnTab(a.id, 'vacancy') }} style={{ flexShrink: 0 }}>
           {a.vacancyId != null ? (
             <a href={buildEntityDeepLink('vacancies', a.vacancyId)} target="_blank" rel="noopener noreferrer"
               title={t('drawer.openVacancy')} aria-label={t('drawer.openVacancy')}
@@ -149,6 +156,12 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
       </div>
       <VacancyLookupsProvider>
         <DetailsTab vacancy={vac} onUpdate={updateVacancy} />
+        {/* Danny 21-07: Beschrijving moved to its own drawer main-tab on the real
+            vacancy — this drill-down has no main-tab bar, so it stays visible here
+            by rendering right below Details (same shared onUpdate path). */}
+        <div style={{ marginTop: 12 }}>
+          <DescriptionTab vacancy={vac} onUpdate={updateVacancy} />
+        </div>
       </VacancyLookupsProvider>
     </div>
   )

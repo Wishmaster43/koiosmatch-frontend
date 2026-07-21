@@ -4,9 +4,10 @@
  * layout; extracted here mirroring how VacanciesPage got useVacancyInsights —
  * behaviour identical, DetailsTab keeps only the card/row JSX). Owns: the field
  * grid's edit/save/cancel, the contract-type multi-select, the customer→location→
- * department→contact cascade (VAC-CASCADE-1), the quick-edit skills list, and the
- * rich-text description block's own toggle — everything DetailsTab needs to
- * render, nothing it needs to compute itself.
+ * department→contact cascade (VAC-CASCADE-1), and the quick-edit skills list —
+ * everything DetailsTab needs to render, nothing it needs to compute itself.
+ * The description block's own edit state now lives in useVacancyDescription
+ * (Danny 21-07: Beschrijving moved to its own drawer tab).
  */
 import { useState } from 'react'
 import { useLookups } from '@/context/LookupsContext'
@@ -99,16 +100,6 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
   const addSkill = () => { const sk = newSkill.trim(); if (sk && !skills.includes(sk)) persistSkills([...skills, sk]); setNewSkill('') }
   const removeSkill = (s: string) => persistSkills(skills.filter(x => x !== s))
 
-  // Description edits in its own block (rich text), like the candidate profile text.
-  const [descEditing, setDescEditing] = useState(false)
-  const [descExpanded, setDescExpanded] = useState(false)
-  const [description, setDescription] = useState(v.description ?? '')
-  // VACGEN-1 fase 1b: bumped whenever a generated concept is applied, forcing
-  // RichTextEditor to remount with the new draft — Tiptap's useEditor only reads
-  // `content` at mount time, so a plain setDescription() while already editing
-  // would not otherwise reach the visible editor.
-  const [descKey, setDescKey] = useState(0)
-
   // Customer options load only while editing (capped page, React Query).
   const customerOptions = useCustomerOptions(editing)
 
@@ -143,12 +134,6 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     setCascade(savedCascade)
     setEditing(false)
   }
-  const saveDesc = () => { onUpdate?.(v.id, { description }); setDescEditing(false) }
-  const cancelDesc = () => { setDescription(v.description ?? ''); setDescEditing(false) }
-  // Seed a Koios-generated concept into the draft (opens edit mode if needed) —
-  // never writes through onUpdate directly, so the existing Save button stays
-  // the ONLY path that persists it (no silent overwrite of the saved text).
-  const applyGeneratedConcept = (concept: string) => { setDescription(concept); setDescEditing(true); setDescKey(k => k + 1) }
 
   const fnOptions = functions.map(f => (typeof f === 'string' ? { value: f, label: f } : { value: f.value, label: f.label ?? f.value }))
 
@@ -163,8 +148,5 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     types, toggleType,
     // Skills (quick-edit, outside the pencil).
     skills, newSkill, setNewSkill, addSkill, removeSkill,
-    // Description (own rich-text toggle) + VACGEN-1 apply-concept + remount key.
-    descEditing, setDescEditing, descExpanded, setDescExpanded, description, setDescription, saveDesc, cancelDesc,
-    descKey, applyGeneratedConcept,
   }
 }
