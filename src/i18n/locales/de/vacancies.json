@@ -193,6 +193,19 @@
     "contactPerson": "Ansprechpartner",
     "pickClientFirst": "Zuerst einen Kunden wählen"
   },
+  "generate": {
+    "button": "Mit Koios generieren",
+    "resolving": "Profil wird ermittelt…",
+    "profileChip": "Profil: {{name}} · Spezifität {{specificity}}",
+    "noProfile": "Für diesen Mandanten ist noch kein Generierungsprofil eingerichtet. Bitten Sie einen Administrator, eines in den Einstellungen anzulegen.",
+    "cta": "Generieren",
+    "generating": "Koios generiert einen Konzepttext für die Vakanz…",
+    "unavailable": "Derzeit ist kein KI-Guthaben verfügbar. Bitte versuchen Sie es später erneut.",
+    "error": "Generieren ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "previewLabel": "Vorschlag (Konzept) — noch nicht gespeichert",
+    "apply": "Übernehmen",
+    "discard": "Verwerfen"
+  },
   "publishing": {
     "channels": "Jobbörsen",
     "applicationSettings": "Bewerbungseinstellungen",

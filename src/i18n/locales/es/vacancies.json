@@ -193,6 +193,19 @@
     "contactPerson": "Persona de contacto",
     "pickClientFirst": "Elige primero un cliente"
   },
+  "generate": {
+    "button": "Generar con Koios",
+    "resolving": "Determinando el perfil…",
+    "profileChip": "Perfil: {{name}} · especificidad {{specificity}}",
+    "noProfile": "Todavía no hay ningún perfil de generación configurado para este inquilino. Pide a un administrador que cree uno en Configuración.",
+    "cta": "Generar",
+    "generating": "Koios está generando un texto de vacante provisional…",
+    "unavailable": "Ahora mismo no hay crédito de IA disponible. Inténtalo de nuevo más tarde.",
+    "error": "No se pudo generar. Inténtalo de nuevo.",
+    "previewLabel": "Propuesta (borrador) — aún no guardada",
+    "apply": "Aplicar",
+    "discard": "Descartar"
+  },
   "publishing": {
     "channels": "Portales de empleo",
     "applicationSettings": "Ajustes de candidatura",

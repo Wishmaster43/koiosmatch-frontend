@@ -6,6 +6,7 @@ import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import EntityLink from '@/components/ui/EntityLink'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+import VacancyGenerateFlow from './VacancyGenerateFlow'
 import { buildVacancyAdviceInsights } from './vacancyAiInsights'
 import { useVacancyDetailsForm, composeAddress } from '../hooks/useVacancyDetailsForm'
 import type { TextKey } from '../hooks/useVacancyDetailsForm'
@@ -42,6 +43,7 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
     types, toggleType,
     skills, newSkill, setNewSkill, addSkill, removeSkill,
     descEditing, setDescEditing, descExpanded, setDescExpanded, description, setDescription, saveDesc, cancelDesc,
+    descKey, applyGeneratedConcept,
   } = useVacancyDetailsForm(v, onUpdate)
 
   // Edit-toggle control block (pencil ↔ save/cancel), reused for the field grid
@@ -195,8 +197,12 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
           {controls(descEditing, saveDesc, cancelDesc, () => setDescEditing(true),
             descEditing ? <button onClick={() => setDescription('')} title={t('common:remove')} style={{ ...iconBtn, background: 'none', color: 'var(--color-danger)', border: '1px solid var(--border)' }}><Trash2 size={13} /></button> : null)}
         </div>
+        {/* VACGEN-1 fase 1b: "Genereer met Koios" — resolves the tenant's generation
+            profile, generates a CONCEPT, and only feeds it into this draft on an
+            explicit "Toepassen" (never a silent overwrite of the saved text). */}
+        <VacancyGenerateFlow vacancy={v} onApply={applyGeneratedConcept} />
         {descEditing
-          ? <RichTextEditor value={description} onChange={setDescription} expanded={descExpanded} onToggleExpand={() => setDescExpanded(x => !x)} />
+          ? <RichTextEditor key={descKey} value={description} onChange={setDescription} expanded={descExpanded} onToggleExpand={() => setDescExpanded(x => !x)} />
           : (v.description
               ? <div style={{ ...blockStyle, padding: '10px 12px', maxHeight: 220, overflow: 'auto' }}><SafeHtml html={v.description} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} /></div>
               : <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>—</div>)}

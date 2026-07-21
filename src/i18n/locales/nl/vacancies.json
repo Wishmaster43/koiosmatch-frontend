@@ -193,6 +193,19 @@
     "description": "Beschrijving",
     "descriptionPlaceholder": "Beschrijf de functie…"
   },
+  "generate": {
+    "button": "Genereer met Koios",
+    "resolving": "Profiel bepalen…",
+    "profileChip": "Profiel: {{name}} · specificiteit {{specificity}}",
+    "noProfile": "Er is nog geen generatieprofiel ingesteld voor deze tenant. Vraag een beheerder dit in te stellen bij Instellingen.",
+    "cta": "Genereren",
+    "generating": "Koios genereert een conceptvacaturetekst…",
+    "unavailable": "Er is nu geen AI-tegoed beschikbaar. Probeer het later opnieuw.",
+    "error": "Genereren is niet gelukt. Probeer het opnieuw.",
+    "previewLabel": "Voorstel (concept) — nog niet opgeslagen",
+    "apply": "Toepassen",
+    "discard": "Verwerpen"
+  },
   "publishing": {
     "channels": "Vacaturesites",
     "applicationSettings": "Sollicitatie-instellingen",

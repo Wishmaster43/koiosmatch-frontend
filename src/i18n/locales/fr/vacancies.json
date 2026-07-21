@@ -193,6 +193,19 @@
     "contactPerson": "Contact",
     "pickClientFirst": "Choisissez d'abord un client"
   },
+  "generate": {
+    "button": "Générer avec Koios",
+    "resolving": "Détermination du profil…",
+    "profileChip": "Profil : {{name}} · spécificité {{specificity}}",
+    "noProfile": "Aucun profil de génération n'est encore configuré pour ce client. Demandez à un administrateur d'en créer un dans les paramètres.",
+    "cta": "Générer",
+    "generating": "Koios génère un texte de vacance provisoire…",
+    "unavailable": "Aucun crédit IA n'est disponible pour le moment. Veuillez réessayer plus tard.",
+    "error": "La génération a échoué. Veuillez réessayer.",
+    "previewLabel": "Proposition (concept) — pas encore enregistrée",
+    "apply": "Appliquer",
+    "discard": "Rejeter"
+  },
   "publishing": {
     "channels": "Sites d'emploi",
     "applicationSettings": "Paramètres de candidature",
