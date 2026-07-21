@@ -16,3 +16,14 @@ export const bucketOfPhase = (key: string, funnelTypes: LookupItem[] = []): stri
   if (funnelTypes.length) return 'active'
   return key === 'rejected' ? 'rejected' : key === 'hired' ? 'matched' : 'active'
 }
+
+// INTERVIEW-PHASE-1: token colour per UNIVERSAL interview category — never a
+// hardcoded hex (§4). Same three semantic tokens used everywhere else for an
+// in-progress/success/danger outcome.
+export const interviewCategoryColor = (category: string): string => {
+  switch (category) {
+    case 'completed':    return 'var(--color-success)'
+    case 'disqualified': return 'var(--color-danger)'
+    default:              return 'var(--color-info)' // 'busy'
+  }
+}

@@ -39,6 +39,7 @@
     "owner": "Responsable",
     "client": "Cliente",
     "status": "Estado del candidato",
+    "interview": "Entrevista",
     "created": "Creado"
   },
   "kpi": {
@@ -145,7 +146,15 @@
     "done": "Hecho",
     "summary": "Resumen",
     "transcript": "Transcripción",
-    "empty": "Aún no hay entrevistas."
+    "empty": "Aún no hay entrevistas.",
+    "progress": "Fase de entrevista",
+    "category": {
+      "busy": "En curso",
+      "completed": "Completado",
+      "disqualified": "Descalificado"
+    },
+    "stepOf": "Paso {{step}} de {{total}}",
+    "filterBusy": "En entrevista"
   },
   "appointments": {
     "empty": "No hay citas programadas.",

@@ -39,6 +39,7 @@
     "owner": "Responsable",
     "client": "Client",
     "status": "Statut du candidat",
+    "interview": "Entretien",
     "created": "Créé le"
   },
   "kpi": {
@@ -145,7 +146,15 @@
     "done": "Terminé",
     "summary": "Résumé",
     "transcript": "Transcription",
-    "empty": "Aucun entretien pour le moment."
+    "empty": "Aucun entretien pour le moment.",
+    "progress": "Phase d'entretien",
+    "category": {
+      "busy": "En cours",
+      "completed": "Terminé",
+      "disqualified": "Disqualifié"
+    },
+    "stepOf": "Étape {{step}} sur {{total}}",
+    "filterBusy": "En entretien"
   },
   "appointments": {
     "empty": "Aucun rendez-vous planifié.",

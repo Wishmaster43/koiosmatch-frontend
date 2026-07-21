@@ -11,6 +11,7 @@ import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useDateFormat } from '@/lib/datetime'
+import { interviewCategoryColor } from './data/applicationsShared'
 
 // Plain-text cell style (used when a colour toggle is off).
 const plainCell = { color: 'var(--text)', fontSize: 12 }
@@ -93,6 +94,19 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
     { key: 'status', header: t('cols.status'), sortable: true, sortValue: r => r.candidateStatusLabel,
       render: r => <CandidateStatusChip status={r.candidateStatus} phase={r.candidatePhase}
         fallbackLabel={r.candidateStatusLabel} fallbackColor={r.candidateStatusColor} plain={!colorStatus} round /> },
+    // INTERVIEW-PHASE-1: the live AI-interview session's universal category chip
+    // + "step X of Y" within its own flow — em-dash when no session exists.
+    { key: 'interview', header: t('cols.interview'), sortable: true, sortValue: r => r.interview?.category ?? '',
+      render: r => r.interview ? (
+        <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <StatusPill label={t(`interview.category.${r.interview.category}`)} color={interviewCategoryColor(r.interview.category)} />
+          {r.interview.total > 0 && (
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+              {t('interview.stepOf', { step: r.interview.step ?? '–', total: r.interview.total })}
+            </span>
+          )}
+        </span>
+      ) : <span style={{ color: 'var(--text-muted)' }}>—</span> },
     // Created date — the table defaults to newest first.
     { key: 'created', header: t('cols.created'), nowrap: true, sortable: true, sortValue: r => r.created ?? '',
       cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => r.created ? formatDate(r.created) : '—' },

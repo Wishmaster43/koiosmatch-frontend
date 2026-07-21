@@ -39,6 +39,7 @@
     "owner": "Owner",
     "client": "Client",
     "status": "Candidate status",
+    "interview": "Interview",
     "created": "Created"
   },
   "kpi": {
@@ -145,7 +146,15 @@
     "done": "Done",
     "summary": "Summary",
     "transcript": "Transcript",
-    "empty": "No interviews yet."
+    "empty": "No interviews yet.",
+    "progress": "Interview phase",
+    "category": {
+      "busy": "In progress",
+      "completed": "Completed",
+      "disqualified": "Disqualified"
+    },
+    "stepOf": "Step {{step}} of {{total}}",
+    "filterBusy": "In interview"
   },
   "appointments": {
     "empty": "No appointments scheduled.",

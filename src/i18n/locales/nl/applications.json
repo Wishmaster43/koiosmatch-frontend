@@ -39,6 +39,7 @@
     "owner": "Eigenaar",
     "client": "Klant",
     "status": "Status van de sollicitant",
+    "interview": "Interview",
     "created": "Aangemaakt"
   },
   "kpi": {
@@ -145,7 +146,15 @@
     "done": "Klaar",
     "summary": "Samenvatting",
     "transcript": "Transcript",
-    "empty": "Nog geen interviews."
+    "empty": "Nog geen interviews.",
+    "progress": "Interviewfase",
+    "category": {
+      "busy": "Bezig",
+      "completed": "Afgerond",
+      "disqualified": "Afgewezen"
+    },
+    "stepOf": "Stap {{step}} van {{total}}",
+    "filterBusy": "In interview"
   },
   "appointments": {
     "empty": "Geen afspraken ingepland.",

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LayoutList, Kanban, Plus, Archive } from 'lucide-react'
+import { LayoutList, Kanban, Plus, Archive, MessageCircle } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useAuth } from '@/context/AuthContext'
@@ -78,6 +78,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     bucket, setBucket, selectedPhase, setSelectedPhase, attention, setAttention,
     selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
     selectedVac, setSelectedVac, showArchived, setShowArchived, query, setQuery,
+    interviewBusy, setInterviewBusy,
     anyFilterActive, clearAllFilters, searchEpoch, matchesFilters,
     filterParams, bucketParam,
   } = useApplicationFilters()
@@ -91,7 +92,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
 
   // Clear the selection whenever the visible set changes (bucket/filters/paging).
   useEffect(() => { setSelectedIds(new Set()) },
-    [bucket, showArchived, page, pageSize, selectedPhase, selectedOwner, selectedSource, selectedVac, query])
+    [bucket, showArchived, interviewBusy, page, pageSize, selectedPhase, selectedOwner, selectedSource, selectedVac, query])
 
   // Board columns = the funnel lookup, normalised to { key, label, color }.
   const phases = useMemo<BoardPhase[]>(() => funnelTypes.map(f => ({ key: f.value, label: f.label, color: f.color })), [funnelTypes])
@@ -132,7 +133,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // Reset to the first page whenever the bucket or any filter changes.
-  useEffect(() => { setPage(1) }, [bucket, attention, selectedPhase, selectedOwner, selectedSource, selectedVac, showArchived, query])
+  useEffect(() => { setPage(1) }, [bucket, attention, selectedPhase, selectedOwner, selectedSource, selectedVac, showArchived, interviewBusy, query])
 
   // TABLE rows: the server's page (already narrowed by bucket/phase_key/vacancy_id/
   // search/include_archived where unambiguous — see useApplicationFilters), refined
@@ -233,6 +234,10 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
           {/* Archived (detached) view — shared quick-view toggle (§4). */}
           <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
             label={t('archived.toggle')} color="var(--color-archive)" icon={Archive} />
+          {/* INTERVIEW-PHASE-1 v1 filter: a simple "In interview" quick-view onto the
+              universal 'busy' category — the shared toggle (§4), never hand-rolled. */}
+          <QuickViewToggle active={interviewBusy} onToggle={() => setInterviewBusy(v => !v)}
+            label={t('interview.filterBusy')} color="var(--color-info)" icon={MessageCircle} />
           <div style={{ display: 'flex', gap: 4 }}>
             <button onClick={() => setView('table')} title={t('view.table')} aria-label={t('view.table')}
               style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',

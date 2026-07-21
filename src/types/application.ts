@@ -13,6 +13,20 @@ export interface ApplicationOwner {
   color: string | null
 }
 
+/**
+ * INTERVIEW-PHASE-1: the live AI-interview session's UNIVERSAL category
+ * (busy/completed/disqualified — works across flows with different questions)
+ * plus its progress within THIS flow's own status list (a Helpende flow may
+ * have 3 steps, a Verpleegkundige flow 12). Null = no interview session at all
+ * (the backend's `interview_status=none` filter bucket).
+ */
+export interface ApplicationInterview {
+  category: 'busy' | 'completed' | 'disqualified'
+  currentStatus: string | null
+  step: number | null
+  total: number
+}
+
 /** The flat application model rendered by the table/board. */
 export interface Application {
   id: Id | undefined
@@ -49,6 +63,9 @@ export interface Application {
   // Phase label/colour the drawer may carry alongside the stable phaseKey.
   phaseLabel?: string
   phaseColor?: string
+  // INTERVIEW-PHASE-1: the live interview session's category + step progress,
+  // null when the candidate has no session at all.
+  interview: ApplicationInterview | null
 }
 
 /** The enriched application model rendered by the drawer tabs. */
@@ -148,6 +165,19 @@ export interface ApiApplication {
   is_new?: boolean
   deleted_at?: string | null
   archived?: boolean
+  // INTERVIEW-PHASE-1: the list contract sends `category` directly
+  // (ApplicationListResource::interviewSummary); the detail contract's
+  // interview() omits it but sends completed_at/disqualified_reason instead —
+  // mapApplication derives category from those when absent. Null = no session.
+  interview?: {
+    category?: string
+    current_status?: string | null
+    statuses?: string[]
+    step?: number | null
+    total?: number
+    completed_at?: string | null
+    disqualified_reason?: string | null
+  } | null
   interviews?: Array<{
     id?: Id; channel?: string; status?: string; created_at?: string; time?: string; summary?: string
     transcript?: Array<{ author?: string; side?: string; time?: string; text?: string }>

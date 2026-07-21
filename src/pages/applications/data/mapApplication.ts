@@ -3,8 +3,28 @@ import { initialsOf } from '@/lib/initials'
 import type { Id, Loose } from '@/types/common'
 import type { LookupItem } from '@/context/LookupsContext'
 import type {
-  ApiApplication, Application, ApplicationDetail, ApiAppCandidate, ApiAppVacancy,
+  ApiApplication, Application, ApplicationDetail, ApiAppCandidate, ApiAppVacancy, ApplicationInterview,
 } from '@/types/application'
+
+/**
+ * INTERVIEW-PHASE-1: raw interview block → the UI model. The list contract
+ * (ApplicationListResource::interviewSummary) sends `category` directly; the
+ * detail contract's interview() omits it but always sends completed_at/
+ * disqualified_reason, so derive it the same way the backend does when
+ * absent. Null (no session at all) stays null — that's the `interview_status=
+ * none` filter bucket, never a synthetic 'none' category value.
+ */
+function mapInterview(raw?: ApiApplication['interview']): ApplicationInterview | null {
+  if (!raw) return null
+  const category = (raw.category
+    ?? (raw.disqualified_reason ? 'disqualified' : raw.completed_at ? 'completed' : 'busy')) as ApplicationInterview['category']
+  return {
+    category,
+    currentStatus: raw.current_status ?? null,
+    step: raw.step ?? null,
+    total: raw.total ?? 0,
+  }
+}
 
 /**
  * mapApplication — raw API application → the flat shape the table/board/drawer
@@ -42,6 +62,8 @@ export function mapApplication(a: ApiApplication = {}, funnelTypes: LookupItem[]
     task: a.task ?? a.ai_task ?? a.ai?.task ?? '',
     phaseKey,
     bucket: a.bucket ?? bucketOfPhase(phaseKey, funnelTypes),
+    // INTERVIEW-PHASE-1: the live interview session's category + step progress.
+    interview: mapInterview(a.interview),
     source: a.source ?? a.source_name ?? '',
     owner: {
       id: owner.id ?? a.owner_id ?? null,

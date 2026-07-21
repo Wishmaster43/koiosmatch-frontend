@@ -10,6 +10,9 @@
  * lacks the array-filter + by_owner/sources/attention support CandidateQuery has),
  * so they — and any MULTI-select on phase/vacancy — stay a client-side refine
  * over the fetched page via matchesFilters, exactly as before pagination.
+ * INTERVIEW-PHASE-1: a v1 "In interview" quick-view sends the server's
+ * `interview_status=busy` filter directly (a full category dropdown may follow
+ * once there's demand — see the applications task note).
  */
 import { useState, useCallback, useMemo } from 'react'
 import { usePageMemory } from '@/lib/usePageMemory'
@@ -42,15 +45,18 @@ export function useApplicationFilters() {
   const [selectedVac,    setSelectedVac]    = usePageMemory<string[]>('apps.vac', [])
   const [showArchived,   setShowArchived]   = usePageMemory('apps.archived', false)
   const [query,          setQuery]          = usePageMemory('apps.search', '')
+  // INTERVIEW-PHASE-1: v1 quick-view — only the 'busy' universal category.
+  const [interviewBusy,  setInterviewBusy]  = usePageMemory('apps.interviewBusy', false)
 
   // Anything narrowing the default view → the shared clear-button shows.
-  const anyFilterActive = Boolean(query.trim() || attention || showArchived || (bucket !== 'active' && bucket !== 'allActive')
+  const anyFilterActive = Boolean(query.trim() || attention || showArchived || interviewBusy
+    || (bucket !== 'active' && bucket !== 'allActive')
     || selectedPhase.length || selectedOwner.length || selectedSource.length || selectedVac.length)
   // Remount the (self-stateful) search input on clear so the visible text resets too.
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setAttention(null); setShowArchived(false); setBucket('active')
-    setSelectedPhase([]); setSelectedOwner([]); setSelectedSource([]); setSelectedVac([])
+    setSelectedPhase([]); setSelectedOwner([]); setSelectedSource([]); setSelectedVac([]); setInterviewBusy(false)
   }
 
   // One row predicate for table + board (the page maps decorate over the result).
@@ -98,8 +104,11 @@ export function useApplicationFilters() {
     // include_archived REVEALS trashed rows alongside the active set (it does not
     // isolate them) — matchesFilters' `showArchived` branch still isolates client-side.
     if (showArchived)               p.include_archived = 1
+    // INTERVIEW-PHASE-1: the v1 "In interview" quick-view maps straight onto the
+    // backend's universal category filter (busy/completed/disqualified/none).
+    if (interviewBusy)              p.interview_status = 'busy'
     return p
-  }, [selectedPhase, selectedVac, query, showArchived])
+  }, [selectedPhase, selectedVac, query, showArchived, interviewBusy])
 
   // Bucket param — TABLE query only (never board/stats): 'allActive' has no server
   // equivalent (spans two buckets) and showArchived's reveal must not be narrowed by
@@ -112,6 +121,7 @@ export function useApplicationFilters() {
     bucket, setBucket, selectedPhase, setSelectedPhase, attention, setAttention,
     selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
     selectedVac, setSelectedVac, showArchived, setShowArchived, query, setQuery,
+    interviewBusy, setInterviewBusy,
     anyFilterActive, clearAllFilters, searchEpoch, matchesFilters,
     filterParams, bucketParam, filterKey,
   }

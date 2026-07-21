@@ -67,6 +67,39 @@ describe('mapApplication', () => {
       expect(mapped.deletedAt).toBeNull()
     })
   })
+
+  // INTERVIEW-PHASE-1: the live interview session's category + step progress.
+  describe('interview (INTERVIEW-PHASE-1)', () => {
+    it('maps null when the candidate has no interview session', () => {
+      expect(mapApplication({ id: 15 }).interview).toBeNull()
+      expect(mapApplication({ id: 16, interview: null }).interview).toBeNull()
+    })
+
+    it("passes through the list contract's explicit category + step/total", () => {
+      const mapped = mapApplication({ id: 17, interview: { category: 'busy', current_status: 'ACTIVE_IN_CARE', step: 2, total: 12 } })
+      expect(mapped.interview).toEqual({ category: 'busy', currentStatus: 'ACTIVE_IN_CARE', step: 2, total: 12 })
+    })
+
+    it('derives disqualified from disqualified_reason when the detail contract omits category', () => {
+      const mapped = mapApplication({ id: 18, interview: { current_status: 'X', step: 3, total: 5, disqualified_reason: 'no_match' } })
+      expect(mapped.interview?.category).toBe('disqualified')
+    })
+
+    it('derives completed from completed_at when the detail contract omits category', () => {
+      const mapped = mapApplication({ id: 19, interview: { current_status: 'X', step: 5, total: 5, completed_at: '2026-07-20T09:00:00Z' } })
+      expect(mapped.interview?.category).toBe('completed')
+    })
+
+    it('defaults to busy when neither category nor completed_at/disqualified_reason are present', () => {
+      const mapped = mapApplication({ id: 20, interview: { current_status: 'X', step: 1, total: 5 } })
+      expect(mapped.interview?.category).toBe('busy')
+    })
+
+    it('defaults total to 0 and step/currentStatus to null when absent', () => {
+      const mapped = mapApplication({ id: 21, interview: { category: 'busy' } })
+      expect(mapped.interview).toEqual({ category: 'busy', currentStatus: null, step: null, total: 0 })
+    })
+  })
 })
 
 describe('mapApplicationDetail', () => {

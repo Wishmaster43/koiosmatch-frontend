@@ -50,3 +50,27 @@ describe('useApplicationFilters — server filterParams', () => {
     expect(result.current.matchesFilters({ archived: true, bucket: 'active' })).toBe(false)
   })
 })
+
+// INTERVIEW-PHASE-1: the v1 "In interview" quick-view sends the server's own
+// universal category filter (busy/completed/disqualified/none) directly.
+describe('useApplicationFilters — interview quick-view (INTERVIEW-PHASE-1)', () => {
+  it('sends no interview_status by default', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    expect(result.current.filterParams.interview_status).toBeUndefined()
+  })
+
+  it('sends interview_status=busy once the quick-view is toggled on', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setInterviewBusy(true) })
+    expect(result.current.filterParams.interview_status).toBe('busy')
+  })
+
+  it('flips anyFilterActive on, and clearAllFilters resets it', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setInterviewBusy(true) })
+    expect(result.current.anyFilterActive).toBe(true)
+    act(() => { result.current.clearAllFilters() })
+    expect(result.current.interviewBusy).toBe(false)
+    expect(result.current.filterParams.interview_status).toBeUndefined()
+  })
+})
