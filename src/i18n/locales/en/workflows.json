@@ -299,6 +299,8 @@
       "apiKey": "API Key",
       "prompt": "Instruction (Prompt)",
       "noPrompt": "— No prompt —",
+      "waIntroTemplate": "WhatsApp intro template",
+      "noWaTemplate": "— No template —",
       "selectFaqs": "Select FAQs",
       "noFaqs": "No FAQs created",
       "knowledge": "Knowledge base",

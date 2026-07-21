@@ -295,6 +295,8 @@
       "apiKey": "API-Schlüssel",
       "prompt": "Anweisung (Prompt)",
       "noPrompt": "— Kein Prompt —",
+      "waIntroTemplate": "WhatsApp-Intro-Vorlage",
+      "noWaTemplate": "— Keine Vorlage —",
       "selectFaqs": "FAQs auswählen",
       "noFaqs": "Keine FAQs erstellt",
       "knowledge": "Wissensdatenbank",

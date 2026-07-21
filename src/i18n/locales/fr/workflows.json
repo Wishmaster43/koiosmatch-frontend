@@ -295,6 +295,8 @@
       "apiKey": "Clé API",
       "prompt": "Instruction (Prompt)",
       "noPrompt": "— Aucun prompt —",
+      "waIntroTemplate": "Modèle d'introduction WhatsApp",
+      "noWaTemplate": "— Aucun modèle —",
       "selectFaqs": "Sélectionner des FAQ",
       "noFaqs": "Aucune FAQ créée",
       "knowledge": "Base de connaissances",

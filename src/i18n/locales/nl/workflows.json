@@ -357,6 +357,8 @@
       "apiKey": "API Key",
       "prompt": "Instructie (Prompt)",
       "noPrompt": "— Geen prompt —",
+      "waIntroTemplate": "WhatsApp-intro-template",
+      "noWaTemplate": "— Geen template —",
       "selectFaqs": "FAQ's selecteren",
       "noFaqs": "Geen FAQ's aangemaakt",
       "knowledge": "Kennisbank",

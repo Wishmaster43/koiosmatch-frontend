@@ -33,6 +33,9 @@ export interface AiAgent {
   faq_ids?: Array<string | number>
   use_knowledge?: boolean
   max_history?: number
+  // The WhatsApp-approved template that opens the conversation with the candidate
+  // (WA_INTRO_TEMPLATE-1) — always a real synced template name, never free text.
+  wa_intro_template?: string | null
   // AI-AGENTS-2/3: the linked recruiter/manager user, this agent's interview
   // flow (read-only here — see InterviewFlowSection) and its own webhook URL.
   user?: AiAgentUser | null

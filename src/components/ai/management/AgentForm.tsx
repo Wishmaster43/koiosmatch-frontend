@@ -4,20 +4,26 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Brain, Check, ChevronDown, MessageSquare, Send, Trash2 } from 'lucide-react'
-import api, { unwrap } from '@/lib/api'
+import { Brain, ChevronDown, MessageSquare, Send, Trash2 } from 'lucide-react'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { interactive } from '@/lib/a11y'
 import Avatar from '@/components/ui/Avatar'
+import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import { initialsOf } from '@/lib/initials'
 import { inputStyle, Field, CopyableValue, SaveBar } from './shared'
 import { InterviewFlowSection } from './InterviewFlowSection'
 import type { AiAgent, AiItem, ChatMessage } from '@/types/ai'
+// Reuse the WhatsApp-templates option shape from the workflow module's template
+// picker (GET /whatsapp-templates) instead of re-declaring it (§11 — one truth).
+import type { WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
 
 // The agent edit-form's local state. No `model` field (MODEL-1): the company-wide
 // model from Settings is used everywhere, never chosen per agent.
 interface AgentFormState {
   name: string; custom_endpoint: string; custom_api_key: string
   prompt_id: string | number; faq_ids: Array<string | number>; use_knowledge: boolean; max_history: number
+  // WA_INTRO_TEMPLATE-1: the approved WhatsApp template that opens the conversation.
+  wa_intro_template: string
 }
 
 // ── Chat test ─────────────────────────────────────────────────────────────────
@@ -125,6 +131,7 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
     faq_ids:         agent?.faq_ids         ?? [],
     use_knowledge:   agent?.use_knowledge   ?? false,
     max_history:     agent?.max_history     ?? 10,
+    wa_intro_template: agent?.wa_intro_template ?? '',
   })
   const [saving,      setSaving]      = useState(false)
   const [saved,       setSaved]       = useState(false)
@@ -132,6 +139,19 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
   // Custom API override is an optional, rarely-used disclosure (calm by default) —
   // pre-opened only when a value is already configured.
   const [showCustomApi, setShowCustomApi] = useState(!!agent?.custom_endpoint)
+
+  // WA_INTRO_TEMPLATE-1: the tenant's real synced WhatsApp templates — the intro
+  // picker MUST offer only these, never free text or a hardcoded name.
+  const [waTemplates, setWaTemplates] = useState<WaTemplateOption[]>([])
+  const [waLoading,   setWaLoading]   = useState(true)
+  useEffect(() => {
+    let alive = true
+    api.get('/whatsapp-templates')
+      .then(r => { if (alive) setWaTemplates(unwrapList<WaTemplateOption>(r).rows) })
+      .catch(() => { /* no WhatsApp connection yet — empty state below */ })
+      .finally(() => { if (alive) setWaLoading(false) })
+    return () => { alive = false }
+  }, [])
 
   const set = <K extends keyof AgentFormState>(k: K, v: AgentFormState[K]) => setForm(f => ({ ...f, [k]: v }))
 
@@ -215,34 +235,49 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
             </select>
           </Field>
 
-          <Field label={t('ai.agent.selectFaqs')}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 5, maxHeight: 160, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 8, padding: 8 }}>
-              {faqs.length === 0 && <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('ai.agent.noFaqs')}</p>}
-              {faqs.map(f => {
-                const fid = f.id as string | number
-                const on = form.faq_ids.includes(fid)
-                return (
-                  <label key={f.id} onClick={() => toggleFaq(fid)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer', padding: '4px 6px', borderRadius: 6, background: on ? 'var(--color-primary-bg)' : 'transparent' }}>
-                    <div style={{ width: 14, height: 14, borderRadius: 4, border: `2px solid ${on ? 'var(--color-primary)' : 'var(--border)'}`, background: on ? 'var(--color-primary)' : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {on && <Check size={9} color="white" />}
-                    </div>
-                    <span style={{ fontSize: 12, color: on ? 'var(--color-primary)' : 'var(--text)' }}>{f.name}</span>
-                  </label>
-                )
-              })}
-            </div>
+          {/* WA_INTRO_TEMPLATE-1: only real, approved, synced templates are selectable —
+              never free text. Empty/loading states reuse the workflow module's wa.* copy
+              (same GET /whatsapp-templates source) instead of a duplicate key. */}
+          <Field label={t('ai.agent.waIntroTemplate')}>
+            {waLoading
+              ? <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('wa.templateLoading')}</p>
+              : waTemplates.length === 0
+                ? <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('wa.templateEmpty')}</p>
+                : (
+                  <select value={form.wa_intro_template} onChange={e => set('wa_intro_template', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
+                    <option value="">{t('ai.agent.noWaTemplate')}</option>
+                    {waTemplates.map(tpl => <option key={tpl.value} value={tpl.value}>{tpl.label}</option>)}
+                  </select>
+                )}
           </Field>
 
-          <Field label={t('ai.agent.knowledge')}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+          {/* Kennisbank section — the general-knowledge toggle plus, when the tenant has
+              FAQs, which ones this agent may draw on (soft chips, mirrors the entity
+              multi-select convention rather than a hand-rolled checkbox list). */}
+          <div style={{ marginBottom: 13 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              {t('ai.agent.knowledge')}
+            </div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginBottom: 10 }}>
               <div {...interactive(() => set('use_knowledge', !form.use_knowledge))}
+                role="switch" aria-checked={form.use_knowledge}
                 style={{ width: 34, height: 18, borderRadius: 999, position: 'relative', transition: 'background 0.15s', background: form.use_knowledge ? 'var(--color-primary)' : '#D1D5DB', cursor: 'pointer', flexShrink: 0 }}>
                 <div style={{ position: 'absolute', top: 2, left: form.use_knowledge ? 16 : 2, width: 14, height: 14, borderRadius: '50%', background: 'white', transition: 'left 0.15s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
               </div>
               <span style={{ fontSize: 12, color: 'var(--text)' }}>{t('ai.agent.useKnowledge')}</span>
             </label>
-          </Field>
+            <Field label={t('ai.agent.selectFaqs')}>
+              {faqs.length === 0
+                ? <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('ai.agent.noFaqs')}</p>
+                : (
+                  <ChipMultiSelect
+                    options={faqs.map(f => ({ value: String(f.id), label: f.name ?? '' }))}
+                    selected={form.faq_ids.map(String)}
+                    onToggle={toggleFaq}
+                  />
+                )}
+            </Field>
+          </div>
 
           <Field label={t('ai.agent.maxHistory')}>
             <input type="number" min={1} max={50} value={form.max_history}
