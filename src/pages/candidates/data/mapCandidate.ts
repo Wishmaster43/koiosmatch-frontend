@@ -245,7 +245,10 @@ export function mapCandidate(c: ApiCandidate): Candidate {
 
     // ── Nested objects (detail only) ──
     preferences:     c.preferences ?? {},
-    zzp:             c.zzp ?? {},
+    // ZZP=freelance (audit 20-07): the table is already candidate_freelance_profiles;
+    // read `freelance` too so the FE survives if the API resource key flips from `zzp`
+    // (still the live key today). Write path stays `zzp` until CMBE confirms the flip.
+    zzp:             c.zzp ?? c.freelance ?? {},
     planningSettings: c.planning_settings ?? {},
     // Channel consent (AVG, C-11): nested under `consent`. WhatsApp/e-mail default
     // true (operational opt-out), newsletter false (opt-in). `_at` is server-stamped.

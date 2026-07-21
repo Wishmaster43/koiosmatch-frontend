@@ -350,6 +350,7 @@ export interface ApiCandidate {
   custom_fields?: Record<string, unknown>
   preferences?: Loose
   zzp?: Loose
+  freelance?: Loose // ZZP=freelance audit: forward-compat if the API key flips (still `zzp` today)
   planning_settings?: Loose
   consent?: {
     whatsapp_opt_in?: boolean
