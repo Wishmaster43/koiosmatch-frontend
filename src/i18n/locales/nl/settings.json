@@ -263,6 +263,11 @@
         "label": "Invulgraad doel",
         "description": "Streefwaarde voor de invulgraad van diensten",
         "unit": "%"
+      },
+      "conversation_active_weeks": {
+        "label": "Actief-gesprek venster",
+        "description": "Een WhatsApp-gesprek telt als 'actief' als het laatste bericht binnen zoveel weken viel",
+        "unit": "weken"
       }
     }
   },

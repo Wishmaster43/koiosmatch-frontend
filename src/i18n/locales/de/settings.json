@@ -263,6 +263,11 @@
         "label": "Ziel Besetzungsquote",
         "description": "Zielwert für die Besetzungsquote",
         "unit": "%"
+      },
+      "conversation_active_weeks": {
+        "label": "Fenster für aktive Gespräche",
+        "description": "Ein WhatsApp-Gespräch gilt als „aktiv\", wenn die letzte Nachricht innerhalb dieser Wochen liegt",
+        "unit": "Wochen"
       }
     }
   },

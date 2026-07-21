@@ -263,6 +263,11 @@
         "label": "Objectif taux de remplissage",
         "description": "Taux de remplissage cible des services",
         "unit": "%"
+      },
+      "conversation_active_weeks": {
+        "label": "Fenêtre de conversation active",
+        "description": "Une conversation WhatsApp est « active » si son dernier message date de ce nombre de semaines",
+        "unit": "semaines"
       }
     }
   },

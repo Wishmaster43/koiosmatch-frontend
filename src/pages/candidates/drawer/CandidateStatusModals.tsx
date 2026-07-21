@@ -24,7 +24,7 @@ const STATUS_REASON_MAX = 255
 
 interface MatchRow { id?: string | number; vacancyTitle?: string; client?: string }
 // isBlacklist → the reason is the lookup-backed blacklist_reason (dropdown from
-// /blacklist-reasons; BE validates Rule::exists), never free text.
+// /candidate-blacklist-reasons; BE validates Rule::exists), never free text.
 export interface StatusModalState { target: string; reason: string; date: string; needReason: boolean; needDate: boolean; isBlacklist?: boolean }
 
 interface Props {
@@ -159,7 +159,7 @@ export default function CandidateStatusModals({
   const [blReasons, setBlReasons] = useState<string[]>([])
   useEffect(() => {
     if (!statusModal?.isBlacklist || blReasons.length) return
-    api.get('/blacklist-reasons')
+    api.get('/candidate-blacklist-reasons')
       .then(r => setBlReasons(((unwrapList(r).rows) as Array<{ name?: string }>).map(x => String(x.name ?? '')).filter(Boolean)))
       .catch(() => setBlReasons([]))
   }, [statusModal?.isBlacklist, blReasons.length])

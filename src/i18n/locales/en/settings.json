@@ -263,6 +263,11 @@
         "label": "Fill rate target",
         "description": "Target fill rate for shifts",
         "unit": "%"
+      },
+      "conversation_active_weeks": {
+        "label": "Active-conversation window",
+        "description": "A WhatsApp conversation counts as 'active' when its last message falls within this many weeks",
+        "unit": "weeks"
       }
     }
   },

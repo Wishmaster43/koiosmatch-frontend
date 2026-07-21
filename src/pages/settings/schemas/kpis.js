@@ -28,6 +28,9 @@ export const kpisCandidates = {
   fields: [
     { key: 'churn_warning_threshold', type: 'number', default: 10, min: 0 },
     { key: 'avg_candidates_window',   type: 'number', default: 12, min: 0 },
+    // Active-conversation window (CONV-DRILLDOWN-FE): drives the drawer's
+    // is_active badge AND the "actieve gesprekken" KPI (same server derivation).
+    { key: 'conversation_active_weeks', type: 'number', default: 4, min: 1, max: 52 },
     ...noContactAlert,
   ],
 }

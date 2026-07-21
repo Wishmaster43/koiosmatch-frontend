@@ -263,6 +263,11 @@
         "label": "Objetivo de tasa de cobertura",
         "description": "Tasa de cobertura objetivo de turnos",
         "unit": "%"
+      },
+      "conversation_active_weeks": {
+        "label": "Ventana de conversación activa",
+        "description": "Una conversación de WhatsApp cuenta como «activa» si su último mensaje entra en estas semanas",
+        "unit": "semanas"
       }
     }
   },
