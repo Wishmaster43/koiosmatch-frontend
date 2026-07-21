@@ -41,6 +41,7 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
     editing, setEditing, form, setF, save, cancel,
     clientId, handleClientChange, customerOptions, cascade, locationPicker, departmentPicker, contactPicker,
     types, toggleType,
+    aiAgentId, setAiAgentId, aiAgentOptions, aiAgentsLoading, aiAgentsError,
     skills, newSkill, setNewSkill, addSkill, removeSkill,
     descEditing, setDescEditing, descExpanded, setDescExpanded, description, setDescription, saveDesc, cancelDesc,
     descKey, applyGeneratedConcept,
@@ -140,6 +141,41 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
         {row(t('details.function'), v.category || dash, select('category', fnOptions))}
         {row(t('details.preferredIndustry'), v.industry || dash, select('industry', industries.map(i => ({ value: i, label: i }))))}
       </>)}
+
+      {/* VAC-AGENT-1: linking an AI agent IS the interview on/off switch for this
+          vacancy (Option A — the agent carries its own interview flow, so there is
+          no separate flow picker here). Own card so the note always sits right
+          under the picker; edited via the same pencil/Save as the rest of the grid. */}
+      <div>
+        <div style={groupTitle}>{t('details.groups.aiAgent')}</div>
+        <div style={{ ...blockStyle, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {editing ? (
+            aiAgentsError ? (
+              <span style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('details.aiAgent.loadError')}</span>
+            ) : (
+              <>
+                <CreatableSelect
+                  value={aiAgentId || null}
+                  onChange={setAiAgentId}
+                  allowCreate={false}
+                  placeholder={aiAgentsLoading ? t('common:loading') : t('details.aiAgent.placeholder')}
+                  options={[
+                    { value: '', label: t('details.aiAgent.none') },
+                    ...aiAgentOptions.map(o => ({ value: String(o.value), label: o.label })),
+                  ]}
+                />
+                {!aiAgentsLoading && aiAgentOptions.length === 0 && (
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('details.aiAgent.empty')}</span>
+                )}
+              </>
+            )
+          ) : (
+            <span style={{ fontSize: 12, color: v.aiAgentName ? 'var(--text)' : 'var(--text-muted)' }}>{v.aiAgentName || dash}</span>
+          )}
+          {/* Calm, honest note — this is exactly what linking does (§3: no fake affordance). */}
+          <p style={{ margin: 0, fontSize: 11, color: 'var(--text-muted)' }}>{t('details.aiAgent.note')}</p>
+        </div>
+      </div>
 
       {card(t('details.groups.location'), <>
         {/* V9: address — each field its own labelled row when editing (mirrors the

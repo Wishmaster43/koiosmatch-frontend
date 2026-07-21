@@ -67,6 +67,28 @@ describe('mapVacancy', () => {
     expect(row.archived).toBe(false)
     expect(row.archivedAt).toBeNull()
   })
+
+  // VAC-AGENT-1: the linked AI agent (Option A — linking IS the interview toggle
+  // for this vacancy) ships as a nested object + a flat interview_flow_id.
+  it('maps the linked AI agent + its interview flow id', () => {
+    const row = mapVacancy({ id: 'v8', ai_agent: { id: 'agent1', name: 'Intake bot' }, interview_flow_id: 'flow1' })
+    expect(row.aiAgentId).toBe('agent1')
+    expect(row.aiAgentName).toBe('Intake bot')
+    expect(row.interviewFlowId).toBe('flow1')
+  })
+
+  it('defaults to no linked agent when none is set', () => {
+    const row = mapVacancy({ id: 'v9' })
+    expect(row.aiAgentId).toBeNull()
+    expect(row.aiAgentName).toBe('')
+    expect(row.interviewFlowId).toBeNull()
+  })
+
+  it('falls back to a flat ai_agent_id when no nested object is sent', () => {
+    const row = mapVacancy({ id: 'v10', ai_agent_id: 'agent2' })
+    expect(row.aiAgentId).toBe('agent2')
+    expect(row.aiAgentName).toBe('')
+  })
 })
 
 describe('mapVacancyDetail', () => {

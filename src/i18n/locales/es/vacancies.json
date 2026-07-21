@@ -8,7 +8,8 @@
     "empty": "Aún no hay vacantes.",
     "loadError": "No se pudieron cargar las vacantes.",
     "count": "Todas las vacantes",
-    "archivedView": "Archivadas"
+    "archivedView": "Archivadas",
+    "withoutAgentView": "Sin agente IA"
   },
   "buckets": {
     "all": "Todas"
@@ -22,7 +23,8 @@
     "published": "Publicada",
     "owner": "Responsable",
     "client": "Cliente",
-    "createdAt": "Creada el"
+    "createdAt": "Creada el",
+    "aiAgent": "Agente IA"
   },
   "publishedState": {
     "yes": "Publicada",
@@ -155,7 +157,8 @@
       "general": "General",
       "requirements": "Requisitos",
       "conditions": "Condiciones",
-      "location": "Ubicación"
+      "location": "Ubicación",
+      "aiAgent": "Agente IA"
     },
     "id": "ID de vacante",
     "startDate": "Fecha de inicio",
@@ -191,7 +194,14 @@
     "customerLocation": "Sede del cliente",
     "customerDepartment": "Departamento",
     "contactPerson": "Persona de contacto",
-    "pickClientFirst": "Elige primero un cliente"
+    "pickClientFirst": "Elige primero un cliente",
+    "aiAgent": {
+      "none": "Sin agente",
+      "placeholder": "Seleccionar un agente IA",
+      "empty": "Aún no hay agentes IA configurados.",
+      "note": "Un agente vinculado realiza las entrevistas de admisión para esta vacante.",
+      "loadError": "No se pudieron cargar los agentes IA."
+    }
   },
   "generate": {
     "button": "Generar con Koios",

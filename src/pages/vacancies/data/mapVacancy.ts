@@ -19,6 +19,9 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
   const status: { value?: string | number; label?: string; color?: string } =
     (typeof v.status === 'object' && v.status) ? v.status : {}
   const byPhase: Loose = v.applications_by_phase ?? v.applicationsByPhase ?? {}
+  // VAC-AGENT-1: the linked AI agent — nested object on the list row, falling back
+  // to a flat id (e.g. an optimistic local patch that only carries the id).
+  const aiAgent: { id?: Id; name?: string } | null = v.ai_agent ?? null
 
   return {
     id: v.id,
@@ -59,6 +62,11 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
     // surfaces these rows; mirror candidates so the row renders the soft chip.
     archived: Boolean(v.archived ?? (v.deleted_at != null)),
     archivedAt: v.deleted_at ?? null,
+    // VAC-AGENT-1: linked AI agent (Option A: linking IS the interview toggle for
+    // this vacancy) + the flow id it carries — present on both list and detail.
+    aiAgentId: aiAgent?.id ?? v.ai_agent_id ?? null,
+    aiAgentName: aiAgent?.name ?? '',
+    interviewFlowId: v.interview_flow_id ?? null,
   }
 }
 

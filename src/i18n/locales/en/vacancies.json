@@ -8,7 +8,8 @@
     "empty": "No vacancies yet.",
     "loadError": "Couldn't load vacancies.",
     "count": "All vacancies",
-    "archivedView": "Archived"
+    "archivedView": "Archived",
+    "withoutAgentView": "Without AI agent"
   },
   "buckets": {
     "all": "All"
@@ -22,7 +23,8 @@
     "published": "Published",
     "owner": "Owner",
     "client": "Client",
-    "createdAt": "Created on"
+    "createdAt": "Created on",
+    "aiAgent": "AI agent"
   },
   "publishedState": {
     "yes": "Published",
@@ -155,7 +157,8 @@
       "general": "General",
       "location": "Location",
       "requirements": "Requirements",
-      "conditions": "Conditions"
+      "conditions": "Conditions",
+      "aiAgent": "AI agent"
     },
     "id": "Vacancy ID",
     "startDate": "Start date",
@@ -191,7 +194,14 @@
     "addSkill": "Add skill",
     "noSkills": "No skills yet.",
     "description": "Description",
-    "descriptionPlaceholder": "Describe the position…"
+    "descriptionPlaceholder": "Describe the position…",
+    "aiAgent": {
+      "none": "No agent",
+      "placeholder": "Select an AI agent",
+      "empty": "No AI agents configured yet.",
+      "note": "A linked agent conducts the intake interviews for this vacancy.",
+      "loadError": "Failed to load AI agents."
+    }
   },
   "generate": {
     "button": "Generate with Koios",

@@ -66,6 +66,9 @@ export const buildVacancyPatch = (patch: Record<string, unknown>): Record<string
   if ('statusValue'         in patch) body.status               = patch.statusValue
   if ('ownerId'             in patch) body.owner_id             = patch.ownerId
   if ('clientId'            in patch) body.customer_id          = patch.clientId
+  // VAC-AGENT-1: linking an agent IS the interview on/off switch (Option A) —
+  // null unlinks (no separate flow field, the agent carries its own flow).
+  if ('aiAgentId'           in patch) body.ai_agent_id          = patch.aiAgentId
   // V3-V6 (VACATURES-100): klant → locatie → afdeling → contactpersoon cascade on the
   // Algemeen card. VAC-CASCADE-1 (backend wave 6): customer_location_id/
   // customer_department_id/contact_id are real columns on `vacancies`, whitelisted

@@ -8,7 +8,8 @@
     "empty": "Noch keine Stellen.",
     "loadError": "Stellen konnten nicht geladen werden.",
     "count": "Alle Stellen",
-    "archivedView": "Archiviert"
+    "archivedView": "Archiviert",
+    "withoutAgentView": "Ohne KI-Agent"
   },
   "buckets": {
     "all": "Alle"
@@ -22,7 +23,8 @@
     "published": "Veröffentlicht",
     "owner": "Inhaber",
     "client": "Kunde",
-    "createdAt": "Erstellt am"
+    "createdAt": "Erstellt am",
+    "aiAgent": "KI-Agent"
   },
   "publishedState": {
     "yes": "Veröffentlicht",
@@ -155,7 +157,8 @@
       "general": "Allgemein",
       "requirements": "Anforderungen",
       "conditions": "Konditionen",
-      "location": "Standort"
+      "location": "Standort",
+      "aiAgent": "KI-Agent"
     },
     "id": "Stellen-ID",
     "startDate": "Startdatum",
@@ -191,7 +194,14 @@
     "customerLocation": "Kundenstandort",
     "customerDepartment": "Abteilung",
     "contactPerson": "Ansprechpartner",
-    "pickClientFirst": "Zuerst einen Kunden wählen"
+    "pickClientFirst": "Zuerst einen Kunden wählen",
+    "aiAgent": {
+      "none": "Kein Agent",
+      "placeholder": "KI-Agenten auswählen",
+      "empty": "Noch keine KI-Agenten eingerichtet.",
+      "note": "Ein verknüpfter Agent führt die Intake-Interviews für diese Stelle.",
+      "loadError": "KI-Agenten konnten nicht geladen werden."
+    }
   },
   "generate": {
     "button": "Mit Koios generieren",

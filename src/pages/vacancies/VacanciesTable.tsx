@@ -100,6 +100,12 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
       },
     },
     {
+      // VAC-AGENT-1: the linked AI agent (Option A: linking IS the interview toggle
+      // for this vacancy) — name, or an em-dash when none is linked.
+      key: 'aiAgent', header: t('columns.aiAgent'), nowrap: true, sortable: true, sortValue: r => r.aiAgentName ?? '',
+      render: r => r.aiAgentName ? <span style={plainCell}>{r.aiAgentName}</span> : <span style={{ color: 'var(--text-muted)' }}>—</span>,
+    },
+    {
       key: 'createdAt', header: t('columns.createdAt'), nowrap: true, cellStyle: mutedCell,
       sortable: true, sortValue: r => r.createdSort ?? r.created, render: r => formatDate(r.created),
     },

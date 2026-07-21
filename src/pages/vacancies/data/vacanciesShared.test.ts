@@ -66,3 +66,27 @@ describe('buildVacancyPatch · runtime window (VAC-DATES-1)', () => {
     expect(body).not.toHaveProperty('end_date')
   })
 })
+
+// VAC-AGENT-1: linking an agent IS the interview on/off switch for this vacancy
+// (Option A) — the patch carries only the agent id, never a separate flow field.
+describe('buildVacancyPatch · AI agent link (VAC-AGENT-1)', () => {
+  it('maps aiAgentId to ai_agent_id when linking an agent', () => {
+    const body = buildVacancyPatch({ aiAgentId: 'agent1' })
+    expect(body).toEqual({ ai_agent_id: 'agent1' })
+  })
+
+  it('maps aiAgentId: null to ai_agent_id: null when unlinking', () => {
+    const body = buildVacancyPatch({ aiAgentId: null })
+    expect(body).toEqual({ ai_agent_id: null })
+  })
+
+  it('omits ai_agent_id entirely when absent from the patch (partial saves)', () => {
+    const body = buildVacancyPatch({ title: 'New title' })
+    expect(body).not.toHaveProperty('ai_agent_id')
+  })
+
+  it('never sends the display-only aiAgentName field to the API', () => {
+    const body = buildVacancyPatch({ aiAgentId: 'agent1', aiAgentName: 'Intake bot' })
+    expect(body).toEqual({ ai_agent_id: 'agent1' })
+  })
+})

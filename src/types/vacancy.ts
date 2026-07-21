@@ -60,6 +60,12 @@ export interface Vacancy {
   // the table can render the same soft "Gearchiveerd" chip when include_archived=1.
   archived: boolean
   archivedAt: string | null
+  // VAC-AGENT-1: the AI agent linked to this vacancy (Option A — linking an agent
+  // IS the interview on/off switch; it carries its own interview flow, so only the
+  // flow's id rides along too, never a duplicate flow picker on the vacancy itself).
+  aiAgentId: Id | null
+  aiAgentName: string
+  interviewFlowId: Id | null
 }
 
 /** The enriched vacancy model rendered by the drawer tabs. */
@@ -153,6 +159,11 @@ export interface ApiVacancy {
   client_id?: Id
   customer_name?: string
   client_name?: string
+  // VAC-AGENT-1: the linked AI agent (list + detail both carry it) + the flow id
+  // that agent brings along — read from either the nested object or a flat id.
+  ai_agent?: { id?: Id; name?: string } | null
+  ai_agent_id?: Id | null
+  interview_flow_id?: Id | null
   tags?: unknown[]
   created_at?: string
   createdAt?: string

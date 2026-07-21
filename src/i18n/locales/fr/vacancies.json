@@ -8,7 +8,8 @@
     "empty": "Aucun poste pour le moment.",
     "loadError": "Impossible de charger les postes.",
     "count": "Tous les postes",
-    "archivedView": "Archivées"
+    "archivedView": "Archivées",
+    "withoutAgentView": "Sans agent IA"
   },
   "buckets": {
     "all": "Tous"
@@ -22,7 +23,8 @@
     "published": "Publié",
     "owner": "Responsable",
     "client": "Client",
-    "createdAt": "Créé le"
+    "createdAt": "Créé le",
+    "aiAgent": "Agent IA"
   },
   "publishedState": {
     "yes": "Publié",
@@ -155,7 +157,8 @@
       "general": "Général",
       "requirements": "Exigences",
       "conditions": "Conditions",
-      "location": "Lieu"
+      "location": "Lieu",
+      "aiAgent": "Agent IA"
     },
     "id": "ID du poste",
     "startDate": "Date de début",
@@ -191,7 +194,14 @@
     "customerLocation": "Site du client",
     "customerDepartment": "Service",
     "contactPerson": "Contact",
-    "pickClientFirst": "Choisissez d'abord un client"
+    "pickClientFirst": "Choisissez d'abord un client",
+    "aiAgent": {
+      "none": "Aucun agent",
+      "placeholder": "Sélectionner un agent IA",
+      "empty": "Aucun agent IA configuré pour l'instant.",
+      "note": "Un agent associé mène les entretiens d'intake pour cette offre.",
+      "loadError": "Impossible de charger les agents IA."
+    }
   },
   "generate": {
     "button": "Générer avec Koios",

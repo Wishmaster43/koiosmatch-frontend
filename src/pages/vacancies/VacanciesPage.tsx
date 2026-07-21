@@ -8,7 +8,7 @@
 import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Archive, Map as MapIcon } from 'lucide-react'
+import { Archive, Map as MapIcon, BotOff } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
@@ -74,6 +74,8 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const [selectedCategory, setSelectedCategory] = usePageMemory<string[]>('vac.category', [])
   const [globalSearch,   setGlobalSearch]   = usePageMemory('vac.search', '')
   const [showArchived,   setShowArchived]   = usePageMemory('vac.archived', false)
+  // VAC-AGENT-1: "online without an AI agent" quick view (?without_agent=1).
+  const [showWithoutAgent, setShowWithoutAgent] = usePageMemory('vac.withoutAgent', false)
   // V27: Gepubliceerd/Niet-gepubliceerd — a real server-side filter (VacancyQuery::
   // rules()/filtered() already accept a `published` boolean on both /vacancies and
   // /vacancies/stats), just never wired into the UI before.
@@ -107,6 +109,8 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     // V28: functie donut filter — VacancyQuery::filtered() already whereIn's on function_title.
     if (selectedCategory.length) p.category  = selectedCategory
     if (showArchived)           p.include_archived = 1
+    // VAC-AGENT-1: quick view onto the vacancies that are online but have no agent linked.
+    if (showWithoutAgent)       p.without_agent = 1
     // V27: server-side published/unpublished filter (honoured by both the list and
     // stats). Laravel's `boolean` rule only accepts true/false/0/1/'0'/'1' — NOT the
     // strings "true"/"false" a JS boolean serialises to in a query string — so this
@@ -116,7 +120,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     // Map view narrows the list server-side to the chosen circle (STRAAL-1).
     if (view === 'map' && mapStraalActive) { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
     return p
-  }, [globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, showArchived, publishedBucket, view, mapCenter, mapRadius, mapStraalActive])
+  }, [globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, showArchived, showWithoutAgent, publishedBucket, view, mapCenter, mapRadius, mapStraalActive])
   const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1; the visible rows change → drop the selection.
@@ -200,11 +204,11 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
       active: publishedBucket !== 'all', onClear: () => setPublishedBucket('all') },
   ]
   // Shared clear-all (page memory keeps filters sticky).
-  const anyFilterActive = Boolean(globalSearch.trim() || showArchived || statusBucket !== 'all'
+  const anyFilterActive = Boolean(globalSearch.trim() || showArchived || showWithoutAgent || statusBucket !== 'all'
     || selectedOwner.length || selectedClient.length || selectedCategory.length || publishedBucket !== 'all')
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
-    setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setStatusBucket('all')
+    setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setShowWithoutAgent(false); setStatusBucket('all')
     setSelectedOwner([]); setSelectedClient([]); setSelectedCategory([]); setPublishedBucket('all'); setPage(1)
   }
 
@@ -261,6 +265,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                   candidate blueprint (the API ships lat/lng + distance_km now). */}
               <QuickViewToggle active={view === 'map'} onToggle={() => setView(x => (x === 'map' ? 'table' : 'map'))}
                 label={t('common:map.view')} color="var(--color-map)" icon={MapIcon} />
+              {/* VAC-AGENT-1: "online without an AI agent" quick view — --color-violet is
+                  the shared system/AI-ish accent token (index.css), not an ad-hoc hex. */}
+              <QuickViewToggle active={showWithoutAgent} onToggle={() => setShowWithoutAgent(v => !v)}
+                label={t('page.withoutAgentView')} color="var(--color-violet)" icon={BotOff} />
               {buckets.map(b => (
                 <button key={b.value} onClick={() => setStatusBucket(b.value)}
                   style={{ padding: '5px 14px', fontSize: 13, fontWeight: statusBucket === b.value ? 600 : 400, borderRadius: 7, cursor: 'pointer',

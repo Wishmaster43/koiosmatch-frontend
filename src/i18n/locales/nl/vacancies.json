@@ -8,7 +8,8 @@
     "empty": "Nog geen vacatures.",
     "loadError": "Vacatures laden is mislukt.",
     "count": "Alle vacatures",
-    "archivedView": "Gearchiveerd"
+    "archivedView": "Gearchiveerd",
+    "withoutAgentView": "Zonder AI-agent"
   },
   "buckets": {
     "all": "Alle"
@@ -22,7 +23,8 @@
     "published": "Gepubliceerd",
     "owner": "Eigenaar",
     "client": "Klant",
-    "createdAt": "Aangemaakt"
+    "createdAt": "Aangemaakt",
+    "aiAgent": "AI-agent"
   },
   "publishedState": {
     "yes": "Gepubliceerd",
@@ -155,7 +157,8 @@
       "general": "Algemeen",
       "location": "Locatie",
       "requirements": "Functie-eisen",
-      "conditions": "Voorwaarden"
+      "conditions": "Voorwaarden",
+      "aiAgent": "AI-agent"
     },
     "id": "Vacature-ID",
     "startDate": "Startdatum",
@@ -191,7 +194,14 @@
     "addSkill": "Vaardigheid toevoegen",
     "noSkills": "Nog geen vaardigheden.",
     "description": "Beschrijving",
-    "descriptionPlaceholder": "Beschrijf de functie…"
+    "descriptionPlaceholder": "Beschrijf de functie…",
+    "aiAgent": {
+      "none": "Geen agent",
+      "placeholder": "Selecteer een AI-agent",
+      "empty": "Nog geen AI-agents ingesteld.",
+      "note": "Een gekoppelde agent voert de intake-interviews voor deze vacature.",
+      "loadError": "AI-agenten laden is mislukt."
+    }
   },
   "generate": {
     "button": "Genereer met Koios",
