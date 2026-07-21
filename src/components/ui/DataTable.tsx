@@ -1,8 +1,15 @@
-import { useState, useMemo, useRef, useCallback, memo } from 'react'
+import { useState, useMemo, useRef, useCallback } from 'react'
 import type { CSSProperties, ReactNode, RefObject } from 'react'
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useVirtualizer } from '@tanstack/react-virtual'
+import { TableRow } from './DataTableRow'
+import { field, compare, checkboxCol, SKELETON_ROWS, skeletonBarWidth, shiftRangeIds } from './dataTableUtils'
+
+// Re-exported so existing `import { shiftRangeIds } from '.../DataTable'` call sites
+// (incl. the test file) keep working unchanged after the 2026-07-21 utils split.
+// eslint-disable-next-line react-refresh/only-export-components -- pure helper re-export, no component; mirrors the original inline export.
+export { shiftRangeIds }
 
 /**
  * DataTable — generic, themed list table.
@@ -18,10 +25,10 @@ import { useVirtualizer } from '@tanstack/react-virtual'
  * table renders exactly as before until it opts in.
  *
  * Row memoization (audit item 7, 2026-07-15): each row is its own memoized
- * component (see TableRow below) so a click that only changes `selectedId`
- * re-renders the two affected rows, not all 5000+ cells. This only pays off
- * when the caller's `columns` array is referentially stable (useMemo) — an
- * unstable columns array still forces every row to re-render every time.
+ * component (`TableRow` in ./DataTableRow.tsx) so a click that only changes
+ * `selectedId` re-renders the two affected rows, not all 5000+ cells. This only
+ * pays off when the caller's `columns` array is referentially stable (useMemo) —
+ * an unstable columns array still forces every row to re-render every time.
  */
 export type RowId = string | number
 
@@ -62,129 +69,6 @@ interface DataTableProps<Row> {
   scrollParentRef?: RefObject<HTMLElement | null>
   estimatedRowHeight?: number
 }
-
-// Read a column's default field off an unknown-shaped row (dynamic accessor).
-const field = (row: unknown, key: string): unknown => (row as Record<string, unknown>)[key]
-
-// Job 43 — pure range helper (unit-tested directly, no rendering needed): given the
-// row-id order on the current page, the last "anchor" id and the row just clicked,
-// return every id between them (inclusive, works whether the click landed above or
-// below the anchor). Unknown anchor/target ids (stale ref against a re-sorted page)
-// fall back to just the target row — never guess a range against a wrong index.
-// eslint-disable-next-line react-refresh/only-export-components -- pure helper exported for unit testing only (mirrors ProfileTab's waDigits); no runtime cost outside dev HMR.
-export function shiftRangeIds<T extends RowId>(pageIds: T[], anchorId: T | null, targetId: T): T[] {
-  if (anchorId == null || anchorId === targetId) return [targetId]
-  const anchorIndex = pageIds.indexOf(anchorId)
-  const targetIndex = pageIds.indexOf(targetId)
-  if (anchorIndex === -1 || targetIndex === -1) return [targetId]
-  const [start, end] = anchorIndex < targetIndex ? [anchorIndex, targetIndex] : [targetIndex, anchorIndex]
-  return pageIds.slice(start, end + 1)
-}
-
-// Comparator: empty/null sort last; numbers numerically; strings naturally.
-function compare(a: unknown, b: unknown): number {
-  const na = a === '' || a == null
-  const nb = b === '' || b == null
-  if (na && nb) return 0
-  if (na) return 1
-  if (nb) return -1
-  if (typeof a === 'number' && typeof b === 'number') return a - b
-  return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
-}
-
-// Shared static styles (module scope — no closures, so no reason to recreate per render).
-const checkboxCol: CSSProperties = { width: 36, padding: '8px 10px', textAlign: 'center' }
-const stopPropagation = (e: { stopPropagation: () => void }) => e.stopPropagation()
-
-// Selected/checked row tint (audit item 1, 2026-07-16): a STICKY column (e.g. the
-// pinned Name cell) paints its OWN opaque background on top of the <tr>'s background
-// so scrolled-under content stays hidden while scrolling horizontally. Painting the
-// translucent `var(--color-primary-bg)` token on BOTH layers double-composites it —
-// the sticky cell reads as a visibly darker/different-coloured block than the rest
-// of the same row (reported as "the name turns a different colour when selected",
-// most visible whenever --color-primary-bg is translucent: any tenant with a custom
-// brand colour, and dark mode for every tenant). Pre-mixing straight into the opaque
-// --bg token keeps this single-layer and fully opaque in both states, so the sticky
-// cell and the rest of the row always render the exact same solid tint.
-const HIGHLIGHT_BG = 'color-mix(in srgb, var(--color-primary) 12%, var(--bg))'
-
-// Loading skeleton (audit item 17): a fixed number of placeholder rows so the
-// table header/chrome stays put and the body doesn't "jump" from a centred
-// spinner to real rows. Bar widths vary per column so the shape reads as text,
-// not a solid block; token-based colour only (no ad-hoc grey, works in dark mode).
-const SKELETON_ROWS = 8
-const SKELETON_BAR_WIDTHS = ['85%', '60%', '75%', '50%', '90%', '65%']
-const skeletonBarWidth = (i: number) => SKELETON_BAR_WIDTHS[i % SKELETON_BAR_WIDTHS.length]
-
-interface TableRowProps<Row> {
-  row: Row
-  columns: Column<Row>[]
-  rowId: RowId
-  isSelected: boolean
-  isChecked: boolean
-  selectable: boolean
-  stickyOffsets: (number | null)[]
-  onRowClick?: (row: Row) => void
-  // Job 43: the checkbox's native click event carries the shift-key flag through, so
-  // the table (not the caller) can resolve a shift-click into a range selection.
-  onToggleRow?: (id: RowId, shiftKey?: boolean) => void
-  virtualIndex?: number
-  measureElement?: (node: Element | null) => void
-  selectRowLabel: string
-}
-
-// One table row — memoized (audit item 7): a row only re-renders when ITS OWN
-// props change (its data, or its own selected/checked flag flips), never because
-// a sibling row or unrelated table state changed. `onRowClick`/`onToggleRow` are
-// stable wrappers from the parent (see stableRowClick/stableToggleRow below), so
-// a caller that doesn't memoize its own handler still gets the full benefit —
-// only an unstable `columns` array (or a genuinely new `row` object) busts this.
-function TableRowInner<Row>({
-  row, columns, rowId, isSelected, isChecked, selectable, stickyOffsets,
-  onRowClick, onToggleRow, virtualIndex, measureElement, selectRowLabel,
-}: TableRowProps<Row>) {
-  const highlight = isSelected || isChecked
-  return (
-    <tr
-      {...(virtualIndex !== undefined ? { 'data-index': virtualIndex, ref: measureElement } : {})}
-      onClick={onRowClick ? () => onRowClick(row) : undefined}
-      style={{ borderBottom: '1px solid var(--border)', cursor: onRowClick ? 'pointer' : 'default',
-        background: highlight ? HIGHLIGHT_BG : 'transparent' }}
-      onMouseEnter={e => { if (!highlight) { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.querySelectorAll('td[data-sticky]').forEach(td => { (td as HTMLElement).style.background = 'var(--hover-bg)' }) } }}
-      onMouseLeave={e => { if (!highlight) { e.currentTarget.style.background = 'transparent'; e.currentTarget.querySelectorAll('td[data-sticky]').forEach(td => { (td as HTMLElement).style.background = 'var(--bg)' }) } }}>
-      {selectable && (
-        <td style={checkboxCol} onClick={stopPropagation}>
-          {/* Job 43: forward the shift-key from the native click event (onChange's
-              nativeEvent is the triggering MouseEvent for a checkbox) so a shift-click
-              can be resolved into a range selection one level up. */}
-          <input type="checkbox" checked={!!isChecked}
-            onChange={e => onToggleRow?.(rowId, (e.nativeEvent as MouseEvent).shiftKey)}
-            style={{ cursor: 'pointer', accentColor: 'var(--color-primary)' }} aria-label={selectRowLabel} />
-        </td>
-      )}
-      {columns.map((col, i) => {
-        // Sticky cells need the same background as the row to cover scrolled content —
-        // HIGHLIGHT_BG (always opaque) so this never double-composites with the <tr>'s
-        // own background above (see the HIGHLIGHT_BG comment, job 1 2026-07-16).
-        const rowBg = highlight ? HIGHLIGHT_BG : 'var(--bg)'
-        const left = stickyOffsets[i]
-        const stickyStyle: CSSProperties = left == null ? {} : { position: 'sticky', left, zIndex: 1, background: rowBg }
-        return (
-          <td key={col.key}
-            {...(col.sticky ? { 'data-sticky': true } : {})}
-            style={{ padding: '10px 10px', textAlign: col.align ?? 'left',
-              whiteSpace: col.nowrap ? 'nowrap' : undefined,
-              ...(col.width ? { minWidth: col.width, width: col.width } : {}),
-              ...col.cellStyle, ...stickyStyle }}>
-            {col.render ? col.render(row) : (field(row, col.key) as ReactNode)}
-          </td>
-        )
-      })}
-    </tr>
-  )
-}
-// Generic components lose their type param through memo()'s signature — cast back.
-const TableRow = memo(TableRowInner) as typeof TableRowInner
 
 export default function DataTable<Row>({
   columns,

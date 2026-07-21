@@ -9,8 +9,7 @@
 import { useState } from 'react'
 import { useLookups } from '@/context/LookupsContext'
 import { useAllSettings } from '@/lib/settings/useAllSettings'
-import { useCreateMatch } from './useCreateMatch'
-import { useVacancyOptions } from './useVacancyOptions'
+import { useCandidatePlacedMatch } from './useCandidatePlacedMatch'
 import { makeRequiredComplete } from '../drawer/candidateStatusInfo'
 import type { StatusFlags } from '../drawer/candidateStatusInfo'
 import type { Candidate } from '@/types/candidate'
@@ -35,25 +34,22 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
     phaseMeta: (v?: string | null) => { label: string; color: string }
   }
   const allSettings = useAllSettings()
-  const { createMatch, creating: creatingMatch } = useCreateMatch(c?.id ?? '')
 
-  // Optimistic overrides + the two prompts (placed→match, reason/date).
+  // Optimistic overrides + the reason/date prompt (the placed→match prompt lives
+  // in the useCandidatePlacedMatch sub-hook below).
   const [phase,  setPhase]  = useState<string | null>(null)
   const [status, setStatus] = useState<string | null>(null)
-  const [matchPrompt,       setMatchPrompt]       = useState(false)
-  const [matchChoice,       setMatchChoice]       = useState<string | null>(null)
-  const [newMatchVacancyId, setNewMatchVacancyId] = useState('')
   const [statusModal,       setStatusModal]       = useState<StatusModalState | null>(null)
   // Convert guard — blocks an accidental CV click right after converting.
   const [converting,        setConverting]        = useState(false)
-  // Vacancy picker options — only fetched while the placed prompt is open.
-  const vacancyOptions = useVacancyOptions(matchPrompt)
+  // "Placed requires a Match" sub-flow (prompt + create/link + confirm).
+  const placed = useCandidatePlacedMatch({ c, onUpdate, setStatus })
 
   // Reset the overrides when a different candidate is shown (render-time state adjust).
   const [prevId, setPrevId] = useState<Id | undefined>(c?.id)
   if (c?.id !== prevId) {
     setPrevId(c?.id)
-    setPhase(null); setStatus(null); setMatchPrompt(false); setMatchChoice(null); setStatusModal(null); setConverting(false)
+    setPhase(null); setStatus(null); placed.setMatchPrompt(false); placed.setMatchChoice(null); setStatusModal(null); setConverting(false)
   }
 
   const currentPhase = phase ?? c?.phase
@@ -127,7 +123,7 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
     if (!c) return
     if (v === currentStatus && (statusFlags?.requires_reason || statusFlags?.expects_return_date || statusFlags?.is_blacklist)) { openStatusEdit(); return }
     const it = statuses.find(s => s.value === v) as (LookupOption & { requires_match?: unknown; requires_reason?: unknown; expects_return_date?: unknown; is_blacklist?: unknown }) | undefined
-    if (it?.requires_match) { setMatchChoice(null); setMatchPrompt(true); return }
+    if (it?.requires_match) { placed.setMatchChoice(null); placed.setMatchPrompt(true); return }
     if (Boolean(it?.requires_reason) || Boolean(it?.expects_return_date)) {
       setStatusModal({ target: v, reason: '', date: '', needReason: Boolean(it?.requires_reason), needDate: Boolean(it?.expects_return_date), isBlacklist: Boolean(it?.is_blacklist) })
       return
@@ -161,21 +157,10 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
     setStatusModal(null)
   }
 
-  // Confirm the "Placed" prompt: use the picked match, or create one for the chosen vacancy.
-  const confirmPlacedMatch = async () => {
-    if (!c) return
-    let mid = matchChoice
-    if (!mid && newMatchVacancyId) mid = await createMatch(newMatchVacancyId)
-    if (!mid) return
-    setStatus('placed'); onUpdate?.(c.id, { status: 'placed', match_id: mid })
-    setMatchPrompt(false); setMatchChoice(null); setNewMatchVacancyId('')
-  }
-
   return {
     statuses, currentPhase, phaseInfo, nextPhase, isEntryPhase, converting, doConvert,
     currentStatus, showStatus, openStatusEdit, canEditStatusReason, changeStatus,
     statusModal, setStatusModal, confirmStatus,
-    matchPrompt, setMatchPrompt, matchChoice, setMatchChoice,
-    newMatchVacancyId, setNewMatchVacancyId, vacancyOptions, creatingMatch, confirmPlacedMatch,
+    ...placed,
   }
 }
