@@ -93,8 +93,6 @@
     "webhooks": "Webhooks",
     "importeren": "Importar",
     "export": "Exportar",
-    "billing_plans": "Plan",
-    "billing_pay": "Pago y recarga",
     "billing_usage": "Uso",
     "billing_invoices": "Facturas",
     "modules": "Paquete",
@@ -597,14 +595,6 @@
     }
   },
   "billing": {
-    "plans": {
-      "title": "Plan",
-      "desc": "Gestiona tu suscripción y plan."
-    },
-    "pay": {
-      "title": "Métodos de pago",
-      "desc": "Añade y gestiona métodos de pago."
-    },
     "usage": {
       "title": "Uso y límites",
       "desc": "Resumen de tu uso actual en este periodo.",

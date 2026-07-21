@@ -93,8 +93,6 @@
     "webhooks": "Webhooks",
     "importeren": "Importer",
     "export": "Exporter",
-    "billing_plans": "Forfait",
-    "billing_pay": "Paiement & recharge",
     "billing_usage": "Utilisation",
     "billing_invoices": "Factures",
     "modules": "Forfait",
@@ -597,14 +595,6 @@
     }
   },
   "billing": {
-    "plans": {
-      "title": "Forfait",
-      "desc": "Gérez votre abonnement et votre forfait."
-    },
-    "pay": {
-      "title": "Moyens de paiement",
-      "desc": "Ajoutez et gérez les moyens de paiement."
-    },
     "usage": {
       "title": "Utilisation & limites",
       "desc": "Aperçu de votre utilisation actuelle sur cette période.",

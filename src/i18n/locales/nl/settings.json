@@ -96,8 +96,6 @@
     "webhooks": "Webhooks",
     "importeren": "Importeren",
     "export": "Exporteren",
-    "billing_plans": "Planbeheer",
-    "billing_pay": "Betaling & opwaarderen",
     "billing_usage": "Gebruik",
     "billing_invoices": "Facturen",
     "modules": "Pakket",
@@ -799,14 +797,6 @@
     }
   },
   "billing": {
-    "plans": {
-      "title": "Planbeheer",
-      "desc": "Beheer je abonnement en plan."
-    },
-    "pay": {
-      "title": "Betaalmethoden",
-      "desc": "Voeg betaalmethoden toe en beheer ze."
-    },
     "usage": {
       "title": "Gebruik & limieten",
       "desc": "Overzicht van je actuele verbruik deze periode.",

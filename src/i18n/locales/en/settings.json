@@ -96,8 +96,6 @@
     "webhooks": "Webhooks",
     "importeren": "Import",
     "export": "Export",
-    "billing_plans": "Plan",
-    "billing_pay": "Payment & top-up",
     "billing_usage": "Usage",
     "billing_invoices": "Invoices",
     "modules": "Package",
@@ -799,14 +797,6 @@
     }
   },
   "billing": {
-    "plans": {
-      "title": "Plan",
-      "desc": "Manage your subscription and plan."
-    },
-    "pay": {
-      "title": "Payment methods",
-      "desc": "Add and manage payment methods."
-    },
     "usage": {
       "title": "Usage & limits",
       "desc": "Overview of your current usage this period.",

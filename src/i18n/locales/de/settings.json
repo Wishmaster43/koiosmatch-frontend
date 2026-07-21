@@ -93,8 +93,6 @@
     "webhooks": "Webhooks",
     "importeren": "Importieren",
     "export": "Exportieren",
-    "billing_plans": "Tarif",
-    "billing_pay": "Zahlung & Aufladen",
     "billing_usage": "Nutzung",
     "billing_invoices": "Rechnungen",
     "modules": "Paket",
@@ -597,14 +595,6 @@
     }
   },
   "billing": {
-    "plans": {
-      "title": "Tarif",
-      "desc": "Verwalte dein Abo und deinen Tarif."
-    },
-    "pay": {
-      "title": "Zahlungsmethoden",
-      "desc": "Zahlungsmethoden hinzufügen und verwalten."
-    },
     "usage": {
       "title": "Nutzung & Limits",
       "desc": "Übersicht deiner aktuellen Nutzung in diesem Zeitraum.",
