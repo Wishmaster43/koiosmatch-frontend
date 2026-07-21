@@ -6,6 +6,7 @@ import type { Column } from '@/components/ui/DataTable'
 import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import StatusPill from '@/components/ui/StatusPill'
 import SoftChip from '@/components/ui/SoftChip'
+import AiAgentAvatar from '@/components/ui/AiAgentAvatar'
 import { useDateFormat } from '@/lib/datetime'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
@@ -103,7 +104,8 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
       // VAC-AGENT-1: the linked AI agent (Option A: linking IS the interview toggle
       // for this vacancy) — name, or an em-dash when none is linked.
       key: 'aiAgent', header: t('columns.aiAgent'), nowrap: true, sortable: true, sortValue: r => r.aiAgentName ?? '',
-      render: r => r.aiAgentName ? <span style={plainCell}>{r.aiAgentName}</span> : <span style={{ color: 'var(--text-muted)' }}>—</span>,
+      // Sparkle soft-avatar so the column reads as an AI agent, not a person (Danny 22-07).
+      render: r => r.aiAgentName ? <AiAgentAvatar name={r.aiAgentName} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>,
     },
     {
       key: 'createdAt', header: t('columns.createdAt'), nowrap: true, cellStyle: mutedCell,
