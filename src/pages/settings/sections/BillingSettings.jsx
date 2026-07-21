@@ -1,7 +1,8 @@
-/** Billing sections — currently placeholders (plan, payment methods, auto top-up,
- * invoices). One component per nav tab; all driven by i18n.
- * GebruikSettings (usage) moved to its own file `./GebruikSettings.jsx` — it grew
- * into a real, data-driven section and no longer belongs next to these placeholders. */
+/** Billing sections — currently placeholders (plan, payment methods, invoices).
+ * One component per nav tab; all driven by i18n. Auto top-up (opwaarderen) is
+ * intentionally GONE (Danny 21-07: "weg, doen we niets meer"), matching the R-1
+ * decision to drop the payment/top-up flow. GebruikSettings (usage) moved to its
+ * own file `./GebruikSettings.jsx` — a real, data-driven section. */
 import { useTranslation } from 'react-i18next'
 import PlaceholderSettings from './PlaceholderSettings'
 
@@ -12,10 +13,6 @@ export function PlanbeheerSettings() {
 export function BetaalmethodenSettings() {
   const { t } = useTranslation('settings')
   return <PlaceholderSettings title={t('billing.pay.title')} description={t('billing.pay.desc')} />
-}
-export function AutoOpwaarderenSettings() {
-  const { t } = useTranslation('settings')
-  return <PlaceholderSettings title={t('billing.auto.title')} description={t('billing.auto.desc')} />
 }
 export function FacturenSettings() {
   const { t } = useTranslation('settings')

@@ -95,7 +95,6 @@
     "export": "Exporter",
     "billing_plans": "Forfait",
     "billing_pay": "Paiement & recharge",
-    "billing_auto": "Recharge automatique",
     "billing_usage": "Utilisation",
     "billing_invoices": "Factures",
     "modules": "Forfait",
@@ -605,10 +604,6 @@
     "pay": {
       "title": "Moyens de paiement",
       "desc": "Ajoutez et gérez les moyens de paiement."
-    },
-    "auto": {
-      "title": "Recharge automatique",
-      "desc": "Configurez la recharge automatique."
     },
     "usage": {
       "title": "Utilisation & limites",

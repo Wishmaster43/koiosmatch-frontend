@@ -118,7 +118,6 @@ export const NAV_GROUPS = [
     key: 'company', icon: Building2,
     items: [
       { id: 'company', icon: Building2, component: CompanySettings },
-      { id: 'memory', icon: BookOpen, component: MemorySettings },
       { id: 'locations', icon: MapPin, component: LocationsSettings },
       { id: 'branding', icon: Palette, component: BrandSettings },
       // NUMMER-1: prefix/padding/start per entity for the human-readable reference numbers.
@@ -126,13 +125,12 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    // AI-driven content — its own top-level group (VACGEN-1 fase 1): sits near the other
-    // AI-flavoured settings (Koios under integrations, Geheugen under company) but gets a
-    // dedicated home since it is a distinct, growing CRUD surface (generation profiles +
-    // reusable content blocks), mirroring note_types/action_rules getting their own group.
+    // Koios AI — all AI-flavoured settings together (Danny 21-07): the Koios overview,
+    // the AI memory (moved here from Company), and the vacancy-generation CRUD surface.
     key: 'ai', icon: Sparkles,
     items: [
       { id: 'koios', icon: Sparkles, component: KoiosSettings },
+      { id: 'memory', icon: BookOpen, component: MemorySettings },
       { id: 'vacancy_generation', icon: Sparkles, component: VacancyGenerationSettings },
     ],
   },

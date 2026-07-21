@@ -95,7 +95,6 @@
     "export": "Exportieren",
     "billing_plans": "Tarif",
     "billing_pay": "Zahlung & Aufladen",
-    "billing_auto": "Automatisch aufladen",
     "billing_usage": "Nutzung",
     "billing_invoices": "Rechnungen",
     "modules": "Paket",
@@ -605,10 +604,6 @@
     "pay": {
       "title": "Zahlungsmethoden",
       "desc": "Zahlungsmethoden hinzufügen und verwalten."
-    },
-    "auto": {
-      "title": "Automatisch aufladen",
-      "desc": "Automatisches Aufladen einrichten."
     },
     "usage": {
       "title": "Nutzung & Limits",

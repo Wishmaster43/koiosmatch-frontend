@@ -95,7 +95,6 @@
     "export": "Exportar",
     "billing_plans": "Plan",
     "billing_pay": "Pago y recarga",
-    "billing_auto": "Recarga automática",
     "billing_usage": "Uso",
     "billing_invoices": "Facturas",
     "modules": "Paquete",
@@ -605,10 +604,6 @@
     "pay": {
       "title": "Métodos de pago",
       "desc": "Añade y gestiona métodos de pago."
-    },
-    "auto": {
-      "title": "Recarga automática",
-      "desc": "Configura la recarga automática."
     },
     "usage": {
       "title": "Uso y límites",

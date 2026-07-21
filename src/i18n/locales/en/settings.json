@@ -98,7 +98,6 @@
     "export": "Export",
     "billing_plans": "Plan",
     "billing_pay": "Payment & top-up",
-    "billing_auto": "Auto top-up",
     "billing_usage": "Usage",
     "billing_invoices": "Invoices",
     "modules": "Package",
@@ -807,10 +806,6 @@
     "pay": {
       "title": "Payment methods",
       "desc": "Add and manage payment methods."
-    },
-    "auto": {
-      "title": "Auto top-up",
-      "desc": "Set up automatic top-up."
     },
     "usage": {
       "title": "Usage & limits",

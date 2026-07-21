@@ -98,7 +98,6 @@
     "export": "Exporteren",
     "billing_plans": "Planbeheer",
     "billing_pay": "Betaling & opwaarderen",
-    "billing_auto": "Automatisch opwaarderen",
     "billing_usage": "Gebruik",
     "billing_invoices": "Facturen",
     "modules": "Pakket",
@@ -807,10 +806,6 @@
     "pay": {
       "title": "Betaalmethoden",
       "desc": "Voeg betaalmethoden toe en beheer ze."
-    },
-    "auto": {
-      "title": "Automatisch opwaarderen",
-      "desc": "Stel automatisch opwaarderen in."
     },
     "usage": {
       "title": "Gebruik & limieten",
