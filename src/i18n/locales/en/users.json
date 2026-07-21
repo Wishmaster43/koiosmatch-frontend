@@ -36,6 +36,10 @@
   },
   "noRoles": "No roles available",
   "rolesLoading": "Loading roles…",
+  "agent": {
+    "label": "Create an AI agent?",
+    "hint": "Automatically creates an AI recruiter agent with its own WhatsApp interview flow. The Meta steps (linking the number, approving the template) follow as a task."
+  },
   "editUser": "Edit user",
   "saveFailed": "Could not save.",
   "saving": "Saving…",

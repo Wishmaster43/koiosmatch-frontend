@@ -36,6 +36,10 @@
   },
   "noRoles": "No hay roles disponibles",
   "rolesLoading": "Cargando roles…",
+  "agent": {
+    "label": "¿Crear un agente de IA?",
+    "hint": "Crea automáticamente un agente de IA reclutador con su propio flujo de entrevista por WhatsApp. Los pasos de Meta (vincular el número, aprobar la plantilla) llegan como una tarea."
+  },
   "editUser": "Editar usuario",
   "saveFailed": "No se pudo guardar.",
   "saving": "Guardando…",

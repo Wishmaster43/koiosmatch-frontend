@@ -36,6 +36,10 @@
   },
   "noRoles": "Aucun rôle disponible",
   "rolesLoading": "Chargement des rôles…",
+  "agent": {
+    "label": "Créer un agent IA ?",
+    "hint": "Crée automatiquement un agent IA recruteur avec son propre parcours d'entretien WhatsApp. Les étapes Meta (associer le numéro, faire approuver le modèle) suivent sous forme de tâche."
+  },
   "editUser": "Modifier l'utilisateur",
   "saveFailed": "Échec de l'enregistrement.",
   "saving": "Enregistrement…",

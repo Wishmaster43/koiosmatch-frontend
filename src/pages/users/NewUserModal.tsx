@@ -16,9 +16,17 @@ import type { ManagedUser } from '@/types/api'
 import { useAssignableRoles } from './hooks/useAssignableRoles'
 import { useRoleBranchTemplate } from './hooks/useRoleBranchTemplate'
 import { useLocations } from '@/lib/useLocations'
-import { notifyError } from '@/lib/notify'
+import { notifyError, notifySuccess } from '@/lib/notify'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import { roleLabel } from './usersParts'
+
+// POST /users response envelope: the UserResource plus a top-level `agent` block
+// the backend attaches only when it provisioned an AI agent for this user
+// (AGENT-META-SETUP — recruiter/manager roles only, see AiAgentProvisioner).
+interface CreateUserResponse {
+  data: ManagedUser
+  agent?: { created: boolean; meta_setup_required: boolean; notice: string } | null
+}
 
 export default function NewUserModal({ onClose, onCreated }: {
   onClose: () => void
@@ -30,6 +38,9 @@ export default function NewUserModal({ onClose, onCreated }: {
   const [form, setForm]     = useState({ firstname: '', lastname: '', email: '', password: '', role: '' })
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState<string | null>(null)
+  // AGENT-META-SETUP: "create an AI agent?" — default on, asked only for the two
+  // roles the backend actually provisions an agent for (AiAgentProvisioner::AGENT_ROLES).
+  const [createAgent, setCreateAgent] = useState(true)
 
   // Seed the role select once the live list arrives — prefer "planner" (the old
   // default) if present, otherwise whatever the tenant's first assignable role is.
@@ -42,6 +53,10 @@ export default function NewUserModal({ onClose, onCreated }: {
   // The picked role's id drives the branch-template seed below the select.
   const selectedRoleId = roles.find(r => r.name === form.role)?.id ?? null
   const { branches: templateBranches, loading: templateLoading } = useRoleBranchTemplate(selectedRoleId)
+
+  // Case-insensitive match against the backend's role-name gate (AiAgentProvisioner
+  // matches the raw role slug, not a label) — a custom tenant role never qualifies.
+  const isAgentRole = /^(recruiter|manager)$/i.test(form.role)
 
   // Danny ronde-2 punt 1.1: the branches are CHOOSABLE at creation (1 or more) —
   // the role template is only the seed. null = follow the template; a manual
@@ -60,7 +75,10 @@ export default function NewUserModal({ onClose, onCreated }: {
     e.preventDefault()
     setSaving(true); setError(null)
     try {
-      const res = await api.post('/users', form)
+      // The flag only means anything for a recruiter/manager — omit it for every
+      // other role so an unrelated role never implies one (server default is true).
+      const body = isAgentRole ? { ...form, create_agent: createAgent } : form
+      const res = await api.post<CreateUserResponse>('/users', body)
       const created = unwrap<ManagedUser>(res)
       // Divergence from the role template → replace-set the chosen branches
       // (the server already copied the template on create; PUT overrides it).
@@ -68,6 +86,9 @@ export default function NewUserModal({ onClose, onCreated }: {
         try { await api.put(`/users/${created.id}/branches`, { location_ids: chosenBranches }) }
         catch { notifyError(t('branches.saveFailed')) }
       }
+      // The backend echoes a top-level agent notice (Meta manual-steps still
+      // needed) only when it actually provisioned one — surface it once here.
+      if (res.data?.agent?.notice) notifySuccess(res.data.agent.notice)
       onCreated(created)
       onClose()
     } catch (err) {
@@ -128,6 +149,20 @@ export default function NewUserModal({ onClose, onCreated }: {
               {roles.map(r => <option key={r.id} value={r.name}>{roleLabel(t, r.name)}</option>)}
             </select>
           </div>
+
+          {/* AGENT-META-SETUP: only asked for a recruiter/manager — the two roles the
+              backend actually provisions an AI agent for. Default on; unchecking sends
+              create_agent: false so the recruiter can opt out per user. */}
+          {isAgentRole && (
+            <div style={{ marginBottom: 12, padding: '10px 12px', borderRadius: 8, background: 'var(--hover-bg)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <input type="checkbox" checked={createAgent} onChange={e => setCreateAgent(e.target.checked)}
+                  aria-label={t('agent.label')} style={{ cursor: 'pointer' }} />
+                <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', cursor: 'pointer' }}>{t('agent.label')}</label>
+              </div>
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, marginLeft: 24 }}>{t('agent.hint')}</p>
+            </div>
+          )}
 
           {/* Vestigingen — seeded from the role template, adjustable before create
               (Danny ronde-2 punt 1.1: kies er 1 of meerdere bij het aanmaken). */}

@@ -36,6 +36,10 @@
   },
   "noRoles": "Geen rollen beschikbaar",
   "rolesLoading": "Rollen laden…",
+  "agent": {
+    "label": "AI-agent aanmaken?",
+    "hint": "Maakt automatisch een AI-recruiter-agent met een eigen WhatsApp-interviewflow. Meta-stappen (nummer koppelen, template goedkeuren) volgen als taak."
+  },
   "editUser": "Gebruiker bewerken",
   "saveFailed": "Opslaan mislukt.",
   "saving": "Opslaan…",

@@ -36,6 +36,10 @@
   },
   "noRoles": "Keine Rollen verfügbar",
   "rolesLoading": "Rollen werden geladen…",
+  "agent": {
+    "label": "KI-Agent erstellen?",
+    "hint": "Erstellt automatisch einen KI-Recruiter-Agenten mit eigenem WhatsApp-Interviewablauf. Die Meta-Schritte (Nummer verknüpfen, Vorlage genehmigen) folgen als Aufgabe."
+  },
   "editUser": "Benutzer bearbeiten",
   "saveFailed": "Speichern fehlgeschlagen.",
   "saving": "Speichern…",

@@ -1,16 +1,19 @@
 /**
  * NewUserModal — regression tests for LOOKUP-GAP-1a (roles come from the live
  * GET /roles list, not the old hardcoded ['tenant_admin','planner','user']
- * literal — custom tenant roles must be assignable) and the role-template
- * branch preview (USERS-ROLES-LOC-1: POST /users copies this set on create).
+ * literal — custom tenant roles must be assignable), the role-template
+ * branch preview (USERS-ROLES-LOC-1: POST /users copies this set on create)
+ * and the AGENT-META-SETUP "create an AI agent?" question (asked only for a
+ * recruiter/manager role; the backend's agent notice is surfaced on success).
  * Sibling lookup hooks are mocked directly (house pattern, see
  * PlanIntakeModal.test.tsx) so no QueryClientProvider is needed here.
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import NewUserModal from './NewUserModal'
 import api from '@/lib/api'
+import { notifySuccess } from '@/lib/notify'
 
 // A tiny, realistic i18n mock: known keys resolve like a real locale file would;
 // anything else (including a custom role's dead `roles.<name>` key) falls back
@@ -28,10 +31,12 @@ vi.mock('@/lib/api', () => ({
   default: { post: vi.fn() },
   unwrap: (r: { data?: { data?: unknown } }) => r?.data?.data,
 }))
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 const roles = [
   { id: 1, name: 'planner' },
   { id: 2, name: 'backoffice' }, // a custom tenant role — must be assignable
+  { id: 3, name: 'recruiter' }, // AGENT-META-SETUP: gets the agent question
 ]
 vi.mock('./hooks/useAssignableRoles', () => ({ useAssignableRoles: () => ({ roles, loading: false }) }))
 vi.mock('./hooks/useRoleBranchTemplate', () => ({
@@ -48,6 +53,10 @@ vi.mock('@/lib/useLocations', () => ({
 const noop = () => {}
 
 describe('NewUserModal', () => {
+  // Mocks are shared across tests in this file (module-level vi.mock) — clear
+  // call history so one test's api.post/notifySuccess calls don't leak into the next.
+  afterEach(() => vi.clearAllMocks())
+
   it('offers every live role (custom roles included) and defaults to planner', async () => {
     render(<NewUserModal onClose={noop} onCreated={noop} />)
     expect(screen.getByRole('option', { name: 'Planner' })).toBeInTheDocument()
@@ -84,5 +93,51 @@ describe('NewUserModal', () => {
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/users', expect.objectContaining({ role: 'backoffice' })))
     expect(onCreated).toHaveBeenCalled()
+  })
+
+  it('asks "create an AI agent?" only for a recruiter/manager role, defaulting to checked', async () => {
+    const user = userEvent.setup()
+    render(<NewUserModal onClose={noop} onCreated={noop} />)
+    // planner is the default role — not an agent role, so no question yet.
+    expect(screen.queryByLabelText('agent.label')).not.toBeInTheDocument()
+
+    await user.selectOptions(screen.getByLabelText('role'), 'recruiter')
+    const checkbox = await screen.findByLabelText('agent.label')
+    expect(checkbox).toBeChecked()
+  })
+
+  it('sends create_agent for a recruiter and surfaces the backend agent notice on success', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({
+      data: { data: { id: 'u2', email: 'kelly@bedrijf.nl' }, agent: { created: true, notice: 'Agent created — Meta steps required.' } },
+    })
+    const user = userEvent.setup()
+    const onCreated = vi.fn()
+    render(<NewUserModal onClose={noop} onCreated={onCreated} />)
+
+    await user.selectOptions(screen.getByLabelText('role'), 'recruiter')
+    await user.type(screen.getByLabelText('firstName'), 'Kelly')
+    await user.type(screen.getByLabelText('email'), 'kelly@bedrijf.nl')
+    await user.type(screen.getByLabelText('password'), 'wachtwoord123')
+    await user.click(screen.getByRole('button', { name: 'create' }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/users', expect.objectContaining({ role: 'recruiter', create_agent: true })))
+    expect(notifySuccess).toHaveBeenCalledWith('Agent created — Meta steps required.')
+    expect(onCreated).toHaveBeenCalled()
+  })
+
+  it('omits create_agent entirely for a non-agent role', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { data: { id: 'u3', email: 'jan@bedrijf.nl' } } })
+    const user = userEvent.setup()
+    render(<NewUserModal onClose={noop} onCreated={noop} />)
+
+    await user.type(screen.getByLabelText('firstName'), 'Jan')
+    await user.type(screen.getByLabelText('email'), 'jan@bedrijf.nl')
+    await user.type(screen.getByLabelText('password'), 'wachtwoord123')
+    await user.selectOptions(screen.getByLabelText('role'), 'backoffice')
+    await user.click(screen.getByRole('button', { name: 'create' }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    expect(vi.mocked(api.post).mock.calls[0][1]).not.toHaveProperty('create_agent')
+    expect(notifySuccess).not.toHaveBeenCalled()
   })
 })
