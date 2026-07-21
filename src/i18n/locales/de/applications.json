@@ -75,14 +75,8 @@
       "title": "Lebenslauf",
       "loading": "Lebenslauf wird geladen…",
       "error": "Lebenslauf konnte nicht geladen werden.",
-      "empty": "Noch kein Lebenslauf hochgeladen.",
-      "view": "Ansehen"
-    },
-    "candidateFields": {
-      "name": "Name",
-      "firstName": "Vorname",
-      "lastName": "Nachname",
-      "function": "Funktion"
+      "view": "Ansehen",
+      "download": "Herunterladen"
     },
     "tabs": {
       "application": "Bewerbung",
@@ -190,6 +184,8 @@
     "reason": "Grund",
     "reasonPlaceholder": "Grund auswählen",
     "note": "Notiz",
+    "notePlaceholder": "Keine Notiz",
+    "editNote": "Notiz bearbeiten",
     "confirm": "Ablehnen",
     "rejected": "Abgelehnt",
     "aiAdvice": "Koios empfiehlt Ablehnung",

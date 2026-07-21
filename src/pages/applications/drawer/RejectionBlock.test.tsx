@@ -52,10 +52,34 @@ describe('RejectionBlock', () => {
     expect(onReject).toHaveBeenCalledWith(1, { reason_id: 'r1', note: '', reason_label: 'Niet gekwalificeerd' })
   })
 
-  it('renders the note as the shared rich-text editor (S9), not a bare textarea', async () => {
+  // Danny 21-07: the toelichting collapses by default (profile-text pattern) —
+  // the rich-text editor only appears once the pencil is clicked.
+  it('keeps the toelichting collapsed until the pencil is clicked, then shows the shared rich-text editor', async () => {
+    const user = userEvent.setup()
     render(<RejectionBlock application={app()} />)
+    // Collapsed: a calm placeholder, no editor and no bare textarea.
+    expect(screen.getByText('rejection.notePlaceholder')).toBeInTheDocument()
+    expect(screen.queryByTestId('rte')).toBeNull()
+    expect(document.querySelector('textarea')).toBeNull()
+    await user.click(screen.getByLabelText('rejection.editNote'))
     expect(await screen.findByTestId('rte')).toBeInTheDocument()
     expect(document.querySelector('textarea:not([data-testid="rte"])')).toBeNull()
+  })
+
+  it('shows the typed note read-only again after Save, and discards it after Cancel', async () => {
+    const user = userEvent.setup()
+    render(<RejectionBlock application={app()} />)
+    await user.click(screen.getByLabelText('rejection.editNote'))
+    await user.type(screen.getByTestId('rte'), 'Geen relevante ervaring')
+    await user.click(screen.getByLabelText('common:save'))
+    expect(screen.queryByTestId('rte')).toBeNull()
+    expect(screen.getByText('Geen relevante ervaring')).toBeInTheDocument()
+
+    // Re-open, change it, then cancel — the saved value must survive untouched.
+    await user.click(screen.getByLabelText('rejection.editNote'))
+    await user.type(screen.getByTestId('rte'), ' meer tekst')
+    await user.click(screen.getByLabelText('common:cancel'))
+    expect(screen.getByText('Geen relevante ervaring')).toBeInTheDocument()
   })
 
   it('shows a compact summary once rejected — reason label AND the stored note (S9 finding)', () => {

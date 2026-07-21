@@ -3,8 +3,10 @@
  * mutations of the applications page (§0.3 split from ApplicationsPage, mirrors
  * useCandidateDrawerActions): select (light row → full record fetch), move/
  * owner/vacancy-link/source edits, reject, manual score adjust, custom fields,
- * candidate name/function edit, detach (soft-delete) and restore. List updates
- * stay optimistic; the backend re-validates (§3B).
+ * detach (soft-delete) and restore. List updates stay optimistic; the backend
+ * re-validates (§3B). Candidate name/function editing was removed from the
+ * Sollicitatie tab (Danny 21-07) — that is candidate-owned data, edited on the
+ * candidate record itself, not from within an application.
  */
 import { useState, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
@@ -14,8 +16,6 @@ import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { mapApplication, mapApplicationDetail } from '../data/mapApplication'
 import { bucketOfPhase } from '../data/applicationsShared'
-import { buildCandidatePatch } from '@/pages/candidates/data/candidatesShared'
-import type { CandidateNamePatch } from '../drawer/CandidateNameFunctionBlock'
 import type { Application, ApplicationDetail } from '@/types/application'
 import type { RejectPayload } from '../drawer/RejectionBlock'
 import type { Criterion } from '../drawer/MatchScoreBlock'
@@ -170,27 +170,6 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
     api.patch(`/applications/${id}`, { custom_fields: merged }).catch(() => notifyError(t('common:actionFailed')))
   }
 
-  // S32: edit the linked candidate's name/function from the Sollicitatie tab.
-  // PATCH /candidates/{id} (buildCandidatePatch: firstname/lastname/title →
-  // first_name/last_name/function_title) — the response is CandidateDetailResource,
-  // which already recomputes `name`/`function_title`, so reconciling from it IS
-  // "refresh drawer data after save" without a second round-trip GET.
-  const handleUpdateCandidate = (candidateId: Id | null | undefined, patch: CandidateNamePatch) => {
-    if (candidateId == null) return
-    const body = buildCandidatePatch(patch as unknown as Record<string, unknown>)
-    api.patch(`/candidates/${candidateId}`, body)
-      .then(r => {
-        const updated = unwrap<{ name?: string; function_title?: string }>(r)
-        setApplications(prev => prev.map(a => a.candidateId === candidateId
-          ? { ...a, candidateName: updated.name ?? a.candidateName } : a))
-        setSelected(prev => (prev && prev.candidateId === candidateId)
-          ? decorate({ ...prev, candidateName: updated.name ?? prev.candidateName,
-              candidate: { ...prev.candidate, function: updated.function_title ?? prev.candidate.function } } as ApplicationDetail)
-          : prev)
-      })
-      .catch(() => notifyError(t('common:actionFailed')))
-  }
-
   // Detach (soft-delete) an application: kept server-side, removed from the active
   // list. S15 (BE cb1e684): DELETE now REQUIRES a `reason` (422 without one) —
   // the drawer's DetachReasonModal collects it — and the backend writes it as a
@@ -247,6 +226,6 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
   return {
     selected, setSelected, expanded, setExpanded, closeDrawer, selectApplication,
     handleMove, handleOwner, handleLinkVacancy, handleUpdateSource, handleReject,
-    handleAdjustScore, handleUpdateCustomFields, handleUpdateCandidate, handleDetach, handleRestore,
+    handleAdjustScore, handleUpdateCustomFields, handleDetach, handleRestore,
   }
 }

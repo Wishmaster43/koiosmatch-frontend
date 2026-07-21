@@ -75,14 +75,8 @@
       "title": "CV",
       "loading": "CV laden…",
       "error": "CV laden is mislukt.",
-      "empty": "Nog geen CV geüpload.",
-      "view": "Bekijken"
-    },
-    "candidateFields": {
-      "name": "Naam",
-      "firstName": "Voornaam",
-      "lastName": "Achternaam",
-      "function": "Functie"
+      "view": "Bekijken",
+      "download": "Downloaden"
     },
     "tabs": {
       "application": "Sollicitatie",
@@ -201,6 +195,8 @@
     "reason": "Reden",
     "reasonPlaceholder": "Selecteer reden",
     "note": "Toelichting",
+    "notePlaceholder": "Geen toelichting",
+    "editNote": "Toelichting bewerken",
     "confirm": "Afwijzen",
     "rejected": "Afgewezen",
     "aiAdvice": "Koios adviseert afwijzen",

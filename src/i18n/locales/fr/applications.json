@@ -75,14 +75,8 @@
       "title": "CV",
       "loading": "Chargement du CV…",
       "error": "Échec du chargement du CV.",
-      "empty": "Aucun CV téléversé pour le moment.",
-      "view": "Voir"
-    },
-    "candidateFields": {
-      "name": "Nom",
-      "firstName": "Prénom",
-      "lastName": "Nom",
-      "function": "Fonction"
+      "view": "Voir",
+      "download": "Télécharger"
     },
     "tabs": {
       "application": "Candidature",
@@ -190,6 +184,8 @@
     "reason": "Motif",
     "reasonPlaceholder": "Sélectionner un motif",
     "note": "Note",
+    "notePlaceholder": "Aucune note",
+    "editNote": "Modifier la note",
     "confirm": "Refuser",
     "rejected": "Refusé",
     "aiAdvice": "Koios conseille le refus",

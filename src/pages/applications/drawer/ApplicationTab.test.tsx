@@ -188,44 +188,25 @@ describe('ApplicationTab', () => {
     expect(peekReturnTab(77)).toBe('application')
   })
 
-  // S32: candidate name + function, editable in place (house pencil), PATCHing
-  // the CANDIDATE endpoint via onUpdateCandidate.
-  describe('candidate name/function block (S32)', () => {
-    it('shows the read-only name/function and hides its pencil without onUpdateCandidate', () => {
-      renderTab(<ApplicationTab application={app({ candidateName: 'Anna de Vries', candidate: { function: 'Verzorgende IG' } as ApplicationDetail['candidate'] })} />)
-      expect(screen.getByText('Anna de Vries')).toBeInTheDocument()
-      expect(screen.getByText('Verzorgende IG')).toBeInTheDocument()
-      expect(screen.queryByLabelText('common:edit')).toBeNull()
-    })
-
-    it('edits the name/function in place and calls onUpdateCandidate with the split name', async () => {
-      const onUpdateCandidate = vi.fn()
-      const user = userEvent.setup()
-      renderTab(<ApplicationTab
-        application={app({ candidateId: 'c1', candidateName: 'Anna de Vries', candidate: { function: 'Verzorgende IG' } as ApplicationDetail['candidate'] })}
-        onUpdateCandidate={onUpdateCandidate} />)
-      await user.click(screen.getByLabelText('common:edit'))
-      const lastNameInput = screen.getByDisplayValue('Vries')
-      await user.clear(lastNameInput)
-      await user.type(lastNameInput, 'Jansen')
-      await user.click(screen.getByLabelText('common:save'))
-      expect(onUpdateCandidate).toHaveBeenCalledWith('c1', { firstname: 'Anna', lastname: 'Jansen', title: 'Verzorgende IG' })
-    })
-  })
-
-  // S31: the linked candidate's CV(s), reusing the candidate Documents preview affordance.
+  // S31 (refined 21-07): compact Ja/Nee CV indicator, reusing the candidate
+  // Documents section's download + DocPreviewModal preview affordance.
   describe('CV block (S31)', () => {
-    it('shows a subtle empty line when the candidate has no CV', async () => {
+    it('shows Nee when the candidate has no CV', async () => {
       renderTab(<ApplicationTab application={app({ candidateId: 'c1' })} />)
-      expect(await screen.findByText('drawer.cv.empty')).toBeInTheDocument()
+      expect(await screen.findByText('common:no')).toBeInTheDocument()
+      expect(screen.queryByLabelText('drawer.cv.download')).toBeNull()
+      expect(screen.queryByLabelText('drawer.cv.view')).toBeNull()
     })
 
-    it('renders a CV row with its filename', async () => {
+    it('shows Ja with a download + preview icon pair when a CV exists', async () => {
       mockGet.mockImplementation((url: string) => String(url).includes('/documents')
-        ? Promise.resolve({ data: { data: [{ id: 'd1', name: 'cv-anna.pdf', type: 'CV', created_at: '2026-07-01T10:00:00Z' }] } })
+        ? Promise.resolve({ data: { data: [{ id: 'd1', name: 'cv-anna.pdf', type: 'CV', url: 'https://files.example/cv-anna.pdf', created_at: '2026-07-01T10:00:00Z' }] } })
         : Promise.resolve({ data: [] }))
       renderTab(<ApplicationTab application={app({ candidateId: 'c1' })} />)
-      expect(await screen.findByText('cv-anna.pdf')).toBeInTheDocument()
+      expect(await screen.findByText('common:yes')).toBeInTheDocument()
+      const downloadLink = screen.getByLabelText('drawer.cv.download')
+      expect(downloadLink).toHaveAttribute('href', 'https://files.example/cv-anna.pdf')
+      expect(screen.getByLabelText('drawer.cv.view')).toBeInTheDocument()
     })
   })
 })

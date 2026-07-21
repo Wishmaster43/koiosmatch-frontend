@@ -11,8 +11,6 @@ import type { Criterion } from './MatchScoreBlock'
 import RejectionBlock from './RejectionBlock'
 import type { RejectPayload } from './RejectionBlock'
 import VacancyLinkField from './VacancyLinkField'
-import CandidateNameFunctionBlock from './CandidateNameFunctionBlock'
-import type { CandidateNamePatch } from './CandidateNameFunctionBlock'
 import CvBlock from './CvBlock'
 import { useVacancyLinkOptions } from '../hooks/useVacancyLinkOptions'
 import { rememberReturnTab } from './constants'
@@ -47,19 +45,19 @@ interface ApplicationTabProps {
   // Details block's edit mode/pencil with onLinkVacancy. Undefined hides the
   // pencil (read-only caller, mirrors onLinkVacancy).
   onUpdateSource?: (id: Id | undefined, source: string) => void
-  // S32: edit the linked candidate's name + function in place (PATCH /candidates/
-  // {id}). Undefined hides the pencil — the caller only passes this when the
-  // user has candidates.update (permission-gated, mirrors onLinkVacancy above).
-  onUpdateCandidate?: (candidateId: Id | null, patch: CandidateNamePatch) => void
 }
 
 /**
- * ApplicationTab — the "Sollicitatie" tab: candidate name/function (S32, editable
- * in place), the linked candidate's CV (S31), the AI task, the Details block (the
- * vacancy link and Bron are editable in-place, S7; Klant is a read-only
- * EntityLink, S12/13 — it derives from the vacancy, so it is never itself an
- * edit target) and the overall match score. Phase + recruiter are edited from
- * the drawer header (meta pickers), so they no longer live here.
+ * ApplicationTab — the "Sollicitatie" tab: the linked candidate's CV (S31), the
+ * AI task, the Details block (the vacancy link and Bron are editable in-place,
+ * S7; Klant is a read-only EntityLink, S12/13 — it derives from the vacancy, so
+ * it is never itself an edit target) and the overall match score. Phase +
+ * recruiter are edited from the drawer header (meta pickers), so they no longer
+ * live here. Candidate name/function are NOT editable here (Danny 21-07): both
+ * are candidate-owned data (PATCH /candidates/{id}), not the application's own
+ * fields — that edit lives on the candidate record itself (the Kandidaat tab's
+ * "Open kandidaat" link, or the candidate's own drawer). The name still shows
+ * read-only in the drawer header.
  * No repeated "Details" heading (§3A) — the pencil alone marks the editable block.
  * Locatie shows the vacancy's own work-site city when the backend sends one.
  * S19 (re-measured 2026-07-17): the vacancy NOW carries customer_location_id/
@@ -70,7 +68,7 @@ interface ApplicationTabProps {
  * summary intentionally stays light (§3A: one shared surface, never fork the
  * same fields into two editors) and only adds the vacancy LINK here.
  */
-export default function ApplicationTab({ application: a, onReject, onAdjustScore, onLinkVacancy, onUpdateSource, onUpdateCandidate }: ApplicationTabProps) {
+export default function ApplicationTab({ application: a, onReject, onAdjustScore, onLinkVacancy, onUpdateSource }: ApplicationTabProps) {
   const { t } = useTranslation(['applications', 'common'])
   // In-place edit of the vacancy link + Bron (S7) — one shared pencil → picker/
   // input → diskette/✕ (§3A house pattern, mirrors KlantTab). Vacancy options
@@ -96,11 +94,6 @@ export default function ApplicationTab({ application: a, onReject, onAdjustScore
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-      {/* S32: candidate name + function, editable in place (house pencil) — PATCHes
-          the candidate record without leaving this tab. */}
-      <CandidateNameFunctionBlock name={a.candidateName} func={a.candidate?.function ?? ''}
-        onSave={onUpdateCandidate ? patch => onUpdateCandidate(a.candidateId, patch) : undefined} />
-
       {/* S31: the linked candidate's CV(s) at a glance — reuses the candidate
           Documents tab's own preview affordance. */}
       <CvBlock candidateId={a.candidateId} />

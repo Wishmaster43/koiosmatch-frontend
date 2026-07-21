@@ -75,14 +75,8 @@
       "title": "CV",
       "loading": "Cargando CV…",
       "error": "No se pudo cargar el CV.",
-      "empty": "Aún no se ha subido ningún CV.",
-      "view": "Ver"
-    },
-    "candidateFields": {
-      "name": "Nombre",
-      "firstName": "Nombre",
-      "lastName": "Apellido",
-      "function": "Función"
+      "view": "Ver",
+      "download": "Descargar"
     },
     "tabs": {
       "application": "Candidatura",
@@ -190,6 +184,8 @@
     "reason": "Motivo",
     "reasonPlaceholder": "Seleccionar un motivo",
     "note": "Nota",
+    "notePlaceholder": "Sin nota",
+    "editNote": "Editar nota",
     "confirm": "Rechazar",
     "rejected": "Rechazado",
     "aiAdvice": "Koios aconseja rechazar",

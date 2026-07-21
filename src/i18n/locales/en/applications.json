@@ -75,14 +75,8 @@
       "title": "CV",
       "loading": "Loading CV…",
       "error": "Failed to load the CV.",
-      "empty": "No CV uploaded yet.",
-      "view": "View"
-    },
-    "candidateFields": {
-      "name": "Name",
-      "firstName": "First name",
-      "lastName": "Last name",
-      "function": "Function"
+      "view": "View",
+      "download": "Download"
     },
     "tabs": {
       "application": "Application",
@@ -201,6 +195,8 @@
     "reason": "Reason",
     "reasonPlaceholder": "Select a reason",
     "note": "Note",
+    "notePlaceholder": "No note",
+    "editNote": "Edit note",
     "confirm": "Reject",
     "rejected": "Rejected",
     "aiAdvice": "Koios advises rejection",

@@ -50,9 +50,6 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const user = auth?.user as { default_per_page?: number } | null | undefined
   // Detach/restore are destructive → gate in the UI (backend re-checks the perm).
   const canManage = auth?.hasPermission?.('applications.update') ?? false
-  // S32: the candidate name/function pencil PATCHes /candidates/{id} — gate on the
-  // actual target permission, not applications.update (backend re-checks either way).
-  const canEditCandidate = auth?.hasPermission?.('candidates.update') ?? false
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Funnel phases come from the tenant lookup (Settings → Funnel stages), never hardcoded.
   const { funnelTypes, funnelMeta } = useLookups()
@@ -105,7 +102,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const {
     selected, expanded, setExpanded, closeDrawer, selectApplication,
     handleMove, handleOwner, handleLinkVacancy, handleUpdateSource, handleReject,
-    handleAdjustScore, handleUpdateCustomFields, handleUpdateCandidate, handleDetach, handleRestore,
+    handleAdjustScore, handleUpdateCustomFields, handleDetach, handleRestore,
   } = useApplicationDrawerActions({ applications, wideRows, setApplications, setTotal, funnelTypes, users, bucket, decorate, t })
 
   // ── Bulk selection + mutations — §0.3 split (F1, audit R1): mirrors useCandidateBulkActions.
@@ -307,7 +304,6 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
         onDetach={handleDetach}
         onRestore={handleRestore}
         canManage={canManage}
-        onUpdateCandidate={canEditCandidate ? handleUpdateCandidate : undefined}
       />
 
       {addOpen && <AddApplicationModal onClose={() => setAddOpen(false)} onCreated={handleCreated} />}

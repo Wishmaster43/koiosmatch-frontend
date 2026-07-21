@@ -13,7 +13,6 @@ import ApplicationChangelogPopover from './drawer/ApplicationChangelogPopover'
 import ApplicationBucketBadge from './drawer/ApplicationBucketBadge'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import ApplicationTab from './drawer/ApplicationTab'
-import type { CandidateNamePatch } from './drawer/CandidateNameFunctionBlock'
 import CandidateTab from './drawer/CandidateTab'
 import VacancyTab from './drawer/VacancyTab'
 import InterviewsTab from './drawer/InterviewsTab'
@@ -54,9 +53,6 @@ interface ApplicationDrawerProps {
   canManage?: boolean
   // Save the Extra tab's tenant custom fields (§3B) — a partial patch, merged by the caller.
   onUpdateCustomFields?: (id: Id | undefined, patch: Record<string, unknown>) => void
-  // S32: edit the linked candidate's name + function in place (PATCH /candidates/
-  // {id}). Undefined hides the pencil (permission-gated by the caller).
-  onUpdateCandidate?: (candidateId: Id | null, patch: CandidateNamePatch) => void
   // Deep-link: open on this tab (mirrors CandidateDrawer's own prop, currently unused
   // by any caller — kept for parity/future deep-links; the return-tab memory below
   // covers the NAV-BACK-1 case this drawer actually needs today).
@@ -67,7 +63,7 @@ interface ApplicationDrawerProps {
  * ApplicationDrawer — thin container: declares the header config + tab list and
  * wires them to the shared EntityDrawer shell. No heavy JSX, no business logic.
  */
-export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, onUpdateSource, users, onDetach, onRestore, canManage, onUpdateCustomFields, onUpdateCandidate, initialTab }: ApplicationDrawerProps) {
+export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, onUpdateSource, users, onDetach, onRestore, canManage, onUpdateCustomFields, initialTab }: ApplicationDrawerProps) {
   const { t } = useTranslation('applications')
   const { formatDate, formatDateTime } = useDateFormat()
   // S15: the reason-required detach confirm modal (footer "Ontkoppelen").
@@ -110,7 +106,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   // Map a tab id to its content component.
   const renderTab = (id: string): ReactNode => {
     switch (id) {
-      case 'application':  return <ApplicationTab application={a} onReject={onReject} onAdjustScore={onAdjustScore} onLinkVacancy={onLinkVacancy} onUpdateSource={onUpdateSource} onUpdateCandidate={onUpdateCandidate} />
+      case 'application':  return <ApplicationTab application={a} onReject={onReject} onAdjustScore={onAdjustScore} onLinkVacancy={onLinkVacancy} onUpdateSource={onUpdateSource} />
       case 'candidate':    return <CandidateTab application={a} />
       case 'vacancy':      return <VacancyTab application={a} onLinkVacancy={onLinkVacancy} />
       case 'interviews':   return <InterviewsTab application={a} />
