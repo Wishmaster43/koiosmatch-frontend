@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ExternalLink, Link2, Unlink, Save, X } from 'lucide-react'
+import { ExternalLink, Link2, Save, X } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import EntityLink from '@/components/ui/EntityLink'
@@ -76,7 +76,6 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
     const picked = vacancyOptions.find(v => String(v.value) === vacancyId)
     onLinkVacancy?.(a.id, vacancyId, { title: picked?.label, client: picked?.client })
   }
-  const unlink = () => onLinkVacancy?.(a.id, null)
 
   // S20: make the reused DetailsTab actually persist — optimistic local merge,
   // then PATCH /vacancies/{id} with the same UI-patch → API-body mapping the
@@ -123,19 +122,12 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
 
   // Full reuse: DetailsTab needs the vacancy lookups it renders labels from, and
   // (S20) now gets a real onUpdate so its edit pencils actually persist. A link
-  // still jumps to the full vacancy record (page + drawer) for anything outside
-  // DetailsTab; Ontkoppelen sits next to it as a subtle affordance (guard-422
-  // toast handled by the parent).
+  // still jumps to the full vacancy record. Ontkoppelen lives ONLY in the drawer
+  // footer (Danny 21-07: no duplicate top link) — that one collects the required
+  // reason (S15); the top affordance both duplicated it and skipped that reason.
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 14 }}>
-        {onLinkVacancy && (
-          <button onClick={unlink} title={t('vacancyDetail.unlink')}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--text-muted)',
-              background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-            <Unlink size={12} /> {t('vacancyDetail.unlink')}
-          </button>
-        )}
         {/* S14/S22: stash the current subtab so browser BACK from the full vacancy
             page reopens THIS application's drawer on the Vacature tab again. */}
         <span onClickCapture={() => { if (a.id != null) rememberReturnTab(a.id, 'vacancy') }}>

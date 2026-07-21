@@ -19,15 +19,6 @@ vi.mock('@/lib/api', () => ({
   unwrap: (r: unknown) => r,
 }))
 
-// CandidateStatusChip's own lookup-resolution logic (LookupsContext) is out of
-// scope here — stub it so this test only asserts CandidateTab wires the RIGHT
-// props (payload: candidate.status/status_label/status_color) into it.
-vi.mock('@/components/ui/CandidateStatusChip', () => ({
-  default: ({ status, phase, fallbackLabel, fallbackColor }: Record<string, unknown>) => (
-    <span data-testid="status-chip">{String(status)}|{String(phase)}|{String(fallbackLabel)}|{String(fallbackColor)}</span>
-  ),
-}))
-
 // Minimal application detail — only the fields CandidateTab's header reads.
 const app = (over: Partial<ApplicationDetail> = {}) => ({
   id: 1, candidateId: 7,
@@ -41,17 +32,14 @@ const app = (over: Partial<ApplicationDetail> = {}) => ({
 } as unknown as ApplicationDetail)
 
 describe('CandidateTab', () => {
-  it('shows the candidate name + deployability status chip immediately, before the full candidate loads', () => {
+  it('shows the candidate name WITHOUT a status chip (Danny 21-07: the drawer header already carries the application status)', () => {
     render(<CandidateTab application={app()} />)
     expect(screen.getByText('Jan Jansen')).toBeInTheDocument()
-    expect(screen.getByTestId('status-chip')).toHaveTextContent('available|candidate|Beschikbaar|#2E7D32')
+    // No second (candidate-deployability) status chip here — that read as "two statuses".
+    expect(screen.queryByTestId('status-chip')).not.toBeInTheDocument()
+    expect(screen.queryByText('Beschikbaar')).not.toBeInTheDocument()
     // The nested fetch never resolves in this test — the tab body stays the loading state.
     expect(screen.getByText(i18n.t('applications:candidateDetail.loading'))).toBeInTheDocument()
-  })
-
-  it('falls back to the pre-resolved label/colour when no status slug is sent yet', () => {
-    render(<CandidateTab application={app({ candidateStatus: '', candidatePhase: '' })} />)
-    expect(screen.getByTestId('status-chip')).toHaveTextContent('||Beschikbaar|#2E7D32')
   })
 
   it('links to the full candidate record', () => {

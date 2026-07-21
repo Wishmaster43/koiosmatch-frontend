@@ -4,7 +4,6 @@ import { ExternalLink } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import EntityLink from '@/components/ui/EntityLink'
-import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { mapCandidate } from '@/pages/candidates/data/mapCandidate'
 import ProfilePanel from '@/pages/candidates/drawer/ProfilePanel'
@@ -93,22 +92,15 @@ export default function CandidateTab({ application: a }: { application: Applicat
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      {/* Candidate name + deployability status — the ONE shared chip (mirrors the
-          applications table); available immediately from the application payload
-          (candidate.status/status_label/status_color), no need to wait for the
-          full candidate fetch below. Jump-to-record link stays on the right.
-          Optional chaining: the drawer shows a LIGHT `Application` row cast as
-          `ApplicationDetail` before the full GET /applications/{id} resolves
-          (ApplicationsPage.selectApplication) — `candidate` only exists once that
-          fetch lands, so this crashed on first render without the `?.` (measured
-          live, mirrors the a.vacancy?.location fix in ApplicationTab.tsx). */}
+      {/* Candidate NAME only — no status chip here (Danny 21-07: the drawer header
+          already shows the application's own status "Actief"; a second candidate-
+          deployability chip next to it read as "two conflicting statuses". The
+          candidate's own status lives on their own drawer, one "Open kandidaat" away. */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {a.candidate?.name ?? a.candidateName}
           </span>
-          <CandidateStatusChip status={a.candidateStatus} phase={a.candidatePhase}
-            fallbackLabel={a.candidate?.statusLabel} fallbackColor={a.candidate?.statusColor} round />
         </div>
         {/* S14/S22: stash the current subtab so browser BACK from the full candidate
             page reopens THIS application's drawer on the Kandidaat tab again. */}
