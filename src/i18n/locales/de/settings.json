@@ -55,7 +55,8 @@
     "custom_fields": "Eigene Felder",
     "note_types": "Notiztypen",
     "action_rules": "Aktionsregeln",
-    "ai": "Koios AI"
+    "ai": "Koios AI",
+    "import_export": "Import & Export"
   },
   "nav": {
     "candidate_display": "Tabellenansicht",

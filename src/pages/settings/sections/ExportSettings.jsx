@@ -68,6 +68,7 @@ export async function downloadCsv(route, entityId) {
 export default function ExportSettings() {
   const { t } = useTranslation('settings')
   const { hasPermission } = useAuth()
+  const [selected, setSelected] = useState(ENTITIES[0].id)
   const [pendingId, setPendingId] = useState(null)
 
   // Trigger one entity's export; a 429 (rate limit) gets its own message, any
@@ -83,51 +84,66 @@ export default function ExportSettings() {
     }
   }
 
-  return (
-    <div style={{ flex: 1 }}>
-      <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('export.title')}</h2>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('export.subtitle')}</p>
-      </div>
+  const entity = ENTITIES.find(e => e.id === selected) ?? ENTITIES[0]
+  const Icon = entity.icon
+  const pending = pendingId === entity.id
+  const allowed = hasPermission(entity.permission)
 
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 24 }}>
-        {ENTITIES.map((entity, i) => {
-          const Icon = entity.icon
-          const pending = pendingId === entity.id
-          const allowed = hasPermission(entity.permission)
+  // Master-detail, identical chrome to ImporterenSettings (Danny 21-07: same
+  // format): a left entity sub-nav + a right panel whose card carries the action.
+  return (
+    <div style={{ display: 'flex', gap: 0, minHeight: 400 }}>
+      {/* Sub-nav — one entity per row (mirrors Importeren's type list). */}
+      <div style={{ width: 200, flexShrink: 0, borderRight: '1px solid var(--border)', paddingRight: 16, marginRight: 32 }}>
+        {ENTITIES.map(e => {
+          const EIcon = e.icon
+          const active = e.id === selected
           return (
-            <div key={entity.id} style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              paddingTop: i ? 20 : 0, marginTop: i ? 20 : 0, borderTop: i ? '1px solid var(--border)' : 'none',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-                <Icon size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
-                    {t(`export.entities.${entity.id}.title`)}
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                    {t(`export.entities.${entity.id}.desc`)}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => handleExport(entity)}
-                disabled={!allowed || pending}
-                title={allowed ? t('export.button') : t('export.noPermission')}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 16px', fontSize: 13,
-                  fontWeight: 500, border: 'none', borderRadius: 8, whiteSpace: 'nowrap', flexShrink: 0,
-                  background: 'var(--color-primary)', color: 'white',
-                  cursor: allowed && !pending ? 'pointer' : 'not-allowed',
-                  opacity: !allowed || pending ? 0.5 : 1,
-                }}>
-                {pending ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Upload size={14} />}
-                {t('export.button')}
-              </button>
-            </div>
+            <button key={e.id} onClick={() => setSelected(e.id)}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
+                       borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 13, textAlign: 'left',
+                       fontWeight: active ? 600 : 400, marginBottom: 2,
+                       background: active ? 'var(--color-primary-bg)' : 'transparent',
+                       color: active ? 'var(--color-primary)' : 'var(--text)' }}>
+              <EIcon size={14} style={{ color: active ? 'var(--color-primary)' : 'var(--text-muted)' }} />
+              {t(`export.entities.${e.id}.title`)}
+            </button>
           )
         })}
+      </div>
+
+      {/* Content — header + a card whose action sits on the right (mirrors Importeren). */}
+      <div style={{ flex: 1 }}>
+        <div style={{ marginBottom: 20 }}>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('export.title')}</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('export.subtitle')}</p>
+        </div>
+
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, minWidth: 0 }}>
+              <Icon size={16} style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: 2 }} />
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t(`export.entities.${entity.id}.title`)}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`export.entities.${entity.id}.desc`)}</div>
+              </div>
+            </div>
+            <button
+              onClick={() => handleExport(entity)}
+              disabled={!allowed || pending}
+              title={allowed ? t('export.button') : t('export.noPermission')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 16px', fontSize: 13,
+                fontWeight: 500, border: 'none', borderRadius: 8, whiteSpace: 'nowrap', flexShrink: 0,
+                background: 'var(--color-primary)', color: 'white',
+                cursor: allowed && !pending ? 'pointer' : 'not-allowed',
+                opacity: !allowed || pending ? 0.5 : 1,
+              }}>
+              {pending ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Upload size={14} />}
+              {t('export.button')}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )

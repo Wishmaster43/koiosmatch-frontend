@@ -55,7 +55,8 @@
     "custom_fields": "Champs personnalisés",
     "note_types": "Types de note",
     "action_rules": "Règles d'action",
-    "ai": "Koios AI"
+    "ai": "Koios AI",
+    "import_export": "Import & Export"
   },
   "nav": {
     "candidate_display": "Affichage du tableau",

@@ -8,6 +8,7 @@
  */
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import ExportSettings, { downloadCsv } from './ExportSettings'
@@ -79,27 +80,33 @@ describe('downloadCsv (the real per-entity export request)', () => {
   })
 })
 
+// Master-detail layout (Danny 21-07: same format as Importeren) — every entity is
+// a left sub-nav item; the right detail panel shows the SELECTED entity's export action.
 describe('ExportSettings screen', () => {
-  it('renders a card per entity, each wired to its own export route', () => {
+  it('lists every entity in the sub-nav and shows one enabled export button for the selection', () => {
     render(<ExportSettings />)
 
+    // All five entities are reachable from the left sub-nav.
     for (const id of ['candidates', 'applications', 'vacancies', 'leads', 'customers']) {
-      expect(screen.getByText(t(`export.entities.${id}.title`))).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: t(`export.entities.${id}.title`) })).toBeInTheDocument()
     }
-    const buttons = screen.getAllByRole('button', { name: t('export.button') })
-    expect(buttons).toHaveLength(5)
-    for (const button of buttons) expect(button).not.toBeDisabled()
+    // The detail panel shows exactly one export button (the selected entity's), enabled.
+    const exportButtons = screen.getAllByRole('button', { name: t('export.button') })
+    expect(exportButtons).toHaveLength(1)
+    expect(exportButtons[0]).toBeEnabled()
   })
 
-  it('disables (never hides) the button for an entity the user lacks view-permission for', () => {
+  it('disables (never hides) the export button for a selected entity the user lacks view-permission for', async () => {
     mockUseAuth.mockReturnValue({ hasPermission: (perm) => perm !== 'vacancies.view' })
+    const user = userEvent.setup()
     render(<ExportSettings />)
 
-    const buttons = screen.getAllByRole('button', { name: t('export.button') })
-    expect(buttons).toHaveLength(5) // still rendered, just disabled — no fake affordance either way
-    // The disallowed entity's button carries the "no permission" title instead.
-    const vacancyButton = screen.getByTitle(t('export.noPermission'))
-    expect(vacancyButton).toBeDisabled()
-    expect(buttons.filter((b) => !b.disabled)).toHaveLength(4)
+    // Candidates (default selection) is allowed → enabled.
+    expect(screen.getByRole('button', { name: t('export.button') })).toBeEnabled()
+    // Select vacancies from the sub-nav → its export button is disabled, never hidden.
+    await user.click(screen.getByRole('button', { name: t('export.entities.vacancies.title') }))
+    const btn = screen.getByRole('button', { name: t('export.button') })
+    expect(btn).toBeDisabled()
+    expect(btn).toHaveAttribute('title', t('export.noPermission'))
   })
 })

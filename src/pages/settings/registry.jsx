@@ -358,11 +358,17 @@ export const NAV_GROUPS = [
     items: [
       { id: 'apikeys', icon: Key, component: ApiKeysSettings },
       { id: 'webhooks', icon: Webhook, component: WebhooksSettings },
-      { id: 'importeren', icon: Download, component: ImporterenSettings },
-      // Exporteren (EXPORT-CSV-1) — mirrors the Importeren item right above it.
-      { id: 'export', icon: Upload, component: ExportSettings },
       // Facebook Leads (FB-LEADS-1) — per-tenant Leads-app credentials + webhook URL.
       { id: 'facebook_leads', icon: Megaphone, component: FacebookLeadsSettings },
+    ],
+  },
+  {
+    // Import & Export — their own menu (Danny 21-07): the two data-exchange screens
+    // share one master-detail format and belong together, not scattered in Integraties.
+    key: 'import_export', icon: Download,
+    items: [
+      { id: 'importeren', icon: Download, component: ImporterenSettings },
+      { id: 'export', icon: Upload, component: ExportSettings },
     ],
   },
   {

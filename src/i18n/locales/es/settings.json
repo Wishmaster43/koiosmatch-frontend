@@ -55,7 +55,8 @@
     "custom_fields": "Campos personalizados",
     "note_types": "Tipos de nota",
     "action_rules": "Reglas de acción",
-    "ai": "Koios AI"
+    "ai": "Koios AI",
+    "import_export": "Importar y exportar"
   },
   "nav": {
     "candidate_display": "Visualización de la tabla",
