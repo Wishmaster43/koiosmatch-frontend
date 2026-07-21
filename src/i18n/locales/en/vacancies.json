@@ -113,6 +113,7 @@
       "details": "Details",
       "applicants": "Applications",
       "matching": "Matching",
+      "aiagent": "AI agent",
       "publishing": "Publish",
       "extra": "Extra",
       "documents": "Documents",
@@ -157,8 +158,7 @@
       "general": "General",
       "location": "Location",
       "requirements": "Requirements",
-      "conditions": "Conditions",
-      "aiAgent": "AI agent"
+      "conditions": "Conditions"
     },
     "id": "Vacancy ID",
     "startDate": "Start date",
@@ -194,14 +194,17 @@
     "addSkill": "Add skill",
     "noSkills": "No skills yet.",
     "description": "Description",
-    "descriptionPlaceholder": "Describe the position…",
-    "aiAgent": {
-      "none": "No agent",
-      "placeholder": "Select an AI agent",
-      "empty": "No AI agents configured yet.",
-      "note": "A linked agent conducts the intake interviews for this vacancy.",
-      "loadError": "Failed to load AI agents."
-    }
+    "descriptionPlaceholder": "Describe the position…"
+  },
+  "aiagent": {
+    "pickerLabel": "AI agent",
+    "placeholder": "Select an AI agent",
+    "none": "No agent",
+    "empty": "No AI agents configured yet.",
+    "loadError": "Failed to load AI agents.",
+    "explanation": "A linked agent conducts the intake interviews for this vacancy. Per-candidate progress is shown on the application.",
+    "flowTitle": "Interview",
+    "flowHint": "Link an agent to see the interview."
   },
   "generate": {
     "button": "Generate with Koios",

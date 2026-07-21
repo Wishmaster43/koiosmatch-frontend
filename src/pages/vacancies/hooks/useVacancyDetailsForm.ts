@@ -16,7 +16,6 @@ import { useFunctions } from '@/lib/useFunctions'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomerOptions } from './useCustomerOptions'
 import { useCascadePickers } from './useCascadePickers'
-import { useAiAgents } from './useAiAgents'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -65,9 +64,6 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
   // Client moved here from the drawer header (P3: calm header, max status+owner pickers).
   const [clientId, setClientId] = useState<string>(String(v.clientId ?? ''))
   const [types, setTypes] = useState<string[]>(v.contractTypes ?? [])
-  // VAC-AGENT-1: the linked AI agent — same "own state, saved with the big Save"
-  // convention as clientId (fetched only while editing, see useAiAgents below).
-  const [aiAgentId, setAiAgentId] = useState<string>(v.aiAgentId != null ? String(v.aiAgentId) : '')
   // V3-V6 (VACATURES-100): klant → locatie → afdeling → contactpersoon cascade.
   // VAC-CASCADE-1 (backend wave 6): the detail now carries the persisted ids +
   // resolved names, so this seeds from `v` — read-mode shows the saved values on
@@ -115,8 +111,6 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
 
   // Customer options load only while editing (capped page, React Query).
   const customerOptions = useCustomerOptions(editing)
-  // VAC-AGENT-1: AI agent options, same load-only-while-editing convention.
-  const { options: aiAgentOptions, loading: aiAgentsLoading, error: aiAgentsError } = useAiAgents(editing)
 
   const save = () => {
     const sen = seniorityLevels.find(s => s.value === form.seniority)
@@ -124,14 +118,9 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     const salary = [form.salaryMin, form.salaryMax].filter(Boolean).join(' – ')
     const hours  = [form.hoursMin, form.hoursMax].filter(Boolean).join(' – ')
     const location = composeAddress(form.street, form.houseNumber, form.houseNumberSuffix, form.postalCode, form.city)
-    // VAC-AGENT-1: resolve the picked agent's name for optimistic UI (mirrors clientName below).
-    const pickedAgent = aiAgentOptions.find(o => String(o.value) === aiAgentId)
     onUpdate?.(v.id, {
       // Client lives in Details now (header stays calm) — send the name too for optimistic UI.
       clientId, clientName: customerOptions.find(c => String(c.value) === clientId)?.label ?? v.clientName,
-      // Linking an agent IS the interview on/off switch for this vacancy (Option A) —
-      // clearing to '' sends null (ontkoppelen), never an empty-string id.
-      aiAgentId: aiAgentId || null, aiAgentName: aiAgentId ? (pickedAgent?.label ?? v.aiAgentName) : '',
       // V3-V6 / VAC-CASCADE-1: persisted for real (buildVacancyPatch → customer_location_id/
       // customer_department_id/contact_id, whitelisted in VacancyWriter's scalar passthrough).
       customerLocationId: cascade.locationId || null, customerDepartmentId: cascade.departmentId || null, contactId: cascade.contactId || null,
@@ -152,7 +141,6 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     setForm(seedForm()); setClientId(String(v.clientId ?? '')); setTypes(v.contractTypes ?? [])
     setSkills((v.skills ?? []).map(skillStr).filter(Boolean)); setNewSkill('')
     setCascade(savedCascade)
-    setAiAgentId(v.aiAgentId != null ? String(v.aiAgentId) : '')
     setEditing(false)
   }
   const saveDesc = () => { onUpdate?.(v.id, { description }); setDescEditing(false) }
@@ -173,8 +161,6 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     clientId, handleClientChange, customerOptions, cascade, locationPicker, departmentPicker, contactPicker,
     // Contract types.
     types, toggleType,
-    // VAC-AGENT-1: AI agent picker (id + fetched options + the load/error state).
-    aiAgentId, setAiAgentId, aiAgentOptions, aiAgentsLoading, aiAgentsError,
     // Skills (quick-edit, outside the pencil).
     skills, newSkill, setNewSkill, addSkill, removeSkill,
     // Description (own rich-text toggle) + VACGEN-1 apply-concept + remount key.

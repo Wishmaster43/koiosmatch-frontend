@@ -113,6 +113,7 @@
       "details": "Detalles",
       "applicants": "Candidaturas",
       "matching": "Matching",
+      "aiagent": "Agente IA",
       "publishing": "Publicar",
       "documents": "Documentos",
       "timeline": "Cronología",
@@ -157,8 +158,7 @@
       "general": "General",
       "requirements": "Requisitos",
       "conditions": "Condiciones",
-      "location": "Ubicación",
-      "aiAgent": "Agente IA"
+      "location": "Ubicación"
     },
     "id": "ID de vacante",
     "startDate": "Fecha de inicio",
@@ -194,14 +194,17 @@
     "customerLocation": "Sede del cliente",
     "customerDepartment": "Departamento",
     "contactPerson": "Persona de contacto",
-    "pickClientFirst": "Elige primero un cliente",
-    "aiAgent": {
-      "none": "Sin agente",
-      "placeholder": "Seleccionar un agente IA",
-      "empty": "Aún no hay agentes IA configurados.",
-      "note": "Un agente vinculado realiza las entrevistas de admisión para esta vacante.",
-      "loadError": "No se pudieron cargar los agentes IA."
-    }
+    "pickClientFirst": "Elige primero un cliente"
+  },
+  "aiagent": {
+    "pickerLabel": "Agente IA",
+    "placeholder": "Seleccionar un agente IA",
+    "none": "Sin agente",
+    "empty": "Aún no hay agentes IA configurados.",
+    "loadError": "No se pudieron cargar los agentes IA.",
+    "explanation": "Un agente vinculado realiza las entrevistas de admisión para esta vacante. El progreso por candidato se muestra en la solicitud.",
+    "flowTitle": "Entrevista",
+    "flowHint": "Vincula un agente para ver la entrevista."
   },
   "generate": {
     "button": "Generar con Koios",

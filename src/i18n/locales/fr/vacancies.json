@@ -113,6 +113,7 @@
       "details": "Détails",
       "applicants": "Candidatures",
       "matching": "Matching",
+      "aiagent": "Agent IA",
       "publishing": "Publier",
       "documents": "Documents",
       "timeline": "Chronologie",
@@ -157,8 +158,7 @@
       "general": "Général",
       "requirements": "Exigences",
       "conditions": "Conditions",
-      "location": "Lieu",
-      "aiAgent": "Agent IA"
+      "location": "Lieu"
     },
     "id": "ID du poste",
     "startDate": "Date de début",
@@ -194,14 +194,17 @@
     "customerLocation": "Site du client",
     "customerDepartment": "Service",
     "contactPerson": "Contact",
-    "pickClientFirst": "Choisissez d'abord un client",
-    "aiAgent": {
-      "none": "Aucun agent",
-      "placeholder": "Sélectionner un agent IA",
-      "empty": "Aucun agent IA configuré pour l'instant.",
-      "note": "Un agent associé mène les entretiens d'intake pour cette offre.",
-      "loadError": "Impossible de charger les agents IA."
-    }
+    "pickClientFirst": "Choisissez d'abord un client"
+  },
+  "aiagent": {
+    "pickerLabel": "Agent IA",
+    "placeholder": "Sélectionner un agent IA",
+    "none": "Aucun agent",
+    "empty": "Aucun agent IA configuré pour l'instant.",
+    "loadError": "Impossible de charger les agents IA.",
+    "explanation": "Un agent associé mène les entretiens d'intake pour cette offre. La progression par candidat s'affiche sur la candidature.",
+    "flowTitle": "Entretien",
+    "flowHint": "Associez un agent pour voir l'entretien."
   },
   "generate": {
     "button": "Générer avec Koios",
