@@ -148,7 +148,28 @@
       "disqualified": "Disqualified"
     },
     "stepOf": "Step {{step}} of {{total}}",
-    "filterBusy": "In interview"
+    "filterBusy": "In interview",
+    "status": {
+      "none": "No interview started for this application yet.",
+      "noAgent": "Unknown agent",
+      "turn": {
+        "agent": "Agent's turn",
+        "candidate": "Candidate's turn",
+        "pending": "Pending",
+        "recruiter": "Taken over by you"
+      },
+      "duration": "Conversation duration",
+      "durationMinutes": "{{count}} min",
+      "durationHours": "{{hours}}h {{minutes}}min",
+      "durationUnknown": "Unknown",
+      "visibilityPending": "Agent, turn and conversation duration will show once the backend link is active.",
+      "takeover": "Stop agent / take over",
+      "takeoverBusy": "Working…",
+      "takeoverSuccess": "You've taken over the conversation.",
+      "takeoverUnavailable": "Taking over isn't available yet — waiting on the backend link.",
+      "takeoverNotActive": "No active interview to take over.",
+      "takeoverFailed": "Taking over failed."
+    }
   },
   "appointments": {
     "empty": "No appointments scheduled.",

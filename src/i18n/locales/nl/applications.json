@@ -148,7 +148,28 @@
       "disqualified": "Afgewezen"
     },
     "stepOf": "Stap {{step}} van {{total}}",
-    "filterBusy": "In interview"
+    "filterBusy": "In interview",
+    "status": {
+      "none": "Nog geen interview gestart voor deze sollicitatie.",
+      "noAgent": "Onbekende agent",
+      "turn": {
+        "agent": "Aan de beurt: agent",
+        "candidate": "Aan de beurt: kandidaat",
+        "pending": "Wachtend",
+        "recruiter": "Overgenomen door jou"
+      },
+      "duration": "Gespreksduur",
+      "durationMinutes": "{{count}} min",
+      "durationHours": "{{hours}}u {{minutes}}min",
+      "durationUnknown": "Onbekend",
+      "visibilityPending": "Agent, beurt en gespreksduur zijn beschikbaar zodra de backend-koppeling actief is.",
+      "takeover": "Agent stoppen / overnemen",
+      "takeoverBusy": "Bezig…",
+      "takeoverSuccess": "Je hebt het gesprek overgenomen.",
+      "takeoverUnavailable": "Overnemen is nog niet beschikbaar — wacht op de backend-koppeling.",
+      "takeoverNotActive": "Geen actief interview om over te nemen.",
+      "takeoverFailed": "Overnemen is mislukt."
+    }
   },
   "appointments": {
     "empty": "Geen afspraken ingepland.",

@@ -1,8 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, CheckCircle2, FileText } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
-import StatusPill from '@/components/ui/StatusPill'
-import { interviewCategoryColor } from '../data/applicationsShared'
+import InterviewStatusCard from './InterviewStatusCard'
 import type { ApplicationDetail } from '@/types/application'
 
 type TranscriptMsg = ApplicationDetail['interviews'][number]['transcript'][number]
@@ -30,26 +29,14 @@ function Message({ msg }: { msg: TranscriptMsg }) {
 export default function InterviewsTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('applications')
   const interviews = a.interviews ?? []
-  // INTERVIEW-PHASE-1: the live session's category + step, distinct from the
-  // transcripts below (that's the per-run history; this is "where they are now").
-  const phase = a.interview
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      {/* Calm, read-only progress summary — a soft-chip category + "step X of Y",
-          shown above both the empty state and the transcript list (§3A). */}
-      {phase && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
-          background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('interview.progress')}</span>
-          <StatusPill label={t(`interview.category.${phase.category}`)} color={interviewCategoryColor(phase.category)} />
-          {phase.total > 0 && (
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-              {t('interview.stepOf', { step: phase.step ?? '–', total: phase.total })}
-            </span>
-          )}
-        </div>
-      )}
+      {/* INTERVIEW-VISIBILITY-1 (speculative): the live session's agent/turn/step/
+          duration, distinct from the transcripts below (that's the per-run
+          history; this is "where things stand right now"). Always rendered —
+          shows its own honest placeholder when there is no session at all. */}
+      <InterviewStatusCard interview={a.interview} />
 
       {!interviews.length ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 64, textAlign: 'center', color: 'var(--text-muted)' }}>

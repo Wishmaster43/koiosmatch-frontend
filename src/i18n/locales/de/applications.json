@@ -148,7 +148,28 @@
       "disqualified": "Disqualifiziert"
     },
     "stepOf": "Schritt {{step}} von {{total}}",
-    "filterBusy": "Im Interview"
+    "filterBusy": "Im Interview",
+    "status": {
+      "none": "Für diese Bewerbung wurde noch kein Interview gestartet.",
+      "noAgent": "Unbekannter Agent",
+      "turn": {
+        "agent": "Agent ist am Zug",
+        "candidate": "Kandidat ist am Zug",
+        "pending": "Ausstehend",
+        "recruiter": "Von dir übernommen"
+      },
+      "duration": "Gesprächsdauer",
+      "durationMinutes": "{{count}} Min.",
+      "durationHours": "{{hours}} Std. {{minutes}} Min.",
+      "durationUnknown": "Unbekannt",
+      "visibilityPending": "Agent, Gesprächsseite und Dauer erscheinen, sobald die Backend-Anbindung aktiv ist.",
+      "takeover": "Agent stoppen / übernehmen",
+      "takeoverBusy": "Wird ausgeführt…",
+      "takeoverSuccess": "Du hast das Gespräch übernommen.",
+      "takeoverUnavailable": "Übernahme ist noch nicht verfügbar — wartet auf die Backend-Anbindung.",
+      "takeoverNotActive": "Kein aktives Interview zum Übernehmen.",
+      "takeoverFailed": "Übernahme fehlgeschlagen."
+    }
   },
   "appointments": {
     "empty": "Keine Termine geplant.",

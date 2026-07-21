@@ -148,7 +148,28 @@
       "disqualified": "Disqualifié"
     },
     "stepOf": "Étape {{step}} sur {{total}}",
-    "filterBusy": "En entretien"
+    "filterBusy": "En entretien",
+    "status": {
+      "none": "Aucun entretien n'a encore commencé pour cette candidature.",
+      "noAgent": "Agent inconnu",
+      "turn": {
+        "agent": "Au tour de l'agent",
+        "candidate": "Au tour du candidat",
+        "pending": "En attente",
+        "recruiter": "Repris par vous"
+      },
+      "duration": "Durée de la conversation",
+      "durationMinutes": "{{count}} min",
+      "durationHours": "{{hours}} h {{minutes}} min",
+      "durationUnknown": "Inconnue",
+      "visibilityPending": "L'agent, le tour et la durée de la conversation s'afficheront dès que la liaison backend sera active.",
+      "takeover": "Arrêter l'agent / reprendre la main",
+      "takeoverBusy": "En cours…",
+      "takeoverSuccess": "Vous avez repris la conversation.",
+      "takeoverUnavailable": "La reprise n'est pas encore disponible — en attente de la liaison backend.",
+      "takeoverNotActive": "Aucun entretien actif à reprendre.",
+      "takeoverFailed": "La reprise a échoué."
+    }
   },
   "appointments": {
     "empty": "Aucun rendez-vous planifié.",

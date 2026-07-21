@@ -77,7 +77,10 @@ describe('mapApplication', () => {
 
     it("passes through the list contract's explicit category + step/total", () => {
       const mapped = mapApplication({ id: 17, interview: { category: 'busy', current_status: 'ACTIVE_IN_CARE', step: 2, total: 12 } })
-      expect(mapped.interview).toEqual({ category: 'busy', currentStatus: 'ACTIVE_IN_CARE', step: 2, total: 12 })
+      expect(mapped.interview).toEqual({
+        category: 'busy', currentStatus: 'ACTIVE_IN_CARE', step: 2, total: 12,
+        id: null, agent: null, flowName: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
+      })
     })
 
     it('derives disqualified from disqualified_reason when the detail contract omits category', () => {
@@ -97,7 +100,53 @@ describe('mapApplication', () => {
 
     it('defaults total to 0 and step/currentStatus to null when absent', () => {
       const mapped = mapApplication({ id: 21, interview: { category: 'busy' } })
-      expect(mapped.interview).toEqual({ category: 'busy', currentStatus: null, step: null, total: 0 })
+      expect(mapped.interview).toEqual({
+        category: 'busy', currentStatus: null, step: null, total: 0,
+        id: null, agent: null, flowName: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
+      })
+    })
+  })
+
+  // INTERVIEW-VISIBILITY-1 (speculative — awaiting CMBE's confirmed contract):
+  // agent/flow/turn/timing map defensively off the PROPOSED raw field names;
+  // none of them exist on today's real payload, so absence must stay null,
+  // never a crash or a synthetic placeholder value.
+  describe('interview visibility fields (INTERVIEW-VISIBILITY-1, speculative)', () => {
+    it('maps the session id, agent identity, flow name and turn when present', () => {
+      const mapped = mapApplication({
+        id: 22,
+        interview: {
+          id: 'iv-1', category: 'busy', step: 1, total: 3,
+          agent: { id: 'a-1', name: 'Koios Verpleegkundige-agent' },
+          flow_name: 'Verpleegkundige intake', turn: 'agent',
+        },
+      })
+      expect(mapped.interview?.id).toBe('iv-1')
+      expect(mapped.interview?.agent).toEqual({ id: 'a-1', name: 'Koios Verpleegkundige-agent' })
+      expect(mapped.interview?.flowName).toBe('Verpleegkundige intake')
+      expect(mapped.interview?.turn).toBe('agent')
+    })
+
+    it('leaves agent null when the raw agent object has no id', () => {
+      const mapped = mapApplication({ id: 23, interview: { category: 'busy', agent: { name: 'No id' } } })
+      expect(mapped.interview?.agent).toBeNull()
+    })
+
+    it('maps explicit duration_seconds directly', () => {
+      const mapped = mapApplication({ id: 24, interview: { category: 'completed', duration_seconds: 720 } })
+      expect(mapped.interview?.durationSeconds).toBe(720)
+    })
+
+    it('maps started_at/last_message_at/ended_at, defaulting all timing to null when absent', () => {
+      const withTiming = mapApplication({
+        id: 25,
+        interview: { category: 'busy', started_at: '2026-07-21T09:00:00Z', last_message_at: '2026-07-21T09:10:00Z', ended_at: '2026-07-21T09:12:00Z' },
+      })
+      expect(withTiming.interview).toMatchObject({
+        startedAt: '2026-07-21T09:00:00Z', lastMessageAt: '2026-07-21T09:10:00Z', endedAt: '2026-07-21T09:12:00Z',
+      })
+      const bare = mapApplication({ id: 26, interview: { category: 'busy' } })
+      expect(bare.interview).toMatchObject({ startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, id: null, turn: null, flowName: null, agent: null })
     })
   })
 })

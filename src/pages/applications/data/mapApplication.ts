@@ -13,6 +13,12 @@ import type {
  * disqualified_reason, so derive it the same way the backend does when
  * absent. Null (no session at all) stays null — that's the `interview_status=
  * none` filter bucket, never a synthetic 'none' category value.
+ *
+ * INTERVIEW-VISIBILITY-1 (speculative, awaiting CMBE's confirmed contract):
+ * `id`/`agent`/`flowName`/`turn`/timing map defensively off the PROPOSED raw
+ * field names below — every one defaults to null so today's real payload
+ * (which sends none of them yet) still maps cleanly. A backend field-name
+ * change is a one-line fix here, not a UI rewrite.
  */
 function mapInterview(raw?: ApiApplication['interview']): ApplicationInterview | null {
   if (!raw) return null
@@ -23,6 +29,14 @@ function mapInterview(raw?: ApiApplication['interview']): ApplicationInterview |
     currentStatus: raw.current_status ?? null,
     step: raw.step ?? null,
     total: raw.total ?? 0,
+    id: raw.id ?? null,
+    agent: raw.agent?.id != null ? { id: raw.agent.id, name: raw.agent.name ?? '' } : null,
+    flowName: raw.flow_name ?? null,
+    turn: (raw.turn ?? null) as ApplicationInterview['turn'],
+    startedAt: raw.started_at ?? null,
+    lastMessageAt: raw.last_message_at ?? null,
+    endedAt: raw.ended_at ?? null,
+    durationSeconds: raw.duration_seconds ?? null,
   }
 }
 

@@ -148,7 +148,28 @@
       "disqualified": "Descalificado"
     },
     "stepOf": "Paso {{step}} de {{total}}",
-    "filterBusy": "En entrevista"
+    "filterBusy": "En entrevista",
+    "status": {
+      "none": "Aún no se ha iniciado ninguna entrevista para esta solicitud.",
+      "noAgent": "Agente desconocido",
+      "turn": {
+        "agent": "Turno del agente",
+        "candidate": "Turno del candidato",
+        "pending": "Pendiente",
+        "recruiter": "Retomado por ti"
+      },
+      "duration": "Duración de la conversación",
+      "durationMinutes": "{{count}} min",
+      "durationHours": "{{hours}} h {{minutes}} min",
+      "durationUnknown": "Desconocida",
+      "visibilityPending": "El agente, el turno y la duración de la conversación aparecerán en cuanto la conexión con el backend esté activa.",
+      "takeover": "Detener agente / retomar",
+      "takeoverBusy": "Procesando…",
+      "takeoverSuccess": "Has retomado la conversación.",
+      "takeoverUnavailable": "Retomar aún no está disponible — a la espera de la conexión con el backend.",
+      "takeoverNotActive": "No hay ninguna entrevista activa para retomar.",
+      "takeoverFailed": "No se pudo retomar la conversación."
+    }
   },
   "appointments": {
     "empty": "No hay citas programadas.",

@@ -19,12 +19,27 @@ export interface ApplicationOwner {
  * plus its progress within THIS flow's own status list (a Helpende flow may
  * have 3 steps, a Verpleegkundige flow 12). Null = no interview session at all
  * (the backend's `interview_status=none` filter bucket).
+ *
+ * INTERVIEW-VISIBILITY-1 (speculative, Danny 21-07): `id`/`agent`/`flowName`/
+ * `turn`/timing fields are awaiting CMBE's confirmed contract — today's real
+ * ApplicationDetailResource::interviewSession() sends none of them, so they
+ * stay nullable and default to null. The UI honest-gates on their absence
+ * rather than assuming a fake value (§3).
  */
 export interface ApplicationInterview {
   category: 'busy' | 'completed' | 'disqualified'
   currentStatus: string | null
   step: number | null
   total: number
+  // The interview session's own id — required to call the takeover endpoint.
+  id: Id | null
+  agent: { id: Id; name: string } | null
+  flowName: string | null
+  turn: 'agent' | 'candidate' | 'pending' | 'recruiter' | null
+  startedAt: string | null
+  lastMessageAt: string | null
+  endedAt: string | null
+  durationSeconds: number | null
 }
 
 /** The flat application model rendered by the table/board. */
@@ -169,7 +184,11 @@ export interface ApiApplication {
   // (ApplicationListResource::interviewSummary); the detail contract's
   // interview() omits it but sends completed_at/disqualified_reason instead —
   // mapApplication derives category from those when absent. Null = no session.
+  // INTERVIEW-VISIBILITY-1 (speculative): `id`/`agent`/`flow_name`/`turn`/timing
+  // fields per the proposed-but-unconfirmed contract — all optional so today's
+  // real payload (which omits them) still maps cleanly.
   interview?: {
+    id?: Id
     category?: string
     current_status?: string | null
     statuses?: string[]
@@ -177,6 +196,13 @@ export interface ApiApplication {
     total?: number
     completed_at?: string | null
     disqualified_reason?: string | null
+    agent?: { id?: Id; name?: string } | null
+    flow_name?: string | null
+    turn?: string | null
+    started_at?: string | null
+    last_message_at?: string | null
+    ended_at?: string | null
+    duration_seconds?: number | null
   } | null
   interviews?: Array<{
     id?: Id; channel?: string; status?: string; created_at?: string; time?: string; summary?: string
