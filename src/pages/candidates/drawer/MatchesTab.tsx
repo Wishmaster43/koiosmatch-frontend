@@ -2,8 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Link2, ExternalLink } from 'lucide-react'
 import SectionCard from '@/components/ui/SectionCard'
 import StatusPill from '@/components/ui/StatusPill'
-import EntityLink from '@/components/ui/EntityLink'
-import { useNavigation } from '@/context/NavigationContext'
+import EntityLink, { buildEntityDeepLink } from '@/components/ui/EntityLink'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { rememberReturnTab } from './constants'
 import type { ReactNode } from 'react'
@@ -25,7 +24,6 @@ function ScorePill({ value }: { value?: number | null }) {
  */
 export default function MatchesTab({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
-  const { openEntity } = useNavigation()
   // Match lifecycle lookup (R-1b) — resolves the "Fase" row's label/colour from the
   // status slug, same as MatchesTable/MatchDrawer; the backend-resolved stage/
   // stageColor stay the fallback for payloads that don't send the slug yet.
@@ -57,11 +55,14 @@ export default function MatchesTab({ c }: { c: Candidate }) {
             {m.id != null && (
               // NAV-BACK-1: remember this subtab (Work/Match) so BACK from the
               // opened match lands on the same drawer tab instead of Profile.
-              <button onClick={() => { rememberReturnTab(c.id, 'work'); openEntity('matches', m.id) }}
+              // Danny 21-07: this is an explicit "Open match" affordance, so it is
+              // a real new-tab anchor (was a button that only navigated in-app).
+              <a href={buildEntityDeepLink('matches', m.id)} target="_blank" rel="noopener noreferrer"
+                onClick={() => rememberReturnTab(c.id, 'work')}
                 title={t('matchesView.openMatch')} aria-label={t('matchesView.openMatch')}
-                style={{ display: 'flex', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', padding: 2 }}>
+                style={{ display: 'flex', color: 'var(--color-primary)', padding: 2 }}>
                 <ExternalLink size={12} />
-              </button>
+              </a>
             )}
             {m.helloflex_contract_guid ? (
               <span title={t('matchesView.backofficeLinked')} style={{ display: 'flex', color: 'var(--color-primary)' }}><Link2 size={13} /></span>

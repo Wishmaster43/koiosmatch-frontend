@@ -42,9 +42,15 @@ describe('CandidateTab', () => {
     expect(screen.getByText(i18n.t('applications:candidateDetail.loading'))).toBeInTheDocument()
   })
 
-  it('links to the full candidate record', () => {
+  // Danny 21-07: "Open candidate" must be a REAL new-tab anchor (href + target=_blank),
+  // not the in-app EntityLink button it used to be wrapped in.
+  it('links to the full candidate record via a real new-tab anchor', () => {
     render(<CandidateTab application={app()} />)
-    expect(screen.getByTitle(i18n.t('applications:drawer.openCandidate'))).toBeInTheDocument()
+    const openLink = screen.getByTitle(i18n.t('applications:drawer.openCandidate'))
+    expect(openLink.tagName).toBe('A')
+    expect(openLink.getAttribute('href')).toContain('?open=7')
+    expect(openLink.getAttribute('target')).toBe('_blank')
+    expect(openLink.getAttribute('rel')).toBe('noopener noreferrer')
   })
 
   // S14/S22: clicking through to the full candidate stashes 'candidate' as the

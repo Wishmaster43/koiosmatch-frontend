@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { ExternalLink, Link2, Save, X } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
-import EntityLink from '@/components/ui/EntityLink'
+import { buildEntityDeepLink } from '@/components/ui/EntityLink'
 import { VacancyLookupsProvider } from '@/context/VacancyLookupsContext'
 import DetailsTab from '@/pages/vacancies/drawer/DetailsTab'
 import { mapVacancyDetail } from '@/pages/vacancies/data/mapVacancy'
@@ -129,13 +129,22 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 14 }}>
         {/* S14/S22: stash the current subtab so browser BACK from the full vacancy
-            page reopens THIS application's drawer on the Vacature tab again. */}
+            page reopens THIS application's drawer on the Vacature tab again.
+            Danny 21-07: this is an explicit "Open vacancy" AFFORDANCE (not the
+            name+trailing-icon EntityLink pattern), so it is a real new-tab anchor
+            rather than EntityLink's in-app button wrapped around the icon+label. */}
         <span onClickCapture={() => { if (a.id != null) rememberReturnTab(a.id, 'vacancy') }}>
-          <EntityLink page="vacancies" id={a.vacancyId} title={t('drawer.openVacancy')}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
+          {a.vacancyId != null ? (
+            <a href={buildEntityDeepLink('vacancies', a.vacancyId)} target="_blank" rel="noopener noreferrer"
+              title={t('drawer.openVacancy')} aria-label={t('drawer.openVacancy')}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--color-primary)', textDecoration: 'none' }}>
+              <ExternalLink size={13} /> {t('drawer.openVacancy')}
+            </a>
+          ) : (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--text-muted)' }}>
               <ExternalLink size={13} /> {t('drawer.openVacancy')}
             </span>
-          </EntityLink>
+          )}
         </span>
       </div>
       <VacancyLookupsProvider>

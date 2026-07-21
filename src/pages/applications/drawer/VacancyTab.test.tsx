@@ -85,4 +85,16 @@ describe('VacancyTab', () => {
     await user.click(openLink)
     expect(peekReturnTab(9)).toBe('vacancy')
   })
+
+  // Danny 21-07: "Open vacancy" must be a REAL new-tab anchor (href + target=_blank),
+  // not the in-app EntityLink button it used to be wrapped in.
+  it('renders "Open vacancy" as a real new-tab anchor', async () => {
+    mockGet.mockResolvedValue({ data: { data: { id: 7, title: 'Verpleegkundige' } } })
+    render(<VacancyTab application={app()} />)
+    const openLink = await screen.findByTitle('drawer.openVacancy')
+    expect(openLink.tagName).toBe('A')
+    expect(openLink.getAttribute('href')).toContain('?open=7')
+    expect(openLink.getAttribute('target')).toBe('_blank')
+    expect(openLink.getAttribute('rel')).toBe('noopener noreferrer')
+  })
 })

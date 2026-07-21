@@ -5,6 +5,17 @@ import { useNavigation } from '@/context/NavigationContext'
 import type { Id } from '@/types/common'
 
 /**
+ * The same-origin hash deep link to a record's own page + drawer (the
+ * NAV-BACK-1 URL contract the drawer-URL hook restores from). Shared by
+ * EntityLink's own trailing icon AND every explicit "Open X" affordance
+ * (candidate/vacancy/match "Open …" links) so the link shape lives in one
+ * place instead of being re-derived per caller.
+ */
+export function buildEntityDeepLink(page: string, id: Id): string {
+  return `${window.location.pathname}#${page}?open=${encodeURIComponent(String(id))}`
+}
+
+/**
  * EntityLink — a clickable reference to a linked record (candidate, vacancy,
  * customer, application). Clicking the NAME opens that entity's page + drawer
  * in-app via the navigation context; clicking the trailing ICON opens the same
@@ -17,7 +28,7 @@ export default function EntityLink({ page, id, children, title, hideIcon = false
   const { openEntity } = useNavigation()
   if (id == null) return <>{children}</>
   // Deep link to this record: same-origin hash route the drawer-URL hook restores.
-  const deepLink = `${window.location.pathname}#${page}?open=${encodeURIComponent(String(id))}`
+  const deepLink = buildEntityDeepLink(page, id)
   const stopThenAllow = (e: MouseEvent) => e.stopPropagation() // anchor default (new tab) proceeds
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, minWidth: 0, maxWidth: '100%' }}>

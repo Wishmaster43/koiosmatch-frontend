@@ -58,11 +58,17 @@ describe('MatchesTab', () => {
     expect(screen.getByText('Fallback stage')).toBeInTheDocument()
   })
 
-  it('stashes the active tab before cross-navigating to the linked match (NAV-BACK-1)', async () => {
+  // Danny 21-07: "Open match" is an explicit new-tab affordance — it must be a
+  // real anchor (href + target=_blank), not an in-app-only button/openEntity call.
+  it('renders "Open match" as a real new-tab anchor and stashes the return tab on click', async () => {
     const user = userEvent.setup()
     render(<MatchesTab c={candidate([{ id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway' }])} />)
-    await user.click(screen.getByTitle('matchesView.openMatch'))
+    const openLink = screen.getByTitle('matchesView.openMatch')
+    expect(openLink.tagName).toBe('A')
+    expect(openLink.getAttribute('href')).toContain('?open=m1')
+    expect(openLink.getAttribute('target')).toBe('_blank')
+    expect(openLink.getAttribute('rel')).toBe('noopener noreferrer')
+    await user.click(openLink)
     expect(rememberReturnTab).toHaveBeenCalledWith(42, 'work')
-    expect(openEntity).toHaveBeenCalledWith('matches', 'm1')
   })
 })

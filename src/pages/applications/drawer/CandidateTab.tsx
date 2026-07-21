@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { ExternalLink } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
-import EntityLink from '@/components/ui/EntityLink'
+import { buildEntityDeepLink } from '@/components/ui/EntityLink'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { mapCandidate } from '@/pages/candidates/data/mapCandidate'
 import ProfilePanel from '@/pages/candidates/drawer/ProfilePanel'
@@ -103,13 +103,22 @@ export default function CandidateTab({ application: a }: { application: Applicat
           </span>
         </div>
         {/* S14/S22: stash the current subtab so browser BACK from the full candidate
-            page reopens THIS application's drawer on the Kandidaat tab again. */}
+            page reopens THIS application's drawer on the Kandidaat tab again.
+            Danny 21-07: this is an explicit "Open candidate" AFFORDANCE (not the
+            name+trailing-icon EntityLink pattern), so it is a real new-tab anchor
+            rather than EntityLink's in-app button wrapped around the icon+label. */}
         <span onClickCapture={() => { if (a.id != null) rememberReturnTab(a.id, 'candidate') }}>
-          <EntityLink page="candidates" id={a.candidateId} title={t('applications:drawer.openCandidate')}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, flexShrink: 0 }}>
+          {a.candidateId != null ? (
+            <a href={buildEntityDeepLink('candidates', a.candidateId)} target="_blank" rel="noopener noreferrer"
+              title={t('applications:drawer.openCandidate')} aria-label={t('applications:drawer.openCandidate')}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, flexShrink: 0, color: 'var(--color-primary)', textDecoration: 'none' }}>
+              <ExternalLink size={13} /> {t('applications:drawer.openCandidate')}
+            </a>
+          ) : (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, flexShrink: 0, color: 'var(--text-muted)' }}>
               <ExternalLink size={13} /> {t('applications:drawer.openCandidate')}
             </span>
-          </EntityLink>
+          )}
         </span>
       </div>
       {/* The default namespace here is 'candidates' (every sub-tab below needs it), so
