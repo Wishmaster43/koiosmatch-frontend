@@ -1,8 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, X, Map as MapIcon, Pencil, Trash2, AlertTriangle } from 'lucide-react'
+import { Plus, X, Map as MapIcon, Pencil, Trash2, AlertTriangle, RefreshCw } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
-import { notifyError } from '@/lib/notify'
+import { notifyError, notifySuccess } from '@/lib/notify'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 
 // STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
@@ -36,6 +36,23 @@ function toFormValues(loc) {
   return values
 }
 
+// LOC-DELETE-GUARD-1: the 409 payload's `counts` object uses backend source keys —
+// map each to its own i18n label (mirrors the shared lookup in-use pattern §3A).
+const USAGE_LABEL_KEYS = {
+  candidates: 'candidates', candidate_links: 'candidateLinks', customers: 'customers',
+  vacancies: 'vacancies', opportunities: 'opportunities', tasks: 'tasks',
+  matches: 'matches', appointments: 'appointments',
+}
+
+// Turn `{ candidates: 3, tasks: 1 }` into "3 candidates, 1 task" (translated,
+// ICU-plural) instead of surfacing the raw server payload/message.
+function formatUsageCounts(counts, t) {
+  return Object.entries(counts ?? {})
+    .filter(([, count]) => count > 0)
+    .map(([key, count]) => t(`locations.usage.${USAGE_LABEL_KEYS[key] ?? key}`, { count }))
+    .join(', ')
+}
+
 export default function LocationsSettings() {
   const { t } = useTranslation(['settings', 'common'])
   const [locations, setLocations] = useState([])
@@ -48,6 +65,7 @@ export default function LocationsSettings() {
   const [editingId, setEditingId] = useState(null)
   const [form,      setForm]      = useState(EMPTY_FORM)
   const [saving,    setSaving]    = useState(false)
+  const [deletingId,setDeletingId]= useState(null)
   const [page,      setPage]      = useState(1)
   const PER_PAGE = 10
 
@@ -82,6 +100,34 @@ export default function LocationsSettings() {
       notifyError(t('locations.saveFailed'))
     } finally {
       setSaving(false)
+    }
+  }
+
+  // The list endpoint already flags a location referenced by other data
+  // (LOC-DELETE-GUARD-1) — mirrors the shared lookup `inUse(item)` convention.
+  const inUse = (loc) => Boolean(loc.in_use)
+
+  // DELETE /locations/{id} — confirm, then remove on success or surface the
+  // in-use counts on a 409 (never drop the row silently in either case).
+  const remove = async (loc) => {
+    if (inUse(loc)) return
+    if (!confirm(t('locations.confirmDelete', { name: loc.name }))) return
+    setDeletingId(loc.id)
+    try {
+      await api.delete(`/locations/${loc.id}`)
+      setLocations(p => p.filter(l => l.id !== loc.id))
+      notifySuccess(t('locations.deleteSuccess'))
+    } catch (e) {
+      if (e?.response?.status === 409) {
+        // In-use guard: keep the row, flag it, and show WHAT is still linked.
+        const list = formatUsageCounts(e.response.data?.counts, t)
+        setLocations(p => p.map(l => (l.id === loc.id ? { ...l, in_use: true } : l)))
+        notifyError(list ? t('locations.deleteBlocked', { list }) : t('locations.deleteBlockedTooltip'))
+      } else {
+        notifyError(t('locations.deleteFailed'))
+      }
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -148,13 +194,17 @@ export default function LocationsSettings() {
                                  background: 'var(--hover-bg)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--text)' }}>
                         <Pencil size={12} />
                       </button>
-                      {/* Delete stays disabled — measured gap: the backend deletes unconditionally
-                          (no in-use guard on referencing candidates/customers/vacancies/appointments),
-                          so shipping it live could silently orphan data (§ report). */}
-                      <button disabled title={t('locations.deleteUnavailable')} aria-label={t('locations.deleteUnavailable')}
+                      {/* Delete is live (LOC-DELETE-GUARD-1): disabled only when the backend
+                          already flagged this location as in use; the 409 catch in remove()
+                          is the belt-and-suspenders path for a race with a fresher link. */}
+                      <button onClick={() => remove(loc)} disabled={deletingId === loc.id || inUse(loc)}
+                        title={inUse(loc) ? t('locations.deleteBlockedTooltip') : t('locations.delete')}
+                        aria-label={inUse(loc) ? t('locations.deleteBlockedTooltip') : t('locations.delete')}
                         style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                 background: 'var(--hover-bg)', border: 'none', borderRadius: 6, cursor: 'not-allowed', color: 'var(--text-muted)', opacity: 0.5 }}>
-                        <Trash2 size={12} />
+                                 background: inUse(loc) ? 'var(--hover-bg)' : 'var(--color-danger-bg)', border: 'none', borderRadius: 6,
+                                 cursor: (deletingId === loc.id || inUse(loc)) ? 'not-allowed' : 'pointer',
+                                 color: inUse(loc) ? 'var(--text-muted)' : 'var(--color-danger)', opacity: inUse(loc) ? 0.5 : 1 }}>
+                        {deletingId === loc.id ? <RefreshCw size={12} className="animate-spin" /> : <Trash2 size={12} />}
                       </button>
                     </div>
                   </td>
