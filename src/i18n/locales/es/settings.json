@@ -55,7 +55,7 @@
     "custom_fields": "Campos personalizados",
     "note_types": "Tipos de nota",
     "action_rules": "Reglas de acción",
-    "ai": "IA"
+    "ai": "Koios AI"
   },
   "nav": {
     "candidate_display": "Visualización de la tabla",
@@ -111,7 +111,7 @@
     "availability": "Disponibilidad",
     "automatch": "Reglas de coincidencia",
     "planning_board": "Tablero de planificación",
-    "koios": "Koios AI",
+    "koios": "Resumen",
     "facebook_leads": "Facebook Leads",
     "numbering": "Numeración",
     "mod_shiftmanager": "Shiftmanager",

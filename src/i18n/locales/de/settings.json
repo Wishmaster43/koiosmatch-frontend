@@ -55,7 +55,7 @@
     "custom_fields": "Eigene Felder",
     "note_types": "Notiztypen",
     "action_rules": "Aktionsregeln",
-    "ai": "KI"
+    "ai": "Koios AI"
   },
   "nav": {
     "candidate_display": "Tabellenansicht",
@@ -111,7 +111,7 @@
     "availability": "Verfügbarkeit",
     "automatch": "Auto-Match-Regeln",
     "planning_board": "Planungstafel",
-    "koios": "Koios AI",
+    "koios": "Übersicht",
     "facebook_leads": "Facebook Leads",
     "numbering": "Nummerierung",
     "mod_shiftmanager": "Shiftmanager",

@@ -55,7 +55,7 @@
     "custom_fields": "Eigen velden",
     "note_types": "Notitietypes",
     "action_rules": "Actieregels",
-    "ai": "AI"
+    "ai": "Koios AI"
   },
   "nav": {
     "candidate_display": "Tabelweergave",
@@ -119,7 +119,7 @@
     "availability": "Beschikbaarheid",
     "automatch": "Automatch-regels",
     "planning_board": "Planbord-weergave",
-    "koios": "Koios AI",
+    "koios": "Overzicht",
     "facebook_leads": "Facebook Leads",
     "numbering": "Nummering",
     "mod_shiftmanager": "Shiftmanager",

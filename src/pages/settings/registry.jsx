@@ -132,6 +132,7 @@ export const NAV_GROUPS = [
     // reusable content blocks), mirroring note_types/action_rules getting their own group.
     key: 'ai', icon: Sparkles,
     items: [
+      { id: 'koios', icon: Sparkles, component: KoiosSettings },
       { id: 'vacancy_generation', icon: Sparkles, component: VacancyGenerationSettings },
     ],
   },
@@ -360,7 +361,6 @@ export const NAV_GROUPS = [
       { id: 'importeren', icon: Download, component: ImporterenSettings },
       // Exporteren (EXPORT-CSV-1) — mirrors the Importeren item right above it.
       { id: 'export', icon: Upload, component: ExportSettings },
-      { id: 'koios', icon: Sparkles, component: KoiosSettings },
       // Facebook Leads (FB-LEADS-1) — per-tenant Leads-app credentials + webhook URL.
       { id: 'facebook_leads', icon: Megaphone, component: FacebookLeadsSettings },
     ],

@@ -55,7 +55,7 @@
     "custom_fields": "Champs personnalisés",
     "note_types": "Types de note",
     "action_rules": "Règles d'action",
-    "ai": "IA"
+    "ai": "Koios AI"
   },
   "nav": {
     "candidate_display": "Affichage du tableau",
@@ -111,7 +111,7 @@
     "availability": "Disponibilité",
     "automatch": "Règles de correspondance",
     "planning_board": "Tableau de planification",
-    "koios": "Koios AI",
+    "koios": "Aperçu",
     "facebook_leads": "Facebook Leads",
     "numbering": "Numérotation",
     "mod_shiftmanager": "Shiftmanager",
