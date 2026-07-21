@@ -10,7 +10,6 @@ import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import ApplicationChangelogPopover from './drawer/ApplicationChangelogPopover'
-import ApplicationBucketBadge from './drawer/ApplicationBucketBadge'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import ApplicationTab from './drawer/ApplicationTab'
 import CandidateTab from './drawer/CandidateTab'
@@ -172,13 +171,15 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
           renderTitle={() => (
             <>
               {/* S4 (Danny): no PHASE badge here — it duplicated the Fase meta picker
-                  below (the picker is the one source of truth for the phase). F2
-                  (audit R1) adds a different axis instead: the read-only OUTCOME
-                  bucket badge (active/matched/rejected), mirroring the candidate/
-                  match drawers' calm-header badge convention (§3A). */}
+                  below (the picker is the one source of truth for the phase). S21
+                  (Danny 21-07): the OUTCOME bucket badge added by F2/audit R1 is ALSO
+                  removed — flagged repeatedly ("kerstboom", "status klopt niet",
+                  "ACTIEF???") as confusing next to the candidate name and redundant
+                  with the Fase picker below, which already shows the position. The
+                  ApplicationBucketBadge component itself stays (bucket data still
+                  drives filters/insights elsewhere) — only this header render is gone. */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{a.candidateName}</span>
-                <ApplicationBucketBadge bucket={a.bucket} />
                 {/* S5/NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
                 <ReferenceNumberChip value={a.referenceNumber} />
               </div>
