@@ -22,6 +22,7 @@ import {
   Boxes, Store, Tags, Target, Upload, UserCheck, Users, Webhook, XCircle,
 } from 'lucide-react'
 import CustomFieldsSettings from './sections/CustomFieldsSettings'
+import VacancyGenerationSettings from './sections/VacancyGenerationSettings'
 
 import UsersPage from '../users/UsersPage'
 import ViewConfigEditor from '@/components/settings/ViewConfigEditor'
@@ -122,6 +123,16 @@ export const NAV_GROUPS = [
       { id: 'branding', icon: Palette, component: BrandSettings },
       // NUMMER-1: prefix/padding/start per entity for the human-readable reference numbers.
       { id: 'numbering', icon: Hash, component: NumberingSettings },
+    ],
+  },
+  {
+    // AI-driven content — its own top-level group (VACGEN-1 fase 1): sits near the other
+    // AI-flavoured settings (Koios under integrations, Geheugen under company) but gets a
+    // dedicated home since it is a distinct, growing CRUD surface (generation profiles +
+    // reusable content blocks), mirroring note_types/action_rules getting their own group.
+    key: 'ai', icon: Sparkles,
+    items: [
+      { id: 'vacancy_generation', icon: Sparkles, component: VacancyGenerationSettings },
     ],
   },
   {

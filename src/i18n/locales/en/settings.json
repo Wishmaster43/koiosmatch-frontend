@@ -54,7 +54,8 @@
     "whatsapp": "WhatsApp",
     "custom_fields": "Custom fields",
     "note_types": "Note types",
-    "action_rules": "Action rules"
+    "action_rules": "Action rules",
+    "ai": "AI"
   },
   "nav": {
     "candidate_display": "Table display",
@@ -193,7 +194,8 @@
     "nt_customer": "Customers",
     "nt_contact": "Contacts",
     "nt_opportunity": "Opportunities",
-    "action_rules": "Action rules"
+    "action_rules": "Action rules",
+    "vacancy_generation": "Vacancy generation"
   },
   "kpis": {
     "title": "KPI settings",
@@ -1976,5 +1978,76 @@
       "confirmResetAll": "Reset all action rules to their default values? This overwrites your changes once you save.",
       "saveFailed": "Saving the action rules failed."
     }
+  },
+  "vacancyGenerationSettings": {
+    "title": "Vacancy generation",
+    "subtitle": "Manage AI generation profiles that control how vacancy texts are drafted automatically.",
+    "tabProfiles": "Profiles",
+    "tabBlocks": "Reusable blocks",
+    "unavailable": "Vacancy generation becomes available once the backend integration lands.",
+    "loadError": "Loading generation profiles failed.",
+    "saveFailed": "Saving failed.",
+    "empty": "No generation profiles created yet.",
+    "add": "+ Profile",
+    "nameLabel": "Name",
+    "namePlaceholder": "E.g. Healthcare — flex morning shifts",
+    "priorityLabel": "Priority",
+    "priorityHint": "When several profiles match, the highest priority wins.",
+    "matcherTitle": "When does this profile apply?",
+    "matcherHint": "Leave a field empty to match any value.",
+    "matcherLocations": "Location",
+    "matcherContractTypes": "Contract form",
+    "matcherFunctions": "Function",
+    "matcherIndustries": "Industry",
+    "matcherEmpty": "No options available.",
+    "contentTitle": "Template & brand voice",
+    "templateLabel": "Template",
+    "templateHint": "Use double curly braces for text parts the generator fills in later, e.g. {{function}} or {{location}}.",
+    "toneLabel": "Tone of voice",
+    "tone": {
+      "neutral": "Neutral",
+      "professional": "Professional",
+      "friendly": "Friendly",
+      "enthusiastic": "Enthusiastic",
+      "formal": "Formal"
+    },
+    "lengthLabel": "Length",
+    "length": {
+      "short": "Short",
+      "medium": "Medium",
+      "long": "Long"
+    },
+    "languageLabel": "Language",
+    "languagePlaceholder": "Choose a language",
+    "emojiLabel": "Allow emoji",
+    "emojiHint": "Let the generator occasionally use an emoji in the text.",
+    "brandLabel": "Brand voice & rules",
+    "forbiddenLabel": "Forbidden words",
+    "forbiddenPlaceholder": "Type a word and press Enter",
+    "blocksLabel": "Reusable blocks",
+    "blocksHint": "Pick fixed text blocks (intro, cta, legal) this profile includes.",
+    "blocksEmpty": "No reusable blocks created yet.",
+    "delete": "Delete",
+    "deleteBlocked": "Cannot delete — profile is in use.",
+    "confirmDelete": "Delete profile \"{{name}}\"?"
+  },
+  "vacancyContentBlocksSettings": {
+    "unavailable": "Reusable blocks become available once the backend integration lands.",
+    "loadError": "Loading blocks failed.",
+    "saveFailed": "Saving failed.",
+    "empty": "No blocks created yet.",
+    "add": "+ Block",
+    "nameLabel": "Name",
+    "namePlaceholder": "E.g. Standard intro",
+    "kindLabel": "Type",
+    "kind": {
+      "intro": "Intro",
+      "cta": "Call to action",
+      "legal": "Legal"
+    },
+    "bodyLabel": "Content",
+    "delete": "Delete",
+    "deleteBlocked": "Cannot delete — block is in use.",
+    "confirmDelete": "Delete block \"{{name}}\"?"
   }
 }

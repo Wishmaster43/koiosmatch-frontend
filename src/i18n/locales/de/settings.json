@@ -54,7 +54,8 @@
     "opportunities": "Chancen",
     "custom_fields": "Eigene Felder",
     "note_types": "Notiztypen",
-    "action_rules": "Aktionsregeln"
+    "action_rules": "Aktionsregeln",
+    "ai": "KI"
   },
   "nav": {
     "candidate_display": "Tabellenansicht",
@@ -193,7 +194,8 @@
     "nt_customer": "Kunden",
     "nt_contact": "Kontakte",
     "nt_opportunity": "Chancen",
-    "action_rules": "Aktionsregeln"
+    "action_rules": "Aktionsregeln",
+    "vacancy_generation": "Stellenanzeigen-Generierung"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -1976,5 +1978,76 @@
       "confirmResetAll": "Alle Aktionsregeln auf ihre Standardwerte zurücksetzen? Dies überschreibt deine Änderungen, sobald du speicherst.",
       "saveFailed": "Speichern der Aktionsregeln ist fehlgeschlagen."
     }
+  },
+  "vacancyGenerationSettings": {
+    "title": "Stellenanzeigen-Generierung",
+    "subtitle": "Verwalten Sie KI-Generierungsprofile, die festlegen, wie Stellenanzeigen automatisch verfasst werden.",
+    "tabProfiles": "Profile",
+    "tabBlocks": "Wiederverwendbare Blöcke",
+    "unavailable": "Die Stellenanzeigen-Generierung ist verfügbar, sobald die Backend-Anbindung besteht.",
+    "loadError": "Laden der Generierungsprofile fehlgeschlagen.",
+    "saveFailed": "Speichern fehlgeschlagen.",
+    "empty": "Noch keine Generierungsprofile angelegt.",
+    "add": "+ Profil",
+    "nameLabel": "Name",
+    "namePlaceholder": "Z. B. Pflege — Flex-Frühschichten",
+    "priorityLabel": "Priorität",
+    "priorityHint": "Passen mehrere Profile, gewinnt die höchste Priorität.",
+    "matcherTitle": "Wann gilt dieses Profil?",
+    "matcherHint": "Ein leeres Feld passt auf jeden Wert.",
+    "matcherLocations": "Standort",
+    "matcherContractTypes": "Vertragsform",
+    "matcherFunctions": "Funktion",
+    "matcherIndustries": "Branche",
+    "matcherEmpty": "Keine Optionen verfügbar.",
+    "contentTitle": "Vorlage & Markenstimme",
+    "templateLabel": "Vorlage",
+    "templateHint": "Verwenden Sie doppelte geschweifte Klammern für Textteile, die der Generator später einfügt, z. B. {{function}} oder {{location}}.",
+    "toneLabel": "Tonalität",
+    "tone": {
+      "neutral": "Neutral",
+      "professional": "Professionell",
+      "friendly": "Freundlich",
+      "enthusiastic": "Enthusiastisch",
+      "formal": "Formell"
+    },
+    "lengthLabel": "Länge",
+    "length": {
+      "short": "Kurz",
+      "medium": "Mittel",
+      "long": "Lang"
+    },
+    "languageLabel": "Sprache",
+    "languagePlaceholder": "Sprache wählen",
+    "emojiLabel": "Emoji zulassen",
+    "emojiHint": "Erlauben Sie dem Generator, gelegentlich ein Emoji im Text zu verwenden.",
+    "brandLabel": "Markenstimme & Regeln",
+    "forbiddenLabel": "Verbotene Wörter",
+    "forbiddenPlaceholder": "Wort eingeben und Enter drücken",
+    "blocksLabel": "Wiederverwendbare Blöcke",
+    "blocksHint": "Wählen Sie feste Textblöcke (Intro, CTA, rechtlich), die dieses Profil einbindet.",
+    "blocksEmpty": "Noch keine wiederverwendbaren Blöcke angelegt.",
+    "delete": "Löschen",
+    "deleteBlocked": "Kann nicht gelöscht werden — Profil wird verwendet.",
+    "confirmDelete": "Profil „{{name}}\" löschen?"
+  },
+  "vacancyContentBlocksSettings": {
+    "unavailable": "Wiederverwendbare Blöcke sind verfügbar, sobald die Backend-Anbindung besteht.",
+    "loadError": "Laden der Blöcke fehlgeschlagen.",
+    "saveFailed": "Speichern fehlgeschlagen.",
+    "empty": "Noch keine Blöcke angelegt.",
+    "add": "+ Block",
+    "nameLabel": "Name",
+    "namePlaceholder": "Z. B. Standard-Intro",
+    "kindLabel": "Typ",
+    "kind": {
+      "intro": "Intro",
+      "cta": "Call-to-Action",
+      "legal": "Rechtlich"
+    },
+    "bodyLabel": "Inhalt",
+    "delete": "Löschen",
+    "deleteBlocked": "Kann nicht gelöscht werden — Block wird verwendet.",
+    "confirmDelete": "Block „{{name}}\" löschen?"
   }
 }

@@ -54,7 +54,8 @@
     "whatsapp": "WhatsApp",
     "custom_fields": "Eigen velden",
     "note_types": "Notitietypes",
-    "action_rules": "Actieregels"
+    "action_rules": "Actieregels",
+    "ai": "AI"
   },
   "nav": {
     "candidate_display": "Tabelweergave",
@@ -193,7 +194,8 @@
     "nt_customer": "Klanten",
     "nt_contact": "Contactpersonen",
     "nt_opportunity": "Kansen",
-    "action_rules": "Actieregels"
+    "action_rules": "Actieregels",
+    "vacancy_generation": "Vacaturegeneratie"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -1976,5 +1978,76 @@
       "confirmResetAll": "Alle actieregels terugzetten naar de standaardwaarden? Dit overschrijft je aanpassingen zodra je opslaat.",
       "saveFailed": "Opslaan van de actieregels is mislukt."
     }
+  },
+  "vacancyGenerationSettings": {
+    "title": "Vacaturegeneratie",
+    "subtitle": "Beheer AI-generatieprofielen die bepalen hoe vacatureteksten automatisch worden opgesteld.",
+    "tabProfiles": "Profielen",
+    "tabBlocks": "Herbruikbare blokken",
+    "unavailable": "Vacaturegeneratie is beschikbaar zodra de backend-koppeling er is.",
+    "loadError": "Laden van generatieprofielen is mislukt.",
+    "saveFailed": "Opslaan is mislukt.",
+    "empty": "Nog geen generatieprofielen aangemaakt.",
+    "add": "+ Profiel",
+    "nameLabel": "Naam",
+    "namePlaceholder": "Bijv. Zorg — Flex ochtenddiensten",
+    "priorityLabel": "Prioriteit",
+    "priorityHint": "Bij meerdere passende profielen wint de hoogste prioriteit.",
+    "matcherTitle": "Wanneer geldt dit profiel?",
+    "matcherHint": "Laat een veld leeg om op elke waarde te matchen.",
+    "matcherLocations": "Vestiging",
+    "matcherContractTypes": "Contractvorm",
+    "matcherFunctions": "Functie",
+    "matcherIndustries": "Branche",
+    "matcherEmpty": "Geen opties beschikbaar.",
+    "contentTitle": "Sjabloon & merkstem",
+    "templateLabel": "Sjabloon",
+    "templateHint": "Gebruik dubbele accolades voor tekstdelen die de generator later invult, bijvoorbeeld {{functie}} of {{locatie}}.",
+    "toneLabel": "Tone of voice",
+    "tone": {
+      "neutral": "Neutraal",
+      "professional": "Professioneel",
+      "friendly": "Vriendelijk",
+      "enthusiastic": "Enthousiast",
+      "formal": "Formeel"
+    },
+    "lengthLabel": "Lengte",
+    "length": {
+      "short": "Kort",
+      "medium": "Gemiddeld",
+      "long": "Lang"
+    },
+    "languageLabel": "Taal",
+    "languagePlaceholder": "Kies een taal",
+    "emojiLabel": "Emoji toestaan",
+    "emojiHint": "Sta de generator toe om af en toe een emoji te gebruiken in de tekst.",
+    "brandLabel": "Merkstem & regels",
+    "forbiddenLabel": "Verboden woorden",
+    "forbiddenPlaceholder": "Typ een woord en druk op Enter",
+    "blocksLabel": "Herbruikbare blokken",
+    "blocksHint": "Kies vaste tekstblokken (intro, cta, juridisch) die dit profiel meeneemt.",
+    "blocksEmpty": "Nog geen herbruikbare blokken aangemaakt.",
+    "delete": "Verwijderen",
+    "deleteBlocked": "Kan niet verwijderd worden — profiel is in gebruik.",
+    "confirmDelete": "Profiel \"{{name}}\" verwijderen?"
+  },
+  "vacancyContentBlocksSettings": {
+    "unavailable": "Herbruikbare blokken zijn beschikbaar zodra de backend-koppeling er is.",
+    "loadError": "Laden van blokken is mislukt.",
+    "saveFailed": "Opslaan is mislukt.",
+    "empty": "Nog geen blokken aangemaakt.",
+    "add": "+ Blok",
+    "nameLabel": "Naam",
+    "namePlaceholder": "Bijv. Standaard intro",
+    "kindLabel": "Type",
+    "kind": {
+      "intro": "Intro",
+      "cta": "Call-to-action",
+      "legal": "Juridisch"
+    },
+    "bodyLabel": "Inhoud",
+    "delete": "Verwijderen",
+    "deleteBlocked": "Kan niet verwijderd worden — blok is in gebruik.",
+    "confirmDelete": "Blok \"{{name}}\" verwijderen?"
   }
 }

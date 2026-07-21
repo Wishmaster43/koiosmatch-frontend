@@ -54,7 +54,8 @@
     "opportunities": "Oportunidades",
     "custom_fields": "Campos personalizados",
     "note_types": "Tipos de nota",
-    "action_rules": "Reglas de acción"
+    "action_rules": "Reglas de acción",
+    "ai": "IA"
   },
   "nav": {
     "candidate_display": "Visualización de la tabla",
@@ -193,7 +194,8 @@
     "nt_customer": "Clientes",
     "nt_contact": "Contactos",
     "nt_opportunity": "Oportunidades",
-    "action_rules": "Reglas de acción"
+    "action_rules": "Reglas de acción",
+    "vacancy_generation": "Generación de vacantes"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -1976,5 +1978,76 @@
       "confirmResetAll": "¿Restablecer todas las reglas de acción a sus valores por defecto? Esto sobrescribirá tus cambios en cuanto guardes.",
       "saveFailed": "Error al guardar las reglas de acción."
     }
+  },
+  "vacancyGenerationSettings": {
+    "title": "Generación de vacantes",
+    "subtitle": "Gestiona los perfiles de generación con IA que determinan cómo se redactan automáticamente los textos de las vacantes.",
+    "tabProfiles": "Perfiles",
+    "tabBlocks": "Bloques reutilizables",
+    "unavailable": "La generación de vacantes estará disponible en cuanto exista la integración con el backend.",
+    "loadError": "Error al cargar los perfiles de generación.",
+    "saveFailed": "Error al guardar.",
+    "empty": "Aún no se han creado perfiles de generación.",
+    "add": "+ Perfil",
+    "nameLabel": "Nombre",
+    "namePlaceholder": "P. ej. Sanidad — turnos flex de mañana",
+    "priorityLabel": "Prioridad",
+    "priorityHint": "Si varios perfiles coinciden, gana la prioridad más alta.",
+    "matcherTitle": "¿Cuándo se aplica este perfil?",
+    "matcherHint": "Deja un campo vacío para que coincida con cualquier valor.",
+    "matcherLocations": "Ubicación",
+    "matcherContractTypes": "Forma de contrato",
+    "matcherFunctions": "Función",
+    "matcherIndustries": "Sector",
+    "matcherEmpty": "No hay opciones disponibles.",
+    "contentTitle": "Plantilla y voz de marca",
+    "templateLabel": "Plantilla",
+    "templateHint": "Usa dobles llaves para las partes de texto que el generador completará después, p. ej. {{function}} o {{location}}.",
+    "toneLabel": "Tono",
+    "tone": {
+      "neutral": "Neutral",
+      "professional": "Profesional",
+      "friendly": "Cercano",
+      "enthusiastic": "Entusiasta",
+      "formal": "Formal"
+    },
+    "lengthLabel": "Longitud",
+    "length": {
+      "short": "Corta",
+      "medium": "Media",
+      "long": "Larga"
+    },
+    "languageLabel": "Idioma",
+    "languagePlaceholder": "Elige un idioma",
+    "emojiLabel": "Permitir emoji",
+    "emojiHint": "Permite que el generador use ocasionalmente un emoji en el texto.",
+    "brandLabel": "Voz de marca y reglas",
+    "forbiddenLabel": "Palabras prohibidas",
+    "forbiddenPlaceholder": "Escribe una palabra y pulsa Enter",
+    "blocksLabel": "Bloques reutilizables",
+    "blocksHint": "Elige bloques de texto fijos (intro, cta, legal) que este perfil incluye.",
+    "blocksEmpty": "Aún no se han creado bloques reutilizables.",
+    "delete": "Eliminar",
+    "deleteBlocked": "No se puede eliminar — el perfil está en uso.",
+    "confirmDelete": "¿Eliminar el perfil \"{{name}}\"?"
+  },
+  "vacancyContentBlocksSettings": {
+    "unavailable": "Los bloques reutilizables estarán disponibles en cuanto exista la integración con el backend.",
+    "loadError": "Error al cargar los bloques.",
+    "saveFailed": "Error al guardar.",
+    "empty": "Aún no se han creado bloques.",
+    "add": "+ Bloque",
+    "nameLabel": "Nombre",
+    "namePlaceholder": "P. ej. Intro estándar",
+    "kindLabel": "Tipo",
+    "kind": {
+      "intro": "Intro",
+      "cta": "Llamada a la acción",
+      "legal": "Legal"
+    },
+    "bodyLabel": "Contenido",
+    "delete": "Eliminar",
+    "deleteBlocked": "No se puede eliminar — el bloque está en uso.",
+    "confirmDelete": "¿Eliminar el bloque \"{{name}}\"?"
   }
 }

@@ -54,7 +54,8 @@
     "opportunities": "Opportunités",
     "custom_fields": "Champs personnalisés",
     "note_types": "Types de note",
-    "action_rules": "Règles d'action"
+    "action_rules": "Règles d'action",
+    "ai": "IA"
   },
   "nav": {
     "candidate_display": "Affichage du tableau",
@@ -193,7 +194,8 @@
     "nt_customer": "Clients",
     "nt_contact": "Contacts",
     "nt_opportunity": "Opportunités",
-    "action_rules": "Règles d'action"
+    "action_rules": "Règles d'action",
+    "vacancy_generation": "Génération d'annonces"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -1976,5 +1978,76 @@
       "confirmResetAll": "Réinitialiser toutes les règles d'action à leurs valeurs par défaut ? Ceci écrasera vos modifications dès l'enregistrement.",
       "saveFailed": "L'enregistrement des règles d'action a échoué."
     }
+  },
+  "vacancyGenerationSettings": {
+    "title": "Génération d'annonces",
+    "subtitle": "Gérez les profils de génération IA qui déterminent comment les textes d'offres d'emploi sont rédigés automatiquement.",
+    "tabProfiles": "Profils",
+    "tabBlocks": "Blocs réutilisables",
+    "unavailable": "La génération d'annonces sera disponible dès que l'intégration backend sera en place.",
+    "loadError": "Le chargement des profils de génération a échoué.",
+    "saveFailed": "L'enregistrement a échoué.",
+    "empty": "Aucun profil de génération créé pour le moment.",
+    "add": "+ Profil",
+    "nameLabel": "Nom",
+    "namePlaceholder": "Ex. Soins — équipes flex du matin",
+    "priorityLabel": "Priorité",
+    "priorityHint": "Si plusieurs profils correspondent, la priorité la plus élevée l'emporte.",
+    "matcherTitle": "Quand ce profil s'applique-t-il ?",
+    "matcherHint": "Laissez un champ vide pour correspondre à toute valeur.",
+    "matcherLocations": "Établissement",
+    "matcherContractTypes": "Forme de contrat",
+    "matcherFunctions": "Fonction",
+    "matcherIndustries": "Secteur",
+    "matcherEmpty": "Aucune option disponible.",
+    "contentTitle": "Modèle & voix de marque",
+    "templateLabel": "Modèle",
+    "templateHint": "Utilisez des doubles accolades pour les parties de texte que le générateur remplira plus tard, par ex. {{function}} ou {{location}}.",
+    "toneLabel": "Ton",
+    "tone": {
+      "neutral": "Neutre",
+      "professional": "Professionnel",
+      "friendly": "Amical",
+      "enthusiastic": "Enthousiaste",
+      "formal": "Formel"
+    },
+    "lengthLabel": "Longueur",
+    "length": {
+      "short": "Courte",
+      "medium": "Moyenne",
+      "long": "Longue"
+    },
+    "languageLabel": "Langue",
+    "languagePlaceholder": "Choisir une langue",
+    "emojiLabel": "Autoriser les emoji",
+    "emojiHint": "Permettre au générateur d'utiliser occasionnellement un emoji dans le texte.",
+    "brandLabel": "Voix de marque & règles",
+    "forbiddenLabel": "Mots interdits",
+    "forbiddenPlaceholder": "Tapez un mot et appuyez sur Entrée",
+    "blocksLabel": "Blocs réutilisables",
+    "blocksHint": "Choisissez les blocs de texte fixes (intro, cta, mentions légales) inclus par ce profil.",
+    "blocksEmpty": "Aucun bloc réutilisable créé pour le moment.",
+    "delete": "Supprimer",
+    "deleteBlocked": "Impossible de supprimer — le profil est utilisé.",
+    "confirmDelete": "Supprimer le profil « {{name}} » ?"
+  },
+  "vacancyContentBlocksSettings": {
+    "unavailable": "Les blocs réutilisables seront disponibles dès que l'intégration backend sera en place.",
+    "loadError": "Le chargement des blocs a échoué.",
+    "saveFailed": "L'enregistrement a échoué.",
+    "empty": "Aucun bloc créé pour le moment.",
+    "add": "+ Bloc",
+    "nameLabel": "Nom",
+    "namePlaceholder": "Ex. Intro standard",
+    "kindLabel": "Type",
+    "kind": {
+      "intro": "Intro",
+      "cta": "Appel à l'action",
+      "legal": "Mentions légales"
+    },
+    "bodyLabel": "Contenu",
+    "delete": "Supprimer",
+    "deleteBlocked": "Impossible de supprimer — le bloc est utilisé.",
+    "confirmDelete": "Supprimer le bloc « {{name}} » ?"
   }
 }
