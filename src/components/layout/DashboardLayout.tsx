@@ -123,7 +123,9 @@ export default function DashboardLayout() {
       />
 
       {/* ── Koios AI panel ── */}
-      <KoiosPanel open={koiosOpen} onClose={() => setKoiosOpen(false)} />
+      {/* onNavigate wires the landing-state radar's deep-links to the same page-switch
+          the sidebar uses (KoiosPanel renders outside NavigationProvider's scope). */}
+      <KoiosPanel open={koiosOpen} onClose={() => setKoiosOpen(false)} onNavigate={goTo} />
 
       {/* ── Right column: topbar + content + filter panel ── */}
       <div className="km-main-bg flex flex-col flex-1 overflow-hidden" style={{ background: 'var(--bg)' }}>

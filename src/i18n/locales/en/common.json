@@ -136,6 +136,10 @@
     "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
     "offline": "Not connected",
     "contextPending": "This record can't be linked as AI context yet — pinned for reference only.",
+    "radar": {
+      "title": "Koios Advice",
+      "empty": "Nothing needs your attention right now — feel free to ask me anything."
+    },
     "mention": {
       "leads": "Leads",
       "locations": "Locations",

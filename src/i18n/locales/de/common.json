@@ -136,6 +136,10 @@
     "usageLine": "{{model}} · {{tokens}} Tokens · {{cost}}",
     "offline": "Nicht verbunden",
     "contextPending": "Dieser Datensatz kann noch nicht als KI-Kontext verknüpft werden — nur zur Referenz angeheftet.",
+    "radar": {
+      "title": "Koios-Empfehlungen",
+      "empty": "Gerade braucht nichts deine Aufmerksamkeit — frag mich gern etwas."
+    },
     "mention": {
       "leads": "Leads",
       "locations": "Standorte",

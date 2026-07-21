@@ -136,6 +136,10 @@
     "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
     "offline": "Non connecté",
     "contextPending": "Cet enregistrement ne peut pas encore être lié comme contexte IA — épinglé à titre indicatif uniquement.",
+    "radar": {
+      "title": "Conseils Koios",
+      "empty": "Rien ne nécessite votre attention pour le moment — n'hésitez pas à me poser une question."
+    },
     "mention": {
       "leads": "Prospects",
       "locations": "Sites",

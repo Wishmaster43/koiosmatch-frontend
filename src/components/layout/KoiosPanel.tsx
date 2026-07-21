@@ -20,6 +20,7 @@ import KoiosMentionMenu from './koios/KoiosMentionMenu'
 import KoiosHeader from './koios/KoiosHeader'
 import KoiosPendingActionCard from './koios/KoiosPendingActionCard'
 import KoiosResultCards from './koios/KoiosResultCards'
+import KoiosRadar from './koios/KoiosRadar'
 import type { KoiosEntityHit } from './koios/useKoiosEntitySearch'
 import type { KoiosResultRef } from './koios/koiosTypes'
 import type { KoiosChatMessage, KoiosContextRef, TFn } from '@/types/koios'
@@ -110,11 +111,14 @@ function TypingIndicator() {
 }
 
 // ── Main panel ────────────────────────────────────────────────────────────────
-export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?: () => void }) {
+export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boolean; onClose?: () => void; onNavigate?: (page: string, intent?: unknown) => void }) {
   const { t } = useTranslation('common')
   const locale = useLocale()
   // All chat state + the synchronous /ai/koios/chat call live in the hook.
   const { messages, loading, model, setModel, send, reset } = useKoiosChat()
+  // Landing state = no real conversation yet (only the intro bubble) — the Koios
+  // Advies radar (Danny 21/7) REPLACES that welcome text, it doesn't sit beside it.
+  const isLanding = messages.length === 1 && messages[0].kind === 'welcome'
   // Settings (selectable models + connection status), loaded on first open.
   const { settings } = useKoiosSettings(open)
   // Wide/normal toggle, persisted across reloads (mirrors the drawer's expand state).
@@ -244,9 +248,13 @@ export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?
       {/* ── Messages ── */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '14px 12px',
         display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {messages.map((msg, i) => (
-          <KoiosMessage key={i} msg={msg} isNew={i === messages.length - 1} t={t} locale={locale} />
-        ))}
+        {isLanding ? (
+          <KoiosRadar onNavigate={onNavigate} />
+        ) : (
+          messages.map((msg, i) => (
+            <KoiosMessage key={i} msg={msg} isNew={i === messages.length - 1} t={t} locale={locale} />
+          ))
+        )}
         {loading && <TypingIndicator />}
         <div ref={bottomRef} />
       </div>

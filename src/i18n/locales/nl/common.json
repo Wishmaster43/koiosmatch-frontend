@@ -136,6 +136,10 @@
     "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
     "offline": "Niet gekoppeld",
     "contextPending": "Dit record kan nog niet als AI-context worden gekoppeld — alleen ter referentie vastgepind.",
+    "radar": {
+      "title": "Koios Advies",
+      "empty": "Niets dat nu je aandacht vraagt — vraag me gerust iets."
+    },
     "mention": {
       "leads": "Leads",
       "locations": "Locaties",
