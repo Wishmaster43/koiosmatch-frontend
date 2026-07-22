@@ -15,6 +15,7 @@ vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }
 })
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
@@ -119,5 +120,51 @@ describe('StatusListEditor — entity scoping (note types)', () => {
     await user.click(screen.getByRole('button', { name: st('common.save') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/note-types/t1', expect.objectContaining({ entity: 'candidate' })))
+  })
+})
+
+// Audit finding C(1): only a 404 means "not deployed yet" (notFoundNotice). Any
+// OTHER failure (500/network) must render its own error state, never an empty
+// list with live CRUD buttons (§3 — error is never the same as empty).
+describe('StatusListEditor — load failure (error ≠ empty)', () => {
+  it('shows an error state instead of an empty list on a 500', async () => {
+    api.get.mockRejectedValue({ response: { status: 500 } })
+    render(<StatusListEditor title="Fasen" subtitle="" endpoint="/phases" addLabel="Fase toevoegen" />)
+
+    expect(await screen.findByText(st('statusList.loadError'))).toBeInTheDocument()
+    // No dead "+ Add" affordance while the real list state is unknown.
+    expect(screen.queryByRole('button', { name: 'Fase toevoegen' })).not.toBeInTheDocument()
+  })
+})
+
+// Audit finding C(2): submit/colour/reorder must notify the user on failure instead
+// of ending in a silent catch{} — the api.ts toast is DEV-only, so this is the only
+// user-visible signal in production.
+describe('StatusListEditor — save failures notify the user', () => {
+  it('notifies on a failed create instead of silently swallowing the error', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    api.post.mockRejectedValue(new Error('network down'))
+    const { notifyError } = await import('@/lib/notify')
+    const user = userEvent.setup()
+    render(<StatusListEditor title="Fasen" subtitle="" endpoint="/phases" addLabel="Fase toevoegen" />)
+
+    await user.click(screen.getByRole('button', { name: 'Fase toevoegen' }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'Intake')
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.saveFailed')))
+  })
+
+  it('notifies on a failed reorder save', async () => {
+    api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Intake' }), type({ id: 't2', name: 'Kennismaking' })] })
+    api.put.mockRejectedValue(new Error('network down'))
+    const { notifyError } = await import('@/lib/notify')
+    const user = userEvent.setup()
+    render(<StatusListEditor title="Fasen" subtitle="" endpoint="/phases" addLabel="Fase toevoegen" />)
+
+    await screen.findByText('Kennismaking')
+    await user.click(screen.getByRole('button', { name: st('common.save') }))
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.saveFailed')))
   })
 })

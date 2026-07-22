@@ -83,7 +83,7 @@ export default function ContactsTab({ contacts = [], locations = [], departments
     { key: 'location', header: t('contacts.col.location'), sortable: true, sortValue: p => p.locationName,
       render: p => chipList(resolvedLocations(p), 'var(--color-secondary)') },
     { key: 'department', header: t('contacts.col.department'), sortable: true, sortValue: p => p.departmentName,
-      render: p => chipList(resolvedDepartments(p), '#8B5CF6') },
+      render: p => chipList(resolvedDepartments(p), 'var(--color-violet)') },
     { key: 'role',  header: t('contacts.col.role'),  cellStyle: muted, sortable: true, sortValue: p => p.role,  render: p => p.role || '—' },
     { key: 'email', header: t('contacts.col.email'), cellStyle: muted, sortable: true, sortValue: p => p.email, render: p => p.email || '—' },
     // Single column, sensible fallback (BE 2026-07-20 split): prefer the mobile

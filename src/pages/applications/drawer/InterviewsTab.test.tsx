@@ -1,9 +1,10 @@
 /**
- * InterviewsTab — INTERVIEW-PERAPP-1 (speculative, Danny 22-07): Flow B's
- * "start interview" agent-picker + button, rendered only when this
+ * InterviewsTab — INTERVIEW-PERAPP-1 (now LIVE, contract-complete 22-07):
+ * Flow B's "start interview" agent-picker + button, rendered only when this
  * application has no session yet, the user can manage applications, and the
  * application isn't in a terminal bucket (rejected/matched). Asserts the real
- * POST request (§13), the honest 404-gate, and every hide condition.
+ * POST request (§13), the confirmed 200/201/409/422 contract, the 404
+ * safety-net gate, and every hide condition.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -33,6 +34,13 @@ const mockPost = api.post as unknown as ReturnType<typeof vi.fn>
 
 const AGENT = { id: 'a1', name: 'Kelly' }
 
+// The 7 known 422 guard-skip reasons (mirrors the component's own list) — used
+// to parametrize "every reason maps to its own message" below (§13).
+const KNOWN_START_REASONS = [
+  'no_mobile_or_consent', 'no_active_connection', 'rejected_stage',
+  'placed_stage', 'no_active_flow', 'no_candidate', 'send_failed',
+] as const
+
 // A minimal ApplicationDetail — mapApplicationDetail is defensive, so only the
 // fields under test need to be populated.
 const app = (over: Partial<ApplicationDetail> = {}) =>
@@ -45,8 +53,22 @@ const renderTab = (application: ApplicationDetail) => {
   return render(<QueryClientProvider client={qc}><InterviewsTab application={application} /></QueryClientProvider>)
 }
 
+// Shared click sequence (pick the agent, then Start) — every 200/201/409/422
+// case below drives the same UI path, only the mocked POST result differs.
+const pickAgentAndStart = async () => {
+  const user = userEvent.setup()
+  await waitFor(() => screen.getByRole('button', { name: 'interview.start.agentPlaceholder' }))
+  await user.click(screen.getByRole('button', { name: 'interview.start.agentPlaceholder' }))
+  await user.click(screen.getByRole('button', { name: 'Kelly' }))
+  await user.click(screen.getByRole('button', { name: 'interview.start.label' }))
+}
+
 beforeEach(() => {
+  // Also reset the notify spies (not just the API mocks) — without this a later
+  // test's assertion could pass on a PREVIOUS test's leftover call history, as
+  // the 200-vs-201 case below found (both call notifySuccess, different message).
   mockGet.mockReset(); mockPost.mockReset()
+  mockNotifySuccess.mockReset(); mockNotifyError.mockReset()
   mockGet.mockResolvedValue({ data: [AGENT] })
   mockUseAuth.mockReturnValue({ hasPermission: () => true })
 })
@@ -79,20 +101,29 @@ describe('InterviewsTab · start-interview action (Flow B)', () => {
     expect(screen.queryByRole('button', { name: 'interview.start.label' })).toBeNull()
   })
 
-  it('POSTs /applications/{id}/interview with the chosen agent_id and flips the status card live', async () => {
-    mockPost.mockResolvedValueOnce({ data: { data: { category: 'busy', id: 'iv-9', agent: { id: 'a1', name: 'Kelly' } } } })
+  it('POSTs /applications/{id}/interview with the chosen agent_id and flips the status card live (201 = started)', async () => {
+    mockPost.mockResolvedValueOnce({ status: 201, data: { data: { category: 'busy', id: 'iv-9', agent: { id: 'a1', name: 'Kelly' } } } })
     renderTab(app())
-    const user = userEvent.setup()
-    await waitFor(() => screen.getByRole('button', { name: 'interview.start.agentPlaceholder' }))
-    await user.click(screen.getByRole('button', { name: 'interview.start.agentPlaceholder' }))
-    await user.click(screen.getByRole('button', { name: 'Kelly' }))
-    await user.click(screen.getByRole('button', { name: 'interview.start.label' }))
+    await pickAgentAndStart()
 
     expect(mockPost).toHaveBeenCalledWith('/applications/app-1/interview', { agent_id: 'a1' })
     await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('interview.start.started'))
     // The freshly-started session now shows in the status card — no session placeholder.
     await waitFor(() => expect(screen.queryByText('interview.status.none')).toBeNull())
     // And the start action itself is now hidden (a session exists).
+    expect(screen.queryByRole('button', { name: 'interview.start.label' })).toBeNull()
+  })
+
+  it('treats a 200 (idempotent dup on the SAME application) as success — maps the existing session with its own message', async () => {
+    mockPost.mockResolvedValueOnce({ status: 200, data: { data: { category: 'busy', id: 'iv-9', agent: { id: 'a1', name: 'Kelly' } } } })
+    renderTab(app())
+    await pickAgentAndStart()
+
+    // Never claim "started" for a session that was already running.
+    await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('interview.start.alreadyRunning'))
+    expect(mockNotifySuccess).not.toHaveBeenCalledWith('interview.start.started')
+    // The existing session still renders and the action still hides.
+    await waitFor(() => expect(screen.queryByText('interview.status.none')).toBeNull())
     expect(screen.queryByRole('button', { name: 'interview.start.label' })).toBeNull()
   })
 
@@ -104,16 +135,39 @@ describe('InterviewsTab · start-interview action (Flow B)', () => {
     expect(mockPost).not.toHaveBeenCalled()
   })
 
-  it('honest-gates a 404 (endpoint not shipped yet): disables the button and shows the calm notice', async () => {
+  it('honest-gates a 404 (safety net only — should no longer be hit in practice): disables the button and shows the calm notice', async () => {
     mockPost.mockRejectedValueOnce({ response: { status: 404 } })
     renderTab(app())
-    const user = userEvent.setup()
-    await waitFor(() => screen.getByRole('button', { name: 'interview.start.agentPlaceholder' }))
-    await user.click(screen.getByRole('button', { name: 'interview.start.agentPlaceholder' }))
-    await user.click(screen.getByRole('button', { name: 'Kelly' }))
-    await user.click(screen.getByRole('button', { name: 'interview.start.label' }))
+    await pickAgentAndStart()
 
     await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('interview.start.unavailable'))
     expect(screen.getByRole('button', { name: 'interview.start.label' })).toBeDisabled()
+  })
+
+  it('shows a specific message for a 409 already_has_session (an OPEN session on a DIFFERENT application)', async () => {
+    mockPost.mockRejectedValueOnce({ response: { status: 409, data: { message: 'conflict', reason: 'already_has_session' } } })
+    renderTab(app())
+    await pickAgentAndStart()
+
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('interview.start.alreadyHasSession'))
+    // Stays retryable — a 409 on a different application is not this action's own fault.
+    expect(screen.getByRole('button', { name: 'interview.start.label' })).not.toBeDisabled()
+  })
+
+  it.each(KNOWN_START_REASONS)('maps 422 reason "%s" to its own translated message', async (reason) => {
+    mockPost.mockRejectedValueOnce({ response: { status: 422, data: { message: 'blocked', reason } } })
+    renderTab(app())
+    await pickAgentAndStart()
+
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith(`interview.start.reasons.${reason}`))
+    expect(screen.getByRole('button', { name: 'interview.start.label' })).not.toBeDisabled()
+  })
+
+  it('falls back to the generic action-failed message for an unrecognised 422 reason', async () => {
+    mockPost.mockRejectedValueOnce({ response: { status: 422, data: { reason: 'some_future_reason' } } })
+    renderTab(app())
+    await pickAgentAndStart()
+
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('common:actionFailed'))
   })
 })

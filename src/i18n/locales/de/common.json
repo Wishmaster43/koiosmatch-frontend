@@ -72,7 +72,9 @@
     "clear": "löschen",
     "geoPlaceholder": "PLZ oder Ort",
     "apply": "Anwenden",
-    "notFound": "Ort nicht gefunden"
+    "notFound": "Ort nicht gefunden",
+    "toggle": "Filter anzeigen/ausblenden",
+    "title": "Filter"
   },
   "nav": {
     "dashboard": "Dashboard",

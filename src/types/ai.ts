@@ -28,6 +28,10 @@ export interface AiAgent {
   id?: string | number
   name?: string
   custom_endpoint?: string
+  // Write-only (CMBE 2026-07-15): the real key never round-trips back in a GET —
+  // only this flag says one is stored. `custom_api_key` is a REQUEST-only field,
+  // sent solely when the user types a new value (never prefilled from `agent`).
+  has_custom_api_key?: boolean
   custom_api_key?: string
   prompt_id?: string | number
   faq_ids?: Array<string | number>

@@ -11,6 +11,7 @@
     "saving": "Saving…",
     "saved": "Saved",
     "loading": "Loading settings…",
+    "loadError": "Could not load the settings. Saving is disabled until loading succeeds.",
     "upload": "Upload",
     "remove": "Remove",
     "cancel": "Cancel",
@@ -484,7 +485,9 @@
     "inUse": "In use — cannot delete",
     "priorityRank": "Priority (1 = sent first)",
     "iconLabel": "Icon (emoji)",
-    "iconPlaceholder": "e.g. 📞"
+    "iconPlaceholder": "e.g. 📞",
+    "loadError": "Could not load the list.",
+    "saveFailed": "Saving failed."
   },
   "phases": {
     "title": "Phases",
@@ -589,7 +592,8 @@
     "title": "Purchase→sale conversion factor",
     "subtitle": "Falls back to purchase rate × this factor when no price agreement matches the function/CAO/scale/step.",
     "placeholder": "E.g. 1.35",
-    "saveFailed": "Saving failed — the value was reverted."
+    "saveFailed": "Saving failed — the value was reverted.",
+    "loadError": "Could not load the conversion factor."
   },
   "outreach": {
     "statusTitle": "Statuses",

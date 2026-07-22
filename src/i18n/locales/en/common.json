@@ -72,7 +72,9 @@
     "clear": "clear",
     "geoPlaceholder": "Postcode or place",
     "apply": "Apply",
-    "notFound": "Location not found"
+    "notFound": "Location not found",
+    "toggle": "Show/hide filters",
+    "title": "Filters"
   },
   "nav": {
     "dashboard": "Dashboard",

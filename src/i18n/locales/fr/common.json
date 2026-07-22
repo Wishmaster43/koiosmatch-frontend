@@ -72,7 +72,9 @@
     "clear": "effacer",
     "geoPlaceholder": "Code postal ou lieu",
     "apply": "Appliquer",
-    "notFound": "Lieu introuvable"
+    "notFound": "Lieu introuvable",
+    "toggle": "Afficher/masquer les filtres",
+    "title": "Filtres"
   },
   "nav": {
     "dashboard": "Tableau de bord",

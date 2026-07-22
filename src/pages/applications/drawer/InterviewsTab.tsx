@@ -16,6 +16,17 @@ import type { Id } from '@/types/common'
 
 type TranscriptMsg = ApplicationDetail['interviews'][number]['transcript'][number]
 
+// The 7 guard-skip reasons the 422 response carries for INTERVIEW-PERAPP-1
+// (COORDINATION-LOG r22-07 audit round) — each maps to its own i18n message;
+// an unknown/future code falls back to the generic action-failed notice (§3).
+const START_INTERVIEW_REASONS = [
+  'no_mobile_or_consent', 'no_active_connection', 'rejected_stage',
+  'placed_stage', 'no_active_flow', 'no_candidate', 'send_failed',
+] as const
+type StartInterviewReason = (typeof START_INTERVIEW_REASONS)[number]
+const isStartInterviewReason = (v: unknown): v is StartInterviewReason =>
+  typeof v === 'string' && (START_INTERVIEW_REASONS as readonly string[]).includes(v)
+
 // A single transcript message (recruiter = out, candidate = in).
 function Message({ msg }: { msg: TranscriptMsg }) {
   const isOut = msg.side === 'out'
@@ -33,12 +44,18 @@ function Message({ msg }: { msg: TranscriptMsg }) {
 }
 
 /**
- * StartInterviewAction — INTERVIEW-PERAPP-1 (speculative, Danny 22-07): lets a
- * recruiter pick an AI agent and kick off a fresh interview session for THIS
- * application, when none is running yet. Hidden entirely without
- * applications.update (mirrors InterviewStatusCard's canManage gate — same
- * permission, same source). Honest-gates a real 404 (endpoint not shipped
- * yet) instead of pretending the button works (§3).
+ * StartInterviewAction — INTERVIEW-PERAPP-1 (now LIVE, contract-complete
+ * 22-07): lets a recruiter pick an AI agent and kick off a fresh interview
+ * session for THIS application, when none is running yet. Hidden entirely
+ * without applications.update (mirrors InterviewStatusCard's canManage gate —
+ * same permission, same source). Response handling per the confirmed
+ * contract: 201 = started, 200 = an idempotent dup on THIS SAME application
+ * (existing session returned — still success, own toast so "started" is
+ * never claimed for a session already running), 409 already_has_session = an
+ * OPEN session on a DIFFERENT application (specific message, not the generic
+ * fallback), 422 = a guard skip with one of 7 known reasons (own message
+ * each, unknown reasons fall back to the generic notice). The 404 honest-gate
+ * stays as a safety net (§3) though it should no longer be hit in practice.
  */
 function StartInterviewAction({ applicationId, onStarted }: { applicationId: Id | undefined; onStarted: (iv: ApplicationInterview) => void }) {
   const { t } = useTranslation('applications')
@@ -51,8 +68,11 @@ function StartInterviewAction({ applicationId, onStarted }: { applicationId: Id 
 
   if (!canManage) return null
 
-  // Real POST — a 404 (endpoint not shipped yet) disables the action honestly;
-  // any other failure surfaces a message but stays retryable (§3).
+  // Real POST against the now-live contract — see the doc comment above for the
+  // full 200/201/409/422 breakdown. A 404 (safety net only) disables the action
+  // honestly; every other failure surfaces a message but stays retryable —
+  // notably 422 send_failed, where the backend rolls the session back so a
+  // simple re-click of this same button IS the retry (§3, no fake affordance).
   const onStart = async () => {
     if (!agentId) { notifyError(t('interview.start.noAgentChosen')); return }
     if (busy || applicationId == null) return
@@ -62,12 +82,21 @@ function StartInterviewAction({ applicationId, onStarted }: { applicationId: Id 
       const raw = unwrap<NonNullable<ApiApplication['interview']>>(res)
       const iv = mapInterview(raw)
       if (iv) onStarted(iv)
-      notifySuccess(t('interview.start.started'))
+      // 200 = the idempotent dup on this SAME application (existing session
+      // returned) — never claim "started" for a session that was already running.
+      notifySuccess(res.status === 200 ? t('interview.start.alreadyRunning') : t('interview.start.started'))
     } catch (err) {
       const status = (err as { response?: { status?: number } })?.response?.status
+      const reason = (err as { response?: { data?: { reason?: string } } })?.response?.data?.reason
       if (status === 404) {
         setUnavailable(true)
         notifyError(t('interview.start.unavailable'))
+      } else if (status === 409 && reason === 'already_has_session') {
+        // A DIFFERENT application already has an open session for this candidate —
+        // distinct from the 404 gate and from a generic failure (specific, actionable copy).
+        notifyError(t('interview.start.alreadyHasSession'))
+      } else if (status === 422 && isStartInterviewReason(reason)) {
+        notifyError(t(`interview.start.reasons.${reason}`))
       } else {
         notifyError(extractApiError(err, t('common:actionFailed')))
       }

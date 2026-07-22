@@ -120,5 +120,17 @@
     "noFollowup": "Keine Nachverfolgung"
   },
   "lastSync": "Letzte Synchronisierung {{source}}",
-  "neverSynced": "noch nie"
+  "neverSynced": "noch nie",
+  "filters": {
+    "periodLabel": "Zeitraum",
+    "locationLabel": "Standort",
+    "statusLabel": "Kandidatenstatus",
+    "period": {
+      "vandaag": "Heute",
+      "week": "Diese Woche",
+      "maand": "Diesen Monat",
+      "kwartaal": "Dieses Quartal",
+      "jaar": "Dieses Jahr"
+    }
+  }
 }

@@ -125,6 +125,15 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     lat:             toCoord(c.lat),
     lng:             toCoord(c.lng),
     distanceKm:      toCoord(c.distance_km),
+    // CAND-PDOK-GEOCODE-META-1: last-request/last-write provenance for the PDOK
+    // panel — null-safe, since older payloads/dummy data omit the block entirely.
+    geocode: c.geocode
+      ? {
+          requestedAt: c.geocode.requested_at ?? null,
+          requestedBy: c.geocode.requested_by ?? null,
+          updatedAt:   c.geocode.updated_at ?? null,
+        }
+      : null,
     // Acquisition source (website/facebook/…) — feeds the source filter once the list sends it.
     source:          (c.source as string | undefined) ?? null,
     province:        c.province ?? '',

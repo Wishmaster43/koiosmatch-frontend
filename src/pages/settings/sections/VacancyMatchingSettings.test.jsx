@@ -52,4 +52,35 @@ describe('VacancyMatchingSettings', () => {
     // The conversion-factor number input was the only <input type="number"> here.
     expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument()
   })
+
+  // §13 seam audit: the save button must PUT the exact strictness enum picked on
+  // the slider — a callback-fired test alone would miss a wrong route/body.
+  it('PUTs /settings/matching with the exact strictness enum for the picked slider level', async () => {
+    const user = userEvent.setup()
+    api.get.mockResolvedValue({ data: { data: { strictness: 'balanced', approval_mode: 'bij_afwijking' } } })
+    api.put.mockResolvedValue({ data: {} })
+    render(<VacancyMatchingSettings />)
+    await waitFor(() => expect(screen.getByText('2/3 · 50%')).toBeInTheDocument())
+
+    const slider = screen.getByRole('slider')
+    slider.focus()
+    await user.keyboard('{ArrowRight}') // balanced → strict
+    await user.click(screen.getByText(st('matching.save')))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/settings/matching', { strictness: 'strict' }))
+  })
+
+  // Approval mode is a partial PUT fired straight from the radio click (no Save
+  // button) — assert the exact route + body, not just that the UI re-renders.
+  it('PUTs /settings/matching with only the picked approval_mode', async () => {
+    const user = userEvent.setup()
+    api.get.mockResolvedValue({ data: { data: { strictness: 'balanced', approval_mode: 'bij_afwijking' } } })
+    api.put.mockResolvedValue({ data: {} })
+    render(<VacancyMatchingSettings />)
+    await waitFor(() => expect(screen.getByText(st('matching.approval.title'))).toBeInTheDocument())
+
+    await user.click(screen.getByText(st('matching.approval.always')))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/settings/matching', { approval_mode: 'altijd' }))
+  })
 })

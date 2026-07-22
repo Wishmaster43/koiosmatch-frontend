@@ -120,5 +120,17 @@
     "noFollowup": "Sans relance"
   },
   "lastSync": "Dernière synchro {{source}}",
-  "neverSynced": "jamais"
+  "neverSynced": "jamais",
+  "filters": {
+    "periodLabel": "Période",
+    "locationLabel": "Site",
+    "statusLabel": "Statut du candidat",
+    "period": {
+      "vandaag": "Aujourd’hui",
+      "week": "Cette semaine",
+      "maand": "Ce mois-ci",
+      "kwartaal": "Ce trimestre",
+      "jaar": "Cette année"
+    }
+  }
 }

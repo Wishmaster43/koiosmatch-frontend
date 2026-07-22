@@ -28,9 +28,10 @@ vi.mock('@/lib/api', async (importOriginal) => ({
 vi.mock('@/lib/notify', () => ({ notifySuccess: (...a: unknown[]) => mockNotifySuccess(...a), notifyError: (...a: unknown[]) => mockNotifyError(...a) }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => `fmt(${v})` }) }))
 
-// Base candidate — no module/app enabled, no coordinates, no backoffice links.
+// Base candidate — no module/app enabled, no coordinates, no backoffice links,
+// no geocode provenance block.
 const baseCandidate = (overrides: Partial<Candidate> = {}): Candidate =>
-  ({ id: 1, lat: null, lng: null, shiftmanagerLink: null, helloflexLink: null, ...overrides } as unknown as Candidate)
+  ({ id: 1, lat: null, lng: null, shiftmanagerLink: null, helloflexLink: null, geocode: null, ...overrides } as unknown as Candidate)
 
 const link = (overrides: Partial<CandidateBackofficeLink> = {}): CandidateBackofficeLink => ({
   status: null, externalId: null, lastError: null, lastSyncedAt: null, linkedAt: null, linkedBy: null, ...overrides,
@@ -60,6 +61,36 @@ describe('IntegrationsTab · PDOK (always visible)', () => {
   it('renders even when no module/app is enabled', () => {
     render(<IntegrationsTab c={baseCandidate()} />)
     expect(screen.getByAltText('integrations.pdok.alt')).toBeInTheDocument()
+  })
+})
+
+// CAND-PDOK-GEOCODE-META-1: when/by whom the last geocode was requested, and
+// when the coordinates were last written — a muted line under the coords/status.
+describe('IntegrationsTab · PDOK geocode provenance (CAND-PDOK-GEOCODE-META-1)', () => {
+  it('shows "updated · requested by" once coordinates were written and a requester is known', () => {
+    const c = baseCandidate({ lat: 52.3676, lng: 4.9041, geocode: { requestedAt: '2026-07-20T08:00:00Z', requestedBy: 'Bente de Jong', updatedAt: '2026-07-20T08:00:05Z' } })
+    render(<IntegrationsTab c={c} />)
+    expect(screen.getByText('integrations.pdok.updatedAtBy')).toBeInTheDocument()
+  })
+
+  it('shows the requester-less "updated" line when updatedAt is stamped without a requester (automatic address path)', () => {
+    const c = baseCandidate({ lat: 52.3676, lng: 4.9041, geocode: { requestedAt: null, requestedBy: null, updatedAt: '2026-07-20T08:00:05Z' } })
+    render(<IntegrationsTab c={c} />)
+    expect(screen.getByText('integrations.pdok.updatedAt')).toBeInTheDocument()
+    expect(screen.queryByText('integrations.pdok.updatedAtBy')).toBeNull()
+  })
+
+  it('shows "requested by" while a manual request is still queued (no updatedAt yet)', () => {
+    const c = baseCandidate({ geocode: { requestedAt: '2026-07-20T08:00:00Z', requestedBy: 'Bente de Jong', updatedAt: null } })
+    render(<IntegrationsTab c={c} />)
+    expect(screen.getByText('integrations.pdok.requestedAtBy')).toBeInTheDocument()
+  })
+
+  it('shows no provenance line when the block is entirely absent', () => {
+    render(<IntegrationsTab c={baseCandidate()} />)
+    expect(screen.queryByText('integrations.pdok.updatedAtBy')).toBeNull()
+    expect(screen.queryByText('integrations.pdok.updatedAt')).toBeNull()
+    expect(screen.queryByText('integrations.pdok.requestedAtBy')).toBeNull()
   })
 })
 

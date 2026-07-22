@@ -116,11 +116,9 @@
     "total": "Totaal",
     "totalSub": "alle kandidaten",
     "available": "Beschikbaar",
-    "availableSub": "actief beschikbaar",
     "new": "Nieuw",
     "newSub": "deze week toegevoegd",
     "inProgress": "In procedure",
-    "inProgressSub": "lopende procedures",
     "intake": "Intake gepland",
     "intakeSub": "komende intakes",
     "tasks": "Taken",
@@ -174,9 +172,6 @@
   },
   "modal": {
     "title": "Kandidaat toevoegen",
-    "selectTypeFirst": "Selecteer eerst het type",
-    "linkVacancy": "Koppelen aan vacature",
-    "noVacancies": "Geen vacatures gevonden",
     "newPrefix": "Nieuw",
     "candidateData": "Kandidaatgegevens",
     "fillRequired": "Vul de verplichte velden in",
@@ -229,12 +224,10 @@
       "other": "Anders / niet opgegeven"
     },
     "vacancyFallback": "Vacature {{id}}",
-    "statusPanelTitle": "Status",
     "statusPanelHint": "Standaard Lead. Een nieuwe kandidaat begint als Lead."
   },
   "drawer": {
     "availability": "Beschikbaarheid",
-    "availabilityNone": "Geen",
     "label": "Kandidaat",
     "tabs": {
       "profile": "Profiel",
@@ -256,8 +249,6 @@
     "tags": "Tags",
     "lastContact": "Laatste contact",
     "notRegistered": "nog niet geregistreerd",
-    "currentCv": "Huidig CV",
-    "uploadCv": "CV uploaden",
     "downloadCv": "CV downloaden",
     "generating": "Genereren...",
     "customFields": "Eigen velden",
@@ -926,6 +917,9 @@
       "linked": "Gekoppeld",
       "notGeocoded": "Nog niet gegeocodeerd",
       "autoInfo": "Coördinaten worden automatisch bijgewerkt zodra het adres wijzigt.",
+      "updatedAt": "Bijgewerkt {{date}}",
+      "updatedAtBy": "Bijgewerkt {{date}} · aangevraagd door {{name}}",
+      "requestedAtBy": "Aangevraagd {{date}} door {{name}}",
       "refresh": "Bijwerken",
       "refreshing": "Bijwerken…",
       "refreshStarted": "PDOK-update gestart — coördinaten verschijnen zo",

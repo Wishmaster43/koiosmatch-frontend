@@ -184,6 +184,27 @@ describe('mapCandidate — backoffice links (KOPPELINGEN-META-1)', () => {
   })
 })
 
+// CAND-PDOK-GEOCODE-META-1 (backend r8450): the `geocode` block records when/by
+// whom the last geocode was requested, and when the coordinates were last
+// written — verify the mapper reads it null-safely (older payloads omit it).
+describe('mapCandidate — geocode provenance (CAND-PDOK-GEOCODE-META-1)', () => {
+  it('maps the full geocode block', () => {
+    const r = mapCandidate({
+      geocode: { requested_at: '2026-07-20T08:00:00Z', requested_by: 'Bente de Jong', updated_at: '2026-07-20T08:00:05Z' },
+    })
+    expect(r.geocode).toEqual({
+      requestedAt: '2026-07-20T08:00:00Z', requestedBy: 'Bente de Jong', updatedAt: '2026-07-20T08:00:05Z',
+    })
+  })
+  it('null-safes individual missing fields inside the block', () => {
+    const r = mapCandidate({ geocode: { updated_at: '2026-07-20T08:00:05Z' } })
+    expect(r.geocode).toEqual({ requestedAt: null, requestedBy: null, updatedAt: '2026-07-20T08:00:05Z' })
+  })
+  it('is null when the backend omits the block entirely', () => {
+    expect(mapCandidate({}).geocode).toBeNull()
+  })
+})
+
 // CREATED-BY-SOURCE-1 (Danny: "wil ik ook zien aangemaakt door wie en de bron") —
 // the Statistieken tab needs both fields; verify the mapper actually forwards them.
 describe('mapCandidate — createdBy / source (CREATED-BY-SOURCE-1)', () => {

@@ -155,9 +155,20 @@
       "label": "Démarrer l'entretien",
       "agentPlaceholder": "Choisir un agent IA",
       "started": "Entretien démarré.",
+      "alreadyRunning": "L'entretien est déjà en cours — la session existante s'affiche.",
+      "alreadyHasSession": "Ce candidat a déjà un entretien ouvert sur une autre candidature.",
       "unavailable": "Démarrer un entretien n'est pas encore disponible — en attente de la liaison backend.",
       "noAgentChosen": "Choisissez d'abord un agent IA.",
-      "loadError": "Impossible de charger les agents IA."
+      "loadError": "Impossible de charger les agents IA.",
+      "reasons": {
+        "no_mobile_or_consent": "Le candidat n'a pas de numéro de mobile ou de consentement WhatsApp.",
+        "no_active_connection": "Aucune connexion WhatsApp active pour cette offre.",
+        "rejected_stage": "Cette candidature est rejetée — impossible de démarrer un entretien.",
+        "placed_stage": "Cette candidature est déjà placée — impossible de démarrer un entretien.",
+        "no_active_flow": "L'agent IA choisi n'a aucun flux d'entretien actif.",
+        "no_candidate": "Aucun candidat associé à cette candidature.",
+        "send_failed": "L'envoi a échoué — réessayez."
+      }
     },
     "status": {
       "none": "Aucun entretien n'a encore commencé pour cette candidature.",

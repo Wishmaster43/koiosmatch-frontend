@@ -91,8 +91,11 @@ describe('AgentsTab — AI-AGENTS-2/3 fields', () => {
     const [url, body] = vi.mocked(api.put).mock.calls[0]
     expect(url).toBe('/ai/agents/a1')
     expect(body).not.toHaveProperty('model')
+    // custom_api_key is write-only (security audit finding D) — it is only ever
+    // included when the user actually types a new value, never on an untouched save.
+    expect(body).not.toHaveProperty('custom_api_key')
     expect(Object.keys(body as object)).toEqual(expect.arrayContaining([
-      'name', 'prompt_id', 'faq_ids', 'use_knowledge', 'max_history', 'custom_endpoint', 'custom_api_key',
+      'name', 'prompt_id', 'faq_ids', 'use_knowledge', 'max_history', 'custom_endpoint',
     ]))
   })
 })

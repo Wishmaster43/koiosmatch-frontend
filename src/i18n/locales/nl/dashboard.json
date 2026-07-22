@@ -120,5 +120,17 @@
     "noFollowup": "Geen opvolging"
   },
   "lastSync": "Laatste sync {{source}}",
-  "neverSynced": "nog nooit"
+  "neverSynced": "nog nooit",
+  "filters": {
+    "periodLabel": "Periode",
+    "locationLabel": "Vestiging",
+    "statusLabel": "Kandidaatstatus",
+    "period": {
+      "vandaag": "Vandaag",
+      "week": "Deze week",
+      "maand": "Deze maand",
+      "kwartaal": "Dit kwartaal",
+      "jaar": "Dit jaar"
+    }
+  }
 }

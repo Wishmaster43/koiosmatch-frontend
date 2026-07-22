@@ -171,14 +171,14 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
 
         {/* Footer — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
-          display: 'flex', justifyContent: 'flex-end', gap: 8, background: '#FAFAFA' }}>
+          display: 'flex', justifyContent: 'flex-end', gap: 8, background: 'var(--hover-bg)' }}>
           <button onClick={onClose}
             style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
             {t('modal.cancel')}
           </button>
           <button onClick={handleSubmit} disabled={!canSubmit}
             style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-              background: canSubmit ? 'var(--color-primary)' : '#E5E7EB', color: canSubmit ? 'white' : '#9CA3AF',
+              background: canSubmit ? 'var(--color-primary)' : 'var(--border)', color: canSubmit ? 'white' : 'var(--text-muted)',
               cursor: canSubmit ? 'pointer' : 'not-allowed' }}>
             {saving ? t('common:saving') : t('modal.create')}
           </button>

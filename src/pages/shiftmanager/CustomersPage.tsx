@@ -145,17 +145,19 @@ export default function CustomersPage() {
   const totalContacts    = useMemo(() => customers.reduce((s, c) => s + (c.contacts ?? []).length, 0), [customers])
   const noContactCount   = useMemo(() => customers.filter(c => (c.contacts ?? []).length === 0).length, [customers])
 
+  // Keys live under the existing `insights.*` namespace (customers.json) —
+  // never a second `analytics.*` source for the same strings (§5).
   const insightDonuts: DonutSpec[] = [
-    { key: 'status', title: t('analytics.statusTitle'), data: statusData, onPick: d => pickOne(setSelectedStatus)(pickKey(d)),
+    { key: 'status', title: t('insights.statusTitle'), data: statusData, onPick: d => pickOne(setSelectedStatus)(pickKey(d)),
       active: selectedStatus.length > 0, onClear: () => setSelectedStatus([]) },
-    { key: 'am',     title: t('analytics.amTitle'),     data: amData,     onPick: d => pickOne(setSelectedAM)(pickKey(d)),
+    { key: 'am',     title: t('insights.amTitle'),     data: amData,     onPick: d => pickOne(setSelectedAM)(pickKey(d)),
       active: selectedAM.length > 0,     onClear: () => setSelectedAM([]) },
   ]
   const insightKpis: KpiSpec[] = [
-    { key: 'locations',   label: t('analytics.locations'),   value: totalLocations,   sub: t('analytics.locationsSub'),   color: 'var(--color-secondary)' },
-    { key: 'departments', label: t('analytics.departments'), value: totalDepartments, sub: t('analytics.departmentsSub'), color: 'var(--color-violet)' },
-    { key: 'contacts',    label: t('analytics.contacts'),    value: totalContacts,    sub: t('analytics.contactsSub'),    color: 'var(--color-primary)' },
-    { key: 'noContact',   label: t('analytics.noContact'),   value: noContactCount,   sub: t('analytics.noContactSub'),   color: 'var(--color-danger)' },
+    { key: 'locations',   label: t('insights.locations'),   value: totalLocations,   sub: t('insights.locationsSub'),   color: 'var(--color-secondary)' },
+    { key: 'departments', label: t('insights.departments'), value: totalDepartments, sub: t('insights.departmentsSub'), color: 'var(--color-violet)' },
+    { key: 'contacts',    label: t('insights.contacts'),    value: totalContacts,    sub: t('insights.contactsSub'),    color: 'var(--color-primary)' },
+    { key: 'noContact',   label: t('insights.noContact'),   value: noContactCount,   sub: t('insights.noContactSub'),   color: 'var(--color-danger)' },
   ]
 
   const onCreate = (form: CustomerForm) => setCustomers(prev => [mapCustomer({ ...form, debtor_number: form.debtorNumber, account_manager: form.accountManager, id: `new-${Date.now()}` }), ...prev])

@@ -55,3 +55,18 @@ describe('RetentionSettings — save', () => {
     }))
   })
 })
+
+// Audit finding A: a failed GET /settings must never render as "policy = defaults"
+// (AVG-sensitive retention windows) — the shared SettingsScaffold shows an error
+// notice and blocks Save until a reload succeeds.
+describe('RetentionSettings — load failure (AVG: never save over an unknown policy)', () => {
+  it('renders the error notice and disables Save when GET /settings fails', async () => {
+    api.get.mockRejectedValue(new Error('network down'))
+    render(<RetentionSettings />)
+
+    expect(await screen.findByText(t('common.loadError'))).toBeInTheDocument()
+    // The hardcoded defaults never render as if they were the confirmed tenant policy.
+    expect(screen.queryByDisplayValue('24')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: t('common.save') })).toBeDisabled()
+  })
+})

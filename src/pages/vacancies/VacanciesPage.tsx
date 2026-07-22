@@ -272,12 +272,14 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                   and the "Zonder AI-agent" KPI card (VAC-KPI-REDESIGN 22-07). */}
               <QuickViewToggle active={showWithoutAgent} onToggle={toggleWithoutAgent}
                 label={t('page.withoutAgentView')} color="var(--color-violet)" icon={BotOff} />
+              {/* Bucket tabs — soft-tinted active (§4: never a solid fill); mirrors
+                  ApplicationsPage's identical bucket control verbatim. */}
               {buckets.map(b => (
                 <button key={b.value} onClick={() => setStatusBucket(b.value)}
                   style={{ padding: '5px 14px', fontSize: 13, fontWeight: statusBucket === b.value ? 600 : 400, borderRadius: 7, cursor: 'pointer',
-                    background: statusBucket === b.value ? 'var(--color-primary)' : 'transparent',
-                    color: statusBucket === b.value ? '#fff' : 'var(--text)',
-                    border: statusBucket === b.value ? 'none' : '1px solid var(--border)' }}>
+                    background: statusBucket === b.value ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'transparent',
+                    color: statusBucket === b.value ? 'var(--color-primary)' : 'var(--text)',
+                    border: `1px solid ${statusBucket === b.value ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}` }}>
                   {b.label}
                 </button>
               ))}

@@ -190,7 +190,7 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ padding: '12px 22px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 8, flexShrink: 0 }}>
           <button onClick={onClose} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>{t('subModal.cancel')}</button>
-          <button onClick={submit} disabled={!form.name.trim()} style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', background: form.name.trim() ? 'var(--color-primary)' : '#E5E7EB', color: form.name.trim() ? 'white' : '#9CA3AF', cursor: form.name.trim() ? 'pointer' : 'not-allowed' }}>
+          <button onClick={submit} disabled={!form.name.trim()} style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', background: form.name.trim() ? 'var(--color-primary)' : 'var(--border)', color: form.name.trim() ? 'white' : 'var(--text-muted)', cursor: form.name.trim() ? 'pointer' : 'not-allowed' }}>
             {isEdit ? t('subModal.save') : t('subModal.create')}
           </button>
         </div>

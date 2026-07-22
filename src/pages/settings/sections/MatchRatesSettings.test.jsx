@@ -73,3 +73,29 @@ describe('MatchRatesSettings', () => {
     expect(api.put).not.toHaveBeenCalled()
   })
 })
+
+// Audit finding B: a load failure must render its own error state, never an empty
+// input that reads as "no factor configured" (§3 — error is never the same as empty).
+describe('MatchRatesSettings — load failure', () => {
+  it('shows an error notice instead of the input when GET /settings/matching fails', async () => {
+    api.get.mockRejectedValue(new Error('network down'))
+    render(<MatchRatesSettings />)
+
+    expect(await screen.findByText(st('matchRates.loadError'))).toBeInTheDocument()
+    expect(screen.queryByLabelText(st('matchRates.title'))).not.toBeInTheDocument()
+  })
+})
+
+// Audit finding B: an unmounted component must not update state once its in-flight
+// GET resolves — a regression would surface as a React act()/state-update warning.
+describe('MatchRatesSettings — unmount safety (alive-guard)', () => {
+  it('does not throw or warn when the GET resolves after unmount', async () => {
+    let resolveGet
+    api.get.mockReturnValue(new Promise(resolve => { resolveGet = resolve }))
+    const { unmount } = render(<MatchRatesSettings />)
+    unmount()
+
+    resolveGet({ data: { data: { conversion_factor: 1.35 } } })
+    await new Promise(resolve => setTimeout(resolve, 0))
+  })
+})

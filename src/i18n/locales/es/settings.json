@@ -11,6 +11,7 @@
     "saving": "Guardando…",
     "saved": "Guardado",
     "loading": "Cargando configuración…",
+    "loadError": "No se pudieron cargar los ajustes. Guardar está deshabilitado hasta que la carga funcione.",
     "upload": "Subir",
     "remove": "Eliminar",
     "cancel": "Cancelar",
@@ -465,7 +466,9 @@
     "inUse": "En uso — no se puede eliminar",
     "priorityRank": "Prioridad (1 = enviado primero)",
     "iconLabel": "Icono (emoji)",
-    "iconPlaceholder": "p. ej. 📞"
+    "iconPlaceholder": "p. ej. 📞",
+    "loadError": "No se pudo cargar la lista.",
+    "saveFailed": "Error al guardar."
   },
   "phases": {
     "title": "Fases",
@@ -1454,7 +1457,8 @@
     "title": "Factor de conversión compra→venta",
     "subtitle": "Recurre a la tarifa de compra × este factor cuando ningún acuerdo de tarifas coincide con la función/convenio colectivo/escala/nivel.",
     "placeholder": "P. ej. 1,35",
-    "saveFailed": "Error al guardar — se restableció el valor."
+    "saveFailed": "Error al guardar — se restableció el valor.",
+    "loadError": "No se pudo cargar el factor de conversión."
   },
   "outreach": {
     "statusTitle": "Estados",

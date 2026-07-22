@@ -152,6 +152,9 @@ export interface Candidate {
   lat: number | null
   lng: number | null
   distanceKm: number | null
+  // CAND-PDOK-GEOCODE-META-1: when/by whom the last geocode was requested, and
+  // when the coordinates were last written — null until the backend sends it.
+  geocode: CandidateGeocode | null
   province: string
   lastContactAt: string | null
   lastContactDate: string | null
@@ -225,6 +228,15 @@ export interface Candidate {
   applicationsCount: number
   shiftsCount: number | undefined
   hoursWorked: number | undefined
+}
+
+/** PDOK geocode provenance (CAND-PDOK-GEOCODE-META-1): when/by whom the last geocode
+ * was REQUESTED, and when the coordinates were last WRITTEN (the automatic
+ * address-change path also stamps updatedAt, without a requester). */
+export interface CandidateGeocode {
+  requestedAt: string | null
+  requestedBy: string | null
+  updatedAt: string | null
 }
 
 /** A raw match item as the API nests it under candidate.matches. */
@@ -315,6 +327,9 @@ export interface ApiCandidate {
   lat?: number
   lng?: number
   distance_km?: number
+  // CAND-PDOK-GEOCODE-META-1: geocode provenance — when/by whom the last request
+  // was made, and when the coordinates were last written (server-stamped).
+  geocode?: { requested_at?: string | null; requested_by?: string | null; updated_at?: string | null } | null
   last_contact?: { date?: string | null; type?: string | null }
   last_contact_type?: string | null
   client?: { name?: string }

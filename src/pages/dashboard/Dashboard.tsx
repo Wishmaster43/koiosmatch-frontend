@@ -107,12 +107,10 @@ function StatusBadge({ label, color }: { label?: ReactNode; color: string }) {
     background: color + '20', color, whiteSpace: 'nowrap' }}>{label}</span>
 }
 
-// Period filter options: backend enum value → Dutch label. Vestiging + status
-// options now come live from GET /dashboard (filters.locations / filters.statuses).
-const PERIODES: Array<[string, string]> = [
-  ['vandaag', 'Vandaag'], ['week', 'Deze week'], ['maand', 'Deze maand'],
-  ['kwartaal', 'Dit kwartaal'], ['jaar', 'Dit jaar'],
-]
+// Period filter slugs — stable values sent to the backend as `period`. Labels are
+// translated inside the component (a module-scope const can't call t()); Vestiging +
+// status options come live from GET /dashboard (filters.locations / filters.statuses).
+const PERIOD_VALUES = ['vandaag', 'week', 'maand', 'kwartaal', 'jaar'] as const
 
 export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page: string, params?: Record<string, unknown>) => void; viewType?: string }) {
   const { t } = useTranslation('dashboard')
@@ -274,17 +272,21 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
+  // Translate the stable period slugs into labels here (component scope has t()).
+  const periodOptions = useMemo(() =>
+    PERIOD_VALUES.map(value => ({ value, label: t(`filters.period.${value}`) })), [t])
+
   const filterGroups = useMemo(() => [
-    { key: 'periode', label: 'Periode', selected: selPeriode,
-      options: PERIODES.map(([value, label]) => ({ value, label })),
+    { key: 'periode', label: t('filters.periodLabel'), selected: selPeriode,
+      options: periodOptions,
       onToggle: (v: string) => setSelPeriode(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
-    { key: 'vestiging', label: 'Vestiging', selected: selVestiging,
+    { key: 'vestiging', label: t('filters.locationLabel'), selected: selVestiging,
       options: (dash?.filters?.locations ?? []).map(l => ({ value: l.id, label: l.name })),
       onToggle: (v: string | number) => setSelVestiging(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
-    { key: 'kandidaatstatus', label: 'Kandidaatstatus', selected: selStatus,
+    { key: 'kandidaatstatus', label: t('filters.statusLabel'), selected: selStatus,
       options: (dash?.filters?.statuses ?? []).map(s => ({ value: s.value, label: s.label })),
       onToggle: (v: string) => setSelStatus(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
-  ], [selPeriode, selVestiging, selStatus, dash])
+  ], [selPeriode, selVestiging, selStatus, dash, periodOptions, t])
 
   useEffect(() => {
     registerFilters('dashboard', filterGroups)

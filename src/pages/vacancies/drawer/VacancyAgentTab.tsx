@@ -17,18 +17,54 @@ type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 const groupTitle: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 6 }
 const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
 
+// One skipped applicant per INTERVIEW-BACKFILL-1's confirmed contract.
+interface BackfillSkip { application_id?: Id; reason?: string }
+interface BackfillResult { started?: number; skipped?: BackfillSkip[]; eligible_total?: number }
+
+// The full skip-reason vocabulary (7 shared 422 guard reasons + the two
+// backfill-only codes already_has_session/error) — every entry gets its own
+// short i18n label for the grouped breakdown; anything unrecognised buckets
+// under 'error' rather than rendering blank.
+const BACKFILL_REASONS = [
+  'no_mobile_or_consent', 'already_has_session', 'no_active_connection', 'rejected_stage',
+  'placed_stage', 'no_active_flow', 'no_candidate', 'send_failed', 'error',
+] as const
+type BackfillReason = (typeof BACKFILL_REASONS)[number]
+const normalizeBackfillReason = (v: string | undefined): BackfillReason =>
+  (BACKFILL_REASONS as readonly string[]).includes(v ?? '') ? (v as BackfillReason) : 'error'
+
 /**
- * BackfillInterviewsAction — INTERVIEW-BACKFILL-1 (speculative, Danny 22-07):
- * lets the linked agent pick up this vacancy's EXISTING applicants, not just
- * future ones. AVG: never auto-fires — always confirmed first (this sends
- * WhatsApp messages to real people), via the shared ConfirmDialog. Honest-gates
- * a real 404 (route not shipped yet) instead of pretending the button works (§3).
+ * BackfillInterviewsAction — INTERVIEW-BACKFILL-1 (now LIVE, contract-complete
+ * 22-07): lets the linked agent pick up this vacancy's EXISTING applicants,
+ * not just future ones. AVG: never auto-fires — always confirmed first (this
+ * sends WhatsApp messages to real people), via the shared ConfirmDialog.
+ * Result toast per the confirmed contract `{ started, skipped:[{application_id,
+ * reason}], eligible_total }` — `eligible_total` counts only LIVE-stage
+ * applications (rejected/placed never enter the pool), so the toast reads
+ * "X of Y started" against that number, never the vacancy's raw applicant
+ * count. When skips exist, they're grouped by reason and translated (mirrors
+ * useCandidateStageBulk's `${count} ${label}` + join(', ') breakdown pattern
+ * for a blocked-reason summary). The 404 honest-gate stays as a safety net
+ * (§3) — also covers an unknown vacancy id, same "not available yet" notice.
  */
 function BackfillInterviewsAction({ vacancyId, applicationsCount }: { vacancyId: Id | undefined; applicationsCount?: number }) {
   const { t } = useTranslation('vacancies')
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
+
+  // Group skipped rows by reason → "{count} {label}" fragments, comma-joined —
+  // the same shape as the toast body, e.g. "2 geen WhatsApp-toestemming, 1 loopt al".
+  const summarizeSkips = (skipped: BackfillSkip[]): string => {
+    const counts = new Map<BackfillReason, number>()
+    for (const s of skipped) {
+      const key = normalizeBackfillReason(s.reason)
+      counts.set(key, (counts.get(key) ?? 0) + 1)
+    }
+    return Array.from(counts.entries())
+      .map(([reason, count]) => `${count} ${t(`aiagent.backfill.reasons.${reason}`)}`)
+      .join(', ')
+  }
 
   // Real POST, only after explicit confirmation — a 404 disables the action
   // honestly; any other failure surfaces a message but stays retryable.
@@ -38,8 +74,15 @@ function BackfillInterviewsAction({ vacancyId, applicationsCount }: { vacancyId:
     setBusy(true)
     try {
       const res = await api.post(`/vacancies/${vacancyId}/start-interviews`)
-      const result = unwrap<{ started?: number; skipped?: number; eligible_total?: number }>(res)
-      notifySuccess(t('aiagent.backfill.resultToast', { started: result?.started ?? 0, skipped: result?.skipped ?? 0 }))
+      const result = unwrap<BackfillResult>(res)
+      const started = result?.started ?? 0
+      const skipped = result?.skipped ?? []
+      const eligibleTotal = result?.eligible_total ?? started
+      notifySuccess(skipped.length > 0
+        ? t('aiagent.backfill.resultToastWithReasons', {
+            started, eligibleTotal, skippedTotal: skipped.length, reasons: summarizeSkips(skipped),
+          })
+        : t('aiagent.backfill.resultToast', { started, eligibleTotal }))
     } catch (err) {
       const status = (err as { response?: { status?: number } })?.response?.status
       if (status === 404) {

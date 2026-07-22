@@ -19,7 +19,7 @@
  */
 import { useContext, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, RefreshCw, Save } from 'lucide-react'
+import { AlertTriangle, Check, RefreshCw, Save } from 'lucide-react'
 import { ColorSwatch } from './SettingsControls'
 import { SettingsDirtyContext } from '../lib/settingsDirty'
 
@@ -30,7 +30,7 @@ const CARD = {
 export function SettingsScaffold({ title, subtitle, form, maxWidth, actions, children }) {
   const { t } = useTranslation('settings')
   const dirtyCtx = useContext(SettingsDirtyContext)
-  const { dirty = false, saving = false, saved = false, loading = false, save } = form ?? {}
+  const { dirty = false, saving = false, saved = false, loading = false, loadError = false, save } = form ?? {}
 
   // Report dirtiness up to the shell so it can guard navigation; clear on unmount.
   useEffect(() => {
@@ -38,7 +38,10 @@ export function SettingsScaffold({ title, subtitle, form, maxWidth, actions, chi
     return () => dirtyCtx?.report(false)
   }, [dirty, dirtyCtx])
 
-  const canSave = dirty && !saving
+  // A failed load blocks Save on every useSettingsForm consumer (RetentionSettings,
+  // NotificationsSettings, MemorySettings, SchemaSection, …) — writing the dirty
+  // draft would overwrite an unknown tenant policy with hardcoded defaults.
+  const canSave = dirty && !saving && !loadError
   return (
     <div style={{ maxWidth }}>
       <div className="flex items-center justify-between" style={{ marginBottom: 20, gap: 16 }}>
@@ -65,7 +68,11 @@ export function SettingsScaffold({ title, subtitle, form, maxWidth, actions, chi
         </div>
       </div>
 
-      {loading ? <SkeletonRows /> : children}
+      {loading ? <SkeletonRows /> : loadError ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '24px 0', color: 'var(--color-danger)', fontSize: 13 }}>
+          <AlertTriangle size={14} /> {t('common.loadError')}
+        </div>
+      ) : children}
     </div>
   )
 }

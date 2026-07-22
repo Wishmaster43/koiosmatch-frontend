@@ -155,9 +155,20 @@
       "label": "Start interview",
       "agentPlaceholder": "Choose an AI agent",
       "started": "Interview started.",
+      "alreadyRunning": "Interview already running — showing the existing session.",
+      "alreadyHasSession": "This candidate already has an open interview on another application.",
       "unavailable": "Starting an interview isn't available yet — waiting on the backend link.",
       "noAgentChosen": "Choose an AI agent first.",
-      "loadError": "Failed to load AI agents."
+      "loadError": "Failed to load AI agents.",
+      "reasons": {
+        "no_mobile_or_consent": "The candidate has no mobile number or no WhatsApp consent.",
+        "no_active_connection": "No active WhatsApp connection for this vacancy.",
+        "rejected_stage": "This application is rejected — an interview can't be started.",
+        "placed_stage": "This application is already placed — an interview can't be started.",
+        "no_active_flow": "The chosen AI agent has no active interview flow.",
+        "no_candidate": "No candidate linked to this application.",
+        "send_failed": "Sending failed — try again."
+      }
     },
     "status": {
       "none": "No interview started for this application yet.",

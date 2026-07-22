@@ -6,6 +6,7 @@ import { notifyError } from '@/lib/notify'
 import { buildEntityDeepLink } from '@/components/ui/EntityLink'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { mapCandidate } from '@/pages/candidates/data/mapCandidate'
+import { buildCandidatePatch } from '@/pages/candidates/data/candidatesShared'
 import ProfilePanel from '@/pages/candidates/drawer/ProfilePanel'
 import BackgroundTab from '@/pages/candidates/drawer/BackgroundTab'
 import WorkTab from '@/pages/candidates/drawer/WorkTab'
@@ -49,10 +50,17 @@ export default function CandidateTab({ application: a }: { application: Applicat
     return () => { alive = false }
   }, [a.candidateId])
 
-  // Optimistic local edit + best-effort persist (full key-mapping lives in the Candidates page).
+  // Optimistic local edit (camelCase UI merge) + persist via the SAME UI-patch →
+  // API-body mapping as the real candidate drawer (buildCandidatePatch, used by
+  // useCandidateRecord().patchCandidate) — the raw camelCase patch used to go
+  // straight to the API and get silently dropped by CandidateProfileRequest's
+  // all-sometimes rules (dob, placeOfBirth, houseNumber(+suffix), postalCode,
+  // linkedin, candidateTypes, zzp, consent.retentionOptIn, …).
   const onUpdate = (id: string | number, patch: Record<string, unknown>) => {
     setEdits(e => ({ ...e, ...patch }))
-    api.patch(`/candidates/${id}`, patch).catch(() => notifyError(t('common:actionFailed')))
+    const body = buildCandidatePatch(patch)
+    if (!Object.keys(body).length) return
+    api.patch(`/candidates/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
   }
 
   // Merge local edits over the fetched record for the tab components (undefined

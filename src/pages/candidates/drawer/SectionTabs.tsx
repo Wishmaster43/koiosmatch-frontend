@@ -218,7 +218,7 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove }: RelTa
         const secondary = [cert.org, dateRange].filter(Boolean).join(' · ')
         return (
           <div key={cert.id ?? i} style={{ display: 'flex', gap: 8, padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#8B5CF6', flexShrink: 0, marginTop: 4 }} />
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-violet)', flexShrink: 0, marginTop: 4 }} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cert.name ?? cert.title}</div>
               {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}

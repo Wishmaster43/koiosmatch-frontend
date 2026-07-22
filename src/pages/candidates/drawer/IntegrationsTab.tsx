@@ -72,6 +72,33 @@ function LinkedByLine({ link }: { link: CandidateBackofficeLink | null }) {
   )
 }
 
+// PDOK geocode provenance (CAND-PDOK-GEOCODE-META-1): prefers "Bijgewerkt …" once
+// coordinates were actually written (the automatic address-change path stamps
+// this too, without a requester — name part only shows when known); falls back
+// to "Aangevraagd … door …" while a manual request is still queued. Renders
+// nothing once neither timestamp is known (H2 graceful-null pattern).
+function PdokMetaLine({ geocode }: { geocode: Candidate['geocode'] }) {
+  const { t } = useTranslation('candidates')
+  const { formatDateTime } = useDateFormat()
+  if (geocode?.updatedAt) {
+    return (
+      <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
+        {geocode.requestedBy
+          ? t('integrations.pdok.updatedAtBy', { date: formatDateTime(geocode.updatedAt), name: geocode.requestedBy })
+          : t('integrations.pdok.updatedAt', { date: formatDateTime(geocode.updatedAt) })}
+      </p>
+    )
+  }
+  if (geocode?.requestedAt && geocode.requestedBy) {
+    return (
+      <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
+        {t('integrations.pdok.requestedAtBy', { date: formatDateTime(geocode.requestedAt), name: geocode.requestedBy })}
+      </p>
+    )
+  }
+  return null
+}
+
 export default function IntegrationsTab({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
   const { formatDateTime } = useDateFormat()
@@ -218,9 +245,12 @@ export default function IntegrationsTab({ c }: { c: Candidate }) {
             </button>
           )}
         </div>
-        <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8, marginBottom: 0 }}>
-          {t('integrations.pdok.autoInfo')}
-        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
+          <PdokMetaLine geocode={c.geocode} />
+          <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
+            {t('integrations.pdok.autoInfo')}
+          </p>
+        </div>
       </SectionCard>
 
       {/* HelloFlex — gated on module/app; links through the same generic sync POST

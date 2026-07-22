@@ -175,9 +175,7 @@
     "category": "Categoría",
     "skills": "Habilidades requeridas",
     "addSkill": "Añadir habilidad",
-    "noSkills": "Aún no hay habilidades.",
     "description": "Descripción",
-    "descriptionPlaceholder": "Describe la posición…",
     "contractType": "Tipo de contrato",
     "experienceFrom": "Desde (años)",
     "experienceTo": "Hasta (años)",
@@ -212,8 +210,20 @@
       "confirm": "¿Debe el agente también encargarse de los candidatos existentes de esta vacante? Esto enviará mensajes de WhatsApp.",
       "confirmWithCount_one": "¿Debe el agente también encargarse del {{count}} candidato existente de esta vacante? Esto enviará mensajes de WhatsApp.",
       "confirmWithCount_other": "¿Debe el agente también encargarse de los {{count}} candidatos existentes de esta vacante? Esto enviará mensajes de WhatsApp.",
-      "resultToast": "{{started}} iniciadas, {{skipped}} omitidas.",
-      "unavailable": "Iniciar entrevistas para los candidatos existentes aún no está disponible — a la espera de la conexión con el backend."
+      "resultToast": "{{started}} de {{eligibleTotal}} iniciadas.",
+      "resultToastWithReasons": "{{started}} de {{eligibleTotal}} iniciadas — {{skippedTotal}} omitidas: {{reasons}}.",
+      "unavailable": "Iniciar entrevistas para los candidatos existentes aún no está disponible — a la espera de la conexión con el backend.",
+      "reasons": {
+        "no_mobile_or_consent": "sin consentimiento de WhatsApp",
+        "already_has_session": "ya en curso",
+        "no_active_connection": "sin conexión activa",
+        "rejected_stage": "rechazada",
+        "placed_stage": "ya colocada",
+        "no_active_flow": "sin flujo activo",
+        "no_candidate": "sin candidato",
+        "send_failed": "envío fallido",
+        "error": "error inesperado"
+      }
     }
   },
   "generate": {
@@ -245,8 +255,6 @@
       "hidden": "Oculto"
     },
     "customFields": "Campos personalizados",
-    "noCustomFields": "No hay campos personalizados configurados.",
-    "integrate": "Integrar",
     "publishedOn": "Publicada",
     "notPublished": "No publicada",
     "queuedOn": "Preparado",
@@ -268,7 +276,6 @@
     "title": "Conversión",
     "conversionRate": "Tasa de conversión",
     "appliedToHired": "Postulado → contratado",
-    "bySource": "Por origen",
     "leadsToApplications": "Leads → candidaturas",
     "ofLeads": "{{count}} leads",
     "daysOpen": "Días abierta",

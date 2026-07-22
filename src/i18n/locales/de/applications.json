@@ -155,9 +155,20 @@
       "label": "Interview starten",
       "agentPlaceholder": "KI-Agenten auswählen",
       "started": "Interview gestartet.",
+      "alreadyRunning": "Interview läuft bereits — bestehende Sitzung wird angezeigt.",
+      "alreadyHasSession": "Dieser Kandidat hat bereits ein offenes Interview bei einer anderen Bewerbung.",
       "unavailable": "Interview starten ist noch nicht verfügbar — wartet auf die Backend-Anbindung.",
       "noAgentChosen": "Wähle zuerst einen KI-Agenten.",
-      "loadError": "KI-Agenten konnten nicht geladen werden."
+      "loadError": "KI-Agenten konnten nicht geladen werden.",
+      "reasons": {
+        "no_mobile_or_consent": "Der Kandidat hat keine Mobilnummer oder keine WhatsApp-Zustimmung.",
+        "no_active_connection": "Keine aktive WhatsApp-Verbindung für diese Stelle.",
+        "rejected_stage": "Diese Bewerbung ist abgelehnt — es kann kein Interview gestartet werden.",
+        "placed_stage": "Diese Bewerbung ist bereits platziert — es kann kein Interview gestartet werden.",
+        "no_active_flow": "Der gewählte KI-Agent hat keinen aktiven Interview-Flow.",
+        "no_candidate": "Kein Kandidat mit dieser Bewerbung verknüpft.",
+        "send_failed": "Versand fehlgeschlagen — bitte erneut versuchen."
+      }
     },
     "status": {
       "none": "Für diese Bewerbung wurde noch kein Interview gestartet.",

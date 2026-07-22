@@ -11,6 +11,7 @@
     "saving": "Enregistrement…",
     "saved": "Enregistré",
     "loading": "Chargement des paramètres…",
+    "loadError": "Impossible de charger les paramètres. L'enregistrement est désactivé tant que le chargement échoue.",
     "upload": "Téléverser",
     "remove": "Supprimer",
     "cancel": "Annuler",
@@ -465,7 +466,9 @@
     "inUse": "Utilisé — suppression impossible",
     "priorityRank": "Priorité (1 = envoyé en premier)",
     "iconLabel": "Icône (emoji)",
-    "iconPlaceholder": "p. ex. 📞"
+    "iconPlaceholder": "p. ex. 📞",
+    "loadError": "Impossible de charger la liste.",
+    "saveFailed": "Échec de l'enregistrement."
   },
   "phases": {
     "title": "Phases",
@@ -1454,7 +1457,8 @@
     "title": "Facteur de conversion achat→vente",
     "subtitle": "Retombe sur le tarif d'achat × ce facteur lorsqu'aucun accord tarifaire ne correspond à la fonction/convention collective/échelon/niveau.",
     "placeholder": "Ex. 1,35",
-    "saveFailed": "Échec de l’enregistrement — la valeur a été rétablie."
+    "saveFailed": "Échec de l’enregistrement — la valeur a été rétablie.",
+    "loadError": "Impossible de charger le facteur de conversion."
   },
   "outreach": {
     "statusTitle": "Statuts",

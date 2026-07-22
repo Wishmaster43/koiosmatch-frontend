@@ -11,6 +11,7 @@
     "saving": "Opslaan…",
     "saved": "Opgeslagen",
     "loading": "Instellingen ophalen…",
+    "loadError": "Kon de instellingen niet laden. Opslaan is uitgeschakeld tot het laden lukt.",
     "upload": "Uploaden",
     "remove": "Verwijderen",
     "cancel": "Annuleren",
@@ -484,7 +485,9 @@
     "inUse": "In gebruik — kan niet verwijderen",
     "priorityRank": "Prioriteit (1 = eerst verstuurd)",
     "iconLabel": "Icoon (emoji)",
-    "iconPlaceholder": "bijv. 📞"
+    "iconPlaceholder": "bijv. 📞",
+    "loadError": "Kon de lijst niet laden.",
+    "saveFailed": "Opslaan mislukt."
   },
   "phases": {
     "title": "Fasen",
@@ -589,7 +592,8 @@
     "title": "Omrekenfactor inkoop→verkoop",
     "subtitle": "Valt terug op inkooptarief × deze factor wanneer geen prijsafspraak past bij functie/CAO/schaal/trede.",
     "placeholder": "Bijv. 1,35",
-    "saveFailed": "Opslaan mislukt — de waarde is teruggezet."
+    "saveFailed": "Opslaan mislukt — de waarde is teruggezet.",
+    "loadError": "Kon de omrekenfactor niet laden."
   },
   "outreach": {
     "statusTitle": "Statussen",

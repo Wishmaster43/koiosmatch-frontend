@@ -150,10 +150,13 @@ describe('VacancyAgentTab · picker → PATCH ai_agent_id + read-only interview 
   })
 })
 
-// INTERVIEW-BACKFILL-1 (speculative, Danny 22-07): the "start interview for
-// existing applicants" action — only visible once an agent is linked, always
-// confirmed first (AVG: never auto-fires, this sends WhatsApp messages), and
-// honest-gated on a real 404.
+// INTERVIEW-BACKFILL-1 (now LIVE, contract-complete 22-07): the "start
+// interview for existing applicants" action — only visible once an agent is
+// linked, always confirmed first (AVG: never auto-fires, this sends WhatsApp
+// messages), honest-gated on a 404 safety net, and — per the confirmed
+// `{ started, skipped:[{application_id, reason}], eligible_total }` contract —
+// its result toast now reads "X of Y started" (Y = eligible_total, i.e. only
+// LIVE-stage applications) plus a translated reason breakdown when rows were skipped.
 const BACKFILL_BUTTON = 'Interview starten voor bestaande sollicitanten'
 
 describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)', () => {
@@ -164,7 +167,7 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
     expect(screen.queryByRole('button', { name: BACKFILL_BUTTON })).toBeNull()
   })
 
-  it('confirms with the generic message when the vacancy carries no applicant count, then POSTs and toasts the result', async () => {
+  it('confirms with the generic message when the vacancy carries no applicant count, then POSTs and toasts against eligible_total (no skips)', async () => {
     mockGet.mockImplementation(routeGet(rawDetail({ ai_agent: { id: 'a1', name: 'Kelly' } })))
     renderHarness()
     await waitFor(() => screen.getByText('Zorgintake (9 stappen)'))
@@ -173,11 +176,52 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
     await user.click(screen.getByRole('button', { name: BACKFILL_BUTTON }))
     expect(screen.getByText(/Dit stuurt WhatsApp-berichten\.$/)).toBeInTheDocument()
 
-    mockPost.mockResolvedValueOnce({ data: { data: { started: 3, skipped: 1, eligible_total: 4 } } })
+    mockPost.mockResolvedValueOnce({ data: { data: { started: 3, skipped: [], eligible_total: 3 } } })
     await user.click(screen.getByRole('button', { name: 'Bevestigen' }))
 
     expect(mockPost).toHaveBeenCalledWith('/vacancies/v1/start-interviews')
-    await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('3 gestart, 1 overgeslagen.'))
+    await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('3 van 3 gestart.'))
+  })
+
+  it('groups skipped rows by reason and includes the translated breakdown in the toast', async () => {
+    mockGet.mockImplementation(routeGet(rawDetail({ ai_agent: { id: 'a1', name: 'Kelly' } })))
+    renderHarness()
+    await waitFor(() => screen.getByText('Zorgintake (9 stappen)'))
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: BACKFILL_BUTTON }))
+    // 2 applicants skipped for missing WhatsApp consent, 1 because a session already runs.
+    mockPost.mockResolvedValueOnce({ data: { data: {
+      started: 2, eligible_total: 5,
+      skipped: [
+        { application_id: 'app-1', reason: 'no_mobile_or_consent' },
+        { application_id: 'app-2', reason: 'no_mobile_or_consent' },
+        { application_id: 'app-3', reason: 'already_has_session' },
+      ],
+    } } })
+    await user.click(screen.getByRole('button', { name: 'Bevestigen' }))
+
+    await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith(
+      '2 van 5 gestart — 3 overgeslagen: 2 geen WhatsApp-toestemming, 1 loopt al.',
+    ))
+  })
+
+  it('buckets an unrecognised skip reason under the generic "unknown error" label', async () => {
+    mockGet.mockImplementation(routeGet(rawDetail({ ai_agent: { id: 'a1', name: 'Kelly' } })))
+    renderHarness()
+    await waitFor(() => screen.getByText('Zorgintake (9 stappen)'))
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: BACKFILL_BUTTON }))
+    mockPost.mockResolvedValueOnce({ data: { data: {
+      started: 1, eligible_total: 2,
+      skipped: [{ application_id: 'app-9', reason: 'some_future_reason' }],
+    } } })
+    await user.click(screen.getByRole('button', { name: 'Bevestigen' }))
+
+    await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith(
+      '1 van 2 gestart — 1 overgeslagen: 1 onbekende fout.',
+    ))
   })
 
   it('confirms with the applicant COUNT in the message when the vacancy carries one', async () => {

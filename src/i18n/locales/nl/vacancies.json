@@ -193,9 +193,7 @@
     "pickClientFirst": "Kies eerst een klant",
     "skills": "Vereiste vaardigheden",
     "addSkill": "Vaardigheid toevoegen",
-    "noSkills": "Nog geen vaardigheden.",
-    "description": "Beschrijving",
-    "descriptionPlaceholder": "Beschrijf de functie…"
+    "description": "Beschrijving"
   },
   "aiagent": {
     "pickerLabel": "AI-agent",
@@ -212,8 +210,20 @@
       "confirm": "De bestaande sollicitanten van deze vacature ook laten oppakken door de agent? Dit stuurt WhatsApp-berichten.",
       "confirmWithCount_one": "{{count}} bestaande sollicitant van deze vacature ook laten oppakken door de agent? Dit stuurt WhatsApp-berichten.",
       "confirmWithCount_other": "{{count}} bestaande sollicitanten van deze vacature ook laten oppakken door de agent? Dit stuurt WhatsApp-berichten.",
-      "resultToast": "{{started}} gestart, {{skipped}} overgeslagen.",
-      "unavailable": "Interview starten voor bestaande sollicitanten is nog niet beschikbaar — wacht op de backend-koppeling."
+      "resultToast": "{{started}} van {{eligibleTotal}} gestart.",
+      "resultToastWithReasons": "{{started}} van {{eligibleTotal}} gestart — {{skippedTotal}} overgeslagen: {{reasons}}.",
+      "unavailable": "Interview starten voor bestaande sollicitanten is nog niet beschikbaar — wacht op de backend-koppeling.",
+      "reasons": {
+        "no_mobile_or_consent": "geen WhatsApp-toestemming",
+        "already_has_session": "loopt al",
+        "no_active_connection": "geen actieve verbinding",
+        "rejected_stage": "afgewezen",
+        "placed_stage": "al geplaatst",
+        "no_active_flow": "geen actieve flow",
+        "no_candidate": "geen kandidaat",
+        "send_failed": "verzenden mislukt",
+        "error": "onbekende fout"
+      }
     }
   },
   "generate": {
@@ -245,8 +255,6 @@
       "hidden": "Verborgen"
     },
     "customFields": "Eigen velden",
-    "noCustomFields": "Geen eigen velden geconfigureerd.",
-    "integrate": "Integreer",
     "publishedOn": "Gepubliceerd",
     "notPublished": "Niet gepubliceerd",
     "queuedOn": "Klaargezet",
@@ -268,7 +276,6 @@
     "title": "Conversie",
     "conversionRate": "Conversieratio",
     "appliedToHired": "Gesolliciteerd → aangenomen",
-    "bySource": "Per bron",
     "leadsToApplications": "Leads → sollicitaties",
     "ofLeads": "{{count}} leads",
     "daysOpen": "Dagen open",

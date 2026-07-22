@@ -155,9 +155,20 @@
       "label": "Iniciar entrevista",
       "agentPlaceholder": "Elegir un agente IA",
       "started": "Entrevista iniciada.",
+      "alreadyRunning": "La entrevista ya está en curso — mostrando la sesión existente.",
+      "alreadyHasSession": "Este candidato ya tiene una entrevista abierta en otra solicitud.",
       "unavailable": "Iniciar una entrevista aún no está disponible — a la espera de la conexión con el backend.",
       "noAgentChosen": "Elige primero un agente IA.",
-      "loadError": "No se pudieron cargar los agentes IA."
+      "loadError": "No se pudieron cargar los agentes IA.",
+      "reasons": {
+        "no_mobile_or_consent": "El candidato no tiene número de móvil o consentimiento de WhatsApp.",
+        "no_active_connection": "No hay conexión activa de WhatsApp para esta vacante.",
+        "rejected_stage": "Esta solicitud está rechazada — no se puede iniciar una entrevista.",
+        "placed_stage": "Esta solicitud ya está colocada — no se puede iniciar una entrevista.",
+        "no_active_flow": "El agente IA elegido no tiene un flujo de entrevista activo.",
+        "no_candidate": "No hay ningún candidato vinculado a esta solicitud.",
+        "send_failed": "El envío falló — inténtalo de nuevo."
+      }
     },
     "status": {
       "none": "Aún no se ha iniciado ninguna entrevista para esta solicitud.",

@@ -84,7 +84,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
     <EdgeDeleteContext.Provider value={handleEdgeDelete}>
     <EdgeFilterContext.Provider value={handleEdgeFilter}>
     <NodeRunContext.Provider value={handleNodeRun}>
-      <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', flexDirection: 'column', background: '#F5F5F7' }}>
+      <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
 
         {/* ── Header ── */}
         <div style={{
@@ -146,7 +146,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
               display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999,
               background: status === 'active' ? 'var(--color-success-bg)' : 'var(--hover-bg)',
               color:      status === 'active' ? 'var(--color-success)' : 'var(--text-muted)',
-              border:     `1px solid ${status === 'active' ? '#BBF7D0' : 'var(--border)'}`,
+              border:     `1px solid ${status === 'active' ? 'color-mix(in srgb, var(--color-success) 40%, transparent)' : 'var(--border)'}`,
               cursor: 'pointer', fontSize: 11, fontWeight: 500,
             }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: status === 'active' ? 'var(--color-success)' : 'var(--border)' }} />

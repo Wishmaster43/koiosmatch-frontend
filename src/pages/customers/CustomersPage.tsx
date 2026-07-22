@@ -234,7 +234,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
     ({ key, label, value, sub, color, onClick: () => toggleKpi(key), active: kpiFilter === key })
   const insightKpis: KpiSpec[] = [
     kpiCard('locations',   t('insights.locations'),     totalLocations,   t('insights.locationsSub'),     'var(--color-secondary)'),
-    kpiCard('departments', t('insights.departments'),   totalDepartments, t('insights.departmentsSub'),   '#8B5CF6'),
+    kpiCard('departments', t('insights.departments'),   totalDepartments, t('insights.departmentsSub'),   'var(--color-violet)'),
     kpiCard('contacts',    t('insights.contacts'),      totalContacts,    t('insights.contactsSub'),      'var(--color-primary)'),
     kpiCard('openVac',     t('insights.openVacancies'), totalOpenVac,     t('insights.openVacanciesSub'), 'var(--color-warning)'),
     kpiCard('active',      t('insights.activeMatches'), totalActive,      t('insights.activeMatchesSub'), 'var(--color-success)'),

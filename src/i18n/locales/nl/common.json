@@ -72,7 +72,9 @@
     "clear": "wis",
     "geoPlaceholder": "Postcode of plaats",
     "apply": "Toepassen",
-    "notFound": "Locatie niet gevonden"
+    "notFound": "Locatie niet gevonden",
+    "toggle": "Filters tonen/verbergen",
+    "title": "Filters"
   },
   "nav": {
     "dashboard": "Dashboard",

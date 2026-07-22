@@ -7,6 +7,7 @@
  */
 import { FilterX } from 'lucide-react'
 import type { CSSProperties } from 'react'
+import { useTranslation } from 'react-i18next'
 import MiniDonut from '@/components/charts/MiniDonut'
 import { interactive } from '@/lib/a11y'
 import { useNumberFormat } from '@/lib/formatters'
@@ -24,7 +25,7 @@ const TITLE: CSSProperties = {
   letterSpacing: '0.04em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
 }
 
-function DonutCard({ title, data, colors, onPick, active, onClear }: Omit<DonutSpec, 'key'>) {
+function DonutCard({ title, data, colors, onPick, active, onClear, clearTitle }: Omit<DonutSpec, 'key'> & { clearTitle: string }) {
   // Total in the title row (ring stays clean at any size — mirrors InsightsRow).
   const { formatNumber } = useNumberFormat()
   const donutTotal = (data as Array<{ value?: number }>).reduce((s, d) => s + (d.value ?? 0), 0)
@@ -38,7 +39,7 @@ function DonutCard({ title, data, colors, onPick, active, onClear }: Omit<DonutS
         )}
       </div>
       {active && onClear && (
-        <button onClick={onClear} title="Filter wissen"
+        <button onClick={onClear} title={clearTitle}
           style={{ position: 'absolute', bottom: 6, right: 6, width: 20, height: 20, borderRadius: 5,
             display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
             background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: 'none', padding: 0 }}
@@ -83,10 +84,14 @@ function KpiCard({ label, value, sub, color, onClick, active }: Omit<KpiSpec, 'k
 }
 
 export default function CustomersInsightsRow({ donuts = [], kpis = [] }: { donuts?: DonutSpec[]; kpis?: KpiSpec[] }) {
+  // Existing `insights.clearFilter` key (customers.json) — mirrors how the
+  // shared InsightsRow takes a translated `clearTitle` prop (§5, no hardcoded copy).
+  const { t } = useTranslation('customers')
+  const clearTitle = t('insights.clearFilter')
   return (
     <div style={{ padding: '16px 24px 12px', display: 'flex', gap: 10, flexShrink: 0,
       flexWrap: 'nowrap', overflowX: 'auto' }}>
-      {donuts.map(({ key, ...d }) => <DonutCard key={key} {...d} />)}
+      {donuts.map(({ key, ...d }) => <DonutCard key={key} {...d} clearTitle={clearTitle} />)}
       {kpis.map(({ key, ...k }) => <KpiCard key={key} {...k} />)}
     </div>
   )

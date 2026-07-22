@@ -6,8 +6,9 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import LookupIcon from '@/components/ui/LookupIcon'
-import { Check, Save, Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
+import { AlertTriangle, Check, Save, Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
 
 // extraField (optioneel): { key, label, options: [{value,label}], default } —
@@ -36,6 +37,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
   const [items,     setItems]     = useState([])
   const [loading,   setLoading]   = useState(true)
   const [notFound,  setNotFound]  = useState(false)
+  const [loadError, setLoadError] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [editing,   setEditing]   = useState(null)   // null = create; item = edit
   const [draft,     setDraft]     = useState(emptyDraft)
@@ -49,8 +51,13 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
       .then(r => setItems(unwrapList(r).rows))
       // A 404 means this lookup isn't deployed on the backend yet — surface the calm
       // notice when the caller opted in; every other/unscoped lookup keeps swallowing
-      // silently as before (its endpoint always exists).
-      .catch(e => { if (notFoundNotice && e?.response?.status === 404) setNotFound(true) })
+      // silently as before (its endpoint always exists). Any OTHER failure (500/network)
+      // is a real error, not "the tenant has no values yet" — show it instead of an
+      // empty list with live CRUD buttons that would silently fail (§3).
+      .catch(e => {
+        if (notFoundNotice && e?.response?.status === 404) setNotFound(true)
+        else setLoadError(true)
+      })
       .finally(() => setLoading(false))
   }, [endpoint, entity, notFoundNotice])
 
@@ -82,7 +89,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
         setItems(p => [...p, unwrap(res)])
       }
       setShowModal(false); setDraft(emptyDraft()); setEditing(null)
-    } catch { /* noop */ } finally { setSaving(false) }
+    } catch { notifyError(t('statusList.saveFailed')) } finally { setSaving(false) }
   }
 
   const remove = async (item) => {
@@ -97,8 +104,12 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
   }
 
   const updateColor = async (item, color) => {
+    const previous = items
     setItems(p => p.map(x => x.id === item.id ? { ...x, color } : x))
-    try { await api.put(`${endpoint}/${item.id}`, { ...item, color }) } catch { /* noop */ }
+    // Revert the optimistic colour on failure — otherwise the row keeps showing an
+    // unsaved colour as if it had persisted (§3: no silent state drift).
+    try { await api.put(`${endpoint}/${item.id}`, { ...item, color }) }
+    catch { setItems(previous); notifyError(t('statusList.saveFailed')) }
   }
 
   // Singleton flip (defaultField): promote one row to the tenant default and clear
@@ -124,7 +135,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
     try {
       await api.put(`${endpoint}/reorder`, { ids: items.map(x => x.id) })
       setSaved(true); setTimeout(() => setSaved(false), 2000)
-    } catch { /* noop */ } finally { setSaving(false) }
+    } catch { notifyError(t('statusList.saveFailed')) } finally { setSaving(false) }
   }
 
   // Set an item's priority by typing its rank: move it to that 1-based position.
@@ -150,6 +161,21 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
           ? <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
           : <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{title}</h2>}
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{notFoundNotice}</p>
+      </div>
+    )
+  }
+
+  // A real load failure (500/network) — distinct from notFound: hide the CRUD
+  // affordances rather than render an empty list that reads as "no values yet".
+  if (loadError) {
+    return (
+      <div style={{ maxWidth: 640 }}>
+        {compact
+          ? <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
+          : <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{title}</h2>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, color: 'var(--color-danger)', fontSize: 13 }}>
+          <AlertTriangle size={14} /> {t('statusList.loadError')}
+        </div>
       </div>
     )
   }

@@ -109,11 +109,9 @@
     "total": "Total",
     "totalSub": "tous les candidats",
     "available": "Disponible",
-    "availableSub": "activement disponible",
     "new": "Nouveau",
     "newSub": "ajoutés cette semaine",
     "inProgress": "En cours",
-    "inProgressSub": "procédures en cours",
     "intake": "Entretien prévu",
     "intakeSub": "entretiens à venir",
     "tasks": "Tâches",
@@ -167,9 +165,6 @@
   },
   "modal": {
     "title": "Ajouter un candidat",
-    "selectTypeFirst": "Sélectionnez d'abord le type",
-    "linkVacancy": "Associer à une offre",
-    "noVacancies": "Aucune offre trouvée",
     "newPrefix": "Nouveau",
     "candidateData": "Données du candidat",
     "fillRequired": "Remplissez les champs obligatoires",
@@ -222,12 +217,10 @@
       "other": "Autre / non précisé"
     },
     "vacancyFallback": "Offre {{id}}",
-    "statusPanelTitle": "Statut",
     "statusPanelHint": "Par défaut Lead. Un nouveau candidat commence comme Lead."
   },
   "drawer": {
     "availability": "Disponibilité",
-    "availabilityNone": "Aucune",
     "label": "Candidat",
     "tabs": {
       "profile": "Profil",
@@ -249,8 +242,6 @@
     "tags": "Étiquettes",
     "lastContact": "Dernier contact",
     "notRegistered": "pas encore enregistré",
-    "currentCv": "CV actuel",
-    "uploadCv": "Téléverser un CV",
     "downloadCv": "Télécharger le CV",
     "generating": "Génération...",
     "customFields": "Champs personnalisés",
@@ -926,6 +917,9 @@
       "linked": "Connecté",
       "notGeocoded": "Pas encore géocodé",
       "autoInfo": "Les coordonnées se mettent à jour automatiquement dès que l'adresse change.",
+      "updatedAt": "Mis à jour le {{date}}",
+      "updatedAtBy": "Mis à jour le {{date}} · demandé par {{name}}",
+      "requestedAtBy": "Demandé le {{date}} par {{name}}",
       "refresh": "Actualiser",
       "refreshing": "Actualisation…",
       "refreshStarted": "Mise à jour PDOK lancée — les coordonnées apparaîtront bientôt",

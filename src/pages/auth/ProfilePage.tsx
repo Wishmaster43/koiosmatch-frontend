@@ -53,7 +53,7 @@ export default function ProfilePage() {
                 : <Camera size={18} color="white" />}
             </div>
           </button>
-          <input ref={fileRef} type="file" accept="image/*" aria-label={t('profile.uploadPhoto', { defaultValue: 'Upload photo' })} style={{ display: 'none' }} onChange={onPickAvatar} />
+          <input ref={fileRef} type="file" accept="image/*" aria-label={t('profile.uploadPhoto')} style={{ display: 'none' }} onChange={onPickAvatar} />
         </div>
         <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>

@@ -155,9 +155,20 @@
       "label": "Interview starten",
       "agentPlaceholder": "Kies een AI-agent",
       "started": "Interview gestart.",
+      "alreadyRunning": "Interview loopt al — bestaande sessie getoond.",
+      "alreadyHasSession": "Deze kandidaat heeft al een open interview op een andere sollicitatie.",
       "unavailable": "Interview starten is nog niet beschikbaar — wacht op de backend-koppeling.",
       "noAgentChosen": "Kies eerst een AI-agent.",
-      "loadError": "AI-agenten laden is mislukt."
+      "loadError": "AI-agenten laden is mislukt.",
+      "reasons": {
+        "no_mobile_or_consent": "Kandidaat heeft geen mobiel nummer of geen WhatsApp-toestemming.",
+        "no_active_connection": "Geen actieve WhatsApp-koppeling voor deze vacature.",
+        "rejected_stage": "Deze sollicitatie is afgewezen — er kan geen interview gestart worden.",
+        "placed_stage": "Deze sollicitatie is al geplaatst — er kan geen interview gestart worden.",
+        "no_active_flow": "De gekozen AI-agent heeft geen actieve interviewflow.",
+        "no_candidate": "Geen kandidaat gekoppeld aan deze sollicitatie.",
+        "send_failed": "Verzenden is mislukt — probeer het opnieuw."
+      }
     },
     "status": {
       "none": "Nog geen interview gestart voor deze sollicitatie.",

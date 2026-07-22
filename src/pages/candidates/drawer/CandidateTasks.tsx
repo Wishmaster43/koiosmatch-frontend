@@ -26,6 +26,7 @@ import { ListChecks, Pencil } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import SectionCard from '@/components/ui/SectionCard'
 import EntityLink from '@/components/ui/EntityLink'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import DrawerAddButton from './DrawerAddButton'
 import AddTaskModal from '@/pages/tasks/AddTaskModal'
 import { TaskLookupsProvider } from '@/context/TaskLookupsContext'
@@ -83,22 +84,15 @@ export default function CandidateTasks({ candidateId }: { candidateId: Id }) {
   // The rendered list follows the sub-view: open tasks vs the completed history.
   const visible = tasks.filter(x => (view === 'open' ? !x.completed_at : !!x.completed_at))
 
-  // Header: Open/Historie sub-toggle + "+ Taak" (shared task modal, pre-linked).
-  const viewChip = (id: 'open' | 'history', label: string) => (
-    <button key={id} onClick={() => setView(id)}
-      style={{ padding: '2px 9px', fontSize: 10, fontWeight: view === id ? 600 : 500, borderRadius: 99, cursor: 'pointer',
-        color: 'var(--color-primary)', border: `1px solid color-mix(in srgb, var(--color-primary) ${view === id ? 50 : 28}%, transparent)`,
-        background: `color-mix(in srgb, var(--color-primary) ${view === id ? 16 : 8}%, transparent)` }}>
-      {label}
-    </button>
-  )
-  // Chips links, de +knop rechts (Danny 20-07) — full-width action row in the
+  // Header: Open/Historie sub-toggle (shared QuickViewToggle, §4 — never a
+  // hand-rolled per-page pill) + "+ Taak" (shared task modal, pre-linked).
+  // Chips left, +knop rechts (Danny 20-07) — full-width action row in the
   // titleless SectionCard header.
   const addAction = (
     <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 6 }}>
       <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        {viewChip('open', t('drawer.tasksOpen'))}
-        {viewChip('history', t('drawer.tasksHistory'))}
+        <QuickViewToggle active={view === 'open'} onToggle={() => setView('open')} label={t('drawer.tasksOpen')} />
+        <QuickViewToggle active={view === 'history'} onToggle={() => setView('history')} label={t('drawer.tasksHistory')} />
       </span>
       <DrawerAddButton onClick={() => setAdding(true)} disabled={taskRuleBlocked}
         title={taskRuleBlocked ? taskRuleDecision?.message ?? undefined : undefined}

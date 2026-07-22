@@ -26,7 +26,7 @@ import type { KoiosResultRef } from './koios/koiosTypes'
 import type { KoiosChatMessage, KoiosContextRef, TFn } from '@/types/koios'
 
 // gradient used for the assistant avatar + user bubble.
-const GRADIENT = 'linear-gradient(135deg,var(--color-primary),#8B5CF6)'
+const GRADIENT = 'linear-gradient(135deg,var(--color-primary),var(--color-violet))'
 
 // Panel width: normal vs. expanded, mirroring EntityDrawer's own proportions.
 const WIDTH_COLLAPSED = 300
@@ -102,7 +102,7 @@ function TypingIndicator() {
         background: 'var(--surface)', border: '1px solid var(--border)',
         display: 'flex', gap: 4, alignItems: 'center' }}>
         {[0, 1, 2].map(i => (
-          <span key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: '#8B5CF6',
+          <span key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-violet)',
             display: 'block', animation: 'bounce 1.2s infinite', animationDelay: `${i * 0.18}s` }} />
         ))}
       </div>
@@ -372,7 +372,7 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
               style={{
                 width: 30, height: 30, borderRadius: '50%', border: 'none', flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: input.trim() && !loading ? '#1F2937' : 'var(--border)',
+                background: input.trim() && !loading ? 'var(--text)' : 'var(--border)',
                 color: 'white',
                 cursor: input.trim() && !loading ? 'pointer' : 'default',
                 transition: 'background 0.15s, transform 0.1s',

@@ -96,16 +96,11 @@ export const buildVacancyPatch = (patch: Record<string, unknown>): Record<string
   if ('postalCode'      in patch) body.postcode           = patch.postalCode
   if ('city'            in patch) body.city               = patch.city
   if ('province'        in patch) body.province           = patch.province
-  // VAC-COUNTRY-1 (Danny 22-07, punt 2): mirrors the province convention above —
-  // plain field name, letting the backend map it onto location_country the same
-  // way VacancyWriter maps `province` onto `location_province`. Honest: the
-  // internal StoreVacancyRequest/VacancyWriter don't accept `country` yet (only
-  // the External partner API does today), so this key is currently dropped
-  // silently by Laravel's validated()-only body (no error, no persistence) until
-  // CMBE wires it — same pattern VAC-CASCADE-1 went through before its whitelist landed.
+  // VAC-COUNTRY-1: mirrors the province convention above — plain field name, the
+  // backend maps it onto location_country (VacancyWriter). LIVE since CMBE shipped
+  // VAC-COUNTRY-WRITE-1 (22-07): the request rule + writer mapping + detail emit
+  // all exist, so this persists for real now (audit 22-07: comment was stale).
   if ('country'         in patch) body.country            = patch.country
-  // Single-line address the BE accepts TODAY; the structured address/contract_types/
-  // experience_min+max above need their validation rules BE-side first (VAC-PATCH-1).
   if ('location'        in patch) body.location           = patch.location
   if ('experienceMin'   in patch) body.experience_min_years = patch.experienceMin
   if ('experienceMax'   in patch) body.experience_max_years = patch.experienceMax

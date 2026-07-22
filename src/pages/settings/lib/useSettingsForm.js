@@ -33,6 +33,11 @@ export function useSettingsForm(defaults) {
   const [loading, setLoading] = useState(true)
   const [saving,  setSaving]  = useState(false)
   const [saved,   setSaved]   = useState(false)
+  // A failed initial load must never be swallowed — otherwise `values` still holds
+  // the hardcoded `defaults` and a consumer would render/save them as if they were
+  // the real tenant policy (AVG-sensitive settings like retention windows). Consumers
+  // show an error notice and Save stays blocked until a reload succeeds.
+  const [loadError, setLoadError] = useState(false)
 
   useEffect(() => {
     let alive = true
@@ -46,7 +51,7 @@ export function useSettingsForm(defaults) {
         setValues(next)
         setInitial(next)
       })
-      .catch(() => {})
+      .catch(() => { if (alive) setLoadError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
   }, [base])
@@ -59,6 +64,9 @@ export function useSettingsForm(defaults) {
   )
 
   const save = async () => {
+    // Never persist over an unknown policy — a failed load means `values` is still
+    // the hardcoded defaults, not what the tenant actually has configured.
+    if (loadError) return
     setSaving(true)
     try {
       await saveSettings(values)
@@ -69,5 +77,5 @@ export function useSettingsForm(defaults) {
     finally { setSaving(false) }
   }
 
-  return { values, set, setValues, dirty, loading, saving, saved, save }
+  return { values, set, setValues, dirty, loading, saving, saved, save, loadError }
 }

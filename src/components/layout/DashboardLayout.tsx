@@ -232,7 +232,7 @@ export default function DashboardLayout() {
             {hasFilters && (
               <button
                 onClick={() => setRightPanelOpen(o => !o)}
-                title="Filters tonen/verbergen"
+                title={t('filters.toggle')}
                 className="flex items-center justify-center transition-colors rounded-lg"
                 style={{
                   position: 'relative',
@@ -296,7 +296,7 @@ export default function DashboardLayout() {
               style={{ width: 360, borderLeft: '1px solid var(--border)', background: 'var(--surface)' }}
             >
               <ReportFilterSidebar
-                title="Filters"
+                title={t('filters.title')}
                 groups={filterGroups as ReportFilterGroup[]}
                 onClose={() => setRightPanelOpen(false)}
                 pageId={activePage}

@@ -116,11 +116,9 @@
     "total": "Total",
     "totalSub": "all candidates",
     "available": "Available",
-    "availableSub": "actively available",
     "new": "New",
     "newSub": "added this week",
     "inProgress": "In progress",
-    "inProgressSub": "ongoing procedures",
     "intake": "Intake planned",
     "intakeSub": "upcoming intakes",
     "tasks": "Tasks",
@@ -174,9 +172,6 @@
   },
   "modal": {
     "title": "Add candidate",
-    "selectTypeFirst": "Select the type first",
-    "linkVacancy": "Link to vacancy",
-    "noVacancies": "No vacancies found",
     "newPrefix": "New",
     "candidateData": "Candidate details",
     "fillRequired": "Fill in the required fields",
@@ -229,12 +224,10 @@
       "other": "Other / not specified"
     },
     "vacancyFallback": "Vacancy {{id}}",
-    "statusPanelTitle": "Status",
     "statusPanelHint": "Defaults to Lead. A new candidate starts as a Lead."
   },
   "drawer": {
     "availability": "Availability",
-    "availabilityNone": "None",
     "label": "Candidate",
     "tabs": {
       "profile": "Profile",
@@ -256,8 +249,6 @@
     "tags": "Tags",
     "lastContact": "Last contact",
     "notRegistered": "not registered yet",
-    "currentCv": "Current CV",
-    "uploadCv": "Upload CV",
     "downloadCv": "Download CV",
     "generating": "Generating...",
     "edit": "Edit",
@@ -926,6 +917,9 @@
       "linked": "Linked",
       "notGeocoded": "Not yet geocoded",
       "autoInfo": "Coordinates update automatically whenever the address changes.",
+      "updatedAt": "Updated {{date}}",
+      "updatedAtBy": "Updated {{date}} · requested by {{name}}",
+      "requestedAtBy": "Requested {{date}} by {{name}}",
       "refresh": "Refresh",
       "refreshing": "Refreshing…",
       "refreshStarted": "PDOK update started — coordinates will appear shortly",

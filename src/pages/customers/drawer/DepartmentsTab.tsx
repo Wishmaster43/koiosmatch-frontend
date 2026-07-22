@@ -39,7 +39,7 @@ export default function DepartmentsTab({ departments = [], contacts = [], locati
     { key: 'name', header: t('departments.col.name'), sortable: true, sortValue: d => d.name,
       render: d => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Building size={14} color="#8B5CF6" style={{ flexShrink: 0 }} />
+          <Building size={14} color="var(--color-violet)" style={{ flexShrink: 0 }} />
           <span style={{ color: 'var(--text)' }}>{d.name}</span>
         </div>
       ) },

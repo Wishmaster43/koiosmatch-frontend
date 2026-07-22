@@ -193,9 +193,7 @@
     "pickClientFirst": "Pick a client first",
     "skills": "Required skills",
     "addSkill": "Add skill",
-    "noSkills": "No skills yet.",
-    "description": "Description",
-    "descriptionPlaceholder": "Describe the position…"
+    "description": "Description"
   },
   "aiagent": {
     "pickerLabel": "AI agent",
@@ -212,8 +210,20 @@
       "confirm": "Also have the agent pick up this vacancy's existing applicants? This sends WhatsApp messages.",
       "confirmWithCount_one": "Also have the agent pick up this vacancy's {{count}} existing applicant? This sends WhatsApp messages.",
       "confirmWithCount_other": "Also have the agent pick up this vacancy's {{count}} existing applicants? This sends WhatsApp messages.",
-      "resultToast": "{{started}} started, {{skipped}} skipped.",
-      "unavailable": "Starting interviews for existing applicants isn't available yet — waiting on the backend link."
+      "resultToast": "{{started}} of {{eligibleTotal}} started.",
+      "resultToastWithReasons": "{{started}} of {{eligibleTotal}} started — {{skippedTotal}} skipped: {{reasons}}.",
+      "unavailable": "Starting interviews for existing applicants isn't available yet — waiting on the backend link.",
+      "reasons": {
+        "no_mobile_or_consent": "no WhatsApp consent",
+        "already_has_session": "already running",
+        "no_active_connection": "no active connection",
+        "rejected_stage": "rejected",
+        "placed_stage": "already placed",
+        "no_active_flow": "no active flow",
+        "no_candidate": "no candidate",
+        "send_failed": "sending failed",
+        "error": "unexpected error"
+      }
     }
   },
   "generate": {
@@ -245,8 +255,6 @@
       "hidden": "Hidden"
     },
     "customFields": "Custom fields",
-    "noCustomFields": "No custom fields configured.",
-    "integrate": "Integrate",
     "publishedOn": "Published",
     "notPublished": "Not published",
     "queuedOn": "Queued",
@@ -268,7 +276,6 @@
     "title": "Conversion",
     "conversionRate": "Conversion rate",
     "appliedToHired": "Applied → hired",
-    "bySource": "By source",
     "leadsToApplications": "Leads → applications",
     "ofLeads": "{{count}} leads",
     "daysOpen": "Days open",

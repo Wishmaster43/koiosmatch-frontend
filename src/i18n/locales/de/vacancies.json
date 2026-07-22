@@ -175,9 +175,7 @@
     "category": "Kategorie",
     "skills": "Erforderliche Fähigkeiten",
     "addSkill": "Fähigkeit hinzufügen",
-    "noSkills": "Noch keine Fähigkeiten.",
     "description": "Beschreibung",
-    "descriptionPlaceholder": "Beschreibe die Stelle…",
     "contractType": "Vertragsart",
     "experienceFrom": "Von (Jahre)",
     "experienceTo": "Bis (Jahre)",
@@ -212,8 +210,20 @@
       "confirm": "Sollen die bestehenden Bewerber dieser Stelle auch vom Agenten übernommen werden? Dies verschickt WhatsApp-Nachrichten.",
       "confirmWithCount_one": "Soll {{count}} bestehender Bewerber dieser Stelle auch vom Agenten übernommen werden? Dies verschickt WhatsApp-Nachrichten.",
       "confirmWithCount_other": "Sollen {{count}} bestehende Bewerber dieser Stelle auch vom Agenten übernommen werden? Dies verschickt WhatsApp-Nachrichten.",
-      "resultToast": "{{started}} gestartet, {{skipped}} übersprungen.",
-      "unavailable": "Interview für bestehende Bewerber starten ist noch nicht verfügbar — wartet auf die Backend-Anbindung."
+      "resultToast": "{{started}} von {{eligibleTotal}} gestartet.",
+      "resultToastWithReasons": "{{started}} von {{eligibleTotal}} gestartet — {{skippedTotal}} übersprungen: {{reasons}}.",
+      "unavailable": "Interview für bestehende Bewerber starten ist noch nicht verfügbar — wartet auf die Backend-Anbindung.",
+      "reasons": {
+        "no_mobile_or_consent": "keine WhatsApp-Zustimmung",
+        "already_has_session": "läuft bereits",
+        "no_active_connection": "keine aktive Verbindung",
+        "rejected_stage": "abgelehnt",
+        "placed_stage": "bereits platziert",
+        "no_active_flow": "kein aktiver Flow",
+        "no_candidate": "kein Kandidat",
+        "send_failed": "Versand fehlgeschlagen",
+        "error": "unerwarteter Fehler"
+      }
     }
   },
   "generate": {
@@ -245,8 +255,6 @@
       "hidden": "Ausgeblendet"
     },
     "customFields": "Benutzerdefinierte Felder",
-    "noCustomFields": "Keine benutzerdefinierten Felder konfiguriert.",
-    "integrate": "Integrieren",
     "publishedOn": "Veröffentlicht",
     "notPublished": "Nicht veröffentlicht",
     "queuedOn": "Vorgemerkt",
@@ -268,7 +276,6 @@
     "title": "Konversion",
     "conversionRate": "Konversionsrate",
     "appliedToHired": "Beworben → eingestellt",
-    "bySource": "Nach Quelle",
     "leadsToApplications": "Leads → Bewerbungen",
     "ofLeads": "{{count}} Leads",
     "daysOpen": "Tage offen",
