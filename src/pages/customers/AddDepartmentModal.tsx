@@ -1,9 +1,11 @@
 /**
  * AddDepartmentModal — create (or edit, via `initial`) a department. Full field set
  * CustomerDepartmentController accepts: location (required — a department always
- * lives under a location), name, description, status. One component serves both the
- * top-level Afdelingen tab AND the location detail's nested list (Danny: "reuse the
- * same components, don't fork") — `lockLocation` hides the location picker when
+ * lives under a location), name, description, status, cost centre (Danny 2026-07-22
+ * — the middle afdeling>locatie>klant cascade level; no billing email here, that
+ * stays customer-only, see OverviewTab). One component serves both the top-level
+ * Afdelingen tab AND the location detail's nested list (Danny: "reuse the same
+ * components, don't fork") — `lockLocation` hides the location picker when
  * creating one scoped to a specific location (it's implied, not user-chosen there).
  */
 import { useState } from 'react'
@@ -23,6 +25,7 @@ interface LocationOption { id: Id; name: string }
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
   name: 'name', location_id: 'locationId', description: 'description', status_id: 'statusId',
+  cost_center: 'costCenter',
 }
 
 export default function AddDepartmentModal({ onClose, onCreate, locations = [], customerName, statuses = [], initial, lockLocationId }: {
@@ -42,6 +45,9 @@ export default function AddDepartmentModal({ onClose, onCreate, locations = [], 
     name: initial?.name ?? '',
     locationId: initial?.locationId ?? lockLocationId ?? locations[0]?.id ?? '',
     description: initial?.description ?? '',
+    // Kostenplaats (Danny 2026-07-22) — the middle cascade level; settable on
+    // create too, not just via the DepartmentDetail edit path.
+    costCenter: initial?.costCenter ?? '',
     statusId: initial?.statusId ?? (statuses[0]?.id as string | undefined) ?? null,
     customFields: initial?.customFields ?? {},
   })
@@ -138,6 +144,14 @@ export default function AddDepartmentModal({ onClose, onCreate, locations = [], 
           <div>
             <Field label={t('subModal.status')}>
               <SelectField value={form.statusId ? String(form.statusId) : ''} onChange={v => set('statusId', v || null)} placeholder={t('subModal.selectStatus')} options={statusOptions} />
+            </Field>
+          </div>
+
+          {/* Kostenplaats (Danny 2026-07-22) — reuses the shared subModal.costCenter
+              label (same field as AddLocationModal, one translation source). */}
+          <div>
+            <Field label={t('subModal.costCenter')}>
+              <TextField value={form.costCenter} onChange={v => set('costCenter', v)} />
             </Field>
           </div>
         </div>

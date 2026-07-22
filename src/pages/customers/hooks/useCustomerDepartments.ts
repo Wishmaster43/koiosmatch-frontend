@@ -20,6 +20,9 @@ export interface DepartmentPayload {
   name: string
   locationId: Id | string
   description: string
+  // Kostenplaats (Danny 2026-07-22) — the middle cascade level (afdeling > locatie
+  // > klant); no billingEmail here, facturatie stays the customer's own.
+  costCenter: string
   statusId: Id | null
   // Tenant custom-field values (§3B "Eigen velden" — the Extra sub-tab).
   customFields: Record<string, unknown>
@@ -31,6 +34,7 @@ const toApi = (p: Partial<DepartmentPayload>) => ({
   ...(p.name !== undefined ? { name: p.name } : {}),
   ...(p.locationId !== undefined ? { location_id: p.locationId } : {}),
   ...(p.description !== undefined ? { description: p.description } : {}),
+  ...(p.costCenter !== undefined ? { cost_center: p.costCenter } : {}),
   ...(p.statusId !== undefined ? { status_id: p.statusId || null } : {}),
   ...(p.customFields !== undefined ? { custom_fields: p.customFields } : {}),
 })

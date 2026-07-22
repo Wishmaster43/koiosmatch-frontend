@@ -34,6 +34,8 @@ export function mapDepartment(d: ApiDepartment = {}): Department {
     locationId: d.location_id ?? d.locationId ?? null,
     locationName: d.location_name ?? d.location?.name ?? d.locationName ?? '',
     contacts: (d.contacts ?? []).map(mapContact),
+    // Kostenplaats (Danny 2026-07-22) — the middle cascade level.
+    costCenter: d.cost_center ?? '',
     statusId: d.status_id ?? null,
     ...mapStatusRef(d.status),
     customFields: d.custom_fields ?? {},
@@ -156,6 +158,10 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     hasCareerPage: Boolean(c.has_career_page),
     showInVacancies: Boolean(c.show_in_my_vacancies),
     excludeFromSourcing: Boolean(c.exclude_from_sourcing),
+    // Kostenplaats + facturatie-email (Danny 2026-07-22) — the top of the cost-
+    // centre cascade and the ONE source billing email always reads from.
+    costCenter: c.cost_center ?? '',
+    billingEmail: c.billing_email ?? '',
     tags: c.tags ?? [],
     // Archived = soft-deleted (deleted_at). Off by default in the list; the
     // "Gearchiveerd" view opts in via ?include_archived=1.

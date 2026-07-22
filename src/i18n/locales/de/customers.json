@@ -102,7 +102,10 @@
     "excludeFromSourcing": "Vom Sourcing ausschließen",
     "privacyPolicyUrl": "URL Datenschutzerklärung",
     "description": "Beschreibung",
-    "recruitmentProblems": "Recruiting-Herausforderungen"
+    "recruitmentProblems": "Recruiting-Herausforderungen",
+    "billing": "Abrechnung",
+    "costCenter": "Kostenstelle",
+    "billingEmail": "Rechnungs-E-Mail"
   },
   "richText": {
     "empty": "Noch nicht ausgefüllt."
@@ -139,7 +142,6 @@
       "email": "E-Mail",
       "billingTitle": "Abrechnung",
       "costCenter": "Kostenstelle",
-      "billingEmail": "Rechnungs-E-Mail",
       "departmentsHere": "Abteilungen an diesem Standort",
       "contactsHere": "Kontakte an diesem Standort",
       "none": "Noch nichts verknüpft",
@@ -170,6 +172,7 @@
       "infoTitle": "Abteilung",
       "name": "Name",
       "location": "Standort",
+      "costCenter": "Kostenstelle",
       "description": "Beschreibung",
       "contactsHere": "Kontakte in dieser Abteilung",
       "none": "Noch nichts verknüpft",
@@ -406,7 +409,6 @@
     "coc": "Handelsregisternr.",
     "vat": "USt-IdNr.",
     "costCenter": "Kostenstelle",
-    "billingEmail": "Rechnungs-E-Mail",
     "groups": {
       "general": "Allgemein",
       "address": "Adresse",

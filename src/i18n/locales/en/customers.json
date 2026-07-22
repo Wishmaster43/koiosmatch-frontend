@@ -102,7 +102,10 @@
     "excludeFromSourcing": "Exclude from sourcing",
     "privacyPolicyUrl": "Privacy policy URL",
     "description": "Description",
-    "recruitmentProblems": "Recruitment challenges"
+    "recruitmentProblems": "Recruitment challenges",
+    "billing": "Billing",
+    "costCenter": "Cost center",
+    "billingEmail": "Billing email"
   },
   "richText": {
     "empty": "Not filled in yet."
@@ -139,7 +142,6 @@
       "email": "Email",
       "billingTitle": "Billing",
       "costCenter": "Cost center",
-      "billingEmail": "Billing email",
       "departmentsHere": "Departments at this location",
       "contactsHere": "Contacts at this location",
       "none": "Nothing linked yet",
@@ -170,6 +172,7 @@
       "infoTitle": "Department",
       "name": "Name",
       "location": "Location",
+      "costCenter": "Cost center",
       "description": "Description",
       "contactsHere": "Contacts in this department",
       "none": "Nothing linked yet",
@@ -406,7 +409,6 @@
     "coc": "CoC number",
     "vat": "VAT number",
     "costCenter": "Cost center",
-    "billingEmail": "Billing email",
     "groups": {
       "general": "General",
       "address": "Address",

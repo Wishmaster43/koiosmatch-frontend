@@ -2,17 +2,19 @@
  * MatchPlacementModal — covers Danny's candidate-100% wave, part 3: the wider
  * two-column panel stays typeable/searchable on the relational pickers (job 17/18,
  * allowCreate={false} — never a free-text create for a real customer/location id),
- * the start date proposes TODAY (job 19), cost centre + billing email propose from
- * the customer→location cascade and FREEZE the moment the recruiter edits them by
- * hand (job 21/22 — the pre-existing bug where a location pick unconditionally
- * clobbered a manual edit), and the opmerkingen field is the shared rich-text
- * block, not a bare textarea (job 23). Also covers the Vestiging default (7.4:
- * proposes the customer's own branch, overridable, sent as branch_id) and the
- * end-date proposal from the picked contract type's default duration (7.1,
- * freezes on manual edit). RichTextEditor's own Tiptap internals are out of scope
- * here (stubbed, mirrors EditableRichTextField.test.tsx); the relational hooks
- * that hit the network (react-query) are mocked directly so the test doesn't
- * need a QueryClientProvider.
+ * the start date proposes TODAY (job 19), cost centre proposes from the customer→
+ * location→department cascade's deepest picked level and FREEZES the moment the
+ * recruiter edits it by hand (job 21/22 — the pre-existing bug where a location
+ * pick unconditionally clobbered a manual edit); billing email does NOT cascade
+ * like that (Danny 2026-07-22) — it is ALWAYS the customer's own address, no
+ * matter which location/department is picked, and still freezes on manual edit.
+ * Also covers the opmerkingen field being the shared rich-text block, not a bare
+ * textarea (job 23), the Vestiging default (7.4: proposes the customer's own
+ * branch, overridable, sent as branch_id) and the end-date proposal from the
+ * picked contract type's default duration (7.1, freezes on manual edit).
+ * RichTextEditor's own Tiptap internals are out of scope here (stubbed, mirrors
+ * EditableRichTextField.test.tsx); the relational hooks that hit the network
+ * (react-query) are mocked directly so the test doesn't need a QueryClientProvider.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, within, fireEvent } from '@testing-library/react'
@@ -20,12 +22,14 @@ import userEvent from '@testing-library/user-event'
 import MatchPlacementModal from './MatchPlacementModal'
 import api from '@/lib/api'
 
-// A minimal customer fixture exercising all three cascade levels: the customer's
-// OWN cost centre/billing email/branch, a location that overrides both, and a
-// location with neither (falls back to the customer) — plus one department
-// (job 21/22 notes departments don't carry these fields yet, a BE gap, so none
-// is seeded here). branch_id (job 7.4) is the customer's own establishment —
-// the Vestiging picker's default PROPOSAL once this customer is picked.
+// A minimal customer fixture exercising the cost-centre cascade levels: the
+// customer's OWN cost centre/billing email/branch, a location that overrides
+// cost centre (and carries its own billing_email too — used to prove billing
+// does NOT read from it, Danny 2026-07-22), and a location with no cost centre
+// of its own (falls back to the customer) — plus one department (job 21/22
+// notes departments don't carry these fields yet, a BE gap, so none is seeded
+// here). branch_id (job 7.4) is the customer's own establishment — the
+// Vestiging picker's default PROPOSAL once this customer is picked.
 const { mockCustomer } = vi.hoisted(() => ({
   mockCustomer: {
     id: 'cust-1', name: 'Zorggroep A',
@@ -202,7 +206,7 @@ describe('MatchPlacementModal · cost centre / billing email cascade (job 21/22)
     expect(screen.getByDisplayValue('klant@factuur.nl')).toBeInTheDocument()
   })
 
-  it('the deepest picked level (location) overrides the customer default', async () => {
+  it('cost centre follows the deepest picked level (location), but billing email stays the customer\'s (Danny 2026-07-22)', async () => {
     const user = userEvent.setup()
     render(<MatchPlacementModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
     await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
@@ -211,7 +215,10 @@ describe('MatchPlacementModal · cost centre / billing email cascade (job 21/22)
     await user.click(screen.getByRole('button', { name: 'placement.pickLocation' }))
     await user.click(screen.getByRole('button', { name: 'Locatie Noord' }))
     expect(await screen.findByDisplayValue('KP-LOC1')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('loc1@factuur.nl')).toBeInTheDocument()
+    // Billing NEVER cascades — the location's own billing_email ('loc1@factuur.nl')
+    // must NOT surface here; the customer's stays the only source, always.
+    expect(screen.getByDisplayValue('klant@factuur.nl')).toBeInTheDocument()
+    expect(screen.queryByDisplayValue('loc1@factuur.nl')).toBeNull()
   })
 
   it('never overwrites a manually-edited cost centre after a later location pick (the fixed bug)', async () => {

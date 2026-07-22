@@ -16,14 +16,23 @@ export const API_TO_FORM: Record<string, string> = {
   remarks: 'remarks', vacancy_id: 'vacancyId', owner_id: 'ownerId', branch_id: 'branchId',
 }
 
-// Deepest-first takeover-default lookup for one field (afdeling > locatie > klant):
-// returns whichever picked level carries a non-empty value, else ''. Department-
-// level values are simply undefined until the BE ships the columns, so this
-// silently falls through to location/customer — no special-casing needed here.
-export function cascadeValue(detail: CustomerCascadeDetail | null, locationId: string, departmentId: string, field: 'cost_center' | 'billing_email'): string {
+// Deepest-first takeover-default lookup for the COST-CENTRE field only (afdeling >
+// locatie > klant): returns whichever picked level carries a non-empty value, else
+// ''. Department-level values are simply undefined until the BE ships the columns,
+// so this silently falls through to location/customer — no special-casing needed
+// here. Billing email does NOT cascade like this — see customerBillingEmail below.
+export function cascadeValue(detail: CustomerCascadeDetail | null, locationId: string, departmentId: string): string {
   const loc = detail?.locations?.find(l => String(l.id) === locationId)
   const dept = loc?.departments?.find(d => String(d.id) === departmentId)
-  return dept?.[field] || loc?.[field] || detail?.[field] || ''
+  return dept?.cost_center || loc?.cost_center || detail?.cost_center || ''
+}
+
+// Billing email is ALWAYS the customer's own billing_email, never the picked
+// location's/department's (Danny 2026-07-22: "facturatie blijft het facturatie-
+// adres dat aan de klant gekoppeld zit") — unlike cost-centre this field never
+// cascades, regardless of which level the recruiter selected.
+export function customerBillingEmail(detail: CustomerCascadeDetail | null): string {
+  return detail?.billing_email || ''
 }
 
 // Today as an input[type=date] value (YYYY-MM-DD) — the start-date PROPOSAL

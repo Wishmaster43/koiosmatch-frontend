@@ -35,6 +35,8 @@ const FIELD_MAP: Record<string, string> = {
   toneOfVoice: 'tone_of_voice', description: 'description', recruitmentProblems: 'recruitment_problems',
   privacyPolicyUrl: 'privacy_policy_url', hideCompanyName: 'hide_company_name', hasCareerPage: 'has_career_page',
   showInVacancies: 'show_in_my_vacancies', excludeFromSourcing: 'exclude_from_sourcing', tags: 'tags',
+  // Kostenplaats + facturatie-email (Danny 2026-07-22) — the customer-level source.
+  costCenter: 'cost_center', billingEmail: 'billing_email',
   // §3B "Eigen velden" — the Extra tab patches the full merged map at once.
   customFields: 'custom_fields',
 }

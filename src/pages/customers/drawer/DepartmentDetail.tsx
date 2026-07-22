@@ -5,7 +5,9 @@
  * block) · Contactpersonen — default Gegevens. Full edit via the shared
  * EditableFieldTable house pattern (pencil → save/cancel): name, location (movable
  * per CustomerDepartmentController — `location_id` is `sometimes` on update),
- * status. Omschrijving is its own rich-text block (EditableRichTextField — own
+ * status, cost centre (Danny 2026-07-22 — the middle cascade level; billing email
+ * stays customer-only, see OverviewTab). Omschrijving is its own rich-text block
+ * (EditableRichTextField — own
  * pencil/save/cancel, RichTextEditor + SafeHtml), same pattern as the customer's
  * Teksten section — a bare textarea is no longer the house pattern for prose.
  * Delete asks for confirmation and fails soft (409 = in use) via the hook's own
@@ -46,11 +48,14 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   const [subTab, setSubTab] = useState<'data' | 'contacts' | 'extra'>('data')
 
   // Description lives in its own rich-text block below (EditableRichTextField),
-  // not in this field-table anymore.
+  // not in this field-table anymore. Kostenplaats (Danny 2026-07-22) is the
+  // middle cascade level (afdeling > locatie > klant) — no billing email here,
+  // facturatie always comes from the customer (see OverviewTab).
   const fields: FieldRow[] = [
     { key: 'name', label: t('departments.detail.name'), type: 'text' },
     { key: 'locationId', label: t('departments.detail.location'), type: 'select', options: locations.map(l => ({ value: String(l.id), label: l.name })) },
     { key: 'statusId', label: t('locations.detail.status'), type: 'select', options: statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label })) },
+    { key: 'costCenter', label: t('departments.detail.costCenter'), type: 'text' },
   ]
 
   // The read/edit values keyed like the fields above; locationId/statusId compare as strings.
@@ -58,10 +63,14 @@ export default function DepartmentDetail({ department, locations, statuses, cont
     name: department.name,
     locationId: department.locationId != null ? String(department.locationId) : '',
     statusId: department.statusId != null ? String(department.statusId) : '',
+    costCenter: department.costCenter,
   }
 
   const save = (v: Record<string, unknown>) => {
-    onSave(department.id as Id, { name: v.name as string, locationId: v.locationId as string, statusId: (v.statusId as string) || null })
+    onSave(department.id as Id, {
+      name: v.name as string, locationId: v.locationId as string, statusId: (v.statusId as string) || null,
+      costCenter: v.costCenter as string,
+    })
   }
   const saveDescription = (html: string) => onSave(department.id as Id, { description: html })
 

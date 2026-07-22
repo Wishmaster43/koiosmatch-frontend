@@ -102,7 +102,10 @@
     "excludeFromSourcing": "Excluir del sourcing",
     "privacyPolicyUrl": "URL política de privacidad",
     "description": "Descripción",
-    "recruitmentProblems": "Retos de contratación"
+    "recruitmentProblems": "Retos de contratación",
+    "billing": "Facturación",
+    "costCenter": "Centro de coste",
+    "billingEmail": "Correo de facturación"
   },
   "richText": {
     "empty": "Aún no completado."
@@ -139,7 +142,6 @@
       "email": "Correo electrónico",
       "billingTitle": "Facturación",
       "costCenter": "Centro de coste",
-      "billingEmail": "Correo de facturación",
       "departmentsHere": "Departamentos en esta ubicación",
       "contactsHere": "Contactos en esta ubicación",
       "none": "Nada vinculado aún",
@@ -170,6 +172,7 @@
       "infoTitle": "Departamento",
       "name": "Nombre",
       "location": "Ubicación",
+      "costCenter": "Centro de coste",
       "description": "Descripción",
       "contactsHere": "Contactos en este departamento",
       "none": "Nada vinculado aún",
@@ -406,7 +409,6 @@
     "coc": "N.º registro",
     "vat": "N.º IVA",
     "costCenter": "Centro de coste",
-    "billingEmail": "Correo de facturación",
     "groups": {
       "general": "General",
       "address": "Dirección",

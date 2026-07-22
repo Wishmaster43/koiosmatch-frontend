@@ -46,6 +46,9 @@ export interface Department {
   locationId: Id | null
   locationName: string
   contacts: Contact[]
+  // Kostenplaats — the middle cascade level (afdeling > locatie > klant, Danny
+  // 2026-07-22). No billingEmail here: facturatie is always the customer's own.
+  costCenter: string
   statusId: Id | null
   status: string
   statusLabel: string
@@ -127,6 +130,11 @@ export interface Customer {
   hasCareerPage: boolean
   showInVacancies: boolean
   excludeFromSourcing: boolean
+  // Kostenplaats + facturatie-email at the CUSTOMER level (Danny 2026-07-22):
+  // cost-centre is the top of the afdeling>locatie>klant cascade; billing email
+  // is the ONE source of truth for invoicing regardless of the picked level.
+  costCenter: string
+  billingEmail: string
   tags: unknown[]
   archived: boolean
   locations: Location[]
@@ -171,6 +179,8 @@ export interface ApiDepartment {
   id?: Id; reference_number?: string; name?: string; description?: string
   location_id?: Id; locationId?: Id; location_name?: string; location?: { name?: string }; locationName?: string
   departments?: ApiDepartment[]; contacts?: ApiContact[]
+  // Kostenplaats (Danny 2026-07-22) — no billing_email: facturatie stays customer-only.
+  cost_center?: string
   status?: ApiStatusRef | null; status_id?: Id | null
   custom_fields?: Record<string, unknown>
   [k: string]: unknown
@@ -204,6 +214,8 @@ export interface ApiCustomer {
   privacy_policy_url?: string; privacyPolicyUrl?: string
   hide_company_name?: unknown; has_career_page?: unknown
   show_in_my_vacancies?: unknown; exclude_from_sourcing?: unknown
+  // Kostenplaats + facturatie-email at the customer level (Danny 2026-07-22).
+  cost_center?: string; billing_email?: string
   tags?: unknown[]
   locations?: ApiLocation[]; departments?: ApiDepartment[]; contacts?: ApiContact[]; contact_persons?: ApiContact[]
   notes?: Array<{ id?: Id; type?: string; title?: string; text?: string; body?: string; created_at?: string; ago?: string }>

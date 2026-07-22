@@ -21,12 +21,14 @@ const row2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }
 const row3 = { display: 'grid', gridTemplateColumns: '1fr 90px 90px', gap: 12 }
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
+// No billing_email entry (Danny 2026-07-22): that field has no input here anymore
+// (facturatie always comes from the customer), so there is nothing to blame it on.
 const API_TO_FORM: Record<string, string> = {
   name: 'name', street: 'street', house_number: 'houseNumber', house_number_suffix: 'houseNumberSuffix',
   postcode: 'postalCode', city: 'city', state: 'state', country: 'country',
   coc_number: 'cocNumber', vat_number: 'vatNumber', contact_name: 'contactName',
   phone: 'phone', email: 'email', is_headquarter: 'isHeadquarter',
-  cost_center: 'costCenter', billing_email: 'billingEmail', status_id: 'statusId',
+  cost_center: 'costCenter', status_id: 'statusId',
 }
 
 export default function AddLocationModal({ onClose, onCreate, customerName, statuses = [], initial }: {
@@ -56,6 +58,9 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
     email: initial?.email ?? '',
     isHeadquarter: initial?.isHeadquarter ?? false,
     costCenter: initial?.costCenter ?? '',
+    // No billingEmail INPUT anymore (Danny 2026-07-22: facturatie always comes from
+    // the customer, see OverviewTab) — kept here only as an untouched passthrough so
+    // an edit-save round trip never clears whatever the record already had stored.
     billingEmail: initial?.billingEmail ?? '',
     statusId: initial?.statusId ?? (statuses[0]?.id as string | undefined) ?? null,
     customFields: initial?.customFields ?? {},
@@ -165,11 +170,11 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
             <Field label={t('subModal.phone')}><TextField value={form.phone} onChange={v => set('phone', v)} /></Field>
           </div>
 
-          {/* Facturatie. */}
+          {/* Facturatie — cost centre only (Danny 2026-07-22): billing email always
+              comes from the customer, so no input for it lives on the location. */}
           <div style={groupTitle}>{t('subModal.groups.billing')}</div>
-          <div style={{ ...row2, marginBottom: 4 }}>
+          <div style={{ marginBottom: 4 }}>
             <Field label={t('subModal.costCenter')}><TextField value={form.costCenter} onChange={v => set('costCenter', v)} /></Field>
-            <Field label={t('subModal.billingEmail')}><TextField type="email" value={form.billingEmail} onChange={v => set('billingEmail', v)} /></Field>
           </div>
         </div>
 

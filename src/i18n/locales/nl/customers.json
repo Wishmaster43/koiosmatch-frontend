@@ -102,7 +102,10 @@
     "excludeFromSourcing": "Uitsluiten van sourcing",
     "privacyPolicyUrl": "URL privacybeleid",
     "description": "Beschrijving",
-    "recruitmentProblems": "Wervingsproblemen"
+    "recruitmentProblems": "Wervingsproblemen",
+    "billing": "Facturatie",
+    "costCenter": "Kostenplaats",
+    "billingEmail": "Factuur e-mailadres"
   },
   "richText": {
     "empty": "Nog niet ingevuld."
@@ -139,7 +142,6 @@
       "email": "E-mailadres",
       "billingTitle": "Facturatie",
       "costCenter": "Kostenplaats",
-      "billingEmail": "Factuur e-mailadres",
       "departmentsHere": "Afdelingen op deze locatie",
       "contactsHere": "Contactpersonen op deze locatie",
       "none": "Nog niets gekoppeld",
@@ -170,6 +172,7 @@
       "infoTitle": "Afdeling",
       "name": "Naam",
       "location": "Locatie",
+      "costCenter": "Kostenplaats",
       "description": "Omschrijving",
       "contactsHere": "Contactpersonen op deze afdeling",
       "none": "Nog niets gekoppeld",
@@ -406,7 +409,6 @@
     "coc": "KvK-nummer",
     "vat": "BTW-nummer",
     "costCenter": "Kostenplaats",
-    "billingEmail": "Factuur e-mailadres",
     "groups": {
       "general": "Algemeen",
       "address": "Adres",

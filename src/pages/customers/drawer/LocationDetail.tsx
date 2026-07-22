@@ -92,10 +92,12 @@ export default function LocationDetail({
     { key: 'email', label: t('locations.detail.email'), type: 'text', group: t('locations.detail.contactTitle') },
     { key: 'phone', label: t('locations.detail.phone'), type: 'text', group: t('locations.detail.contactTitle') },
   ]
-  // Facturatie — its own sub-tab, own EditableFieldTable instance/pencil.
+  // Facturatie — its own sub-tab, own EditableFieldTable instance/pencil. No
+  // billingEmail input here (Danny 2026-07-22): facturatie ALWAYS comes from the
+  // customer regardless of the picked location, so an editable field here would
+  // be a misleading affordance (§3) — see OverviewTab for the real billing email.
   const billingFields: FieldRow[] = [
     { key: 'costCenter', label: t('locations.detail.costCenter'), type: 'text' },
-    { key: 'billingEmail', label: t('locations.detail.billingEmail'), type: 'text' },
   ]
 
   const values = {
@@ -104,7 +106,7 @@ export default function LocationDetail({
     postalCode: l.postalCode, city: l.city, state: l.state, country: l.country,
     cocNumber: l.cocNumber, vatNumber: l.vatNumber,
     contactName: l.contactName, email: l.email, phone: l.phone,
-    costCenter: l.costCenter, billingEmail: l.billingEmail,
+    costCenter: l.costCenter,
   }
 
   const save = (v: Record<string, unknown>) => {
@@ -114,7 +116,7 @@ export default function LocationDetail({
       postalCode: v.postalCode as string, city: v.city as string, state: v.state as string, country: v.country as string,
       cocNumber: v.cocNumber as string, vatNumber: v.vatNumber as string,
       contactName: v.contactName as string, email: v.email as string, phone: v.phone as string,
-      costCenter: v.costCenter as string, billingEmail: v.billingEmail as string,
+      costCenter: v.costCenter as string,
     })
   }
 
