@@ -1,4 +1,5 @@
 import { initialsOf } from '@/lib/initials'
+import { toCoord } from '@/lib/coords'
 import type { Id } from '@/types/common'
 import type {
   ApiContact, ApiDepartment, ApiLocation, ApiCustomer,
@@ -144,9 +145,10 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     ownerColor: owner.avatar_color ?? c.owner_color ?? null,
     city: c.city ?? '',
     // STRAAL-1: geocoded coordinates + radius distance from the server.
-    lat: typeof c.lat === 'number' ? c.lat : null,
-    lng: typeof c.lng === 'number' ? c.lng : null,
-    distanceKm: typeof c.distance_km === 'number' ? c.distance_km : null,
+    // PDOK-LATLNG-1: tolerant coercion — Laravel decimals arrive as strings (see lib/coords).
+    lat: toCoord(c.lat),
+    lng: toCoord(c.lng),
+    distanceKm: toCoord(c.distance_km),
     industry: (c.industry && typeof c.industry === 'object') ? (c.industry.name ?? '') : (c.industry ?? ''),
     website: c.website ?? '',
     employeeCount: c.employee_count ?? c.employeeCount ?? '',

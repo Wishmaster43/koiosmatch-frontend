@@ -19,6 +19,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
 import { useDateFormat } from '@/lib/datetime'
 import api, { unwrap } from '@/lib/api'
+import { toCoord } from '@/lib/coords'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import pdokIcon from '@/assets/integrations/pdok.png'
@@ -105,27 +106,31 @@ export default function IntegrationsTab({ c }: { c: Candidate }) {
       setPdokRefreshing(false)
       return
     }
-    // Poll a few times for the async job to land — stop early once coordinates
-    // appear or change vs. the original prop value; give up silently after 5 tries
-    // (the toast above already told the user the update started).
+    // PDOK-LATLNG-1 (CMBE 22-07): the 202 means "queued" — stop the spinner HERE
+    // (Danny saw an "eternal" spinner riding the whole poll) and refresh in the
+    // background: the job writes lat/lng within ~1s, so re-fetch at ~3s (one
+    // retry at 6s). Values are coerced via toCoord — Laravel sends decimals as
+    // strings, which the old !== comparison and the mapper both mishandled.
+    setPdokRefreshing(false)
     const baseLat = c.lat
     const baseLng = c.lng
-    for (let attempt = 0; attempt < 5 && mountedRef.current; attempt++) {
-      await new Promise(resolve => setTimeout(resolve, 2000))
+    for (const delayMs of [3000, 3000]) {
+      await new Promise(resolve => setTimeout(resolve, delayMs))
       if (!mountedRef.current) return
       try {
-        const fresh = unwrap<{ lat?: number | null; lng?: number | null }>(await api.get(`/candidates/${c.id}`))
+        const fresh = unwrap<{ lat?: unknown; lng?: unknown }>(await api.get(`/candidates/${c.id}`))
         if (!mountedRef.current) return
-        if (fresh?.lat != null && fresh?.lng != null && (fresh.lat !== baseLat || fresh.lng !== baseLng)) {
-          setCoordsOverride({ lat: fresh.lat, lng: fresh.lng })
-          break
+        const lat = toCoord(fresh?.lat)
+        const lng = toCoord(fresh?.lng)
+        if (lat != null && lng != null && (lat !== baseLat || lng !== baseLng)) {
+          setCoordsOverride({ lat, lng })
+          return
         }
       } catch {
         // Silent — a poll failure just keeps the last-known coordinates; the
         // manual trigger already reported "started" above.
       }
     }
-    if (mountedRef.current) setPdokRefreshing(false)
   }
 
   // Effective coordinates: the just-polled override wins, else the candidate prop.

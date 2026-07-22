@@ -1,4 +1,5 @@
 import { initialsOf } from '@/lib/initials'
+import { toCoord } from '@/lib/coords'
 import type { Id, Loose } from '@/types/common'
 import type { ApiVacancy, Vacancy, VacancyDetail } from '@/types/vacancy'
 
@@ -50,10 +51,11 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
     created: v.created_at ?? v.createdAt ?? '',
     createdSort: v.created_at ?? v.createdAt ?? '',
     // City + STRAAL-1 geo — the map view plots list rows once the API sends these.
+    // PDOK-LATLNG-1: tolerant coercion — Laravel decimals arrive as strings (see lib/coords).
     city: v.city ?? '',
-    lat: typeof v.lat === 'number' ? v.lat : null,
-    lng: typeof v.lng === 'number' ? v.lng : null,
-    distanceKm: typeof v.distance_km === 'number' ? v.distance_km : null,
+    lat: toCoord(v.lat),
+    lng: toCoord(v.lng),
+    distanceKm: toCoord(v.distance_km),
     // VAC-DATES-1: runtime window, already YYYY-MM-DD (Carbon::toDateString()) —
     // the exact shape a native <input type="date"> reads/writes.
     startDate: v.start_date ?? '',
@@ -145,10 +147,10 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
     // `country` yet (BE gap, CMBE follow-up), so `country` reads '' until that lands.
     province: raw.location_province ?? raw.province ?? '',
     country: raw.location_country ?? raw.country ?? '',
-    // STRAAL-1: geocoded coordinates + radius distance from the server.
-    lat: typeof raw.lat === 'number' ? raw.lat : null,
-    lng: typeof raw.lng === 'number' ? raw.lng : null,
-    distanceKm: typeof raw.distance_km === 'number' ? raw.distance_km : null,
+    // STRAAL-1: geocoded coordinates + radius distance from the server (tolerant, see lib/coords).
+    lat: toCoord(raw.lat),
+    lng: toCoord(raw.lng),
+    distanceKm: toCoord(raw.distance_km),
     experienceMin: numStr(raw.experience_min_years),
     experienceMax: numStr(raw.experience_max_years),
     salaryMin: numStr(raw.salary_min),

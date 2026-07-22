@@ -8,6 +8,7 @@
  * is intentionally light. The `?? ` fallbacks also keep the dummy data working.
  */
 import { initialsOf } from '@/lib/initials'
+import { toCoord } from '@/lib/coords'
 import type { ApiCandidate, Candidate, CandidatePool, CandidateBranch, CandidateMatch, CandidateBackofficeLink, Loose } from '@/types/candidate'
 
 // Bytes → human size ("44856" → "44 KB"). Backend sends documents.size in bytes.
@@ -118,9 +119,12 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     ownerInitials:   initialsOf(ownerName),
     city:            c.city ?? '',
     // STRAAL-1: PDOK-geocoded coordinates + the server's distance for a radius query.
-    lat:             typeof c.lat === 'number' ? c.lat : null,
-    lng:             typeof c.lng === 'number' ? c.lng : null,
-    distanceKm:      typeof c.distance_km === 'number' ? c.distance_km : null,
+    // PDOK-LATLNG-1 (CMBE bug 22-07): Laravel serialises decimal columns as STRINGS
+    // ("53.2185923"), so a typeof-number check mapped real coordinates to null and the
+    // PDOK panel showed "not geocoded" for geocoded candidates. Coerce tolerantly.
+    lat:             toCoord(c.lat),
+    lng:             toCoord(c.lng),
+    distanceKm:      toCoord(c.distance_km),
     // Acquisition source (website/facebook/…) — feeds the source filter once the list sends it.
     source:          (c.source as string | undefined) ?? null,
     province:        c.province ?? '',
