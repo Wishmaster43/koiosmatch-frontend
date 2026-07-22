@@ -844,6 +844,7 @@
     "function": "Función",
     "pickFunction": "Elige función",
     "owner": "Reclutador",
+    "branch": "Sucursal",
     "vacancyOptional": "Vacante (opcional)",
     "noVacancy": "Sin vacante",
     "contract": "Contrato",

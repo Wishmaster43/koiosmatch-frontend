@@ -77,6 +77,7 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
           creatingContact={form.creatingContact} setCreatingContact={form.setCreatingContact} nc={form.nc} setNc={form.setNc} saveContact={form.saveContact}
           func={form.func} setFunc={form.setFunc} functions={form.functions}
           ownerId={form.ownerId} setOwnerId={form.setOwnerId} users={form.users}
+          branchId={form.branchId} setBranchId={form.setBranchId} setBranchDirty={form.setBranchDirty} branchLocations={form.branchLocations}
           vacancyId={form.vacancyId} setVacancyId={form.setVacancyId} vacancyOptions={form.vacancyOptions}
           branchMismatch={form.branchMismatch} candBranch={form.candBranch} detail={form.detail}
           mismatchChoice={form.mismatchChoice} setMismatchChoice={form.setMismatchChoice}
@@ -93,7 +94,7 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
               contractType={form.contractType} setContractType={form.setContractType} contractTypes={form.contractTypes}
               cao={form.cao} setCao={form.setCao}
               startDate={form.startDate} setStartDate={form.setStartDate}
-              endDate={form.endDate} setEndDate={form.setEndDate}
+              endDate={form.endDate} setEndDate={form.setEndDate} setEndDateDirty={form.setEndDateDirty}
               hours={form.hours} setHours={form.setHours}
             />
           </div>

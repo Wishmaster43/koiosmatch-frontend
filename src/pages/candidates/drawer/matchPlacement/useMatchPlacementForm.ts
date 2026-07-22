@@ -10,7 +10,10 @@
  * (useBranchMismatch, useCascadeDefaults — each a self-contained concern). This
  * hook owns what's left: candidate/relations/contract/financial state, the
  * rate proposal (useRateProposal), inline contact creation, and the POST
- * /matches submit + 422 field mapping.
+ * /matches submit + 422 field mapping. The Vestiging default (useBranchDefault,
+ * 7.4) and the end-date proposal from contract type (useEndDateProposal, 7.1)
+ * are their own sibling hooks too — same reason as useCascadeDefaults/
+ * useBranchMismatch: each a self-contained propose-but-freeze-on-edit concern.
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -22,11 +25,14 @@ import { useCustomerOptions } from '@/pages/vacancies/hooks/useCustomerOptions'
 import { useVacancyOptions } from '@/pages/candidates/hooks/useVacancyOptions'
 import { useFunctions } from '@/lib/useFunctions'
 import { useContractTypes } from '@/lib/useContractTypes'
+import { useLocations } from '@/lib/useLocations'
 import { useRateProposal } from '@/pages/candidates/hooks/useRateProposal'
 import { useActionRulePreflight } from '@/components/actionrules'
 import { useCustomerCascade } from '@/hooks/useCustomerCascade'
 import { useBranchMismatch } from './useBranchMismatch'
 import { useCascadeDefaults } from './useCascadeDefaults'
+import { useBranchDefault } from './useBranchDefault'
+import { useEndDateProposal } from './useEndDateProposal'
 import { API_TO_FORM, todayISO } from './helpers'
 import type { Id } from '@/types/common'
 
@@ -55,7 +61,9 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, onClose, 
   }, [fixedCandidateId])
   const candidateId = fixedCandidateId ?? (pickedCandidateId || '')
   const { functions } = useFunctions()
-  const { types: contractTypes } = useContractTypes()
+  const { types: contractTypes, options: contractTypeOptions } = useContractTypes()
+  // Tenant establishments (7.4) — feeds both the Vestiging picker and its default proposal.
+  const branchLocations = useLocations()
 
   // AXIS-MATRIX-2 preflight (item 22, pattern-prover): POST /matches enforces
   // match.create against the candidate server-side (MatchController::store) —
@@ -78,6 +86,9 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, onClose, 
     setLocationId(''); setDepartmentId(''); setContactId('')
   }, [customerId])
   const departments = locations.find(l => String(l.id) === locationId)?.departments ?? []
+  // Vestiging PROPOSAL (7.4): customer branch > recruiter's own branch > tenant
+  // default — own sibling hook, freezes the moment the recruiter edits it by hand.
+  const { branchId, setBranchId, setBranchDirty } = useBranchDefault(detail, branchLocations)
 
   // Inline contact-create (Danny): when a customer has no matching contact, add one
   // and couple it to the picked location right here (POST /customers/{id}/contacts).
@@ -91,7 +102,9 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, onClose, 
   const [contractType, setContractType] = useState('')
   // Proposal, not a hard default — the recruiter can freely change it (job 19).
   const [startDate, setStartDate] = useState(todayISO)
-  const [endDate, setEndDate] = useState('')
+  // End-date PROPOSAL (7.1): from the picked contract type's default duration —
+  // own sibling hook, honest no-op until the BE column exists.
+  const { endDate, setEndDate, setEndDateDirty } = useEndDateProposal({ contractType, startDate, options: contractTypeOptions })
   const [hours, setHours] = useState('')
   const [cao, setCao] = useState('')
 
@@ -139,6 +152,7 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, onClose, 
       customer_location_id: locationId || null,
       customer_department_id: departmentId || null,
       contact_id: contactId || null,
+      branch_id: branchId || null,
       function_title: func,
       contract_type: contractType || null,
       start_date: startDate || null,
@@ -212,8 +226,9 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, onClose, 
     locationId, setLocationId, departmentId, setDepartmentId, contactId, setContactId,
     creatingContact, setCreatingContact, nc, setNc, saveContact,
     func, setFunc, vacancyId, setVacancyId, ownerId, setOwnerId,
+    branchId, setBranchId, setBranchDirty, branchLocations,
     branchMismatch, candBranch, mismatchChoice, setMismatchChoice,
-    contractType, setContractType, startDate, setStartDate, endDate, setEndDate, hours, setHours, cao, setCao,
+    contractType, setContractType, startDate, setStartDate, endDate, setEndDate, setEndDateDirty, hours, setHours, cao, setCao,
     scale, setScale, step, setStep, purchase, setPurchase, sell, setSell,
     costCenter, setCostCenter, setCostCenterDirty, billingEmails, setBillingEmails, setBillingDirty,
     remarks, setRemarks, remarksExpanded, setRemarksExpanded,

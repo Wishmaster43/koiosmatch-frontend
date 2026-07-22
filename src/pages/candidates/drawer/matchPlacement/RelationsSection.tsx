@@ -12,10 +12,11 @@ import type { TFunction } from 'i18next'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import SelectMenu from '@/components/ui/SelectMenu'
 import { FormField as F } from './FormField'
-import { lbl, errMsg, row2, pickerMenuWidth, input } from './styles'
+import { lbl, errMsg, row2, row3Even, pickerMenuWidth, input } from './styles'
 import type { CascadeOption, CascadeLocation, CascadeDepartment, CustomerCascadeDetail } from '@/hooks/useCustomerCascade'
 import type { CustomerOption } from '@/pages/vacancies/hooks/useCustomerOptions'
 import type { VacancyOption } from '@/pages/candidates/hooks/useVacancyOptions'
+import type { LocationOption } from '@/lib/useLocations'
 import type { Id } from '@/types/common'
 
 interface UserLike { id?: Id; name?: string }
@@ -34,6 +35,7 @@ export default function RelationsSection({
   creatingContact, setCreatingContact, nc, setNc, saveContact,
   func, setFunc, functions,
   ownerId, setOwnerId, users,
+  branchId, setBranchId, setBranchDirty, branchLocations,
   vacancyId, setVacancyId, vacancyOptions,
   branchMismatch, candBranch, detail, mismatchChoice, setMismatchChoice,
 }: {
@@ -48,6 +50,9 @@ export default function RelationsSection({
   nc: NewContact; setNc: Dispatch<SetStateAction<NewContact>>; saveContact: () => void
   func: string; setFunc: (v: string) => void; functions: string[]
   ownerId: string; setOwnerId: (v: string) => void; users: UserLike[]
+  // Vestiging picker (7.4) — the TENANT's own establishments, distinct from the
+  // customer-cascade `locations` above (a customer's nested address).
+  branchId: string; setBranchId: (v: string) => void; setBranchDirty: (v: boolean) => void; branchLocations: LocationOption[]
   vacancyId: string; setVacancyId: (v: string) => void; vacancyOptions: VacancyOption[]
   branchMismatch: boolean; candBranch: { id: Id | null; name: string } | null; detail: CustomerCascadeDetail | null
   mismatchChoice: 'placement' | 'candidate'; setMismatchChoice: (v: 'placement' | 'candidate') => void
@@ -113,9 +118,10 @@ export default function RelationsSection({
           {errors.contactId && <div style={errMsg}>{t('common:required')}</div>}
         </div>
       </div>
-      <div style={row2}>
+      <div style={row3Even}>
         {/* Functie — searchable (tenant lookup, can run to dozens of job titles);
-            Recruiter stays a plain SelectMenu (small, not in job 18's long-list scope). */}
+            Recruiter/Vestiging stay a plain SelectMenu (small lists, not in job 18's
+            long-list scope). */}
         <F label={t('placement.function')} error={errors.func}>
           <CreatableSelect value={func || null} onChange={setFunc} allowCreate={false}
             placeholder={t('placement.pickFunction')} menuWidth={pickerMenuWidth}
@@ -124,6 +130,14 @@ export default function RelationsSection({
         <F label={t('placement.owner')} error={errors.ownerId}>
           <SelectMenu value={ownerId || null} onChange={setOwnerId} placeholder={t('placement.optional')}
             options={users.map(u => ({ value: String(u.id), label: u.name ?? '—' }))} />
+        </F>
+        {/* Vestiging (7.4) — proposes from the customer's own branch, then the
+            recruiter's, then the tenant default (useBranchDefault); editing it by
+            hand freezes the proposal (setBranchDirty), same pattern as cost centre. */}
+        <F label={t('placement.branch')} error={errors.branchId}>
+          <SelectMenu value={branchId || null} onChange={v => { setBranchDirty(true); setBranchId(v) }}
+            placeholder={t('placement.optional')}
+            options={branchLocations.map(l => ({ value: String(l.value), label: l.label }))} />
         </F>
       </div>
       {/* Vacature — searchable, mirrors PlanIntakeModal's vacancy picker. */}

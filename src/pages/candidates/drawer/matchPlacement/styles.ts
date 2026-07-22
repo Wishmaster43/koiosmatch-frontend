@@ -18,6 +18,9 @@ export const row2: React.CSSProperties = { display: 'grid', gridTemplateColumns:
 // S24c ("alle info leesbaar zonder scrollen"): a compact third column for short
 // numeric cells (uren p/w, marge) so those no longer cost a whole extra row each.
 export const row3: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr 110px', gap: 14 }
+// Three EVEN columns (job 7.4: the Vestiging picker joins Functie/Eigenaar) —
+// distinct from row3, whose third slot is a narrow fixed width for short numeric cells.
+export const row3Even: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }
 export const errMsg: React.CSSProperties = { fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }
 
 // Section-level two-column layout (punt C.2.1): Contract + Financieel sit SIDE BY

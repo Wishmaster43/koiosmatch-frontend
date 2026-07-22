@@ -48,7 +48,7 @@ import { VacancyStatusSettings, VacancyPhaseSettings, VacancySenioritySettings, 
 import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
 import MatchTemplatesSettings from './sections/MatchTemplatesSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
-import { MatchStatusSettings } from './sections/MatchSettings'
+import { MatchStatusSettings, ContractTypesSettings } from './sections/MatchSettings'
 import { AppointmentTypeSettings } from './sections/AppointmentTypeSettings'
 import { AppointmentLocationSettings } from './sections/AppointmentLocationSettings'
 import { SkillLevelSettings } from './sections/SkillLevelSettings'
@@ -245,6 +245,7 @@ export const NAV_GROUPS = [
     key: 'matches', icon: Sparkles,
     items: [
       { id: 'match_statuses', icon: Tags, component: MatchStatusSettings },
+      { id: 'contract_types', icon: FileText, component: ContractTypesSettings },
       { id: 'appointment_types', icon: CalendarCheck, component: AppointmentTypeSettings },
       { id: 'appointment_locations', icon: MapPin, component: AppointmentLocationSettings },
       { id: 'match_display', icon: Palette, schema: matchDisplay },

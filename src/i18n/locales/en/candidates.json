@@ -844,6 +844,7 @@
     "function": "Function",
     "pickFunction": "Pick function",
     "owner": "Recruiter",
+    "branch": "Branch",
     "vacancyOptional": "Vacancy (optional)",
     "noVacancy": "No vacancy",
     "contract": "Contract",

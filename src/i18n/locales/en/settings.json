@@ -141,6 +141,7 @@
     "matches": "Matches",
     "outreach": "Call lists",
     "match_statuses": "Statuses",
+    "contract_types": "Contract types",
     "outreach_statuses": "Statuses",
     "task_types": "Activity types",
     "task_priorities": "Priorities",
@@ -573,7 +574,11 @@
     "statusSubtitle": "Manage the match statuses (status + colour).",
     "statusAdd": "Add status",
     "flagClosed": "Closes the match",
-    "flagClosedDesc": "A match in this status is ended (end date set, no longer counts as open)."
+    "flagClosedDesc": "A match in this status is ended (end date set, no longer counts as open).",
+    "contractTypeTitle": "Contract types",
+    "contractTypeSubtitle": "Manage the contract types and their default duration.",
+    "contractTypeAdd": "Add contract type",
+    "contractTypeDurationLabel": "Duration (days)"
   },
   "outreach": {
     "statusTitle": "Statuses",

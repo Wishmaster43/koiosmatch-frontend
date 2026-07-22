@@ -844,6 +844,7 @@
     "function": "Funktion",
     "pickFunction": "Funktion wählen",
     "owner": "Recruiter",
+    "branch": "Niederlassung",
     "vacancyOptional": "Stelle (optional)",
     "noVacancy": "Keine Stelle",
     "contract": "Vertrag",

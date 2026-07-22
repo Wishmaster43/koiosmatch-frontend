@@ -844,6 +844,7 @@
     "function": "Fonction",
     "pickFunction": "Choisir fonction",
     "owner": "Recruteur",
+    "branch": "Agence",
     "vacancyOptional": "Poste (facultatif)",
     "noVacancy": "Aucun poste",
     "contract": "Contrat",

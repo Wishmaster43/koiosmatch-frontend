@@ -13,7 +13,7 @@ export const API_TO_FORM: Record<string, string> = {
   function_title: 'func', contract_type: 'contractType', start_date: 'startDate', end_date: 'endDate',
   hours_per_week: 'hours', cao: 'cao', scale: 'scale', step: 'step',
   purchase_rate: 'purchase', sell_rate: 'sell', cost_center: 'costCenter', billing_emails: 'billingEmails',
-  remarks: 'remarks', vacancy_id: 'vacancyId', owner_id: 'ownerId',
+  remarks: 'remarks', vacancy_id: 'vacancyId', owner_id: 'ownerId', branch_id: 'branchId',
 }
 
 // Deepest-first takeover-default lookup for one field (afdeling > locatie > klant):
@@ -30,6 +30,15 @@ export function cascadeValue(detail: CustomerCascadeDetail | null, locationId: s
 // (job 19); the recruiter can still change it, it's just a sensible default.
 export function todayISO(): string {
   const d = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+// Add N days to an input[type=date] value (YYYY-MM-DD) — the end-date PROPOSAL
+// (7.1) from the picked contract type's default duration.
+export function addDays(iso: string, days: number): string {
+  const d = new Date(`${iso}T00:00:00`)
+  d.setDate(d.getDate() + days)
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }

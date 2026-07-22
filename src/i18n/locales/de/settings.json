@@ -144,6 +144,7 @@
     "matches": "Matches",
     "outreach": "Anruflisten",
     "match_statuses": "Status",
+    "contract_types": "Vertragsarten",
     "outreach_statuses": "Status",
     "task_types": "Aktivitätstypen",
     "task_priorities": "Prioritäten",
@@ -1438,7 +1439,11 @@
     "statusSubtitle": "Verwalte die Match-Status (Status + Farbe).",
     "statusAdd": "Status hinzufügen",
     "flagClosed": "Schließt das Match",
-    "flagClosedDesc": "Ein Match mit diesem Status ist beendet (Enddatum gesetzt, zählt nicht mehr als offen)."
+    "flagClosedDesc": "Ein Match mit diesem Status ist beendet (Enddatum gesetzt, zählt nicht mehr als offen).",
+    "contractTypeTitle": "Vertragsarten",
+    "contractTypeSubtitle": "Verwalte die Vertragsarten und ihre Standardlaufzeit.",
+    "contractTypeAdd": "Vertragsart hinzufügen",
+    "contractTypeDurationLabel": "Laufzeit (Tage)"
   },
   "outreach": {
     "statusTitle": "Status",

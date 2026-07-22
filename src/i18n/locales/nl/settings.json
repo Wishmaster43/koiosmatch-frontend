@@ -141,6 +141,7 @@
     "matches": "Matches",
     "outreach": "Bellijsten",
     "match_statuses": "Statussen",
+    "contract_types": "Contractsoorten",
     "outreach_statuses": "Statussen",
     "task_types": "Activiteit-types",
     "task_priorities": "Prioriteiten",
@@ -573,7 +574,11 @@
     "statusSubtitle": "Beheer de match-statussen (status + kleur).",
     "statusAdd": "Status toevoegen",
     "flagClosed": "Sluit de match",
-    "flagClosedDesc": "Een match in deze status is beëindigd (einddatum gezet, telt niet meer als open)."
+    "flagClosedDesc": "Een match in deze status is beëindigd (einddatum gezet, telt niet meer als open).",
+    "contractTypeTitle": "Contractsoorten",
+    "contractTypeSubtitle": "Beheer de contractsoorten en hun standaard looptijd.",
+    "contractTypeAdd": "Contractsoort toevoegen",
+    "contractTypeDurationLabel": "Looptijd (dagen)"
   },
   "outreach": {
     "statusTitle": "Statussen",

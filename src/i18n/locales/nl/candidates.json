@@ -844,6 +844,7 @@
     "function": "Functie",
     "pickFunction": "Kies functie",
     "owner": "Recruiter",
+    "branch": "Vestiging",
     "vacancyOptional": "Vacature (optioneel)",
     "noVacancy": "Geen vacature",
     "contract": "Contract",

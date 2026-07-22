@@ -144,6 +144,7 @@
     "matches": "Coincidencias",
     "outreach": "Listas de llamadas",
     "match_statuses": "Estados",
+    "contract_types": "Tipos de contrato",
     "outreach_statuses": "Estados",
     "task_types": "Tipos de actividad",
     "task_priorities": "Prioridades",
@@ -1438,7 +1439,11 @@
     "statusSubtitle": "Gestiona los estados de coincidencias (estado + color).",
     "statusAdd": "Añadir estado",
     "flagClosed": "Cierra el match",
-    "flagClosedDesc": "Un match en este estado queda finalizado (fecha de fin establecida, ya no cuenta como abierto)."
+    "flagClosedDesc": "Un match en este estado queda finalizado (fecha de fin establecida, ya no cuenta como abierto).",
+    "contractTypeTitle": "Tipos de contrato",
+    "contractTypeSubtitle": "Gestiona los tipos de contrato y su duración predeterminada.",
+    "contractTypeAdd": "Añadir tipo de contrato",
+    "contractTypeDurationLabel": "Duración (días)"
   },
   "outreach": {
     "statusTitle": "Estados",

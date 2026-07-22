@@ -144,6 +144,7 @@
     "matches": "Correspondances",
     "outreach": "Listes d'appels",
     "match_statuses": "Statuts",
+    "contract_types": "Types de contrat",
     "outreach_statuses": "Statuts",
     "task_types": "Types d'activité",
     "task_priorities": "Priorités",
@@ -1438,7 +1439,11 @@
     "statusSubtitle": "Gérer les statuts des correspondances (statut + couleur).",
     "statusAdd": "Ajouter un statut",
     "flagClosed": "Clôture le match",
-    "flagClosedDesc": "Un match dans ce statut est terminé (date de fin définie, ne compte plus comme ouvert)."
+    "flagClosedDesc": "Un match dans ce statut est terminé (date de fin définie, ne compte plus comme ouvert).",
+    "contractTypeTitle": "Types de contrat",
+    "contractTypeSubtitle": "Gérer les types de contrat et leur durée par défaut.",
+    "contractTypeAdd": "Ajouter un type de contrat",
+    "contractTypeDurationLabel": "Durée (jours)"
   },
   "outreach": {
     "statusTitle": "Statuts",

@@ -6,25 +6,30 @@
  * the customer→location cascade and FREEZE the moment the recruiter edits them by
  * hand (job 21/22 — the pre-existing bug where a location pick unconditionally
  * clobbered a manual edit), and the opmerkingen field is the shared rich-text
- * block, not a bare textarea (job 23). RichTextEditor's own Tiptap internals are
- * out of scope here (stubbed, mirrors EditableRichTextField.test.tsx); the
- * relational hooks that hit the network (react-query) are mocked directly so the
- * test doesn't need a QueryClientProvider.
+ * block, not a bare textarea (job 23). Also covers the Vestiging default (7.4:
+ * proposes the customer's own branch, overridable, sent as branch_id) and the
+ * end-date proposal from the picked contract type's default duration (7.1,
+ * freezes on manual edit). RichTextEditor's own Tiptap internals are out of scope
+ * here (stubbed, mirrors EditableRichTextField.test.tsx); the relational hooks
+ * that hit the network (react-query) are mocked directly so the test doesn't
+ * need a QueryClientProvider.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import MatchPlacementModal from './MatchPlacementModal'
 import api from '@/lib/api'
 
 // A minimal customer fixture exercising all three cascade levels: the customer's
-// OWN cost centre/billing email, a location that overrides both, and a location
-// with neither (falls back to the customer) — plus one department (job 21/22 notes
-// departments don't carry these fields yet, a BE gap, so none is seeded here).
+// OWN cost centre/billing email/branch, a location that overrides both, and a
+// location with neither (falls back to the customer) — plus one department
+// (job 21/22 notes departments don't carry these fields yet, a BE gap, so none
+// is seeded here). branch_id (job 7.4) is the customer's own establishment —
+// the Vestiging picker's default PROPOSAL once this customer is picked.
 const { mockCustomer } = vi.hoisted(() => ({
   mockCustomer: {
     id: 'cust-1', name: 'Zorggroep A',
-    cost_center: 'KP-KLANT', billing_email: 'klant@factuur.nl', branch_id: null,
+    cost_center: 'KP-KLANT', billing_email: 'klant@factuur.nl', branch_id: 'branch-1',
     locations: [
       // Two departments here (job C.2.1 regression: the department picker must be
       // searchable too, not just customer/location) — Afdeling A/B.
@@ -45,7 +50,21 @@ vi.mock('@/pages/vacancies/hooks/useCustomerOptions', () => ({
 }))
 vi.mock('../hooks/useVacancyOptions', () => ({ useVacancyOptions: () => [] }))
 vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzorgende IG'], allowFreeEntry: false }) }))
-vi.mock('@/lib/useContractTypes', () => ({ useContractTypes: () => ({ types: ['Fase 1-2 z.u.b. (Works)'] }) }))
+// options carries a default_duration_days (7.1) so the end-date proposal has
+// something to compute from; types stays the plain label list other callers use.
+vi.mock('@/lib/useContractTypes', () => ({
+  useContractTypes: () => ({
+    types: ['Fase 1-2 z.u.b. (Works)'],
+    options: [{ value: 'Fase 1-2 z.u.b. (Works)', label: 'Fase 1-2 z.u.b. (Works)', default_duration_days: 30 }],
+  }),
+}))
+// Tenant establishments (7.4) — the Vestiging picker's option list.
+vi.mock('@/lib/useLocations', () => ({
+  useLocations: () => [{ value: 'branch-1', label: 'Hoofdkantoor' }, { value: 'branch-2', label: 'Bijkantoor' }],
+}))
+// Read-only recruiter branch fallback (ME-BRANCHES-1) — empty here so the
+// customer's own branch (mockCustomer.branch_id) is the proposal under test.
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1', branch_ids: [] } }) }))
 vi.mock('../hooks/useRateProposal', () => ({
   useRateProposal: () => ({ proposal: null, deviatesFromProposal: false, confirmDeviation: false, setConfirmDeviation: vi.fn() }),
 }))
@@ -220,6 +239,100 @@ describe('MatchPlacementModal · opmerkingen is the shared rich-text block (job 
     render(<MatchPlacementModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
     await screen.findByRole('dialog') // let the candidate-branch lookup settle first
     expect(screen.getByTestId('rte')).toBeInTheDocument()
+  })
+})
+
+// Vestiging default (7.4): proposes the picked customer's own branch, sends it
+// as branch_id on POST /matches, and is overridable by hand.
+describe('MatchPlacementModal · Vestiging default (7.4)', () => {
+  const branchField = () => screen.getByText('placement.branch').parentElement as HTMLElement
+
+  it('proposes the customer\'s own branch once the customer is picked', async () => {
+    const user = userEvent.setup()
+    render(<MatchPlacementModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
+    expect(await within(branchField()).findByRole('button', { name: 'Hoofdkantoor' })).toBeInTheDocument()
+  })
+
+  it('sends the proposed branch_id on submit', async () => {
+    const user = userEvent.setup()
+    render(<MatchPlacementModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
+    await user.click(screen.getByRole('button', { name: 'placement.pickFunction' }))
+    await user.click(await screen.findByRole('button', { name: 'Verzorgende IG' }))
+    await within(branchField()).findByRole('button', { name: 'Hoofdkantoor' })
+
+    await user.click(screen.getByRole('button', { name: 'placement.create' }))
+    expect(api.post).toHaveBeenCalledWith('/matches', expect.objectContaining({ branch_id: 'branch-1' }))
+  })
+
+  it('an overridden branch wins over the proposal', async () => {
+    const user = userEvent.setup()
+    render(<MatchPlacementModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
+    await user.click(screen.getByRole('button', { name: 'placement.pickFunction' }))
+    await user.click(await screen.findByRole('button', { name: 'Verzorgende IG' }))
+    await within(branchField()).findByRole('button', { name: 'Hoofdkantoor' })
+
+    // Manual override — picks a different branch than the proposal.
+    await user.click(within(branchField()).getByRole('button', { name: 'Hoofdkantoor' }))
+    await user.click(screen.getByRole('button', { name: 'Bijkantoor' }))
+
+    await user.click(screen.getByRole('button', { name: 'placement.create' }))
+    expect(api.post).toHaveBeenCalledWith('/matches', expect.objectContaining({ branch_id: 'branch-2' }))
+  })
+})
+
+// End-date proposal from contract type (7.1): proposes start_date + the picked
+// type's default_duration_days, and freezes once the recruiter edits it by hand.
+describe('MatchPlacementModal · end-date proposal from contract type (7.1)', () => {
+  // Local date getters (never toISOString(), which round-trips through UTC and
+  // drifts a calendar day in CEST/Europe timezones) — mirrors the production
+  // helpers.ts addDays/todayISO exactly.
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const addDays = (iso: string, days: number) => {
+    const d = new Date(`${iso}T00:00:00`)
+    d.setDate(d.getDate() + days)
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  }
+
+  it('proposes start date + the contract type\'s default duration', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<MatchPlacementModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await screen.findByRole('dialog')
+    const now = new Date()
+    const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+
+    await user.click(screen.getByRole('button', { name: 'placement.pickContractType' }))
+    await user.click(await screen.findByRole('button', { name: 'Fase 1-2 z.u.b. (Works)' }))
+
+    const dateInputs = container.querySelectorAll('input[type="date"]')
+    expect(dateInputs[1]).toHaveValue(addDays(today, 30))
+  })
+
+  it('freezes the end date after a manual edit — picking the type again never overwrites it', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<MatchPlacementModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await screen.findByRole('dialog')
+
+    await user.click(screen.getByRole('button', { name: 'placement.pickContractType' }))
+    await user.click(await screen.findByRole('button', { name: 'Fase 1-2 z.u.b. (Works)' }))
+    const dateInputs = container.querySelectorAll('input[type="date"]')
+    const endDateInput = dateInputs[1] as HTMLInputElement
+
+    // fireEvent (not userEvent.type) — native date inputs take a whole value per
+    // change, not a per-keystroke sequence.
+    fireEvent.change(endDateInput, { target: { value: '2030-01-15' } })
+    expect(endDateInput).toHaveValue('2030-01-15')
+
+    // Re-picking the start date would normally re-trigger the proposal — the
+    // manual edit must freeze it regardless.
+    const startDateInput = dateInputs[0] as HTMLInputElement
+    fireEvent.change(startDateInput, { target: { value: '2026-08-01' } })
+    expect(endDateInput).toHaveValue('2030-01-15')
   })
 })
 
