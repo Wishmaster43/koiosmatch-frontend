@@ -17,7 +17,6 @@ import ErrorBanner from '@/components/ui/ErrorBanner'
 import ActionMessageBanner from '@/components/ui/ActionMessageBanner'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
 import InsightsRow from '@/components/insights/InsightsRow'
-import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
@@ -26,7 +25,8 @@ import VacanciesTable from './VacanciesTable'
 import VacanciesBulkBar from './VacanciesBulkBar'
 import VacancyDrawer from './VacancyDrawer'
 import AddVacancyModal from './AddVacancyModal'
-import { toggleOneValue, pickKey } from './data/vacanciesShared'
+import { toggleOneValue } from './data/vacanciesShared'
+import { buildVacancyInsightsConfig } from './data/vacancyInsightsConfig'
 import { useNavigation } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
@@ -76,6 +76,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const [showArchived,   setShowArchived]   = usePageMemory('vac.archived', false)
   // VAC-AGENT-1: "online without an AI agent" quick view (?without_agent=1).
   const [showWithoutAgent, setShowWithoutAgent] = usePageMemory('vac.withoutAgent', false)
+  // VAC-KPI-REDESIGN 22-07: the AI-agent donut's "real agent" segment click (?agent_id=).
+  // Mutually exclusive with showWithoutAgent — see toggleWithoutAgent + the 'agent'
+  // donut's onPick below, which keep only one of the two ever set.
+  const [selectedAgentId, setSelectedAgentId] = usePageMemory<string | null>('vac.agent', null)
   // V27: Gepubliceerd/Niet-gepubliceerd — a real server-side filter (VacancyQuery::
   // rules()/filtered() already accept a `published` boolean on both /vacancies and
   // /vacancies/stats), just never wired into the UI before.
@@ -111,6 +115,8 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     if (showArchived)           p.include_archived = 1
     // VAC-AGENT-1: quick view onto the vacancies that are online but have no agent linked.
     if (showWithoutAgent)       p.without_agent = 1
+    // VAC-KPI-REDESIGN 22-07: the AI-agent donut's real-agent segment click.
+    else if (selectedAgentId)   p.agent_id = selectedAgentId
     // V27: server-side published/unpublished filter (honoured by both the list and
     // stats). Laravel's `boolean` rule only accepts true/false/0/1/'0'/'1' — NOT the
     // strings "true"/"false" a JS boolean serialises to in a query string — so this
@@ -120,7 +126,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     // Map view narrows the list server-side to the chosen circle (STRAAL-1).
     if (view === 'map' && mapStraalActive) { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
     return p
-  }, [globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, showArchived, showWithoutAgent, publishedBucket, view, mapCenter, mapRadius, mapStraalActive])
+  }, [globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, showArchived, showWithoutAgent, selectedAgentId, publishedBucket, view, mapCenter, mapRadius, mapStraalActive])
   const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1; the visible rows change → drop the selection.
@@ -155,9 +161,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     close: closeDrawer, intent,
   })
 
-  // ── Insights derivation (status/owner/client/category/published donuts + phase KPI counts) ──
-  const { statusData, ownerData, clientData, publishedData, categoryData, phaseCounts } =
-    useVacancyInsights({ stats, vacancies, statuses, statusMeta, t })
+  // ── Insights derivation (7 donuts: status/owner/client/category/published/funnel/agent
+  // + the 2 KPI cards below) ──
+  const { statusData, ownerData, clientData, publishedData, categoryData, funnelData, agentData, applicationsTotal } =
+    useVacancyInsights({ stats, vacancies, statuses, phases, statusMeta, t })
 
   // Option lists for the right-panel filters.
   const ownerOptions    = useMemo(() => ownerData.map(d => ({ value: d.key, label: d.name, count: d.value })), [ownerData])
@@ -184,40 +191,32 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkSetClient, bulkPublish, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags, dialog: bulkConfirmDialog } =
     useVacancyBulkActions({ vacancies, setVacancies, setTotal, selectedIds, setSelectedIds, notify, t, statusMeta: statusMetaSafe })
 
-  // ── Insights strip: 4 donuts + funnel-phase KPI cards ──
-  const insightDonuts: DonutSpec[] = [
-    { key: 'status', title: t('insights.statusTitle'), data: statusData,
-      onPick: d => { const k = pickKey(d); setStatusBucket(prev => (prev === k ? 'all' : (k ?? 'all'))) },
-      active: statusBucket !== 'all', onClear: () => setStatusBucket('all') },
-    { key: 'owner',  title: t('insights.ownerTitle'),  data: ownerData,  onPick: d => pickOne(setSelectedOwner)(pickKey(d)),  active: selectedOwner.length > 0,  onClear: () => setSelectedOwner([]) },
-    { key: 'client', title: t('insights.clientTitle'), data: clientData, onPick: d => pickOne(setSelectedClient)(pickKey(d)), active: selectedClient.length > 0, onClear: () => setSelectedClient([]) },
-    // V28: functie donut — server-wide by_category aggregate, click-to-filter onto
-    // the existing category[] param. §4/§3A equal-footprint note (audit R1 item 7):
-    // this is the row's 5th donut, not the candidate blueprint's 3 — a deliberate
-    // product choice (Danny asked for this + the V27 published donut on 17-07), not
-    // drift; see useVacancyInsights.ts's docblock for the full written reason.
-    { key: 'category', title: t('insights.categoryTitle'), data: categoryData,
-      onPick: d => pickOne(setSelectedCategory)(pickKey(d)), active: selectedCategory.length > 0, onClear: () => setSelectedCategory([]) },
-    // V27: click a segment → publishedBucket ('published'/'unpublished'); click again clears.
-    { key: 'published', title: t('insights.publishedTitle'), data: publishedData,
-      onPick: d => { const k = pickKey(d); setPublishedBucket(prev => (prev === k ? 'all' : (k === 'published' || k === 'unpublished' ? k : 'all'))) },
-      active: publishedBucket !== 'all', onClear: () => setPublishedBucket('all') },
-  ]
+  // VAC-KPI-REDESIGN 22-07: toggling "no agent" always clears the picked real-agent
+  // id (mutually exclusive) — shared by the toolbar QuickViewToggle, the agent
+  // donut's "Geen agent" segment and the "Zonder AI-agent" KPI card below.
+  const toggleWithoutAgent = () => { setSelectedAgentId(null); setShowWithoutAgent(v => !v) }
+
+  // ── Insights strip: 7 donuts + 2 KPI cards (VAC-KPI-REDESIGN 22-07 — was 5
+  // donuts + 6 funnel-KPI cards = 11 tiles; the array/onPick wiring itself lives in
+  // vacancyInsightsConfig.ts, extracted once this page crossed ~400 lines). ──
+  const { donuts: insightDonuts, kpis: insightKpis } = buildVacancyInsightsConfig({
+    t, navigate, statusData, ownerData, clientData, categoryData, publishedData, funnelData, agentData,
+    statusBucket, setStatusBucket,
+    selectedOwner, pickOwner: pickOne(setSelectedOwner), clearOwner: () => setSelectedOwner([]),
+    selectedClient, pickClient: pickOne(setSelectedClient), clearClient: () => setSelectedClient([]),
+    selectedCategory, pickCategory: pickOne(setSelectedCategory), clearCategory: () => setSelectedCategory([]),
+    publishedBucket, setPublishedBucket,
+    selectedAgentId, setSelectedAgentId, showWithoutAgent, setShowWithoutAgent, toggleWithoutAgent,
+    applicationsTotal,
+  })
   // Shared clear-all (page memory keeps filters sticky).
-  const anyFilterActive = Boolean(globalSearch.trim() || showArchived || showWithoutAgent || statusBucket !== 'all'
+  const anyFilterActive = Boolean(globalSearch.trim() || showArchived || showWithoutAgent || Boolean(selectedAgentId) || statusBucket !== 'all'
     || selectedOwner.length || selectedClient.length || selectedCategory.length || publishedBucket !== 'all')
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
-    setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setShowWithoutAgent(false); setStatusBucket('all')
+    setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setShowWithoutAgent(false); setSelectedAgentId(null); setStatusBucket('all')
     setSelectedOwner([]); setSelectedClient([]); setSelectedCategory([]); setPublishedBucket('all'); setPage(1)
   }
-
-  // Funnel counts are APPLICATION numbers — clicking jumps to Sollicitaties with that
-  // stage pre-filtered (Danny's "Gesolliciteerd doet niks": these cards had no click).
-  const insightKpis: KpiSpec[] = phases.map(p => ({
-    key: p.value, label: t(`kpi.${p.value}`, p.label), value: phaseCounts[p.value] ?? 0, color: p.color,
-    onClick: () => navigate('applications', { stage: p.value }),
-  }))
 
   // Status tab bar: "All" + one button per configured status.
   const buckets = [{ value: 'all', label: t('buckets.all') }, ...statuses.map(st => ({ value: st.value, label: st.label }))]
@@ -228,8 +227,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
       <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-          {/* KPI block: donuts + funnel-phase KPI cards. V27: the published donut is now
-              a real server-wide aggregate, so no more STATS-OOM-1 honesty notice here. */}
+          {/* KPI block: 7 donuts + 2 KPI cards (VAC-KPI-REDESIGN 22-07 — 9 tiles total).
+              V27: the published donut is a real server-wide aggregate, so no more
+              STATS-OOM-1 honesty notice here; the agent donut's own honest-gate lives
+              in useVacancyInsights.ts (agentData) until VAC-STATS-BYAGENT-1 lands. */}
           <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
 
           {/* Add/bulk on the left (like Candidates/Applications); status tabs pushed right */}
@@ -266,8 +267,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
               <QuickViewToggle active={view === 'map'} onToggle={() => setView(x => (x === 'map' ? 'table' : 'map'))}
                 label={t('common:map.view')} color="var(--color-map)" icon={MapIcon} />
               {/* VAC-AGENT-1: "online without an AI agent" quick view — --color-violet is
-                  the shared system/AI-ish accent token (index.css), not an ad-hoc hex. */}
-              <QuickViewToggle active={showWithoutAgent} onToggle={() => setShowWithoutAgent(v => !v)}
+                  the shared system/AI-ish accent token (index.css), not an ad-hoc hex.
+                  Shares toggleWithoutAgent with the agent donut's "Geen agent" segment
+                  and the "Zonder AI-agent" KPI card (VAC-KPI-REDESIGN 22-07). */}
+              <QuickViewToggle active={showWithoutAgent} onToggle={toggleWithoutAgent}
                 label={t('page.withoutAgentView')} color="var(--color-violet)" icon={BotOff} />
               {buckets.map(b => (
                 <button key={b.value} onClick={() => setStatusBucket(b.value)}

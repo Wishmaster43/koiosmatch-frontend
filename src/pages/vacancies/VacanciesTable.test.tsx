@@ -27,10 +27,12 @@ vi.mock('@/lib/datetime', () => ({
 }))
 
 // Minimal rows — only the fields the table's columns actually read; cast past the
-// full Vacancy shape (mirrors DetailsTab.test.tsx's VacancyDetail cast).
+// full Vacancy shape (mirrors DetailsTab.test.tsx's VacancyDetail cast). Explicit
+// distinct createdSort values so the table's real newest-first defaultSort (the
+// VAC-KPI-REDESIGN 22-07 meelift-fix) doesn't reorder rows out from under this test.
 const rows = [
-  { id: 'v1', title: 'Verpleegkundige', aiAgentName: 'Kelly' },
-  { id: 'v2', title: 'Doktersassistent', aiAgentName: '' },
+  { id: 'v1', title: 'Verpleegkundige', aiAgentName: 'Kelly', created: '2024-02-01', createdSort: '2024-02-01' },
+  { id: 'v2', title: 'Doktersassistent', aiAgentName: '', created: '2024-01-01', createdSort: '2024-01-01' },
 ] as unknown as Vacancy[]
 
 describe('VacanciesTable · AI-agent column (Danny 22-07)', () => {
@@ -50,5 +52,20 @@ describe('VacanciesTable · AI-agent column (Danny 22-07)', () => {
     const agentCellRow2 = tableRows[1].children[colIndex]
     expect(agentCellRow2.textContent).toBe('—')
     expect(agentCellRow2.querySelector('svg')).toBeFalsy()
+  })
+})
+
+describe('VacanciesTable · default sort (VAC-KPI-REDESIGN 22-07 meelift-fix)', () => {
+  it('sorts newest-first by createdAt on first render — defaultSort must match the real column key', () => {
+    // The column's real key is 'createdAt' (not 'created'); a stale defaultSort key
+    // used to silently no-op (DataTable drops an unresolvable sort key), leaving
+    // rows in their raw insertion order instead of newest-first.
+    const unsortedRows = [
+      { id: 'v1', title: 'Oud', created: '2020-01-01', createdSort: '2020-01-01' },
+      { id: 'v2', title: 'Nieuw', created: '2024-01-01', createdSort: '2024-01-01' },
+    ] as unknown as Vacancy[]
+    const { container } = render(<VacanciesTable rows={unsortedRows} />)
+    const titleCells = Array.from(container.querySelectorAll('tbody tr')).map(tr => tr.children[0].textContent)
+    expect(titleCells).toEqual(['Nieuw', 'Oud'])
   })
 })

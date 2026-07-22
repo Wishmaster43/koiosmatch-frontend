@@ -36,17 +36,16 @@
     "clientTitle": "Cliente",
     "publishedTitle": "Publicada",
     "categoryTitle": "Función",
+    "funnelTitle": "Embudo",
+    "agentTitle": "Agente IA",
+    "noAgent": "Sin agente",
     "clearFilter": "Borrar filtro",
     "noStatus": "Sin estado",
     "unknownStatus": "Desconocido"
   },
   "kpi": {
-    "applied": "Postulado",
-    "accepted": "Aceptado",
-    "invited": "Invitado",
-    "proposed": "Propuesta enviada",
-    "hired": "Contratado",
-    "rejected": "Rechazado"
+    "withoutAgent": "Sin agente IA",
+    "applicationsTotal": "Solicitudes totales"
   },
   "filters": {
     "search": "Buscar",
@@ -192,6 +191,7 @@
     "postalCode": "Código postal",
     "city": "Ciudad",
     "province": "Provincia",
+    "country": "País",
     "customerLocation": "Sede del cliente",
     "customerDepartment": "Departamento",
     "contactPerson": "Persona de contacto",

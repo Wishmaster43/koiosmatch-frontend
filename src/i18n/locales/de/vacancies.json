@@ -36,17 +36,16 @@
     "clientTitle": "Kunde",
     "publishedTitle": "Veröffentlicht",
     "categoryTitle": "Funktion",
+    "funnelTitle": "Funnel",
+    "agentTitle": "KI-Agent",
+    "noAgent": "Kein Agent",
     "clearFilter": "Filter zurücksetzen",
     "noStatus": "Kein Status",
     "unknownStatus": "Unbekannt"
   },
   "kpi": {
-    "applied": "Beworben",
-    "accepted": "Angenommen",
-    "invited": "Eingeladen",
-    "proposed": "Vorschlag gesendet",
-    "hired": "Eingestellt",
-    "rejected": "Abgelehnt"
+    "withoutAgent": "Ohne KI-Agent",
+    "applicationsTotal": "Bewerbungen gesamt"
   },
   "filters": {
     "search": "Suchen",
@@ -192,6 +191,7 @@
     "postalCode": "PLZ",
     "city": "Ort",
     "province": "Provinz",
+    "country": "Land",
     "customerLocation": "Kundenstandort",
     "customerDepartment": "Abteilung",
     "contactPerson": "Ansprechpartner",

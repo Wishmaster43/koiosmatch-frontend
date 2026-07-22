@@ -36,17 +36,16 @@
     "clientTitle": "Client",
     "publishedTitle": "Published",
     "categoryTitle": "Function",
+    "funnelTitle": "Funnel",
+    "agentTitle": "AI agent",
+    "noAgent": "No agent",
     "clearFilter": "Clear filter",
     "noStatus": "No status",
     "unknownStatus": "Unknown"
   },
   "kpi": {
-    "applied": "Applied",
-    "accepted": "Accepted",
-    "invited": "Invited",
-    "proposed": "Proposal sent",
-    "hired": "Hired",
-    "rejected": "Rejected"
+    "withoutAgent": "Without AI agent",
+    "applicationsTotal": "Total applications"
   },
   "filters": {
     "search": "Search",
@@ -187,6 +186,7 @@
     "postalCode": "Postal code",
     "city": "City",
     "province": "Province",
+    "country": "Country",
     "customerLocation": "Customer location",
     "customerDepartment": "Department",
     "contactPerson": "Contact person",

@@ -90,3 +90,17 @@ describe('buildVacancyPatch · AI agent link (VAC-AGENT-1)', () => {
     expect(body).toEqual({ ai_agent_id: 'agent1' })
   })
 })
+
+// VAC-COUNTRY-1 (Danny 22-07, punt 2): land→provincie cascade — mirrors the
+// existing `province` mapping convention (plain field name, unchanged).
+describe('buildVacancyPatch · country (VAC-COUNTRY-1)', () => {
+  it('maps country to the same plain field name as province', () => {
+    const body = buildVacancyPatch({ province: 'Utrecht', country: 'NL' })
+    expect(body).toEqual({ province: 'Utrecht', country: 'NL' })
+  })
+
+  it('omits country entirely when absent from the patch (partial saves)', () => {
+    const body = buildVacancyPatch({ title: 'New title' })
+    expect(body).not.toHaveProperty('country')
+  })
+})

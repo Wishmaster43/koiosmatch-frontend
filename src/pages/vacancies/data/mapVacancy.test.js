@@ -189,4 +189,24 @@ describe('mapVacancyDetail', () => {
     expect(detail.applicationsByPhase).toEqual({})
     expect(detail.applicationsCount).toBe(0)
   })
+
+  // VAC-COUNTRY-1 (Danny 22-07, punt 2): land→provincie cascade — the DB column
+  // is location_country/location_province (create_vacancy_table r131-132); read
+  // that raw name first, falling back to the already-mapped key the resource
+  // sends today for province.
+  it('maps country/province from the raw location_* column names', () => {
+    const detail = mapVacancyDetail({ id: 'v1', location_country: 'NL', location_province: 'Utrecht' })
+    expect(detail.country).toBe('NL')
+    expect(detail.province).toBe('Utrecht')
+  })
+
+  it('falls back to the already-mapped province key when location_province is absent', () => {
+    const detail = mapVacancyDetail({ id: 'v1', province: 'Zuid-Holland' })
+    expect(detail.province).toBe('Zuid-Holland')
+  })
+
+  it('defaults country to an empty string — honest about the BE gap, never crashes', () => {
+    const detail = mapVacancyDetail({ id: 'v1' })
+    expect(detail.country).toBe('')
+  })
 })

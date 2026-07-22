@@ -9,12 +9,13 @@
  * The description block's own edit state now lives in useVacancyDescription
  * (Danny 21-07: Beschrijving moved to its own drawer tab).
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useLookups } from '@/context/LookupsContext'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useIndustries } from '@/lib/useIndustries'
 import { useFunctions } from '@/lib/useFunctions'
 import { useDateFormat } from '@/lib/datetime'
+import { useProvinces } from '@/hooks/useProvinces'
 import { useCustomerOptions } from './useCustomerOptions'
 import { useCascadePickers } from './useCascadePickers'
 import type { VacancyDetail } from '@/types/vacancy'
@@ -22,7 +23,7 @@ import type { Id } from '@/types/common'
 
 type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 export type TextKey = 'category' | 'industry' | 'street' | 'houseNumber' | 'houseNumberSuffix' | 'postalCode' | 'city'
-  | 'province' | 'experienceMin' | 'experienceMax' | 'seniority' | 'education' | 'salaryMin' | 'salaryMax' | 'hoursMin' | 'hoursMax'
+  | 'province' | 'country' | 'experienceMin' | 'experienceMax' | 'seniority' | 'education' | 'salaryMin' | 'salaryMax' | 'hoursMin' | 'hoursMax'
   // VAC-DATES-1: the vacancy's own runtime window (native <input type="date">, YYYY-MM-DD).
   | 'startDate' | 'endDate'
 export type Form = Record<TextKey, string>
@@ -55,6 +56,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
   const seedForm = (): Form => ({
     category: v.category, industry: v.industry,
     street: v.street, houseNumber: v.houseNumber, houseNumberSuffix: v.houseNumberSuffix, postalCode: v.postalCode, city: v.city, province: v.province,
+    country: v.country,
     experienceMin: v.experienceMin, experienceMax: v.experienceMax, seniority: v.seniorityValue, education: v.educationValue,
     salaryMin: v.salaryMin, salaryMax: v.salaryMax, hoursMin: v.hoursMin, hoursMax: v.hoursMax,
     // VAC-DATES-1: seed from the raw YYYY-MM-DD strings the detail already carries.
@@ -62,6 +64,18 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
   })
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState<Form>(seedForm)
+  const setF = (k: TextKey, val: string) => setForm(p => ({ ...p, [k]: val }))
+  // VAC-COUNTRY-1 (Danny 22-07, punt 2): province list CASCADES on the picked
+  // country, mirroring the candidate ProfileTab/AddCandidateModal pattern exactly
+  // — its own cache slot per country (useProvinces), so switching country never
+  // leaks another country's list in. If the country changes and the currently
+  // filled province no longer exists in the new list, clear it rather than
+  // silently keep a mismatch.
+  const { provinces } = useProvinces(form.country)
+  useEffect(() => {
+    if (form.province && !provinces.includes(form.province)) setF('province', '')
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved province list changing, not every form edit
+  }, [provinces])
   // Client moved here from the drawer header (P3: calm header, max status+owner pickers).
   const [clientId, setClientId] = useState<string>(String(v.clientId ?? ''))
   const [types, setTypes] = useState<string[]>(v.contractTypes ?? [])
@@ -91,7 +105,6 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
   })
   const [skills, setSkills] = useState<string[]>(() => (v.skills ?? []).map(skillStr).filter(Boolean))
   const [newSkill, setNewSkill] = useState('')
-  const setF = (k: TextKey, val: string) => setForm(p => ({ ...p, [k]: val }))
   const toggleType = (val: string) => setTypes(p => p.includes(val) ? p.filter(x => x !== val) : [...p, val])
   // Skills are quick-editable OUTSIDE the pencil (Danny 2026-07-06: "kan ik niet
   // invullen"): adding/removing persists immediately; inside edit-mode the change
@@ -117,7 +130,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
       customerLocationId: cascade.locationId || null, customerDepartmentId: cascade.departmentId || null, contactId: cascade.contactId || null,
       contractTypes: types, category: form.category, industry: form.industry,
       street: form.street, houseNumber: form.houseNumber, houseNumberSuffix: form.houseNumberSuffix,
-      postalCode: form.postalCode, city: form.city, province: form.province, location,
+      postalCode: form.postalCode, city: form.city, province: form.province, country: form.country, location,
       experienceMin: form.experienceMin, experienceMax: form.experienceMax,
       seniorityValue: form.seniority, seniority: sen?.label ?? '', educationValue: form.education, education: edu?.label ?? '',
       salaryMin: form.salaryMin, salaryMax: form.salaryMax, hoursMin: form.hoursMin, hoursMax: form.hoursMax, salary, hours,
@@ -142,6 +155,8 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     candidateTypes, typeMeta, seniorityLevels, educationLevels, industries, formatDate, fnOptions,
     // Field-grid edit state.
     editing, setEditing, form, setF, save, cancel,
+    // VAC-COUNTRY-1: province options scoped to the picked country.
+    provinces,
     // Client + cascade.
     clientId, handleClientChange, customerOptions, cascade, locationPicker, departmentPicker, contactPicker,
     // Contract types.

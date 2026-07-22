@@ -6,13 +6,12 @@
  * Pure derivation only: stats first (server-wide, filter-honouring), page-loaded
  * rows as the fallback — no fetching, no side effects.
  *
- * Donut-footprint deviation (§4/§3A equal-footprint note, audit R1 item 7): this
- * hook feeds FIVE donuts (status/owner/client/category/published), not the
- * candidate blueprint's three. This is a deliberate, Danny-requested product
- * choice, not drift: Danny explicitly asked for the Gepubliceerd donut (V27) and
- * the Functie donut (V28) on 17-07, on top of the pre-existing status/owner/client
- * set — see VacanciesPage's `insightDonuts` array for where the two extra entries
- * are wired in.
+ * VAC-KPI-REDESIGN (Danny 22-07): the row moved from 5 donuts + 6 funnel-KPI-cards
+ * (11 tiles) to the agreed 7-donut + 2-KPI footprint (9 tiles). The 6 funnel-phase
+ * KPI cards collapsed into ONE `funnelData` donut (mirrors the candidate blueprint's
+ * funnel donut, candidateInsights.tsx), and a new `agentData` donut groups vacancies
+ * by linked AI agent. See VacanciesPage's `insightDonuts`/`insightKpis` for how the
+ * 7 donuts + 2 KPI cards are wired in.
  */
 import { useMemo } from 'react'
 import type { TFunction } from 'i18next'
@@ -36,6 +35,11 @@ interface VacancyStatsShape {
   // arrives as its own resolved bucket (label 'Geen functie') — see categoryData below
   // for why the FE never makes that particular bucket clickable.
   by_category?: Array<{ value?: string | null; label?: string; count?: number }>
+  // VAC-STATS-BYAGENT-1 (BE ticket, not yet delivered 22-07): counts grouped by
+  // ai_agent_id, id: null = the "Geen agent" bucket. Until this lands, agentData
+  // below honestly falls back to a page-scope group-by (see COORDINATION-LOG.md
+  // 2026-07-22 CMFE→CMBE).
+  by_agent?: Array<{ id?: Id | null; name?: string; count?: number }>
 }
 
 interface Args {
@@ -45,11 +49,14 @@ interface Args {
   stats: Record<string, unknown> | null
   vacancies: Vacancy[]
   statuses: VacancyLookupItem[]
+  // Funnel-phase lookup (tenant-configurable, VacancyLookupsContext) — drives the
+  // funnel donut's segment labels/colours, never hardcoded (§3B golden rule).
+  phases: VacancyLookupItem[]
   statusMeta: (v?: string | null) => VacancyLookupItem
   t: TFunction
 }
 
-export function useVacancyInsights({ stats, vacancies, statuses, statusMeta, t }: Args) {
+export function useVacancyInsights({ stats, vacancies, statuses, phases, statusMeta, t }: Args) {
   const s = stats as VacancyStatsShape | null
   // ── Donut data (status / owner / client / published) — stats first, page-derived fallback ──
   const statusData = useMemo<Aggregate[]>(() => {
@@ -117,7 +124,8 @@ export function useVacancyInsights({ stats, vacancies, statuses, statusMeta, t }
     return Object.values(m)
   }, [s, vacancies])
 
-  // KPI cards = funnel-phase counts across applications.
+  // Funnel-phase counts across applications — server-wide when `stats.by_phase`
+  // is present, page-derived fallback otherwise.
   const phaseCounts = useMemo<Record<string, number>>(() => {
     if (s?.by_phase) {
       if (Array.isArray(s.by_phase)) return Object.fromEntries(s.by_phase.map(o => [o.value ?? o.phase, o.count ?? 0]))
@@ -128,5 +136,53 @@ export function useVacancyInsights({ stats, vacancies, statuses, statusMeta, t }
     return acc
   }, [s, vacancies])
 
-  return { statusData, ownerData, clientData, publishedData, categoryData, phaseCounts }
+  // VAC-KPI-REDESIGN 22-07: ONE funnel donut replacing the 6 separate funnel-KPI
+  // cards — same phaseCounts aggregate, now grouped under the tenant phase lookup
+  // for label/colour (never hardcoded), mirroring the candidate funnel donut. A
+  // zero-count phase drops out rather than showing a dead ring segment (same
+  // stance as publishedData/categoryData above).
+  const funnelData = useMemo<Aggregate[]>(() =>
+    phases.map(p => ({ name: p.label, key: p.value, color: p.color, value: phaseCounts[p.value] ?? 0 })).filter(d => d.value > 0)
+  , [phases, phaseCounts])
+
+  // VAC-KPI-REDESIGN 22-07: AI-agent donut. PREFERS the server-wide by_agent
+  // aggregate (VAC-STATS-BYAGENT-1 — requested from CMBE, not yet delivered);
+  // until it lands this HONEST-GATEs on a page-scope fallback that groups the
+  // loaded rows by aiAgentId, same stance as owner/client above. "Geen agent" is
+  // its own bucket (key '__none', mirrors the status donut's no-status bucket) so
+  // VacanciesPage's onPick can route a real agent to `?agent_id=` and this bucket
+  // to `?without_agent=1`. Colour: one fixed primary-family accent for every real
+  // agent (mirrors AiAgentAvatar's "every agent IS Koios AI" stance — not a
+  // per-item hash), neutral grey for "Geen agent".
+  const agentData = useMemo<Aggregate[]>(() => {
+    if (s?.by_agent) {
+      return s.by_agent
+        .map(o => ({
+          name: o.id == null ? t('insights.noAgent') : (o.name || '—'),
+          key: o.id == null ? '__none' : String(o.id),
+          color: o.id == null ? '#9CA3AF' : 'var(--color-primary)',
+          value: o.count ?? 0,
+        }))
+        .filter(d => d.value > 0)
+    }
+    const m: Record<string, Aggregate> = {}
+    let noAgentCount = 0
+    vacancies.forEach(v => {
+      if (v.aiAgentId != null) {
+        const k = String(v.aiAgentId)
+        ;(m[k] ??= { name: v.aiAgentName || '—', key: k, color: 'var(--color-primary)', value: 0 }).value++
+      } else {
+        noAgentCount++
+      }
+    })
+    const out = Object.values(m)
+    if (noAgentCount > 0) out.push({ name: t('insights.noAgent'), key: '__none', color: '#9CA3AF', value: noAgentCount })
+    return out
+  }, [s, vacancies, t])
+
+  // "Sollicitaties totaal" KPI (VAC-KPI-REDESIGN proposal, easy to swap) — the sum
+  // across every funnel phase, server-wide when stats honours the active filters.
+  const applicationsTotal = useMemo(() => Object.values(phaseCounts).reduce((sum, n) => sum + (Number(n) || 0), 0), [phaseCounts])
+
+  return { statusData, ownerData, clientData, publishedData, categoryData, funnelData, agentData, applicationsTotal }
 }

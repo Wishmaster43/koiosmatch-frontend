@@ -36,17 +36,16 @@
     "clientTitle": "Client",
     "publishedTitle": "Publié",
     "categoryTitle": "Fonction",
+    "funnelTitle": "Entonnoir",
+    "agentTitle": "Agent IA",
+    "noAgent": "Aucun agent",
     "clearFilter": "Effacer le filtre",
     "noStatus": "Sans statut",
     "unknownStatus": "Inconnu"
   },
   "kpi": {
-    "applied": "Postulé",
-    "accepted": "Accepté",
-    "invited": "Invité",
-    "proposed": "Proposition envoyée",
-    "hired": "Recruté",
-    "rejected": "Refusé"
+    "withoutAgent": "Sans agent IA",
+    "applicationsTotal": "Candidatures totales"
   },
   "filters": {
     "search": "Rechercher",
@@ -192,6 +191,7 @@
     "postalCode": "Code postal",
     "city": "Ville",
     "province": "Province",
+    "country": "Pays",
     "customerLocation": "Site du client",
     "customerDepartment": "Service",
     "contactPerson": "Contact",

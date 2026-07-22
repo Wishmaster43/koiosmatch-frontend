@@ -10,6 +10,13 @@
  * scroll (no `role="tablist"`), and the field-edit pencil sits in the Algemeen
  * card's own title row instead of a separate row above the tab content.
  * Description moved OUT to its own drawer main-tab (DescriptionTab.test.tsx).
+ *
+ * VAC-COUNTRY-1 (Danny 22-07, punt 2): the land→provincie cascade logic itself
+ * (province options scoping to the picked country, clearing an invalid province)
+ * lives in useVacancyDetailsForm — fully stubbed here — so it's covered by
+ * useVacancyDetailsForm.test.ts instead. This file only proves the component's
+ * OWN wiring: the resolved country display name in read-mode, and the province
+ * options the hook hands back reaching the picker.
  */
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -17,11 +24,19 @@ import { vi } from 'vitest'
 import DetailsTab from './DetailsTab'
 import type { VacancyDetail } from '@/types/vacancy'
 
+// Deterministic stand-in for the real ISO-3166 + Intl.DisplayNames lookup — the
+// real function is exercised by countries.test.ts, not here.
+vi.mock('@/lib/countries', () => ({
+  getCountryOptions: () => [{ value: 'NL', label: 'Netherlands' }, { value: 'BE', label: 'Belgium' }],
+  getCountryName: (code: string) => (code === 'NL' ? 'Netherlands' : code),
+}))
+
 vi.mock('../hooks/useVacancyDetailsForm', () => ({
   useVacancyDetailsForm: () => ({
     candidateTypes: [], typeMeta: () => ({ label: '', color: '#000' }),
     seniorityLevels: [], educationLevels: [], industries: [], formatDate: (d: string) => d, fnOptions: [],
     editing: false, setEditing: vi.fn(), form: {}, setF: vi.fn(), save: vi.fn(), cancel: vi.fn(),
+    provinces: ['Utrecht', 'Zuid-Holland'],
     clientId: '', handleClientChange: vi.fn(), customerOptions: [],
     cascade: { locationName: '', departmentName: '', contactName: '' },
     locationPicker: null, departmentPicker: null, contactPicker: null,
@@ -68,5 +83,21 @@ describe('DetailsTab · flat layout (Danny 21-07: no sub-tab strip)', () => {
     const editButton = screen.getByTitle('common:edit')
     // Same row wrapper: the title and the pencil share one parent (title-row div).
     expect(editButton.parentElement).toBe(generalTitle.parentElement)
+  })
+})
+
+describe('DetailsTab · land→provincie cascade (Danny 22-07, punt 2)', () => {
+  it('read-mode resolves the country to its display name, never the bare ISO code', () => {
+    const v = { ...vacancy, country: 'NL', province: 'Utrecht' } as VacancyDetail
+    render(<DetailsTab vacancy={v} onUpdate={vi.fn()} />)
+    expect(screen.getByText('Netherlands')).toBeInTheDocument()
+    expect(screen.getByText('Utrecht')).toBeInTheDocument()
+  })
+
+  it('shows a dash for an unset country/province, never a raw empty string', () => {
+    const v = { ...vacancy, country: '', province: '' } as VacancyDetail
+    render(<DetailsTab vacancy={v} onUpdate={vi.fn()} />)
+    // Both the Location card's province and country rows fall back to the dash.
+    expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(2)
   })
 })

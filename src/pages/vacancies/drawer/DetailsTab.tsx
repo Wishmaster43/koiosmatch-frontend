@@ -4,6 +4,7 @@ import { Edit2, Save, X, Plus } from 'lucide-react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import EntityLink from '@/components/ui/EntityLink'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+import { getCountryOptions, getCountryName } from '@/lib/countries'
 import { buildVacancyAdviceInsights } from './vacancyAiInsights'
 import { useVacancyDetailsForm, composeAddress } from '../hooks/useVacancyDetailsForm'
 import type { TextKey } from '../hooks/useVacancyDetailsForm'
@@ -33,14 +34,17 @@ const groupTitle: CSSProperties = { ...groupTitleText, marginBottom: 3 }
  * vertical list (edit/remove per row).
  */
 export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: UpdateFn }) {
-  const { t } = useTranslation('vacancies')
+  const { t, i18n } = useTranslation('vacancies')
   const {
     candidateTypes, typeMeta, seniorityLevels, educationLevels, industries, formatDate, fnOptions,
-    editing, setEditing, form, setF, save, cancel,
+    editing, setEditing, form, setF, save, cancel, provinces,
     clientId, handleClientChange, customerOptions, cascade, locationPicker, departmentPicker, contactPicker,
     types, toggleType,
     skills, newSkill, setNewSkill, addSkill, removeSkill,
   } = useVacancyDetailsForm(v, onUpdate)
+  // VAC-COUNTRY-1 (Danny 22-07, punt 2): fixed ISO-3166 code list, localized to the
+  // current UI language — never a tenant lookup (mirrors the candidate's country field).
+  const countryOptions = getCountryOptions(i18n.language)
 
   // Edit-toggle control block (pencil ↔ save/cancel) — governs the field grid
   // spread across the Algemeen + Profiel cards below (one shared `editing`/`form`
@@ -157,7 +161,19 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
         ) : (
           row(t('details.address'), composeAddress(v.street, v.houseNumber, v.houseNumberSuffix, v.postalCode, v.city) || v.location || dash, null)
         )}
-        {row(t('details.province'), v.province || dash, text('province'))}
+        {/* VAC-COUNTRY-1 (Danny 22-07, punt 2): land→provincie cascade, mirroring the
+            candidate ProfileTab/AddCandidateModal pattern exactly — both are pick-only
+            (allowCreate=false) searchable dropdowns; the province list scopes to the
+            picked country (useProvinces(form.country) in the hook), and an already-
+            filled province that no longer exists in the new country's list is cleared
+            automatically. Read-mode resolves the country's display name, never the
+            bare ISO code. */}
+        {row(t('details.province'), v.province || dash,
+          <CreatableSelect value={form.province || null} onChange={(val: string) => setF('province', val)} allowCreate={false}
+            placeholder={t('common:select')} options={provinces.map((p: string) => ({ value: p, label: p }))} />)}
+        {row(t('details.country'), v.country ? getCountryName(v.country, i18n.language) : dash,
+          <CreatableSelect value={form.country || null} onChange={(val: string) => setF('country', val)} allowCreate={false}
+            placeholder={t('common:select')} options={countryOptions} />)}
       </>)}
 
       {card(t('details.groups.requirements'), <>

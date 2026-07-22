@@ -36,17 +36,16 @@
     "clientTitle": "Klant",
     "publishedTitle": "Gepubliceerd",
     "categoryTitle": "Functie",
+    "funnelTitle": "Funnel",
+    "agentTitle": "AI-agent",
+    "noAgent": "Geen agent",
     "clearFilter": "Filter wissen",
     "noStatus": "Geen status",
     "unknownStatus": "Onbekend"
   },
   "kpi": {
-    "applied": "Gesolliciteerd",
-    "accepted": "Geaccepteerd",
-    "invited": "Uitgenodigd",
-    "proposed": "Voorstel gedaan",
-    "hired": "Aangenomen",
-    "rejected": "Afgewezen"
+    "withoutAgent": "Zonder AI-agent",
+    "applicationsTotal": "Sollicitaties totaal"
   },
   "filters": {
     "search": "Zoeken",
@@ -187,6 +186,7 @@
     "postalCode": "Postcode",
     "city": "Plaats",
     "province": "Provincie",
+    "country": "Land",
     "customerLocation": "Klantlocatie",
     "customerDepartment": "Afdeling",
     "contactPerson": "Contactpersoon",

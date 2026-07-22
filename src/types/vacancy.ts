@@ -83,6 +83,10 @@ export interface VacancyDetail extends Vacancy {
   houseNumberSuffix: string
   postalCode: string
   province: string
+  // VAC-COUNTRY-1 (Danny 22-07, punt 2): land→provincie cascade, mirroring the
+  // candidate's address country — an ISO-3166 code, resolved to a display name
+  // via getCountryName (never a tenant lookup, same as the candidate's country).
+  country: string
   // Experience range in years (from–to).
   experienceMin: string
   experienceMax: string
@@ -184,6 +188,14 @@ export interface ApiVacancy {
   postal_code?: string
   city?: string
   province?: string
+  // VAC-COUNTRY-1: the DB column is `location_province`/`location_country`
+  // (create_vacancy_table r131-132); the internal VacancyDetailResource already
+  // maps `location_province` onto the `province` key above, but does not (yet)
+  // send `location_country` or `country` — both are read defensively so a future
+  // backend addition of either key is picked up with no FE change.
+  location_province?: string
+  location_country?: string
+  country?: string
   experience_min_years?: number | string | null
   experience_max_years?: number | string | null
   location?: string

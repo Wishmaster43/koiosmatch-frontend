@@ -137,7 +137,7 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
       emptyText={t('page.empty')}
       stickyHeader={stickyHeader}
       scrollParentRef={scrollParentRef}
-      defaultSort={{ key: 'created', dir: 'desc' }}
+      defaultSort={{ key: 'createdAt', dir: 'desc' }}
     />
   )
 }
