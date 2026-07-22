@@ -146,9 +146,10 @@ describe('MatchingTab · template pick → weights preview + PATCH payload', () 
     render(<Harness />)
     await waitFor(() => screen.getByText('matching.profile'))
 
-    // Sum = 5+3+3+3+3+3 = 20; qualifications' share = 5/20 = 25%.
-    expect(screen.getByText('5/5 · 25%')).toBeInTheDocument()
-    // Each of the other five dimensions (weight 3) shares 3/20 = 15%.
-    expect(screen.getAllByText('3/5 · 15%')).toHaveLength(5)
+    // Sum = 5+3+3+3+3+3 = 20; qualifications' share = 5/20 = 25,0% (one decimal, Danny 22-07;
+    // the six shares total exactly 100). Separator-tolerant: test locale may be comma or dot.
+    expect(screen.getByText(/5\/5 · 25[.,]0%/)).toBeInTheDocument()
+    // Each of the other five dimensions (weight 3) shares 3/20 = 15,0%.
+    expect(screen.getAllByText(/3\/5 · 15[.,]0%/)).toHaveLength(5)
   })
 })

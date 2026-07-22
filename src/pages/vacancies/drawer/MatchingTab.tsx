@@ -37,7 +37,7 @@ const buildWeights = (w: Record<string, unknown> | undefined): Record<string, nu
  * (see useVacancyRecord.updateVacancy).
  */
 export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void | Promise<boolean> }) {
-  const { t } = useTranslation('vacancies')
+  const { t, i18n } = useTranslation('vacancies')
   const { templates, loading: templatesLoading, error: templatesError } = useMatchWeightTemplates()
 
   // Local weights, resynced whenever the server's stored set changes (switching to
@@ -48,9 +48,12 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
 
   const [saved, setSaved] = useState(false)
   const setW = (d: string, val: number) => setWeights(p => ({ ...p, [d]: val }))
-  // Per-dimension % share that sums to exactly 100 across the six sliders.
-  const pcts = largestRemainderPct(DIMENSIONS.map(d => weights[d] ?? 3))
+  // Per-dimension % share that sums to exactly 100 across the six sliders. One decimal
+  // (Danny 22-07) so six equal weights read equal (16,7 vs 16,6) AND still total 100.
+  const pcts = largestRemainderPct(DIMENSIONS.map(d => weights[d] ?? 3), 1)
   const pctByDim: Record<string, number> = Object.fromEntries(DIMENSIONS.map((d, i) => [d, pcts[i]]))
+  // Locale-aware 1-decimal % (nl → "16,7").
+  const fmtPct = (n: number) => n.toLocaleString(i18n.language, { minimumFractionDigits: 1, maximumFractionDigits: 1 })
   // Gate "Saved ✓" on the real PATCH result — a failing save (403/422/network) must not
   // read as success (Danny 22-07). onUpdate returning void (older callers) counts as success.
   const save = () => {
@@ -121,7 +124,7 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
             {/* Danny 22-07: the concrete 1..5 weight + its % share of the total,
                 next to (not instead of) the word labels kept below the slider. */}
             <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
-              {weights[d] ?? 3}/5 · {pctByDim[d]}%
+              {weights[d] ?? 3}/5 · {fmtPct(pctByDim[d])}%
             </span>
           </div>
           {/* Slider is 0-based (0..4); stored weight is 1..5. */}
