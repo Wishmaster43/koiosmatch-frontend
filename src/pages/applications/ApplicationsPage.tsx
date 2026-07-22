@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LayoutList, Kanban, Plus, Archive, MessageCircle } from 'lucide-react'
+import { LayoutList, Kanban, Plus, Archive, MessageCircle, Users, X } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useAuth } from '@/context/AuthContext'
@@ -76,6 +76,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
     selectedVac, setSelectedVac, showArchived, setShowArchived, query, setQuery,
     interviewBusy, setInterviewBusy,
+    selectedCandidateIds, setSelectedCandidateIds,
     anyFilterActive, clearAllFilters, searchEpoch, matchesFilters,
     filterParams, bucketParam,
   } = useApplicationFilters()
@@ -130,7 +131,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // Reset to the first page whenever the bucket or any filter changes.
-  useEffect(() => { setPage(1) }, [bucket, attention, selectedPhase, selectedOwner, selectedSource, selectedVac, showArchived, interviewBusy, query])
+  useEffect(() => { setPage(1) }, [bucket, attention, selectedPhase, selectedOwner, selectedSource, selectedVac, showArchived, interviewBusy, query, selectedCandidateIds])
 
   // TABLE rows: the server's page (already narrowed by bucket/phase_key/vacancy_id/
   // search/include_archived where unambiguous — see useApplicationFilters), refined
@@ -156,11 +157,15 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // Shared clear-all (page memory keeps filters sticky): anything off-default resets.
   // Seed the funnel-stage filter from a dashboard chart click (funnel / funnel-conversion).
   // Mirrors the candidate status/recruiter drill-down: the InsightsRow then shows the active chip.
+  // 11.1: a candidates-bulk "manage per application" deep-link also carries
+  // `candidate_ids` — seeded into the (transient, not sticky) selectedCandidateIds
+  // scope, see useApplicationFilters' header comment for the honest-gate reasoning.
   useEffect(() => {
-    const i = intent as { stage?: string; vacancy?: string } | undefined
+    const i = intent as { stage?: string; vacancy?: string; candidate_ids?: Id[] } | undefined
     if (i?.stage) setSelectedPhase([i.stage])
     // A vacancy statistics-bar click carries the vacancy too — scope the list to it.
     if (i?.vacancy) setSelectedVac([String(i.vacancy)])
+    if (i?.candidate_ids?.length) setSelectedCandidateIds(i.candidate_ids)
   }, [intent])
 
   // A freshly created application: prepend to the list, bump the server-total
@@ -213,6 +218,22 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
             {/* Shared header search (T10) — debounced, client-side text filter. */}
             <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={300} />
             <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
+            {/* 11.1: the candidates-bulk deep-link scope — a soft chip (§4 convention)
+                showing the selection-based filter is active, clearable on its own
+                (independent of the general clear-filters button above). */}
+            {selectedCandidateIds.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 10px', borderRadius: 7,
+                background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
+                color: 'var(--color-primary)', fontSize: 12, fontWeight: 500 }}>
+                <Users size={13} />
+                {t('page.scopedBySelection', { count: selectedCandidateIds.length })}
+                <button onClick={() => setSelectedCandidateIds([])} aria-label={t('page.clearScope')}
+                  style={{ display: 'flex', border: 'none', background: 'none', color: 'inherit', cursor: 'pointer', padding: 0 }}>
+                  <X size={13} />
+                </button>
+              </div>
+            )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {/* Bucket tabs — soft-tinted active (§4: never a solid fill). */}

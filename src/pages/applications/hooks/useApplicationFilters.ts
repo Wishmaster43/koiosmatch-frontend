@@ -13,9 +13,17 @@
  * INTERVIEW-PHASE-1: a v1 "In interview" quick-view sends the server's
  * `interview_status=busy` filter directly (a full category dropdown may follow
  * once there's demand — see the applications task note).
+ * 11.1: `selectedCandidateIds` is the deep-link scope from the candidates bulk
+ * "manage per application" action (NavigationContext intent, plain useState —
+ * NOT persisted like the other filters, a deep-link seed shouldn't linger across
+ * sessions). Sent to the server as `candidate_ids` for forward-compat; the BE
+ * (ApplicationQuery) does not accept it yet, so today it has no narrowing effect
+ * (honest — see ApplicationsPage's intent effect for why this stays server-only
+ * rather than an unreliable client-side refine over a paginated, unfiltered set).
  */
 import { useState, useCallback, useMemo } from 'react'
 import { usePageMemory } from '@/lib/usePageMemory'
+import type { Id } from '@/types/common'
 
 // The owner facet key for unowned rows (kept identical to the donut slice key).
 export const OWNER_NONE = '__none'
@@ -47,16 +55,22 @@ export function useApplicationFilters() {
   const [query,          setQuery]          = usePageMemory('apps.search', '')
   // INTERVIEW-PHASE-1: v1 quick-view — only the 'busy' universal category.
   const [interviewBusy,  setInterviewBusy]  = usePageMemory('apps.interviewBusy', false)
+  // 11.1: deep-link scope from the candidates bulk "manage per application"
+  // action — transient (not usePageMemory), cleared via clearAllFilters or its
+  // own dedicated chip (see ApplicationsPage).
+  const [selectedCandidateIds, setSelectedCandidateIds] = useState<Id[]>([])
 
   // Anything narrowing the default view → the shared clear-button shows.
   const anyFilterActive = Boolean(query.trim() || attention || showArchived || interviewBusy
     || (bucket !== 'active' && bucket !== 'allActive')
-    || selectedPhase.length || selectedOwner.length || selectedSource.length || selectedVac.length)
+    || selectedPhase.length || selectedOwner.length || selectedSource.length || selectedVac.length
+    || selectedCandidateIds.length)
   // Remount the (self-stateful) search input on clear so the visible text resets too.
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setAttention(null); setShowArchived(false); setBucket('active')
     setSelectedPhase([]); setSelectedOwner([]); setSelectedSource([]); setSelectedVac([]); setInterviewBusy(false)
+    setSelectedCandidateIds([])
   }
 
   // One row predicate for table + board (the page maps decorate over the result).
@@ -107,8 +121,12 @@ export function useApplicationFilters() {
     // INTERVIEW-PHASE-1: the v1 "In interview" quick-view maps straight onto the
     // backend's universal category filter (busy/completed/disqualified/none).
     if (interviewBusy)              p.interview_status = 'busy'
+    // 11.1: forward-compat filter for the candidates-bulk deep-link — sent so a
+    // future ApplicationQuery `candidate_ids` filter "just works"; see the header
+    // comment for why this has no client-side fallback narrowing today.
+    if (selectedCandidateIds.length) p.candidate_ids = selectedCandidateIds
     return p
-  }, [selectedPhase, selectedVac, query, showArchived, interviewBusy])
+  }, [selectedPhase, selectedVac, query, showArchived, interviewBusy, selectedCandidateIds])
 
   // Bucket param — TABLE query only (never board/stats): 'allActive' has no server
   // equivalent (spans two buckets) and showArchived's reveal must not be narrowed by
@@ -122,6 +140,7 @@ export function useApplicationFilters() {
     selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
     selectedVac, setSelectedVac, showArchived, setShowArchived, query, setQuery,
     interviewBusy, setInterviewBusy,
+    selectedCandidateIds, setSelectedCandidateIds,
     anyFilterActive, clearAllFilters, searchEpoch, matchesFilters,
     filterParams, bucketParam, filterKey,
   }

@@ -243,7 +243,10 @@
     "done": "Application restored"
   },
   "page": {
-    "searchPlaceholder": "Search applications"
+    "searchPlaceholder": "Search applications",
+    "scopedBySelection_one": "Filtered to {{count}} selected candidate",
+    "scopedBySelection_other": "Filtered to {{count}} selected candidates",
+    "clearScope": "Clear selection filter"
   },
   "board": {
     "movedHidden": "Moved — the card falls outside the current filter"

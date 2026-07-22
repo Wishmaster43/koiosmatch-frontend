@@ -243,7 +243,10 @@
     "done": "Sollicitatie hersteld"
   },
   "page": {
-    "searchPlaceholder": "Zoek naar sollicitaties"
+    "searchPlaceholder": "Zoek naar sollicitaties",
+    "scopedBySelection_one": "Gefilterd op {{count}} geselecteerde kandidaat",
+    "scopedBySelection_other": "Gefilterd op {{count}} geselecteerde kandidaten",
+    "clearScope": "Selectiefilter wissen"
   },
   "board": {
     "movedHidden": "Verplaatst — de kaart valt buiten het huidige filter"

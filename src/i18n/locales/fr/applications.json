@@ -243,7 +243,10 @@
     "done": "{{count}} mis(es) à jour"
   },
   "page": {
-    "searchPlaceholder": "Rechercher des candidatures"
+    "searchPlaceholder": "Rechercher des candidatures",
+    "scopedBySelection_one": "Filtré sur {{count}} candidat sélectionné",
+    "scopedBySelection_other": "Filtré sur {{count}} candidats sélectionnés",
+    "clearScope": "Effacer le filtre de sélection"
   },
   "board": {
     "movedHidden": "Déplacée — la carte sort du filtre actuel"

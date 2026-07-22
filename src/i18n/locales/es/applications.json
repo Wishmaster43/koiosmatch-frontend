@@ -243,7 +243,10 @@
     "done": "{{count}} actualizado(s)"
   },
   "page": {
-    "searchPlaceholder": "Buscar candidaturas"
+    "searchPlaceholder": "Buscar candidaturas",
+    "scopedBySelection_one": "Filtrado por {{count}} candidato seleccionado",
+    "scopedBySelection_other": "Filtrado por {{count}} candidatos seleccionados",
+    "clearScope": "Borrar filtro de selección"
   },
   "board": {
     "movedHidden": "Movida — la tarjeta queda fuera del filtro actual"

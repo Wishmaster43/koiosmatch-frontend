@@ -28,6 +28,9 @@ interface BulkBarProps {
   canArchive: boolean
   onMerge: () => void
   canMerge: boolean
+  // 11.1: deep-link to the Applications page carrying the current selection
+  // (honest gate: the menu entry only renders once this is wired — see CandidatesBulkBar).
+  onManageByApplication?: () => void
   // GEO-REGEOCODE-1: bulk "PDOK opnieuw ophalen" (queued + async, gated on candidates.update).
   onGeocode?: () => void
   canGeocode?: boolean
@@ -82,6 +85,7 @@ export default function CandidatesToolbar({
           onRemoveTag={bulkBar.onRemoveTag} onAddNote={bulkBar.onAddNote} onArchive={bulkBar.onArchive}
           canArchive={bulkBar.canArchive}
           onMerge={bulkBar.onMerge} canMerge={bulkBar.canMerge}
+          onManageByApplication={bulkBar.onManageByApplication}
           onGeocode={bulkBar.onGeocode} canGeocode={bulkBar.canGeocode}
           users={bulkBar.users} funnelTypes={bulkBar.funnelTypes} candidateTypes={bulkBar.candidateTypes}
           phases={bulkBar.phases} statuses={bulkBar.statuses} selectedTags={bulkBar.selectedTags} />

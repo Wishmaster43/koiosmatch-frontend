@@ -243,7 +243,10 @@
     "done": "{{count}} aktualisiert"
   },
   "page": {
-    "searchPlaceholder": "Bewerbungen suchen"
+    "searchPlaceholder": "Bewerbungen suchen",
+    "scopedBySelection_one": "Gefiltert nach {{count}} ausgewähltem Kandidaten",
+    "scopedBySelection_other": "Gefiltert nach {{count}} ausgewählten Kandidaten",
+    "clearScope": "Auswahlfilter entfernen"
   },
   "board": {
     "movedHidden": "Verschoben — die Karte fällt außerhalb des aktuellen Filters"

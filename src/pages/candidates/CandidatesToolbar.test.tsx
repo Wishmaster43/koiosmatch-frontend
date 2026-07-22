@@ -54,4 +54,24 @@ describe('CandidatesToolbar', () => {
     await user.click(screen.getByText('page.blacklistView'))
     expect(props.onToggleBlacklist).toHaveBeenCalledTimes(1)
   })
+
+  // 11.1: the "manage by application" deep-link — CandidatesToolbar must forward
+  // bulkBar.onManageByApplication straight through to CandidatesBulkBar (mirrors
+  // how bulkGeocode/canGeocode were wired Page→Toolbar→BulkBar).
+  it('threads onManageByApplication through to the bulk bar and fires it on click', async () => {
+    const user = userEvent.setup()
+    const onManageByApplication = vi.fn()
+    const props = { ...baseProps(), selectedCount: 2, bulkBar: { ...bulkBar(), onManageByApplication } }
+    render(<CandidatesToolbar {...props} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.manageByApplication'))
+    expect(onManageByApplication).toHaveBeenCalledTimes(1)
+  })
+
+  it('hides the deep-link entry when the toolbar receives no onManageByApplication (honest gate)', async () => {
+    const user = userEvent.setup()
+    render(<CandidatesToolbar {...baseProps()} selectedCount={2} />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.queryByText('bulk.manageByApplication')).toBeNull()
+  })
 })

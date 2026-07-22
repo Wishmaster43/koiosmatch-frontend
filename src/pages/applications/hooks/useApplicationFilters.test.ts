@@ -74,3 +74,28 @@ describe('useApplicationFilters — interview quick-view (INTERVIEW-PHASE-1)', (
     expect(result.current.filterParams.interview_status).toBeUndefined()
   })
 })
+
+// 11.1: the candidates-bulk "manage per application" deep-link scope — sent to
+// the server as `candidate_ids` (forward-compat; the BE doesn't honour it yet,
+// see the hook's header comment), flips anyFilterActive, and is clearable.
+describe('useApplicationFilters — candidate_ids deep-link scope (11.1)', () => {
+  it('sends no candidate_ids by default', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    expect(result.current.filterParams.candidate_ids).toBeUndefined()
+  })
+
+  it('sends candidate_ids once the deep-link scope is set, and flips anyFilterActive', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setSelectedCandidateIds([1, 2, 3]) })
+    expect(result.current.filterParams.candidate_ids).toEqual([1, 2, 3])
+    expect(result.current.anyFilterActive).toBe(true)
+  })
+
+  it('clearAllFilters resets the deep-link scope', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setSelectedCandidateIds([1, 2]) })
+    act(() => { result.current.clearAllFilters() })
+    expect(result.current.selectedCandidateIds).toEqual([])
+    expect(result.current.filterParams.candidate_ids).toBeUndefined()
+  })
+})

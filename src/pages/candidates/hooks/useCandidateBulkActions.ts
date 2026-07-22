@@ -1,13 +1,15 @@
 /**
  * useCandidateBulkActions — the bulk operations for CandidatesPage: row/all
- * selection toggles, pool add/remove, owner/stage/type mutations, tag removal,
+ * selection toggles, pool add/remove, owner/type mutations, tag removal,
  * note add and archive. Each mutation is optimistic, persists, then reconciles
  * against the server's `updated`/`added`/`removed` list (reverts on failure).
  * Selection state + the toast `notify` live in the container and are passed in.
  *
- * AXIS-MATRIX-2 (CMFE audit R1): `bulkSetStatus` additionally runs the shared
- * N2 bulk preflight (`POST /action-rules/preflight-bulk`) before mutating — see
- * its own comment below for why it is the ONE bulk action here that gets it.
+ * The funnel/phase/status cluster (`bulkSetStage`/`bulkConvertPhase`/
+ * `bulkSetStatus` + the AXIS-MATRIX-2 N2 bulk preflight) lives in
+ * `useCandidateStageBulk` (§3 size split, > ~400-line trigger) and is called
+ * below — its three functions are re-exported here unchanged so CandidatesPage/
+ * CandidatesBulkBar never notice the split.
  */
 import { useMemo, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
@@ -17,6 +19,7 @@ import { metaOf, initialsOf } from '../data/candidatesShared'
 import { needsLiveCheck, fetchLiveBlockers, liveFromError } from '../data/archiveGuard'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useNavigation } from '@/context/NavigationContext'
+import { useCandidateStageBulk } from './useCandidateStageBulk'
 import type { BlockingApplication, BlockingMatch } from '../data/archiveGuard'
 import type { Candidate, CandidatePool } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
@@ -42,13 +45,6 @@ const BULK_GUARD_CHECK_CAP = 25
 export interface BulkMergeLite { id: Id; name: string; code?: string; email?: string }
 export interface BulkMergeTarget { current: BulkMergeLite; other: BulkMergeLite }
 
-// AXIS-MATRIX-2 N2 — POST /action-rules/preflight-bulk's response shape (mirrors
-// ActionRuleBulkPreflight::evaluate() verbatim, koiosmatch-api read-only per this
-// task's file boundary). `breakdown` only ever carries warn/block groups (an
-// allow cell never dialogs, docs/AXIS-MATRIX.md's own rule).
-interface BulkPreflightGroup { condition: string; popup_code: string | null; effect: 'warn' | 'block'; count: number; sample_names: string[] }
-interface BulkPreflightResult { total: number; allowed: number; warned: number; blocked: number; not_found: number; breakdown: BulkPreflightGroup[] }
-
 interface UseCandidateBulkActionsParams {
   candidates: Candidate[]
   setCandidates: Dispatch<SetStateAction<Candidate[]>>
@@ -61,7 +57,9 @@ interface UseCandidateBulkActionsParams {
   candidateTypes: LookupOption[]
 }
 
-interface BulkMutateArgs {
+// Exported so useCandidateStageBulk (the extracted funnel/phase/status cluster)
+// can type the `bulkMutate` function it receives without a second declaration.
+export interface BulkMutateArgs {
   url: string
   body?: Record<string, unknown>
   patch: Partial<Candidate>
@@ -155,23 +153,6 @@ export function useCandidateBulkActions({
     }
   }
 
-  // BULK-SKIP-REASONS-1: `/candidates/bulk/funnel-stage` and `/candidates/bulk/phase`
-  // now return `skipped` as [{id, reason}] (every other bulk endpoint keeps the bare
-  // id array — see notifyOutcome above, unchanged for those). Group the reasons into
-  // a human "N reason, M reason" string; returns '' when `skipped` isn't the reasoned
-  // shape (defensive fallback — caller falls back to the old bare-count summary).
-  const reasonBreakdown = (skipped?: unknown[]): string => {
-    const reasoned = (skipped ?? []).filter(
-      (s): s is { id: Id; reason: string } => typeof s === 'object' && s !== null && 'reason' in s,
-    )
-    if (!reasoned.length) return ''
-    const counts: Record<string, number> = {}
-    reasoned.forEach(s => { counts[s.reason] = (counts[s.reason] ?? 0) + 1 })
-    return Object.entries(counts)
-      .map(([reason, count]) => `${count} ${t(`bulk.skipReasons.${reason}`, { defaultValue: reason })}`)
-      .join(', ')
-  }
-
   // Generic optimistic bulk field mutation: apply `patch` to the selected rows,
   // persist, reconcile against the server's `updated` list, revert on failure.
   const bulkMutate = ({ url, body, patch, keys, onSuccess }: BulkMutateArgs) => {
@@ -200,33 +181,16 @@ export function useCandidateBulkActions({
     keys: ['owner', 'ownerId', 'ownerInitials', 'ownerColor'],
     onSuccess: (n, total) => notifyOutcome('bulk.ownerChanged', { name: user.name }, n, total),
   })
-  // Move the selection to a funnel stage — the real bulk route (BULK-2) with single-PATCH
-  // semantics (Match-spawn on hired, event after commit). Replaces the per-id bridge.
-  // BULK-FUNNEL-SOLE-1: the BE now moves each candidate's ONE-AND-ONLY live application
-  // (0 or >1 live applications → skipped, never silently guessed). BULK-SKIP-REASONS-1:
-  // `skipped` now carries [{id,reason}] — show WHY, not just a bare count.
-  const bulkSetStage = (stage: string) => bulkMutate({
-    url: '/candidates/bulk/funnel-stage', body: { funnel_type: stage },
-    patch: { stage }, keys: ['stage'],
-    onSuccess: (n, total, skipped) => {
-      const breakdown = reasonBreakdown(skipped)
-      if (total > 0 && n < total && breakdown) {
-        notify('warning', t('bulk.partialResultReasoned', {
-          value: metaOf(funnelTypes, stage)?.label ?? stage, updated: n, total, skipped: total - n, breakdown,
-        }))
-        return
-      }
-      notifyOutcome('bulk.stageChanged', { value: metaOf(funnelTypes, stage)?.label ?? stage }, n, total)
-    },
-  })
   // 11.1: convenience deep-link from the funnel bulk-node to the Applications page,
   // carrying the current selection via the shared NavigationContext intent pattern
   // (mirrors a KPI/chart click seeding a filter on arrival). The axis-correct bulk
   // home for funnel stage stays PER-APPLICATION (ApplicationsBulkBar) — this just
-  // gets the recruiter there with the right candidates in view. NOTE: ApplicationsPage
-  // does not yet consume an intent `candidate_ids` key (out of this task's file scope
-  // — a follow-up ticket), so today this lands on the (unfiltered) Applications page;
-  // the navigate call itself is real and ready for that intent to be wired up.
+  // gets the recruiter there with the right candidates in view. ApplicationsPage
+  // reads the `candidate_ids` intent key and sends it on to the server as a
+  // `candidate_ids` filter param (see useApplicationFilters) — until the backend
+  // ApplicationQuery accepts that filter, the list shows everything unfiltered
+  // (honest: no client-only scope that would silently disagree with the server's
+  // unfiltered pagination totals) while a chip shows the scope is active + clearable.
   const manageByApplication = () => {
     const ids = [...selectedIds]
     if (!ids.length) return
@@ -356,73 +320,13 @@ export function useCandidateBulkActions({
     runBulkArchive(ids)
   }
 
-  // Convert the selection to a phase (e.g. Lead→Kandidaat). The backend validates
-  // each candidate against that phase's required fields; incomplete ones are skipped
-  // (reconciled back via bulkMutate) → "X van Y gelukt" (warning when any skipped).
-  // BULK-SKIP-REASONS-1: `skipped` now carries [{id,reason}] — show WHY when present.
-  const bulkConvertPhase = (phase: string) => {
-    const total = selectedIds.size
-    bulkMutate({
-      url: '/candidates/bulk/phase', body: { phase },
-      patch: { phase }, keys: ['phase'],
-      onSuccess: (n, _total, skipped) => {
-        const breakdown = reasonBreakdown(skipped)
-        if (n < total && breakdown) { notify('warning', t('bulk.convertResultReasoned', { updated: n, total, breakdown })); return }
-        notify(n < total ? 'warning' : 'success', t('bulk.convertResult', { updated: n, total }))
-      },
-    })
-  }
-  // AXIS-MATRIX-2 N2 (docs/AXIS-MATRIX.md "Niet-interactieve contexten"): one
-  // summary preflight BEFORE a guarded bulk mutation runs, so a recruiter sees
-  // "{n} of {m} will be skipped" up front instead of only in the after-the-fact
-  // partial-result toast. Of every candidate bulk mutation, `candidate.status_set`
-  // is the ONLY one with a real action-rules catalog entry (CandidateBulkService::
-  // status already re-checks the SAME guard server-side and skips blocked rows —
-  // this call never invents a second source of truth, it just previews it). The
-  // other bulk actions here (owner/phase/candidate-type/tags/notes/archive/consent)
-  // have no action-rules catalog token at all — their existing skip-and-reconcile
-  // reporting (notifyOutcome/bulk.partialResult) already is the honest, only signal,
-  // so they deliberately get no preflight call (no double gate).
-  const fetchStatusBulkPreflight = (ids: Id[]): Promise<BulkPreflightResult> =>
-    api.post('/action-rules/preflight-bulk', { action: 'candidate.status_set', candidate_ids: ids })
-      .then(r => r.data as BulkPreflightResult)
-
-  // Human label for one axis condition token (lead/available/temporarily_unavailable/
-  // placed/blacklist/archived) — falls back to the raw token so an unmapped future
-  // condition never renders blank.
-  const axisConditionLabel = (condition: string): string => t(`bulk.axisConditions.${condition}`, { defaultValue: condition })
-
-  // Set a (simple) deployability status for the selection. Match/reason-gated statuses
-  // (placed/unavailable/blacklist) are excluded from bulk in the UI.
-  const runBulkSetStatus = (status: string, label: string) => bulkMutate({
-    url: '/candidates/bulk/status', body: { status },
-    patch: { status }, keys: ['status'],
-    onSuccess: (n, total) => notifyOutcome('bulk.statusChanged', { value: label }, n, total),
+  // Funnel/phase/status cluster (§3 size split) — bulkSetStage/bulkConvertPhase/
+  // bulkSetStatus + the AXIS-MATRIX-2 N2 bulk preflight now live in their own hook;
+  // bulkMutate/notifyOutcome are passed in so there is exactly one implementation
+  // of each. The three returned functions are re-exported below unchanged.
+  const { bulkSetStage, bulkConvertPhase, bulkSetStatus } = useCandidateStageBulk({
+    selectedIds, notify, t, funnelTypes, confirm, bulkMutate, notifyOutcome,
   })
-  const bulkSetStatus = (status: string, label: string) => {
-    const ids = [...selectedIds]
-    if (!ids.length) return
-    fetchStatusBulkPreflight(ids)
-      .then(({ total, blocked, breakdown }) => {
-        // Nothing will be skipped — proceed exactly as before, no extra confirm.
-        if (blocked <= 0) { runBulkSetStatus(status, label); return }
-        const blockedGroups = breakdown.filter(g => g.effect === 'block')
-        const reasons = blockedGroups.map(g => `${g.count} ${axisConditionLabel(g.condition)}`).join(', ')
-        const proceed = total - blocked
-        if (proceed <= 0) { notify('warning', t('bulk.statusAllBlocked', { total, reasons })); return }
-        // 11.3: name a few of the blocked candidates (the preflight already returns
-        // sample_names[] per group) so the recruiter sees WHO is blocked, not just a
-        // count — capped + deduped since the same name can appear in >1 reason group.
-        const names = [...new Set(blockedGroups.flatMap(g => g.sample_names))].slice(0, 3).join(', ')
-        const message = names
-          ? t('bulk.statusBlockedConfirmSample', { blocked, total, reasons, proceed, names })
-          : t('bulk.statusBlockedConfirm', { blocked, total, reasons, proceed })
-        confirm(message, () => runBulkSetStatus(status, label))
-      })
-      // The preflight is a courtesy preview, not a gate — a network hiccup or a
-      // permission read-gap must never block the actual (still server-enforced) action.
-      .catch(() => runBulkSetStatus(status, label))
-  }
   // Add a tag to the selection (mirror of bulkRemoveTag).
   const bulkAddTag = (tag: string) => {
     const ids = [...selectedIds]
