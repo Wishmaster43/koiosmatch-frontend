@@ -201,6 +201,10 @@
     "pointCount": "{{count}} points sur la carte",
     "clearRadius": "Effacer le rayon"
   },
+  "geocode": {
+    "refresh": "Actualiser les coordonnées PDOK",
+    "started": "Actualisation démarrée…"
+  },
   "noAccess": "Accès refusé",
   "noAccessDesc": "Vous n'avez pas les droits pour cette page.",
   "noAgencies": "Aucune agence trouvée",

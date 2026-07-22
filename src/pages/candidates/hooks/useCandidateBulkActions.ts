@@ -451,10 +451,23 @@ export function useCandidateBulkActions({
     onSuccess: (n, total) => notifyOutcome('bulk.consentChanged', { value: label }, n, total),
   })
 
+  // GEO-REGEOCODE-1: manual "PDOK opnieuw ophalen" for the selection. The endpoint
+  // is queued + rate-limited (202) — no optimistic row patch, no reconcile against
+  // an `updated` list, just fire the bulk POST and say "started" (never "done";
+  // the coordinates land later via the async worker, same honesty as the per-id button).
+  const bulkGeocode = () => {
+    const ids = [...selectedIds]
+    if (!ids.length) return
+    setSelectedIds(new Set())
+    api.post('/candidates/bulk/geocode', { candidate_ids: ids })
+      .then(() => notify('success', t('common:geocode.started')))
+      .catch(() => notify('error', t('bulk.mutateError')))
+  }
+
   return {
     toggleRow, toggleAll, bulkAddToPool, bulkRemoveFromPool,
     bulkSetOwner, bulkSetStage, bulkSetTypes, bulkSetConsent, bulkConvertPhase, bulkSetStatus, bulkAddTag,
-    selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive, manageByApplication,
+    selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive, manageByApplication, bulkGeocode,
     bulkArchiveGuard, setBulkArchiveGuard, resolveBulkArchiveGuard,
     bulkMergeTarget, bulkMergePrompt, resolveBulkMerge,
     dialog,

@@ -121,4 +121,23 @@ describe('CandidatesBulkBar', () => {
     await user.click(screen.getByText('bulk.manageByApplication'))
     expect(onManageByApplication).toHaveBeenCalledTimes(1)
   })
+
+  // GEO-REGEOCODE-1: bulk "PDOK opnieuw ophalen" — gated on candidates.update
+  // (canGeocode, set by the page from hasPermission), reuses the ONE shared
+  // common:geocode.refresh label rather than a per-entity i18n key.
+  it('hides the geocode action without candidates.update', async () => {
+    const user = userEvent.setup()
+    render(<CandidatesBulkBar {...baseProps()} canGeocode={false} onGeocode={vi.fn()} />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.queryByText('common:geocode.refresh')).toBeNull()
+  })
+
+  it('shows the geocode action and fires onGeocode when permitted', async () => {
+    const user = userEvent.setup()
+    const onGeocode = vi.fn()
+    render(<CandidatesBulkBar {...baseProps()} canGeocode onGeocode={onGeocode} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('common:geocode.refresh'))
+    expect(onGeocode).toHaveBeenCalledTimes(1)
+  })
 })

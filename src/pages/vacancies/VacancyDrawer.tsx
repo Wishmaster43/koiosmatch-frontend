@@ -5,6 +5,7 @@ import { Globe, Edit2, Save, X } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
+import GeocodeButton from '@/components/ui/GeocodeButton'
 import { channelIcon } from './data/channelIcons'
 import VacancyChangelogPopover from './drawer/VacancyChangelogPopover'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
@@ -155,7 +156,14 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
           )}
           // Changelog icon (§3A(d)) — GET /vacancies/{id}/activity exists (measured:
           // routes/api/tenant/candidates.php), so this is the missing icon-popover, not a tab.
-          titleActions={<VacancyChangelogPopover vacancy={v} />}
+          titleActions={<>
+            <VacancyChangelogPopover vacancy={v} />
+            {/* GEO-REGEOCODE-1: manual "PDOK opnieuw ophalen" — queued + async, never
+                claims "done" (see GeocodeButton). No bulk variant for vacancies (BE
+                spec). Disabled when there's no address at all yet. */}
+            <GeocodeButton endpoint={`/vacancies/${v.id}/geocode`} permission="vacancies.update"
+              disabled={!v.city && !v.street && !v.postalCode && !v.location} />
+          </>}
           // V7: title pencil → save/cancel, same spot as the changelog icon's row.
           actions={editingTitle ? (
             <>

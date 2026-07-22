@@ -250,7 +250,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const {
     toggleRow, toggleAll, bulkAddToPool, bulkRemoveFromPool,
     bulkSetOwner, bulkSetStage, bulkSetTypes, bulkSetConsent, bulkConvertPhase, bulkSetStatus, bulkAddTag,
-    selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive,
+    selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive, bulkGeocode,
     bulkArchiveGuard, setBulkArchiveGuard, resolveBulkArchiveGuard,
     bulkMergeTarget, bulkMergePrompt, resolveBulkMerge,
     dialog: bulkConfirmDialog,
@@ -304,6 +304,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
               onRemoveTag: bulkRemoveTag, onAddNote: bulkAddNote, onArchive: bulkArchive,
               canArchive: hasPermission('candidates.delete'),
               onMerge: bulkMergePrompt, canMerge: hasPermission('candidates.delete'),
+              onGeocode: bulkGeocode, canGeocode: hasPermission('candidates.update'),
               users, funnelTypes, candidateTypes, phases, statuses, selectedTags,
             }}
             onAddOpen={() => setAddOpen(true)}

@@ -201,6 +201,10 @@
     "pointCount": "{{count}} points on the map",
     "clearRadius": "Clear radius"
   },
+  "geocode": {
+    "refresh": "Re-fetch PDOK coordinates",
+    "started": "Re-fetch started…"
+  },
   "noAccess": "No access",
   "noAccessDesc": "You don't have permission to view this page.",
   "noAgencies": "No agencies found",

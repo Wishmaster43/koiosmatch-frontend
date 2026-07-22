@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { ListChecks, UserCog, CircleDot, Tag, Tags, StickyNote, Archive, X } from 'lucide-react'
+import { ListChecks, UserCog, CircleDot, Tag, Tags, StickyNote, Archive, RefreshCw, X } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import { BTN_H } from '@/config/buttonMetrics'
@@ -17,6 +17,10 @@ interface CustomersBulkBarProps {
   onAddNote: (text: string) => void
   onArchive: () => void
   canArchive?: boolean
+  // GEO-REGEOCODE-1: bulk "PDOK opnieuw ophalen" — queued + async (202), gated on
+  // customers.update, same as the per-record GeocodeButton.
+  onGeocode?: () => void
+  canGeocode?: boolean
   users?: BulkUser[]
   statuses?: LookupOption[]
   selectedTags?: string[]
@@ -30,7 +34,7 @@ interface CustomersBulkBarProps {
  */
 export default function CustomersBulkBar({
   count, onClear, onSetOwner, onSetStatus, onAddTag, onRemoveTag, onAddNote, onArchive,
-  canArchive = false, users = [], statuses = [], selectedTags = [],
+  canArchive = false, onGeocode, canGeocode = false, users = [], statuses = [], selectedTags = [],
 }: CustomersBulkBarProps) {
   const { t } = useTranslation('customers')
 
@@ -54,6 +58,9 @@ export default function CustomersBulkBar({
       searchPlaceholder: t('bulk.searchTag'), emptyText: t('bulk.noTags'), options: tagOptions, onPick: v => onRemoveTag(String(v)) },
     { key: 'note', label: t('bulk.addNote'), icon: StickyNote, input: true,
       placeholder: t('bulk.notePlaceholder'), submitLabel: t('bulk.noteSubmit'), onSubmit: v => onAddNote(String(v)) },
+    // GEO-REGEOCODE-1: reuses the ONE shared common:geocode.refresh label (no
+    // per-entity i18n key) — mirrors the per-record GeocodeButton's tooltip text.
+    ...(canGeocode && onGeocode ? [{ key: 'geocode', label: t('common:geocode.refresh'), icon: RefreshCw, onSelect: onGeocode }] : []),
     ...(canArchive ? [{ key: 'archive', label: t('bulk.archive'), icon: Archive, danger: true, onSelect: onArchive }] : []),
   ]
 

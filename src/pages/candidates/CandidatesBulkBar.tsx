@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, Archive, ShieldCheck, UserCheck, Activity, GitMerge, X, ExternalLink } from 'lucide-react'
+import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, Archive, ShieldCheck, UserCheck, Activity, GitMerge, RefreshCw, X, ExternalLink } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import { BTN_H } from '@/config/buttonMetrics'
@@ -34,6 +34,10 @@ interface CandidatesBulkBarProps {
   // and the same permission as archive (candidates.delete).
   onMerge?: () => void
   canMerge?: boolean
+  // GEO-REGEOCODE-1: bulk "PDOK opnieuw ophalen" — queued + async (202), no per-row
+  // reconcile. Gated on candidates.update, same as the per-record GeocodeButton.
+  onGeocode?: () => void
+  canGeocode?: boolean
   users?: BulkUser[]
   funnelTypes?: LookupOption[]
   candidateTypes?: LookupOption[]
@@ -51,7 +55,7 @@ interface CandidatesBulkBarProps {
 export default function CandidatesBulkBar({
   count, onClear, onAddToPool, onRemoveFromPool, onSetOwner, onSetStage, onSetTypes, onSetConsent,
   onConvertPhase, onSetStatus, onAddTag, onRemoveTag, onAddNote, onArchive, canArchive = false,
-  onMerge, canMerge = false, onManageByApplication,
+  onMerge, canMerge = false, onManageByApplication, onGeocode, canGeocode = false,
   users = [], funnelTypes = [], candidateTypes = [], phases = [], statuses = [], selectedTags = [],
 }: CandidatesBulkBarProps) {
   const { t } = useTranslation('candidates')
@@ -129,6 +133,9 @@ export default function CandidatesBulkBar({
     // Bulk-merge (punt 4): only offered with EXACTLY 2 rows selected — merging is
     // pairwise (one survivor absorbs one duplicate), so any other count is ambiguous.
     ...(count === 2 && canMerge && onMerge ? [{ key: 'merge', label: t('bulk.merge'), icon: GitMerge, onSelect: onMerge }] : []),
+    // GEO-REGEOCODE-1: reuses the ONE shared common:geocode.refresh label (no
+    // per-entity i18n key) — mirrors the per-record GeocodeButton's tooltip text.
+    ...(canGeocode && onGeocode ? [{ key: 'geocode', label: t('common:geocode.refresh'), icon: RefreshCw, onSelect: onGeocode }] : []),
     ...(canArchive ? [{ key: 'archive', label: t('bulk.archive'), icon: Archive, danger: true, onSelect: onArchive }] : []),
   ]
 

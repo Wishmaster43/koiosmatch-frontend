@@ -13,6 +13,7 @@ import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import EntityDrawerJs from '@/components/drawer/EntityDrawer'
 import EntityHeaderJs from '@/components/drawer/EntityHeader'
 import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
+import GeocodeButton from '@/components/ui/GeocodeButton'
 import { useGenders } from '@/lib/useGenders'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useAuth } from '@/context/AuthContext'
@@ -250,6 +251,11 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           )}
           titleActions={<>
             <ChangelogPopover c={c} />
+            {/* GEO-REGEOCODE-1: manual "PDOK opnieuw ophalen" — queued + async, never
+                claims "done" (see GeocodeButton). Disabled when there's no address at
+                all yet (nothing meaningful to geocode). */}
+            <GeocodeButton endpoint={`/candidates/${c.id}/geocode`} permission="candidates.update"
+              disabled={!c.city && !c.street && !c.postalCode} />
             {/* Merge a duplicate into this record (punt 4) — same permission signal
                 as archive (candidates.delete via the page); not on archived dossiers. */}
             {onMerged && !c.archived && (

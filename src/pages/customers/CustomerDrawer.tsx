@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
+import GeocodeButton from '@/components/ui/GeocodeButton'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
@@ -249,7 +250,13 @@ export default function CustomerDrawer({
           onPhotoChange={setLogoUrl}
           photoLabels={{ upload: t('drawer.photoUpload'), remove: t('drawer.photoRemove') }}
           renderTitle={renderTitle}
-          titleActions={<CustomerChangelog customerId={c.id} />}
+          titleActions={<>
+            <CustomerChangelog customerId={c.id} />
+            {/* GEO-REGEOCODE-1: manual "PDOK opnieuw ophalen" — queued + async, never
+                claims "done" (see GeocodeButton). Disabled when there's no city yet
+                (the customer's own address is city-only on this flat model). */}
+            <GeocodeButton endpoint={`/customers/${c.id}/geocode`} permission="customers.update" disabled={!c.city} />
+          </>}
           actions={headerActions}
           meta={[
             { key: 'status', label: t('drawer.status'), value: currentStatus, width: 160,

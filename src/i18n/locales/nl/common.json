@@ -201,6 +201,10 @@
     "pointCount": "{{count}} punten op de kaart",
     "clearRadius": "Wis straal"
   },
+  "geocode": {
+    "refresh": "PDOK opnieuw ophalen",
+    "started": "Opnieuw ophalen gestart…"
+  },
   "noAccess": "Geen toegang",
   "noAccessDesc": "Je hebt geen rechten voor deze pagina.",
   "noAgencies": "Geen bureaus gevonden",

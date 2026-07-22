@@ -101,5 +101,16 @@ export function useCustomerBulkActions({ customers, setCustomers, setTotal, sele
     }, { danger: true })
   }
 
-  return { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags, dialog }
+  // GEO-REGEOCODE-1: manual "PDOK opnieuw ophalen" for the selection. Queued +
+  // rate-limited (202) — no optimistic row patch, no reconcile, just fire the
+  // bulk POST and say "started" (never "done"; mirrors bulkGeocode on candidates).
+  const bulkGeocode = () => {
+    const ids = [...selectedIds]; if (!ids.length) return
+    setSelectedIds(new Set())
+    api.post('/customers/bulk/geocode', { customer_ids: ids })
+      .then(() => notify('success', t('common:geocode.started')))
+      .catch(() => notify('error', t('bulk.mutateError')))
+  }
+
+  return { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, bulkGeocode, selectedTags, dialog }
 }

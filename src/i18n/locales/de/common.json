@@ -201,6 +201,10 @@
     "pointCount": "{{count}} Punkte auf der Karte",
     "clearRadius": "Radius löschen"
   },
+  "geocode": {
+    "refresh": "PDOK-Koordinaten erneut abrufen",
+    "started": "Erneutes Abrufen gestartet…"
+  },
   "noAccess": "Kein Zugriff",
   "noAccessDesc": "Du hast keine Berechtigung für diese Seite.",
   "noAgencies": "Keine Agenturen gefunden",

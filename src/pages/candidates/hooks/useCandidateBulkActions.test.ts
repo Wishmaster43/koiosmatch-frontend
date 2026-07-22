@@ -460,3 +460,31 @@ describe('useCandidateBulkActions · bulkMergePrompt / resolveBulkMerge (punt 4)
     expect(r.result.current.actions.bulkMergeTarget).toBeNull()
   })
 })
+
+// GEO-REGEOCODE-1: bulk "PDOK opnieuw ophalen" — queued + async (202), no
+// optimistic row patch and no reconcile against an `updated` list (§13: assert
+// the exact request, not just that a callback fired).
+describe('useCandidateBulkActions · bulkGeocode (GEO-REGEOCODE-1)', () => {
+  it('POSTs /candidates/bulk/geocode with the exact selected candidate_ids', async () => {
+    post.mockResolvedValue({ status: 202, data: {} })
+    const r = harness([cand({ id: 1 }), cand({ id: 2 })])
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    act(() => r.result.current.actions.bulkGeocode())
+    expect(post).toHaveBeenCalledWith('/candidates/bulk/geocode', { candidate_ids: [1, 2] })
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('success', 'common:geocode.started'))
+  })
+
+  it('is a no-op when nothing is selected', () => {
+    const r = harness([cand({ id: 1 })])
+    act(() => r.result.current.actions.bulkGeocode())
+    expect(post).not.toHaveBeenCalled()
+  })
+
+  it('shows the generic mutate error toast when the call fails', async () => {
+    post.mockRejectedValue(new Error('boom'))
+    const r = harness([cand({ id: 1 })])
+    act(() => r.result.current.setSelectedIds(new Set([1])))
+    act(() => r.result.current.actions.bulkGeocode())
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('error', 'bulk.mutateError'))
+  })
+})

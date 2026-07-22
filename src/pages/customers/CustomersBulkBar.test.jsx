@@ -50,4 +50,23 @@ describe('CustomersBulkBar', () => {
     await user.click(screen.getByText('Actief'))
     expect(props.onSetStatus).toHaveBeenCalledWith('actief')
   })
+
+  // GEO-REGEOCODE-1: bulk "PDOK opnieuw ophalen" — gated on customers.update
+  // (canGeocode, set by the page from hasPermission), reuses the ONE shared
+  // common:geocode.refresh label rather than a per-entity i18n key.
+  it('hides the geocode action without customers.update', async () => {
+    const user = userEvent.setup()
+    render(<CustomersBulkBar {...baseProps()} canGeocode={false} onGeocode={vi.fn()} />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.queryByText('common:geocode.refresh')).toBeNull()
+  })
+
+  it('shows the geocode action and fires onGeocode when permitted', async () => {
+    const user = userEvent.setup()
+    const onGeocode = vi.fn()
+    render(<CustomersBulkBar {...baseProps()} canGeocode onGeocode={onGeocode} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('common:geocode.refresh'))
+    expect(onGeocode).toHaveBeenCalledTimes(1)
+  })
 })

@@ -4,6 +4,7 @@ import { Plus, X, Map as MapIcon, Pencil, Trash2, AlertTriangle, RefreshCw } fro
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import GeocodeButton from '@/components/ui/GeocodeButton'
 
 // STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
 const LocationsMapView = lazy(() => import('./LocationsMapView'))
@@ -189,6 +190,10 @@ export default function LocationsSettings() {
                   </td>
                   <td style={{ ...TD, textAlign: 'right' }}>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
+                      {/* GEO-REGEOCODE-1: manual "PDOK opnieuw ophalen" — queued + async,
+                          never claims "done" (see GeocodeButton). No bulk for locations (BE spec). */}
+                      <GeocodeButton endpoint={`/locations/${loc.id}/geocode`} permission="settings.update"
+                        disabled={!loc.postal_code && !loc.city && !loc.street} variant="row" />
                       <button onClick={() => openEdit(loc)} title={t('locations.edit')} aria-label={t('locations.edit')}
                         style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
                                  background: 'var(--hover-bg)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--text)' }}>
