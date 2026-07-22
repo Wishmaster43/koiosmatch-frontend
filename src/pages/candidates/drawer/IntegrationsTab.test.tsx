@@ -4,6 +4,7 @@
  * the shared "Koppelen" POST both systems fire, and the Shiftmanager "Nu synchroniseren"
  * mutation (§13: asserts the real POST route/body, never just that a callback fired).
  */
+import { StrictMode } from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -118,6 +119,30 @@ describe('IntegrationsTab · PDOK manual "Bijwerken" (CAND-PDOK-GEOCODE-FE-1, ca
     expect(mockPost).toHaveBeenCalledWith('/candidates/1/geocode')
     expect(mockNotifySuccess).toHaveBeenCalledWith('integrations.pdok.refreshStarted')
     expect(mockGet).toHaveBeenCalledWith('/candidates/1')
+  })
+
+  // PDOK-REFRESH-3 regression (Danny 22-07 "moet nog steeds CMD+R"): StrictMode runs
+  // effects setup → cleanup → setup in dev; the old cleanup-only mountedRef effect left
+  // the ref permanently false after the simulated remount, so every poll tick bailed and
+  // the panel never updated in place. This renders under REAL StrictMode and proves the
+  // poll completes: fresh coords + a bumped updated_at must reach onUpdate (the record merge).
+  it('still polls and merges fresh data under StrictMode (dev double-mount)', async () => {
+    vi.useFakeTimers()
+    mockUseAuth.mockReturnValue({ hasModule: () => false, hasPermission: (p: string) => p === 'candidates.update' })
+    mockPost.mockResolvedValue({})
+    mockGet.mockResolvedValue({ data: {
+      lat: '51.92115', lng: '5.84185',
+      geocode: { requested_at: '2026-07-22T22:48:00Z', requested_by: 'Danny', updated_at: '2026-07-22T22:48:05Z' },
+    } })
+    const onUpdate = vi.fn()
+    render(<StrictMode><IntegrationsTab c={baseCandidate()} onUpdate={onUpdate} /></StrictMode>)
+    fireEvent.click(screen.getByRole('button', { name: /integrations.pdok.refresh/ }))
+    await act(async () => { await vi.advanceTimersByTimeAsync(11000) })
+    // The poll survived the double-mount: fresh (string-)coords coerced + provenance merged up.
+    expect(onUpdate).toHaveBeenCalledWith(1, {
+      lat: 51.92115, lng: 5.84185,
+      geocode: { requestedAt: '2026-07-22T22:48:00Z', requestedBy: 'Danny', updatedAt: '2026-07-22T22:48:05Z' },
+    })
   })
 
   it('shows an error toast when the geocode POST fails, without crashing', async () => {

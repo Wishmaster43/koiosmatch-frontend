@@ -130,7 +130,14 @@ export default function IntegrationsTab({ c, onUpdate }: {
   // re-geocode (same address → same pin), so without this nothing visibly updates.
   const [geocodeOverride, setGeocodeOverride] = useState<Candidate['geocode']>(null)
   const mountedRef = useRef(true)
-  useEffect(() => () => { mountedRef.current = false }, [])
+  // PDOK-REFRESH-3 (Danny 22-07 "MOET CMD+R???"): the setup MUST re-arm the ref.
+  // StrictMode runs setup → cleanup → setup in dev; the old cleanup-only effect
+  // left mountedRef permanently false after the simulated remount, so every poll
+  // tick bailed instantly — the panel never updated in dev, only after a reload.
+  useEffect(() => {
+    mountedRef.current = true
+    return () => { mountedRef.current = false }
+  }, [])
 
   const onRefreshPdok = async () => {
     if (pdokRefreshing) return
