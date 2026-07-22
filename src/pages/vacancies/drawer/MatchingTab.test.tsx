@@ -138,18 +138,17 @@ describe('MatchingTab · template pick → weights preview + PATCH payload', () 
     await waitFor(() => expect(screen.queryByText(/matching.basedOn/)).toBeNull())
   })
 
-  // Danny 22-07: concrete number + % instead of only the vague word label.
-  it('shows the numeric weight + its % share of the total next to each dimension', async () => {
+  // Danny 22-07: concrete weight number next to each dimension (no %-of-total — see the badge comment).
+  it('shows the numeric weight next to each dimension', async () => {
     mockGet.mockResolvedValue({ data: { data: rawDetail({
       match_weights: { qualifications: 5, technical_fit: 3, soft_skills: 3, cultural_alignment: 3, career_aspirations: 3, location: 3 },
     }) } })
     render(<Harness />)
     await waitFor(() => screen.getByText('matching.profile'))
 
-    // Sum = 5+3+3+3+3+3 = 20; qualifications' share = 5/20 = 25,0% (one decimal, Danny 22-07;
-    // the six shares total exactly 100). Separator-tolerant: test locale may be comma or dot.
-    expect(screen.getByText(/5\/5 · 25[.,]0%/)).toBeInTheDocument()
-    // Each of the other five dimensions (weight 3) shares 3/20 = 15,0%.
-    expect(screen.getAllByText(/3\/5 · 15[.,]0%/)).toHaveLength(5)
+    // Just the concrete weight (Danny 22-07: no %-of-total — on a 6-way split it can't be
+    // both equal for equal sliders AND sum to 100, so it read as "wrong").
+    expect(screen.getByText('5/5')).toBeInTheDocument()
+    expect(screen.getAllByText('3/5')).toHaveLength(5)
   })
 })
