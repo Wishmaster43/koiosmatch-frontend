@@ -925,7 +925,11 @@
       "alt": "PDOK-logo",
       "linked": "Gekoppeld",
       "notGeocoded": "Nog niet gegeocodeerd",
-      "autoInfo": "Coördinaten worden automatisch bijgewerkt zodra het adres wijzigt."
+      "autoInfo": "Coördinaten worden automatisch bijgewerkt zodra het adres wijzigt.",
+      "refresh": "Bijwerken",
+      "refreshing": "Bijwerken…",
+      "refreshStarted": "PDOK-update gestart — coördinaten verschijnen zo",
+      "refreshFailed": "Bijwerken mislukt"
     },
     "helloflex": {
       "name": "HelloFlex",

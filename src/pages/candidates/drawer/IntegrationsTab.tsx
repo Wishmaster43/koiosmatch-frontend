@@ -1,6 +1,7 @@
 /**
  * IntegrationsTab ("Koppelingen") — per-system backoffice link status: PDOK
- * address-geocoding (fully automatic), and HelloFlex/Shiftmanager (KOPPELINGEN-
+ * address-geocoding (automatic on address change, plus a manual "Bijwerken"
+ * trigger — CAND-PDOK-GEOCODE-FE-1), and HelloFlex/Shiftmanager (KOPPELINGEN-
  * META-1: both link through the same POST /sync/candidates/{id} { system }
  * endpoint, which now also stamps who/when the link was FIRST made). PDOK is
  * always shown; the HelloFlex/Shiftmanager cards only appear when the tenant has
@@ -8,7 +9,7 @@
  * `passesModuleOrApp`). No fake affordances (§3): every button here fires a real
  * request; nothing renders a control that goes nowhere.
  */
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw, Link2 } from 'lucide-react'
@@ -17,7 +18,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
 import { useDateFormat } from '@/lib/datetime'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import pdokIcon from '@/assets/integrations/pdok.png'
@@ -77,13 +78,60 @@ export default function IntegrationsTab({ c }: { c: Candidate }) {
   // either signal first); mirrors SettingsPage's passesModuleOrApp.
   const auth = useAuth()
   const hasModule = auth?.hasModule ?? (() => false)
+  const hasPermission = auth?.hasPermission ?? (() => false)
   const apps = useApps()
   const isAppEnabled = apps?.isAppEnabled ?? (() => false)
   const showHelloflex = hasModule('hf') || isAppEnabled('helloflex')
   const showShiftmanager = hasModule('sm') || isAppEnabled('shiftmanager')
 
-  // Real datapath: STRAAL-1 coordinates, already mapped onto Candidate today.
-  const hasCoords = c.lat != null && c.lng != null
+  // CAND-PDOK-GEOCODE-FE-1: manual "Bijwerken" trigger for the async geocode
+  // workflow (POST .../geocode, 202 queued). Once it resolves we poll the
+  // candidate a few times so the fresh lat/lng show up without a full drawer
+  // reload; guarded so a stray poll tick after unmount never sets state.
+  const canRefreshPdok = hasPermission('candidates.update')
+  const [pdokRefreshing, setPdokRefreshing] = useState(false)
+  const [coordsOverride, setCoordsOverride] = useState<{ lat: number | null; lng: number | null } | null>(null)
+  const mountedRef = useRef(true)
+  useEffect(() => () => { mountedRef.current = false }, [])
+
+  const onRefreshPdok = async () => {
+    if (pdokRefreshing) return
+    setPdokRefreshing(true)
+    try {
+      await api.post(`/candidates/${c.id}/geocode`)
+      notifySuccess(t('integrations.pdok.refreshStarted'))
+    } catch (err) {
+      notifyError(extractApiError(err, t('integrations.pdok.refreshFailed')))
+      setPdokRefreshing(false)
+      return
+    }
+    // Poll a few times for the async job to land — stop early once coordinates
+    // appear or change vs. the original prop value; give up silently after 5 tries
+    // (the toast above already told the user the update started).
+    const baseLat = c.lat
+    const baseLng = c.lng
+    for (let attempt = 0; attempt < 5 && mountedRef.current; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      if (!mountedRef.current) return
+      try {
+        const fresh = unwrap<{ lat?: number | null; lng?: number | null }>(await api.get(`/candidates/${c.id}`))
+        if (!mountedRef.current) return
+        if (fresh?.lat != null && fresh?.lng != null && (fresh.lat !== baseLat || fresh.lng !== baseLng)) {
+          setCoordsOverride({ lat: fresh.lat, lng: fresh.lng })
+          break
+        }
+      } catch {
+        // Silent — a poll failure just keeps the last-known coordinates; the
+        // manual trigger already reported "started" above.
+      }
+    }
+    if (mountedRef.current) setPdokRefreshing(false)
+  }
+
+  // Effective coordinates: the just-polled override wins, else the candidate prop.
+  const effectiveLat = coordsOverride?.lat ?? c.lat
+  const effectiveLng = coordsOverride?.lng ?? c.lng
+  const hasCoords = effectiveLat != null && effectiveLng != null
 
   // KOPPELINGEN-META-1: both systems resolved onto the candidate symmetrically —
   // status/external id/last error plus who/when the link was FIRST made.
@@ -137,18 +185,34 @@ export default function IntegrationsTab({ c }: { c: Candidate }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* PDOK — always visible; geocoding is fully automatic, no manual trigger exists. */}
+      {/* PDOK — geocoding runs automatically on address change; "Bijwerken" (gated
+          on candidates.update) queues a manual re-geocode via the same async
+          workflow, then the tab polls briefly for the fresh coordinates. */}
       <SectionCard title={<CardTitle icon={pdokIcon} alt={t('integrations.pdok.alt')} label={t('integrations.pdok.name')} />}>
-        {hasCoords ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <SoftChip label={t('integrations.pdok.linked')} color="var(--color-success)" />
-            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
-              {c.lat?.toFixed(5)}, {c.lng?.toFixed(5)}
-            </span>
-          </div>
-        ) : (
-          <SoftChip label={t('integrations.pdok.notGeocoded')} color="var(--text-muted)" />
-        )}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+          {hasCoords ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <SoftChip label={t('integrations.pdok.linked')} color="var(--color-success)" />
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
+                {effectiveLat?.toFixed(5)}, {effectiveLng?.toFixed(5)}
+              </span>
+            </div>
+          ) : (
+            <SoftChip label={t('integrations.pdok.notGeocoded')} color="var(--text-muted)" />
+          )}
+          {canRefreshPdok && (
+            <button type="button" onClick={onRefreshPdok} disabled={pdokRefreshing}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px',
+                fontSize: 11, fontWeight: 500, borderRadius: 7, border: '1px solid var(--border)',
+                cursor: pdokRefreshing ? 'not-allowed' : 'pointer', background: 'var(--surface)',
+                color: 'var(--text)', opacity: pdokRefreshing ? 0.6 : 1, flexShrink: 0,
+              }}>
+              <RefreshCw size={11} className={pdokRefreshing ? 'animate-spin' : ''} />
+              {pdokRefreshing ? t('integrations.pdok.refreshing') : t('integrations.pdok.refresh')}
+            </button>
+          )}
+        </div>
         <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8, marginBottom: 0 }}>
           {t('integrations.pdok.autoInfo')}
         </p>

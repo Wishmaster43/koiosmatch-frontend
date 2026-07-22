@@ -925,7 +925,11 @@
       "alt": "Logo PDOK",
       "linked": "Connecté",
       "notGeocoded": "Pas encore géocodé",
-      "autoInfo": "Les coordonnées se mettent à jour automatiquement dès que l'adresse change."
+      "autoInfo": "Les coordonnées se mettent à jour automatiquement dès que l'adresse change.",
+      "refresh": "Actualiser",
+      "refreshing": "Actualisation…",
+      "refreshStarted": "Mise à jour PDOK lancée — les coordonnées apparaîtront bientôt",
+      "refreshFailed": "Échec de l'actualisation"
     },
     "helloflex": {
       "name": "HelloFlex",

@@ -925,7 +925,11 @@
       "alt": "PDOK-Logo",
       "linked": "Verknüpft",
       "notGeocoded": "Noch nicht geocodiert",
-      "autoInfo": "Koordinaten werden automatisch aktualisiert, sobald sich die Adresse ändert."
+      "autoInfo": "Koordinaten werden automatisch aktualisiert, sobald sich die Adresse ändert.",
+      "refresh": "Aktualisieren",
+      "refreshing": "Wird aktualisiert…",
+      "refreshStarted": "PDOK-Update gestartet — Koordinaten erscheinen in Kürze",
+      "refreshFailed": "Aktualisierung fehlgeschlagen"
     },
     "helloflex": {
       "name": "HelloFlex",

@@ -925,7 +925,11 @@
       "alt": "PDOK logo",
       "linked": "Linked",
       "notGeocoded": "Not yet geocoded",
-      "autoInfo": "Coordinates update automatically whenever the address changes."
+      "autoInfo": "Coordinates update automatically whenever the address changes.",
+      "refresh": "Refresh",
+      "refreshing": "Refreshing…",
+      "refreshStarted": "PDOK update started — coordinates will appear shortly",
+      "refreshFailed": "Refresh failed"
     },
     "helloflex": {
       "name": "HelloFlex",

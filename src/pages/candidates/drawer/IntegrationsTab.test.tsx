@@ -4,8 +4,8 @@
  * the shared "Koppelen" POST both systems fire, and the Shiftmanager "Nu synchroniseren"
  * mutation (§13: asserts the real POST route/body, never just that a callback fired).
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import IntegrationsTab from './IntegrationsTab'
 import type { Candidate, CandidateBackofficeLink } from '@/types/candidate'
@@ -13,12 +13,18 @@ import type { Candidate, CandidateBackofficeLink } from '@/types/candidate'
 const mockUseAuth = vi.fn()
 const mockUseApps = vi.fn()
 const mockPost = vi.fn()
+const mockGet = vi.fn()
 const mockNotifySuccess = vi.fn()
 const mockNotifyError = vi.fn()
 
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 vi.mock('@/context/AppsContext', () => ({ useApps: () => mockUseApps() }))
-vi.mock('@/lib/api', () => ({ default: { post: (...args: unknown[]) => mockPost(...args) } }))
+// Keep the real `unwrap` helper (a pure function) — only post/get are stubbed,
+// so the PDOK poll (CAND-PDOK-GEOCODE-FE-1) reads its response the real way.
+vi.mock('@/lib/api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/api')>()),
+  default: { post: (...args: unknown[]) => mockPost(...args), get: (...args: unknown[]) => mockGet(...args) },
+}))
 vi.mock('@/lib/notify', () => ({ notifySuccess: (...a: unknown[]) => mockNotifySuccess(...a), notifyError: (...a: unknown[]) => mockNotifyError(...a) }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => `fmt(${v})` }) }))
 
@@ -35,6 +41,9 @@ beforeEach(() => {
   mockUseAuth.mockReturnValue({ hasModule: () => false })
   mockUseApps.mockReturnValue({ isAppEnabled: () => false })
 })
+// Always restore real timers — the PDOK refresh test below runs with fake ones
+// so its background poll loop never leaks a pending real setTimeout past the test.
+afterEach(() => { vi.useRealTimers() })
 
 describe('IntegrationsTab · PDOK (always visible)', () => {
   it('shows the "not geocoded" fallback when lat/lng are null', () => {
@@ -51,6 +60,44 @@ describe('IntegrationsTab · PDOK (always visible)', () => {
   it('renders even when no module/app is enabled', () => {
     render(<IntegrationsTab c={baseCandidate()} />)
     expect(screen.getByAltText('integrations.pdok.alt')).toBeInTheDocument()
+  })
+})
+
+describe('IntegrationsTab · PDOK manual "Bijwerken" (CAND-PDOK-GEOCODE-FE-1, candidates.update-gated)', () => {
+  it('does not render the "Bijwerken" button without candidates.update permission', () => {
+    render(<IntegrationsTab c={baseCandidate()} />)
+    expect(screen.queryByRole('button', { name: /integrations.pdok.refresh/ })).toBeNull()
+  })
+
+  it('POSTs /candidates/{id}/geocode on click, shows the "started" toast, and polls quietly for new coordinates', async () => {
+    vi.useFakeTimers()
+    mockUseAuth.mockReturnValue({ hasModule: () => false, hasPermission: (p: string) => p === 'candidates.update' })
+    mockPost.mockResolvedValue({})
+    // The poll after the POST never finds new coordinates in this test — mocked
+    // (fake timers) so the background loop resolves inside the test instead of
+    // leaking a real, unresolved network call.
+    mockGet.mockResolvedValue({ data: { lat: null, lng: null } })
+    render(<IntegrationsTab c={baseCandidate()} />)
+    const button = screen.getByRole('button', { name: /integrations.pdok.refresh/ })
+    fireEvent.click(button)
+    // advanceTimersByTimeAsync drains microtasks between each timer tick, so both
+    // the POST's .then chain and every setTimeout-based poll step settle here —
+    // covers the POST resolution plus all 5 poll ticks (~10s) in one go.
+    await act(async () => { await vi.advanceTimersByTimeAsync(11000) })
+    expect(mockPost).toHaveBeenCalledWith('/candidates/1/geocode')
+    expect(mockNotifySuccess).toHaveBeenCalledWith('integrations.pdok.refreshStarted')
+    expect(mockGet).toHaveBeenCalledWith('/candidates/1')
+  })
+
+  it('shows an error toast when the geocode POST fails, without crashing', async () => {
+    mockUseAuth.mockReturnValue({ hasModule: () => false, hasPermission: (p: string) => p === 'candidates.update' })
+    mockPost.mockRejectedValue({ response: { data: { message: 'Geen rechten' } } })
+    render(<IntegrationsTab c={baseCandidate()} />)
+    const button = screen.getByRole('button', { name: /integrations.pdok.refresh/ })
+    fireEvent.click(button)
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Geen rechten'))
+    // No poll on failure — the button is clickable again right away.
+    expect(mockGet).not.toHaveBeenCalled()
   })
 })
 

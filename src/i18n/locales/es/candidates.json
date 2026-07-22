@@ -925,7 +925,11 @@
       "alt": "Logo de PDOK",
       "linked": "Vinculado",
       "notGeocoded": "Aún no geocodificado",
-      "autoInfo": "Las coordenadas se actualizan automáticamente en cuanto cambia la dirección."
+      "autoInfo": "Las coordenadas se actualizan automáticamente en cuanto cambia la dirección.",
+      "refresh": "Actualizar",
+      "refreshing": "Actualizando…",
+      "refreshStarted": "Actualización de PDOK iniciada — las coordenadas aparecerán en breve",
+      "refreshFailed": "Error al actualizar"
     },
     "helloflex": {
       "name": "HelloFlex",
