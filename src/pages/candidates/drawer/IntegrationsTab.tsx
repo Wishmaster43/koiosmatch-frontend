@@ -119,6 +119,10 @@ export default function IntegrationsTab({ c }: { c: Candidate }) {
   const canRefreshPdok = hasPermission('candidates.update')
   const [pdokRefreshing, setPdokRefreshing] = useState(false)
   const [coordsOverride, setCoordsOverride] = useState<{ lat: number | null; lng: number | null } | null>(null)
+  // PDOK-REFRESH-2 (Danny 22-07 "moet CMD-R doen"): the poll must also refresh the
+  // provenance line ("Bijgewerkt … door …") — coords alone often DON'T change on a
+  // re-geocode (same address → same pin), so without this nothing visibly updates.
+  const [geocodeOverride, setGeocodeOverride] = useState<Candidate['geocode']>(null)
   const mountedRef = useRef(true)
   useEffect(() => () => { mountedRef.current = false }, [])
 
@@ -139,20 +143,33 @@ export default function IntegrationsTab({ c }: { c: Candidate }) {
     // retry at 6s). Values are coerced via toCoord — Laravel sends decimals as
     // strings, which the old !== comparison and the mapper both mishandled.
     setPdokRefreshing(false)
-    const baseLat = c.lat
-    const baseLng = c.lng
+    // PDOK-REFRESH-2: always ADOPT the fresh values (coords + provenance) — a re-geocode
+    // of the same address keeps the same pin, but the "Bijgewerkt … door …" meta DID
+    // change; the old changed-coords-only guard made that invisible until a page reload.
+    const baseUpdatedAt = c.geocode?.updatedAt ?? null
     for (const delayMs of [3000, 3000]) {
       await new Promise(resolve => setTimeout(resolve, delayMs))
       if (!mountedRef.current) return
       try {
-        const fresh = unwrap<{ lat?: unknown; lng?: unknown }>(await api.get(`/candidates/${c.id}`))
+        const fresh = unwrap<{ lat?: unknown; lng?: unknown; geocode?: { requested_at?: string | null; requested_by?: string | null; updated_at?: string | null } | null }>(
+          await api.get(`/candidates/${c.id}`),
+        )
         if (!mountedRef.current) return
         const lat = toCoord(fresh?.lat)
         const lng = toCoord(fresh?.lng)
-        if (lat != null && lng != null && (lat !== baseLat || lng !== baseLng)) {
+        if (lat != null && lng != null) {
           setCoordsOverride({ lat, lng })
-          return
         }
+        const meta = fresh?.geocode
+          ? {
+              requestedAt: fresh.geocode.requested_at ?? null,
+              requestedBy: fresh.geocode.requested_by ?? null,
+              updatedAt: fresh.geocode.updated_at ?? null,
+            }
+          : null
+        if (meta) setGeocodeOverride(meta)
+        // Done once the write actually landed (a fresh updated_at stamp); else poll once more.
+        if (meta?.updatedAt && meta.updatedAt !== baseUpdatedAt) return
       } catch {
         // Silent — a poll failure just keeps the last-known coordinates; the
         // manual trigger already reported "started" above.
@@ -246,7 +263,7 @@ export default function IntegrationsTab({ c }: { c: Candidate }) {
           )}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
-          <PdokMetaLine geocode={c.geocode} />
+          <PdokMetaLine geocode={geocodeOverride ?? c.geocode} />
           <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
             {t('integrations.pdok.autoInfo')}
           </p>
