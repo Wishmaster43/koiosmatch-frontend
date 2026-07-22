@@ -73,6 +73,10 @@ export interface CandidateConsent {
   whatsapp_consent_at: string | null
   email_consent_at: string | null
   newsletter_consent_at: string | null
+  // AVG-RET-2: unlimited-retention opt-in + when it was given. Read-only in the UI
+  // until CMBE-RET-A ships the write-path validation — see buildCandidatePatch.
+  retentionOptIn: boolean
+  retentionConsentAt: string | null
 }
 
 /** A resolved backoffice link for ONE system (KOPPELINGEN-META-1): current sync
@@ -213,6 +217,9 @@ export interface Candidate {
   zzp: Loose
   planningSettings: Loose
   consent: CandidateConsent
+  // AVG-RET-2: derived, read-only retention deadline (tenant retention_months_*
+  // windows applied server-side) — GET /candidates/{id} returns this already.
+  retentionExpiresAt: string | null
   customFields: Record<string, unknown>
   matchesCount: number
   applicationsCount: number
@@ -384,7 +391,13 @@ export interface ApiCandidate {
     whatsapp_consent_at?: string | null
     email_consent_at?: string | null
     newsletter_consent_at?: string | null
+    // AVG-RET-2: unlimited-retention opt-in flag + when it was recorded.
+    retention_opt_in?: boolean
+    retention_consent_at?: string | null
   }
+  // AVG-RET-2: derived retention deadline (tenant policy applied server-side),
+  // already returned by CandidateDetailResource.
+  retention_expires_at?: string | null
   stats?: { matches_count?: number; applications_count?: number; shifts_count?: number; hours_worked?: number }
   [k: string]: unknown
 }

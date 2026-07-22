@@ -176,6 +176,9 @@
   },
   "yes": "Yes",
   "no": "No",
+  "customFieldsCard": {
+    "title": "Custom fields"
+  },
   "send": "Send",
   "expand": "Expand",
   "collapse": "Collapse",

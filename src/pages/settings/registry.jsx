@@ -55,6 +55,7 @@ import { SkillLevelSettings } from './sections/SkillLevelSettings'
 import { OutreachStatusSettings } from './sections/OutreachSettings'
 import RejectionSettings from './sections/RejectionSettings'
 import CandidateRequiredFieldsSettings from './sections/CandidateRequiredFieldsSettings'
+import RetentionSettings from './sections/RetentionSettings'
 import CvTemplateSettings from './sections/CvTemplateSettings'
 import DocumentTypesSettings from './sections/DocumentTypesSettings'
 import EmailSettings from './sections/EmailSettings'
@@ -139,6 +140,8 @@ export const NAV_GROUPS = [
     key: 'personalisation', icon: BookOpen,
     items: [
       { id: 'industries', icon: Factory, component: IndustrySettings },
+      // Candidate function list only (nav label "Functions (candidate)", FUNCTIONS-SPLIT-1) —
+      // contact-person job titles are the separate `contact_functions` item under `contacts`.
       { id: 'functions', icon: Briefcase, component: FunctionsSettings },
       { id: 'lang_languages', icon: Languages, component: LanguageListSettings },
       { id: 'lang_levels', icon: BarChart2, component: LanguageLevelSettings },
@@ -164,6 +167,9 @@ export const NAV_GROUPS = [
       // Candidate custom fields moved to the shared "Eigen velden" group below
       // (§3B custom-fields wave) — one CRUD implementation for every entity.
       { id: 'candidate_required_fields', icon: Flag, component: CandidateRequiredFieldsSettings },
+      // AVG-RET-2 (Danny 22-07 punt 8): tenant retention windows (never-placed /
+      // ever-placed) behind the candidate's read-only "Bewaren tot" derivation.
+      { id: 'candidate_retention', icon: Clock, component: RetentionSettings },
     ],
   },
   {

@@ -276,7 +276,15 @@ export function mapCandidate(c: ApiCandidate): Candidate {
       whatsapp_consent_at:   c.consent?.whatsapp_consent_at   ?? null,
       email_consent_at:      c.consent?.email_consent_at      ?? null,
       newsletter_consent_at: c.consent?.newsletter_consent_at ?? null,
+      // AVG-RET-2: unlimited-retention opt-in — read-only until CMBE-RET-A (see
+      // buildCandidatePatch, which deliberately never forwards this flag yet).
+      retentionOptIn:        c.consent?.retention_opt_in      ?? false,
+      retentionConsentAt:    c.consent?.retention_consent_at  ?? null,
     },
+    // AVG-RET-2: derived retention deadline (tenant retention_months_never_placed /
+    // _ever_placed windows, applied server-side) — feeds the Communication → Consent
+    // tab's read-only "Bewaren tot" line.
+    retentionExpiresAt: c.retention_expires_at ?? null,
 
     // Tenant-defined custom field values — pass through as-is (key → value map).
     customFields: (c.custom_fields as Record<string, unknown>) ?? {},

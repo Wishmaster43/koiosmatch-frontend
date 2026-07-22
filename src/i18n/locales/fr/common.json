@@ -176,6 +176,9 @@
   },
   "yes": "Oui",
   "no": "Non",
+  "customFieldsCard": {
+    "title": "Champs personnalisés"
+  },
   "send": "Envoyer",
   "expand": "Agrandir",
   "collapse": "Réduire",

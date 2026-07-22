@@ -111,6 +111,30 @@ describe('mapCandidate — pools / consent / address', () => {
   })
 })
 
+// AVG-RET-2 (Danny 22-07 punt 8): the retention deadline is derived server-side
+// and comes back on GET /candidates/{id} — verify the mapper reads both the
+// top-level retention_expires_at and the nested consent.retention_* pair, with
+// defensive null-safety when the backend omits them (older payloads/dummy data).
+describe('mapCandidate — retention (AVG-RET-2)', () => {
+  it('maps the top-level retention deadline', () => {
+    expect(mapCandidate({ retention_expires_at: '2027-01-01T00:00:00.000Z' }).retentionExpiresAt)
+      .toBe('2027-01-01T00:00:00.000Z')
+  })
+  it('is null when the backend does not send a deadline', () => {
+    expect(mapCandidate({}).retentionExpiresAt).toBeNull()
+  })
+  it('maps the nested consent.retention_opt_in / retention_consent_at pair', () => {
+    const r = mapCandidate({ consent: { retention_opt_in: true, retention_consent_at: '2026-05-01T00:00:00.000Z' } })
+    expect(r.consent.retentionOptIn).toBe(true)
+    expect(r.consent.retentionConsentAt).toBe('2026-05-01T00:00:00.000Z')
+  })
+  it('defaults retentionOptIn to false and retentionConsentAt to null when absent', () => {
+    const r = mapCandidate({})
+    expect(r.consent.retentionOptIn).toBe(false)
+    expect(r.consent.retentionConsentAt).toBeNull()
+  })
+})
+
 // KOPPELINGEN-META-1 (backend commit 0375fa9): backoffice_links[] now carries
 // linked_at/linked_by per system alongside the existing sync state — verify both
 // shiftmanagerLink and helloflexLink resolve symmetrically from the same array.

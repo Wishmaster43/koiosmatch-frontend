@@ -176,6 +176,9 @@
   },
   "yes": "Ja",
   "no": "Nee",
+  "customFieldsCard": {
+    "title": "Eigen velden"
+  },
   "send": "Versturen",
   "expand": "Vergroten",
   "collapse": "Verkleinen",

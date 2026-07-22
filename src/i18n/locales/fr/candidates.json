@@ -449,7 +449,12 @@
     "consentWhatsapp": "Messages WhatsApp",
     "consentEmail": "E-mail",
     "consentNewsletter": "Newsletter",
-    "consentGivenAt": "Consentement donné le {{date}}"
+    "consentGivenAt": "Consentement donné le {{date}}",
+    "consentRetentionOptIn": "Conservation illimitée",
+    "consentRetentionNotice": "Enregistrement disponible dès que la validation back-end sera en ligne",
+    "retentionUntil": "Conservé jusqu'au {{date}}",
+    "retentionUnlimited": "Conservé indéfiniment (consentement donné le {{date}})",
+    "retentionUnknown": "Durée de conservation inconnue"
   },
   "statistics": {
     "placements": "Placements",

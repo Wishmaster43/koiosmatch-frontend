@@ -153,7 +153,8 @@
     "document_types": "Documenttypes",
     "candidate_phases": "Fase",
     "candidate_required_fields": "Verplichte velden",
-    "functions": "Functies",
+    "candidate_retention": "Bewaartermijn",
+    "functions": "Functies (kandidaat)",
     "contact_functions": "Contactfuncties",
     "customer_display": "Tabelweergave",
     "opportunity_display": "Tabelweergave",
@@ -452,6 +453,19 @@
     "title": "Geheugen",
     "subtitle": "Sla notities en context op die door het hele systeem beschikbaar zijn.",
     "placeholder": "Voeg hier notities, context of instructies toe…"
+  },
+  "retention": {
+    "title": "Bewaartermijn",
+    "subtitle": "Hoelang kandidaatgegevens bewaard blijven voordat ze in aanmerking komen voor verwijdering (AVG).",
+    "neverPlaced": {
+      "label": "Bewaartermijn — nooit geplaatst",
+      "description": "Aantal maanden dat een kandidaat die nooit geplaatst is bewaard blijft, gerekend vanaf het laatste contact."
+    },
+    "everPlaced": {
+      "label": "Bewaartermijn — ooit geplaatst",
+      "description": "Aantal maanden dat een ooit geplaatste kandidaat bewaard blijft. Standaard langer vanwege de fiscale bewaarplicht."
+    },
+    "unit": "maanden"
   },
   "statusList": {
     "nameLabel": "Naam",
@@ -1602,8 +1616,8 @@
     "show": "Tonen"
   },
   "functionsSettings": {
-    "title": "Functies",
-    "subtitle": "Beheer de functielijst en of recruiters vrije waarden mogen invoeren.",
+    "title": "Functies (kandidaat)",
+    "subtitle": "Beheer de functielijst die je aan KANDIDATEN toekent (bijv. Verzorgende IG) en of recruiters vrije waarden mogen invoeren. Dit is een andere lijst dan de contactpersoon-functies.",
     "add": "Functie toevoegen",
     "freeEntry": "Vrije invoer toestaan",
     "freeEntryHint": "Aan: recruiters kunnen een eigen functie typen (combobox). Uit: alleen kiezen uit de lijst (strikte dropdown).",

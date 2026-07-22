@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
+import { useAuth } from '@/context/AuthContext'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import SectionCard from '@/components/ui/SectionCard'
@@ -34,6 +35,10 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent }: { c: 
   const { types: channels } = useLastContactTypes()
   // Notes persist via the API (G-1) — add/edit/delete hit /candidates/{id}/notes.
   const { notes, addNote, editNote } = useCandidateNotes(c.id)
+  // AVG-RET-2: the retention deadline exposes the erasure timeline, so gate it like
+  // the rest of the erasure-adjacent UI (mirrors CandidatesPage's archive/merge gate
+  // on candidates.delete) — hidden entirely without the permission, never blank.
+  const canViewRetention = useAuth()?.hasPermission('candidates.delete') ?? false
 
   // SYSTEM notes (status/phase changes, BE-written) are EVENTS, not notes (Danny
   // 2026-07-13): they render in the Tijdlijn, never in the Notities thread. Keep the
@@ -130,6 +135,41 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent }: { c: 
                 </div>
               )
             })}
+
+            {/* Retention opt-in (Block B, AVG-RET-2) — 4th consent item, same visual
+                pattern as the channels above, but DISABLED: buildCandidatePatch still
+                strips consent.retention_opt_in from the PATCH body until CMBE-RET-A
+                ships the write-path validation (§3 no fake affordance). */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <input type="checkbox" checked={!!c.consent.retentionOptIn} disabled
+                aria-label={t('communication.consentRetentionOptIn')}
+                style={{ width: 16, height: 16, flexShrink: 0, cursor: 'not-allowed' }} />
+              <span style={{ fontSize: 13, color: 'var(--text)', flex: 1 }}>{t('communication.consentRetentionOptIn')}</span>
+              {c.consent.retentionOptIn && c.consent.retentionConsentAt && (
+                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                  {t('communication.consentGivenAt', { date: formatDate(c.consent.retentionConsentAt) })}
+                </span>
+              )}
+            </div>
+            {/* TODO(CMBE-RET-A): enable the checkbox above + whitelist
+                consent.retention_opt_in in buildCandidatePatch once the backend
+                validation lands — not before. */}
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 26 }}>
+              {t('communication.consentRetentionNotice')}
+            </span>
+
+            {/* Read-only "Bewaren tot" summary (Block A, AVG-RET-2) — the tenant's
+                retention windows applied server-side; role-gated (see canViewRetention
+                above) so it is hidden, not blank, for users without the permission. */}
+            {canViewRetention && (
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                {c.retentionExpiresAt
+                  ? t('communication.retentionUntil', { date: formatDate(c.retentionExpiresAt) })
+                  : c.consent.retentionOptIn
+                    ? t('communication.retentionUnlimited', { date: formatDate(c.consent.retentionConsentAt) })
+                    : t('communication.retentionUnknown')}
+              </span>
+            )}
           </div>
         </SectionCard>
       )}

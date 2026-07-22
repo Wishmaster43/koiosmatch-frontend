@@ -14,6 +14,12 @@ import type { Candidate } from '@/types/candidate'
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, locale: 'nl-NL' }) }))
 vi.mock('@/lib/useNoteTypes', () => ({ useNoteTypes: () => ({ types: [], writableTypes: [] }), SYSTEM_NOTE_TYPES: new Set() }))
 vi.mock('@/lib/useLastContactTypes', () => ({ useLastContactTypes: () => ({ types: [] }) }))
+// AVG-RET-2: role-gate for the retention line — default to "no permission" so the
+// pre-existing tests below (which never touch this mock) keep their original,
+// permission-less behaviour; the retention describe block overrides per test.
+const mockUseAuth = vi.fn()
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
+beforeEach(() => { mockUseAuth.mockReturnValue({ hasPermission: () => false }) })
 // Mutable per-test notes list (vi.hoisted so the mock factory below can read it) —
 // the status-change pencil tests need a system note in the list; every other test
 // keeps the original empty list.
@@ -23,8 +29,8 @@ vi.mock('@/pages/candidates/hooks/useCandidateNotes', () => ({
 }))
 vi.mock('./CandidateTasks', () => ({ default: () => <div data-testid="candidate-tasks-stub" /> }))
 
-const candidate = (consent: Record<string, unknown> = {}): Candidate =>
-  ({ id: 1, consent, timeline: [], name: 'Piet', initials: 'PJ', ownerInitials: 'AB' } as unknown as Candidate)
+const candidate = (consent: Record<string, unknown> = {}, extra: Partial<Candidate> = {}): Candidate =>
+  ({ id: 1, consent, timeline: [], name: 'Piet', initials: 'PJ', ownerInitials: 'AB', ...extra } as unknown as Candidate)
 
 describe('CommunicationTab · sub-tab heading sweep (Danny addendum 4)', () => {
   it('Toestemmingen has no repeated in-content heading', async () => {
@@ -159,5 +165,53 @@ describe('CommunicationTab · status-change timeline pencil (Danny 2026-07-20)',
     render(<CommunicationTab c={candidate()} onEditStatusEvent={vi.fn()} />)
     await goToTimeline(user)
     expect(screen.queryByTitle('drawer.editStatusReason')).toBeNull()
+  })
+})
+
+// AVG-RET-2 (Danny 22-07 punt 8): the read-only "Bewaren tot" summary + the
+// disabled retention opt-in item. Role-gated on candidates.delete, mirroring
+// CandidatesPage's archive/merge gate — hidden entirely without the permission
+// (never an empty line), and the opt-in checkbox never interacts until CMBE-RET-A.
+describe('CommunicationTab · retention (AVG-RET-2, Danny 22-07 punt 8)', () => {
+  const openConsent = async (user: ReturnType<typeof userEvent.setup>) =>
+    user.click(screen.getByRole('tab', { name: 'communication.consentTitle' }))
+
+  it('shows "Bewaren tot" with the deadline when the user has candidates.delete', async () => {
+    mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'candidates.delete' })
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate({}, { retentionExpiresAt: '2027-01-01' })} />)
+    await openConsent(user)
+    expect(screen.getByText(/retentionUntil/)).toBeInTheDocument()
+  })
+
+  it('falls back to the "unlimited" copy when opted in and no deadline is set', async () => {
+    mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'candidates.delete' })
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate({ retentionOptIn: true, retentionConsentAt: '2026-01-01' }, { retentionExpiresAt: null })} />)
+    await openConsent(user)
+    expect(screen.getByText(/retentionUnlimited/)).toBeInTheDocument()
+  })
+
+  it('falls back to the "unknown" copy when there is neither a deadline nor an opt-in', async () => {
+    mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'candidates.delete' })
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate({}, { retentionExpiresAt: null })} />)
+    await openConsent(user)
+    expect(screen.getByText(/retentionUnknown/)).toBeInTheDocument()
+  })
+
+  it('hides the retention line entirely for a user without candidates.delete (never blank)', async () => {
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate({}, { retentionExpiresAt: '2027-01-01' })} />)
+    await openConsent(user)
+    expect(screen.queryByText(/retentionUntil|retentionUnlimited|retentionUnknown/)).toBeNull()
+  })
+
+  it('renders the retention opt-in item as a disabled checkbox with the honest notice', async () => {
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate({ retentionOptIn: true })} />)
+    await openConsent(user)
+    expect(screen.getByLabelText('communication.consentRetentionOptIn')).toBeDisabled()
+    expect(screen.getByText('communication.consentRetentionNotice')).toBeInTheDocument()
   })
 })

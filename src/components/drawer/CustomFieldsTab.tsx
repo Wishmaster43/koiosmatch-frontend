@@ -7,11 +7,13 @@ import type { CustomFieldDef, CustomFieldEntityType } from '@/lib/useCustomField
 import { useDateFormat } from '@/lib/datetime'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
-// Job 45: the SHARED titled-card frame (border/radius/padding/background) — this tab
-// is reused across all 11 entity drawers, so it must use the generic ui/SectionCard
-// styling (never a candidate-only constants file) for the frame to look identical
-// everywhere, mirroring how ProfileTab's own field groups + summary block are boxed.
-import { sectionBlock } from '@/components/ui/SectionCard'
+// Job 45 / Danny 22-07 point 12: the SHARED titled-card frame — this tab is reused
+// across all 11 entity drawers, so both the bordered frame AND the uppercase group
+// title use the generic ui/SectionCard (never a candidate-only constants file),
+// mirroring how vacancies' DetailsTab card() and the candidate ProfileTab's field
+// groups (Persoonlijk/Contact) are boxed. The simple-fields grid used to float with
+// no title above it — that read as out of tone next to those sibling cards.
+import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
 
 const inputStyle: CSSProperties = { width: '100%', padding: '6px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', outline: 'none', boxSizing: 'border-box' }
 const iconBtn: CSSProperties = { width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
@@ -119,29 +121,30 @@ export default function CustomFieldsTab({ entityType, values, onSave }: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {simpleFields.length > 0 && (
-        <div>
-          {/* No repeated "Extra" title — it would duplicate the tab label (§3A). */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-            {editing ? (
-              <div style={{ display: 'flex', gap: 4 }}>
-                <button onClick={save} title={t('save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
-                <button onClick={cancel} title={t('cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
-              </div>
-            ) : (
-              <button onClick={startEdit} title={t('edit')} style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
-            )}
-          </div>
-          <div style={{ ...sectionBlock, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 20px' }}>
-            {simpleFields.map(def => (
-              <div key={def.key}>
-                <div style={labelStyle}>{def.label}</div>
-                {editing
-                  ? <FieldInput def={def} value={draft[def.key] ?? values[def.key]} onChange={val => setVal(def.key, val)} />
-                  : <div style={{ fontSize: 13, color: 'var(--text)', minHeight: 18 }}>{display(def, values[def.key], t, formatDate)}</div>}
-              </div>
-            ))}
-          </div>
-        </div>
+        // Danny 22-07 point 12: titled SectionCard (border/surface + uppercase group
+        // title) instead of a bare grid — matches the Persoonlijk/Contact-style cards
+        // elsewhere in the drawer; the edit pencil sits in the card's own title row.
+        <SectionCard
+          title={t('customFieldsCard.title')}
+          action={editing ? (
+            <div style={{ display: 'flex', gap: 4 }}>
+              <button onClick={save} title={t('save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+              <button onClick={cancel} title={t('cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+            </div>
+          ) : (
+            <button onClick={startEdit} title={t('edit')} style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
+          )}
+          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 20px' }}
+        >
+          {simpleFields.map(def => (
+            <div key={def.key}>
+              <div style={labelStyle}>{def.label}</div>
+              {editing
+                ? <FieldInput def={def} value={draft[def.key] ?? values[def.key]} onChange={val => setVal(def.key, val)} />
+                : <div style={{ fontSize: 13, color: 'var(--text)', minHeight: 18 }}>{display(def, values[def.key], t, formatDate)}</div>}
+            </div>
+          ))}
+        </SectionCard>
       )}
       {textFields.map(def => (
         <RichTextField key={def.key} def={def} value={values[def.key]} onSave={v => onSave({ [def.key]: v })} />

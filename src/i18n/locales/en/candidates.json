@@ -456,7 +456,12 @@
     "consentWhatsapp": "WhatsApp messages",
     "consentEmail": "Email",
     "consentNewsletter": "Newsletter",
-    "consentGivenAt": "Consent given on {{date}}"
+    "consentGivenAt": "Consent given on {{date}}",
+    "consentRetentionOptIn": "Unlimited retention",
+    "consentRetentionNotice": "Saving becomes available once the backend validation is live",
+    "retentionUntil": "Retained until {{date}}",
+    "retentionUnlimited": "Retained indefinitely (consent given on {{date}})",
+    "retentionUnknown": "Retention period unknown"
   },
   "statistics": {
     "placements": "Matches",

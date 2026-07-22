@@ -151,8 +151,9 @@
     "document_types": "Types de document",
     "candidate_phases": "Phase",
     "candidate_required_fields": "Champs requis",
+    "candidate_retention": "Durée de conservation",
     "application_display": "Affichage du tableau",
-    "functions": "Fonctions",
+    "functions": "Fonctions (candidat)",
     "contact_functions": "Fonctions des contacts",
     "customer_display": "Affichage du tableau",
     "vacancy_app_defaults": "Paramètres de candidature",
@@ -433,6 +434,19 @@
     "title": "Mémoire",
     "subtitle": "Enregistrez des notes et du contexte disponibles dans tout le système.",
     "placeholder": "Ajoutez ici des notes, du contexte ou des instructions…"
+  },
+  "retention": {
+    "title": "Durée de conservation",
+    "subtitle": "Durée pendant laquelle les données du candidat sont conservées avant de pouvoir être supprimées (RGPD).",
+    "neverPlaced": {
+      "label": "Conservation — jamais placé",
+      "description": "Nombre de mois de conservation d'un candidat jamais placé, à compter du dernier contact."
+    },
+    "everPlaced": {
+      "label": "Conservation — déjà placé",
+      "description": "Nombre de mois de conservation d'un candidat placé au moins une fois. Plus long par défaut en raison de l'obligation légale de conservation fiscale."
+    },
+    "unit": "mois"
   },
   "statusList": {
     "nameLabel": "Nom",
@@ -1602,8 +1616,8 @@
     }
   },
   "functionsSettings": {
-    "title": "Fonctions",
-    "subtitle": "Gérez la liste des fonctions et si les recruteurs peuvent saisir des valeurs libres.",
+    "title": "Fonctions (candidat)",
+    "subtitle": "Gérez la liste des fonctions attribuées aux CANDIDATS (ex. Aide-soignant) et si les recruteurs peuvent saisir des valeurs libres. Cette liste est distincte des fonctions des contacts.",
     "add": "Ajouter une fonction",
     "freeEntry": "Autoriser la saisie libre",
     "freeEntryHint": "Activé : les recruteurs peuvent saisir leur propre fonction (combobox). Désactivé : choisir uniquement dans la liste.",

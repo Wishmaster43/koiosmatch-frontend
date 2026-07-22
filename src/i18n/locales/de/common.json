@@ -176,6 +176,9 @@
   },
   "yes": "Ja",
   "no": "Nein",
+  "customFieldsCard": {
+    "title": "Eigene Felder"
+  },
   "send": "Senden",
   "expand": "Vergrößern",
   "collapse": "Verkleinern",

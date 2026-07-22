@@ -456,7 +456,12 @@
     "consentWhatsapp": "WhatsApp-berichten",
     "consentEmail": "E-mail",
     "consentNewsletter": "Nieuwsbrief",
-    "consentGivenAt": "Toestemming gegeven op {{date}}"
+    "consentGivenAt": "Toestemming gegeven op {{date}}",
+    "consentRetentionOptIn": "Onbeperkt bewaren",
+    "consentRetentionNotice": "Opslaan beschikbaar zodra de backend-validatie live is",
+    "retentionUntil": "Bewaren tot {{date}}",
+    "retentionUnlimited": "Onbeperkt bewaard (toestemming op {{date}})",
+    "retentionUnknown": "Bewaartermijn onbekend"
   },
   "statistics": {
     "placements": "Matches",

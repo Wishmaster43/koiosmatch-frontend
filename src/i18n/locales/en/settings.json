@@ -153,7 +153,8 @@
     "document_types": "Document types",
     "candidate_phases": "Phase",
     "candidate_required_fields": "Required fields",
-    "functions": "Functions",
+    "candidate_retention": "Data retention",
+    "functions": "Functions (candidate)",
     "contact_functions": "Contact functions",
     "customer_display": "Table display",
     "opportunity_display": "Table display",
@@ -452,6 +453,19 @@
     "title": "Memory",
     "subtitle": "Store notes and context available across the whole system.",
     "placeholder": "Add notes, context or instructions here…"
+  },
+  "retention": {
+    "title": "Data retention",
+    "subtitle": "How long candidate data is kept before it becomes eligible for erasure (AVG/GDPR).",
+    "neverPlaced": {
+      "label": "Retention — never placed",
+      "description": "Months a candidate who was never placed is kept, counted from the last activity."
+    },
+    "everPlaced": {
+      "label": "Retention — ever placed",
+      "description": "Months a candidate who was placed at least once is kept. Longer by default for the statutory tax/payroll retention duty."
+    },
+    "unit": "months"
   },
   "statusList": {
     "nameLabel": "Name",
@@ -1602,8 +1616,8 @@
     "show": "Show"
   },
   "functionsSettings": {
-    "title": "Functions",
-    "subtitle": "Manage the function list and whether recruiters can enter free values.",
+    "title": "Functions (candidate)",
+    "subtitle": "Manage the function list assigned to CANDIDATES (e.g. Verzorgende IG) and whether recruiters can enter free values. This is a separate list from contact-person functions.",
     "add": "Add function",
     "freeEntry": "Allow free entry",
     "freeEntryHint": "On: recruiters can type their own function (combobox). Off: pick from the list only (strict dropdown).",

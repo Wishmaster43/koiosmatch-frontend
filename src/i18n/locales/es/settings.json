@@ -151,8 +151,9 @@
     "document_types": "Tipos de documento",
     "candidate_phases": "Fase",
     "candidate_required_fields": "Campos obligatorios",
+    "candidate_retention": "Periodo de conservación",
     "application_display": "Vista de tabla",
-    "functions": "Funciones",
+    "functions": "Funciones (candidato)",
     "contact_functions": "Funciones de contacto",
     "customer_display": "Vista de tabla",
     "vacancy_app_defaults": "Ajustes de candidatura",
@@ -433,6 +434,19 @@
     "title": "Memoria",
     "subtitle": "Guarda notas y contexto disponibles en todo el sistema.",
     "placeholder": "Añade aquí notas, contexto o instrucciones…"
+  },
+  "retention": {
+    "title": "Periodo de conservación",
+    "subtitle": "Cuánto tiempo se conservan los datos del candidato antes de poder eliminarse (RGPD).",
+    "neverPlaced": {
+      "label": "Conservación — nunca colocado",
+      "description": "Meses que se conserva un candidato que nunca fue colocado, contados desde el último contacto."
+    },
+    "everPlaced": {
+      "label": "Conservación — alguna vez colocado",
+      "description": "Meses que se conserva un candidato que fue colocado al menos una vez. Por defecto más largo debido a la obligación legal de conservación fiscal."
+    },
+    "unit": "meses"
   },
   "statusList": {
     "nameLabel": "Nombre",
@@ -1602,8 +1616,8 @@
     }
   },
   "functionsSettings": {
-    "title": "Funciones",
-    "subtitle": "Gestiona la lista de funciones y si los reclutadores pueden introducir valores libres.",
+    "title": "Funciones (candidato)",
+    "subtitle": "Gestiona la lista de funciones asignadas a los CANDIDATOS (p. ej. Auxiliar de enfermería) y si los reclutadores pueden introducir valores libres. Es una lista distinta de las funciones de contacto.",
     "add": "Añadir función",
     "freeEntry": "Permitir entrada libre",
     "freeEntryHint": "Activado: los reclutadores pueden escribir su propia función (combobox). Desactivado: solo elegir de la lista.",

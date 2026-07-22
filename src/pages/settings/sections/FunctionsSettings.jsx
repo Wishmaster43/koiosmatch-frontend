@@ -6,11 +6,15 @@ import { useAllSettings, getBoolSetting, saveSettingsKeys } from '@/lib/settings
 import { useConfirm } from '@/hooks/useConfirm'
 
 /**
- * FunctionsSettings — the tenant job-function list (/functions) plus the field-mode
- * toggle (creatable combobox ↔ strict dropdown), stored as the tenant setting
- * `functions_allow_free_entry`. Turning free-entry ON (strict → free) asks for
- * confirmation; turning it OFF (free → strict) lets the backend fold every used
- * function into the list so nothing is lost.
+ * FunctionsSettings — the CANDIDATE job-function list (/functions, e.g. "Verzorgende
+ * IG") plus the field-mode toggle (creatable combobox ↔ strict dropdown), stored as
+ * the tenant setting `functions_allow_free_entry`. Turning free-entry ON (strict →
+ * free) asks for confirmation; turning it OFF (free → strict) lets the backend fold
+ * every used function into the list so nothing is lost.
+ *
+ * Distinct from the contact-person job-title list (ContactFunctionsSettings, `/contact-
+ * functions`, FUNCTIONS-SPLIT-1, Danny 2026-07-20/22) — the title/subtitle/nav label
+ * here spell out "candidate" so the two vocabularies are never confused (Danny 22-07).
  */
 export default function FunctionsSettings() {
   const { t } = useTranslation('settings')

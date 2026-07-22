@@ -449,7 +449,12 @@
     "consentWhatsapp": "WhatsApp-Nachrichten",
     "consentEmail": "E-Mail",
     "consentNewsletter": "Newsletter",
-    "consentGivenAt": "Einwilligung erteilt am {{date}}"
+    "consentGivenAt": "Einwilligung erteilt am {{date}}",
+    "consentRetentionOptIn": "Unbegrenzte Aufbewahrung",
+    "consentRetentionNotice": "Speichern verfügbar, sobald die Backend-Validierung live ist",
+    "retentionUntil": "Aufbewahrt bis {{date}}",
+    "retentionUnlimited": "Unbegrenzt aufbewahrt (Einwilligung am {{date}})",
+    "retentionUnknown": "Aufbewahrungsfrist unbekannt"
   },
   "statistics": {
     "placements": "Vermittlungen",

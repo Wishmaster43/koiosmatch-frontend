@@ -176,6 +176,9 @@
   },
   "yes": "Sí",
   "no": "No",
+  "customFieldsCard": {
+    "title": "Campos personalizados"
+  },
   "send": "Enviar",
   "expand": "Ampliar",
   "collapse": "Contraer",

@@ -151,8 +151,9 @@
     "document_types": "Dokumenttypen",
     "candidate_phases": "Phase",
     "candidate_required_fields": "Pflichtfelder",
+    "candidate_retention": "Aufbewahrungsfrist",
     "application_display": "Tabellenansicht",
-    "functions": "Funktionen",
+    "functions": "Funktionen (Kandidat)",
     "contact_functions": "Kontaktfunktionen",
     "customer_display": "Tabellenanzeige",
     "vacancy_app_defaults": "Bewerbungseinstellungen",
@@ -433,6 +434,19 @@
     "title": "Speicher",
     "subtitle": "Speichere Notizen und Kontext, die im gesamten System verfügbar sind.",
     "placeholder": "Füge hier Notizen, Kontext oder Anweisungen hinzu…"
+  },
+  "retention": {
+    "title": "Aufbewahrungsfrist",
+    "subtitle": "Wie lange Kandidatendaten aufbewahrt werden, bevor sie für die Löschung infrage kommen (DSGVO).",
+    "neverPlaced": {
+      "label": "Aufbewahrung — nie vermittelt",
+      "description": "Anzahl Monate, die ein nie vermittelter Kandidat aufbewahrt wird, gerechnet ab dem letzten Kontakt."
+    },
+    "everPlaced": {
+      "label": "Aufbewahrung — schon einmal vermittelt",
+      "description": "Anzahl Monate, die ein mindestens einmal vermittelter Kandidat aufbewahrt wird. Standardmäßig länger wegen der steuerlichen Aufbewahrungspflicht."
+    },
+    "unit": "Monate"
   },
   "statusList": {
     "nameLabel": "Name",
@@ -1602,8 +1616,8 @@
     }
   },
   "functionsSettings": {
-    "title": "Funktionen",
-    "subtitle": "Verwalte die Funktionsliste und ob Recruiter freie Werte eingeben dürfen.",
+    "title": "Funktionen (Kandidat)",
+    "subtitle": "Verwalte die Funktionsliste, die du KANDIDATEN zuweist (z. B. Pflegehelfer), und ob Recruiter freie Werte eingeben dürfen. Dies ist eine andere Liste als die Kontaktpersonen-Funktionen.",
     "add": "Funktion hinzufügen",
     "freeEntry": "Freie Eingabe erlauben",
     "freeEntryHint": "An: Recruiter können eine eigene Funktion eingeben (Combobox). Aus: nur aus der Liste wählen (strikte Auswahl).",
