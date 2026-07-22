@@ -72,6 +72,7 @@
     "changePhase": "Cambiar fase",
     "searchPhase": "Buscar una fase…",
     "convertResult": "{{updated}} de {{total}} realizados",
+    "convertResultReasoned": "{{updated}} de {{total}} realizados, {{breakdown}}",
     "changeStatus": "Cambiar estado",
     "searchStatus": "Buscar un estado…",
     "statusChanged": "Estado → {{value}} ({{count}})",
@@ -80,9 +81,12 @@
     "tagAdded": "Etiqueta \"{{tag}}\" añadida ({{count}})",
     "stageFailed": "{{count}} candidatos no actualizados.",
     "partialResult": "{{updated}} de {{total}} actualizados, {{skipped}} omitidos",
-    "stageNote": "Cambia la etapa de la solicitud más reciente de cada candidato (sin elegir vacante — los candidatos sin solicitud se omiten).",
+    "partialResultReasoned": "{{updated}} de {{total}} actualizados, {{skipped}} omitidos ({{breakdown}})",
+    "stageNote": "Cambia la etapa de la única solicitud en curso de cada candidato (sin elegir vacante — los candidatos con cero o varias solicitudes en curso se omiten).",
+    "manageByApplication": "Gestionar por solicitud →",
     "merge": "Fusionar…",
     "statusBlockedConfirm": "{{blocked}} de {{total}} candidatos no se pueden actualizar ({{reasons}}). ¿Continuar con {{proceed}}?",
+    "statusBlockedConfirmSample": "{{blocked}} de {{total}} candidatos no se pueden actualizar ({{reasons}}), entre ellos {{names}}. ¿Continuar con {{proceed}}?",
     "statusAllBlocked": "Ninguno de los {{total}} candidatos seleccionados se puede actualizar ({{reasons}}).",
     "axisConditions": {
       "lead": "Lead",
@@ -91,6 +95,14 @@
       "placed": "Colocado",
       "blacklist": "Lista negra",
       "archived": "Archivado"
+    },
+    "skipReasons": {
+      "no_application": "sin solicitud en curso",
+      "multiple_applications": "varias solicitudes en curso",
+      "already_on_stage": "ya en esta etapa",
+      "missing_required_field": "falta un campo obligatorio",
+      "already_on_phase": "ya en esta fase",
+      "not_found": "no encontrado"
     }
   },
   "kpi": {
@@ -451,7 +463,6 @@
     "consentNewsletter": "Boletín",
     "consentGivenAt": "Consentimiento otorgado el {{date}}",
     "consentRetentionOptIn": "Conservación ilimitada",
-    "consentRetentionNotice": "El guardado estará disponible cuando la validación del backend esté activa",
     "retentionUntil": "Conservado hasta {{date}}",
     "retentionUnlimited": "Conservado indefinidamente (consentimiento otorgado el {{date}})",
     "retentionUnknown": "Periodo de conservación desconocido"

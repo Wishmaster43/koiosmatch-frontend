@@ -72,6 +72,7 @@
     "changePhase": "Phase ändern",
     "searchPhase": "Phase suchen…",
     "convertResult": "{{updated}} von {{total}} erfolgreich",
+    "convertResultReasoned": "{{updated}} von {{total}} erfolgreich, {{breakdown}}",
     "changeStatus": "Status ändern",
     "searchStatus": "Status suchen…",
     "statusChanged": "Status → {{value}} ({{count}})",
@@ -80,9 +81,12 @@
     "tagAdded": "Tag \"{{tag}}\" hinzugefügt ({{count}})",
     "stageFailed": "{{count}} Kandidaten nicht aktualisiert.",
     "partialResult": "{{updated}} von {{total}} aktualisiert, {{skipped}} übersprungen",
-    "stageNote": "Ändert die Phase der neuesten Bewerbung je Kandidat (keine Vakanzauswahl — Kandidaten ohne Bewerbung werden übersprungen).",
+    "partialResultReasoned": "{{updated}} von {{total}} aktualisiert, {{skipped}} übersprungen ({{breakdown}})",
+    "stageNote": "Ändert die Phase der einzigen laufenden Bewerbung je Kandidat (keine Vakanzauswahl — Kandidaten mit keiner oder mehreren laufenden Bewerbungen werden übersprungen).",
+    "manageByApplication": "Pro Bewerbung verwalten →",
     "merge": "Zusammenführen…",
     "statusBlockedConfirm": "{{blocked}} von {{total}} Kandidaten können nicht aktualisiert werden ({{reasons}}). Mit {{proceed}} fortfahren?",
+    "statusBlockedConfirmSample": "{{blocked}} von {{total}} Kandidaten können nicht aktualisiert werden ({{reasons}}), darunter {{names}}. Mit {{proceed}} fortfahren?",
     "statusAllBlocked": "Keiner der {{total}} ausgewählten Kandidaten kann aktualisiert werden ({{reasons}}).",
     "axisConditions": {
       "lead": "Lead",
@@ -91,6 +95,14 @@
       "placed": "Platziert",
       "blacklist": "Sperrliste",
       "archived": "Archiviert"
+    },
+    "skipReasons": {
+      "no_application": "keine laufende Bewerbung",
+      "multiple_applications": "mehrere laufende Bewerbungen",
+      "already_on_stage": "bereits in dieser Phase",
+      "missing_required_field": "Pflichtfeld fehlt",
+      "already_on_phase": "bereits in dieser Phase",
+      "not_found": "nicht gefunden"
     }
   },
   "kpi": {
@@ -451,7 +463,6 @@
     "consentNewsletter": "Newsletter",
     "consentGivenAt": "Einwilligung erteilt am {{date}}",
     "consentRetentionOptIn": "Unbegrenzte Aufbewahrung",
-    "consentRetentionNotice": "Speichern verfügbar, sobald die Backend-Validierung live ist",
     "retentionUntil": "Aufbewahrt bis {{date}}",
     "retentionUnlimited": "Unbegrenzt aufbewahrt (Einwilligung am {{date}})",
     "retentionUnknown": "Aufbewahrungsfrist unbekannt"

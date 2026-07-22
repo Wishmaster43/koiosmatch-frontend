@@ -107,6 +107,11 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
     for (const k of ['whatsapp_opt_in', 'email_opt_in', 'newsletter_opt_in']) {
       if (k in cs) out[k] = cs[k]
     }
+    // CMBE-RET-A (2026-07-22): the backend now validates consent.retention_opt_in,
+    // so the retention checkbox's flip reaches the API too. The UI-side consent
+    // object uses the camelCase key (mirrors mapCandidate.ts) — map it to the
+    // snake_case API key the other channels above already use.
+    if ('retentionOptIn' in cs) out.retention_opt_in = cs.retentionOptIn
     if (Object.keys(out).length) body.consent = out
   }
   return body

@@ -207,11 +207,30 @@ describe('CommunicationTab · retention (AVG-RET-2, Danny 22-07 punt 8)', () => 
     expect(screen.queryByText(/retentionUntil|retentionUnlimited|retentionUnknown/)).toBeNull()
   })
 
-  it('renders the retention opt-in item as a disabled checkbox with the honest notice', async () => {
+  // CMBE-RET-A shipped (2026-07-22): the retention opt-in is a REAL toggle now,
+  // same as the 3 channel checkboxes — no more disabled honest-gate.
+  it('renders the retention opt-in as a working checkbox (CMBE-RET-A shipped)', async () => {
     const user = userEvent.setup()
     render(<CommunicationTab c={candidate({ retentionOptIn: true })} />)
     await openConsent(user)
-    expect(screen.getByLabelText('communication.consentRetentionOptIn')).toBeDisabled()
-    expect(screen.getByText('communication.consentRetentionNotice')).toBeInTheDocument()
+    expect(screen.getByLabelText('communication.consentRetentionOptIn')).not.toBeDisabled()
+  })
+
+  it('toggling retention ON stamps the local retentionConsentAt immediately, mirroring the channel checkboxes', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<CommunicationTab c={candidate({ retentionOptIn: false })} onSave={onSave} />)
+    await openConsent(user)
+    await user.click(screen.getByLabelText('communication.consentRetentionOptIn'))
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ retentionOptIn: true, retentionConsentAt: expect.any(String) }))
+  })
+
+  it('toggling retention OFF nulls the local retentionConsentAt so no stale date lingers', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<CommunicationTab c={candidate({ retentionOptIn: true, retentionConsentAt: '2026-01-01T00:00:00.000Z' })} onSave={onSave} />)
+    await openConsent(user)
+    await user.click(screen.getByLabelText('communication.consentRetentionOptIn'))
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ retentionOptIn: false, retentionConsentAt: null }))
   })
 })

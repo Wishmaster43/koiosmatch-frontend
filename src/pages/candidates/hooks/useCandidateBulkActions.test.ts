@@ -19,6 +19,10 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() } }
 })
 import api from '@/lib/api'
+// 11.1: manageByApplication's deep-link goes through the shared NavigationContext
+// (mirrors EntityLink) — spy on `navigate`, no provider needed for the default stub.
+const navigate = vi.fn()
+vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: vi.fn(), navigate }) }))
 
 const get   = api.get    as unknown as ReturnType<typeof vi.fn>
 const post  = api.post   as unknown as ReturnType<typeof vi.fn>
@@ -56,7 +60,7 @@ function harness(initial: Candidate[]) {
 }
 const rowOf = (r: { result: { current: { candidates: Candidate[] } } }, id: Id) => r.result.current.candidates.find(c => c.id === id)
 
-beforeEach(() => { notify.mockClear(); get.mockReset(); post.mockReset(); del.mockReset() })
+beforeEach(() => { notify.mockClear(); get.mockReset(); post.mockReset(); del.mockReset(); navigate.mockClear() })
 
 describe('useCandidateBulkActions · bulkSetOwner (bulkMutate optimistic/reconcile)', () => {
   it('patches optimistically, keeps confirmed rows, reverts skipped ones on partial reconcile', async () => {
@@ -153,10 +157,11 @@ describe('useCandidateBulkActions · tags', () => {
   })
 })
 
-// Job 35/42: bulkSetStage drives the bulk funnel-stage action (candidates/bulk/funnel-stage),
-// which the BE resolves against each candidate's LATEST application (no vacancy scope — a
-// candidate without a live application is `skipped`, never silently dropped from the count).
-describe('useCandidateBulkActions · bulkSetStage (funnel-stage, job 35/42)', () => {
+// BULK-FUNNEL-SOLE-1/42: bulkSetStage drives the bulk funnel-stage action
+// (candidates/bulk/funnel-stage), which the BE resolves against each candidate's ONE-
+// AND-ONLY live application (no vacancy scope — a candidate with 0 or >1 live
+// applications is `skipped`, never silently dropped from the count or guessed at).
+describe('useCandidateBulkActions · bulkSetStage (funnel-stage, BULK-FUNNEL-SOLE-1/42)', () => {
   it('reports the specific stage-changed success when every candidate has an application to move', async () => {
     post.mockResolvedValue({ data: { updated: [1] } })
     const r = harness([cand({ id: 1, stage: 'applied' })])
@@ -166,12 +171,39 @@ describe('useCandidateBulkActions · bulkSetStage (funnel-stage, job 35/42)', ()
     expect(post).toHaveBeenCalledWith('/candidates/bulk/funnel-stage', { candidate_ids: [1], funnel_type: 'proposal' })
   })
 
-  it('warns with the shared partial-result summary when a candidate without an application is skipped', async () => {
-    post.mockResolvedValue({ data: { updated: [1] } }) // candidate 2 has no application → BE skips it
+  it('warns with the shared partial-result summary when skipped is still the bare id shape (defensive fallback)', async () => {
+    post.mockResolvedValue({ data: { updated: [1] } }) // candidate 2 skipped, no reason shape at all
     const r = harness([cand({ id: 1, stage: 'applied' }), cand({ id: 2, stage: '' })])
     act(() => r.result.current.setSelectedIds(new Set([1, 2])))
     act(() => r.result.current.actions.bulkSetStage('proposal'))
     await waitFor(() => expect(notify).toHaveBeenCalledWith('warning', 'bulk.partialResult'))
+  })
+
+  // BULK-SKIP-REASONS-1: the BE now returns skipped as [{id, reason}] — the toast
+  // must show WHY (no_application / multiple_applications / …), not just a count.
+  it('warns with the reasoned breakdown when skipped carries [{id, reason}]', async () => {
+    post.mockResolvedValue({ data: { updated: [1], skipped: [{ id: 2, reason: 'no_application' }] } })
+    const r = harness([cand({ id: 1, stage: 'applied' }), cand({ id: 2, stage: '' })])
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    act(() => r.result.current.actions.bulkSetStage('proposal'))
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('warning', 'bulk.partialResultReasoned'))
+  })
+})
+
+// 11.1: the funnel bulk-node's convenience deep-link to the Applications page,
+// pre-seeding the current selection via the shared NavigationContext intent pattern.
+describe('useCandidateBulkActions · manageByApplication (11.1 deep-link)', () => {
+  it('navigates to the applications page carrying the selected candidate_ids', () => {
+    const r = harness([cand({ id: 1 }), cand({ id: 2 })])
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    act(() => r.result.current.actions.manageByApplication())
+    expect(navigate).toHaveBeenCalledWith('applications', { candidate_ids: [1, 2] })
+  })
+
+  it('is a no-op when nothing is selected', () => {
+    const r = harness([cand({ id: 1 })])
+    act(() => r.result.current.actions.manageByApplication())
+    expect(navigate).not.toHaveBeenCalled()
   })
 })
 
@@ -203,6 +235,16 @@ describe('useCandidateBulkActions · note / phase / consent', () => {
     act(() => r.result.current.setSelectedIds(new Set([1, 2])))
     act(() => r.result.current.actions.bulkConvertPhase('candidate'))
     await waitFor(() => expect(notify).toHaveBeenCalledWith('warning', expect.any(String)))
+  })
+
+  // BULK-SKIP-REASONS-1: /candidates/bulk/phase now also returns skipped as
+  // [{id, reason}] — the toast shows the reason breakdown instead of a bare count.
+  it('bulkConvertPhase warns with the reasoned breakdown when skipped carries [{id, reason}]', async () => {
+    post.mockResolvedValue({ data: { updated: [1], skipped: [{ id: 2, reason: 'missing_required_field' }] } })
+    const r = harness([cand({ id: 1 }), cand({ id: 2 })])
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    act(() => r.result.current.actions.bulkConvertPhase('candidate'))
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('warning', 'bulk.convertResultReasoned'))
   })
 
   it('bulkSetConsent patches no row field (no list column) but still confirms via toast', async () => {
@@ -307,7 +349,9 @@ describe('useCandidateBulkActions · bulkSetStatus (AXIS-MATRIX-2 N2 bulk prefli
     expect(r.result.current.actions.dialog.props.open).toBe(false)
   })
 
-  it('confirms with the skip summary, then proceeds with the full selection once accepted', async () => {
+  // 11.3: the preflight already returns sample_names[] per blocked group — the
+  // confirm now names a few of them instead of only a bare count.
+  it('confirms with the skip summary INCLUDING sample names, then proceeds once accepted', async () => {
     post.mockImplementation((url: string) => {
       if (url === '/action-rules/preflight-bulk') return Promise.resolve({
         data: { total: 3, allowed: 2, warned: 0, blocked: 1, not_found: 0,
@@ -320,9 +364,23 @@ describe('useCandidateBulkActions · bulkSetStatus (AXIS-MATRIX-2 N2 bulk prefli
     act(() => r.result.current.setSelectedIds(new Set([1, 2, 3])))
     await act(async () => { r.result.current.actions.bulkSetStatus('placed', 'Geplaatst') })
     // Staged via the shared ConfirmDialog (replaces window.confirm) — assert the message, then confirm.
-    expect(r.result.current.actions.dialog.props.message).toBe('bulk.statusBlockedConfirm')
+    expect(r.result.current.actions.dialog.props.message).toBe('bulk.statusBlockedConfirmSample')
     act(() => r.result.current.actions.dialog.props.onConfirm())
     await waitFor(() => expect(post).toHaveBeenCalledWith('/candidates/bulk/status', { candidate_ids: [1, 2, 3], status: 'placed' }))
+  })
+
+  it('falls back to the plain blocked confirm when the preflight has no sample names', async () => {
+    post.mockImplementation((url: string) => {
+      if (url === '/action-rules/preflight-bulk') return Promise.resolve({
+        data: { total: 3, allowed: 2, warned: 0, blocked: 1, not_found: 0,
+          breakdown: [{ condition: 'archived', popup_code: 'P4', effect: 'block', count: 1, sample_names: [] }] },
+      })
+      return Promise.reject(new Error('unexpected ' + url))
+    })
+    const r = harness([cand({ id: 1 }), cand({ id: 2 }), cand({ id: 3 })])
+    act(() => r.result.current.setSelectedIds(new Set([1, 2, 3])))
+    await act(async () => { r.result.current.actions.bulkSetStatus('placed', 'Geplaatst') })
+    expect(r.result.current.actions.dialog.props.message).toBe('bulk.statusBlockedConfirm')
   })
 
   it('never mutates when the recruiter cancels the confirm', async () => {

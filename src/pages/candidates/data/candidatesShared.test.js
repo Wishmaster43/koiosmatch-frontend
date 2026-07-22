@@ -103,6 +103,13 @@ describe('buildCandidatePatch', () => {
     expect(buildCandidatePatch({ consent: { whatsapp_opt_in: true, email_opt_in: false, whatsapp_consent_at: '2026-01-01' } }))
       .toEqual({ consent: { whatsapp_opt_in: true, email_opt_in: false } })
   })
+  // CMBE-RET-A (2026-07-22): the retention opt-in now reaches the API too — the UI
+  // side carries it as camelCase (retentionOptIn, mirrors mapCandidate.ts), mapped
+  // to the snake_case API key alongside the other channels.
+  it('maps the camelCase retentionOptIn to the snake_case API key (CMBE-RET-A)', () => {
+    expect(buildCandidatePatch({ consent: { whatsapp_opt_in: true, retentionOptIn: true, retentionConsentAt: '2026-01-01' } }))
+      .toEqual({ consent: { whatsapp_opt_in: true, retention_opt_in: true } })
+  })
   it('only includes keys present in the patch (empty → {})', () => {
     expect(buildCandidatePatch({})).toEqual({})
     expect(buildCandidatePatch({ city: 'Utrecht' })).toEqual({ city: 'Utrecht' })

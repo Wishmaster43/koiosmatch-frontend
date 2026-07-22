@@ -79,6 +79,7 @@
     "changePhase": "Fase wijzigen",
     "searchPhase": "Zoek een fase…",
     "convertResult": "{{updated}} van de {{total}} gelukt",
+    "convertResultReasoned": "{{updated}} van de {{total}} gelukt, {{breakdown}}",
     "changeStatus": "Status wijzigen",
     "searchStatus": "Zoek een status…",
     "statusChanged": "Status → {{value}} ({{count}})",
@@ -87,9 +88,12 @@
     "tagAdded": "Tag \"{{tag}}\" toegevoegd ({{count}})",
     "stageFailed": "{{count}} kandidaten niet bijgewerkt.",
     "partialResult": "{{updated}} van de {{total}} aangepast, {{skipped}} overgeslagen",
-    "stageNote": "Wijzigt de fase van de meest recente sollicitatie per kandidaat (geen vacature-keuze — kandidaten zonder sollicitatie worden overgeslagen).",
+    "partialResultReasoned": "{{updated}} van de {{total}} aangepast, {{skipped}} overgeslagen ({{breakdown}})",
+    "stageNote": "Wijzigt de fase van de énige lopende sollicitatie per kandidaat (geen vacature-keuze — 0 of meerdere lopende sollicitaties worden overgeslagen).",
+    "manageByApplication": "Beheer per sollicitatie →",
     "merge": "Samenvoegen…",
     "statusBlockedConfirm": "{{blocked}} van de {{total}} kandidaten kunnen niet worden aangepast ({{reasons}}). Doorgaan met {{proceed}}?",
+    "statusBlockedConfirmSample": "{{blocked}} van de {{total}} kandidaten kunnen niet worden aangepast ({{reasons}}), waaronder {{names}}. Doorgaan met {{proceed}}?",
     "statusAllBlocked": "Geen van de {{total}} geselecteerde kandidaten kan worden aangepast ({{reasons}}).",
     "axisConditions": {
       "lead": "Lead",
@@ -98,6 +102,14 @@
       "placed": "Geplaatst",
       "blacklist": "Blacklist",
       "archived": "Gearchiveerd"
+    },
+    "skipReasons": {
+      "no_application": "geen lopende sollicitatie",
+      "multiple_applications": "meerdere lopende sollicitaties",
+      "already_on_stage": "al op deze fase",
+      "missing_required_field": "verplicht veld ontbreekt",
+      "already_on_phase": "al in deze fase",
+      "not_found": "niet gevonden"
     }
   },
   "kpi": {
@@ -458,7 +470,6 @@
     "consentNewsletter": "Nieuwsbrief",
     "consentGivenAt": "Toestemming gegeven op {{date}}",
     "consentRetentionOptIn": "Onbeperkt bewaren",
-    "consentRetentionNotice": "Opslaan beschikbaar zodra de backend-validatie live is",
     "retentionUntil": "Bewaren tot {{date}}",
     "retentionUnlimited": "Onbeperkt bewaard (toestemming op {{date}})",
     "retentionUnknown": "Bewaartermijn onbekend"

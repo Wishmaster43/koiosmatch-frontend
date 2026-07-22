@@ -70,6 +70,13 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent }: { c: 
     const atKey = CONSENT_CH.find(ch => ch.key === key)?.at
     onSave?.({ ...consent, [key]: val, ...(atKey ? { [atKey]: val ? new Date().toISOString() : null } : {}) })
   }
+  // Retention opt-in (Block B, AVG-RET-2) — CMBE-RET-A shipped the backend validation
+  // (consent.retention_opt_in now persists), so this behaves exactly like the 3
+  // channel toggles above: same optimistic "given at" stamp, no more honest-gate.
+  // Uses the camelCase field names mapCandidate.ts already produces (retentionOptIn/
+  // retentionConsentAt) — buildCandidatePatch maps them to the snake_case API keys.
+  const setRetentionOptIn = (val: boolean) =>
+    onSave?.({ ...consent, retentionOptIn: val, retentionConsentAt: val ? new Date().toISOString() : null })
 
   // Shared NotesTab props — each sub-tab renders exactly one of its sections.
   const notesProps = {
@@ -136,14 +143,14 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent }: { c: 
               )
             })}
 
-            {/* Retention opt-in (Block B, AVG-RET-2) — 4th consent item, same visual
-                pattern as the channels above, but DISABLED: buildCandidatePatch still
-                strips consent.retention_opt_in from the PATCH body until CMBE-RET-A
-                ships the write-path validation (§3 no fake affordance). */}
+            {/* Retention opt-in (Block B, AVG-RET-2) — 4th consent item, now a REAL
+                toggle: CMBE-RET-A shipped the backend validation, so it works exactly
+                like the 3 channel checkboxes above. */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <input type="checkbox" checked={!!c.consent.retentionOptIn} disabled
+              <input type="checkbox" checked={!!c.consent.retentionOptIn}
+                onChange={e => setRetentionOptIn(e.target.checked)}
                 aria-label={t('communication.consentRetentionOptIn')}
-                style={{ width: 16, height: 16, flexShrink: 0, cursor: 'not-allowed' }} />
+                style={{ width: 16, height: 16, cursor: 'pointer', flexShrink: 0 }} />
               <span style={{ fontSize: 13, color: 'var(--text)', flex: 1 }}>{t('communication.consentRetentionOptIn')}</span>
               {c.consent.retentionOptIn && c.consent.retentionConsentAt && (
                 <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
@@ -151,12 +158,6 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent }: { c: 
                 </span>
               )}
             </div>
-            {/* TODO(CMBE-RET-A): enable the checkbox above + whitelist
-                consent.retention_opt_in in buildCandidatePatch once the backend
-                validation lands — not before. */}
-            <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 26 }}>
-              {t('communication.consentRetentionNotice')}
-            </span>
 
             {/* Read-only "Bewaren tot" summary (Block A, AVG-RET-2) — the tenant's
                 retention windows applied server-side; role-gated (see canViewRetention

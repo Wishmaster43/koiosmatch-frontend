@@ -79,6 +79,7 @@
     "changePhase": "Change phase",
     "searchPhase": "Search a phase…",
     "convertResult": "{{updated}} of {{total}} converted",
+    "convertResultReasoned": "{{updated}} of {{total}} converted, {{breakdown}}",
     "changeStatus": "Change status",
     "searchStatus": "Search a status…",
     "statusChanged": "Status → {{value}} ({{count}})",
@@ -87,9 +88,12 @@
     "tagAdded": "Tag \"{{tag}}\" added ({{count}})",
     "stageFailed": "{{count}} candidates not updated.",
     "partialResult": "{{updated}} of {{total}} updated, {{skipped}} skipped",
-    "stageNote": "Changes the stage of each candidate's most recent application (no vacancy choice — candidates without an application are skipped).",
+    "partialResultReasoned": "{{updated}} of {{total}} updated, {{skipped}} skipped ({{breakdown}})",
+    "stageNote": "Changes the stage of each candidate's one-and-only live application (no vacancy choice — candidates with zero or multiple live applications are skipped).",
+    "manageByApplication": "Manage per application →",
     "merge": "Merge…",
     "statusBlockedConfirm": "{{blocked}} of {{total}} candidates can't be updated ({{reasons}}). Continue with {{proceed}}?",
+    "statusBlockedConfirmSample": "{{blocked}} of {{total}} candidates can't be updated ({{reasons}}), including {{names}}. Continue with {{proceed}}?",
     "statusAllBlocked": "None of the {{total}} selected candidates can be updated ({{reasons}}).",
     "axisConditions": {
       "lead": "Lead",
@@ -98,6 +102,14 @@
       "placed": "Placed",
       "blacklist": "Blacklist",
       "archived": "Archived"
+    },
+    "skipReasons": {
+      "no_application": "no live application",
+      "multiple_applications": "multiple live applications",
+      "already_on_stage": "already on this stage",
+      "missing_required_field": "missing required field",
+      "already_on_phase": "already in this phase",
+      "not_found": "not found"
     }
   },
   "kpi": {
@@ -458,7 +470,6 @@
     "consentNewsletter": "Newsletter",
     "consentGivenAt": "Consent given on {{date}}",
     "consentRetentionOptIn": "Unlimited retention",
-    "consentRetentionNotice": "Saving becomes available once the backend validation is live",
     "retentionUntil": "Retained until {{date}}",
     "retentionUnlimited": "Retained indefinitely (consent given on {{date}})",
     "retentionUnknown": "Retention period unknown"

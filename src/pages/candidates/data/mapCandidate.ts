@@ -276,8 +276,8 @@ export function mapCandidate(c: ApiCandidate): Candidate {
       whatsapp_consent_at:   c.consent?.whatsapp_consent_at   ?? null,
       email_consent_at:      c.consent?.email_consent_at      ?? null,
       newsletter_consent_at: c.consent?.newsletter_consent_at ?? null,
-      // AVG-RET-2: unlimited-retention opt-in — read-only until CMBE-RET-A (see
-      // buildCandidatePatch, which deliberately never forwards this flag yet).
+      // AVG-RET-2: unlimited-retention opt-in — CMBE-RET-A shipped the backend
+      // validation, so this is now a real, writable flag (see buildCandidatePatch).
       retentionOptIn:        c.consent?.retention_opt_in      ?? false,
       retentionConsentAt:    c.consent?.retention_consent_at  ?? null,
     },

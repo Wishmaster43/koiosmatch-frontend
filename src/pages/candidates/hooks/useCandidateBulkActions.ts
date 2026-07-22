@@ -16,6 +16,7 @@ import api from '@/lib/api'
 import { metaOf, initialsOf } from '../data/candidatesShared'
 import { needsLiveCheck, fetchLiveBlockers, liveFromError } from '../data/archiveGuard'
 import { useConfirm } from '@/hooks/useConfirm'
+import { useNavigation } from '@/context/NavigationContext'
 import type { BlockingApplication, BlockingMatch } from '../data/archiveGuard'
 import type { Candidate, CandidatePool } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
@@ -67,13 +68,19 @@ interface BulkMutateArgs {
   keys: Array<keyof Candidate>
   // Job 42: called with (updated, total) so every caller can surface an honest
   // partial-failure summary instead of a bare "success" that hides a skip.
-  onSuccess: (updated: number, total: number) => void
+  // BULK-SKIP-REASONS-1: also forwards the raw `skipped` array so the funnel/phase
+  // callers (the only two endpoints that return the reasoned [{id,reason}] shape)
+  // can build a "why" breakdown — every other caller ignores this 3rd argument.
+  onSuccess: (updated: number, total: number, skipped?: unknown[]) => void
 }
 
 export function useCandidateBulkActions({
   candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t, funnelTypes, candidateTypes,
 }: UseCandidateBulkActionsParams) {
   const { confirm, dialog } = useConfirm()
+  // 11.1: the shared cross-entity navigate — powers the funnel bulk-node's
+  // "manage per application" deep-link (mirrors EntityLink's use of the same context).
+  const { navigate } = useNavigation()
   // ── Bulk selection ──
   const toggleRow = (id: Id) => setSelectedIds(prev => {
     const next = new Set(prev)
@@ -148,6 +155,23 @@ export function useCandidateBulkActions({
     }
   }
 
+  // BULK-SKIP-REASONS-1: `/candidates/bulk/funnel-stage` and `/candidates/bulk/phase`
+  // now return `skipped` as [{id, reason}] (every other bulk endpoint keeps the bare
+  // id array — see notifyOutcome above, unchanged for those). Group the reasons into
+  // a human "N reason, M reason" string; returns '' when `skipped` isn't the reasoned
+  // shape (defensive fallback — caller falls back to the old bare-count summary).
+  const reasonBreakdown = (skipped?: unknown[]): string => {
+    const reasoned = (skipped ?? []).filter(
+      (s): s is { id: Id; reason: string } => typeof s === 'object' && s !== null && 'reason' in s,
+    )
+    if (!reasoned.length) return ''
+    const counts: Record<string, number> = {}
+    reasoned.forEach(s => { counts[s.reason] = (counts[s.reason] ?? 0) + 1 })
+    return Object.entries(counts)
+      .map(([reason, count]) => `${count} ${t(`bulk.skipReasons.${reason}`, { defaultValue: reason })}`)
+      .join(', ')
+  }
+
   // Generic optimistic bulk field mutation: apply `patch` to the selected rows,
   // persist, reconcile against the server's `updated` list, revert on failure.
   const bulkMutate = ({ url, body, patch, keys, onSuccess }: BulkMutateArgs) => {
@@ -159,7 +183,9 @@ export function useCandidateBulkActions({
       .then((res) => {
         const updated = Array.isArray(res.data?.updated) ? new Set(res.data.updated) : null
         if (updated) setCandidates(prev => prev.map(c => (ids.includes(c.id) && !updated.has(c.id)) ? { ...c, ...snap.get(c.id) } : c))
-        onSuccess(updated ? updated.size : ids.length, ids.length)
+        // BULK-SKIP-REASONS-1: forward the raw `skipped` array too — funnel/phase read
+        // it for the reason breakdown; every other caller ignores this 3rd argument.
+        onSuccess(updated ? updated.size : ids.length, ids.length, Array.isArray(res.data?.skipped) ? res.data.skipped : undefined)
       })
       .catch(() => {
         setCandidates(prev => prev.map(c => ids.includes(c.id) ? { ...c, ...snap.get(c.id) } : c))
@@ -176,13 +202,36 @@ export function useCandidateBulkActions({
   })
   // Move the selection to a funnel stage — the real bulk route (BULK-2) with single-PATCH
   // semantics (Match-spawn on hired, event after commit). Replaces the per-id bridge.
-  // Job 35: the BE moves each candidate's LATEST application (no vacancy scope) — a
-  // candidate without one is `skipped`, surfaced honestly via notifyOutcome below.
+  // BULK-FUNNEL-SOLE-1: the BE now moves each candidate's ONE-AND-ONLY live application
+  // (0 or >1 live applications → skipped, never silently guessed). BULK-SKIP-REASONS-1:
+  // `skipped` now carries [{id,reason}] — show WHY, not just a bare count.
   const bulkSetStage = (stage: string) => bulkMutate({
     url: '/candidates/bulk/funnel-stage', body: { funnel_type: stage },
     patch: { stage }, keys: ['stage'],
-    onSuccess: (n, total) => notifyOutcome('bulk.stageChanged', { value: metaOf(funnelTypes, stage)?.label ?? stage }, n, total),
+    onSuccess: (n, total, skipped) => {
+      const breakdown = reasonBreakdown(skipped)
+      if (total > 0 && n < total && breakdown) {
+        notify('warning', t('bulk.partialResultReasoned', {
+          value: metaOf(funnelTypes, stage)?.label ?? stage, updated: n, total, skipped: total - n, breakdown,
+        }))
+        return
+      }
+      notifyOutcome('bulk.stageChanged', { value: metaOf(funnelTypes, stage)?.label ?? stage }, n, total)
+    },
   })
+  // 11.1: convenience deep-link from the funnel bulk-node to the Applications page,
+  // carrying the current selection via the shared NavigationContext intent pattern
+  // (mirrors a KPI/chart click seeding a filter on arrival). The axis-correct bulk
+  // home for funnel stage stays PER-APPLICATION (ApplicationsBulkBar) — this just
+  // gets the recruiter there with the right candidates in view. NOTE: ApplicationsPage
+  // does not yet consume an intent `candidate_ids` key (out of this task's file scope
+  // — a follow-up ticket), so today this lands on the (unfiltered) Applications page;
+  // the navigate call itself is real and ready for that intent to be wired up.
+  const manageByApplication = () => {
+    const ids = [...selectedIds]
+    if (!ids.length) return
+    navigate('applications', { candidate_ids: ids })
+  }
   // Set the EXACT candidate-type set for the selection (multi-select add/remove).
   // An empty set clears all types — so an unused type can then be deleted in Settings.
   const bulkSetTypes = (types: string[]) => bulkMutate({
@@ -310,12 +359,17 @@ export function useCandidateBulkActions({
   // Convert the selection to a phase (e.g. Lead→Kandidaat). The backend validates
   // each candidate against that phase's required fields; incomplete ones are skipped
   // (reconciled back via bulkMutate) → "X van Y gelukt" (warning when any skipped).
+  // BULK-SKIP-REASONS-1: `skipped` now carries [{id,reason}] — show WHY when present.
   const bulkConvertPhase = (phase: string) => {
     const total = selectedIds.size
     bulkMutate({
       url: '/candidates/bulk/phase', body: { phase },
       patch: { phase }, keys: ['phase'],
-      onSuccess: (n) => notify(n < total ? 'warning' : 'success', t('bulk.convertResult', { updated: n, total })),
+      onSuccess: (n, _total, skipped) => {
+        const breakdown = reasonBreakdown(skipped)
+        if (n < total && breakdown) { notify('warning', t('bulk.convertResultReasoned', { updated: n, total, breakdown })); return }
+        notify(n < total ? 'warning' : 'success', t('bulk.convertResult', { updated: n, total }))
+      },
     })
   }
   // AXIS-MATRIX-2 N2 (docs/AXIS-MATRIX.md "Niet-interactieve contexten"): one
@@ -352,11 +406,18 @@ export function useCandidateBulkActions({
       .then(({ total, blocked, breakdown }) => {
         // Nothing will be skipped — proceed exactly as before, no extra confirm.
         if (blocked <= 0) { runBulkSetStatus(status, label); return }
-        const reasons = breakdown.filter(g => g.effect === 'block')
-          .map(g => `${g.count} ${axisConditionLabel(g.condition)}`).join(', ')
+        const blockedGroups = breakdown.filter(g => g.effect === 'block')
+        const reasons = blockedGroups.map(g => `${g.count} ${axisConditionLabel(g.condition)}`).join(', ')
         const proceed = total - blocked
         if (proceed <= 0) { notify('warning', t('bulk.statusAllBlocked', { total, reasons })); return }
-        confirm(t('bulk.statusBlockedConfirm', { blocked, total, reasons, proceed }), () => runBulkSetStatus(status, label))
+        // 11.3: name a few of the blocked candidates (the preflight already returns
+        // sample_names[] per group) so the recruiter sees WHO is blocked, not just a
+        // count — capped + deduped since the same name can appear in >1 reason group.
+        const names = [...new Set(blockedGroups.flatMap(g => g.sample_names))].slice(0, 3).join(', ')
+        const message = names
+          ? t('bulk.statusBlockedConfirmSample', { blocked, total, reasons, proceed, names })
+          : t('bulk.statusBlockedConfirm', { blocked, total, reasons, proceed })
+        confirm(message, () => runBulkSetStatus(status, label))
       })
       // The preflight is a courtesy preview, not a gate — a network hiccup or a
       // permission read-gap must never block the actual (still server-enforced) action.
@@ -393,7 +454,7 @@ export function useCandidateBulkActions({
   return {
     toggleRow, toggleAll, bulkAddToPool, bulkRemoveFromPool,
     bulkSetOwner, bulkSetStage, bulkSetTypes, bulkSetConsent, bulkConvertPhase, bulkSetStatus, bulkAddTag,
-    selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive,
+    selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive, manageByApplication,
     bulkArchiveGuard, setBulkArchiveGuard, resolveBulkArchiveGuard,
     bulkMergeTarget, bulkMergePrompt, resolveBulkMerge,
     dialog,

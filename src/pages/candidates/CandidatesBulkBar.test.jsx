@@ -102,4 +102,23 @@ describe('CandidatesBulkBar', () => {
     await user.click(screen.getByText('bulk.merge'))
     expect(onMerge).toHaveBeenCalledTimes(1)
   })
+
+  // 11.1: the funnel-node's "manage per application" deep-link — a thin action
+  // node next to "change funnel stage", gated on the callback being wired (honest
+  // gate: CandidatesToolbar/CandidatesPage don't wire it yet, out of this task's scope).
+  it('hides the "manage by application" deep-link when no callback is provided', async () => {
+    const user = userEvent.setup()
+    render(<CandidatesBulkBar {...baseProps()} />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.queryByText('bulk.manageByApplication')).toBeNull()
+  })
+
+  it('shows the "manage by application" deep-link and fires the callback when provided', async () => {
+    const user = userEvent.setup()
+    const onManageByApplication = vi.fn()
+    render(<CandidatesBulkBar {...baseProps()} onManageByApplication={onManageByApplication} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.manageByApplication'))
+    expect(onManageByApplication).toHaveBeenCalledTimes(1)
+  })
 })
