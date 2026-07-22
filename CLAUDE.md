@@ -653,19 +653,18 @@ Be honest. If something is not done, say so — do not pretend.
 - Prefer small reusable components over large ones.
 - Use the candidate's own UUID `id` for internal references, never ShiftManager's
   `external_id`.
-- **Subagent model policy (cost, Danny 2026-07-08; effort added 2026-07-15):**
-  build/implementation agents run on **Sonnet** (`refactorer` in `.claude/agents/`);
-  simple search/scan/verify agents on **Haiku** (`sweeper`). **Reasoning effort per
-  agent type:** sweeps/verify = **low** (mechanical, the checklist is the brain);
-  build agents = **medium** (default — the prompt carries the design, the agent
-  executes); plan/architecture agents (concept plans, cross-cutting designs) =
-  **high**, or keep that work in the manager lane. The prompt compensates for
-  effort: a lower-effort agent gets measured facts and an explicit file list, never
-  open design questions. The **manager session runs Fable 5 (high reasoning)** and
-  ALWAYS does the CONTROL itself: it reviews every subagent deliverable, runs
-  `tsc --noEmit` + the tests + the smoke suite, and does the committing — subagents
-  never `git add/commit/push` on their own. Delicate work (auth, API contracts,
-  data model) stays with the manager.
+- **Subagent model policy (Danny 2026-07-22 — supersedes 2026-07-08/15/17):**
+  The MANAGER runs **Fable 5 at reasoning effort high**; when Fable's budget is
+  exhausted, **Opus at high** takes over as manager. ALL execution agents stay on
+  cheap models at reasoning effort **low** — build/implementation on **Sonnet**
+  (`refactorer` in `.claude/agents/`), search/scan/verify on **Haiku** (`sweeper`).
+  The prompt compensates for effort: a low-effort agent gets measured facts, an
+  explicit file list, a reference implementation and acceptance criteria, never
+  open design questions — if the prompt can't be made that concrete, it is
+  manager-lane work. The manager ALWAYS does the CONTROL itself: it reviews every
+  subagent deliverable, runs `tsc --noEmit` + the tests + the smoke suite, and does
+  the committing — subagents never `git add/commit/push` on their own. Delicate
+  work (auth, API contracts, data model) stays with the manager.
 - **Session names (Danny 2026-07-08):** this frontend manager session is **CMFE**; the
   backend manager session (koiosmatch-api) is **CMBE**. One manager per repo; cross-repo
   coordination goes through the shared docs in koiosmatch-api/docs/.
