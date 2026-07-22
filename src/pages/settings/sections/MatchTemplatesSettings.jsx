@@ -9,6 +9,7 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useContractTypes } from '@/lib/useContractTypes'
 import { useFunctions } from '@/lib/useFunctions'
+import { largestRemainderPct } from '@/lib/pct'
 
 // The six scoring dimensions (mirrors the backend App\Enums\MatchDimension, single
 // source of truth there, and the vacancy Matching tab's picker). Duplicated here on
@@ -19,13 +20,6 @@ const DIMENSIONS = ['qualifications', 'technical_fit', 'soft_skills', 'cultural_
 
 // Merge a stored weight set over the neutral default (3 = balanced) for a complete set.
 const buildWeights = (w) => Object.fromEntries(DIMENSIONS.map(d => [d, Number((w ?? {})[d]) || 3]))
-
-// Danny 22-07: concrete number + % share (of the sum of all six weights) instead of
-// only a vague word label — mirrors MatchingTab's per-vacancy readout.
-const pctShare = (weight, all) => {
-  const sum = DIMENSIONS.reduce((s, k) => s + (all?.[k] ?? 3), 0) || 1
-  return Math.round((weight / sum) * 100)
-}
 
 // Add/remove a value in a multi-select array (Soort dienstverband).
 const toggleInArray = (arr, value) => (arr ?? []).includes(value) ? arr.filter(x => x !== value) : [...(arr ?? []), value]
@@ -164,7 +158,12 @@ export default function MatchTemplatesSettings() {
   }
 
   // One slider editor, shared by the create card and every edit card.
-  const renderWeightSliders = (weights, onChangeDim) => (
+  const renderWeightSliders = (weights, onChangeDim) => {
+    // Danny 22-07: % shares that total exactly 100 across the six sliders
+    // (largest-remainder — plain rounding gave 6×17%=102%).
+    const pcts = largestRemainderPct(DIMENSIONS.map(d => weights?.[d] ?? 3))
+    const pctByDim = Object.fromEntries(DIMENSIONS.map((d, i) => [d, pcts[i]]))
+    return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {DIMENSIONS.map(d => (
         <div key={d}>
@@ -172,7 +171,7 @@ export default function MatchTemplatesSettings() {
             <span style={{ fontSize: 12, color: 'var(--text)' }}>{dimLabel(d)}</span>
             {/* Danny 22-07: concrete 1..5 weight + its % share, next to the word labels. */}
             <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>
-              {weights?.[d] ?? 3}/5 · {pctShare(weights?.[d] ?? 3, weights)}%
+              {weights?.[d] ?? 3}/5 · {pctByDim[d]}%
             </span>
           </div>
           <Slider value={(weights?.[d] ?? 3) - 1} max={4} step={1}
@@ -182,7 +181,8 @@ export default function MatchTemplatesSettings() {
         </div>
       ))}
     </div>
-  )
+    )
+  }
 
   // Soort dienstverband — searchable MULTI-select (Danny 22-07), fed from the tenant
   // contract-type lookup; optional, several values may be checked. Shared by the

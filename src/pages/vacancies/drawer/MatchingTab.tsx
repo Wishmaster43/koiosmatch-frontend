@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Save, Check, Info } from 'lucide-react'
 import SliderJs from '@/components/ui/Slider'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import { largestRemainderPct } from '@/lib/pct'
 import { useMatchWeightTemplates } from '../hooks/useMatchWeightTemplates'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -18,12 +19,9 @@ const DIMENSIONS = ['qualifications', 'technical_fit', 'soft_skills', 'cultural_
 const buildWeights = (w: Record<string, unknown> | undefined): Record<string, number> =>
   Object.fromEntries(DIMENSIONS.map(d => [d, Number((w ?? {})[d]) || 3]))
 
-// Danny 22-07: concrete number + % share (of the sum of all six weights) instead of
-// only a vague word label — this dimension's weight relative to the vacancy's total.
-const pctShare = (weight: number, all: Record<string, number>): number => {
-  const sum = DIMENSIONS.reduce((s, k) => s + (all[k] ?? 3), 0) || 1
-  return Math.round((weight / sum) * 100)
-}
+// Danny 22-07: concrete number + % share of the sum of all six weights, next to the
+// word label. The six shares are allocated with the largest-remainder method so they
+// add up to exactly 100 (plain rounding gave 6×17%=102%) — see @/lib/pct.
 
 /**
  * MatchingTab — the vacancy's per-dimension importance for the AI matcher: an
@@ -50,6 +48,9 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
 
   const [saved, setSaved] = useState(false)
   const setW = (d: string, val: number) => setWeights(p => ({ ...p, [d]: val }))
+  // Per-dimension % share that sums to exactly 100 across the six sliders.
+  const pcts = largestRemainderPct(DIMENSIONS.map(d => weights[d] ?? 3))
+  const pctByDim: Record<string, number> = Object.fromEntries(DIMENSIONS.map((d, i) => [d, pcts[i]]))
   // Gate "Saved ✓" on the real PATCH result — a failing save (403/422/network) must not
   // read as success (Danny 22-07). onUpdate returning void (older callers) counts as success.
   const save = () => {
@@ -120,7 +121,7 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
             {/* Danny 22-07: the concrete 1..5 weight + its % share of the total,
                 next to (not instead of) the word labels kept below the slider. */}
             <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
-              {weights[d] ?? 3}/5 · {pctShare(weights[d] ?? 3, weights)}%
+              {weights[d] ?? 3}/5 · {pctByDim[d]}%
             </span>
           </div>
           {/* Slider is 0-based (0..4); stored weight is 1..5. */}
