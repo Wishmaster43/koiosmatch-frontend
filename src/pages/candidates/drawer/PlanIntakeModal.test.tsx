@@ -148,6 +148,33 @@ describe('PlanIntakeModal · S24a defaults', () => {
   })
 })
 
+// INTAKE-VACANCY-ID-1 (CMBE VAC-LEADS-1): the appointment endpoint now accepts
+// vacancy_id — without it on the create payload, the vacancy's leads-list stays
+// empty. Assert the actual REQUEST body (§13), not just that a callback fired.
+describe('PlanIntakeModal · INTAKE-VACANCY-ID-1 (vacancy_id on the create payload)', () => {
+  it('sends vacancy_id on the POST body when a vacancy context is prefilled', async () => {
+    vi.mocked(api.get).mockImplementation((url: unknown) => {
+      if (String(url).includes('/vacancies/vac-9')) return Promise.resolve({ data: { data: { title: 'Verzorgende IG' } } })
+      return Promise.reject({ response: { status: 404 } })
+    })
+    vi.mocked(api.post).mockResolvedValueOnce({ data: {} })
+    const user = userEvent.setup()
+    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} defaultVacancyId="vac-9" />)
+    await screen.findByText('Verzorgende IG')
+    await user.click(screen.getByRole('button', { name: 'work.createIntake' }))
+    expect(api.post).toHaveBeenCalledWith('/candidates/cand-1/appointments', expect.objectContaining({ vacancy_id: 'vac-9' }))
+  })
+
+  it('sends no vacancy_id for a genuinely vacancy-less appointment (CONSIST-2 — no fake requirement)', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: {} })
+    const user = userEvent.setup()
+    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await user.click(screen.getByRole('button', { name: 'work.createIntake' }))
+    const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
+    expect(body).not.toHaveProperty('vacancy_id')
+  })
+})
+
 describe('PlanIntakeModal · AXIS-MATRIX-2 preflight (CMFE audit R1)', () => {
   it('warn: shows the banner but leaves the submit button enabled', () => {
     vi.mocked(useActionRulePreflight).mockReturnValue({

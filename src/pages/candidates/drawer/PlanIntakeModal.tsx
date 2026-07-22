@@ -19,6 +19,15 @@
  * since the backend's own guard (AppointmentController::store) only runs on create,
  * never on the PATCH edit path. A warn cell shows an inline banner and still lets
  * the recruiter proceed; a block cell additionally disables the submit button.
+ *
+ * INTAKE-VACANCY-ID-1 (CMBE VAC-LEADS-1, 22-07): the backend's vacancy leads-list
+ * (`GET /vacancies/{id}/leads`) is computed from intake appointments carrying
+ * `vacancy_id` — this modal already threads it whenever a caller passes
+ * `defaultVacancyId` (application drawer → `application.vacancyId`; vacancy
+ * drawer's applicant list → the vacancy's own id). The candidate-drawer quick
+ * action (WorkTab, no application context) now defaults it too, but only when
+ * the candidate's applications resolve to exactly ONE distinct vacancy —
+ * otherwise it stays empty and this picker decides (see WorkTab.tsx).
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'

@@ -91,6 +91,17 @@ export default function WorkTab({ c }: { c: Candidate }) {
   const pages = Math.max(1, Math.ceil(apps.length / PER))
   const slice = apps.slice((page - 1) * PER, page * PER)
 
+  // INTAKE-VACANCY-ID-1: a single distinct vacancy across the candidate's own
+  // applications is an unambiguous "Intake plannen" default — without vacancy_id
+  // on the create payload the vacancy's leads-list stays empty (CMBE VAC-LEADS-1).
+  // 0 or 2+ distinct vacancies is genuinely ambiguous — left to the modal's own
+  // searchable vacancy picker rather than guessing (never string-match stage
+  // labels here: funnel stages are tenant lookups, not a fixed vocabulary).
+  const distinctVacancyIds = Array.from(new Set(
+    apps.map(s => s.vacancy?.id).filter((id): id is Id => id != null).map(String)
+  ))
+  const soleVacancyId: Id | null = distinctVacancyIds.length === 1 ? distinctVacancyIds[0] : null
+
   // House sub-tab bar (Danny kandidaten-ronde-2, punt C): Sollicitaties · Matches ·
   // Talentenpools, sorted ALPHABETICALLY BY TRANSLATED LABEL (computed at render
   // time so the order still reads correctly once another locale reorders them) —
@@ -178,7 +189,7 @@ export default function WorkTab({ c }: { c: Candidate }) {
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ModalityIcon m={appt.modality} /> {t(`work.modality${appt.modality === 'remote' ? 'Remote' : appt.modality === 'phone' ? 'Phone' : 'Office'}`)}{appt.location_name ? ` · ${appt.location_name}` : ''}</span>
                     {appt.owner?.name && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><User size={11} /> {appt.owner.name}</span>}
                     {/* Pencil: edit this intake appointment (Danny) — prefilled modal → PATCH. */}
-                    <button onClick={() => setEditAppt({ id: appt.id, scheduled_at: appt.scheduled_at, duration_min: appt.duration_min, modality: appt.modality, type: appt.type, owner_id: (appt.owner as { id?: Id })?.id, vacancy_id: s.id ?? null })}
+                    <button onClick={() => setEditAppt({ id: appt.id, scheduled_at: appt.scheduled_at, duration_min: appt.duration_min, modality: appt.modality, type: appt.type, owner_id: (appt.owner as { id?: Id })?.id, vacancy_id: vacancyId })}
                       title={t('work.editIntake')} aria-label={t('work.editIntake')}
                       style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2 }}>
                       <Pencil size={11} />
@@ -201,7 +212,7 @@ export default function WorkTab({ c }: { c: Candidate }) {
       )}
 
       {modal === 'apply'  && <AddApplicationModal candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
-      {modal === 'intake' && <PlanIntakeModal     candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
+      {modal === 'intake' && <PlanIntakeModal     candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} defaultVacancyId={soleVacancyId} />}
       {modal === 'match'  && <MatchPlacementModal candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
       {editAppt && <PlanIntakeModal candidateId={c.id} existing={editAppt} onClose={() => setEditAppt(null)} onCreated={reload} />}
     </div>

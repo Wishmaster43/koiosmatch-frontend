@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import WorkTab from './WorkTab'
+import api from '@/lib/api'
 import type { Candidate } from '@/types/candidate'
 
 // The candidate's appointments fetch (a sibling structured entity) is irrelevant
@@ -16,6 +17,14 @@ vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEnti
 vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => ({ statuses: [], metaOf: () => undefined }) }))
 // sectionBlock (styling) + the NAV-BACK-1 helpers MatchesTab imports from the same module.
 vi.mock('./constants', () => ({ sectionBlock: {}, rememberReturnTab: vi.fn(), peekReturnTab: () => null, clearReturnTab: () => {} }))
+// The shared appointment modal is a different file's scope (its own lookups/auth/
+// vacancy-options hooks) — stand in with a marker exposing the props INTAKE-
+// VACANCY-ID-1 cares about, so the wiring is observable without those hooks.
+vi.mock('./PlanIntakeModal', () => ({
+  default: ({ defaultVacancyId, existing }: { defaultVacancyId?: string | number | null; existing?: { vacancy_id?: string | number | null } }) => (
+    <div data-testid="plan-intake-modal" data-default-vacancy-id={defaultVacancyId ?? ''} data-existing-vacancy-id={existing?.vacancy_id ?? ''} />
+  ),
+}))
 
 const candidate = (applications: unknown[]): Candidate => ({ id: 9, matches: [], applications } as unknown as Candidate)
 
@@ -88,5 +97,50 @@ describe('WorkTab · sub-tabs (kandidaten-ronde-2, punt C)', () => {
     render(<WorkTab c={candidate([])} />)
     const tabs = screen.getAllByRole('tab').map(el => el.textContent)
     expect(tabs).toEqual(['sections.applications', 'sections.placements', 'sections.pools'])
+  })
+})
+
+// INTAKE-VACANCY-ID-1 (CMBE VAC-LEADS-1): the vacancy leads-list is computed from
+// intake appointments carrying `vacancy_id` — a "Intake plannen" booked from the
+// candidate side must thread that id whenever it is unambiguous.
+describe('WorkTab · INTAKE-VACANCY-ID-1 (vacancy_id wiring for the shared appointment modal)', () => {
+  it('defaults "Intake plannen" to the single distinct vacancy across the applications', async () => {
+    const user = userEvent.setup()
+    render(<WorkTab c={candidate([{ id: 'app-1', vacancy: { id: 'vac-1', title: 'Verpleegkundige' }, created_at: '2026-07-01' }])} />)
+    await user.click(screen.getByRole('button', { name: 'work.planIntake' }))
+    expect(screen.getByTestId('plan-intake-modal')).toHaveAttribute('data-default-vacancy-id', 'vac-1')
+  })
+
+  it('leaves the default empty when the candidate has two DIFFERENT vacancies (ambiguous — the modal picker decides)', async () => {
+    const user = userEvent.setup()
+    render(<WorkTab c={candidate([
+      { id: 'app-1', vacancy: { id: 'vac-1', title: 'Verpleegkundige' }, created_at: '2026-07-01' },
+      { id: 'app-2', vacancy: { id: 'vac-2', title: 'Verzorgende' }, created_at: '2026-07-02' },
+    ])} />)
+    await user.click(screen.getByRole('button', { name: 'work.planIntake' }))
+    expect(screen.getByTestId('plan-intake-modal')).toHaveAttribute('data-default-vacancy-id', '')
+  })
+
+  it('leaves the default empty for a genuinely vacancy-less candidate (CONSIST-2)', async () => {
+    const user = userEvent.setup()
+    render(<WorkTab c={candidate([{ id: 'app-1', created_at: '2026-07-01' }])} />)
+    await user.click(screen.getByRole('button', { name: 'work.planIntake' }))
+    expect(screen.getByTestId('plan-intake-modal')).toHaveAttribute('data-default-vacancy-id', '')
+  })
+
+  it('edits an intake appointment with the ROW\'S VACANCY id, never the application\'s own id', async () => {
+    // Regression: the pencil used to pass the application's own row id as `vacancy_id`
+    // (a copy-paste of the wrong local), corrupting the appointment on save.
+    vi.mocked(api.get).mockImplementation((url: unknown) => {
+      if (String(url).includes('/appointments')) {
+        return Promise.resolve({ data: { data: [{ id: 'appt-1', application_id: 'app-1', type: 'intake', scheduled_at: '2026-07-20T10:00:00Z', duration_min: 30, modality: 'office', owner: { id: 'u1', name: 'Piet' } }] } })
+      }
+      return Promise.resolve({ data: { data: [] } })
+    })
+    const user = userEvent.setup()
+    render(<WorkTab c={candidate([{ id: 'app-1', vacancy: { id: 'vac-1', title: 'Verpleegkundige' }, created_at: '2026-07-01' }])} />)
+    const editButton = await screen.findByRole('button', { name: 'work.editIntake' })
+    await user.click(editButton)
+    expect(screen.getByTestId('plan-intake-modal')).toHaveAttribute('data-existing-vacancy-id', 'vac-1')
   })
 })
