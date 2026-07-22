@@ -370,7 +370,11 @@
     "street": "Straße",
     "streetPlaceholder": "Straßenname",
     "houseNumber": "Hausnummer",
-    "houseNumberSuffix": "Zusatz"
+    "houseNumberSuffix": "Zusatz",
+    "careerSiteActive": "Karriereseite aktiv",
+    "careerSiteOn": "An — öffentliche Stellenseite sichtbar",
+    "careerSiteOff": "Aus — öffentliche Seite nicht erreichbar",
+    "careerSiteHint": "Schalte die öffentliche Karriereseite (…/{tenant}/vacatures) für diesen Mandanten ein oder aus. Deine Wahl wird gespeichert; die öffentliche Seite berücksichtigt sie, sobald das Backend sie durchsetzt."
   },
   "locations": {
     "title": "Standorte",

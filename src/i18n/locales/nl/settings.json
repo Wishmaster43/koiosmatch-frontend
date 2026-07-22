@@ -389,7 +389,11 @@
     "street": "Straat",
     "streetPlaceholder": "Straatnaam",
     "houseNumber": "Huisnummer",
-    "houseNumberSuffix": "Toevoegsel"
+    "houseNumberSuffix": "Toevoegsel",
+    "careerSiteActive": "Carrière-site actief",
+    "careerSiteOn": "Aan — publieke vacaturesite zichtbaar",
+    "careerSiteOff": "Uit — publieke site niet bereikbaar",
+    "careerSiteHint": "Zet de publieke carrière-site (…/{tenant}/vacatures) aan of uit voor deze tenant. Je keuze wordt bewaard; de publieke site respecteert 'm zodra de backend het afdwingt."
   },
   "locations": {
     "title": "Locaties",

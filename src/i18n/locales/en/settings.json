@@ -389,7 +389,11 @@
     "street": "Street",
     "streetPlaceholder": "Street name",
     "houseNumber": "House number",
-    "houseNumberSuffix": "Addition"
+    "houseNumberSuffix": "Addition",
+    "careerSiteActive": "Career site active",
+    "careerSiteOn": "On — public vacancy site visible",
+    "careerSiteOff": "Off — public site not reachable",
+    "careerSiteHint": "Turn the public career site (…/{tenant}/vacatures) on or off for this tenant. Your choice is saved; the public site will respect it once the backend enforces it."
   },
   "locations": {
     "title": "Locations",
