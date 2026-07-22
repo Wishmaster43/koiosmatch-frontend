@@ -13,7 +13,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "prepare": "git config core.hooksPath .githooks || true",
-    "smoke": "node e2e/run.mjs"
+    "smoke": "node e2e/run.mjs",
+    "dev:career": "vite --config careersite/vite.config.ts",
+    "build:career": "vite build --config careersite/vite.config.ts",
+    "test:career": "vitest run --config careersite/vite.config.ts"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.5.1",

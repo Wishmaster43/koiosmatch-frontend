@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Standalone career-site build output (careersite/vite.config.ts outDir).
+dist-careersite
+
 # Local env files (keep .env.example tracked as the template)
 .env
 .env.*

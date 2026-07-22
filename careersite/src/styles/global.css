@@ -1,0 +1,329 @@
+/* Design tokens (CLAUDE.md §4) — one accent color (--brand, set per tenant by
+   theme.tsx) plus a small neutral/semantic set. Light by default, dark via
+   prefers-color-scheme; no ad-hoc hex anywhere else in this stylesheet. */
+:root {
+  --brand: #2f6f4f; /* neutral fallback until GET /site resolves the tenant color */
+  --bg: #ffffff;
+  --surface: #f7f7f8;
+  --text: #1a1a1a;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
+  --danger: #b3261e;
+  --success: #1e7d43;
+  --radius: 10px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121212;
+    --surface: #1c1c1e;
+    --text: #f2f2f2;
+    --text-muted: #9a9a9a;
+    --border: #2d2d2f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--brand);
+}
+
+/* Branded header — logo + tenant name, same on every page under /:tenant. */
+.site-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.site-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.site-header__logo {
+  height: 32px;
+  width: auto;
+}
+
+.page-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+}
+
+/* Friendly full-page notices (home / 404 / tenant-not-found). */
+.page-notice {
+  max-width: 480px;
+  margin: 15vh auto 0;
+  padding: 0 16px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.page-notice h1 {
+  color: var(--text);
+  font-size: 20px;
+}
+
+/* Loading / error / empty inline states — same treatment across list and detail. */
+.state-notice {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.state-notice--success {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.field-error {
+  display: block;
+  color: var(--danger);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* Filters bar — mobile-first: stacked fields, side by side from tablet width up. */
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0 24px;
+}
+
+@media (min-width: 640px) {
+  .filters {
+    flex-direction: row;
+  }
+}
+
+.filters__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-muted);
+  flex: 1;
+}
+
+.filters__field input {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 15px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Vacancy grid — one column on mobile, more columns as space allows. */
+.vacancy-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .vacancy-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 960px) {
+  .vacancy-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.vacancy-card {
+  display: block;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-decoration: none;
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+.vacancy-card__title {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.vacancy-card__meta {
+  margin: 0 0 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.vacancy-card__chips {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 8px;
+  padding: 0;
+}
+
+/* Soft-chip convention (CLAUDE.md §4): tinted with the one accent color, never a solid fill. */
+.chip {
+  background: color-mix(in srgb, var(--brand) 10%, transparent);
+  color: var(--brand);
+  border: 1px solid color-mix(in srgb, var(--brand) 35%, transparent);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.vacancy-card__salary {
+  margin: 0 0 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.vacancy-card__intro {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* Pagination. */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.pagination__label {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* Buttons. */
+.btn {
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  background: var(--brand);
+  color: #fff;
+}
+
+.btn--secondary {
+  background: color-mix(in srgb, var(--brand) 8%, transparent);
+  color: var(--brand);
+  border-color: color-mix(in srgb, var(--brand) 30%, transparent);
+}
+
+/* Vacancy detail. */
+.back-link {
+  display: inline-block;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
+.vacancy-detail__meta {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.vacancy-detail__description {
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.vacancy-detail__apply {
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+}
+
+/* Apply form. */
+.apply-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 480px;
+}
+
+.apply-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.apply-form__field input,
+.apply-form__field textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-family: inherit;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.apply-form__consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.apply-form__consent input {
+  margin-top: 3px;
+}
+
+/* Honeypot — off-screen, not display:none (some bots skip that check), and out of
+   the tab order (tabIndex=-1 on the input) + aria-hidden so screen reader users never meet it. */
+.hp-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}

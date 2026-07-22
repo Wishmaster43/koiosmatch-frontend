@@ -29,7 +29,7 @@ const projectRules = {
 }
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'dist-careersite']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [
