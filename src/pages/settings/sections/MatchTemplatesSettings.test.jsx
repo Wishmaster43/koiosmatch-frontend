@@ -9,6 +9,8 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
+import { DEFAULT_CONTRACT_TYPES } from '@/lib/useContractTypes'
+import { DEFAULT_FUNCTIONS } from '@/lib/useFunctions'
 import MatchTemplatesSettings from './MatchTemplatesSettings'
 
 // Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
@@ -26,15 +28,26 @@ const ct = (key, opts) => i18n.t(key, { ns: 'common', ...opts })
 const template = (over = {}) => ({
   id: 't1', name: 'Senior profile',
   weights: { qualifications: 4, technical_fit: 3, soft_skills: 3, cultural_alignment: 3, career_aspirations: 2, location: 5 },
-  employment_type_id: null, function_title: null, linked_vacancies_count: 0,
+  contract_types: [], function_title: null, linked_vacancies_count: 0,
   ...over,
 })
+
+// Every test's api.get resolves an empty list for any non-templates URL, so the
+// useContractTypes/useFunctions lookup hooks fall back to their seed defaults
+// (DEFAULT_CONTRACT_TYPES/DEFAULT_FUNCTIONS) — a stable, known option set to drive.
+const mockLookupsEmpty = () => Promise.resolve({ data: { data: [] } })
 
 afterEach(() => vi.clearAllMocks())
 
 describe('MatchTemplatesSettings', () => {
   it('shows the loading state, then the error state on a failed fetch', async () => {
-    api.get.mockRejectedValue(new Error('network down'))
+    // Only the templates fetch fails — the contract-type/function lookup hooks
+    // (useContractTypes/useFunctions) hit different endpoints and must not be
+    // rejected too, or their own unhandled-rejection surfaces as test noise.
+    api.get.mockImplementation((url) =>
+      url.includes('match-weight-templates')
+        ? Promise.reject(new Error('network down'))
+        : Promise.resolve({ data: { data: [] } }))
     render(<MatchTemplatesSettings />)
     expect(screen.getByText(st('common.loading'))).toBeInTheDocument()
     await waitFor(() => expect(screen.getByText(st('matchTemplatesSettings.loadError'))).toBeInTheDocument())
@@ -127,5 +140,46 @@ describe('MatchTemplatesSettings', () => {
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/settings/match-weight-templates/t1'))
     // Row survives the 409 (never silently removed) — its name is still on screen.
     expect(screen.getByText('Senior profile')).toBeInTheDocument()
+  })
+
+  // Danny 22-07: "Soort dienstverband" is now a searchable MULTI-select (several
+  // values checkable, optional) fed from the tenant contract-type lookup; "Functie"
+  // is a searchable single-select fed from the candidate function lookup — neither
+  // is a hardcoded option list (§3B). Both must persist in the create request body.
+  it('Soort dienstverband checks multiple values and Functie is searchable; both persist in the create payload', async () => {
+    api.get.mockImplementation((url) =>
+      url.includes('match-weight-templates') ? Promise.resolve({ data: { data: [] } }) : mockLookupsEmpty())
+    api.post.mockResolvedValue({ data: { data: template({ id: 't2', name: 'Zorg profiel' }) } })
+
+    const user = userEvent.setup()
+    render(<MatchTemplatesSettings />)
+    await waitFor(() => expect(screen.getByText(st('matchTemplatesSettings.empty'))).toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: st('matchTemplatesSettings.add') }))
+    await user.type(screen.getByPlaceholderText(st('matchTemplatesSettings.namePlaceholder')), 'Zorg profiel')
+
+    // Open the searchable multi-select and check TWO contract types — the menu
+    // stays open between clicks (SearchSelect never auto-closes on toggle).
+    await user.click(screen.getByRole('button', { name: st('matchTemplatesSettings.employmentTypeAdd') }))
+    await user.click(screen.getByRole('button', { name: DEFAULT_CONTRACT_TYPES[0] }))
+    await user.click(screen.getByRole('button', { name: DEFAULT_CONTRACT_TYPES[1] }))
+    // Close the menu (outside click) before asserting — both stay checked/rendered
+    // as removable chips, proof several values can be checked at once.
+    await user.click(screen.getByPlaceholderText(st('matchTemplatesSettings.namePlaceholder')))
+    expect(screen.getAllByText(DEFAULT_CONTRACT_TYPES[0]).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(DEFAULT_CONTRACT_TYPES[1]).length).toBeGreaterThan(0)
+
+    // Functie — searchable single-select (CreatableSelect); its trigger shows the
+    // placeholder text until a value is picked.
+    await user.click(screen.getByRole('button', { name: st('matchTemplatesSettings.functionTitlePlaceholder') }))
+    await user.click(screen.getByRole('button', { name: DEFAULT_FUNCTIONS[0] }))
+
+    await user.click(screen.getByRole('button', { name: st('matchTemplatesSettings.add') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings/match-weight-templates', expect.objectContaining({
+      name: 'Zorg profiel',
+      contract_types: [DEFAULT_CONTRACT_TYPES[0], DEFAULT_CONTRACT_TYPES[1]],
+      function_title: DEFAULT_FUNCTIONS[0],
+    })))
   })
 })

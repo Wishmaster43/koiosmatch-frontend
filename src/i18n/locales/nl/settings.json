@@ -142,6 +142,7 @@
     "outreach": "Bellijsten",
     "match_statuses": "Statussen",
     "contract_types": "Contractsoorten",
+    "match_rates": "Omrekenfactor",
     "outreach_statuses": "Statussen",
     "task_types": "Activiteit-types",
     "task_priorities": "Prioriteiten",
@@ -580,6 +581,12 @@
     "contractTypeAdd": "Contractsoort toevoegen",
     "contractTypeDurationLabel": "Looptijd (dagen)"
   },
+  "matchRates": {
+    "title": "Omrekenfactor inkoop→verkoop",
+    "subtitle": "Valt terug op inkooptarief × deze factor wanneer geen prijsafspraak past bij functie/CAO/schaal/trede.",
+    "placeholder": "Bijv. 1,35",
+    "saveFailed": "Opslaan mislukt — de waarde is teruggezet."
+  },
   "outreach": {
     "statusTitle": "Statussen",
     "statusSubtitle": "Beheer de bellijst-statussen (status + kleur).",
@@ -688,12 +695,6 @@
       "always": "Altijd",
       "alwaysDesc": "Elke plaatsing heeft eerst goedkeuring nodig.",
       "saveFailed": "Opslaan mislukt — de keuze is teruggezet."
-    },
-    "conversionFactor": {
-      "title": "Omrekenfactor inkoop→verkoop",
-      "subtitle": "Valt terug op inkooptarief × deze factor wanneer geen prijsafspraak past bij functie/CAO/schaal/trede.",
-      "placeholder": "Bijv. 1,35",
-      "saveFailed": "Opslaan mislukt — de waarde is teruggezet."
     }
   },
   "matchTemplatesSettings": {
@@ -706,6 +707,7 @@
     "linkedCount_one": "{{count}} gekoppelde vacature",
     "linkedCount_other": "{{count}} gekoppelde vacatures",
     "employmentTypeLabel": "Soort dienstverband (optioneel)",
+    "employmentTypeAdd": "Dienstverband toevoegen",
     "employmentTypeNone": "— geen —",
     "functionTitleLabel": "Functie (optioneel)",
     "functionTitlePlaceholder": "Bijv. Verpleegkundige",

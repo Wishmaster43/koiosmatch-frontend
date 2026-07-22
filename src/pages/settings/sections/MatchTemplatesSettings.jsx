@@ -4,7 +4,11 @@ import { Plus, Trash2, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-reac
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import Slider from '@/components/ui/Slider'
+import CreatableSelect from '@/components/ui/CreatableSelect'
+import SearchSelect from '@/components/ui/SearchSelect'
 import { useConfirm } from '@/hooks/useConfirm'
+import { useContractTypes } from '@/lib/useContractTypes'
+import { useFunctions } from '@/lib/useFunctions'
 
 // The six scoring dimensions (mirrors the backend App\Enums\MatchDimension, single
 // source of truth there, and the vacancy Matching tab's picker). Duplicated here on
@@ -15,6 +19,16 @@ const DIMENSIONS = ['qualifications', 'technical_fit', 'soft_skills', 'cultural_
 
 // Merge a stored weight set over the neutral default (3 = balanced) for a complete set.
 const buildWeights = (w) => Object.fromEntries(DIMENSIONS.map(d => [d, Number((w ?? {})[d]) || 3]))
+
+// Danny 22-07: concrete number + % share (of the sum of all six weights) instead of
+// only a vague word label — mirrors MatchingTab's per-vacancy readout.
+const pctShare = (weight, all) => {
+  const sum = DIMENSIONS.reduce((s, k) => s + (all?.[k] ?? 3), 0) || 1
+  return Math.round((weight / sum) * 100)
+}
+
+// Add/remove a value in a multi-select array (Soort dienstverband).
+const toggleInArray = (arr, value) => (arr ?? []).includes(value) ? arr.filter(x => x !== value) : [...(arr ?? []), value]
 
 const cardStyle = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 8 }
 const labelStyle = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
@@ -51,30 +65,29 @@ function MiniWeightBars({ weights }) {
 export default function MatchTemplatesSettings() {
   const { t } = useTranslation(['settings', 'vacancies'])
   const dimLabel = (d) => t(`vacancies:matching.dim.${d}`)
+  // Danny 22-07: "Soort dienstverband" now feeds from the tenant contract-type lookup
+  // (searchable, multi-select) instead of the single-value /vacancy-employment-types
+  // picker; "Functie" feeds from the candidate function lookup (searchable, single).
+  // Neither is ever a hardcoded option list (§3B).
+  const { options: contractTypeOptions } = useContractTypes()
+  const { functions: functionOptions, allowFreeEntry } = useFunctions()
 
   const [templates, setTemplates] = useState([])
-  const [employmentTypes, setEmploymentTypes] = useState([])
   // Four explicit UI states, no blank screen on failure.
   const [phase, setPhase] = useState('loading') // loading | error | ready
   const [expanded, setExpanded] = useState(null)
   const [adding, setAdding] = useState(false)
   const [saving, setSaving] = useState(null) // 'new' | template id | null
   const [editForms, setEditForms] = useState({})
-  const [newForm, setNewForm] = useState({ name: '', weights: buildWeights(), employment_type_id: '', function_title: '' })
+  const [newForm, setNewForm] = useState({ name: '', weights: buildWeights(), contract_types: [], function_title: '' })
   const { confirm, dialog } = useConfirm()
 
-  // Load templates + the optional employment-type lookup for the default-assignment
-  // picker (a template can auto-default to a new vacancy's type/function — read-only
-  // display here; the vacancy-create auto-default logic itself lives on the backend).
+  // Load templates (the default-assignment picker's lookups now come from the shared
+  // useContractTypes/useFunctions hooks above, not a bespoke fetch here).
   useEffect(() => {
-    Promise.all([
-      api.get('/settings/match-weight-templates'),
-      api.get('/vacancy-employment-types').catch(() => ({ data: [] })),
-    ]).then(([tRes, eRes]) => {
-      setTemplates(unwrapList(tRes).rows)
-      setEmploymentTypes(unwrapList(eRes).rows)
-      setPhase('ready')
-    }).catch(() => setPhase('error'))
+    api.get('/settings/match-weight-templates')
+      .then(res => { setTemplates(unwrapList(res).rows); setPhase('ready') })
+      .catch(() => setPhase('error'))
   }, [])
 
   const setEF = (id, k, v) => setEditForms(p => ({ ...p, [id]: { ...(p[id] ?? {}), [k]: v } }))
@@ -83,7 +96,7 @@ export default function MatchTemplatesSettings() {
   const openEdit = (tpl) => {
     setEditForms(p => ({ ...p, [tpl.id]: {
       name: tpl.name, weights: buildWeights(tpl.weights),
-      employment_type_id: tpl.employment_type_id ?? '', function_title: tpl.function_title ?? '',
+      contract_types: tpl.contract_types ?? [], function_title: tpl.function_title ?? '',
     } }))
     setExpanded(tpl.id)
   }
@@ -94,10 +107,10 @@ export default function MatchTemplatesSettings() {
     if (!name) return
     setSaving('new')
     try {
-      const payload = { name, weights: newForm.weights, employment_type_id: newForm.employment_type_id || null, function_title: newForm.function_title.trim() || null }
+      const payload = { name, weights: newForm.weights, contract_types: newForm.contract_types, function_title: newForm.function_title.trim() || null }
       const res = await api.post('/settings/match-weight-templates', payload)
       setTemplates(p => [...p, unwrap(res)])
-      setNewForm({ name: '', weights: buildWeights(), employment_type_id: '', function_title: '' })
+      setNewForm({ name: '', weights: buildWeights(), contract_types: [], function_title: '' })
       setAdding(false)
     } catch {
       notifyError(t('matchTemplatesSettings.saveFailed'))
@@ -112,7 +125,7 @@ export default function MatchTemplatesSettings() {
     if (!form?.name?.trim()) return
     setSaving(tpl.id)
     try {
-      const payload = { name: form.name.trim(), weights: form.weights, employment_type_id: form.employment_type_id || null, function_title: (form.function_title ?? '').trim() || null }
+      const payload = { name: form.name.trim(), weights: form.weights, contract_types: form.contract_types ?? [], function_title: (form.function_title ?? '').trim() || null }
       const res = await api.patch(`/settings/match-weight-templates/${tpl.id}`, payload)
       const updated = unwrap(res)
       setTemplates(p => p.map(x => x.id === tpl.id ? updated : x))
@@ -155,13 +168,59 @@ export default function MatchTemplatesSettings() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {DIMENSIONS.map(d => (
         <div key={d}>
-          <div style={{ fontSize: 12, color: 'var(--text)', marginBottom: 4 }}>{dimLabel(d)}</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+            <span style={{ fontSize: 12, color: 'var(--text)' }}>{dimLabel(d)}</span>
+            {/* Danny 22-07: concrete 1..5 weight + its % share, next to the word labels. */}
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>
+              {weights?.[d] ?? 3}/5 · {pctShare(weights?.[d] ?? 3, weights)}%
+            </span>
+          </div>
           <Slider value={(weights?.[d] ?? 3) - 1} max={4} step={1}
             onChange={i => onChangeDim(d, i + 1)}
             labels={[t('vacancies:matching.less'), t('vacancies:matching.balanced'), t('vacancies:matching.very')]}
             ariaLabel={dimLabel(d)} />
         </div>
       ))}
+    </div>
+  )
+
+  // Soort dienstverband — searchable MULTI-select (Danny 22-07), fed from the tenant
+  // contract-type lookup; optional, several values may be checked. Shared by the
+  // create card and every edit card (selected/onToggle come from the caller's form).
+  const renderContractTypesField = (selected, onToggle) => (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+        <label style={labelStyle}>{t('matchTemplatesSettings.employmentTypeLabel')}</label>
+        <SearchSelect triggerLabel={t('matchTemplatesSettings.employmentTypeAdd')}
+          options={contractTypeOptions} selected={selected ?? []} onToggle={onToggle} width={240} />
+      </div>
+      {(selected ?? []).length > 0 ? (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+          {selected.map(v => {
+            const label = contractTypeOptions.find(o => o.value === v)?.label ?? v
+            return (
+              <span key={v} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '3px 8px',
+                borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
+                {label}
+                <button type="button" onClick={() => onToggle(v)} aria-label={t('common.remove')}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
+              </span>
+            )
+          })}
+        </div>
+      ) : (
+        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('matchTemplatesSettings.employmentTypeNone')}</span>
+      )}
+    </div>
+  )
+
+  // Functie — searchable single-select (Danny 22-07), fed from the candidate function
+  // lookup; the tenant free-entry toggle decides whether a new value can be typed in.
+  const renderFunctionField = (value, onChange) => (
+    <div>
+      <label style={labelStyle}>{t('matchTemplatesSettings.functionTitleLabel')}</label>
+      <CreatableSelect value={value || null} onChange={onChange} options={functionOptions}
+        allowCreate={allowFreeEntry} placeholder={t('matchTemplatesSettings.functionTitlePlaceholder')} />
     </div>
   )
 
@@ -223,21 +282,8 @@ export default function MatchTemplatesSettings() {
 
                 {/* Optional default-assignment keys — auto-default a NEW vacancy of this
                     type/function onto this template when exactly one template matches. */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                  <div>
-                    <label style={labelStyle}>{t('matchTemplatesSettings.employmentTypeLabel')}</label>
-                    <select value={form.employment_type_id ?? ''} onChange={e => setEF(tpl.id, 'employment_type_id', e.target.value)}
-                      style={{ ...inputStyle, cursor: 'pointer' }}>
-                      <option value="">{t('matchTemplatesSettings.employmentTypeNone')}</option>
-                      {employmentTypes.map(et => <option key={et.id} value={et.id}>{et.name ?? et.label}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label style={labelStyle}>{t('matchTemplatesSettings.functionTitleLabel')}</label>
-                    <input value={form.function_title ?? ''} onChange={e => setEF(tpl.id, 'function_title', e.target.value)}
-                      placeholder={t('matchTemplatesSettings.functionTitlePlaceholder')} style={inputStyle} />
-                  </div>
-                </div>
+                {renderContractTypesField(form.contract_types, v => setEF(tpl.id, 'contract_types', toggleInArray(form.contract_types, v)))}
+                {renderFunctionField(form.function_title, v => setEF(tpl.id, 'function_title', v))}
                 <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('matchTemplatesSettings.defaultAssignmentHint')}</p>
 
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
@@ -278,21 +324,8 @@ export default function MatchTemplatesSettings() {
 
             {renderWeightSliders(newForm.weights, (d, val) => setNewForm(p => ({ ...p, weights: { ...p.weights, [d]: val } })))}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <div>
-                <label style={labelStyle}>{t('matchTemplatesSettings.employmentTypeLabel')}</label>
-                <select value={newForm.employment_type_id} onChange={e => setNewForm(p => ({ ...p, employment_type_id: e.target.value }))}
-                  style={{ ...inputStyle, cursor: 'pointer' }}>
-                  <option value="">{t('matchTemplatesSettings.employmentTypeNone')}</option>
-                  {employmentTypes.map(et => <option key={et.id} value={et.id}>{et.name ?? et.label}</option>)}
-                </select>
-              </div>
-              <div>
-                <label style={labelStyle}>{t('matchTemplatesSettings.functionTitleLabel')}</label>
-                <input value={newForm.function_title} onChange={e => setNewForm(p => ({ ...p, function_title: e.target.value }))}
-                  placeholder={t('matchTemplatesSettings.functionTitlePlaceholder')} style={inputStyle} />
-              </div>
-            </div>
+            {renderContractTypesField(newForm.contract_types, v => setNewForm(p => ({ ...p, contract_types: toggleInArray(p.contract_types, v) })))}
+            {renderFunctionField(newForm.function_title, v => setNewForm(p => ({ ...p, function_title: v })))}
             <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('matchTemplatesSettings.defaultAssignmentHint')}</p>
 
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>

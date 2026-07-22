@@ -129,10 +129,26 @@ describe('MatchingTab · template pick → weights preview + PATCH payload', () 
     const user = userEvent.setup()
     await user.click(screen.getByText('matching.save'))
 
-    const [, body] = mockPatch.mock.calls.at(-1) as [string, Record<string, unknown>]
-    expect(body).toHaveProperty('match_weights')
-    expect(body).not.toHaveProperty('match_weight_template_id')
+    const [url, body] = mockPatch.mock.calls.at(-1) as [string, Record<string, unknown>]
+    // The exact request Danny asked to be proven: PATCH /vacancies/{id} with the full
+    // dragged weight set (not just "a" property), and nothing else riding along.
+    expect(url).toBe('/vacancies/v1')
+    expect(body).toEqual({ match_weights: { ...TEMPLATE_WEIGHTS, location: 4 } })
 
     await waitFor(() => expect(screen.queryByText(/matching.basedOn/)).toBeNull())
+  })
+
+  // Danny 22-07: concrete number + % instead of only the vague word label.
+  it('shows the numeric weight + its % share of the total next to each dimension', async () => {
+    mockGet.mockResolvedValue({ data: { data: rawDetail({
+      match_weights: { qualifications: 5, technical_fit: 3, soft_skills: 3, cultural_alignment: 3, career_aspirations: 3, location: 3 },
+    }) } })
+    render(<Harness />)
+    await waitFor(() => screen.getByText('matching.profile'))
+
+    // Sum = 5+3+3+3+3+3 = 20; qualifications' share = 5/20 = 25%.
+    expect(screen.getByText('5/5 · 25%')).toBeInTheDocument()
+    // Each of the other five dimensions (weight 3) shares 3/20 = 15%.
+    expect(screen.getAllByText('3/5 · 15%')).toHaveLength(5)
   })
 })

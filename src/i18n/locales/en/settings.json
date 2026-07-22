@@ -142,6 +142,7 @@
     "outreach": "Call lists",
     "match_statuses": "Statuses",
     "contract_types": "Contract types",
+    "match_rates": "Conversion factor",
     "outreach_statuses": "Statuses",
     "task_types": "Activity types",
     "task_priorities": "Priorities",
@@ -580,6 +581,12 @@
     "contractTypeAdd": "Add contract type",
     "contractTypeDurationLabel": "Duration (days)"
   },
+  "matchRates": {
+    "title": "Purchase→sale conversion factor",
+    "subtitle": "Falls back to purchase rate × this factor when no price agreement matches the function/CAO/scale/step.",
+    "placeholder": "E.g. 1.35",
+    "saveFailed": "Saving failed — the value was reverted."
+  },
   "outreach": {
     "statusTitle": "Statuses",
     "statusSubtitle": "Manage the call-list statuses (status + colour).",
@@ -688,12 +695,6 @@
       "always": "Always",
       "alwaysDesc": "Every placement requires approval first.",
       "saveFailed": "Saving failed — your choice was reverted."
-    },
-    "conversionFactor": {
-      "title": "Purchase→sale conversion factor",
-      "subtitle": "Falls back to purchase rate × this factor when no price agreement matches the function/CAO/scale/step.",
-      "placeholder": "E.g. 1.35",
-      "saveFailed": "Saving failed — the value was reverted."
     }
   },
   "matchTemplatesSettings": {
@@ -706,6 +707,7 @@
     "linkedCount_one": "{{count}} linked vacancy",
     "linkedCount_other": "{{count}} linked vacancies",
     "employmentTypeLabel": "Employment type (optional)",
+    "employmentTypeAdd": "Add employment type",
     "employmentTypeNone": "— none —",
     "functionTitleLabel": "Function (optional)",
     "functionTitlePlaceholder": "E.g. Registered nurse",

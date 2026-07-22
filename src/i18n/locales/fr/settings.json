@@ -145,6 +145,7 @@
     "outreach": "Listes d'appels",
     "match_statuses": "Statuts",
     "contract_types": "Types de contrat",
+    "match_rates": "Facteur de conversion",
     "outreach_statuses": "Statuts",
     "task_types": "Types d'activité",
     "task_priorities": "Priorités",
@@ -1445,6 +1446,12 @@
     "contractTypeAdd": "Ajouter un type de contrat",
     "contractTypeDurationLabel": "Durée (jours)"
   },
+  "matchRates": {
+    "title": "Facteur de conversion achat→vente",
+    "subtitle": "Retombe sur le tarif d'achat × ce facteur lorsqu'aucun accord tarifaire ne correspond à la fonction/convention collective/échelon/niveau.",
+    "placeholder": "Ex. 1,35",
+    "saveFailed": "Échec de l’enregistrement — la valeur a été rétablie."
+  },
   "outreach": {
     "statusTitle": "Statuts",
     "statusSubtitle": "Gérer les statuts des listes d'appels (statut + couleur).",
@@ -1535,12 +1542,6 @@
       "always": "Toujours",
       "alwaysDesc": "Chaque placement nécessite d’abord une approbation.",
       "saveFailed": "Échec de l’enregistrement — le choix a été rétabli."
-    },
-    "conversionFactor": {
-      "title": "Facteur de conversion achat→vente",
-      "subtitle": "Retombe sur le tarif d'achat × ce facteur lorsqu'aucun accord tarifaire ne correspond à la fonction/convention collective/échelon/niveau.",
-      "placeholder": "Ex. 1,35",
-      "saveFailed": "Échec de l’enregistrement — la valeur a été rétablie."
     }
   },
   "matchTemplatesSettings": {
@@ -1553,6 +1554,7 @@
     "linkedCount_one": "{{count}} poste lié",
     "linkedCount_other": "{{count}} postes liés",
     "employmentTypeLabel": "Type de contrat (optionnel)",
+    "employmentTypeAdd": "Ajouter un type de contrat",
     "employmentTypeNone": "— aucun —",
     "functionTitleLabel": "Fonction (optionnel)",
     "functionTitlePlaceholder": "Ex. Infirmier(ère)",

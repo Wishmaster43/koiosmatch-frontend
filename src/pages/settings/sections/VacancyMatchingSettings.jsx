@@ -26,20 +26,16 @@ export default function VacancyMatchingSettings() {
   const [approval, setApproval] = useState('bij_afwijking') // backend default
   const [saving, setSaving] = useState(false)
   const [saved, setSaved]   = useState(false)
-  // Purchase→sale conversion factor (e.g. 1.35) — the rate-proposal fallback when no
-  // price agreement covers a function/CAO/schaal/trede combo. Nullable: '' = null.
-  const [conversionFactor, setConversionFactor] = useState('')
-  const [savedFactor, setSavedFactor] = useState('') // last server-confirmed value, for revert-on-failure
 
-  // Load the saved strictness enum → slider index + approval mode + conversion factor.
+  // Load the saved strictness enum → slider index + approval mode. The purchase→sale
+  // conversion factor moved to Settings → Matches → MatchRatesSettings (Danny 22-07:
+  // it's a match concept, not a vacancy one) — this screen no longer reads/writes it.
   useEffect(() => {
     api.get('/settings/matching')
       .then(r => {
         const d = (unwrap(r)) ?? {}
         const i = LEVELS.indexOf(d.strictness); if (i >= 0) setLevel(i)
         if (MODES.some(m => m.value === d.approval_mode)) setApproval(d.approval_mode)
-        const cf = d.conversion_factor != null ? String(d.conversion_factor) : ''
-        setConversionFactor(cf); setSavedFactor(cf)
       })
       .catch(() => {})
   }, [])
@@ -59,17 +55,10 @@ export default function VacancyMatchingSettings() {
     catch { setApproval(prev); notifyError(t('matching.approval.saveFailed')) }
   }
 
-  // Conversion factor saves on blur (partial PUT) — optimistic, revert + toast on
-  // failure. An empty input persists null (no factor configured); a non-numeric or
-  // non-positive value is rejected locally and reverted, no request sent.
-  const saveConversionFactor = async () => {
-    const trimmed = conversionFactor.trim()
-    if (trimmed === savedFactor) return
-    const num = trimmed === '' ? null : Number(trimmed)
-    if (trimmed !== '' && (!isFinite(num) || num <= 0)) { setConversionFactor(savedFactor); return }
-    try { await api.put('/settings/matching', { conversion_factor: num }); setSavedFactor(trimmed) }
-    catch { setConversionFactor(savedFactor); notifyError(t('matching.conversionFactor.saveFailed')) }
-  }
+  // Danny 22-07: concrete number + % alongside the word label — position on the
+  // 3-step scale (0/50/100%), since this is a single global enum, not a weighted
+  // sum across siblings like the per-vacancy dimension weights (MatchingTab).
+  const levelPct = Math.round((level / (LEVELS.length - 1)) * 100)
 
   return (
     <div style={{ maxWidth: 560 }}>
@@ -87,6 +76,11 @@ export default function VacancyMatchingSettings() {
       </div>
 
       <div style={{ marginTop: 18 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>
+          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
+            {level + 1}/{LEVELS.length} · {levelPct}%
+          </span>
+        </div>
         <Slider value={level} max={2} step={1} onChange={setLevel}
           labels={[t('matching.lenient'), t('matching.balanced'), t('matching.strict')]} ariaLabel={t('matching.title')} />
       </div>
@@ -119,22 +113,6 @@ export default function VacancyMatchingSettings() {
             )
           })}
         </div>
-      </div>
-
-      {/* Purchase→sale conversion factor — the rate-proposal fallback (source:
-          conversion_factor) when a placement's function/CAO/schaal/trede has no
-          matching price agreement on the customer. Nullable — empty clears it. */}
-      <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
-        <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('matching.conversionFactor.title')}</h3>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('matching.conversionFactor.subtitle')}</p>
-        <input type="number" step="0.01" min="0" value={conversionFactor}
-          onChange={e => setConversionFactor(e.target.value)}
-          onBlur={saveConversionFactor}
-          placeholder={t('matching.conversionFactor.placeholder')}
-          aria-label={t('matching.conversionFactor.title')}
-          style={{ marginTop: 10, width: 140, height: 34, padding: '0 10px', fontSize: 13,
-            fontFamily: 'JetBrains Mono, monospace', border: '1px solid var(--border)', borderRadius: 8,
-            outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }} />
       </div>
     </div>
   )

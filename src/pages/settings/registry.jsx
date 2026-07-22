@@ -18,7 +18,7 @@
 import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays, Car,
   ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Hash, Key, LayoutGrid,
-  ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Megaphone, Package, Palette, Phone, Scale, Shield, SlidersHorizontal, Sparkles, Star,
+  ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Megaphone, Package, Palette, Percent, Phone, Scale, Shield, SlidersHorizontal, Sparkles, Star,
   Boxes, Store, Tags, Target, Upload, UserCheck, Users, Webhook, XCircle,
 } from 'lucide-react'
 import CustomFieldsSettings from './sections/CustomFieldsSettings'
@@ -47,6 +47,7 @@ import ContactFunctionsSettings from './sections/ContactFunctionsSettings'
 import { VacancyStatusSettings, VacancyPhaseSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings, VacancyApplicationDefaultsSettings } from './sections/VacancySettings'
 import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
 import MatchTemplatesSettings from './sections/MatchTemplatesSettings'
+import MatchRatesSettings from './sections/MatchRatesSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
 import { MatchStatusSettings, ContractTypesSettings } from './sections/MatchSettings'
 import { AppointmentTypeSettings } from './sections/AppointmentTypeSettings'
@@ -248,6 +249,9 @@ export const NAV_GROUPS = [
       { id: 'contract_types', icon: FileText, component: ContractTypesSettings },
       { id: 'appointment_types', icon: CalendarCheck, component: AppointmentTypeSettings },
       { id: 'appointment_locations', icon: MapPin, component: AppointmentLocationSettings },
+      // Purchase→sale conversion factor (Danny 22-07) — moved here from Vacancies →
+      // Matching: it's a match/placement rate concept, not a per-vacancy one.
+      { id: 'match_rates', icon: Percent, component: MatchRatesSettings },
       { id: 'match_display', icon: Palette, schema: matchDisplay },
     ],
   },

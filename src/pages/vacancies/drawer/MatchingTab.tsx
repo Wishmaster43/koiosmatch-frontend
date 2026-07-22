@@ -18,6 +18,13 @@ const DIMENSIONS = ['qualifications', 'technical_fit', 'soft_skills', 'cultural_
 const buildWeights = (w: Record<string, unknown> | undefined): Record<string, number> =>
   Object.fromEntries(DIMENSIONS.map(d => [d, Number((w ?? {})[d]) || 3]))
 
+// Danny 22-07: concrete number + % share (of the sum of all six weights) instead of
+// only a vague word label — this dimension's weight relative to the vacancy's total.
+const pctShare = (weight: number, all: Record<string, number>): number => {
+  const sum = DIMENSIONS.reduce((s, k) => s + (all[k] ?? 3), 0) || 1
+  return Math.round((weight / sum) * 100)
+}
+
 /**
  * MatchingTab — the vacancy's per-dimension importance for the AI matcher: an
  * optional TEMPLATE picker (MATCH-TEMPLATE-1) above one slider per dimension (1..5).
@@ -31,7 +38,7 @@ const buildWeights = (w: Record<string, unknown> | undefined): Record<string, nu
  * way the response's resolved weights + provenance are the source of truth
  * (see useVacancyRecord.updateVacancy).
  */
-export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void }) {
+export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void | Promise<boolean> }) {
   const { t } = useTranslation('vacancies')
   const { templates, loading: templatesLoading, error: templatesError } = useMatchWeightTemplates()
 
@@ -43,7 +50,13 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
 
   const [saved, setSaved] = useState(false)
   const setW = (d: string, val: number) => setWeights(p => ({ ...p, [d]: val }))
-  const save = () => { onUpdate?.(v.id, { matchWeights: weights }); setSaved(true); setTimeout(() => setSaved(false), 1500) }
+  // Gate "Saved ✓" on the real PATCH result — a failing save (403/422/network) must not
+  // read as success (Danny 22-07). onUpdate returning void (older callers) counts as success.
+  const save = () => {
+    Promise.resolve(onUpdate?.(v.id, { matchWeights: weights })).then(ok => {
+      if (ok !== false) { setSaved(true); setTimeout(() => setSaved(false), 1500) }
+    })
+  }
 
   // Assigning a template previews its weights immediately (optimistic); the PATCH
   // response reconciles both the weights and the provenance via the effect above.
@@ -102,7 +115,14 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
 
       {DIMENSIONS.map(d => (
         <div key={d}>
-          <div style={{ fontSize: 13, color: 'var(--text)', marginBottom: 6 }}>{t(`matching.dim.${d}`)}</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+            <span style={{ fontSize: 13, color: 'var(--text)' }}>{t(`matching.dim.${d}`)}</span>
+            {/* Danny 22-07: the concrete 1..5 weight + its % share of the total,
+                next to (not instead of) the word labels kept below the slider. */}
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
+              {weights[d] ?? 3}/5 · {pctShare(weights[d] ?? 3, weights)}%
+            </span>
+          </div>
           {/* Slider is 0-based (0..4); stored weight is 1..5. */}
           <Slider value={(weights[d] ?? 3) - 1} max={4} step={1} onChange={(i: number) => setW(d, i + 1)}
             labels={[t('matching.less'), t('matching.balanced'), t('matching.very')]} ariaLabel={t(`matching.dim.${d}`)} />

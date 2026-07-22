@@ -49,7 +49,7 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
   const handleCreated = (v: Vacancy) => { setVacancies(prev => [v, ...prev]); setTotal(prev => prev + 1); selectVacancy(v) }
 
   // Header/picker edits: optimistic locally (list + selected + detail), then PATCH.
-  const updateVacancy = (id: Id | undefined, patch: Record<string, unknown>) => {
+  const updateVacancy = (id: Id | undefined, patch: Record<string, unknown>): Promise<boolean> => {
     const local: Record<string, unknown> = { ...patch }
     if ('statusValue' in patch) { const m = statusMeta(patch.statusValue as string); local.statusLabel = m.label; local.statusColor = m.color }
     if ('ownerId' in patch) { const u = users.find(x => x.id === patch.ownerId); local.owner = { id: patch.ownerId, name: u?.name ?? '', initials: initialsOf(u?.name ?? ''), color: null } }
@@ -60,19 +60,22 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
     setDetail(prev   => (prev && prev.id === id ? ({ ...prev, ...local } as VacancyDetail) : prev))
 
     const body = buildVacancyPatch(patch)
-    if (!Object.keys(body).length) return
+    if (!Object.keys(body).length) return Promise.resolve(true)
     const request = api.patch(`/vacancies/${id}`, body)
     // MATCH-TEMPLATE-1: the server computes the actual match_weights snapshot (and
     // may clear/keep the template provenance), so re-sync those two fields from the
-    // authoritative response instead of trusting the optimistic local patch.
+    // authoritative response instead of trusting the optimistic local patch. Resolve
+    // true/false so a caller (MatchingTab's Save) can gate its "Saved ✓" on the REAL
+    // PATCH result instead of firing it optimistically (Danny 22-07: a silently failing
+    // save must never read as success — §3 no fake affordance). Errors still toast here.
     if ('matchWeights' in patch || 'matchWeightTemplateId' in patch) {
-      request.then(r => {
+      return request.then(r => {
         const updated = mapVacancyDetail(unwrap(r))
         setDetail(prev => (prev && prev.id === id ? { ...prev, matchWeights: updated.matchWeights, matchWeightTemplateId: updated.matchWeightTemplateId } : prev))
-      }).catch(() => notifyError(t('common:actionFailed')))
-    } else {
-      request.catch(() => notifyError(t('common:actionFailed')))
+        return true
+      }).catch(() => { notifyError(t('common:actionFailed')); return false })
     }
+    return request.then(() => true).catch(() => { notifyError(t('common:actionFailed')); return false })
   }
 
   // VAC-RESTORE-1 (BE 1ac4e14): bring an archived vacancy back; reconcile all three

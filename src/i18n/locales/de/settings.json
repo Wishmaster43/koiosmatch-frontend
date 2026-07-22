@@ -145,6 +145,7 @@
     "outreach": "Anruflisten",
     "match_statuses": "Status",
     "contract_types": "Vertragsarten",
+    "match_rates": "Umrechnungsfaktor",
     "outreach_statuses": "Status",
     "task_types": "Aktivitätstypen",
     "task_priorities": "Prioritäten",
@@ -1445,6 +1446,12 @@
     "contractTypeAdd": "Vertragsart hinzufügen",
     "contractTypeDurationLabel": "Laufzeit (Tage)"
   },
+  "matchRates": {
+    "title": "Umrechnungsfaktor Einkauf→Verkauf",
+    "subtitle": "Fällt auf Einkaufstarif × diesen Faktor zurück, wenn keine Preisvereinbarung zu Funktion/Tarifvertrag/Gruppe/Stufe passt.",
+    "placeholder": "Z. B. 1,35",
+    "saveFailed": "Speichern fehlgeschlagen — der Wert wurde zurückgesetzt."
+  },
   "outreach": {
     "statusTitle": "Status",
     "statusSubtitle": "Verwalte die Anruflisten-Status (Status + Farbe).",
@@ -1535,12 +1542,6 @@
       "always": "Immer",
       "alwaysDesc": "Jede Platzierung braucht zuerst eine Genehmigung.",
       "saveFailed": "Speichern fehlgeschlagen — die Auswahl wurde zurückgesetzt."
-    },
-    "conversionFactor": {
-      "title": "Umrechnungsfaktor Einkauf→Verkauf",
-      "subtitle": "Fällt auf Einkaufstarif × diesen Faktor zurück, wenn keine Preisvereinbarung zu Funktion/Tarifvertrag/Gruppe/Stufe passt.",
-      "placeholder": "Z. B. 1,35",
-      "saveFailed": "Speichern fehlgeschlagen — der Wert wurde zurückgesetzt."
     }
   },
   "matchTemplatesSettings": {
@@ -1553,6 +1554,7 @@
     "linkedCount_one": "{{count}} verknüpfte Stelle",
     "linkedCount_other": "{{count}} verknüpfte Stellen",
     "employmentTypeLabel": "Anstellungsart (optional)",
+    "employmentTypeAdd": "Anstellungsart hinzufügen",
     "employmentTypeNone": "— keine —",
     "functionTitleLabel": "Funktion (optional)",
     "functionTitlePlaceholder": "Z. B. Krankenpfleger",

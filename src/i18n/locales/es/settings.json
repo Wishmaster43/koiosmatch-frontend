@@ -145,6 +145,7 @@
     "outreach": "Listas de llamadas",
     "match_statuses": "Estados",
     "contract_types": "Tipos de contrato",
+    "match_rates": "Factor de conversión",
     "outreach_statuses": "Estados",
     "task_types": "Tipos de actividad",
     "task_priorities": "Prioridades",
@@ -1445,6 +1446,12 @@
     "contractTypeAdd": "Añadir tipo de contrato",
     "contractTypeDurationLabel": "Duración (días)"
   },
+  "matchRates": {
+    "title": "Factor de conversión compra→venta",
+    "subtitle": "Recurre a la tarifa de compra × este factor cuando ningún acuerdo de tarifas coincide con la función/convenio colectivo/escala/nivel.",
+    "placeholder": "P. ej. 1,35",
+    "saveFailed": "Error al guardar — se restableció el valor."
+  },
   "outreach": {
     "statusTitle": "Estados",
     "statusSubtitle": "Gestiona los estados de listas de llamadas (estado + color).",
@@ -1535,12 +1542,6 @@
       "always": "Siempre",
       "alwaysDesc": "Cada colocación necesita primero aprobación.",
       "saveFailed": "Error al guardar — se restableció la selección."
-    },
-    "conversionFactor": {
-      "title": "Factor de conversión compra→venta",
-      "subtitle": "Recurre a la tarifa de compra × este factor cuando ningún acuerdo de tarifas coincide con la función/convenio colectivo/escala/nivel.",
-      "placeholder": "P. ej. 1,35",
-      "saveFailed": "Error al guardar — se restableció el valor."
     }
   },
   "matchTemplatesSettings": {
@@ -1553,6 +1554,7 @@
     "linkedCount_one": "{{count}} vacante vinculada",
     "linkedCount_other": "{{count}} vacantes vinculadas",
     "employmentTypeLabel": "Tipo de contrato (opcional)",
+    "employmentTypeAdd": "Añadir tipo de contrato",
     "employmentTypeNone": "— ninguno —",
     "functionTitleLabel": "Función (opcional)",
     "functionTitlePlaceholder": "P. ej. Enfermero/a",
