@@ -61,6 +61,7 @@ import wait              from './wait'
 import ai_match          from './ai_match'
 import condition         from './condition'
 import facebook_send     from './facebook_send'
+import pdok_geocode      from './pdok_geocode'
 import type { ModuleDef } from './types'
 
 /**
@@ -138,6 +139,7 @@ const MODULES: ModuleDef[] = [
   ai_match,
   condition,
   facebook_send,
+  pdok_geocode,
 ]
 
 export const MODULE_META = Object.fromEntries(

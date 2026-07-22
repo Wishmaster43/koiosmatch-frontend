@@ -102,6 +102,9 @@ export interface RunRow {
   trigger_type?: string
   triggered_by?: string
   user_name?: string
+  // WF-LOG-WHO-1: the run's subject candidate (id + display ref + name), when the
+  // trigger context carried one (e.g. the PDOK geocode scenario / event runs).
+  candidate?: { id?: string; reference_number?: string | null; name?: string | null } | null
   error_message?: string
   step_results?: RunStep[]
   steps?: RunStep[]

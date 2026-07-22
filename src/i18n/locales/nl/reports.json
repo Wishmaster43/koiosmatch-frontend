@@ -351,6 +351,7 @@
     "drawer": {
       "startedColon": "Gestart:",
       "candidates": "Kandidaten",
+      "candidate": "Kandidaat",
       "duration": "Duur",
       "timeline": "Tijdlijn",
       "started": "Gestart",

@@ -351,6 +351,7 @@
     "drawer": {
       "startedColon": "Started:",
       "candidates": "Candidates",
+      "candidate": "Candidate",
       "duration": "Duration",
       "timeline": "Timeline",
       "started": "Started",

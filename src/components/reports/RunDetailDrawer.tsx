@@ -137,6 +137,10 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
               { label: t('runs.drawer.finished'),  value: formatDT(shown.finished_at ?? shown.completed_at) },
               { label: t('runs.drawer.trigger'),   value: shown.trigger ?? shown.trigger_type },
               { label: t('runs.drawer.createdBy'), value: shown.triggered_by ?? shown.user_name },
+              // WF-LOG-WHO-1 (Danny 22-07): the run's subject candidate — name + display ref.
+              { label: t('runs.drawer.candidate'), value: shown.candidate
+                  ? `${shown.candidate.name || '—'}${shown.candidate.reference_number ? ` (${shown.candidate.reference_number})` : ''}`
+                  : null },
             ].filter(r => r.value && r.value !== '—').map(r => (
               <div key={r.label} style={{ display: 'flex', gap: 8, padding: '7px 0',
                                           borderBottom: '1px solid var(--hover-bg)' }}>

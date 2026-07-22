@@ -111,6 +111,9 @@ export default function LogsPanel({ workflowId, liveRun, onClose }: { workflowId
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
                       {t('runs.drawer.candidates')}: {run.candidates_count ?? run.candidates ?? '—'} · {t('runs.drawer.duration')}: {formatDuration(run.duration_ms ?? run.duration)}
+                      {/* WF-LOG-WHO-1 (Danny 22-07): who requested it + which candidate it ran for. */}
+                      {run.triggered_by ? ` · ${run.triggered_by}` : ''}
+                      {run.candidate?.name ? ` · ${run.candidate.name}${run.candidate.reference_number ? ` (${run.candidate.reference_number})` : ''}` : ''}
                     </div>
                     {run.error_message && (
                       <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 2 }}>{run.error_message}</div>
