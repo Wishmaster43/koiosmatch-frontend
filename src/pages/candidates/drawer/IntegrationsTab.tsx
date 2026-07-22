@@ -115,7 +115,7 @@ export default function IntegrationsTab({ c, onUpdate }: {
   const hasPermission = auth?.hasPermission ?? (() => false)
   const apps = useApps()
   const isAppEnabled = apps?.isAppEnabled ?? (() => false)
-  const showHelloflex = hasModule('hf') || isAppEnabled('helloflex')
+  const showHelloflex = hasModule('hf') || isAppEnabled('hf')
   const showShiftmanager = hasModule('sm') || isAppEnabled('shiftmanager')
 
   // CAND-PDOK-GEOCODE-FE-1: manual "Bijwerken" trigger for the async geocode

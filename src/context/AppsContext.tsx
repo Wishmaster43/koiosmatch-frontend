@@ -51,7 +51,10 @@ export const AVAILABLE_APPS: AppDef[] = [
     monthly:     true,
   },
   {
-    id:          'helloflex',
+    // APPS-HF-SLUG-1 (Danny 23-07 "aanzetten gaat fout"): the connector id MUST be
+    // 'hf' — the backend allow-list (ModuleSettingController::VALID_APPS) and the
+    // module flag both use the §10 hf-slug; 'helloflex' 422'd on every toggle.
+    id:          'hf',
     label:       'HelloFlex',
     description: 'Backoffice-koppeling met HelloFlex (verloning, facturatie, contracten).',
     icon:        '🟡',

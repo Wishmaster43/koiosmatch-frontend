@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Check } from 'lucide-react'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import { useAuth } from '@/context/AuthContext'
 import { useApps, AVAILABLE_APPS } from '@/context/AppsContext'
 import { canAccessPage } from '@/lib/access'
@@ -28,7 +30,11 @@ export default function AppsSettings() {
       await api.put('/settings/apps', { enabled: newEnabled })
       setApps(newEnabled)
       setSaved(appId); setTimeout(() => setSaved(null), 2000)
-    } catch { /* noop */ }
+    } catch (err) {
+      // Surface the real reason (422 invalid slug / 403 no super-admin/package) —
+      // the silent noop hid the hf-slug 422 entirely (Danny 23-07).
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    }
     setSaving(null)
   }
 

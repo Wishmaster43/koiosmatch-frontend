@@ -172,7 +172,9 @@ describe('IntegrationsTab · HelloFlex card visibility (module OR app)', () => {
   })
 
   it('shows via the app/koppeling flag alone', () => {
-    mockUseApps.mockReturnValue({ isAppEnabled: (a: string) => a === 'helloflex' })
+    // APPS-HF-SLUG-1: the connector flag is the backend's 'hf' slug (the sync
+    // endpoint's { system: 'helloflex' } below is a different, unchanged contract).
+    mockUseApps.mockReturnValue({ isAppEnabled: (a: string) => a === 'hf' })
     render(<IntegrationsTab c={baseCandidate()} />)
     expect(screen.getByAltText('integrations.helloflex.alt')).toBeInTheDocument()
   })
