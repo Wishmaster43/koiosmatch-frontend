@@ -11,8 +11,9 @@ import type { Id, LookupOption } from '@/types/common'
 interface BulkUser { id: Id; name: string }
 
 // The bulk-mutation props CandidatesBulkBar needs — passed through as one group
-// (composition over a 15-prop flat toolbar interface, §3).
-interface BulkBarProps {
+// (composition over a 15-prop flat toolbar interface, §3). Exported so
+// CandidatesListPanel can type its own `bulkBar` pass-through prop.
+export interface BulkBarProps {
   onAddToPool: (pool: CandidatePool) => void
   onRemoveFromPool: (pool: CandidatePool) => void
   onSetOwner: (user: BulkUser) => void

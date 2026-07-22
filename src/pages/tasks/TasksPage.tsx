@@ -2,17 +2,11 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutList, Kanban, Archive, Plus } from 'lucide-react'
-import api, { unwrap, unwrapList } from '@/lib/api'
-import { notifyError, notifySuccess } from '@/lib/notify'
-import { isAbortError } from '@/lib/mocks'
-import { initialsOf } from '@/lib/initials'
 import { useUsers } from '@/lib/queries'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { TaskLookupsProvider, useTaskLookups } from '@/context/TaskLookupsContext'
-import type { TaskLookupItem } from '@/context/TaskLookupsContext'
 import { useAuth } from '@/context/AuthContext'
 import InsightsRow from '@/components/insights/InsightsRow'
-import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
@@ -24,30 +18,25 @@ import TasksBoard from './TasksBoard'
 import type { BoardColumn } from './TasksBoard'
 import TaskDrawer from './TaskDrawer'
 import AddTaskModal from './AddTaskModal'
-import { mapTask, mapTaskDetail, isTaskOverdue } from './data/mapTask'
+import { mapTask } from './data/mapTask'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { useTaskFilters } from './hooks/useTaskFilters'
+import { useTasksData } from './hooks/useTasksData'
+import { useTaskOptions } from './hooks/useTaskOptions'
+import { useTaskDrawerActions } from './hooks/useTaskDrawerActions'
+import { useTaskBulkActions } from './hooks/useTaskBulkActions'
+import { buildTaskFilterGroups } from './data/taskFilterGroups'
+import { buildTaskInsights } from './data/taskInsights'
 import { BTN_H } from '@/config/buttonMetrics'
-import type { Task, TaskDetail, ApiTask } from '@/types/task'
+import type { Task, ApiTask } from '@/types/task'
 import type { Id } from '@/types/common'
 
-interface Aggregate { name: string; key: string; color?: string; value: number }
-interface NewLink { type: string; id: string; label: string }
 interface UserLike { id: Id; name: string; avatar_color?: string | null }
 
-// Donut click → set exactly one filter value (or clear when clicking it again).
-const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
-  const o = d as { key?: string; name?: string; payload?: { key?: string } } | null | undefined
-  const v = o?.key ?? o?.payload?.key ?? o?.name
-  if (v != null) set(p => (p.length === 1 && p[0] === v) ? [] : [v])
-}
 // Right-panel multi-toggle for a filter dimension.
 const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
-
-// Midnight today — the boundary for overdue/due-today comparisons.
-const todayStart = () => new Date(new Date().toDateString())
 
 // Page wrapper: scopes the task lookups (statuses/types/priorities) to this screen.
 export default function TasksPage({ intent }: { intent?: unknown } = {}) {
@@ -71,15 +60,9 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   // Statuses (= board columns), types and priorities come from the tenant lookup.
   const { statuses, types, priorities, statusMeta, typeMeta, priorityMeta, doneStatusValues } = useTaskLookups()
 
-  const [tasks,    setTasks]    = useState<Task[]>([])
-  const [loading,  setLoading]  = useState(true)
-  const [error,    setError]    = useState(false)
   const [view,     setView]     = usePageMemory('tasks.view', 'table')   // 'table' | 'board'
-  const [archivedTasks, setArchivedTasks] = useState<Task[]>([])
   const [page,     setPage]     = usePageMemory('tasks.page', 1)
   const [pageSize, setPageSize] = useState(() => user?.default_per_page ?? 50)
-  const [selected, setSelected] = useState<TaskDetail | null>(null)
-  const [expanded, setExpanded] = useState(false)
   const [addOpen,  setAddOpen]  = useState(false)
   // Bulk-selection (checkboxes) — id-set, cleared on filter/page change.
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
@@ -106,69 +89,22 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   // Board columns = the status lookup, normalised to { key, label, color }.
   const columns = useMemo<BoardColumn[]>(() => statuses.map(s => ({ key: s.value, label: s.label, color: s.color })), [statuses])
 
-  // Resolve a task's status/type/priority label+colour from the lookups (de-hardcoded).
-  const decorate = <T extends Task>(task: T): T => {
-    const sm = statusMeta(String(task.statusKey)), pm = priorityMeta(String(task.priorityKey)), tm = typeMeta(String(task.typeKey))
-    return { ...task,
-      statusLabel: sm.label, statusColor: sm.color, statusIsDone: doneStatusValues.includes(String(task.statusKey)),
-      priorityLabel: pm.label, priorityColor: pm.color,
-      typeLabel: tm.label, typeColor: tm.color } as T
-  }
+  // Data layer: load + decorate tasks/archived tasks (§0.3 split → hook).
+  const { setTasks, archivedTasks, setArchivedTasks, loading, error, all, decorate } = useTasksData({
+    showArchived, statuses, priorities, types, statusMeta, priorityMeta, typeMeta, doneStatusValues,
+  })
 
-  // Load tasks. A 404 means the endpoint isn't built yet → treat as empty.
-  useEffect(() => {
-    const ctrl = new AbortController()
-    setLoading(true); setError(false)
-    api.get('/tasks', { signal: ctrl.signal })
-      .then(res => setTasks(unwrapList<ApiTask>(res).rows.map(mapTask)))
-      .catch(err => {
-        if (isAbortError(err)) return
-        if (err?.response?.status && err.response.status !== 404) setError(true)
-      })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-  }, [])
+  // Donut/filter/KPI derivations from the decorated list (§0.3 split → hook).
+  const { statusData, priorityData, typeData, assigneeOptions, overdue, dueToday, openCount, completedCount } =
+    useTaskOptions({ all, statuses, priorities, types })
 
-  // All tasks decorated with their lookup labels/colours — the basis for KPIs/donuts/view.
-  // Archived (soft-deleted) tasks, fetched lazily while the archived toggle is on
-  // (server-side onlyTrashed via ?archived=1). TaskListResource now delivers
-  // `archived`/`deleted_at` itself (W2 delivered, measured), so mapTask already sets
-  // them correctly; the `archived: true` stamp below stays as a defensive no-op in
-  // case a future BE regression drops the field on this specific fetch.
-  useEffect(() => {
-    if (!showArchived) return
-    const ctrl = new AbortController()
-    api.get('/tasks', { params: { archived: 1 }, signal: ctrl.signal })
-      .then(res => setArchivedTasks(unwrapList<ApiTask>(res).rows.map(mapTask).map(x => ({ ...x, archived: true }))))
-      .catch(err => { if (!isAbortError(err)) setArchivedTasks([]) })
-    return () => ctrl.abort()
-  }, [showArchived])
-
-  const all = useMemo(() => (showArchived ? archivedTasks : tasks).map(decorate), [tasks, archivedTasks, showArchived, statuses, priorities, types]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Donut data (status / priority / type), each with counts ──
-  const donutBy = (list: TaskLookupItem[], keyOf: (x: Task) => string | number): Aggregate[] => list
-    .map(it => ({ name: it.label, key: it.value, color: it.color, value: all.filter(x => keyOf(x) === it.value).length }))
-    .filter(d => d.value > 0)
-  const statusData   = useMemo(() => donutBy(statuses,   x => x.statusKey),   [all, statuses])   // eslint-disable-line react-hooks/exhaustive-deps
-  const priorityData = useMemo(() => donutBy(priorities, x => x.priorityKey), [all, priorities]) // eslint-disable-line react-hooks/exhaustive-deps
-  const typeData     = useMemo(() => donutBy(types,      x => x.typeKey),     [all, types])      // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Assignee filter options (value/label/count) from the loaded rows.
-  const assigneeOptions = useMemo(() => {
-    const m: Record<string, { value: string; label: string; count: number }> = {}
-    all.forEach(x => { const n = x.assignee?.name; if (n) (m[n] ??= { value: n, label: n, count: 0 }).count++ })
-    return Object.values(m)
-  }, [all])
-  const asOptions = (data: Aggregate[]) => data.map(d => ({ value: d.key, label: d.name, count: d.value }))
-
-  // Register the right-panel filters (status + priority + type + assignee).
-  const filterGroups = useMemo(() => [
-    { key: 'status',   label: t('insights.status'),   selected: selectedStatus,   options: asOptions(statusData),   onToggle: tog(setSelectedStatus) },
-    { key: 'priority', label: t('insights.priority'), selected: selectedPriority, options: asOptions(priorityData), onToggle: tog(setSelectedPriority) },
-    { key: 'type',     label: t('insights.type'),     selected: selectedType,     options: asOptions(typeData),     onToggle: tog(setSelectedType) },
-    { key: 'assignee', label: t('cols.assignee'),     selected: selectedAssignee, options: assigneeOptions,         onToggle: tog(setSelectedAssignee) },
-  ], [t, selectedStatus, selectedPriority, selectedType, selectedAssignee, statusData, priorityData, typeData, assigneeOptions])
+  // Register the right-panel filters (status + priority + type + assignee) — pure builder (§0.3 split).
+  const filterGroups = useMemo(() => buildTaskFilterGroups({
+    t, tog,
+    selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority,
+    selectedType, setSelectedType, selectedAssignee, setSelectedAssignee,
+    statusData, priorityData, typeData, assigneeOptions,
+  }), [t, selectedStatus, selectedPriority, selectedType, selectedAssignee, statusData, priorityData, typeData, assigneeOptions])
 
   useEffect(() => {
     registerFilters('tasks-page', filterGroups)
@@ -185,21 +121,12 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
   const filtered  = useMemo(() => filteredAll.slice((page - 1) * pageSize, page * pageSize), [filteredAll, page, pageSize])
 
-  // Open a task: show the light row immediately, then fetch the full detail.
-  const selectedIdRef = useRef<Id | null>(null)
-  const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setExpanded(false) }
-  const selectTask = (task: Task) => {
-    if (selected?.id === task.id) { closeDrawer(); return }
-    selectedIdRef.current = task.id ?? null
-    setSelected(decorate(task) as TaskDetail); setExpanded(false)
-    // W2 delivered (measured: TaskController::show is now Task::withTrashed()->
-    // findOrFail) — this fetch succeeds for an archived task too and replaces the
-    // light row with the full detail; `archived` still pins to the row's own value
-    // (same value either way) so a stale response can never flip it.
-    api.get(`/tasks/${task.id}`)
-      .then(r => { if (selectedIdRef.current === task.id) setSelected(decorate({ ...mapTaskDetail(unwrap(r)), archived: task.archived })) })
-      .catch(() => {})
-  }
+  // Drawer open/close + single-record mutations (§0.3 split → hook).
+  const {
+    selected, setSelected, expanded, setExpanded,
+    closeDrawer, selectTask, handleUpdate, handleMove, handleAddLink, handleRemoveLink, restoreTask,
+  } = useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks, decorate, t })
+
   // Open a task drawer when arriving via a cross-entity link ({ open: id }, candidate → task).
   useOpenFromIntent(intent, (id) => selectTask({ id } as Task))
 
@@ -208,117 +135,20 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   // the old memory-only remember).
   useDrawerUrl({ selectedId: selected?.id, openById: (id) => selectTask({ id } as Task), close: closeDrawer, intent })
 
-  // Edit one or more fields (drawer or kanban drag). `patch` is LOCAL-shaped.
-  const handleUpdate = (id: Id | undefined, patch: Record<string, unknown>) => {
-    setTasks(prev => prev.map(x => x.id === id ? ({ ...x, ...patch } as Task) : x))
-    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...patch } as TaskDetail) : prev))
-    const body: Record<string, unknown> = {
-      status: patch.statusKey, priority: patch.priorityKey, type: patch.typeKey,
-      // TASK-DUE-TIME-1: '' (cleared time input) persists as null, never as "".
-      due_date: patch.due, due_time: patch.dueTime === undefined ? undefined : (patch.dueTime || null),
-      description: patch.description, assignee_id: patch.assigneeId,
-      tags: patch.tags, custom_fields: patch.customFields,
-    }
-    Object.keys(body).forEach(k => { if (body[k] === undefined) delete body[k] })
-    api.patch(`/tasks/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
-  }
-
-  // Kanban move = a status-only update.
-  const handleMove = (id: Id, statusKey: string | number) => handleUpdate(id, { statusKey })
-
-  // Apply the authoritative task detail returned by the link endpoints.
-  const applyDetail = (id: Id | undefined, res: { data: unknown }) => {
-    const detail = decorate(mapTaskDetail(unwrap<ApiTask>(res)))
-    setSelected(prev => (prev && prev.id === id ? detail : prev))
-    setTasks(prev => prev.map(x => x.id === id ? { ...x, links: detail.links, linkLabel: detail.linkLabel } : x))
-  }
-
-  // Add a polymorphic link from the drawer; show it optimistically, then POST and re-sync.
-  const handleAddLink = (id: Id | undefined, link: NewLink) => {
-    setSelected(prev => (prev && prev.id === id ? ({ ...prev, links: [...(prev.links ?? []), { type: link.type, id: link.id, label: link.label }] } as TaskDetail) : prev))
-    api.post(`/tasks/${id}/links`, { type: link.type, id: link.id }).then(r => applyDetail(id, r)).catch(() => notifyError(t('common:actionFailed')))
-  }
-
-  // Remove a link from the drawer; drop it optimistically, then DELETE and re-sync.
-  const handleRemoveLink = (id: Id | undefined, link: { type: string; id: Id | null }) => {
-    setSelected(prev => (prev && prev.id === id
-      ? ({ ...prev, links: (prev.links ?? []).filter(l => !(l.type === link.type && String(l.id) === String(link.id))) } as TaskDetail)
-      : prev))
-    api.delete(`/tasks/${id}/links`, { data: { type: link.type, id: link.id } }).then(r => applyDetail(id, r)).catch(() => notifyError(t('common:actionFailed')))
-  }
-
   // A new task created in the modal — prepend it to the list.
   const handleCreated = (raw: unknown) => { setTasks(prev => [mapTask(raw as ApiTask), ...prev]); setAddOpen(false) }
 
-  // Enkelstuks-sweep: un-archive ONE task via the per-id route (POST /tasks/{id}/restore,
-  // BE D-3 — never the bulk route for one record). The row moves back to the active
-  // list; the drawer closes (the row leaves the archived view, mirroring candidates).
-  const restoreTask = (id: Id | undefined) => {
-    if (id == null) return
-    const row = archivedTasks.find(x => x.id === id)
-    api.post(`/tasks/${id}/restore`)
-      .then(() => {
-        setArchivedTasks(prev => prev.filter(x => x.id !== id))
-        if (row) setTasks(prev => [{ ...row, archived: false, archivedAt: null }, ...prev])
-        closeDrawer()
-        notifySuccess(t('drawer.archivedBanner.restored'))
-      })
-      .catch(() => notifyError(t('drawer.archivedBanner.restoreFailed')))
-  }
+  // Bulk selection + mutations (§0.3 split → hook).
+  const { clearSelection, toggleRow, toggleAll, bulkSetStatus, bulkSetPriority, bulkSetAssignee, bulkArchive } =
+    useTaskBulkActions({ setTasks, setSelected, selected, closeDrawer, selectedIds, setSelectedIds, decorate, users, t })
 
-  // ── Bulk selection + mutations ──
-  const clearSelection = () => setSelectedIds(new Set())
-  const toggleRow = (id: Id) => setSelectedIds(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n })
-  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => {
-    const n = new Set(prev); ids.forEach(i => { if (allSelected) n.delete(i); else n.add(i) }); return n
-  })
-
-  // Optimistic bulk field-set: apply the local patch + PATCH each; `all` re-derives labels.
-  const runBulkPatch = async (localPatch: Record<string, unknown>, apiBody: Record<string, unknown>) => {
-    const ids = [...selectedIds]; if (ids.length === 0) return
-    const idSet = new Set(ids)
-    setTasks(prev => prev.map(x => idSet.has(x.id as Id) ? ({ ...x, ...localPatch } as Task) : x))
-    setSelected(prev => (prev && idSet.has(prev.id as Id) ? decorate({ ...prev, ...localPatch } as TaskDetail) : prev))
-    clearSelection()
-    const results = await Promise.allSettled(ids.map(id => api.patch(`/tasks/${id}`, apiBody)))
-    if (results.some(r => r.status === 'rejected')) notifyError(t('common:actionFailed'))
-    else notifySuccess(t('bulk.done', { count: ids.length }))
-  }
-  const bulkSetStatus   = (statusKey: string)   => runBulkPatch({ statusKey },   { status: statusKey })
-  const bulkSetPriority = (priorityKey: string) => runBulkPatch({ priorityKey }, { priority: priorityKey })
-  const bulkSetAssignee = (userId: string) => {
-    const sel = users.find(u => String(u.id) === String(userId))
-    const assignee = sel ? { name: sel.name, initials: initialsOf(sel.name), color: sel.avatar_color ?? null } : null
-    runBulkPatch({ assigneeId: userId || null, assignee }, { assignee_id: userId || null })
-  }
-  // Optimistic bulk archive (reversible soft-delete) via the dedicated endpoint;
-  // drop the rows + close the drawer if the open task was archived.
-  const bulkArchive = async () => {
-    const ids = [...selectedIds]; if (ids.length === 0) return
-    const idSet = new Set(ids)
-    setTasks(prev => prev.filter(x => !idSet.has(x.id as Id)))
-    if (selected && idSet.has(selected.id as Id)) closeDrawer()
-    clearSelection()
-    try { await api.post('/tasks/bulk/archive', { task_ids: ids }); notifySuccess(t('bulk.done', { count: ids.length })) }
-    catch { notifyError(t('common:actionFailed')) }
-  }
-
-  // ── Insights strip: 3 donuts (filterable) + 4 KPI cards, equal footprint ──
-  const insightDonuts: DonutSpec[] = [
-    { key: 'status',   title: t('insights.status'),   data: statusData,   onPick: pickOne(setSelectedStatus),   active: selectedStatus.length > 0,   onClear: () => setSelectedStatus([]) },
-    { key: 'priority', title: t('insights.priority'), data: priorityData, onPick: pickOne(setSelectedPriority), active: selectedPriority.length > 0, onClear: () => setSelectedPriority([]) },
-    { key: 'type',     title: t('insights.type'),     data: typeData,     onPick: pickOne(setSelectedType),     active: selectedType.length > 0,     onClear: () => setSelectedType([]) },
-  ]
-  // Overdue is time-aware (TASK-DUE-TIME-1): a timed task counts from its due moment.
-  const overdue  = all.filter(x => isTaskOverdue(x)).length
-  const dueToday = all.filter(x => x.due && !x.statusIsDone && new Date(x.due).toDateString() === todayStart().toDateString()).length
+  // ── Insights strip: 3 donuts (filterable) + 4 KPI cards, equal footprint — pure builder (§0.3 split) ──
   const toggleKpi = (k: string) => setKpiFilter(p => p === k ? null : k)
-  const insightKpis: KpiSpec[] = [
-    { key: 'open',      label: t('kpi.open'),      value: all.filter(x => !x.statusIsDone).length, color: 'var(--color-primary)', onClick: () => toggleKpi('open'),      active: kpiFilter === 'open' },
-    { key: 'overdue',   label: t('kpi.overdue'),   value: overdue,                                 color: 'var(--color-danger)',  onClick: () => toggleKpi('overdue'),   active: kpiFilter === 'overdue' },
-    { key: 'dueToday',  label: t('kpi.dueToday'),  value: dueToday,                                color: 'var(--color-warning)', onClick: () => toggleKpi('dueToday'),  active: kpiFilter === 'dueToday' },
-    { key: 'completed', label: t('kpi.completed'), value: all.filter(x => x.statusIsDone).length,  color: 'var(--color-success)', onClick: () => toggleKpi('completed'), active: kpiFilter === 'completed' },
-  ]
+  const { donuts: insightDonuts, kpis: insightKpis } = buildTaskInsights({
+    t, statusData, priorityData, typeData,
+    selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority, selectedType, setSelectedType,
+    kpiFilter, toggleKpi, openCount, overdue, dueToday, completedCount,
+  })
 
   return (
     <div style={{ display: 'flex', height: '100%', background: 'var(--bg)', overflow: 'hidden' }}>

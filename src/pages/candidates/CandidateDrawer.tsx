@@ -180,7 +180,10 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       case 'communication':  return <CommunicationTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { consent: p })}
         onEditStatusEvent={status.canEditStatusReason ? status.openStatusEdit : undefined} />
       case 'documents':      return <DocumentsSection c={c} />
-      case 'integrations':   return <IntegrationsTab c={c} />
+      // onUpdate lets the PDOK refresh push fresh lat/lng/provenance into the page
+      // record (pure local merge — buildCandidatePatch maps none of those fields,
+      // so patchCandidate skips the API call): no CMD+R needed (Danny 22-07).
+      case 'integrations':   return <IntegrationsTab c={c} onUpdate={onUpdate} />
       case 'statistics':     return <StatisticsTab c={c} onJump={setTab} />
       // §3A(f): tenant custom fields live on their OWN gated tab (Danny 16-07,
       // punt 28 — they were buried as a section at the bottom of Profiel).

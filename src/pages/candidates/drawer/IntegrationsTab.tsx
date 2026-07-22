@@ -99,7 +99,13 @@ function PdokMetaLine({ geocode }: { geocode: Candidate['geocode'] }) {
   return null
 }
 
-export default function IntegrationsTab({ c }: { c: Candidate }) {
+export default function IntegrationsTab({ c, onUpdate }: {
+  c: Candidate
+  // Optional record-merge callback (CandidateDrawer wires the page's updateCandidate):
+  // lets the PDOK poll push fresh lat/lng/geocode into the page record so the whole
+  // drawer/list/map updates without a manual reload (Danny 22-07: "nog steeds CMD+R").
+  onUpdate?: (id: Candidate['id'], patch: Record<string, unknown>) => void
+}) {
   const { t } = useTranslation('candidates')
   const { formatDateTime } = useDateFormat()
   // Module OR app/koppeling flag unlocks the card — never AND (a tenant can enable
@@ -147,7 +153,8 @@ export default function IntegrationsTab({ c }: { c: Candidate }) {
     // of the same address keeps the same pin, but the "Bijgewerkt … door …" meta DID
     // change; the old changed-coords-only guard made that invisible until a page reload.
     const baseUpdatedAt = c.geocode?.updatedAt ?? null
-    for (const delayMs of [3000, 3000]) {
+    // Slightly longer window (~11s) so a slower dev queue-worker still lands in view.
+    for (const delayMs of [2000, 2000, 3000, 4000]) {
       await new Promise(resolve => setTimeout(resolve, delayMs))
       if (!mountedRef.current) return
       try {
@@ -169,7 +176,14 @@ export default function IntegrationsTab({ c }: { c: Candidate }) {
           : null
         if (meta) setGeocodeOverride(meta)
         // Done once the write actually landed (a fresh updated_at stamp); else poll once more.
-        if (meta?.updatedAt && meta.updatedAt !== baseUpdatedAt) return
+        if (meta?.updatedAt && meta.updatedAt !== baseUpdatedAt) {
+          // PDOK-REFRESH-2b (Danny: "nog steeds CMD+R"): merge the fresh values into the
+          // PAGE record too — list/map/other tabs update in place, and the panel survives
+          // a tab switch. Pure local merge: patchCandidate maps none of these keys, so
+          // this never fires an API write (buildCandidatePatch → empty body → skipped).
+          onUpdate?.(c.id, { lat, lng, geocode: meta })
+          return
+        }
       } catch {
         // Silent — a poll failure just keeps the last-known coordinates; the
         // manual trigger already reported "started" above.

@@ -5,7 +5,7 @@
  * counts) and the bulk-actions hook, then renders the insights row + table +
  * drawer. Heavy logic lives in the hooks under ./hooks and ./data.
  */
-import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import type { ComponentType, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
@@ -16,13 +16,8 @@ import { useUsers } from '@/lib/queries'
 import CandidateDrawerJs from './CandidateDrawer'
 import CandidateLifecycleModals from './CandidateLifecycleModals'
 import AddCandidateModal from './AddCandidateModal'
-import CandidatesTable from './CandidatesTable'
-import CandidatesToolbar from './CandidatesToolbar'
-import InsightsRowJs from '@/components/insights/InsightsRow'
-import PaginationBar from '@/components/ui/PaginationBar'
-import ActionMessageBanner, { type ActionMessage } from '@/components/ui/ActionMessageBanner'
-import ErrorBanner from '@/components/ui/ErrorBanner'
-import ViewSwitch from '@/components/ui/ViewSwitch'
+import CandidatesListPanel from './CandidatesListPanel'
+import type { ActionMessage } from '@/components/ui/ActionMessageBanner'
 import { toggleOneValue, isStale, isNeverContacted, optsFrom } from './data/candidatesShared'
 import { usePools } from '@/lib/usePools'
 import { usePageMemory } from '@/lib/usePageMemory'
@@ -58,9 +53,6 @@ const CandidateDrawer = CandidateDrawerJs as ComponentType<{
   onMerged?: (survivorId: Id) => void
   users: AppUser[]; initialTab?: string
 }>
-const InsightsRow = InsightsRowJs as ComponentType<{ donuts?: unknown[]; kpis?: unknown[]; clearTitle?: string; notice?: string }>
-// STRAAL-1: the map view lazy-loads so Leaflet stays out of the main bundle (§9).
-const CandidatesMapView = lazy(() => import('./CandidatesMapView'))
 
 export default function CandidatesPage({ intent }: { intent?: CandidateIntent } = {}) {
   // Auth/user must come first — pageSize initial value reads user.default_per_page.
@@ -278,108 +270,42 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
       {addOpen && <AddCandidateModal onClose={() => setAddOpen(false)} onCreated={handleCreated} />}
       <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
 
-        {/* Table area */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-
-          <InsightsRow donuts={insightDonuts} kpis={insightKpis}
-            clearTitle={t('analytics.clearFilter', { defaultValue: 'Filter wissen' })}
-            // Data honesty (STATS-OOM-1): when the server-wide stats call failed and
-            // there is more data than the loaded page, the cards fall back to
-            // page-scope counts — label them instead of presenting them as totals.
-            notice={statsFailed && total > candidates.length ? t('analytics.pageScopeNotice') : undefined} />
-
-          {/* Transient feedback for bulk mutations (aria-live for screen readers) —
-              shared banner (§0.3 split, audit R1 item 1: was copy-pasted per page). */}
-          <ActionMessageBanner msg={actionMsg} onDismiss={() => setActionMsg(null)} dismissLabel={t('close', { ns: 'common' })} />
-
-          {/* Toolbar — bulk-bar zodra er selectie is, anders de toevoeg-knop (§0.3 split
-              into its own component, audit R1 item 1). */}
-          <CandidatesToolbar
-            selectedCount={selectedIds.size}
-            onClearSelection={() => setSelectedIds(new Set())}
-            bulkBar={{
-              onAddToPool: bulkAddToPool, onRemoveFromPool: bulkRemoveFromPool,
-              onSetOwner: bulkSetOwner, onSetStage: bulkSetStage, onSetTypes: bulkSetTypes, onSetConsent: bulkSetConsent,
-              onConvertPhase: bulkConvertPhase, onSetStatus: bulkSetStatus, onAddTag: bulkAddTag,
-              onRemoveTag: bulkRemoveTag, onAddNote: bulkAddNote, onArchive: bulkArchive,
-              canArchive: hasPermission('candidates.delete'),
-              onMerge: bulkMergePrompt, canMerge: hasPermission('candidates.delete'),
-              onManageByApplication: manageByApplication,
-              onGeocode: bulkGeocode, canGeocode: hasPermission('candidates.update'),
-              users, funnelTypes, candidateTypes, phases, statuses, selectedTags,
-            }}
-            onAddOpen={() => setAddOpen(true)}
-            searchEpoch={searchEpoch} globalSearch={globalSearch} onSearch={setGlobalSearch}
-            anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters}
-            blacklistActive={blacklistActive} onToggleBlacklist={toggleBlacklist}
-            showArchived={showArchived} onToggleArchived={() => { setShowArchived(v => !v); setShowTrash(false) }}
-            showTrash={showTrash} onToggleTrash={() => { setShowTrash(v => !v); setShowArchived(false) }}
-            view={view} onToggleView={() => setView(v => (v === 'map' ? 'table' : 'map'))}
-          />
-
-          {/* Table ⇄ map — ViewSwitch keeps both mounted (display toggle, not unmount)
-              so the table's virtualizer never remeasures 0 on returning from the
-              map (§ViewSwitch). Map LEFT, filtered candidate table RIGHT when active,
-              one radius search drives both panes. Lazy Leaflet load. */}
-          <ViewSwitch active={view} views={[
-            {
-              id: 'table',
-              render: () => (
-                <>
-                  <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'auto', padding: '0 24px 16px' }}>
-                    {error && <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>}
-                    <CandidatesTable
-                      rows={filtered}
-                      loading={loading}
-                      selectedId={selected?.id}
-                      onSelect={selectCandidate}
-                      onOpenTab={selectCandidate}
-                      selectable
-                      selectedIds={selectedIds}
-                      onToggleRow={toggleRow}
-                      onToggleAll={toggleAll}
-                      stickyHeader
-                      scrollParentRef={tableScrollRef}
-                    />
-                  </div>
-                  <PaginationBar
-                    page={page}
-                    totalPages={lastPage}
-                    totalRows={total}
-                    pageSize={pageSize}
-                    onPageChange={setPage}
-                    onPageSizeChange={handlePageSizeChange}
-                  />
-                </>
-              ),
-            },
-            {
-              id: 'map',
-              render: () => (
-                <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 14, padding: '0 24px 16px' }}>
-                  <div style={{ flex: '1.1 1 0', minWidth: 400, display: 'flex', flexDirection: 'column' }}>
-                    <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
-                      <CandidatesMapView rows={filtered} center={mapCenter} radiusKm={mapStraalActive ? mapRadius : 0} padded={false}
-                        onCenterChange={(lat, lng) => { setMapCenter({ lat, lng }); setMapStraalActive(true) }}
-                        onRadiusChange={(km) => { setMapRadius(km); setMapStraalActive(true) }}
-                        onClearRadius={mapStraalActive ? () => setMapStraalActive(false) : undefined}
-                        onPick={(id) => selectCandidate({ id } as Candidate)} />
-                    </Suspense>
-                  </div>
-                  {/* Right pane: the same server-filtered rows as a table (row click = drawer). */}
-                  <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto' }}>
-                      <CandidatesTable rows={filtered} loading={loading} selectedId={selected?.id}
-                        onSelect={selectCandidate} onOpenTab={selectCandidate} />
-                    </div>
-                    <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
-                      onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
-                  </div>
-                </div>
-              ),
-            },
-          ]} />
-        </div>
+        {/* Table area — insights row, action banner, toolbar and the table⇄map
+            ViewSwitch all live in one thin panel component (§0.3 size split). */}
+        <CandidatesListPanel
+          insightDonuts={insightDonuts} insightKpis={insightKpis}
+          statsFailed={statsFailed} total={total} loadedCount={candidates.length}
+          actionMsg={actionMsg} onDismissMessage={() => setActionMsg(null)}
+          selectedCount={selectedIds.size}
+          onClearSelection={() => setSelectedIds(new Set())}
+          bulkBar={{
+            onAddToPool: bulkAddToPool, onRemoveFromPool: bulkRemoveFromPool,
+            onSetOwner: bulkSetOwner, onSetStage: bulkSetStage, onSetTypes: bulkSetTypes, onSetConsent: bulkSetConsent,
+            onConvertPhase: bulkConvertPhase, onSetStatus: bulkSetStatus, onAddTag: bulkAddTag,
+            onRemoveTag: bulkRemoveTag, onAddNote: bulkAddNote, onArchive: bulkArchive,
+            canArchive: hasPermission('candidates.delete'),
+            onMerge: bulkMergePrompt, canMerge: hasPermission('candidates.delete'),
+            onManageByApplication: manageByApplication,
+            onGeocode: bulkGeocode, canGeocode: hasPermission('candidates.update'),
+            users, funnelTypes, candidateTypes, phases, statuses, selectedTags,
+          }}
+          onAddOpen={() => setAddOpen(true)}
+          searchEpoch={searchEpoch} globalSearch={globalSearch} onSearch={setGlobalSearch}
+          anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters}
+          blacklistActive={blacklistActive} onToggleBlacklist={toggleBlacklist}
+          showArchived={showArchived} onToggleArchived={() => { setShowArchived(v => !v); setShowTrash(false) }}
+          showTrash={showTrash} onToggleTrash={() => { setShowTrash(v => !v); setShowArchived(false) }}
+          view={view} onToggleView={() => setView(v => (v === 'map' ? 'table' : 'map'))}
+          tableScrollRef={tableScrollRef} error={error} filtered={filtered} loading={loading}
+          selectedId={selected?.id} onSelectCandidate={selectCandidate}
+          selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
+          page={page} lastPage={lastPage} pageSize={pageSize}
+          onPageChange={setPage} onPageSizeChange={handlePageSizeChange}
+          mapCenter={mapCenter} mapRadius={mapRadius} mapStraalActive={mapStraalActive}
+          onMapCenterChange={(lat, lng) => { setMapCenter({ lat, lng }); setMapStraalActive(true) }}
+          onMapRadiusChange={(km) => { setMapRadius(km); setMapStraalActive(true) }}
+          onMapClearRadius={mapStraalActive ? () => setMapStraalActive(false) : undefined}
+        />
 
         {/* Drawer — remounts (key) when the full detail arrives so the tabs
             re-initialise from the complete record instead of the light row. */}
