@@ -19,6 +19,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
 import { BTN_H } from '@/config/buttonMetrics'
 
@@ -67,8 +68,12 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
   }
 
   const updateColor = async (it, color) => {
+    const previous = items
     setItems(p => p.map(x => x.id === it.id ? { ...x, color } : x))
-    try { await api.put(`${BASE}/${slug}/${it.id}`, { label: it.label, color }) } catch { /* noop */ }
+    // Revert the optimistic colour on failure — otherwise the row keeps showing an
+    // unsaved colour as if it had persisted (§3: no silent state drift).
+    try { await api.put(`${BASE}/${slug}/${it.id}`, { label: it.label, color }) }
+    catch { setItems(previous); notifyError(t('statusList.saveFailed')) }
   }
 
   // Singleton flip (funnel stages only): promote one stage to is_default and clear
@@ -103,8 +108,12 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
   }
 
   const reorder = async (next) => {
+    const previous = items
     setItems(next)
-    try { await api.put(`${BASE}/${slug}/reorder`, { ids: next.map(x => x.id) }) } catch { /* noop */ }
+    // Revert the optimistic order on failure — otherwise the list shows an order
+    // that was never actually saved (§3: no silent state drift).
+    try { await api.put(`${BASE}/${slug}/reorder`, { ids: next.map(x => x.id) }) }
+    catch { setItems(previous); notifyError(t('statusList.saveFailed')) }
   }
 
   return (

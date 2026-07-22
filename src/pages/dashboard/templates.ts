@@ -24,10 +24,10 @@ export const KPI_ROWS: Record<DashboardType, string[]> = {
   // vacatures · Taken over tijd · Actieve gesprekken (alle drie live) = 9 blokjes.
   admin:       ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
   management:  ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
-  recruitment: ['candidates', 'never', 'stale', 'tasksOverdue', 'failedWa', 'failedWf', 'uncalledCallist', 'intakes'],
+  recruitment: ['candidates', 'never', 'stale', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes'],
   backoffice:  ['tasks', 'placements', 'missingDocs', 'expiringContracts', 'couplingErrors', 'incompleteRuns'],
   sales:       ['opps', 'pipeline', 'expiringOpps', 'fillRate', 'placements', 'activeConv'],
-  planning:    ['waQueue', 'failedWa', 'failedWf', 'incompleteRuns', 'openShifts', 'occupancy'],
+  planning:    ['failedWf', 'incompleteRuns', 'openShifts', 'occupancy'],
   readonly:    ['candidates', 'tasks', 'stale'],
 }
 
@@ -38,7 +38,7 @@ export const DASHBOARD_TEMPLATES: Record<DashboardType, string[]> = {
   recruitment: ['block.touchpoints', 'block.attention', 'chart.status', 'chart.funnel', 'chart.funnelConversion', 'chart.weekly', 'list.candidates', 'list.applications', 'list.conversations', 'list.runs'],
   backoffice: ['chart.status', 'chart.funnel', 'list.applications', 'list.runs'],
   sales: ['chart.oppStage', 'chart.status', 'list.leads'],
-  planning: ['block.waQueue', 'block.shifts', 'chart.weekly', 'list.runs', 'list.conversations'],
+  planning: ['block.shifts', 'chart.weekly', 'list.runs', 'list.conversations'],
   readonly: ['chart.status', 'chart.funnel'],
 }
 
@@ -48,7 +48,7 @@ export const KPI_LABEL_KEY: Record<string, string> = {
   candidates: 'kpi.candidatesTotal', stale: 'kpi.notContacted6m', never: 'kpi.neverContacted',
   tasks: 'kpi.openTasks', opps: 'kpi.opportunities', pipeline: 'kpi.pipelineValue',
   placements: 'kpi.placements', intakes: 'kpi.intakes', fillRate: 'kpi.fillRate',
-  failedWa: 'kpi.failedWa', waQueue: 'kpi.waQueue', incompleteRuns: 'kpi.incompleteRuns',
+  incompleteRuns: 'kpi.incompleteRuns',
   activeConv: 'kpi.activeConv', missingDocs: 'kpi.missingDocs', expiringContracts: 'kpi.expiringContracts',
   couplingErrors: 'kpi.couplingErrors', openShifts: 'kpi.openShifts', occupancy: 'kpi.occupancy',
   escalations: 'kpi.escalations', failedWf: 'kpi.failedWf', tasksOverdue: 'kpi.tasksOverdue',
@@ -63,7 +63,7 @@ export const BLOCK_LABEL_KEY: Record<string, string> = {
   'list.candidates': 'block.recentCandidates', 'list.applications': 'block.recentApplications',
   'list.conversations': 'block.recentConversations', 'list.runs': 'block.recentRuns', 'list.leads': 'block.leadsPipeline',
   'block.touchpoints': 'block.touchpoints', 'block.attention': 'block.attentionTitle',
-  'block.waQueue': 'block.waQueue', 'block.shifts': 'block.shifts',
+  'block.shifts': 'block.shifts',
 }
 
 // Is a chart/list block visible for the active dashboard type?

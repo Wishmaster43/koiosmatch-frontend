@@ -375,7 +375,8 @@
     "careerSiteActive": "Karriereseite aktiv",
     "careerSiteOn": "An — öffentliche Stellenseite sichtbar",
     "careerSiteOff": "Aus — öffentliche Seite nicht erreichbar",
-    "careerSiteHint": "Schalte die öffentliche Karriereseite (…/{tenant}/vacatures) für diesen Mandanten ein oder aus. Deine Wahl wird gespeichert; die öffentliche Seite berücksichtigt sie, sobald das Backend sie durchsetzt."
+    "careerSiteHint": "Schalte die öffentliche Karriereseite (…/{tenant}/vacatures) für diesen Mandanten ein oder aus. Deine Wahl wird gespeichert; die öffentliche Seite berücksichtigt sie, sobald das Backend sie durchsetzt.",
+    "bannerUploadUnavailable": "Hochladen ist noch nicht verfügbar — kommt, sobald das Upload-Backend existiert."
   },
   "locations": {
     "title": "Standorte",
@@ -468,6 +469,7 @@
     "iconLabel": "Symbol (Emoji)",
     "iconPlaceholder": "z. B. 📞",
     "loadError": "Die Liste konnte nicht geladen werden.",
+    "deleteFailed": "Löschen fehlgeschlagen.",
     "saveFailed": "Speichern fehlgeschlagen."
   },
   "phases": {
@@ -1141,7 +1143,8 @@
     "branchesTemplateHint": "Die Standortmenge, die neue Benutzer mit dieser Rolle als Ausgangspunkt erhalten. Bestehende Benutzer behalten ihre eigene Auswahl — dies bearbeitet nur die Vorlage.",
     "branchesEmptyHint": "Keine Niederlassungen ausgewählt — neue Benutzer mit dieser Rolle starten ohne Niederlassungs-Zuordnung und sehen ALLE Kandidaten. Mit zugeordneten Niederlassungen sieht ein Benutzer nur Kandidaten dieser Niederlassungen.",
     "branchesNoLocations": "Noch keine Standorte angelegt.",
-    "branchesSaveFailed": "Die Standortvorlage konnte nicht gespeichert werden. Bitte erneut versuchen."
+    "branchesSaveFailed": "Die Standortvorlage konnte nicht gespeichert werden. Bitte erneut versuchen.",
+    "appearanceSaveFailed": "Das Erscheinungsbild konnte nicht gespeichert werden. Bitte erneut versuchen."
   },
   "audit": {
     "title": "Audit-Log",

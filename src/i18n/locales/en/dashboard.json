@@ -1,4 +1,8 @@
 {
+  "page": {
+    "loading": "Loading dashboard…",
+    "loadError": "Couldn't load the dashboard."
+  },
   "kpi": {
     "candidatesTotal": "Total candidates",
     "inAts": "In the ATS",
@@ -17,10 +21,6 @@
     "placementsSub": "All matches",
     "fillRate": "Fill rate",
     "fillRateSub": "Filled vacancies",
-    "failedWa": "Failed WhatsApp",
-    "failedWaSub": "Not delivered",
-    "waQueue": "WhatsApp queue",
-    "waQueueSub": "Queued",
     "incompleteRuns": "Incomplete runs",
     "incompleteRunsSub": "Failed/pending",
     "activeConv": "Active conversations",
@@ -46,7 +46,6 @@
     "expiringOpps": "Expiring opportunities",
     "expiringOppsSub": "closing soon",
     "pipelineHours": "Pipeline hours",
-    "hoursUnit": "hrs",
     "openVacancies": "Vacancies",
     "openVacanciesSub": "Active under management"
   },
@@ -57,7 +56,6 @@
     "byStage": "Opportunities by stage",
     "intakeOverTime": "Inflow over time",
     "intakeWeekly": "Candidate & application inflow (weekly)",
-    "comingSoon": "Chart appears once the time-series data is available.",
     "series": {
       "candidates": "Candidates",
       "applications": "Applications",
@@ -76,9 +74,6 @@
     "leadsPipeline": "Leads in pipeline",
     "recentRuns": "Recent runs",
     "recentConversations": "Recent conversations",
-    "waQueue": "WhatsApp queue",
-    "waQueued": "Queued",
-    "waFailed": "Failed",
     "shifts": "Shifts",
     "shiftsOpen": "Open",
     "shiftsFilled": "Filled",

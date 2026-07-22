@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, RefreshCw, Save } from 'lucide-react'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
@@ -66,7 +66,6 @@ export default function CompanySettings() {
   const [saved,      setSaved]      = useState(false)
   const [saving,     setSaving]     = useState(false)
   const [loading,    setLoading]    = useState(true)
-  const bannerRef = useRef(null)
 
   useEffect(() => {
     loadSettings().then(s => {
@@ -88,27 +87,23 @@ export default function CompanySettings() {
         // stringifies on save), so coerce every truthy legacy/string form here.
         career_site_active: [true, 1, '1', 'true'].includes(s.career_site_active),
       }))
-      if (s.company_banner_url)  setBannerUrl(s.company_banner_url)
+      // Never trust a stored blob: URL — it only ever worked in the browser tab
+      // that created it (session-local object URL) and is dead in every other
+      // tab/session/user (§3: no fake affordance surviving a reload).
+      if (s.company_banner_url && !String(s.company_banner_url).startsWith('blob:')) setBannerUrl(s.company_banner_url)
     }).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
-  const handleBannerFile = async (e) => {
-    const file = e.target.files?.[0]; if (!file) return
-    setLoading(true)
-    try {
-      const url = URL.createObjectURL(file)
-      setBannerUrl(url)
-      await saveSettings({ company_banner_url: url })
-    } catch { /* noop */ } finally { setLoading(false) }
-  }
-
   const save = async () => {
     setSaving(true)
     try {
       const payload = { ...form }
-      if (bannerUrl) payload.company_banner_url = bannerUrl
+      // The banner upload backend doesn't exist yet (no persisted-file endpoint
+      // mirroring the logo's /settings/logo) — never send a blob: URL, it would
+      // only break on reload/for another user (§3: no silent state drift).
+      if (bannerUrl && !bannerUrl.startsWith('blob:')) payload.company_banner_url = bannerUrl
       await saveSettings(payload)
       setSaved(true); setTimeout(() => setSaved(false), 2000)
     } catch { /* noop */ } finally { setSaving(false) }
@@ -140,11 +135,17 @@ export default function CompanySettings() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {bannerUrl && <img src={bannerUrl} alt="" style={{ width: '100%', maxWidth: 400, height: 100, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }} />}
               <div style={{ display: 'flex', gap: 8 }}>
-                <input ref={bannerRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleBannerFile} />
-                {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-                <button onClick={() => bannerRef.current?.click()} style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common.upload')}</button>
+                {/* Honest gate (§3): no upload backend exists yet for the banner (unlike
+                    the logo's /settings/logo endpoint) — disabled rather than a fake
+                    affordance that silently breaks on reload/for another user. */}
+                <button disabled title={t('company.bannerUploadUnavailable')}
+                  style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7,
+                           background: 'var(--hover-bg)', cursor: 'not-allowed', color: 'var(--text-muted)', opacity: 0.6 }}>
+                  {t('common.upload')}
+                </button>
                 {bannerUrl && <button onClick={() => setBannerUrl(null)} style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common.remove')}</button>}
               </div>
+              <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('company.bannerUploadUnavailable')}</p>
             </div>
           </Row>
           <Row label={t('company.industry')}><Select value={form.company_industry} onChange={v => set('company_industry', v)} options={industries} /></Row>

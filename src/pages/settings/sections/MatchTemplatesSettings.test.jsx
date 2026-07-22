@@ -37,6 +37,17 @@ const template = (over = {}) => ({
 // (DEFAULT_CONTRACT_TYPES/DEFAULT_FUNCTIONS) — a stable, known option set to drive.
 const mockLookupsEmpty = () => Promise.resolve({ data: { data: [] } })
 
+// Exact PATCH body a plain save of `template()` (opened via openEdit, unchanged)
+// must send — the six weight-dimension keys plus contract_types/function_title,
+// so a field rename in the component surfaces here instead of staying green
+// under a loose expect.any(Object)/call-count assertion.
+const expectedSavePayload = {
+  name: 'Senior profile',
+  weights: { qualifications: 4, technical_fit: 3, soft_skills: 3, cultural_alignment: 3, career_aspirations: 2, location: 5 },
+  contract_types: [],
+  function_title: null,
+}
+
 afterEach(() => vi.clearAllMocks())
 
 describe('MatchTemplatesSettings', () => {
@@ -97,7 +108,7 @@ describe('MatchTemplatesSettings', () => {
     await user.click(screen.getByRole('button', { name: `${st('common.edit')}: Senior profile` }))
     await user.click(await screen.findByRole('button', { name: st('common.save') }))
 
-    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/settings/match-weight-templates/t1', expect.any(Object)))
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/settings/match-weight-templates/t1', expectedSavePayload))
     // Confirm the apply-to-linked-vacancies prompt via the shared ConfirmDialog.
     await user.click(await screen.findByRole('button', { name: ct('confirm') }))
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings/match-weight-templates/t1/apply', { all_linked: true }))
@@ -116,7 +127,7 @@ describe('MatchTemplatesSettings', () => {
     await user.click(screen.getByRole('button', { name: `${st('common.edit')}: Senior profile` }))
     await user.click(await screen.findByRole('button', { name: st('common.save') }))
 
-    await waitFor(() => expect(api.patch).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/settings/match-weight-templates/t1', expectedSavePayload))
     // Decline the apply-to-linked-vacancies prompt via the shared ConfirmDialog.
     await user.click(await screen.findByRole('button', { name: ct('cancel') }))
     expect(api.post).not.toHaveBeenCalled()
@@ -176,10 +187,14 @@ describe('MatchTemplatesSettings', () => {
 
     await user.click(screen.getByRole('button', { name: st('matchTemplatesSettings.add') }))
 
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings/match-weight-templates', expect.objectContaining({
+    // Exact body — weights included with all six dimension keys (untouched sliders
+    // stay at the neutral default of 3) so this assertion also catches a dimension
+    // being dropped/renamed, not only the contract-type/function fields.
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings/match-weight-templates', {
       name: 'Zorg profiel',
+      weights: { qualifications: 3, technical_fit: 3, soft_skills: 3, cultural_alignment: 3, career_aspirations: 3, location: 3 },
       contract_types: [DEFAULT_CONTRACT_TYPES[0], DEFAULT_CONTRACT_TYPES[1]],
       function_title: DEFAULT_FUNCTIONS[0],
-    })))
+    }))
   })
 })

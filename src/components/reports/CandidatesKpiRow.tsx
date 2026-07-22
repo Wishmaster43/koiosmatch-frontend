@@ -104,7 +104,7 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
         value={count(candidates, 'nietactief')}
         icon={UserX}
         iconBg="var(--color-warning-bg)"
-        iconColor="#C2410C"
+        iconColor="var(--color-danger)"
         loading={loading}
         onClick={statusClick('nietactief', t('kpiRow.drillInactive'))}
       />
@@ -114,8 +114,8 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
         label={t('kpiRow.intake')}
         value={count(candidates, 'intake')}
         icon={UserPlus}
-        iconBg="#FAF5FF"
-        iconColor="#7C3AED"
+        iconBg="var(--color-violet-bg)"
+        iconColor="var(--color-violet)"
         loading={loading}
         onClick={statusClick('intake', t('kpiRow.drillIntake'))}
       />
@@ -126,8 +126,8 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
         value={currentMonthCount}
         delta={delta}
         icon={TrendingUp}
-        iconBg="#F0F7FF"
-        iconColor="#3B8FD4"
+        iconBg="var(--color-primary-bg)"
+        iconColor="var(--color-primary)"
         loading={loading}
         onClick={drill(t('kpiRow.drillNewIn', { month: currentMonthLabel }), c => c.filter(x => {
           if (!x.registration_date) return false

@@ -40,7 +40,12 @@ export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks
     // (same value either way) so a stale response can never flip it.
     api.get(`/tasks/${task.id}`)
       .then(r => { if (selectedIdRef.current === task.id) setSelected(decorate({ ...mapTaskDetail(unwrap(r)), archived: task.archived })) })
-      .catch(() => {})
+      .catch(() => {
+        // Audit finding: a failed detail fetch used to fail silently, leaving the
+        // drawer stuck on the light row with empty sections — notify so the user
+        // knows the detail didn't load (only if this task is still the open one).
+        if (selectedIdRef.current === task.id) notifyError(t('common:actionFailed'))
+      })
   }
 
   // Edit one or more fields (drawer or kanban drag). `patch` is LOCAL-shaped.

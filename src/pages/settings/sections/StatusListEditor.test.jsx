@@ -22,7 +22,7 @@ const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 
 const type = (over = {}) => ({ id: 't1', name: 'Intake', color: '#3B8FD4', is_default: false, ...over })
 
-afterEach(() => vi.clearAllMocks())
+afterEach(() => { vi.clearAllMocks(); vi.unstubAllGlobals() })
 
 describe('StatusListEditor — defaultField singleton', () => {
   it('renders the current default as a non-interactive "Standaard" pill and the rest as clickable "Maak standaard"', async () => {
@@ -53,9 +53,10 @@ describe('StatusListEditor — defaultField singleton', () => {
     expect(screen.getByRole('button', { name: st('common.setDefault') })).toBeInTheDocument()
   })
 
-  it('rolls back the optimistic flip when the backend rejects the promotion', async () => {
+  it('rolls back the optimistic flip and notifies when the backend rejects the promotion', async () => {
     api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Intake', is_default: true }), type({ id: 't2', name: 'Kennismaking' })] })
     api.put.mockRejectedValue(new Error('network down'))
+    const { notifyError } = await import('@/lib/notify')
     const user = userEvent.setup()
     render(<StatusListEditor title="Afspraaktypes" subtitle="" endpoint="/appointment-types" addLabel="Toevoegen"
       defaultField={{ key: 'is_default' }} />)
@@ -70,6 +71,71 @@ describe('StatusListEditor — defaultField singleton', () => {
     expect(rows[0]).toBeInTheDocument()
     // Intake's row still shows the disabled "Standaard" pill (rollback succeeded).
     expect(screen.getByText('Intake').closest('div')).toBeTruthy()
+    // Audit finding: the rollback used to be silent — it must notify the user too.
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.saveFailed')))
+  })
+})
+
+// Audit finding: a non-409 delete failure (500/network) used to swallow the
+// error silently — the row just stayed in the list with no explanation.
+describe('StatusListEditor — delete failures notify the user', () => {
+  it('notifies on a non-409 delete failure, keeping the row in the list', async () => {
+    vi.stubGlobal('confirm', vi.fn(() => true))
+    api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Intake' })] })
+    api.delete.mockRejectedValue(new Error('network down'))
+    const { notifyError } = await import('@/lib/notify')
+    const user = userEvent.setup()
+    render(<StatusListEditor title="Fasen" subtitle="" endpoint="/phases" addLabel="Fase toevoegen" />)
+
+    await screen.findByText('Intake')
+    // The delete button is an unlabelled icon button, the immediate sibling of
+    // the (labelled) edit button in the row's action group.
+    const editBtn = screen.getByRole('button', { name: st('statusList.edit') })
+    const deleteBtn = editBtn.nextElementSibling
+    await user.click(deleteBtn)
+
+    await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/phases/t1'))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.deleteFailed')))
+    // The row stays — a non-409 failure never removed it from local state.
+    expect(screen.getByText('Intake')).toBeInTheDocument()
+  })
+
+  it('does not notify on a 409 (in-use) delete rejection — the row is flagged instead', async () => {
+    vi.stubGlobal('confirm', vi.fn(() => true))
+    api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Intake' })] })
+    api.delete.mockRejectedValue({ response: { status: 409 } })
+    const { notifyError } = await import('@/lib/notify')
+    const user = userEvent.setup()
+    render(<StatusListEditor title="Fasen" subtitle="" endpoint="/phases" addLabel="Fase toevoegen" />)
+
+    await screen.findByText('Intake')
+    const editBtn = screen.getByRole('button', { name: st('statusList.edit') })
+    await user.click(editBtn.nextElementSibling)
+
+    await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/phases/t1'))
+    expect(notifyError).not.toHaveBeenCalled()
+    expect(screen.getByTitle(st('statusList.inUse'))).toBeInTheDocument()
+  })
+})
+
+// Audit finding: the load effect never reset loading/loadError/notFound when the
+// endpoint/entity prop changed, so a stale error/list from the OLD lookup stayed
+// on screen while the new one loaded (also missing an alive guard).
+describe('StatusListEditor — load effect resets on endpoint/entity change', () => {
+  it('clears a previous loadError/list state when the endpoint prop changes', async () => {
+    api.get.mockImplementation((url) => {
+      if (url === '/phases') return Promise.reject({ response: { status: 500 } })
+      if (url === '/statuses') return Promise.resolve({ data: [type({ id: 's1', name: 'Beschikbaar' })] })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    const { rerender } = render(<StatusListEditor title="Fasen" subtitle="" endpoint="/phases" addLabel="Fase toevoegen" />)
+    expect(await screen.findByText(st('statusList.loadError'))).toBeInTheDocument()
+
+    rerender(<StatusListEditor title="Statussen" subtitle="" endpoint="/statuses" addLabel="Status toevoegen" />)
+
+    // The stale error state from /phases must not leak into the /statuses view.
+    await waitFor(() => expect(screen.queryByText(st('statusList.loadError'))).not.toBeInTheDocument())
+    expect(await screen.findByText('Beschikbaar')).toBeInTheDocument()
   })
 })
 

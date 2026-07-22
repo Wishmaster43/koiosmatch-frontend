@@ -74,7 +74,7 @@ export default function PeriodGroup({ group }: { group: ReportFilterGroup }) {
               onClick={() => setGranularity(g.id)}
               style={{ ...btnBase, flex: 1, padding: '4px 0',
                        border: active ? '1px solid var(--border)' : '1px solid transparent',
-                       background: active ? 'white' : 'transparent',
+                       background: active ? 'var(--surface)' : 'transparent',
                        color: active ? 'var(--text)' : 'var(--text-muted)',
                        boxShadow: active ? '0 1px 2px rgba(0,0,0,0.06)' : 'none' }}>
               {g.label}

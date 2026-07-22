@@ -10,6 +10,7 @@ import { notify, notifyError } from '@/lib/notify'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
+import { extractApiError } from '@/lib/extractApiError'
 import { normalizeWorkflow, denormalizeWorkflow } from '../data/workflowMap'
 import type { Workflow, RawWorkflow } from '@/types/workflow'
 
@@ -145,10 +146,9 @@ export function useWorkflowsData(showArchived: boolean) {
       // else: editor keeps its own state; no prop change needed
     } catch (err) {
       // WF-R2 saves validate the graph server-side (loop / disconnected step): surface
-      // the SPECIFIC 422 detail, not just the generic message.
-      const e = err as { response?: { data?: { message?: string; errors?: Record<string, string[]> } }; message?: string }
-      const detail = Object.values(e.response?.data?.errors ?? {}).flat()[0]
-      alert(t('page.saveFailed', { msg: detail ?? e.response?.data?.message ?? e.message }))
+      // the SPECIFIC 422 detail via the shared extractApiError helper — never a raw
+      // axios/network string in the user-facing message (§10).
+      alert(t('page.saveFailed', { msg: extractApiError(err, t('common:actionFailed')) }))
     }
   }
 
@@ -156,7 +156,10 @@ export function useWorkflowsData(showArchived: boolean) {
     try {
       const res = await api.post('/workflow-folders', { name })
       setFolders(prev => [...prev, unwrap<WorkflowFolder>(res)])
-    } catch { /* noop */ }
+    } catch {
+      // A failed create used to fail silently — give the same feedback as every other mutation here.
+      notifyError(t('common:actionFailed'))
+    }
   }
 
   const deleteFolder = async (folder: WorkflowFolder) => {
@@ -180,7 +183,9 @@ export function useWorkflowsData(showArchived: boolean) {
     if (!wf) return
     const payload = { ...denormalizeWorkflow(wf), folder_id: folderId }
     api.put(`/workflows/${workflowId}`, payload).catch(() => {
+      // Roll back the optimistic move and say so — mirrors handleToggleStatus's rollback+toast.
       setWorkflows(prev => prev.map(w => w.id === workflowId ? { ...w, folder_id: wf.folder_id } : w))
+      notifyError(t('common:actionFailed'))
     })
   }
 

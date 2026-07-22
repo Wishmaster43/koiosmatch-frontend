@@ -375,7 +375,8 @@
     "careerSiteActive": "Sitio de carreras activo",
     "careerSiteOn": "Activado — sitio público de vacantes visible",
     "careerSiteOff": "Desactivado — sitio público no accesible",
-    "careerSiteHint": "Activa o desactiva el sitio de carreras público (…/{tenant}/vacatures) para este cliente. Tu elección se guarda; el sitio público la respetará en cuanto el backend la aplique."
+    "careerSiteHint": "Activa o desactiva el sitio de carreras público (…/{tenant}/vacatures) para este cliente. Tu elección se guarda; el sitio público la respetará en cuanto el backend la aplique.",
+    "bannerUploadUnavailable": "La subida aún no está disponible — llegará en cuanto exista el backend de subida."
   },
   "locations": {
     "title": "Ubicaciones",
@@ -468,6 +469,7 @@
     "iconLabel": "Icono (emoji)",
     "iconPlaceholder": "p. ej. 📞",
     "loadError": "No se pudo cargar la lista.",
+    "deleteFailed": "Error al eliminar.",
     "saveFailed": "Error al guardar."
   },
   "phases": {
@@ -1141,7 +1143,8 @@
     "branchesTemplateHint": "El conjunto de sedes inicial que reciben los nuevos usuarios con este rol. Los usuarios existentes conservan su propio conjunto — esto solo edita la plantilla.",
     "branchesEmptyHint": "Sin sedes seleccionadas — los nuevos usuarios con este rol empiezan sin vinculación y ven TODOS los candidatos. Con sedes vinculadas, un usuario solo ve candidatos de esas sedes.",
     "branchesNoLocations": "Todavía no hay sedes configuradas.",
-    "branchesSaveFailed": "No se pudo guardar la plantilla de sedes. Inténtalo de nuevo."
+    "branchesSaveFailed": "No se pudo guardar la plantilla de sedes. Inténtalo de nuevo.",
+    "appearanceSaveFailed": "No se pudo guardar la apariencia. Inténtalo de nuevo."
   },
   "audit": {
     "title": "Registro de auditoría",

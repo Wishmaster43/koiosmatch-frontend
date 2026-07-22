@@ -70,7 +70,7 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
         </div>
         <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{label}</div>
         {note && (
-          <div style={{ fontSize: 11, color: '#A78BFA', marginTop: 3, fontWeight: 500 }}>
+          <div style={{ fontSize: 11, color: 'var(--color-violet)', marginTop: 3, fontWeight: 500 }}>
             {note}
           </div>
         )}

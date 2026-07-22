@@ -1,4 +1,8 @@
 {
+  "page": {
+    "loading": "Cargando el panel…",
+    "loadError": "No se pudo cargar el panel."
+  },
   "kpi": {
     "candidatesTotal": "Candidatos totales",
     "inAts": "En el ATS",
@@ -17,10 +21,6 @@
     "placementsSub": "Todos los matches",
     "fillRate": "Tasa de cobertura",
     "fillRateSub": "Vacantes cubiertas",
-    "failedWa": "WhatsApp fallidos",
-    "failedWaSub": "No entregados",
-    "waQueue": "Cola de WhatsApp",
-    "waQueueSub": "En cola",
     "incompleteRuns": "Runs incompletos",
     "incompleteRunsSub": "Fallidos/pendientes",
     "activeConv": "Conversaciones activas",
@@ -46,7 +46,6 @@
     "expiringOpps": "Oportunidades por vencer",
     "expiringOppsSub": "cierran pronto",
     "pipelineHours": "Horas de pipeline",
-    "hoursUnit": "h",
     "openVacancies": "Vacantes",
     "openVacanciesSub": "Activas en gestión"
   },
@@ -57,7 +56,6 @@
     "byStage": "Oportunidades por fase",
     "intakeOverTime": "Entradas a lo largo del tiempo",
     "intakeWeekly": "Entrada de candidatos y candidaturas (semanal)",
-    "comingSoon": "El gráfico aparecerá cuando los datos de series temporales estén disponibles.",
     "series": {
       "candidates": "Candidatos",
       "applications": "Candidaturas",
@@ -76,9 +74,6 @@
     "leadsPipeline": "Leads en el embudo",
     "recentRuns": "Ejecuciones recientes",
     "recentConversations": "Conversaciones recientes",
-    "waQueue": "Cola de WhatsApp",
-    "waQueued": "En cola",
-    "waFailed": "Fallidos",
     "shifts": "Turnos",
     "shiftsOpen": "Abiertos",
     "shiftsFilled": "Cubiertos",

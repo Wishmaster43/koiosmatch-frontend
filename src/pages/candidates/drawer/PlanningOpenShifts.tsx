@@ -7,7 +7,7 @@
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Heart, Ban } from 'lucide-react'
-import { sectionBlock } from './constants'
+import { sectionBlock, softPill } from './constants'
 import { useFunctions } from '@/lib/useFunctions'
 import type { Id } from '@/types/common'
 import type { FavLists, OpenFilters, OpenShift } from './planningTypes'
@@ -53,11 +53,9 @@ export default function PlanningOpenShifts({ openShifts, openFilters, setOpenFil
               {([['Dag', 'day'], ['Avond', 'evening'], ['Nacht', 'night']] as [string, string][]).map(([dt, key]) => {
                 const active = openFilters.shiftTypes.includes(dt)
                 return (
+                  // Soft-tint pill (§4) — never a solid fill; shared with Availability/roles-pools chips.
                   <button key={dt} onClick={() => toggleShiftType(dt)}
-                    style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer', fontWeight: active ? 600 : 400,
-                      border: `1px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
-                      background: active ? 'var(--color-primary)' : 'var(--bg)',
-                      color: active ? '#fff' : 'var(--text-muted)' }}>
+                    style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer', ...softPill(active) }}>
                     {t(`planning.${key}`)}
                   </button>
                 )

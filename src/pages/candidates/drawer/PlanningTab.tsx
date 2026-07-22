@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Check, Info } from 'lucide-react'
-import { sectionBlock, sectionTitle } from './constants'
+import { sectionBlock, sectionTitle, softPill } from './constants'
 import { useFunctions } from '@/lib/useFunctions'
 import { usePools } from '@/lib/usePools'
 import { useDriverLicenses } from '@/lib/useDriverLicenses'
@@ -20,12 +20,11 @@ const disabledStyle: CSSProperties = { cursor: 'not-allowed', opacity: 0.55 }
 // One selectable chip — `disabled` (the not-yet-persisted gate) both disables the
 // native button (keyboard/focus semantics for free) and dims it, while still
 // showing which values are selected (layout stays, per the audit instruction).
+// Soft-tint pill (§4) — never a solid fill; shared with Availability/open-shift filters.
 const Chip = ({ label, selected, onToggle, disabled }: { label: ReactNode; selected: boolean; onToggle: () => void; disabled?: boolean }) => (
   <button onClick={onToggle} disabled={disabled} style={{
     padding: '4px 11px', fontSize: 11, borderRadius: 99, transition: 'all 0.1s',
-    border: `1px solid ${selected ? 'var(--color-primary)' : 'var(--border)'}`,
-    background: selected ? 'var(--color-primary)' : 'var(--bg)',
-    color: selected ? '#fff' : 'var(--text-muted)', fontWeight: selected ? 600 : 400,
+    ...softPill(selected),
     ...(disabled ? disabledStyle : { cursor: 'pointer' }),
   }}>
     {label}
@@ -128,10 +127,10 @@ export default function PlanningTab({ c }: { c: Candidate }) {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
             {drivingLicences.map(r => (
               <span key={r} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', fontSize: 11,
-                borderRadius: 99, border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: '#fff', fontWeight: 600, opacity: 0.7 }}>
+                borderRadius: 99, ...softPill(true), opacity: 0.7 }}>
                 {r}
                 <button disabled aria-label={t('common:close')}
-                  style={{ background: 'none', border: 'none', color: '#fff', padding: 0, lineHeight: 1, fontSize: 14, ...disabledStyle, opacity: 0.7 }}>×</button>
+                  style={{ background: 'none', border: 'none', color: 'var(--color-primary)', padding: 0, lineHeight: 1, fontSize: 14, ...disabledStyle, opacity: 0.7 }}>×</button>
               </span>
             ))}
           </div>

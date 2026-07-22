@@ -1,4 +1,8 @@
 {
+  "page": {
+    "loading": "Dashboard laden…",
+    "loadError": "Dashboard laden is mislukt."
+  },
   "kpi": {
     "candidatesTotal": "Totaal kandidaten",
     "inAts": "In het ATS",
@@ -17,10 +21,6 @@
     "placementsSub": "Alle matches",
     "fillRate": "Invulgraad",
     "fillRateSub": "Vervulde vacatures",
-    "failedWa": "Mislukte WhatsApp",
-    "failedWaSub": "Niet verzonden",
-    "waQueue": "WhatsApp-wachtrij",
-    "waQueueSub": "In wachtrij",
     "incompleteRuns": "Incomplete runs",
     "incompleteRunsSub": "Gefaald/pending",
     "activeConv": "Actieve gesprekken",
@@ -46,7 +46,6 @@
     "expiringOpps": "Aflopende kansen",
     "expiringOppsSub": "sluiten binnenkort",
     "pipelineHours": "Pijplijn uren",
-    "hoursUnit": "uur",
     "openVacancies": "Vacatures",
     "openVacanciesSub": "Actief in beheer"
   },
@@ -57,7 +56,6 @@
     "byStage": "Kansen per fase",
     "intakeOverTime": "Instroom over tijd",
     "intakeWeekly": "Instroom kandidaten & sollicitaties (per week)",
-    "comingSoon": "Grafiek volgt zodra de tijdreeks-data beschikbaar is.",
     "series": {
       "candidates": "Kandidaten",
       "applications": "Sollicitaties",
@@ -76,9 +74,6 @@
     "leadsPipeline": "Leads in pipeline",
     "recentRuns": "Recente uitvoeringen",
     "recentConversations": "Recente conversaties",
-    "waQueue": "WhatsApp-wachtrij",
-    "waQueued": "In wachtrij",
-    "waFailed": "Mislukt",
     "shifts": "Diensten",
     "shiftsOpen": "Open",
     "shiftsFilled": "Ingevuld",

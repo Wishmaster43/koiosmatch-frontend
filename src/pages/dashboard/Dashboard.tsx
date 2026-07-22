@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next'
+import { Loader2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useCandidateCount } from '@/lib/queries'
 import { useLookups } from '@/context/LookupsContext'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { useDashboardData } from './hooks/useDashboardData'
 import { useDashboardFilterState } from './hooks/useDashboardFilterState'
 import { useDashboardFilterPanel } from './hooks/useDashboardFilterPanel'
@@ -57,7 +59,10 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // Live distributions/counts. /candidates/stats is live; /opportunities/stats
   // is best-effort (renders only if it returns). Defensive field readers mirror
   // the Candidates page (by_status→status, by_funnel→funnel_type, by_owner→owner_id).
-  const { stats, opp, dash, dashCharts, matchesTotal, vacanciesTotal } =
+  // `loading`/`error` cover the two CRITICAL feeds (/candidates/stats + /dashboard) —
+  // a failure there must render an explicit error notice, never a KPI strip full of
+  // "—" that reads as real zeros (audit finding).
+  const { stats, opp, dash, dashCharts, matchesTotal, vacanciesTotal, loading, error, retry } =
     useDashboardData<DashStats, DashOpp, DashData, { timeseries?: Record<string, unknown>; net?: unknown }>({
       tenantId: activeTenant?.id, filterParams: dashFilterParams,
     })
@@ -85,47 +90,72 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   return (
     <div style={{ padding: 24, overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
 
-      {/* Bron-versheid — ShiftManager heeft z'n eigen "Laatste sync" op het SM-dashboard,
-          dus hier alleen de overige koppelingen (intus/sdb). Datum in nl-NL (24u). */}
-      {(dash?.sync_sources ?? []).filter(s => s.system !== 'shiftmanager').length > 0 && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 16, marginBottom: 8, flexWrap: 'wrap' }}>
-          {(dash?.sync_sources ?? []).filter(s => s.system !== 'shiftmanager').map(s => (
-            <span key={s.system} style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-              {t('lastSync', { source: s.label })}: {s.last_synced_at
-                ? new Date(s.last_synced_at).toLocaleString('nl-NL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
-                : t('neverSynced')}
-            </span>
-          ))}
+      {/* Loading state (§3: the four UI states) — the two critical feeds are still
+          in flight. Shown instead of the KPI strip so a slow load never flashes
+          "—" values that could be mistaken for real zeros. */}
+      {loading && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          gap: 8, padding: '96px 0', color: 'var(--text-muted)' }}>
+          <Loader2 size={22} className="animate-spin" />
+          <span style={{ fontSize: 13 }}>{t('page.loading')}</span>
         </div>
       )}
 
-      {/* KPI-strip — live data */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-        {kpis.map(k => <KpiCard key={k.label} {...k} />)}
-      </div>
-
-      <DistributionCharts vis={vis} statusData={statusData} funnelData={funnelData} recruiterData={recruiterData} oppStageData={oppStageData} opp={opp} onNavigate={onNavigate} />
-
-      <TrendsRow vis={vis} trendData={trendData} trendSeries={trendSeries} funnelData={funnelData} onNavigate={onNavigate} />
-
-      {/* Recruitment-feeds — kandidaat-touchpoints (Vandaag) + kandidaten om af te werken. */}
-      {(vis('block.touchpoints') || vis('block.attention')) && (
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-        {vis('block.touchpoints') && <TouchpointsFeed items={dash?.touchpoints ?? []} onOpen={(id) => onNavigate?.('candidates', { open: id })} />}
-        {vis('block.attention') && <AttentionCandidates groups={dash?.attention_candidates} onOpen={(id) => onNavigate?.('candidates', { open: id })} />}
-      </div>
+      {/* Error state — /candidates/stats or /dashboard failed. A calm banner + retry,
+          never a dashboard rendered with fake-looking "—" KPIs (audit finding). */}
+      {!loading && error && (
+        <ErrorBanner style={{ marginBottom: 16 }} onRetry={retry}>{t('page.loadError')}</ErrorBanner>
       )}
 
-      {/* Planning-blokken — WhatsApp-wachtrij (🟢) + diensten-overzicht (🟡 tot de feed). */}
-      {vis('block.shifts') && (
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-        {vis('block.shifts') && <ShiftsSummary open={att.open_shifts} filled={att.filled_shifts} unfilled={att.unfilled_shifts} occupancy={att.occupancy} onOpen={() => onNavigate?.('planning')} />}
-      </div>
+      {/* Success state — the live dashboard. (No distinct "empty" state: a tenant
+          with zero candidates/vacancies is a legitimate all-zero dashboard, not a
+          missing-data case — that distinction is exactly what the error state above
+          now makes explicit.) */}
+      {!loading && !error && (
+        <>
+          {/* Bron-versheid — ShiftManager heeft z'n eigen "Laatste sync" op het SM-dashboard,
+              dus hier alleen de overige koppelingen (intus/sdb). Datum in nl-NL (24u). */}
+          {(dash?.sync_sources ?? []).filter(s => s.system !== 'shiftmanager').length > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 16, marginBottom: 8, flexWrap: 'wrap' }}>
+              {(dash?.sync_sources ?? []).filter(s => s.system !== 'shiftmanager').map(s => (
+                <span key={s.system} style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                  {t('lastSync', { source: s.label })}: {s.last_synced_at
+                    ? new Date(s.last_synced_at).toLocaleString('nl-NL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+                    : t('neverSynced')}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* KPI-strip — live data */}
+          <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+            {kpis.map(k => <KpiCard key={k.label} {...k} />)}
+          </div>
+
+          <DistributionCharts vis={vis} statusData={statusData} funnelData={funnelData} recruiterData={recruiterData} oppStageData={oppStageData} opp={opp} onNavigate={onNavigate} />
+
+          <TrendsRow vis={vis} trendData={trendData} trendSeries={trendSeries} funnelData={funnelData} onNavigate={onNavigate} />
+
+          {/* Recruitment-feeds — kandidaat-touchpoints (Vandaag) + kandidaten om af te werken. */}
+          {(vis('block.touchpoints') || vis('block.attention')) && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+            {vis('block.touchpoints') && <TouchpointsFeed items={dash?.touchpoints ?? []} onOpen={(id) => onNavigate?.('candidates', { open: id })} />}
+            {vis('block.attention') && <AttentionCandidates groups={dash?.attention_candidates} onOpen={(id) => onNavigate?.('candidates', { open: id })} />}
+          </div>
+          )}
+
+          {/* Planning-blokken — WhatsApp-wachtrij (🟢) + diensten-overzicht (🟡 tot de feed). */}
+          {vis('block.shifts') && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+            {vis('block.shifts') && <ShiftsSummary open={att.open_shifts} filled={att.filled_shifts} unfilled={att.unfilled_shifts} occupancy={att.occupancy} onOpen={() => onNavigate?.('planning')} />}
+          </div>
+          )}
+
+          <RecentListsRow vis={vis} recentCandidates={recentCandidates} recentApplications={recentApplications} onNavigate={onNavigate} />
+
+          <ActivityListsRow vis={vis} showRuns={showRuns} showConv={showConv} recentLeads={recentLeads} runs={runs} conversations={conversations} onNavigate={onNavigate} />
+        </>
       )}
-
-      <RecentListsRow vis={vis} recentCandidates={recentCandidates} recentApplications={recentApplications} onNavigate={onNavigate} />
-
-      <ActivityListsRow vis={vis} showRuns={showRuns} showConv={showConv} recentLeads={recentLeads} runs={runs} conversations={conversations} onNavigate={onNavigate} />
     </div>
   )
 }

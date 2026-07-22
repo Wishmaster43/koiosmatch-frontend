@@ -394,7 +394,8 @@
     "careerSiteActive": "Carrière-site actief",
     "careerSiteOn": "Aan — publieke vacaturesite zichtbaar",
     "careerSiteOff": "Uit — publieke site niet bereikbaar",
-    "careerSiteHint": "Zet de publieke carrière-site (…/{tenant}/vacatures) aan of uit voor deze tenant. Je keuze wordt bewaard; de publieke site respecteert 'm zodra de backend het afdwingt."
+    "careerSiteHint": "Zet de publieke carrière-site (…/{tenant}/vacatures) aan of uit voor deze tenant. Je keuze wordt bewaard; de publieke site respecteert 'm zodra de backend het afdwingt.",
+    "bannerUploadUnavailable": "Uploaden is nog niet beschikbaar — komt zodra de upload-backend er is."
   },
   "locations": {
     "title": "Locaties",
@@ -487,7 +488,8 @@
     "iconLabel": "Icoon (emoji)",
     "iconPlaceholder": "bijv. 📞",
     "loadError": "Kon de lijst niet laden.",
-    "saveFailed": "Opslaan mislukt."
+    "saveFailed": "Opslaan mislukt.",
+    "deleteFailed": "Verwijderen mislukt."
   },
   "phases": {
     "title": "Fasen",
@@ -1349,7 +1351,8 @@
     "branchesTemplateHint": "De startset vestigingen die nieuwe gebruikers met deze rol krijgen. Bestaande gebruikers behouden hun eigen set — dit past alleen de template aan.",
     "branchesEmptyHint": "Geen vestigingen geselecteerd — nieuwe gebruikers met deze rol starten zonder vestiging-koppeling en zien álle kandidaten. Mét gekoppelde vestigingen ziet een gebruiker alleen kandidaten van die vestigingen.",
     "branchesNoLocations": "Nog geen vestigingen ingericht.",
-    "branchesSaveFailed": "Opslaan van de vestiging-template is mislukt. Probeer het opnieuw."
+    "branchesSaveFailed": "Opslaan van de vestiging-template is mislukt. Probeer het opnieuw.",
+    "appearanceSaveFailed": "Opslaan van het uiterlijk is mislukt. Probeer het opnieuw."
   },
   "audit": {
     "title": "Audit log",

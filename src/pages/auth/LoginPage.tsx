@@ -127,9 +127,9 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
           <input id="login-email" type="email" value={email} onChange={e => setEmail(e.target.value)}
             placeholder={t('login.emailPlaceholder')} required autoFocus
             className="w-full text-sm text-gray-900 bg-white rounded-lg"
-            style={{ padding: '10px 12px', border: '1px solid #E5E7EB', outline: 'none' }}
+            style={{ padding: '10px 12px', border: '1px solid var(--border)', outline: 'none' }}
             onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
-            onBlur={e  => (e.target.style.borderColor = '#E5E7EB')} />
+            onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
         </div>
 
         <div>
@@ -139,9 +139,9 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
               onChange={e => setPassword(e.target.value)}
               placeholder={t('login.password')} required
               className="w-full text-sm text-gray-900 bg-white rounded-lg"
-              style={{ padding: '10px 40px 10px 12px', border: '1px solid #E5E7EB', outline: 'none' }}
+              style={{ padding: '10px 40px 10px 12px', border: '1px solid var(--border)', outline: 'none' }}
               onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
-              onBlur={e  => (e.target.style.borderColor = '#E5E7EB')} />
+              onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
             <button type="button" onClick={() => setShowPw(v => !v)}
               className="absolute text-gray-400 -translate-y-1/2 right-3 top-1/2 hover:text-gray-600"
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
@@ -154,7 +154,7 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
 
         <button type="submit" disabled={loading}
           className="flex items-center justify-center w-full gap-2 text-sm font-medium text-white transition-opacity rounded-lg"
-          style={{ padding: '11px', background: loading ? '#9CA3AF' : 'var(--color-primary)',
+          style={{ padding: '11px', background: loading ? 'var(--text-muted)' : 'var(--color-primary)',
                    border: 'none', cursor: loading ? 'not-allowed' : 'pointer' }}>
           {loading && <Loader2 size={15} className="animate-spin" />}
           {loading ? t('login.busy') : t('login.signIn')}
@@ -217,7 +217,7 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
         </div>
       </div>
 
-      <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 24, lineHeight: 1.6 }}>
+      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 24, lineHeight: 1.6 }}>
         {t('mfa.instructions')}
       </p>
 
@@ -228,10 +228,10 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
             value={code} onChange={handleChange}
             placeholder="123456" maxLength={6} required
             className="w-full text-sm text-gray-900 bg-white rounded-lg"
-            style={{ padding: '12px 14px', border: '1px solid #E5E7EB', outline: 'none',
+            style={{ padding: '12px 14px', border: '1px solid var(--border)', outline: 'none',
                      fontSize: 20, letterSpacing: '0.25em', textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}
             onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
-            onBlur={e  => (e.target.style.borderColor = '#E5E7EB')} />
+            onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
         </div>
 
         {error && <ErrorBanner>{error}</ErrorBanner>}
@@ -239,7 +239,7 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
         <button type="submit" disabled={loading || code.length < 6}
           className="flex items-center justify-center w-full gap-2 text-sm font-medium text-white transition-opacity rounded-lg"
           style={{ padding: '11px',
-                   background: (loading || code.length < 6) ? '#9CA3AF' : 'var(--color-primary)',
+                   background: (loading || code.length < 6) ? 'var(--text-muted)' : 'var(--color-primary)',
                    border: 'none', cursor: (loading || code.length < 6) ? 'not-allowed' : 'pointer' }}>
           {loading && <Loader2 size={15} className="animate-spin" />}
           {loading ? t('mfa.verifying') : t('mfa.verify')}
@@ -247,7 +247,7 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
 
         <button type="button" onClick={onBack}
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                   fontSize: 13, color: '#6B7280', background: 'none', border: 'none',
+                   fontSize: 13, color: 'var(--text-muted)', background: 'none', border: 'none',
                    cursor: 'pointer', padding: '4px 0' }}>
           <ArrowLeft size={13} /> {t('mfa.back')}
         </button>

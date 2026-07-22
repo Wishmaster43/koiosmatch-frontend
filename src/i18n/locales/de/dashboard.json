@@ -1,4 +1,8 @@
 {
+  "page": {
+    "loading": "Dashboard wird geladen…",
+    "loadError": "Dashboard konnte nicht geladen werden."
+  },
   "kpi": {
     "candidatesTotal": "Kandidaten gesamt",
     "inAts": "Im ATS",
@@ -17,10 +21,6 @@
     "placementsSub": "Alle Matches",
     "fillRate": "Besetzungsquote",
     "fillRateSub": "Besetzte Stellen",
-    "failedWa": "Fehlgeschl. WhatsApp",
-    "failedWaSub": "Nicht zugestellt",
-    "waQueue": "WhatsApp-Warteschlange",
-    "waQueueSub": "In Warteschlange",
     "incompleteRuns": "Unvollständige Runs",
     "incompleteRunsSub": "Fehlgeschl./ausstehend",
     "activeConv": "Aktive Gespräche",
@@ -46,7 +46,6 @@
     "expiringOpps": "Auslaufende Chancen",
     "expiringOppsSub": "laufen bald aus",
     "pipelineHours": "Pipeline-Stunden",
-    "hoursUnit": "Std.",
     "openVacancies": "Stellen",
     "openVacanciesSub": "Aktiv in Verwaltung"
   },
@@ -57,7 +56,6 @@
     "byStage": "Chancen nach Phase",
     "intakeOverTime": "Zulauf über Zeit",
     "intakeWeekly": "Kandidaten- & Bewerbungszulauf (wöchentlich)",
-    "comingSoon": "Diagramm erscheint, sobald die Zeitreihendaten verfügbar sind.",
     "series": {
       "candidates": "Kandidaten",
       "applications": "Bewerbungen",
@@ -76,9 +74,6 @@
     "leadsPipeline": "Leads in der Pipeline",
     "recentRuns": "Letzte Ausführungen",
     "recentConversations": "Letzte Konversationen",
-    "waQueue": "WhatsApp-Warteschlange",
-    "waQueued": "In Warteschlange",
-    "waFailed": "Fehlgeschlagen",
     "shifts": "Schichten",
     "shiftsOpen": "Offen",
     "shiftsFilled": "Besetzt",

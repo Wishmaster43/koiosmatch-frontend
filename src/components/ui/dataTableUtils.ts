@@ -56,5 +56,6 @@ export const HIGHLIGHT_BG = 'color-mix(in srgb, var(--color-primary) 12%, var(--
 // spinner to real rows. Bar widths vary per column so the shape reads as text,
 // not a solid block; token-based colour only (no ad-hoc grey, works in dark mode).
 export const SKELETON_ROWS = 8
-export const SKELETON_BAR_WIDTHS = ['85%', '60%', '75%', '50%', '90%', '65%']
+// Internal palette for skeletonBarWidth — not exported (audit 22-07: zero importers; §11).
+const SKELETON_BAR_WIDTHS = ['85%', '60%', '75%', '50%', '90%', '65%']
 export const skeletonBarWidth = (i: number) => SKELETON_BAR_WIDTHS[i % SKELETON_BAR_WIDTHS.length]

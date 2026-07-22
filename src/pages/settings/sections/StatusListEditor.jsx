@@ -47,18 +47,29 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
   const [settingDefaultId, setSettingDefaultId] = useState(null)
 
   useEffect(() => {
+    // Reset every previous-load flag when the endpoint/entity identity changes —
+    // otherwise a stale error/notFound/list from the OLD lookup stays on screen
+    // while the new one is loading (§3: no stale state leaking across switches).
+    // The alive guard drops a late response after the effect re-runs or unmounts.
+    let alive = true
+    setLoading(true)
+    setLoadError(false)
+    setNotFound(false)
+    setItems([])
     api.get(endpoint, entity ? { params: { entity } } : undefined)
-      .then(r => setItems(unwrapList(r).rows))
+      .then(r => { if (alive) setItems(unwrapList(r).rows) })
       // A 404 means this lookup isn't deployed on the backend yet — surface the calm
       // notice when the caller opted in; every other/unscoped lookup keeps swallowing
       // silently as before (its endpoint always exists). Any OTHER failure (500/network)
       // is a real error, not "the tenant has no values yet" — show it instead of an
       // empty list with live CRUD buttons that would silently fail (§3).
       .catch(e => {
+        if (!alive) return
         if (notFoundNotice && e?.response?.status === 404) setNotFound(true)
         else setLoadError(true)
       })
-      .finally(() => setLoading(false))
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
   }, [endpoint, entity, notFoundNotice])
 
   // Open the modal blank (create) or prefilled with an existing item (edit).
@@ -97,9 +108,12 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
     if (!confirm(t('statusList.confirmDelete', { name: labelOf(item) }))) return
     setDeleting(item.id)
     // 409 = backend rejects deletion of an in-use item; keep the row and flag it.
+    // Any OTHER failure (500/network) still needs a visible signal — otherwise the
+    // row silently stays in the list with no explanation (§3: no silent catch).
     try { await api.delete(`${endpoint}/${item.id}`); setItems(p => p.filter(x => x.id !== item.id)) }
     catch (e) {
       if (e?.response?.status === 409) setItems(p => p.map(x => x.id === item.id ? { ...x, in_use: true } : x))
+      else notifyError(t('statusList.deleteFailed'))
     } finally { setDeleting(null) }
   }
 
@@ -125,6 +139,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
       await api.put(`${endpoint}/${item.id}`, { ...item, [key]: true })
     } catch {
       setItems(previous)
+      notifyError(t('statusList.saveFailed'))
     } finally {
       setSettingDefaultId(null)
     }

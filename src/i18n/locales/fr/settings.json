@@ -375,7 +375,8 @@
     "careerSiteActive": "Site carrière actif",
     "careerSiteOn": "Activé — site public des offres visible",
     "careerSiteOff": "Désactivé — site public inaccessible",
-    "careerSiteHint": "Activez ou désactivez le site carrière public (…/{tenant}/vacatures) pour ce client. Votre choix est enregistré ; le site public en tiendra compte dès que le backend l'appliquera."
+    "careerSiteHint": "Activez ou désactivez le site carrière public (…/{tenant}/vacatures) pour ce client. Votre choix est enregistré ; le site public en tiendra compte dès que le backend l'appliquera.",
+    "bannerUploadUnavailable": "Le téléversement n'est pas encore disponible — arrivera une fois le backend de téléversement en place."
   },
   "locations": {
     "title": "Emplacements",
@@ -468,6 +469,7 @@
     "iconLabel": "Icône (emoji)",
     "iconPlaceholder": "p. ex. 📞",
     "loadError": "Impossible de charger la liste.",
+    "deleteFailed": "Échec de la suppression.",
     "saveFailed": "Échec de l'enregistrement."
   },
   "phases": {
@@ -1141,7 +1143,8 @@
     "branchesTemplateHint": "L'ensemble de sites de départ attribué aux nouveaux utilisateurs ayant ce rôle. Les utilisateurs existants gardent leur propre ensemble — ceci ne modifie que le modèle.",
     "branchesEmptyHint": "Aucune agence sélectionnée — les nouveaux utilisateurs avec ce rôle démarrent sans rattachement et voient TOUS les candidats. Avec des agences rattachées, un utilisateur ne voit que les candidats de ces agences.",
     "branchesNoLocations": "Aucun site configuré pour le moment.",
-    "branchesSaveFailed": "Impossible d'enregistrer le modèle de sites. Veuillez réessayer."
+    "branchesSaveFailed": "Impossible d'enregistrer le modèle de sites. Veuillez réessayer.",
+    "appearanceSaveFailed": "Impossible d'enregistrer l'apparence. Veuillez réessayer."
   },
   "audit": {
     "title": "Journal d'audit",

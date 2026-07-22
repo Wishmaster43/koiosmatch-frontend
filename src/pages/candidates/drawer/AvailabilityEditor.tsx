@@ -7,7 +7,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, X, Check, Ban } from 'lucide-react'
-import { sectionBlock, sectionTitle } from './constants'
+import { sectionBlock, sectionTitle, softPill } from './constants'
 import { useCandidateAvailability } from '../hooks/useCandidatePlanning'
 import type { AvailStatus, DayPart } from '../hooks/useCandidatePlanning'
 import type { Id } from '@/types/common'
@@ -38,7 +38,8 @@ export default function AvailabilityEditor({ candidateId }: { candidateId?: Id }
   const sorted = [...entries].sort((a, b) => (a.date < b.date ? 1 : -1))
 
   const input = { padding: '5px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--bg)', color: 'var(--text)' } as const
-  const pill = (active: boolean) => ({ padding: '5px 12px', fontSize: 12, borderRadius: 99, cursor: 'pointer', border: `1px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`, background: active ? 'var(--color-primary)' : 'var(--bg)', color: active ? '#fff' : 'var(--text-muted)', fontWeight: active ? 600 : 400 })
+  // Soft-tint pill (§4) — never a solid fill; shared with roles/pools/open-shift filters.
+  const pill = (active: boolean) => ({ padding: '5px 12px', fontSize: 12, borderRadius: 99, cursor: 'pointer', ...softPill(active) })
 
   return (
     <div style={sectionBlock}>

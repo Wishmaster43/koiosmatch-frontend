@@ -20,6 +20,17 @@ export const sectionBlock: CSSProperties = { border: '1px solid var(--border)', 
 // block-level marginBottom is added here because Planning renders it as a bare span.
 export const sectionTitle: CSSProperties = { ...uiSectionTitle, display: 'block', marginBottom: 8 }
 
+// Soft-tint selectable pill (§4 color-mix formula, mirrors ApplicationsPage's bucket
+// tabs) — shared by the planning family (Availability / roles-pools chips / open-shift
+// filters) so the same solid-primary+white-text selection pill can't drift back into
+// three separate hand-rolled copies.
+export const softPill = (active: boolean, color: string = 'var(--color-primary)'): CSSProperties => ({
+  color: active ? color : 'var(--text-muted)',
+  fontWeight: active ? 600 : 400,
+  background: active ? `color-mix(in srgb, ${color} 14%, transparent)` : 'transparent',
+  border: `1px solid ${active ? `color-mix(in srgb, ${color} 45%, transparent)` : 'var(--border)'}`,
+})
+
 // Return-tab memory (NAV-BACK-1 tab-remember): candidate→Match cross-navigation
 // (MatchesTab's "open match" icon) stashes which drawer subtab was active so
 // browser BACK reopens the SAME subtab instead of resetting to Profile. In-memory

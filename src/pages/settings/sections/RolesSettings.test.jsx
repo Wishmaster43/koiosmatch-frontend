@@ -27,6 +27,7 @@ vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }
 })
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 afterEach(() => vi.clearAllMocks())
 
@@ -149,5 +150,40 @@ describe('RolesSettings — end-to-end toggle through the matrix', () => {
       '/roles/r1/permissions', { permissions: ['candidates.view', 'candidates.create'] }))
     // Retired group (SYNC-RETIRE-1): the BE still returns sync until removal — never rendered.
     expect(screen.queryByTitle('sync.refresh')).not.toBeInTheDocument()
+  })
+})
+
+// Audit finding: saveAppearance used to commit the local role + call onUpdate
+// BEFORE the PUT and swallow a failure — the picker kept showing an appearance
+// the backend never saved. It now reverts both the local card and the parent
+// list row, and notifies (§13 — assert the request AND the rolled-back state).
+describe('RolesSettings — appearance save reverts on failure', () => {
+  it('reverts the start-dashboard change and notifies when the PUT fails', async () => {
+    mockAuth.mockReturnValue({ user: { is_super_admin: false }, accessiblePages: [] })
+    // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture role's tenant-picked colour, not a style rule.
+    const role = { id: 'r1', name: 'recruiter', color: '#3B8FD4', icon: 'shield', users_count: 0, dashboard_type: null, permissions: [] }
+    api.get.mockImplementation((url) => {
+      if (url === '/roles') return Promise.resolve({ data: [role] })
+      if (url === '/permissions') return Promise.resolve({ data: {} })
+      if (url === '/roles/icons') return Promise.reject(new Error('404'))
+      if (url === '/roles/r1/branches') return Promise.resolve({ data: [] })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    api.put.mockRejectedValue(new Error('network down'))
+    const { notifyError } = await import('@/lib/notify')
+    const user = userEvent.setup()
+    render(<RolesSettings />)
+
+    await user.click(await screen.findByRole('button', { name: st('roles.edit') }))
+    const select = await screen.findByLabelText(st('roles.startDashboard'))
+    expect(select).toHaveValue('')
+
+    await user.selectOptions(select, 'recruitment')
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      '/roles/r1', { color: '#3B8FD4', icon: 'shield', dashboard_type: 'recruitment' }))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('roles.appearanceSaveFailed')))
+    // Reverted: the select falls back to the original (empty) dashboard type.
+    await waitFor(() => expect(select).toHaveValue(''))
   })
 })

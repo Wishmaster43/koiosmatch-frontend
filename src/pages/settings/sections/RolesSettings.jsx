@@ -153,11 +153,19 @@ function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }) {
 
   // Appearance (colour + icon) + start dashboard persist optimistically via PUT /roles/{id}.
   const saveAppearance = async (patch) => {
+    const previous = localRole
     const next = { color, icon: iconName, dashboard_type: localRole.dashboard_type ?? null, ...patch }
     const r = { ...localRole, color: next.color, icon: next.icon, dashboard_type: next.dashboard_type }
     setLocalRole(r); onUpdate(r)
     setSaving(true)
-    try { await api.put(`/roles/${localRole.id}`, { color: next.color, icon: next.icon, dashboard_type: next.dashboard_type }) } catch { /* noop */ }
+    try {
+      await api.put(`/roles/${localRole.id}`, { color: next.color, icon: next.icon, dashboard_type: next.dashboard_type })
+    } catch {
+      // Revert both the local card and the parent list row — otherwise the picker
+      // shows a colour/icon/dashboard the backend never actually saved (§3).
+      setLocalRole(previous); onUpdate(previous)
+      notifyError(t('roles.appearanceSaveFailed'))
+    }
     setSaving(false)
   }
 

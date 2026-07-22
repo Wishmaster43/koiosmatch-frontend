@@ -27,12 +27,13 @@ export const LANGUAGES = [
 ]
 
 // Role → colour (mirrors UsersPage). Label comes from the `users` i18n namespace.
+// All tokens (never ad-hoc hex) so the chip stays correct in dark mode too.
 export const ROLE_META: Record<string, { color: string; bg: string }> = {
-  super_admin:  { color: '#7C3AED', bg: '#F5F3FF' },
-  tenant_admin: { color: '#1D4ED8', bg: 'var(--color-secondary-bg)' },
-  admin:        { color: '#1D4ED8', bg: 'var(--color-secondary-bg)' },
-  planner:      { color: '#065F46', bg: '#ECFDF5' },
-  default:      { color: '#6B7280', bg: '#F3F4F6' },
+  super_admin:  { color: 'var(--color-violet)', bg: 'var(--color-violet-bg)' },
+  tenant_admin: { color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
+  admin:        { color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
+  planner:      { color: 'var(--color-success)', bg: 'var(--color-success-bg)' },
+  default:      { color: 'var(--text-muted)', bg: 'color-mix(in srgb, var(--text-muted) 12%, transparent)' },
 }
 
 // Shared text-input style for the profile forms.
@@ -43,13 +44,15 @@ export const inputStyle: CSSProperties = {
   transition: 'border-color 0.15s',
 }
 
-// Small coloured chip — used for roles and linked locations.
-export function Pill({ label, color = '#6B7280', bg = '#F3F4F6', icon: Icon }: {
+// Small coloured chip — used for roles and linked locations. Border uses
+// color-mix (not a hex-alpha string suffix) so it stays valid once `color` is a
+// CSS var() token, and stays correct across light/dark automatically.
+export function Pill({ label, color = 'var(--text-muted)', bg = 'color-mix(in srgb, var(--text-muted) 12%, transparent)', icon: Icon }: {
   label: ReactNode; color?: string; bg?: string; icon?: IconComp
 }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: bg, color,
-                   border: `1px solid ${color}22`, borderRadius: 999, padding: '3px 10px',
+                   border: `1px solid color-mix(in srgb, ${color} 30%, transparent)`, borderRadius: 999, padding: '3px 10px',
                    fontSize: 12, fontWeight: 500 }}>
       {Icon && <Icon size={11} />}{label}
     </span>

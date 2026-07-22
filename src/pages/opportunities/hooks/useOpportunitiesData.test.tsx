@@ -18,11 +18,12 @@ vi.mock('@/lib/useOpportunityStages', () => ({
 }))
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn() } }
+  return { ...actual, default: { get: vi.fn(), patch: vi.fn() } }
 })
 
 import api from '@/lib/api'
 const mockedGet = vi.mocked(api.get)
+const mockedPatch = vi.mocked(api.patch)
 
 // react-query needs a client in the tree; retry:false keeps failed-fetch tests fast.
 function wrapper({ children }: { children: ReactNode }) {
@@ -63,5 +64,20 @@ describe('useOpportunitiesData · ARCHIVE-1', () => {
     const { result } = renderHook(() => useOpportunitiesData(true), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.rows[0]).toMatchObject({ archived: true, archivedAt: '2026-07-10T00:00:00Z' })
+  })
+})
+
+describe('useOpportunitiesData · tags PATCH (audit finding: tags never persisted)', () => {
+  it('sends { tags } in the PATCH body when the drawer edits tags', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'o1', title: 'Deal A', tags: ['foo'] }] } })
+    mockedPatch.mockResolvedValue({ data: { data: {} } })
+    const { result } = renderHook(() => useOpportunitiesData(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    // Mirrors OpportunityDrawer's setTagsAndSave: onUpdate(id, { tags: next }).
+    result.current.updateOpportunity('o1', { tags: ['foo', 'bar'] })
+
+    await waitFor(() => expect(mockedPatch).toHaveBeenCalled())
+    expect(mockedPatch).toHaveBeenCalledWith('/opportunities/o1', { tags: ['foo', 'bar'] })
   })
 })

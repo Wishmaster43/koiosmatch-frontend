@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, LayoutList, Kanban, Archive } from 'lucide-react'
+import ViewModeToggle from '@/components/ui/ViewModeToggle'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
@@ -316,17 +317,11 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
               alongside the active set (MatchesTable renders the "Gearchiveerd" chip). */}
           <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
             label={t('view.archived')} color="var(--color-archive)" icon={Archive} />
-          {/* View toggle — icon-only (label as aria-label + tooltip, §6) */}
-          <button onClick={() => setView('table')} title={t('view.matches')} aria-label={t('view.matches')}
-            style={{ display: 'flex', padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
-              background: view === 'table' ? 'var(--color-primary)' : 'var(--surface)', color: view === 'table' ? '#fff' : 'var(--text)' }}>
-            <LayoutList size={16} aria-hidden="true" />
-          </button>
-          <button onClick={() => setView('board')} title={t('view.board')} aria-label={t('view.board')}
-            style={{ display: 'flex', padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
-              background: view === 'board' ? 'var(--color-primary)' : 'var(--surface)', color: view === 'board' ? '#fff' : 'var(--text)' }}>
-            <Kanban size={16} aria-hidden="true" />
-          </button>
+          {/* View toggle — shared soft-tint component (§4), never a solid fill. */}
+          <ViewModeToggle value={view} onChange={setView} options={[
+            { id: 'table', icon: LayoutList, label: t('view.matches') },
+            { id: 'board', icon: Kanban, label: t('view.board') },
+          ]} />
         </div>
       </div>
 

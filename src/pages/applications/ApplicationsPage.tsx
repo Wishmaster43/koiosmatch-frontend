@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutList, Kanban, Plus, Archive, MessageCircle, Users, X } from 'lucide-react'
+import ViewModeToggle from '@/components/ui/ViewModeToggle'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useAuth } from '@/context/AuthContext'
@@ -256,20 +257,11 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
               universal 'busy' category — the shared toggle (§4), never hand-rolled. */}
           <QuickViewToggle active={interviewBusy} onToggle={() => setInterviewBusy(v => !v)}
             label={t('interview.filterBusy')} color="var(--color-info)" icon={MessageCircle} />
-          <div style={{ display: 'flex', gap: 4 }}>
-            <button onClick={() => setView('table')} title={t('view.table')} aria-label={t('view.table')}
-              style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
-                background: view === 'table' ? 'var(--color-primary)' : 'var(--surface)',
-                color: view === 'table' ? '#fff' : 'var(--text)' }}>
-              <LayoutList size={16} />
-            </button>
-            <button onClick={() => setView('board')} title={t('view.board')} aria-label={t('view.board')}
-              style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
-                background: view === 'board' ? 'var(--color-primary)' : 'var(--surface)',
-                color: view === 'board' ? '#fff' : 'var(--text)' }}>
-              <Kanban size={16} />
-            </button>
-          </div>
+          {/* Table/board switcher — shared soft-tint component (§4), never a solid fill. */}
+          <ViewModeToggle value={view} onChange={setView} options={[
+            { id: 'table', icon: LayoutList, label: t('view.table') },
+            { id: 'board', icon: Kanban, label: t('view.board') },
+          ]} />
           </div>
         </div>
 

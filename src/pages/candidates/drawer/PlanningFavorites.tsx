@@ -41,7 +41,7 @@ export default function PlanningFavorites({ favorites, blacklist, targets, onAdd
   // The two cards: preference (favourite) and do-not-schedule (blacklist).
   const cards: { kind: PrefKind; icon: ReactNode; title: string; emptyText: string; data: Preference[] }[] = [
     { kind: 'favorite',  icon: <Heart size={14} color="var(--color-danger)" fill="var(--color-danger)" />, title: t('planning.preference'),    emptyText: t('planning.noPreferences'),  data: favorites },
-    { kind: 'blacklist', icon: <Ban size={14} color="#EF4444" />,                                          title: t('planning.doNotSchedule'), emptyText: t('planning.noRestrictions'), data: blacklist },
+    { kind: 'blacklist', icon: <Ban size={14} color="var(--color-danger)" />,                              title: t('planning.doNotSchedule'), emptyText: t('planning.noRestrictions'), data: blacklist },
   ]
 
   return (

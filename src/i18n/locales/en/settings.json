@@ -394,7 +394,8 @@
     "careerSiteActive": "Career site active",
     "careerSiteOn": "On — public vacancy site visible",
     "careerSiteOff": "Off — public site not reachable",
-    "careerSiteHint": "Turn the public career site (…/{tenant}/vacatures) on or off for this tenant. Your choice is saved; the public site will respect it once the backend enforces it."
+    "careerSiteHint": "Turn the public career site (…/{tenant}/vacatures) on or off for this tenant. Your choice is saved; the public site will respect it once the backend enforces it.",
+    "bannerUploadUnavailable": "Upload isn't available yet — coming once the upload backend exists."
   },
   "locations": {
     "title": "Locations",
@@ -487,7 +488,8 @@
     "iconLabel": "Icon (emoji)",
     "iconPlaceholder": "e.g. 📞",
     "loadError": "Could not load the list.",
-    "saveFailed": "Saving failed."
+    "saveFailed": "Saving failed.",
+    "deleteFailed": "Deleting failed."
   },
   "phases": {
     "title": "Phases",
@@ -1349,7 +1351,8 @@
     "branchesTemplateHint": "The starting set of branches new users with this role receive. Existing users keep their own set — this only edits the template.",
     "branchesEmptyHint": "No branches selected — new users with this role start without a branch link and see ALL candidates. With linked branches, a user only sees candidates from those branches.",
     "branchesNoLocations": "No branches configured yet.",
-    "branchesSaveFailed": "Couldn't save the branch template. Please try again."
+    "branchesSaveFailed": "Couldn't save the branch template. Please try again.",
+    "appearanceSaveFailed": "Couldn't save the appearance. Please try again."
   },
   "audit": {
     "title": "Audit log",

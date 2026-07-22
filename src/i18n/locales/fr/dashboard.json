@@ -1,4 +1,8 @@
 {
+  "page": {
+    "loading": "Chargement du tableau de bord…",
+    "loadError": "Impossible de charger le tableau de bord."
+  },
   "kpi": {
     "candidatesTotal": "Total candidats",
     "inAts": "Dans l'ATS",
@@ -17,10 +21,6 @@
     "placementsSub": "Tous les matchs",
     "fillRate": "Taux de remplissage",
     "fillRateSub": "Postes pourvus",
-    "failedWa": "WhatsApp échoués",
-    "failedWaSub": "Non délivrés",
-    "waQueue": "File WhatsApp",
-    "waQueueSub": "En file",
     "incompleteRuns": "Runs incomplets",
     "incompleteRunsSub": "Échoués/en attente",
     "activeConv": "Conversations actives",
@@ -46,7 +46,6 @@
     "expiringOpps": "Opportunités expirantes",
     "expiringOppsSub": "clôture proche",
     "pipelineHours": "Heures pipeline",
-    "hoursUnit": "h",
     "openVacancies": "Postes",
     "openVacanciesSub": "Actifs en gestion"
   },
@@ -57,7 +56,6 @@
     "byStage": "Opportunités par phase",
     "intakeOverTime": "Flux dans le temps",
     "intakeWeekly": "Flux de candidats et candidatures (hebdo)",
-    "comingSoon": "Le graphique apparaîtra dès que les données de séries temporelles seront disponibles.",
     "series": {
       "candidates": "Candidats",
       "applications": "Candidatures",
@@ -76,9 +74,6 @@
     "leadsPipeline": "Leads dans le pipeline",
     "recentRuns": "Exécutions récentes",
     "recentConversations": "Conversations récentes",
-    "waQueue": "File WhatsApp",
-    "waQueued": "En file",
-    "waFailed": "Échoués",
     "shifts": "Créneaux",
     "shiftsOpen": "Ouverts",
     "shiftsFilled": "Pourvus",

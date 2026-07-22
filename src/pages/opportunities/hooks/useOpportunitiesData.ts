@@ -158,6 +158,10 @@ export function useOpportunitiesData(includeArchived: boolean = false) {
     if ('contactId'    in patch) body.contact_id    = patch.contactId || null
     // §3B "Eigen velden" — the Extra tab patches the full merged map at once.
     if ('customFieldValues' in patch) body.custom_fields = patch.customFieldValues
+    // C-41 free-form tags — UpdateOpportunityRequest validates `tags` as a nullable
+    // array of strings and Opportunity::update() mass-assigns it straight through
+    // (measured: app/Http/Requests/Opportunity/OpportunityRequest.php + OpportunityController::update).
+    if ('tags' in patch) body.tags = patch.tags
     if (Object.keys(body).length) {
       api.patch(`/opportunities/${id}`, body).catch(() => {
         notifyError(t('common:actionFailed'))

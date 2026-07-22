@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { Plus, Loader2, LayoutGrid, List, Archive } from 'lucide-react'
 import WorkflowCard from './WorkflowCard'
 import WorkflowListRow from './WorkflowListRow'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import type { Workflow } from '@/types/workflow'
 import type { WorkflowFolder, FolderId } from './hooks/useWorkflowsData'
 import type { ViewMode } from './hooks/useWorkflowsFilters'
@@ -52,15 +53,9 @@ export default function WorkflowsListPanel({
           {/* Visible count */}
           <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('page.countWorkflows', { n: visibleWorkflows.length })}</span>
 
-          {/* Archived (soft-deleted) view toggle */}
-          <button onClick={() => setShowArchived(v => !v)} title={t('page.archivedView')}
-            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12, fontWeight: showArchived ? 600 : 500,
-              borderRadius: 8, cursor: 'pointer',
-              border: `1px solid ${showArchived ? 'var(--color-primary)' : 'var(--border)'}`,
-              background: showArchived ? 'var(--color-primary-bg)' : 'var(--surface)',
-              color: showArchived ? 'var(--color-primary)' : 'var(--text)' }}>
-            <Archive size={14} /> {t('page.archived')}
-          </button>
+          {/* Archived (soft-deleted) view — shared quick-view toggle (§4), never hand-rolled. */}
+          <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+            label={t('page.archived')} title={t('page.archivedView')} icon={Archive} />
 
           {/* View mode toggle — icon-pair, persisted (list is the Make.com-style default) */}
           <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
