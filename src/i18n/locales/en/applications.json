@@ -142,13 +142,23 @@
     "transcript": "Transcript",
     "empty": "No interviews yet.",
     "progress": "Interview phase",
+    "resume": "Resume",
     "category": {
       "busy": "In progress",
       "completed": "Completed",
-      "disqualified": "Disqualified"
+      "disqualified": "Disqualified",
+      "paused": "Paused"
     },
     "stepOf": "Step {{step}} of {{total}}",
     "filterBusy": "In interview",
+    "start": {
+      "label": "Start interview",
+      "agentPlaceholder": "Choose an AI agent",
+      "started": "Interview started.",
+      "unavailable": "Starting an interview isn't available yet — waiting on the backend link.",
+      "noAgentChosen": "Choose an AI agent first.",
+      "loadError": "Failed to load AI agents."
+    },
     "status": {
       "none": "No interview started for this application yet.",
       "noAgent": "Unknown agent",
@@ -168,7 +178,11 @@
       "takeoverSuccess": "You've taken over the conversation.",
       "takeoverUnavailable": "Taking over isn't available yet — waiting on the backend link.",
       "takeoverNotActive": "No active interview to take over.",
-      "takeoverFailed": "Taking over failed."
+      "takeoverFailed": "Taking over failed.",
+      "resumeBusy": "Working…",
+      "resumeSuccess": "You've resumed the conversation.",
+      "resumeUnavailable": "Resuming isn't available yet — waiting on the backend link.",
+      "resumeFailed": "Resuming failed."
     }
   },
   "appointments": {

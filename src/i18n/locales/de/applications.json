@@ -142,13 +142,23 @@
     "transcript": "Transkript",
     "empty": "Noch keine Interviews.",
     "progress": "Interview-Phase",
+    "resume": "Fortsetzen",
     "category": {
       "busy": "Läuft",
       "completed": "Abgeschlossen",
-      "disqualified": "Disqualifiziert"
+      "disqualified": "Disqualifiziert",
+      "paused": "Pausiert"
     },
     "stepOf": "Schritt {{step}} von {{total}}",
     "filterBusy": "Im Interview",
+    "start": {
+      "label": "Interview starten",
+      "agentPlaceholder": "KI-Agenten auswählen",
+      "started": "Interview gestartet.",
+      "unavailable": "Interview starten ist noch nicht verfügbar — wartet auf die Backend-Anbindung.",
+      "noAgentChosen": "Wähle zuerst einen KI-Agenten.",
+      "loadError": "KI-Agenten konnten nicht geladen werden."
+    },
     "status": {
       "none": "Für diese Bewerbung wurde noch kein Interview gestartet.",
       "noAgent": "Unbekannter Agent",
@@ -168,7 +178,11 @@
       "takeoverSuccess": "Du hast das Gespräch übernommen.",
       "takeoverUnavailable": "Übernahme ist noch nicht verfügbar — wartet auf die Backend-Anbindung.",
       "takeoverNotActive": "Kein aktives Interview zum Übernehmen.",
-      "takeoverFailed": "Übernahme fehlgeschlagen."
+      "takeoverFailed": "Übernahme fehlgeschlagen.",
+      "resumeBusy": "Wird ausgeführt…",
+      "resumeSuccess": "Du hast das Gespräch fortgesetzt.",
+      "resumeUnavailable": "Fortsetzen ist noch nicht verfügbar — wartet auf die Backend-Anbindung.",
+      "resumeFailed": "Fortsetzen ist fehlgeschlagen."
     }
   },
   "appointments": {

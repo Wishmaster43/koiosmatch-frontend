@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Hand } from 'lucide-react'
+import { Hand, PlayCircle } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import SoftChip from '@/components/ui/SoftChip'
 import StatusPill from '@/components/ui/StatusPill'
@@ -12,6 +12,7 @@ import { extractApiError } from '@/lib/extractApiError'
 import { BTN_H } from '@/config/buttonMetrics'
 import { interviewCategoryColor } from '../data/applicationsShared'
 import type { ApplicationInterview } from '@/types/application'
+import type { Id } from '@/types/common'
 
 // Soft-chip colour per turn (§4 semantic tokens, never ad-hoc hex) — who is
 // currently expected to act in the conversation.
@@ -50,6 +51,14 @@ const cardStyle: CSSProperties = {
   background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
 }
 
+const actionBtnStyle = (active: boolean, danger: boolean): CSSProperties => ({
+  display: 'inline-flex', alignItems: 'center', gap: 5,
+  fontSize: 12, fontWeight: 500, height: BTN_H, padding: '0 12px', borderRadius: 8,
+  border: `1px solid ${active ? (danger ? 'var(--color-danger)' : 'var(--color-primary)') : 'var(--border)'}`,
+  background: 'none', color: active ? (danger ? 'var(--color-danger)' : 'var(--color-primary)') : 'var(--text-muted)',
+  cursor: active ? 'pointer' : 'not-allowed', opacity: active ? 1 : 0.6,
+})
+
 /**
  * InterviewStatusCard — the compact "who's talking to whom, right now" summary
  * for the live interview session: agent, flow, turn, step and total duration
@@ -57,8 +66,16 @@ const cardStyle: CSSProperties = {
  * PROPOSED contract; every new field is optional so today's real payload
  * (which only sends category/step/total) renders the calm/honest branches
  * instead of crashing or inventing a value (§3 no fake affordances).
+ *
+ * INTERVIEW-STOP-1 (Danny 22-07): the stop/takeover button now calls the REAL
+ * `POST /applications/{id}/stop-interview` — the previous `/interviews/{id}/
+ * takeover` route was a phantom endpoint that never existed. A resume
+ * affordance mirrors it for the `paused` category → `POST /applications/{id}/
+ * resume-interview`. Both honest-gate a real 404 (route not shipped yet) AND
+ * the session's own `id` (still awaiting INTERVIEW-SESSION-ID-AGENT) — needs
+ * `applicationId` from the caller since neither route embeds the interview id.
  */
-export default function InterviewStatusCard({ interview }: { interview: ApplicationInterview | null }) {
+export default function InterviewStatusCard({ interview, applicationId }: { interview: ApplicationInterview | null; applicationId?: Id }) {
   const { t } = useTranslation('applications')
   const auth = useAuth()
   // Mirrors ApplicationsPage's own canManage gate (applications.update) — this
@@ -66,11 +83,12 @@ export default function InterviewStatusCard({ interview }: { interview: Applicat
   // right now), so it checks the permission directly, same source of truth.
   const canManage = auth?.hasPermission?.('applications.update') ?? false
 
-  // Optimistic "you just took over" override, plus a client-confirmed "the
-  // takeover endpoint doesn't exist yet" flag — set only after a REAL 404, never
-  // assumed up front (the honest-gate reacts to the actual response).
-  const [turnOverride, setTurnOverride] = useState<'recruiter' | null>(null)
-  const [takeoverUnavailable, setTakeoverUnavailable] = useState(false)
+  // Optimistic local override for both actions (stop → paused/recruiter, resume →
+  // busy/agent), plus per-action "the endpoint doesn't exist yet" flags — set only
+  // after a REAL 404, never assumed up front (the honest-gate reacts to the actual response).
+  const [override, setOverride] = useState<{ category: 'busy' | 'paused'; turn: 'agent' | 'recruiter' } | null>(null)
+  const [stopUnavailable, setStopUnavailable] = useState(false)
+  const [resumeUnavailable, setResumeUnavailable] = useState(false)
   const [busy, setBusy] = useState(false)
 
   // No session at all yet — a calm placeholder, not an empty blank area.
@@ -82,37 +100,62 @@ export default function InterviewStatusCard({ interview }: { interview: Applicat
     )
   }
 
-  const turn = turnOverride ?? interview.turn
+  const category = override?.category ?? interview.category
+  const turn = override?.turn ?? interview.turn
   const durationSeconds = resolveDurationSeconds(interview)
   const duration = durationSeconds != null ? splitDuration(durationSeconds) : null
   // True once the backend has actually sent ANY INTERVIEW-VISIBILITY-1 field —
   // until then, show ONE calm notice instead of four separate "unknown" chips.
   const hasVisibilityData = Boolean(interview.agent || interview.flowName || interview.turn || durationSeconds != null)
 
-  const canTakeOver = canManage && interview.category === 'busy' && interview.id != null && !takeoverUnavailable && turn !== 'recruiter'
-  const disabledReason = !canManage ? null
+  const canStop = canManage && category === 'busy' && interview.id != null && applicationId != null && !stopUnavailable && turn !== 'recruiter'
+  const stopDisabledReason = !canManage ? null
     : turn === 'recruiter' ? null
-    : interview.category !== 'busy' ? t('interview.status.takeoverNotActive')
-    : (interview.id == null || takeoverUnavailable) ? t('interview.status.takeoverUnavailable')
+    : category !== 'busy' ? t('interview.status.takeoverNotActive')
+    : (interview.id == null || applicationId == null || stopUnavailable) ? t('interview.status.takeoverUnavailable')
     : null
 
-  // Real POST — no fake affordance (§3): this really calls the proposed
-  // endpoint. A 404 (endpoint not shipped yet) disables the button honestly;
-  // any other failure surfaces a message but stays retryable.
-  const onTakeover = async () => {
-    if (!canTakeOver || busy) return
+  const canResume = canManage && category === 'paused' && interview.id != null && applicationId != null && !resumeUnavailable
+  const resumeDisabledReason = (interview.id == null || applicationId == null || resumeUnavailable) ? t('interview.status.resumeUnavailable') : null
+
+  // Real POST — no fake affordance (§3): this really calls the (now real)
+  // stop-interview endpoint. A 404 (endpoint not shipped yet) disables the
+  // button honestly; any other failure surfaces a message but stays retryable.
+  const onStop = async () => {
+    if (!canStop || busy) return
     setBusy(true)
     try {
-      await api.post(`/interviews/${interview.id}/takeover`)
-      setTurnOverride('recruiter')
+      await api.post(`/applications/${applicationId}/stop-interview`)
+      setOverride({ category: 'paused', turn: 'recruiter' })
       notifySuccess(t('interview.status.takeoverSuccess'))
     } catch (err) {
       const status = (err as { response?: { status?: number } })?.response?.status
       if (status === 404) {
-        setTakeoverUnavailable(true)
+        setStopUnavailable(true)
         notifyError(t('interview.status.takeoverUnavailable'))
       } else {
         notifyError(extractApiError(err, t('interview.status.takeoverFailed')))
+      }
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  // Mirrors onStop for the reverse action — hands control back to the agent.
+  const onResume = async () => {
+    if (!canResume || busy) return
+    setBusy(true)
+    try {
+      await api.post(`/applications/${applicationId}/resume-interview`)
+      setOverride({ category: 'busy', turn: 'agent' })
+      notifySuccess(t('interview.status.resumeSuccess'))
+    } catch (err) {
+      const status = (err as { response?: { status?: number } })?.response?.status
+      if (status === 404) {
+        setResumeUnavailable(true)
+        notifyError(t('interview.status.resumeUnavailable'))
+      } else {
+        notifyError(extractApiError(err, t('interview.status.resumeFailed')))
       }
     } finally {
       setBusy(false)
@@ -135,7 +178,7 @@ export default function InterviewStatusCard({ interview }: { interview: Applicat
         {turn && <SoftChip label={t(`interview.status.turn.${turn}`)} color={TURN_COLOR[turn]} round />}
 
         {/* Category + step (INTERVIEW-PHASE-1 — already real today). */}
-        <StatusPill label={t(`interview.category.${interview.category}`)} color={interviewCategoryColor(interview.category)} />
+        <StatusPill label={t(`interview.category.${category}`)} color={interviewCategoryColor(category)} />
         {interview.total > 0 && (
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
             {t('interview.stepOf', { step: interview.step ?? '–', total: interview.total })}
@@ -162,21 +205,27 @@ export default function InterviewStatusCard({ interview }: { interview: Applicat
         </span>
       )}
 
-      {/* Stop/takeover — authorization-gated (hidden, not just disabled, for a
-          user who may not manage this application). */}
+      {/* Stop/takeover + resume — authorization-gated (hidden, not just disabled,
+          for a user who may not manage this application). Resume only shows once
+          the session is actually paused; stop always shows (disabled otherwise),
+          mirroring the original single-button precedent. */}
       {canManage && (
-        <button type="button" onClick={onTakeover} disabled={!canTakeOver || busy}
-          aria-label={t('interview.status.takeover')} title={disabledReason ?? undefined}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 5, alignSelf: 'flex-start',
-            fontSize: 12, fontWeight: 500, height: BTN_H, padding: '0 12px', borderRadius: 8,
-            border: `1px solid ${canTakeOver ? 'var(--color-danger)' : 'var(--border)'}`, background: 'none',
-            color: canTakeOver ? 'var(--color-danger)' : 'var(--text-muted)',
-            cursor: canTakeOver && !busy ? 'pointer' : 'not-allowed', opacity: canTakeOver ? 1 : 0.6,
-          }}>
-          <Hand size={12} />
-          {busy ? t('interview.status.takeoverBusy') : t('interview.status.takeover')}
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button type="button" onClick={onStop} disabled={!canStop || busy}
+            aria-label={t('interview.status.takeover')} title={stopDisabledReason ?? undefined}
+            style={actionBtnStyle(canStop, true)}>
+            <Hand size={12} />
+            {busy ? t('interview.status.takeoverBusy') : t('interview.status.takeover')}
+          </button>
+          {category === 'paused' && (
+            <button type="button" onClick={onResume} disabled={!canResume || busy}
+              aria-label={t('interview.resume')} title={resumeDisabledReason ?? undefined}
+              style={actionBtnStyle(canResume, false)}>
+              <PlayCircle size={12} />
+              {busy ? t('interview.status.resumeBusy') : t('interview.resume')}
+            </button>
+          )}
+        </div>
       )}
     </div>
   )

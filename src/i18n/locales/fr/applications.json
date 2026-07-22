@@ -142,13 +142,23 @@
     "transcript": "Transcription",
     "empty": "Aucun entretien pour le moment.",
     "progress": "Phase d'entretien",
+    "resume": "Reprendre l'entretien",
     "category": {
       "busy": "En cours",
       "completed": "Terminé",
-      "disqualified": "Disqualifié"
+      "disqualified": "Disqualifié",
+      "paused": "En pause"
     },
     "stepOf": "Étape {{step}} sur {{total}}",
     "filterBusy": "En entretien",
+    "start": {
+      "label": "Démarrer l'entretien",
+      "agentPlaceholder": "Choisir un agent IA",
+      "started": "Entretien démarré.",
+      "unavailable": "Démarrer un entretien n'est pas encore disponible — en attente de la liaison backend.",
+      "noAgentChosen": "Choisissez d'abord un agent IA.",
+      "loadError": "Impossible de charger les agents IA."
+    },
     "status": {
       "none": "Aucun entretien n'a encore commencé pour cette candidature.",
       "noAgent": "Agent inconnu",
@@ -168,7 +178,11 @@
       "takeoverSuccess": "Vous avez repris la conversation.",
       "takeoverUnavailable": "La reprise n'est pas encore disponible — en attente de la liaison backend.",
       "takeoverNotActive": "Aucun entretien actif à reprendre.",
-      "takeoverFailed": "La reprise a échoué."
+      "takeoverFailed": "La reprise a échoué.",
+      "resumeBusy": "En cours…",
+      "resumeSuccess": "Vous avez remis la conversation à l'agent.",
+      "resumeUnavailable": "La reprise n'est pas encore disponible — en attente de la liaison backend.",
+      "resumeFailed": "La reprise a échoué."
     }
   },
   "appointments": {

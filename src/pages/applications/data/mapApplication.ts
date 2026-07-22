@@ -19,11 +19,16 @@ import type {
  * field names below — every one defaults to null so today's real payload
  * (which sends none of them yet) still maps cleanly. A backend field-name
  * change is a one-line fix here, not a UI rewrite.
+ *
+ * INTERVIEW-STOP-1 (Danny 22-07): `paused_at`/`paused_by` map the same way —
+ * nullable/defensive. Exported so Flow B (InterviewsTab's "start interview"
+ * action) can map a fresh session straight out of the POST response, without
+ * a full application refetch.
  */
-function mapInterview(raw?: ApiApplication['interview']): ApplicationInterview | null {
+export function mapInterview(raw?: ApiApplication['interview']): ApplicationInterview | null {
   if (!raw) return null
   const category = (raw.category
-    ?? (raw.disqualified_reason ? 'disqualified' : raw.completed_at ? 'completed' : 'busy')) as ApplicationInterview['category']
+    ?? (raw.disqualified_reason ? 'disqualified' : raw.completed_at ? 'completed' : raw.paused_at ? 'paused' : 'busy')) as ApplicationInterview['category']
   return {
     category,
     currentStatus: raw.current_status ?? null,
@@ -37,6 +42,8 @@ function mapInterview(raw?: ApiApplication['interview']): ApplicationInterview |
     lastMessageAt: raw.last_message_at ?? null,
     endedAt: raw.ended_at ?? null,
     durationSeconds: raw.duration_seconds ?? null,
+    pausedAt: raw.paused_at ?? null,
+    pausedBy: raw.paused_by?.id != null ? { id: raw.paused_by.id, name: raw.paused_by.name ?? '' } : null,
   }
 }
 

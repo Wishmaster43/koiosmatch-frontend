@@ -205,7 +205,16 @@
     "loadError": "No se pudieron cargar los agentes IA.",
     "explanation": "Un agente vinculado realiza las entrevistas de admisión para esta vacante. El progreso por candidato se muestra en la solicitud.",
     "flowTitle": "Entrevista",
-    "flowHint": "Vincula un agente para ver la entrevista."
+    "flowHint": "Vincula un agente para ver la entrevista.",
+    "backfill": {
+      "title": "Candidatos existentes",
+      "button": "Iniciar entrevista para los candidatos existentes",
+      "confirm": "¿Debe el agente también encargarse de los candidatos existentes de esta vacante? Esto enviará mensajes de WhatsApp.",
+      "confirmWithCount_one": "¿Debe el agente también encargarse del {{count}} candidato existente de esta vacante? Esto enviará mensajes de WhatsApp.",
+      "confirmWithCount_other": "¿Debe el agente también encargarse de los {{count}} candidatos existentes de esta vacante? Esto enviará mensajes de WhatsApp.",
+      "resultToast": "{{started}} iniciadas, {{skipped}} omitidas.",
+      "unavailable": "Iniciar entrevistas para los candidatos existentes aún no está disponible — a la espera de la conexión con el backend."
+    }
   },
   "generate": {
     "button": "Generar con Koios",

@@ -205,7 +205,16 @@
     "loadError": "Failed to load AI agents.",
     "explanation": "A linked agent conducts the intake interviews for this vacancy. Per-candidate progress is shown on the application.",
     "flowTitle": "Interview",
-    "flowHint": "Link an agent to see the interview."
+    "flowHint": "Link an agent to see the interview.",
+    "backfill": {
+      "title": "Existing applicants",
+      "button": "Start interview for existing applicants",
+      "confirm": "Also have the agent pick up this vacancy's existing applicants? This sends WhatsApp messages.",
+      "confirmWithCount_one": "Also have the agent pick up this vacancy's {{count}} existing applicant? This sends WhatsApp messages.",
+      "confirmWithCount_other": "Also have the agent pick up this vacancy's {{count}} existing applicants? This sends WhatsApp messages.",
+      "resultToast": "{{started}} started, {{skipped}} skipped.",
+      "unavailable": "Starting interviews for existing applicants isn't available yet — waiting on the backend link."
+    }
   },
   "generate": {
     "button": "Generate with Koios",

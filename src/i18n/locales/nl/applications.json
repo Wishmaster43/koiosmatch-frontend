@@ -142,13 +142,23 @@
     "transcript": "Transcript",
     "empty": "Nog geen interviews.",
     "progress": "Interviewfase",
+    "resume": "Hervatten",
     "category": {
       "busy": "Bezig",
       "completed": "Afgerond",
-      "disqualified": "Afgewezen"
+      "disqualified": "Afgewezen",
+      "paused": "Gepauzeerd"
     },
     "stepOf": "Stap {{step}} van {{total}}",
     "filterBusy": "In interview",
+    "start": {
+      "label": "Interview starten",
+      "agentPlaceholder": "Kies een AI-agent",
+      "started": "Interview gestart.",
+      "unavailable": "Interview starten is nog niet beschikbaar — wacht op de backend-koppeling.",
+      "noAgentChosen": "Kies eerst een AI-agent.",
+      "loadError": "AI-agenten laden is mislukt."
+    },
     "status": {
       "none": "Nog geen interview gestart voor deze sollicitatie.",
       "noAgent": "Onbekende agent",
@@ -168,7 +178,11 @@
       "takeoverSuccess": "Je hebt het gesprek overgenomen.",
       "takeoverUnavailable": "Overnemen is nog niet beschikbaar — wacht op de backend-koppeling.",
       "takeoverNotActive": "Geen actief interview om over te nemen.",
-      "takeoverFailed": "Overnemen is mislukt."
+      "takeoverFailed": "Overnemen is mislukt.",
+      "resumeBusy": "Bezig…",
+      "resumeSuccess": "Je hebt het gesprek hervat.",
+      "resumeUnavailable": "Hervatten is nog niet beschikbaar — wacht op de backend-koppeling.",
+      "resumeFailed": "Hervatten is mislukt."
     }
   },
   "appointments": {

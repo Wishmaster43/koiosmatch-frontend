@@ -205,7 +205,16 @@
     "loadError": "Impossible de charger les agents IA.",
     "explanation": "Un agent associé mène les entretiens d'intake pour cette offre. La progression par candidat s'affiche sur la candidature.",
     "flowTitle": "Entretien",
-    "flowHint": "Associez un agent pour voir l'entretien."
+    "flowHint": "Associez un agent pour voir l'entretien.",
+    "backfill": {
+      "title": "Candidats existants",
+      "button": "Démarrer l'entretien pour les candidats existants",
+      "confirm": "L'agent doit-il aussi prendre en charge les candidats existants de cette offre ? Cela enverra des messages WhatsApp.",
+      "confirmWithCount_one": "L'agent doit-il aussi prendre en charge le {{count}} candidat existant de cette offre ? Cela enverra des messages WhatsApp.",
+      "confirmWithCount_other": "L'agent doit-il aussi prendre en charge les {{count}} candidats existants de cette offre ? Cela enverra des messages WhatsApp.",
+      "resultToast": "{{started}} démarré(s), {{skipped}} ignoré(s).",
+      "unavailable": "Démarrer l'entretien pour les candidats existants n'est pas encore disponible — en attente de la liaison backend."
+    }
   },
   "generate": {
     "button": "Générer avec Koios",

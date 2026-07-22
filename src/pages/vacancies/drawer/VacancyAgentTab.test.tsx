@@ -28,11 +28,16 @@ import type { AiAgent } from '@/types/ai'
 // Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn(), patch: vi.fn() } }
+  return { ...actual, default: { get: vi.fn(), patch: vi.fn(), post: vi.fn() } }
 })
+// INTERVIEW-BACKFILL-1: assert the real toast text, not just that a callback fired.
+const mockNotifySuccess = vi.fn()
+const mockNotifyError = vi.fn()
+vi.mock('@/lib/notify', () => ({ notifySuccess: (...a: unknown[]) => mockNotifySuccess(...a), notifyError: (...a: unknown[]) => mockNotifyError(...a) }))
 
 const mockGet   = api.get   as unknown as ReturnType<typeof vi.fn>
 const mockPatch = api.patch as unknown as ReturnType<typeof vi.fn>
+const mockPost  = api.post  as unknown as ReturnType<typeof vi.fn>
 
 // One agent shaped like the real GET /ai/agents response (mirrors
 // AIManagementTabs.test.tsx), carrying an interview flow so the read-only
@@ -94,7 +99,7 @@ const routeGet = (detail: Record<string, unknown>, agents: unknown[] = [mockAgen
     return Promise.resolve({ data: [] })
   }
 
-beforeEach(() => { mockGet.mockReset(); mockPatch.mockReset() })
+beforeEach(() => { mockGet.mockReset(); mockPatch.mockReset(); mockPost.mockReset(); mockNotifySuccess.mockReset(); mockNotifyError.mockReset() })
 
 describe('VacancyAgentTab · picker → PATCH ai_agent_id + read-only interview flow', () => {
   it('links an agent: PATCHes ai_agent_id and then shows the interview flow it carries', async () => {
@@ -142,5 +147,67 @@ describe('VacancyAgentTab · picker → PATCH ai_agent_id + read-only interview 
     await waitFor(() => screen.getByText(LOAD_ERROR))
     // The currently-linked name still shows even though the fresh list failed.
     expect(screen.getByText('Kelly')).toBeInTheDocument()
+  })
+})
+
+// INTERVIEW-BACKFILL-1 (speculative, Danny 22-07): the "start interview for
+// existing applicants" action — only visible once an agent is linked, always
+// confirmed first (AVG: never auto-fires, this sends WhatsApp messages), and
+// honest-gated on a real 404.
+const BACKFILL_BUTTON = 'Interview starten voor bestaande sollicitanten'
+
+describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)', () => {
+  it('does not render the backfill action when no agent is linked', async () => {
+    mockGet.mockImplementation(routeGet(rawDetail()))
+    renderHarness()
+    await waitFor(() => screen.getByText(FLOW_HINT))
+    expect(screen.queryByRole('button', { name: BACKFILL_BUTTON })).toBeNull()
+  })
+
+  it('confirms with the generic message when the vacancy carries no applicant count, then POSTs and toasts the result', async () => {
+    mockGet.mockImplementation(routeGet(rawDetail({ ai_agent: { id: 'a1', name: 'Kelly' } })))
+    renderHarness()
+    await waitFor(() => screen.getByText('Zorgintake (9 stappen)'))
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: BACKFILL_BUTTON }))
+    expect(screen.getByText(/Dit stuurt WhatsApp-berichten\.$/)).toBeInTheDocument()
+
+    mockPost.mockResolvedValueOnce({ data: { data: { started: 3, skipped: 1, eligible_total: 4 } } })
+    await user.click(screen.getByRole('button', { name: 'Bevestigen' }))
+
+    expect(mockPost).toHaveBeenCalledWith('/vacancies/v1/start-interviews')
+    await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('3 gestart, 1 overgeslagen.'))
+  })
+
+  it('confirms with the applicant COUNT in the message when the vacancy carries one', async () => {
+    mockGet.mockImplementation(routeGet(rawDetail({ ai_agent: { id: 'a1', name: 'Kelly' }, applications_count: 3 })))
+    renderHarness()
+    await waitFor(() => screen.getByText('Zorgintake (9 stappen)'))
+    await userEvent.click(screen.getByRole('button', { name: BACKFILL_BUTTON }))
+    expect(screen.getByText(/^3 bestaande sollicitanten van deze vacature/)).toBeInTheDocument()
+  })
+
+  it('cancelling the confirm dialog never calls the API', async () => {
+    mockGet.mockImplementation(routeGet(rawDetail({ ai_agent: { id: 'a1', name: 'Kelly' } })))
+    renderHarness()
+    await waitFor(() => screen.getByText('Zorgintake (9 stappen)'))
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: BACKFILL_BUTTON }))
+    await user.click(screen.getByRole('button', { name: 'Annuleren' }))
+    expect(mockPost).not.toHaveBeenCalled()
+  })
+
+  it('honest-gates a 404 (route not shipped yet): disables the button and shows the calm notice', async () => {
+    mockGet.mockImplementation(routeGet(rawDetail({ ai_agent: { id: 'a1', name: 'Kelly' } })))
+    renderHarness()
+    await waitFor(() => screen.getByText('Zorgintake (9 stappen)'))
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: BACKFILL_BUTTON }))
+    mockPost.mockRejectedValueOnce({ response: { status: 404 } })
+    await user.click(screen.getByRole('button', { name: 'Bevestigen' }))
+
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Interview starten voor bestaande sollicitanten is nog niet beschikbaar — wacht op de backend-koppeling.'))
+    expect(screen.getByRole('button', { name: BACKFILL_BUTTON })).toBeDisabled()
   })
 })

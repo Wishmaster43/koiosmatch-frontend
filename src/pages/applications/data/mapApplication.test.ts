@@ -80,6 +80,7 @@ describe('mapApplication', () => {
       expect(mapped.interview).toEqual({
         category: 'busy', currentStatus: 'ACTIVE_IN_CARE', step: 2, total: 12,
         id: null, agent: null, flowName: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
+        pausedAt: null, pausedBy: null,
       })
     })
 
@@ -103,7 +104,32 @@ describe('mapApplication', () => {
       expect(mapped.interview).toEqual({
         category: 'busy', currentStatus: null, step: null, total: 0,
         id: null, agent: null, flowName: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
+        pausedAt: null, pausedBy: null,
       })
+    })
+  })
+
+  // INTERVIEW-STOP-1 (Danny 22-07): the `paused` category + who/when paused it.
+  describe('interview paused (INTERVIEW-STOP-1)', () => {
+    it('passes through an explicit paused category with paused_at/paused_by', () => {
+      const mapped = mapApplication({
+        id: 27,
+        interview: { category: 'paused', paused_at: '2026-07-22T10:00:00Z', paused_by: { id: 'u1', name: 'Bente de Jong' } },
+      })
+      expect(mapped.interview?.category).toBe('paused')
+      expect(mapped.interview?.pausedAt).toBe('2026-07-22T10:00:00Z')
+      expect(mapped.interview?.pausedBy).toEqual({ id: 'u1', name: 'Bente de Jong' })
+    })
+
+    it('derives paused from paused_at alone when the category field is omitted', () => {
+      const mapped = mapApplication({ id: 28, interview: { paused_at: '2026-07-22T10:00:00Z' } })
+      expect(mapped.interview?.category).toBe('paused')
+    })
+
+    it('leaves pausedAt/pausedBy null when absent, and pausedBy null when its id is missing', () => {
+      const mapped = mapApplication({ id: 29, interview: { category: 'busy', paused_by: { name: 'No id' } } })
+      expect(mapped.interview?.pausedAt).toBeNull()
+      expect(mapped.interview?.pausedBy).toBeNull()
     })
   })
 

@@ -205,7 +205,16 @@
     "loadError": "AI-agenten laden is mislukt.",
     "explanation": "Een gekoppelde agent voert de intake-interviews voor deze vacature. De voortgang per kandidaat zie je bij de sollicitatie.",
     "flowTitle": "Interview",
-    "flowHint": "Koppel een agent om het interview te zien."
+    "flowHint": "Koppel een agent om het interview te zien.",
+    "backfill": {
+      "title": "Bestaande sollicitanten",
+      "button": "Interview starten voor bestaande sollicitanten",
+      "confirm": "De bestaande sollicitanten van deze vacature ook laten oppakken door de agent? Dit stuurt WhatsApp-berichten.",
+      "confirmWithCount_one": "{{count}} bestaande sollicitant van deze vacature ook laten oppakken door de agent? Dit stuurt WhatsApp-berichten.",
+      "confirmWithCount_other": "{{count}} bestaande sollicitanten van deze vacature ook laten oppakken door de agent? Dit stuurt WhatsApp-berichten.",
+      "resultToast": "{{started}} gestart, {{skipped}} overgeslagen.",
+      "unavailable": "Interview starten voor bestaande sollicitanten is nog niet beschikbaar — wacht op de backend-koppeling."
+    }
   },
   "generate": {
     "button": "Genereer met Koios",

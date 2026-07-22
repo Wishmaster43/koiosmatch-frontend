@@ -15,23 +15,28 @@ export interface ApplicationOwner {
 
 /**
  * INTERVIEW-PHASE-1: the live AI-interview session's UNIVERSAL category
- * (busy/completed/disqualified — works across flows with different questions)
- * plus its progress within THIS flow's own status list (a Helpende flow may
- * have 3 steps, a Verpleegkundige flow 12). Null = no interview session at all
- * (the backend's `interview_status=none` filter bucket).
+ * (busy/completed/disqualified/paused — works across flows with different
+ * questions) plus its progress within THIS flow's own status list (a Helpende
+ * flow may have 3 steps, a Verpleegkundige flow 12). Null = no interview
+ * session at all (the backend's `interview_status=none` filter bucket).
  *
  * INTERVIEW-VISIBILITY-1 (speculative, Danny 21-07): `id`/`agent`/`flowName`/
  * `turn`/timing fields are awaiting CMBE's confirmed contract — today's real
  * ApplicationDetailResource::interviewSession() sends none of them, so they
  * stay nullable and default to null. The UI honest-gates on their absence
  * rather than assuming a fake value (§3).
+ *
+ * INTERVIEW-STOP-1 (Danny 22-07): `paused` is the category a session moves to
+ * once a recruiter stops the agent (`POST /applications/{id}/stop-interview`);
+ * `pausedAt`/`pausedBy` record when/who — both nullable until that ships.
  */
 export interface ApplicationInterview {
-  category: 'busy' | 'completed' | 'disqualified'
+  category: 'busy' | 'completed' | 'disqualified' | 'paused'
   currentStatus: string | null
   step: number | null
   total: number
-  // The interview session's own id — required to call the takeover endpoint.
+  // The interview session's own id — awaited from INTERVIEW-SESSION-ID-AGENT;
+  // the stop/resume actions honest-gate on its presence rather than assume it.
   id: Id | null
   agent: { id: Id; name: string } | null
   flowName: string | null
@@ -40,6 +45,8 @@ export interface ApplicationInterview {
   lastMessageAt: string | null
   endedAt: string | null
   durationSeconds: number | null
+  pausedAt: string | null
+  pausedBy: { id: Id; name: string } | null
 }
 
 /** The flat application model rendered by the table/board. */
@@ -187,6 +194,8 @@ export interface ApiApplication {
   // INTERVIEW-VISIBILITY-1 (speculative): `id`/`agent`/`flow_name`/`turn`/timing
   // fields per the proposed-but-unconfirmed contract — all optional so today's
   // real payload (which omits them) still maps cleanly.
+  // INTERVIEW-STOP-1: `paused_at`/`paused_by` ride along once a recruiter stops
+  // the agent — also optional/nullable, same defensive treatment.
   interview?: {
     id?: Id
     category?: string
@@ -203,6 +212,8 @@ export interface ApiApplication {
     last_message_at?: string | null
     ended_at?: string | null
     duration_seconds?: number | null
+    paused_at?: string | null
+    paused_by?: { id?: Id; name?: string } | null
   } | null
   interviews?: Array<{
     id?: Id; channel?: string; status?: string; created_at?: string; time?: string; summary?: string

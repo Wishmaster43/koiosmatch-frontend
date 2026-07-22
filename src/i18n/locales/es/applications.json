@@ -142,13 +142,23 @@
     "transcript": "Transcripción",
     "empty": "Aún no hay entrevistas.",
     "progress": "Fase de entrevista",
+    "resume": "Reanudar",
     "category": {
       "busy": "En curso",
       "completed": "Completado",
-      "disqualified": "Descalificado"
+      "disqualified": "Descalificado",
+      "paused": "En pausa"
     },
     "stepOf": "Paso {{step}} de {{total}}",
     "filterBusy": "En entrevista",
+    "start": {
+      "label": "Iniciar entrevista",
+      "agentPlaceholder": "Elegir un agente IA",
+      "started": "Entrevista iniciada.",
+      "unavailable": "Iniciar una entrevista aún no está disponible — a la espera de la conexión con el backend.",
+      "noAgentChosen": "Elige primero un agente IA.",
+      "loadError": "No se pudieron cargar los agentes IA."
+    },
     "status": {
       "none": "Aún no se ha iniciado ninguna entrevista para esta solicitud.",
       "noAgent": "Agente desconocido",
@@ -168,7 +178,11 @@
       "takeoverSuccess": "Has retomado la conversación.",
       "takeoverUnavailable": "Retomar aún no está disponible — a la espera de la conexión con el backend.",
       "takeoverNotActive": "No hay ninguna entrevista activa para retomar.",
-      "takeoverFailed": "No se pudo retomar la conversación."
+      "takeoverFailed": "No se pudo retomar la conversación.",
+      "resumeBusy": "Procesando…",
+      "resumeSuccess": "Has reanudado la conversación.",
+      "resumeUnavailable": "Reanudar aún no está disponible — a la espera de la conexión con el backend.",
+      "resumeFailed": "No se pudo reanudar la conversación."
     }
   },
   "appointments": {

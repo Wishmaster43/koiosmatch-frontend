@@ -3,8 +3,13 @@
  * confirmed contract): the honest-gated "no session yet" placeholder, the rich
  * status render once agent/turn/flow/duration are present, the calm notice
  * when they are still absent (today's real payload), the duration derivation,
- * and the takeover button's real POST + honest 404-disable (§13: asserts the
- * request, not just that a callback fired).
+ * and the stop/resume buttons' real POSTs + honest 404-disable (§13: asserts
+ * the request, not just that a callback fired).
+ *
+ * INTERVIEW-STOP-1 (Danny 22-07): the stop button now POSTs the REAL
+ * `/applications/{id}/stop-interview` (the previous `/interviews/{id}/takeover`
+ * route was a phantom endpoint) — every render passes `applicationId`. A
+ * `paused` category renders a resume button POSTing `/resume-interview`.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -31,6 +36,7 @@ const fullInterview = (overrides: Partial<ApplicationInterview> = {}): Applicati
   category: 'busy', currentStatus: 'ACTIVE_IN_CARE', step: 2, total: 5,
   id: 'iv-1', agent: { id: 'a-1', name: 'Verpleegkundige-agent' }, flowName: 'Verpleegkundige intake',
   turn: 'agent', startedAt: '2026-07-21T09:00:00Z', lastMessageAt: '2026-07-21T09:07:00Z', endedAt: null, durationSeconds: null,
+  pausedAt: null, pausedBy: null,
   ...overrides,
 })
 
@@ -38,6 +44,7 @@ const fullInterview = (overrides: Partial<ApplicationInterview> = {}): Applicati
 const bareInterview: ApplicationInterview = {
   category: 'busy', currentStatus: 'X', step: 1, total: 3,
   id: null, agent: null, flowName: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
+  pausedAt: null, pausedBy: null,
 }
 
 beforeEach(() => {
@@ -93,35 +100,35 @@ describe('InterviewStatusCard · no session', () => {
 
 describe('InterviewStatusCard · rich render (future/confirmed contract)', () => {
   it('shows the agent name, flow name and turn chip when present', () => {
-    render(<InterviewStatusCard interview={fullInterview()} />)
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
     expect(screen.getByText('Verpleegkundige-agent')).toBeInTheDocument()
     expect(screen.getByText('Verpleegkundige intake')).toBeInTheDocument()
     expect(screen.getByText('interview.status.turn.agent')).toBeInTheDocument()
   })
 
   it('picks the minutes-only key under an hour, and the hours+minutes key over an hour', () => {
-    const { rerender } = render(<InterviewStatusCard interview={fullInterview()} />)
+    const { rerender } = render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
     expect(screen.getByText('interview.status.durationMinutes')).toBeInTheDocument()
-    rerender(<InterviewStatusCard interview={fullInterview({ durationSeconds: 3720 })} />)
+    rerender(<InterviewStatusCard interview={fullInterview({ durationSeconds: 3720 })} applicationId="app-1" />)
     expect(screen.getByText('interview.status.durationHours')).toBeInTheDocument()
   })
 
   it('does not show the visibility-pending notice once real data is present', () => {
-    render(<InterviewStatusCard interview={fullInterview()} />)
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
     expect(screen.queryByText('interview.status.visibilityPending')).toBeNull()
   })
 })
 
 describe("InterviewStatusCard · honest gate (today's real payload)", () => {
   it('shows "unknown agent" and the visibility-pending notice when the new fields are absent', () => {
-    render(<InterviewStatusCard interview={bareInterview} />)
+    render(<InterviewStatusCard interview={bareInterview} applicationId="app-1" />)
     expect(screen.getByText('interview.status.noAgent')).toBeInTheDocument()
     expect(screen.getByText('interview.status.visibilityPending')).toBeInTheDocument()
     expect(screen.getByText('interview.status.durationUnknown')).toBeInTheDocument()
   })
 
   it('still renders the category + step, which already works today (INTERVIEW-PHASE-1)', () => {
-    render(<InterviewStatusCard interview={bareInterview} />)
+    render(<InterviewStatusCard interview={bareInterview} applicationId="app-1" />)
     expect(screen.getByText('interview.category.busy')).toBeInTheDocument()
     expect(screen.getByText('interview.stepOf')).toBeInTheDocument()
   })
@@ -130,38 +137,46 @@ describe("InterviewStatusCard · honest gate (today's real payload)", () => {
 describe('InterviewStatusCard · authorization gate', () => {
   it('hides the takeover button entirely for a user without applications.update', () => {
     mockUseAuth.mockReturnValue({ hasPermission: () => false })
-    render(<InterviewStatusCard interview={fullInterview()} />)
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
     expect(screen.queryByRole('button')).toBeNull()
   })
 })
 
-describe('InterviewStatusCard · takeover button', () => {
+describe('InterviewStatusCard · takeover (stop) button', () => {
   it('disables the button with an honest reason when the interview has no id yet', () => {
-    render(<InterviewStatusCard interview={fullInterview({ id: null })} />)
+    render(<InterviewStatusCard interview={fullInterview({ id: null })} applicationId="app-1" />)
+    const btn = screen.getByRole('button', { name: 'interview.status.takeover' })
+    expect(btn).toBeDisabled()
+    expect(btn).toHaveAttribute('title', 'interview.status.takeoverUnavailable')
+  })
+
+  it('disables the button with an honest reason when applicationId is missing (no route to call)', () => {
+    render(<InterviewStatusCard interview={fullInterview()} />)
     const btn = screen.getByRole('button', { name: 'interview.status.takeover' })
     expect(btn).toBeDisabled()
     expect(btn).toHaveAttribute('title', 'interview.status.takeoverUnavailable')
   })
 
   it('disables the button with an honest reason when the interview is not busy', () => {
-    render(<InterviewStatusCard interview={fullInterview({ category: 'completed' })} />)
+    render(<InterviewStatusCard interview={fullInterview({ category: 'completed' })} applicationId="app-1" />)
     const btn = screen.getByRole('button', { name: 'interview.status.takeover' })
     expect(btn).toBeDisabled()
     expect(btn).toHaveAttribute('title', 'interview.status.takeoverNotActive')
   })
 
-  it('POSTs /interviews/{id}/takeover and flips the turn chip on success', async () => {
+  it('POSTs /applications/{id}/stop-interview (never the phantom /interviews/{id}/takeover route) and flips the category to paused', async () => {
     mockPost.mockResolvedValueOnce({ data: {} })
-    render(<InterviewStatusCard interview={fullInterview()} />)
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
     await userEvent.click(screen.getByRole('button', { name: 'interview.status.takeover' }))
-    expect(mockPost).toHaveBeenCalledWith('/interviews/iv-1/takeover')
+    expect(mockPost).toHaveBeenCalledWith('/applications/app-1/stop-interview')
     await waitFor(() => expect(screen.getByText('interview.status.turn.recruiter')).toBeInTheDocument())
+    expect(screen.getByText('interview.category.paused')).toBeInTheDocument()
     expect(mockNotifySuccess).toHaveBeenCalledWith('interview.status.takeoverSuccess')
   })
 
   it('honest-gates a 404 (endpoint not shipped yet): disables the button and shows the calm message', async () => {
     mockPost.mockRejectedValueOnce({ response: { status: 404 } })
-    render(<InterviewStatusCard interview={fullInterview()} />)
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
     const btn = screen.getByRole('button', { name: 'interview.status.takeover' })
     await userEvent.click(btn)
     await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('interview.status.takeoverUnavailable'))
@@ -170,8 +185,49 @@ describe('InterviewStatusCard · takeover button', () => {
 
   it('surfaces a non-404 failure via extractApiError but keeps the button retryable', async () => {
     mockPost.mockRejectedValueOnce({ response: { status: 500, data: { message: 'Server broke' } } })
-    render(<InterviewStatusCard interview={fullInterview()} />)
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
     const btn = screen.getByRole('button', { name: 'interview.status.takeover' })
+    await userEvent.click(btn)
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Server broke'))
+    expect(btn).not.toBeDisabled()
+  })
+})
+
+describe('InterviewStatusCard · resume button (paused category)', () => {
+  it('renders no resume button while the session is busy (not paused)', () => {
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
+    expect(screen.queryByRole('button', { name: 'interview.resume' })).toBeNull()
+  })
+
+  it('renders a disabled resume button with an honest reason when the session has no id yet', () => {
+    render(<InterviewStatusCard interview={fullInterview({ category: 'paused', id: null })} applicationId="app-1" />)
+    const btn = screen.getByRole('button', { name: 'interview.resume' })
+    expect(btn).toBeDisabled()
+    expect(btn).toHaveAttribute('title', 'interview.status.resumeUnavailable')
+  })
+
+  it('POSTs /applications/{id}/resume-interview and flips the category back to busy', async () => {
+    mockPost.mockResolvedValueOnce({ data: {} })
+    render(<InterviewStatusCard interview={fullInterview({ category: 'paused', turn: 'recruiter' })} applicationId="app-1" />)
+    await userEvent.click(screen.getByRole('button', { name: 'interview.resume' }))
+    expect(mockPost).toHaveBeenCalledWith('/applications/app-1/resume-interview')
+    await waitFor(() => expect(screen.getByText('interview.category.busy')).toBeInTheDocument())
+    expect(mockNotifySuccess).toHaveBeenCalledWith('interview.status.resumeSuccess')
+  })
+
+  it('honest-gates a 404 (endpoint not shipped yet): disables the button and shows the calm message', async () => {
+    mockPost.mockRejectedValueOnce({ response: { status: 404 } })
+    render(<InterviewStatusCard interview={fullInterview({ category: 'paused' })} applicationId="app-1" />)
+    const btn = screen.getByRole('button', { name: 'interview.resume' })
+    await userEvent.click(btn)
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('interview.status.resumeUnavailable'))
+    expect(btn).toBeDisabled()
+  })
+
+  it('surfaces a non-404 failure via extractApiError but keeps the button retryable', async () => {
+    mockPost.mockRejectedValueOnce({ response: { status: 500, data: { message: 'Server broke' } } })
+    render(<InterviewStatusCard interview={fullInterview({ category: 'paused' })} applicationId="app-1" />)
+    const btn = screen.getByRole('button', { name: 'interview.resume' })
     await userEvent.click(btn)
     await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Server broke'))
     expect(btn).not.toBeDisabled()

@@ -205,7 +205,16 @@
     "loadError": "KI-Agenten konnten nicht geladen werden.",
     "explanation": "Ein verknüpfter Agent führt die Intake-Interviews für diese Stelle. Der Fortschritt pro Kandidat wird bei der Bewerbung angezeigt.",
     "flowTitle": "Interview",
-    "flowHint": "Verknüpfen Sie einen Agenten, um das Interview zu sehen."
+    "flowHint": "Verknüpfen Sie einen Agenten, um das Interview zu sehen.",
+    "backfill": {
+      "title": "Bestehende Bewerber",
+      "button": "Interview für bestehende Bewerber starten",
+      "confirm": "Sollen die bestehenden Bewerber dieser Stelle auch vom Agenten übernommen werden? Dies verschickt WhatsApp-Nachrichten.",
+      "confirmWithCount_one": "Soll {{count}} bestehender Bewerber dieser Stelle auch vom Agenten übernommen werden? Dies verschickt WhatsApp-Nachrichten.",
+      "confirmWithCount_other": "Sollen {{count}} bestehende Bewerber dieser Stelle auch vom Agenten übernommen werden? Dies verschickt WhatsApp-Nachrichten.",
+      "resultToast": "{{started}} gestartet, {{skipped}} übersprungen.",
+      "unavailable": "Interview für bestehende Bewerber starten ist noch nicht verfügbar — wartet auf die Backend-Anbindung."
+    }
   },
   "generate": {
     "button": "Mit Koios generieren",
