@@ -52,7 +52,10 @@ export function useCachedLookup<T>(
     if (!request) {
       request = api.get(url, requestConfig)
       inFlight.set(url, request)
-      request.finally(() => inFlight.delete(url))
+      // Settle-cleanup runs once (not per mount). The trailing .catch swallows THIS
+      // chain's rejection — the real error is handled per-consumer at the .catch below;
+      // without it a failed lookup fetch surfaced as an unhandled promise rejection.
+      request.finally(() => inFlight.delete(url)).catch(() => {})
     }
 
     let alive = true
