@@ -923,7 +923,8 @@
     "Leeg = alle plaatsen": "Vide = toutes les villes.",
     "Leeg = veiligheidsplafond (10000)": "Vide = plafond de sécurité (10 000).",
     "Alleen relevant wanneer de gekoppelde entiteit een klant is": "Pertinent uniquement lorsque l'entité liée est un client.",
-    "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Ignorer les enregistrements déjà liés à ce système — recommandé en bulk."
+    "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Ignorer les enregistrements déjà liés à ce système — recommandé en bulk.",
+    "Leeg = geen contactfilter (alle kandidaten komen mee)": "Vide = aucun filtre de contact (tous les candidats sont inclus)."
   },
   "triggers": {
     "events": {

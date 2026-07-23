@@ -923,7 +923,8 @@
     "Leeg = alle plaatsen": "Vacío = todas las ciudades.",
     "Leeg = veiligheidsplafond (10000)": "Vacío = límite de seguridad (10.000).",
     "Alleen relevant wanneer de gekoppelde entiteit een klant is": "Solo relevante cuando la entidad vinculada es un cliente.",
-    "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Omitir registros que ya tienen un enlace con este sistema — recomendado en bulk."
+    "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Omitir registros que ya tienen un enlace con este sistema — recomendado en bulk.",
+    "Leeg = geen contactfilter (alle kandidaten komen mee)": "Vacío = sin filtro de contacto (se incluyen todos los candidatos)."
   },
   "triggers": {
     "events": {

@@ -923,7 +923,8 @@
     "Leeg = alle plaatsen": "Empty = all cities.",
     "Leeg = veiligheidsplafond (10000)": "Empty = safety ceiling (10,000).",
     "Alleen relevant wanneer de gekoppelde entiteit een klant is": "Only relevant when the linked entity is a customer.",
-    "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Skip records that already have a link with this system — recommended for bulk."
+    "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Skip records that already have a link with this system — recommended for bulk.",
+    "Leeg = geen contactfilter (alle kandidaten komen mee)": "Empty = no contact filter (all candidates are included)."
   },
   "triggers": {
     "events": {

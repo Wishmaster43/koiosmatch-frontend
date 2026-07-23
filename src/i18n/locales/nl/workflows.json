@@ -923,7 +923,8 @@
     "Leeg = alle plaatsen": "Leeg = alle plaatsen.",
     "Leeg = veiligheidsplafond (10000)": "Leeg = veiligheidsplafond (10.000).",
     "Alleen relevant wanneer de gekoppelde entiteit een klant is": "Alleen relevant wanneer de gekoppelde entiteit een klant is.",
-    "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk."
+    "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk.",
+    "Leeg = geen contactfilter (alle kandidaten komen mee)": "Leeg = geen contactfilter (alle kandidaten komen mee)."
   },
   "triggers": {
     "events": {
