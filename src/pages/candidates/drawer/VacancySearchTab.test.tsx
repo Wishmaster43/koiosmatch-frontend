@@ -223,6 +223,22 @@ describe('VacancySearchTab · row selection shows a summary card, not an immedia
     openSpy.mockRestore()
   })
 
+  it('renders the summary card even when the API embeds status as an OBJECT (23-07 crash)', async () => {
+    // The /vacancies list can embed the tenant lookup as {value,label,color};
+    // unmapped it fell through makeMetaResolver's fallback INTO a rendered label.
+    const objectStatusRows = [{ id: 'v9', title: 'Objectstatus | Test', customer_name: 'Zorggroep C', city: 'Breda', status: { value: 'open', label: 'Open', color: '#123456' }, lat: '51.5', lng: '4.7', distance_km: '2.0' }]
+    mockGet.mockResolvedValueOnce({ data: { data: objectStatusRows } })
+    mockGet.mockResolvedValueOnce({ data: { description: '' } })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+
+    await waitFor(() => expect(screen.getByText('Objectstatus | Test')).toBeInTheDocument())
+    await userEvent.click(screen.getByText('Zorggroep C · Breda'))
+
+    // Card renders (title twice: row + card) and the status label is the STRING.
+    await waitFor(() => expect(screen.getAllByText('Objectstatus | Test').length).toBeGreaterThan(1))
+    expect(screen.getAllByText('Open').length).toBeGreaterThan(0)
+  })
+
   it('clicking the row TITLE navigates in-app (Match-style EntityLink), not the summary', async () => {
     mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
     render(<VacancySearchTab candidate={candidateWithLocation} />)

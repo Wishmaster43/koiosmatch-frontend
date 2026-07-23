@@ -87,3 +87,18 @@ export function canonicalizeToOptions(values: string[], options: Array<{ value: 
   })
   return out
 }
+
+/**
+ * Coerce a lookup-ish API field to its string value. Resources sometimes embed
+ * the tenant lookup as {value,label,color} instead of a bare string (the
+ * vacancy list's `status`, 23-07 crash: that object fell through makeMetaResolver's
+ * fallback into a rendered label). Same tolerance class as lib/coords.toCoord.
+ */
+export function lookupValue(x: unknown): string {
+  if (typeof x === 'string') return x
+  if (x && typeof x === 'object') {
+    const o = x as { value?: unknown; label?: unknown; name?: unknown }
+    for (const k of [o.value, o.name, o.label]) if (typeof k === 'string') return k
+  }
+  return ''
+}

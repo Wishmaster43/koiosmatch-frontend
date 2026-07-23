@@ -8,7 +8,7 @@
 import { useState, useEffect } from 'react'
 import api, { unwrapList } from '@/lib/api'
 import { toCoord } from '@/lib/coords'
-import { canonicalizeToOptions } from '@/lib/lookupUtils'
+import { canonicalizeToOptions, lookupValue } from '@/lib/lookupUtils'
 import { useLookups } from '@/context/LookupsContext'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -33,7 +33,7 @@ interface RawCandidateRow {
   name?: string; full_name?: string; first_name?: string; last_name?: string
   city?: string; woonplaats?: string
   function_title?: string
-  status?: string
+  status?: unknown
   lat?: unknown; lng?: unknown; distance_km?: unknown
 }
 
@@ -104,7 +104,7 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
           name: nameOf(r),
           city: r.city ?? r.woonplaats ?? '',
           functionTitle: r.function_title ?? '',
-          status: r.status ?? '',
+          status: lookupValue(r.status),
           lat: toCoord(r.lat), lng: toCoord(r.lng), distanceKm: toCoord(r.distance_km),
         }))
         // Closest first; rows without a resolved distance sort to the end.
