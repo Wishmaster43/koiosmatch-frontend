@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { ExternalLink, X } from 'lucide-react'
 import MatchExplorerLayout from '@/components/match/MatchExplorerLayout'
 import RadiusMapPanel from '@/components/map/RadiusMapPanel'
+import EntityLink from '@/components/ui/EntityLink'
 import SearchSelect from '@/components/ui/SearchSelect'
 import StatusPill from '@/components/ui/StatusPill'
 import api, { unwrap } from '@/lib/api'
@@ -197,14 +198,23 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
       {rows.map(r => {
         const isSelected = r.id === selectedId
         return (
-          // Native <button> (semantic HTML first, §6) — full width so it reads as one row.
-          <button key={String(r.id)} type="button" onClick={() => selectVacancy(r.id)}
-            style={{ ...rowStyle, width: '100%', border: 'none', textAlign: 'left', font: 'inherit',
+          // Row = div[role=button] (not <button>: the title nests EntityLink's own
+          // button+anchor, and interactive-inside-interactive is invalid HTML).
+          // Danny 23-07: row click = summary card HERE; the title link/icon (Match-tab
+          // style: primary name in-app, trailing icon new tab) navigates instead.
+          <div key={String(r.id)} role="button" tabIndex={0}
+            onClick={() => selectVacancy(r.id)}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectVacancy(r.id) } }}
+            style={{ ...rowStyle, width: '100%',
               background: isSelected ? 'var(--color-primary-bg)' : 'transparent' }}
             onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'var(--hover-bg)' }}
             onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.title}</div>
+              {/* Title clicks must not ALSO flip the summary selection. */}
+              <div style={{ fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
+                <EntityLink page="vacancies" id={r.id} title={t('vacancySearch.openInApp')}>{r.title}</EntityLink>
+              </div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {[r.customer, r.city].filter(Boolean).join(' · ') || '—'}
               </div>
@@ -214,7 +224,7 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
                 {r.distanceKm.toFixed(1)} km
               </span>
             )}
-          </button>
+          </div>
         )
       })}
     </div>

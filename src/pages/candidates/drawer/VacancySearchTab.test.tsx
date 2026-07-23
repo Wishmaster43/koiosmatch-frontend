@@ -184,7 +184,8 @@ describe('VacancySearchTab · row selection shows a summary card, not an immedia
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
-    await userEvent.click(screen.getByText('Verzorgende IG | Amersfoort'))
+    // Click the ROW surface (subtitle) — the title itself is the navigate-link now.
+    await userEvent.click(screen.getByText('Zorggroep B · Amersfoort'))
 
     expect(openEntityMock).not.toHaveBeenCalled()
     // The card renders the title again (once in the row, once in the card) plus the snippet.
@@ -198,7 +199,8 @@ describe('VacancySearchTab · row selection shows a summary card, not an immedia
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
-    await userEvent.click(screen.getByText('Verzorgende IG | Amersfoort'))
+    // Click the ROW surface (subtitle) — the title itself is the navigate-link now.
+    await userEvent.click(screen.getByText('Zorggroep B · Amersfoort'))
 
     const openBtn = await screen.findByText(nl.vacancySearch.openInApp)
     await userEvent.click(openBtn)
@@ -212,11 +214,22 @@ describe('VacancySearchTab · row selection shows a summary card, not an immedia
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
-    await userEvent.click(screen.getByText('Verzorgende IG | Amersfoort'))
+    // Click the ROW surface (subtitle) — the title itself is the navigate-link now.
+    await userEvent.click(screen.getByText('Zorggroep B · Amersfoort'))
 
     const externalBtn = await screen.findByLabelText(nl.vacancySearch.openNewWindow)
     await userEvent.click(externalBtn)
     expect(openSpy).toHaveBeenCalledWith(`${window.location.origin}${window.location.pathname}#vacancies?open=v1`, '_blank', 'noopener,noreferrer')
     openSpy.mockRestore()
+  })
+
+  it('clicking the row TITLE navigates in-app (Match-style EntityLink), not the summary', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+
+    await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
+    await userEvent.click(screen.getByText('Verzorgende IG | Amersfoort'))
+
+    expect(openEntityMock).toHaveBeenCalledWith('vacancies', 'v1')
   })
 })

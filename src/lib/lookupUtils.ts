@@ -65,3 +65,25 @@ export function makeMetaResolver<T extends { value: string; label: string; color
   return (v?: string | null): T =>
     list.find(i => i.value === v) ?? ({ value: v ?? '', label: v ?? '', color: fallbackColor, ...extra } as T)
 }
+
+/**
+ * Map stored/seed filter values onto the tenant lookup's CANONICAL option values
+ * (case/trim-tolerant, matches value OR label). Fixes the "1 geselecteerd maar
+ * geen vinkje" class of bug (Danny 23-07): a preselection computed against the
+ * seed lookup ('open') stops matching once the API lookup arrives ('Open') —
+ * the count sees one value, the checklist another. Unmatched values pass
+ * through so vocabulary drift never silently drops a filter; result is deduped.
+ */
+export function canonicalizeToOptions(values: string[], options: Array<{ value: string; label?: string }>): string[] {
+  const byKey = new Map<string, string>()
+  options.forEach(o => {
+    byKey.set(o.value.trim().toLowerCase(), o.value)
+    if (o.label) byKey.set(String(o.label).trim().toLowerCase(), o.value)
+  })
+  const out: string[] = []
+  values.forEach(v => {
+    const canon = byKey.get(String(v).trim().toLowerCase()) ?? v
+    if (!out.includes(canon)) out.push(canon)
+  })
+  return out
+}

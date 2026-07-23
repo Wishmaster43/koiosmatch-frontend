@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react'
 import api, { unwrapList } from '@/lib/api'
 import { toCoord } from '@/lib/coords'
+import { canonicalizeToOptions } from '@/lib/lookupUtils'
 import { useLookups } from '@/context/LookupsContext'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -64,6 +65,12 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
     setFunctions(vacancy.category ? [vacancy.category] : [])
     setStatusSel(defaultStatus ? [defaultStatus.value] : [])
   }
+
+  // Converge the selection onto the lookup's canonical values once the API rows
+  // replace the seed (mirror of the candidate-side fix): the trigger counted the
+  // seed value while the checklist compared the API value, so no ✓ showed.
+  const canonicalStatuses = canonicalizeToOptions(statusSel, statuses)
+  if (canonicalStatuses.join(' ') !== statusSel.join(' ')) setStatusSel(canonicalStatuses)
 
   const [rows, setRows]       = useState<CandidateSearchRow[]>([])
   const [loading, setLoading] = useState(false)

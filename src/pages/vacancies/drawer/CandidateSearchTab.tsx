@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import MatchExplorerLayout from '@/components/match/MatchExplorerLayout'
 import RadiusMapPanel from '@/components/map/RadiusMapPanel'
+import EntityLink from '@/components/ui/EntityLink'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { useCandidateSearch } from '../hooks/useCandidateSearch'
 import { useFunctions } from '@/lib/useFunctions'
@@ -97,13 +98,21 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   ) : (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       {rows.map(r => (
-        // Native <button> (semantic HTML first, §6) — full width so it reads as one row.
-        <button key={String(r.id)} type="button" onClick={() => openCandidate(r.id)}
-          style={{ ...rowStyle, width: '100%', border: 'none', background: 'transparent', textAlign: 'left', font: 'inherit' }}
+        // Row = div[role=button]: the title nests EntityLink's own button+anchor
+        // (Match-tab style — primary name opens in-app, trailing icon a new tab),
+        // and interactive-inside-interactive is invalid HTML (mirror 23-07).
+        <div key={String(r.id)} role="button" tabIndex={0}
+          onClick={() => openCandidate(r.id)}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCandidate(r.id) } }}
+          style={{ ...rowStyle, width: '100%', background: 'transparent' }}
           onMouseEnter={e => { e.currentTarget.style.background = 'var(--hover-bg)' }}
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
+            {/* Link clicks must not double-fire the row's own open. */}
+            <div style={{ fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+              onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
+              <EntityLink page="candidates" id={r.id}>{r.name}</EntityLink>
+            </div>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {[r.functionTitle, r.city].filter(Boolean).join(' · ') || '—'}
             </div>
@@ -113,7 +122,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
               {r.distanceKm.toFixed(1)} km
             </span>
           )}
-        </button>
+        </div>
       ))}
     </div>
   )
