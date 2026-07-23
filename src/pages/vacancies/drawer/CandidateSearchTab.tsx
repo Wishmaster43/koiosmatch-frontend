@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw, X } from 'lucide-react'
 import MatchExplorerLayout from '@/components/match/MatchExplorerLayout'
+import ScorePill from '@/components/match/ScorePill'
 import MatchScoreBlock from '@/components/match/MatchScoreBlock'
 import RadiusMapPanel from '@/components/map/RadiusMapPanel'
 import EntityLink from '@/components/ui/EntityLink'
@@ -19,22 +20,6 @@ import type { Id } from '@/types/common'
 
 const filterLabel: CSSProperties = { fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
 const rowStyle: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 10px', borderRadius: 8, cursor: 'pointer' }
-
-// Row-level LIVE score pill — same thresholds as the shared MatchScoreBlock's
-// scoreColor (≥75 success / ≥50 warning / else danger), soft-tinted per §4.
-// Duplicated (not imported): MatchScoreBlock keeps its threshold helper private
-// and is outside this task's file scope — keep both in sync if they ever change.
-function ScorePill({ score }: { score: number }) {
-  const color = score >= 75 ? 'var(--color-success)' : score >= 50 ? 'var(--color-warning)' : 'var(--color-danger)'
-  return (
-    <span style={{
-      fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 600, flexShrink: 0,
-      color, background: `color-mix(in srgb, ${color} 12%, transparent)`,
-      border: `1px solid color-mix(in srgb, ${color} 40%, transparent)`,
-      borderRadius: 99, padding: '1px 7px',
-    }}>{Math.round(score)}%</span>
-  )
-}
 
 /**
  * CandidateSearchTab — the LIVE scored match search (MATCH-EXPLORER-1 fase

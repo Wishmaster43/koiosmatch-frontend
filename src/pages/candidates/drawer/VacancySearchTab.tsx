@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import MatchExplorerLayout from '@/components/match/MatchExplorerLayout'
+import ScorePill from '@/components/match/ScorePill'
 import MatchScoreBlock from '@/components/match/MatchScoreBlock'
 import RadiusMapPanel from '@/components/map/RadiusMapPanel'
 import EntityLink from '@/components/ui/EntityLink'
@@ -46,20 +47,6 @@ function toSnippet(html: string): string {
   const text = new DOMParser().parseFromString(html, 'text/html').body.textContent ?? ''
   const trimmed = text.trim().replace(/\s+/g, ' ')
   return trimmed.length > SNIPPET_MAX_LENGTH ? `${trimmed.slice(0, SNIPPET_MAX_LENGTH)}…` : trimmed
-}
-
-// Row-level LIVE score pill — same thresholds as the shared MatchScoreBlock's
-// scoreColor (≥75 success / ≥50 warning / else danger), soft-tinted per §4.
-function ScorePill({ score }: { score: number }) {
-  const color = score >= 75 ? 'var(--color-success)' : score >= 50 ? 'var(--color-warning)' : 'var(--color-danger)'
-  return (
-    <span style={{
-      fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 600, flexShrink: 0,
-      color, background: `color-mix(in srgb, ${color} 12%, transparent)`,
-      border: `1px solid color-mix(in srgb, ${color} 40%, transparent)`,
-      borderRadius: 99, padding: '1px 7px',
-    }}>{Math.round(score)}%</span>
-  )
 }
 
 // Inner component: rendered inside the local VacancyLookupsProvider so
