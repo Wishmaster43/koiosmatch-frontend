@@ -15,12 +15,21 @@ import type { Id } from '@/types/common'
 
 const mutedCell = { color: 'var(--text-muted)', fontSize: 12 }
 const plainCell = { color: 'var(--text)', fontSize: 12 }
+// Leads count → "Kandidaten zoeken" deep-link button (ghost, mono number, no chip
+// noise) — mirrors CustomersTable's count-cell deep-link buttons (§3A: extend the
+// established pattern, never a fresh inline copy).
+const leadsBtn = { display: 'inline-flex', fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
+  color: 'var(--color-primary)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }
 
 interface VacanciesTableProps {
   rows: Vacancy[]
   loading?: boolean
   selectedId?: Id | null
   onSelect?: (row: Vacancy) => void
+  // VACANCY-MATCH-COUNT-1 (Danny 23-07): the Leads count deep-links straight to
+  // this vacancy's "Kandidaten zoeken" tab — a plain number when the caller
+  // doesn't wire this (mirrors the candidates/customers count-cell deep-links).
+  onOpenCandidateSearch?: (id: Id) => void
   selectable?: boolean
   selectedIds?: Set<Id>
   onToggleRow?: (id: Id) => void
@@ -34,7 +43,7 @@ interface VacanciesTableProps {
  * sorting, selection and the loading/empty states live in the shared DataTable.
  * Mirrors CandidatesTable / ApplicationsTable.
  */
-export default function VacanciesTable({ rows, loading, selectedId, onSelect, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: VacanciesTableProps) {
+export default function VacanciesTable({ rows, loading, selectedId, onSelect, onOpenCandidateSearch, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: VacanciesTableProps) {
   const { t } = useTranslation('vacancies')
   const { formatDate } = useDateFormat()
   const { statusMeta } = useVacancyLookups()
@@ -77,7 +86,17 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
     {
       key: 'leads', header: t('columns.leads'), align: 'left', sortable: true, sortValue: r => r.leadsCount,
       cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text)' },
-      render: r => r.leadsCount ?? 0,
+      // VACANCY-MATCH-COUNT-1: a ghost button when the caller wired the deep-link,
+      // else the plain number (unchanged behaviour). stopPropagation so the click
+      // opens the "Kandidaten zoeken" tab instead of double-firing the row's own open.
+      render: r => onOpenCandidateSearch ? (
+        <button type="button" style={leadsBtn} aria-label={t('columns.leadsOpenSearch')}
+          onClick={e => { e.stopPropagation(); onOpenCandidateSearch(r.id as Id) }}
+          onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
+          onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
+          {r.leadsCount ?? 0}
+        </button>
+      ) : (r.leadsCount ?? 0),
     },
     {
       key: 'applications', header: t('columns.applications'), sortable: true, sortValue: r => r.applicationsCount,

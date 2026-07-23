@@ -62,13 +62,6 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
 
   return (
     <div>
-      {/* Leads */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '10px 12px', marginBottom: 16, borderRadius: 8, background: 'var(--color-warning-bg)' }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-warning)' }}>{t('applicants.totalLeads')}</span>
-        <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-warning)' }}>{live.leadsCount ?? 0}</span>
-      </div>
-
       {/* Per-phase breakdown — only phases with a count, in the configured order. */}
       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('applicants.byPhase')}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>

@@ -149,15 +149,24 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const { selected, detail, drawerExpanded, setDrawerExpanded, closeDrawer, selectVacancy, handleCreated, updateVacancy, restoreVacancy } =
     useVacancyRecord({ setVacancies, setTotal, statusMeta, users, customers: customerList, t })
 
+  // VACANCY-MATCH-COUNT-1 (Danny 23-07): the drawer's deep-link target tab. The
+  // table's Leads count opens straight on "candidateSearch"; every other entry
+  // point (row click, map pick, intent, URL) opens on the default tab, so those
+  // reset it via openVacancy below (mirrors CustomerRecord's drawerTab, kept here
+  // instead since useVacancyRecord.ts is out of scope for this change).
+  const [drawerInitialTab, setDrawerInitialTab] = useState<string | undefined>(undefined)
+  const openVacancy = (v: Parameters<typeof selectVacancy>[0]) => { setDrawerInitialTab(undefined); selectVacancy(v) }
+  const openCandidateSearch = (id: Id) => { setDrawerInitialTab('candidateSearch'); selectVacancy({ id } as Parameters<typeof selectVacancy>[0]) }
+
   // Open a vacancy drawer when arriving via a cross-entity link (intent).
-  useOpenFromIntent(intent, (id) => selectVacancy({ id } as Parameters<typeof selectVacancy>[0]))
+  useOpenFromIntent(intent, (id) => openVacancy({ id } as Parameters<typeof selectVacancy>[0]))
 
   // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
   // through it and a copied link reopens the same vacancy (NAV-BACK-1;
   // supersedes the old memory-only remember).
   useDrawerUrl({
     selectedId: selected?.id,
-    openById: (id) => selectVacancy({ id } as Parameters<typeof selectVacancy>[0]),
+    openById: (id) => openVacancy({ id } as Parameters<typeof selectVacancy>[0]),
     close: closeDrawer, intent,
   })
 
@@ -301,7 +310,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                     onCenterChange={(lat, lng) => { setMapCenter({ lat, lng }); setMapStraalActive(true) }}
                     onRadiusChange={(km: number) => { setMapRadius(km); setMapStraalActive(true) }}
                     onClearRadius={mapStraalActive ? () => setMapStraalActive(false) : undefined}
-                    onPick={id => selectVacancy({ id } as Parameters<typeof selectVacancy>[0])} />
+                    onPick={id => openVacancy({ id } as Parameters<typeof selectVacancy>[0])} />
                 </Suspense>
               </div>
               {/* Right pane: the same server-filtered rows as a table (row click = drawer). */}
@@ -310,7 +319,8 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                   {error && (
                     <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
                   )}
-                  <VacanciesTable rows={vacancies} loading={loading} selectedId={selected?.id} onSelect={selectVacancy} />
+                  <VacanciesTable rows={vacancies} loading={loading} selectedId={selected?.id} onSelect={openVacancy}
+                    onOpenCandidateSearch={openCandidateSearch} />
                 </div>
                 <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
                   onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
@@ -327,7 +337,8 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                   rows={vacancies}
                   loading={loading}
                   selectedId={selected?.id}
-                  onSelect={selectVacancy}
+                  onSelect={openVacancy}
+                  onOpenCandidateSearch={openCandidateSearch}
                   selectable
                   selectedIds={selectedIds}
                   onToggleRow={toggleRow}
@@ -353,6 +364,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
           onUpdate={updateVacancy}
           onRestore={hasPermission('vacancies.update') ? restoreVacancy : undefined}
           users={users}
+          initialTab={drawerInitialTab}
         />
         {bulkConfirmDialog}
       </div>

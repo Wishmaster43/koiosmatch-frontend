@@ -81,6 +81,10 @@ interface VacancyDrawerProps {
   // VAC-RESTORE-1: page passes this only with vacancies.update permission.
   onRestore?: (id: Id | undefined) => void
   users?: DrawerUser[]
+  // VACANCY-MATCH-COUNT-1 (Danny 23-07): deep-link from the table's Leads count —
+  // open straight on this tab id (mirrors CustomerDrawer's initialTab). Falls back
+  // to the default tab below if the requested tab is gated away for this vacancy.
+  initialTab?: string
 }
 
 const hdrBtn: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 }
@@ -91,7 +95,7 @@ const hdrPrimary: CSSProperties = { ...hdrBtn, background: 'var(--color-primary)
  * VacancyDrawer — thin container: wires data (lookups + onUpdate) and declares the
  * header config + tab list. No heavy JSX, no business logic (mirror CandidateDrawer).
  */
-export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleExpand, onUpdate, onRestore, users = [] }: VacancyDrawerProps) {
+export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleExpand, onUpdate, onRestore, users = [], initialTab }: VacancyDrawerProps) {
   const { t } = useTranslation('vacancies')
   const { statuses } = useVacancyLookups()
   const { formatDate, formatDateTime } = useDateFormat()
@@ -120,6 +124,12 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
     .filter(tab => tab.id !== 'extra' || customFieldDefs.length > 0)
     .filter(tab => tab.id !== 'candidateSearch' || isCandidateTabVisible(candidateTabCfg, { status: v.statusValue != null ? String(v.statusValue) : null }, statuses))
 
+  // VACANCY-MATCH-COUNT-1: only honour the requested deep-link tab when it's
+  // actually visible for this vacancy — a gated-away tab (e.g. candidateSearch
+  // hidden by the status gate) falls back to EntityDrawer's own default (first tab),
+  // never a blank pane.
+  const safeInitialTab = initialTab && visibleTabs.some(tab => tab.id === initialTab) ? initialTab : undefined
+
   const currentTags = tags ?? (v.tags as string[]) ?? []
   const setTagsAndSave = (next: string[]) => { setTags(next); onUpdate?.(v.id, { tags: next }) }
 
@@ -142,6 +152,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
       entity={v}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
+      initialTab={safeInitialTab}
       // Two-sided footer (§3A(8)): created-at left, empty right (consistent spacing
       // with the candidate/other drawers even when there is no right-side content).
       footer={

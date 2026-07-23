@@ -99,3 +99,27 @@ describe('VacancyDrawer · "Kandidaten zoeken" tenant visibility gate (Danny 23-
     expect(screen.getByRole('button', { name: 'Kandidaten zoeken' })).toBeInTheDocument()
   })
 })
+
+describe('VacancyDrawer · initialTab deep-link (VACANCY-MATCH-COUNT-1, Danny 23-07)', () => {
+  afterEach(() => { settingsState.settings = {} })
+
+  it('opens straight on "Kandidaten zoeken" when initialTab targets it', () => {
+    render(<VacancyDrawer vacancy={vacancy} onClose={vi.fn()} initialTab="candidateSearch" />)
+    // The tab's content shows immediately — no click needed to switch there.
+    expect(screen.getByText('candidate-search-tab-content')).toBeInTheDocument()
+    const activeBtn = screen.getByRole('button', { name: 'Kandidaten zoeken' })
+    expect(activeBtn).toHaveStyle({ fontWeight: 600 })
+  })
+
+  it('falls back to the default tab when the requested tab is gated away, never a blank pane', () => {
+    // This vacancy's status is excluded from "Kandidaten zoeken" by tenant config —
+    // the requested initialTab must not win; the drawer lands on "Details" instead.
+    settingsState.settings = { vacancy_candidate_tab: { vacancy_statuses: ['open'] } }
+    const closedVacancy = { ...vacancy, statusValue: 'closed' } as unknown as VacancyDetail
+    render(<VacancyDrawer vacancy={closedVacancy} onClose={vi.fn()} initialTab="candidateSearch" />)
+    expect(screen.queryByRole('button', { name: 'Kandidaten zoeken' })).not.toBeInTheDocument()
+    expect(screen.queryByText('candidate-search-tab-content')).not.toBeInTheDocument()
+    const detailsBtn = screen.getByRole('button', { name: 'Details' })
+    expect(detailsBtn).toHaveStyle({ fontWeight: 600 })
+  })
+})

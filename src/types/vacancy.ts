@@ -147,6 +147,9 @@ export interface ApiVacancy {
   status_color?: string
   leads_count?: number
   leadsCount?: number
+  // VACANCY-MATCH-COUNT-1: the real match-count field the backend will repoint
+  // `leadsCount` to (read first, tolerant fallback to leads_count/leadsCount above).
+  candidate_match_count?: number
   applications_count?: number
   applicationsCount?: number
   applications_by_phase?: Loose

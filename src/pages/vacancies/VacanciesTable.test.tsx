@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 // Real i18n (nl) side-effect init so the "AI-agent" column header resolves genuine
 // Dutch text (mirrors VacancyDrawer.test.tsx's convention).
 import '@/i18n'
@@ -52,6 +53,32 @@ describe('VacanciesTable · AI-agent column (Danny 22-07)', () => {
     const agentCellRow2 = tableRows[1].children[colIndex]
     expect(agentCellRow2.textContent).toBe('—')
     expect(agentCellRow2.querySelector('svg')).toBeFalsy()
+  })
+})
+
+describe('VacanciesTable · Leads count deep-link (VACANCY-MATCH-COUNT-1, Danny 23-07)', () => {
+  it('renders a plain number when onOpenCandidateSearch is not wired', () => {
+    render(<VacanciesTable rows={rows} />)
+    expect(screen.queryByRole('button', { name: 'Open Kandidaten zoeken' })).not.toBeInTheDocument()
+  })
+
+  it('clicking the leads count calls onOpenCandidateSearch with the row id and does not open the row', async () => {
+    const user = userEvent.setup()
+    const onOpenCandidateSearch = vi.fn()
+    const onSelect = vi.fn()
+    const leadsRows = [
+      { id: 'v1', title: 'Verpleegkundige', leadsCount: 3, created: '2024-02-01', createdSort: '2024-02-01' },
+    ] as unknown as Vacancy[]
+    render(<VacanciesTable rows={leadsRows} onSelect={onSelect} onOpenCandidateSearch={onOpenCandidateSearch} />)
+
+    // The button's real (nl) aria-label + its own text (the leads count).
+    const btn = screen.getByRole('button', { name: 'Open Kandidaten zoeken' })
+    expect(btn).toHaveTextContent('3')
+    await user.click(btn)
+
+    expect(onOpenCandidateSearch).toHaveBeenCalledWith('v1')
+    // stopPropagation on the button's click must stop the row's own onClick firing.
+    expect(onSelect).not.toHaveBeenCalled()
   })
 })
 

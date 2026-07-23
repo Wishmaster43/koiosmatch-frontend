@@ -35,7 +35,9 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
     statusLabel: status.label ?? v.status_label ?? '',
     // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar.tsx's identical constant)
     statusColor: status.color ?? v.status_color ?? '#9CA3AF',
-    leadsCount: v.leads_count ?? v.leadsCount ?? 0,
+    // VACANCY-MATCH-COUNT-1 (CMBE ticket): reads the real match count first, once
+    // the backend ships it — tolerant fallback to the legacy leads count until then.
+    leadsCount: v.candidate_match_count ?? v.leads_count ?? v.leadsCount ?? 0,
     applicationsCount: v.applications_count ?? v.applicationsCount ?? sumPhases(byPhase),
     applicationsByPhase: byPhase,
     published: Boolean(v.published ?? false),
