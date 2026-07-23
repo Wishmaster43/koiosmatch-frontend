@@ -184,9 +184,9 @@
     "sync": {
       "button": "Sync",
       "busy": "Bezig…",
-      "choose": "Kies ShiftManager-account…",
+      "choose": "Kies Shiftmanager-account…",
       "noPermission": "Geen rechten om te synchroniseren",
-      "noConnection": "Geen actieve ShiftManager-koppeling gevonden",
+      "noConnection": "Geen actieve Shiftmanager-koppeling gevonden",
       "started": "Synchronisatie gestart — kan enkele minuten duren",
       "failed": "Synchroniseren mislukt",
       "tooManyRequests": "Te veel pogingen, probeer over {{secs}}s opnieuw"

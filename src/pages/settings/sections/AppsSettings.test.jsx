@@ -13,7 +13,7 @@ const mockNotifyError = vi.fn()
 vi.mock('@/lib/notify', () => ({ notifyError: (...a) => mockNotifyError(...a) }))
 vi.mock('@/lib/extractApiError', () => ({ extractApiError: (err, fb) => err?.response?.data?.message ?? fb }))
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k) => k }) }))
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true, hasModule: () => true }) }))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true, hasModule: () => true, isSuperAdmin: () => true }) }))
 vi.mock('@/lib/access', () => ({ canAccessPage: () => true }))
 
 // Real AVAILABLE_APPS ride along; only the enabled-state hook is stubbed.
@@ -29,9 +29,11 @@ describe('AppsSettings', () => {
   it("enabling HelloFlex PUTs the backend 'hf' slug, never 'helloflex'", async () => {
     mockPut.mockResolvedValue({})
     render(<AppsSettings />)
-    // Row order is data-driven: click every toggle, then assert the wire slugs —
-    // at least one PUT carries 'hf' and none ever carries 'helloflex'.
-    for (const b of screen.getAllByRole('button')) fireEvent.click(b)
+    // APPS-GROUPS-1: HelloFlex lives under the Backoffice subtab — open it first.
+    fireEvent.click(screen.getByRole('button', { name: 'apps.tabBackoffice' }))
+    // Click every ENABLED toggle on this tab (coming-soon toggles are disabled by
+    // design): at least one PUT carries 'hf' and none ever carries 'helloflex'.
+    for (const b of screen.getAllByTitle('apps.enable')) fireEvent.click(b)
     await waitFor(() => expect(mockPut).toHaveBeenCalled())
     const bodies = mockPut.mock.calls.map(([url, body]) => ({ url, body }))
     expect(bodies.every(({ url }) => url === '/settings/apps')).toBe(true)
@@ -42,7 +44,8 @@ describe('AppsSettings', () => {
   it('surfaces the server message on a failed toggle instead of silently swallowing it', async () => {
     mockPut.mockRejectedValue({ response: { data: { message: 'Ongeldige app(s): x' } } })
     render(<AppsSettings />)
-    fireEvent.click(screen.getAllByRole('button')[0])
+    // The first buttons are the subtab bar — click the first real TOGGLE instead.
+    fireEvent.click(screen.getAllByTitle('apps.enable')[0])
     await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Ongeldige app(s): x'))
     expect(mockSetApps).not.toHaveBeenCalled()
   })

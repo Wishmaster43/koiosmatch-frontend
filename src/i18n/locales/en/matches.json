@@ -115,7 +115,7 @@
     "couple": "Couple to backoffice",
     "target": {
       "helloflex": "HelloFlex",
-      "shiftmanager": "ShiftManager"
+      "shiftmanager": "Shiftmanager"
     },
     "coupleQueued": "{{count}} match(es) queued for coupling with {{target}}.",
     "coupleUnavailable": "Backoffice coupling isn't available yet.",

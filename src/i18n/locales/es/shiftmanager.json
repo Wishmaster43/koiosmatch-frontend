@@ -184,9 +184,9 @@
     "sync": {
       "button": "Sincr.",
       "busy": "Sincronizando…",
-      "choose": "Elegir cuenta de ShiftManager…",
+      "choose": "Elegir cuenta de Shiftmanager…",
       "noPermission": "Sin permiso para sincronizar",
-      "noConnection": "No se encontró ninguna conexión activa de ShiftManager",
+      "noConnection": "No se encontró ninguna conexión activa de Shiftmanager",
       "started": "Sincronización iniciada — puede tardar unos minutos",
       "failed": "Error al sincronizar",
       "tooManyRequests": "Demasiados intentos, vuelve a intentarlo en {{secs}}s"

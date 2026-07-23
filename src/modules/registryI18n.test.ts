@@ -71,7 +71,7 @@ describe('module registry placeholder/hint i18n coverage', () => {
 const OUTPUT_FIELD_LABELS = [
   'AI-enabled', 'AI-interview extractieveld', 'Aantal beschikbare diensten', 'Aantal keer gewerkt',
   'Aantal keer gewerkt (ruw, API-shape)', 'Aantal no-shows', 'Achternaam', 'Achternaam (ruw)', 'Actief',
-  'Adres (straat nr postcode)', 'Beschikbare diensten (ruwe ShiftManager-response)',
+  'Adres (straat nr postcode)', 'Beschikbare diensten (ruwe Shiftmanager-response)',
   'Conversation: WhatsApp-nummer', 'Conversation: actief intent', 'Conversation: geëscaleerd',
   'Conversation: laatste bericht', 'Conversation: laatste inkomend bericht', 'Conversation: mislukte pogingen',
   'Conversation: state AI flexplanner', 'Conversation: state diensten aangeboden',
@@ -89,7 +89,7 @@ const OUTPUT_FIELD_LABELS = [
   'Laatste contact', 'Locatie (order)', 'Medewerker-ID', 'Mobiel nummer', 'Mobiel nummer (ruw)',
   'Order-onderwerp (ruw)', 'Personeelsnummer', 'Plaats',
   'Planningsnotitie', 'Pools', 'Postcode', 'Reden van afwijzing (bij DISQUALIFIED)', 'Respons-percentage',
-  'Runtijd (HH:mm)', 'SM-reminder al gemaild', 'Shift-einde (ruw)', 'Shift-start (ruw)', 'ShiftManager ID',
+  'Runtijd (HH:mm)', 'SM-reminder al gemaild', 'Shift-einde (ruw)', 'Shift-start (ruw)', 'Shiftmanager ID',
   'Start (ISO/UTC)', 'Starttijd (ISO)', 'Starttijd (NL)', 'Status (SM)',
   'Status (afgeleid: employee.status of top-level)', 'Status (eigen bucket: open/in_process/completed)',
   'Status (inzetbaarheid)', 'Status (ruw, genest)', 'Straat', 'Tarieven (samengevat)', 'Telefoonnummer',

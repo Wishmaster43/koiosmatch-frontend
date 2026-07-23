@@ -12,7 +12,7 @@ export default {
   color: '#E11D2A',
   bg:    '#FDECEC',
   schema: [
-    { key: 'connection_id', label: 'ShiftManager-account', type: 'lookup_select', endpoint: '/planning-connections' },
+    { key: 'connection_id', label: 'Shiftmanager-account', type: 'lookup_select', endpoint: '/planning-connections' },
     { key: 'limit', label: 'Max. items', type: 'number', default: 10000, placeholder: '10000' },
   ],
 }

@@ -12,7 +12,7 @@ export default {
   bg:    '#FDECEC',
   // Only fields the sync actually reads (client/status were dead leftovers).
   schema: [
-    { key: 'connection_id', label: 'ShiftManager-account', type: 'lookup_select', endpoint: '/planning-connections' },
+    { key: 'connection_id', label: 'Shiftmanager-account', type: 'lookup_select', endpoint: '/planning-connections' },
     { key: 'date_from', label: 'Datum van',  type: 'date' },
     { key: 'date_to',   label: 'Datum t/m',  type: 'date' },
     { key: 'limit',     label: 'Max. items', type: 'number', default: 500, placeholder: '500' },

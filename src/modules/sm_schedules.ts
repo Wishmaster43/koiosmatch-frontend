@@ -13,7 +13,7 @@ export default {
   color: '#E11D2A',
   bg:    '#FDECEC',
   schema: [
-    { key: 'connection_id', label: 'ShiftManager-account', type: 'lookup_select', endpoint: '/planning-connections' },
+    { key: 'connection_id', label: 'Shiftmanager-account', type: 'lookup_select', endpoint: '/planning-connections' },
     // Window in days relative to the run day: 0 = vandaag, 1 = morgen, enz.
     { key: 'offset_from', label: 'Vanaf (dagen vanaf vandaag)', type: 'number', default: 0, placeholder: '0' },
     { key: 'offset_to',   label: 'T/m (dagen vanaf vandaag)',   type: 'number', default: 0, placeholder: '0' },

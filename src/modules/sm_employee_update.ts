@@ -11,7 +11,7 @@ export default {
   color: '#E11D2A',
   bg:    '#FDECEC',
   schema: [
-    { key: 'connection_id', label: 'ShiftManager-account', type: 'lookup_select', endpoint: '/planning-connections' },
+    { key: 'connection_id', label: 'Shiftmanager-account', type: 'lookup_select', endpoint: '/planning-connections' },
     // BE whitelist for the target status (contract 2026-07-09; being widened BE-side).
     { key: 'target_status', label: 'Nieuwe status', type: 'select',
       options: ['actief', 'nietactief', 'nieuw', 'uitgeschreven', 'verwijderd', 'extern'] },

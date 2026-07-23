@@ -991,7 +991,12 @@
     "monthly": "Mensual",
     "noRights": "Sin permiso",
     "disable": "Desactivar",
-    "enable": "Activar"
+    "enable": "Activar",
+    "superadminOnly": "Solo un superadministrador de la plataforma puede activar o desactivar conectores (contacte con Koios).",
+    "tabPlanning": "Planificación",
+    "tabBackoffice": "Back office",
+    "tabKoiosAi": "Koios AI",
+    "comingSoon": "Próximamente"
   },
   "modules": {
     "loading": "Cargando paquete…",
@@ -1023,7 +1028,7 @@
     "tierHeading": "Paquete",
     "addonsHeading": "Módulos individuales (add-ons)",
     "comingSoon": "próximamente",
-    "connectorsHint": "Los conectores (ShiftManager, HelloFlex, Elanza…) se gestionan por cliente en Integraciones → Apps. Activarlos tiene coste y desbloquea las plantillas de workflow.",
+    "connectorsHint": "Los conectores (Shiftmanager, HelloFlex, Elanza…) se gestionan por cliente en Integraciones → Apps. Activarlos tiene coste y desbloquea las plantillas de workflow.",
     "tierDesc": {
       "core": "ATS + CRM",
       "pro": "+ Koios AI + AI Agents + Workflows + WhatsApp Business",

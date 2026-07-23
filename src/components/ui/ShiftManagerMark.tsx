@@ -17,7 +17,7 @@ const SM_RED = '#E11D2A'
 type ShiftManagerMarkProps = { size?: number; color?: string; cut?: string; title?: string } & SVGProps<SVGSVGElement>
 
 // eslint-disable-next-line no-restricted-syntax -- DATA: fixed white glyph, must read against the solid brand-colour hexagon in any theme, not a themeable UI colour
-export default function ShiftManagerMark({ size = 24, color = SM_RED, cut = '#FFFFFF', title = 'ShiftManager', ...rest }: ShiftManagerMarkProps) {
+export default function ShiftManagerMark({ size = 24, color = SM_RED, cut = '#FFFFFF', title = 'Shiftmanager', ...rest }: ShiftManagerMarkProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 96 96" fill="none"
       role="img" aria-label={title} xmlns="http://www.w3.org/2000/svg" {...rest}>

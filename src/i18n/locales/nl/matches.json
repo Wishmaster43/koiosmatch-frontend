@@ -115,7 +115,7 @@
     "couple": "Koppelen aan backoffice",
     "target": {
       "helloflex": "HelloFlex",
-      "shiftmanager": "ShiftManager"
+      "shiftmanager": "Shiftmanager"
     },
     "coupleQueued": "{{count}} match(es) in wachtrij gezet voor koppeling met {{target}}.",
     "coupleUnavailable": "Backoffice-koppeling is nog niet beschikbaar.",

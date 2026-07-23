@@ -1199,7 +1199,12 @@
     "monthly": "Maandelijks",
     "noRights": "Geen rechten",
     "disable": "Uitschakelen",
-    "enable": "Inschakelen"
+    "enable": "Inschakelen",
+    "superadminOnly": "Alleen een platform-super-admin kan koppelingen aan- of uitzetten (neem contact op met Koios).",
+    "tabPlanning": "Planning",
+    "tabBackoffice": "Backoffice",
+    "tabKoiosAi": "Koios AI",
+    "comingSoon": "Binnenkort beschikbaar"
   },
   "modules": {
     "loading": "Pakket ophalen…",
@@ -1208,7 +1213,7 @@
     "tierHeading": "Pakket",
     "addonsHeading": "Losse modules (add-ons)",
     "comingSoon": "binnenkort",
-    "connectorsHint": "Connectors (ShiftManager, HelloFlex, Elanza…) beheer je per klant onder Integraties → Apps. Aanzetten kost geld én ontsluit de workflow-templates.",
+    "connectorsHint": "Connectors (Shiftmanager, HelloFlex, Elanza…) beheer je per klant onder Integraties → Apps. Aanzetten kost geld én ontsluit de workflow-templates.",
     "tierDesc": {
       "core": "ATS + CRM",
       "pro": "+ Koios AI + AI Agents + Workflows + WhatsApp Business",

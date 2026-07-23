@@ -1199,7 +1199,12 @@
     "monthly": "Monthly",
     "noRights": "No permission",
     "disable": "Disable",
-    "enable": "Enable"
+    "enable": "Enable",
+    "superadminOnly": "Only a platform super admin can enable or disable connectors (contact Koios).",
+    "tabPlanning": "Planning",
+    "tabBackoffice": "Back office",
+    "tabKoiosAi": "Koios AI",
+    "comingSoon": "Coming soon"
   },
   "modules": {
     "loading": "Loading package…",
@@ -1208,7 +1213,7 @@
     "tierHeading": "Package",
     "addonsHeading": "Add-on modules",
     "comingSoon": "soon",
-    "connectorsHint": "Connectors (ShiftManager, HelloFlex, Elanza…) are managed per client under Integrations → Apps. Enabling them costs money and unlocks the workflow templates.",
+    "connectorsHint": "Connectors (Shiftmanager, HelloFlex, Elanza…) are managed per client under Integrations → Apps. Enabling them costs money and unlocks the workflow templates.",
     "tierDesc": {
       "core": "ATS + CRM",
       "pro": "+ Koios AI + AI Agents + Workflows + WhatsApp Business",

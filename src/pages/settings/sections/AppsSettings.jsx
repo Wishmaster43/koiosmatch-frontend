@@ -16,7 +16,13 @@ export default function AppsSettings() {
   const { hasPermission }           = auth
   const [saving, setSaving]         = useState(null)
   const [saved,  setSaved]          = useState(null)
-  const canEdit = hasPermission('settings.update')
+  // APPS-GROUPS-1 (Danny 23-07): subtabs Planning / Backoffice / Koios AI.
+  const [tab, setTab]               = useState('planning')
+  // APPS-SUPERADMIN-1 (Danny 23-07 403): connectors are PLATFORM-provisioned — the
+  // backend refuses everyone but a super admin (by design, 2026-06-23), so a tenant
+  // admin must see honest disabled toggles + a notice, never a clickable 403.
+  const isSuperAdmin = auth?.isSuperAdmin?.() ?? false
+  const canEdit = hasPermission('settings.update') && isSuperAdmin
   // True when the active tenant's package includes connectors (package 3).
   const tenantHasConnectors = canAccessPage('apps', auth)
 
@@ -58,15 +64,29 @@ export default function AppsSettings() {
       {!canEdit && (
         <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16, padding: '10px 14px',
                       background: 'var(--hover-bg)', borderRadius: 8, border: '1px solid var(--border)' }}>
-          {t('apps.adminOnly')}
+          {isSuperAdmin ? t('apps.adminOnly') : t('apps.superadminOnly')}
         </div>
       )}
 
+      {/* APPS-GROUPS-1: subtab bar — Planning / Backoffice / Koios AI. */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+        {[['planning', t('apps.tabPlanning')], ['backoffice', t('apps.tabBackoffice')], ['koios_ai', t('apps.tabKoiosAi')]].map(([id, label]) => (
+          <button key={id} type="button" onClick={() => setTab(id)}
+            style={{ padding: '7px 14px', fontSize: 13, fontWeight: 600, borderRadius: 8,
+                     border: `1px solid ${tab === id ? 'var(--color-primary)' : 'var(--border)'}`,
+                     background: tab === id ? 'var(--color-primary-bg, var(--hover-bg))' : 'var(--surface)',
+                     color: tab === id ? 'var(--color-primary)' : 'var(--text-muted)', cursor: 'pointer' }}>
+            {label}
+          </button>
+        ))}
+      </div>
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {AVAILABLE_APPS.map(app => {
+        {AVAILABLE_APPS.filter(app => app.group === tab).map(app => {
           const on = enabled.includes(app.id)
           const isSaving = saving === app.id
           const isSaved  = saved  === app.id
+          const soon = !!app.comingSoon
           return (
             <div key={app.id} style={{
               display: 'flex', alignItems: 'center', gap: 16,
@@ -76,10 +96,16 @@ export default function AppsSettings() {
               transition: 'all 0.15s',
               opacity: !canEdit && !on ? 0.6 : 1,
             }}>
-              <div style={{ fontSize: 26, flexShrink: 0, width: 44, height: 44, borderRadius: 10,
-                             background: on ? app.color + '18' : 'var(--border)',
-                             display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {app.icon}
+              <div style={{ flexShrink: 0, width: 44, height: 44, borderRadius: 10, overflow: 'hidden',
+                             background: app.image ? 'var(--surface)' : app.color,
+                             border: app.image ? '1px solid var(--border)' : 'none',
+                             display: 'flex', alignItems: 'center', justifyContent: 'center',
+                             filter: soon ? 'grayscale(1)' : 'none', opacity: soon ? 0.55 : 1 }}>
+                {app.image
+                  ? <img src={app.image} alt={app.label} width={34} height={34} style={{ objectFit: 'contain' }} />
+                  : <span style={{ fontSize: 15, fontWeight: 800, color: '#FFFFFF', letterSpacing: '0.02em' }}>
+                      {app.label.replace(/-koppeling$/, '').slice(0, 2).toUpperCase()}
+                    </span>}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -90,7 +116,14 @@ export default function AppsSettings() {
                       {t('apps.active')}
                     </span>
                   )}
-                  {app.monthly && (
+                  {soon && (
+                    <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)',
+                                   background: 'var(--hover-bg)', border: '1px solid var(--border)',
+                                   borderRadius: 999, padding: '1px 7px' }}>
+                      {t('apps.comingSoon')}
+                    </span>
+                  )}
+                  {app.monthly && !soon && (
                     <span style={{ fontSize: 10, color: 'var(--color-warning)', background: 'var(--color-warning-bg)',
                                    borderRadius: 999, padding: '1px 7px', fontWeight: 500 }}>
                       {t('apps.monthly')}
@@ -100,13 +133,13 @@ export default function AppsSettings() {
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{app.description}</div>
               </div>
               <button
-                onClick={() => toggle(app.id)}
-                disabled={!canEdit || isSaving}
-                title={!canEdit ? t('apps.noRights') : on ? t('apps.disable') : t('apps.enable')}
+                onClick={() => !soon && toggle(app.id)}
+                disabled={!canEdit || isSaving || soon}
+                title={soon ? t('apps.comingSoon') : !canEdit ? t('apps.noRights') : on ? t('apps.disable') : t('apps.enable')}
                 style={{
                   width: 44, height: 24, borderRadius: 999, border: 'none', flexShrink: 0,
-                  background: on ? app.color : 'var(--border)',
-                  cursor: canEdit ? 'pointer' : 'not-allowed',
+                  background: on && !soon ? app.color : 'var(--border)',
+                  cursor: canEdit && !soon ? 'pointer' : 'not-allowed',
                   position: 'relative', transition: 'background 0.2s',
                   opacity: isSaving ? 0.6 : 1,
                 }}>
