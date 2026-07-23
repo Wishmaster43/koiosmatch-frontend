@@ -112,7 +112,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
 
   const mapPane = (
     <RadiusMapPanel padded={false} points={points} center={center} radiusKm={radiusKm}
-      mapHeight={'clamp(320px, calc(100vh - 580px), 680px)'}
+      mapHeight={'clamp(340px, calc(100vh - 540px), 720px)'}
       centerMarker={{ label: vacancy.title ?? '', sub: t('candidateSearch.centerVacancy') }}
       onRadiusChange={setRadiusKm}
       // The vacancy pin stays fixed — re-centring by clicking the map must never
