@@ -141,7 +141,8 @@
     "new": "Nueva nota",
     "type": "Tipo",
     "empty": "Aún no hay notas.",
-    "placeholder": "Escribe una nota…"
+    "placeholder": "Escribe una nota…",
+    "loadError": "No se pudieron cargar las notas"
   },
   "tasks": {
     "loading": "Cargando tareas…",

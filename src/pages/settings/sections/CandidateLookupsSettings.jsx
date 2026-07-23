@@ -87,7 +87,9 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
     try {
       await api.put(`${BASE}/${slug}/${it.id}`, { label: it.label, color: it.color, is_default: true })
     } catch {
+      // Audit r4: revert alone read as "saved" — tell the user, like the siblings.
       setItems(previous)
+      notifyError(t('statusList.saveFailed'))
     } finally {
       setSettingDefaultId(null)
     }

@@ -68,15 +68,16 @@ export function useCustomerLocations(customerId: Id | undefined) {
   const [error, setError] = useState(false)
 
   // Load the list whenever the customer changes.
-  const load = useCallback(() => {
+  // Audit r4 (§9): abortable load — see useCustomerContacts (same race/unmount guard).
+  const load = useCallback((signal?: AbortSignal) => {
     if (!customerId) { setLocations([]); setLoading(false); return }
     setLoading(true); setError(false)
-    api.get(`/customers/${customerId}/locations`)
-      .then(res => setLocations(unwrapList<ApiLocation>(res).rows.map(mapLocation)))
-      .catch(() => setError(true))
-      .finally(() => setLoading(false))
+    api.get(`/customers/${customerId}/locations`, { signal })
+      .then(res => { if (!signal?.aborted) setLocations(unwrapList<ApiLocation>(res).rows.map(mapLocation)) })
+      .catch(err => { if (err?.code !== 'ERR_CANCELED' && !signal?.aborted) setError(true) })
+      .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId])
-  useEffect(() => { load() }, [load])
+  useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
 
   // Create — optimistic row with a temp id, swapped for the server row on success.
   // Only the Add-modal's create path calls this (inline edits go through `update`

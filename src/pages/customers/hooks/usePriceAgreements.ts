@@ -81,15 +81,16 @@ export function usePriceAgreements(customerId: Id | undefined) {
   const [error, setError] = useState(false)
 
   // Load the list whenever the customer changes.
-  const load = useCallback(() => {
+  // Audit r4 (§9): abortable load — see useCustomerContacts (same race/unmount guard).
+  const load = useCallback((signal?: AbortSignal) => {
     if (!customerId) { setAgreements([]); setLoading(false); return }
     setLoading(true); setError(false)
-    api.get(`/customers/${customerId}/price-agreements`)
-      .then(res => setAgreements(unwrapList<ApiPriceAgreement>(res).rows.map(toUi)))
-      .catch(() => setError(true))
-      .finally(() => setLoading(false))
+    api.get(`/customers/${customerId}/price-agreements`, { signal })
+      .then(res => { if (!signal?.aborted) setAgreements(unwrapList<ApiPriceAgreement>(res).rows.map(toUi)) })
+      .catch(err => { if (err?.code !== 'ERR_CANCELED' && !signal?.aborted) setError(true) })
+      .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId])
-  useEffect(() => { load() }, [load])
+  useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
 
   // Create — optimistic row with a temp id, swapped for the server row on success.
   const add = useCallback((payload: PriceAgreementPayload) => {

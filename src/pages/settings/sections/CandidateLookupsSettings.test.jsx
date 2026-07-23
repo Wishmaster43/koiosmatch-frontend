@@ -50,6 +50,26 @@ describe('CandidateLookupsSettings — funnel stage default singleton', () => {
     await waitFor(() => expect(screen.getAllByRole('button', { name: st('common.default') })).toHaveLength(1))
   })
 
+  // Audit r4: a failed default-flip must revert AND tell the user (the revert
+  // alone read as "saved" — the siblings updateColor/reorder already notify).
+  it('reverts the default flip and notifies when the PUT fails', async () => {
+    api.get.mockResolvedValue({ data: {
+      funnel_types: [stage({ id: 'f1', label: 'Gesolliciteerd', is_default: true }), stage({ id: 'f2', label: 'Aangenomen', value: 'hired' })],
+    } })
+    api.put.mockRejectedValue(new Error('network down'))
+    const { notifyError } = await import('@/lib/notify')
+    const user = userEvent.setup()
+    render(<FunnelStagesSettings />)
+
+    await screen.findByText('Aangenomen')
+    await user.click(screen.getByRole('button', { name: st('common.setDefault') }))
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.saveFailed')))
+    // Reverted: f1 is the default again; f2 offers "make default" once more.
+    await waitFor(() => expect(screen.getByRole('button', { name: st('common.setDefault') })).toBeInTheDocument())
+    expect(screen.getAllByRole('button', { name: st('common.default') })).toHaveLength(1)
+  })
+
   it('does not render the DefaultToggle on the contract-forms (candidate_types) block', async () => {
     api.get.mockResolvedValue({ data: {
       candidate_types: [{ id: 'c1', value: 'zzp', label: 'ZZP', color: '#3B8FD4' }],

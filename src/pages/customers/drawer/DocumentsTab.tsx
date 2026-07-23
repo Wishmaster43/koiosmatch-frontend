@@ -74,11 +74,13 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
             </div>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('documents.docType')}</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+              {/* §4 soft-tint (audit r4): active = tinted, never a solid primary fill. */}
               {docTypes.map(dt => (
                 <button key={dt.value} onClick={() => setPendingType(dt.value)}
                   style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer', fontWeight: pendingType === dt.value ? 600 : 400,
-                    border: `1px solid ${pendingType === dt.value ? 'var(--color-primary)' : 'var(--border)'}`,
-                    background: pendingType === dt.value ? 'var(--color-primary)' : 'var(--surface)', color: pendingType === dt.value ? 'white' : 'var(--text)' }}>{dt.label}</button>
+                    border: `1px solid ${pendingType === dt.value ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}`,
+                    background: pendingType === dt.value ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'var(--surface)',
+                    color: pendingType === dt.value ? 'var(--color-primary)' : 'var(--text)' }}>{dt.label}</button>
               ))}
             </div>
             <div style={{ display: 'flex', gap: 8 }}>

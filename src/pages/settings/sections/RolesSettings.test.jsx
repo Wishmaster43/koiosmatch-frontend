@@ -13,7 +13,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
-import RolesSettings from './RolesSettings'
+import RolesSettings, { RoleBranchTemplate } from './RolesSettings'
 import { PermissionMatrix } from './RolesPermissionMatrix'
 
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
@@ -22,7 +22,9 @@ const mockAuth = vi.fn()
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockAuth() }))
 // Network-backed hook, mocked directly so the branch-template card doesn't
 // need a real QueryClientProvider (mirrors AddCandidateModal.test.tsx).
-vi.mock('@/lib/useLocations', () => ({ useLocations: () => [] }))
+// Controllable per test (the branch-toggle tests below need real options).
+const mockLocations = vi.fn(() => [])
+vi.mock('@/lib/useLocations', () => ({ useLocations: () => mockLocations() }))
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
   return { ...actual, default: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }
@@ -185,5 +187,46 @@ describe('RolesSettings — appearance save reverts on failure', () => {
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('roles.appearanceSaveFailed')))
     // Reverted: the select falls back to the original (empty) dashboard type.
     await waitFor(() => expect(select).toHaveValue(''))
+  })
+})
+
+// Audit r4 (§13): the branch-assignment toggle had a full optimistic+revert+notify
+// implementation but zero coverage — assert the REQUEST and the reverted state.
+describe('RoleBranchTemplate — branch toggle (optimistic PUT + revert on failure)', () => {
+  const arm = () => {
+    mockLocations.mockReturnValue([{ value: 'l1', label: 'Noord' }])
+    api.get.mockResolvedValue({ data: { data: [] } }) // role has no branches yet
+  }
+
+  it('toggling a branch PUTs the replace-set to /roles/{id}/branches', async () => {
+    arm()
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<RoleBranchTemplate roleId="r1" />)
+
+    const chip = await screen.findByRole('button', { name: 'Noord' })
+    await user.click(chip)
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/roles/r1/branches', { location_ids: ['l1'] }))
+    expect(chip).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('reverts the toggle and notifies when the PUT fails', async () => {
+    arm()
+    api.put.mockRejectedValue(new Error('network down'))
+    const { notifyError } = await import('@/lib/notify')
+    const user = userEvent.setup()
+    render(<RoleBranchTemplate roleId="r1" />)
+
+    const chip = await screen.findByRole('button', { name: 'Noord' })
+    await user.click(chip)
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('roles.branchesSaveFailed')))
+    // Reverted STATE, not just the toast: the chip is deselected again, and a
+    // second click ADDS again (proving branchIds rolled back to empty).
+    await waitFor(() => expect(chip).toHaveAttribute('aria-pressed', 'false'))
+    api.put.mockResolvedValue({ data: {} })
+    await user.click(chip)
+    await waitFor(() => expect(api.put).toHaveBeenLastCalledWith('/roles/r1/branches', { location_ids: ['l1'] }))
   })
 })

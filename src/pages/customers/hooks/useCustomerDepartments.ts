@@ -45,15 +45,16 @@ export function useCustomerDepartments(customerId: Id | undefined) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
-  const load = useCallback(() => {
+  // Audit r4 (§9): abortable load — see useCustomerContacts (same race/unmount guard).
+  const load = useCallback((signal?: AbortSignal) => {
     if (!customerId) { setDepartments([]); setLoading(false); return }
     setLoading(true); setError(false)
-    api.get(`/customers/${customerId}/departments`)
-      .then(res => setDepartments(unwrapList<ApiDepartment>(res).rows.map(mapDepartment)))
-      .catch(() => setError(true))
-      .finally(() => setLoading(false))
+    api.get(`/customers/${customerId}/departments`, { signal })
+      .then(res => { if (!signal?.aborted) setDepartments(unwrapList<ApiDepartment>(res).rows.map(mapDepartment)) })
+      .catch(err => { if (err?.code !== 'ERR_CANCELED' && !signal?.aborted) setError(true) })
+      .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId])
-  useEffect(() => { load() }, [load])
+  useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
 
   // Create — optimistic row with a temp id + the picked location's name pre-filled
   // by the caller (via `locationName`), swapped for the server row on success.

@@ -75,7 +75,8 @@
     "new": "New note",
     "type": "Type",
     "empty": "No notes yet.",
-    "placeholder": "Write a note…"
+    "placeholder": "Write a note…",
+    "loadError": "Failed to load notes"
   },
   "tasks": {
     "loading": "Loading tasks…",

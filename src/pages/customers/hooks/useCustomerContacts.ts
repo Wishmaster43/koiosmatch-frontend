@@ -71,15 +71,17 @@ export function useCustomerContacts(customerId: Id | undefined) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
-  const load = useCallback(() => {
+  // Audit r4 (§9): abortable load — a fast customerId switch must never let the
+  // previous customer's stale response win, nor setState after unmount.
+  const load = useCallback((signal?: AbortSignal) => {
     if (!customerId) { setContacts([]); setLoading(false); return }
     setLoading(true); setError(false)
-    api.get(`/customers/${customerId}/contacts`)
-      .then(res => setContacts(dedupeById(unwrapList<ApiContact>(res).rows.map(mapContact))))
-      .catch(() => setError(true))
-      .finally(() => setLoading(false))
+    api.get(`/customers/${customerId}/contacts`, { signal })
+      .then(res => { if (!signal?.aborted) setContacts(dedupeById(unwrapList<ApiContact>(res).rows.map(mapContact))) })
+      .catch(err => { if (err?.code !== 'ERR_CANCELED' && !signal?.aborted) setError(true) })
+      .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId])
-  useEffect(() => { load() }, [load])
+  useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
 
   // Create — optimistic row with a temp id, swapped for the server row on success.
   // Only the Add-modal's create path calls this (couple/uncouple + inline edits go

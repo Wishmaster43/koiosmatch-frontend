@@ -13,7 +13,13 @@ export default function NotesTab({ opportunity: o }: { opportunity: Opportunity 
   const { t } = useTranslation(['opportunities', 'common'])
   // Note categories from the tenant lookup, scoped to 'opportunity' (NOTE-TYPES-2/3).
   const { writableTypes: noteTypes } = useNoteTypes('opportunity')
-  const { items: notes, addNote } = useOpportunityNotes(o?.id)
+  const { items: notes, loading, error, addNote } = useOpportunityNotes(o?.id)
+
+  // §3 (audit r4): loading/error render explicitly — a failed fetch must never
+  // look like "no notes yet" (SharedNotesTab has no state props of its own).
+  const muted = { fontSize: 13, color: 'var(--text-muted)', padding: '24px 0', textAlign: 'center' as const }
+  if (loading) return <div style={muted}>{t('common:loading')}</div>
+  if (error) return <div style={{ ...muted, color: 'var(--color-danger)' }}>{t('notes.loadError')}</div>
 
   return (
     <SharedNotesTab

@@ -75,7 +75,8 @@
     "new": "Nieuwe notitie",
     "type": "Type",
     "empty": "Nog geen notities.",
-    "placeholder": "Schrijf een notitie…"
+    "placeholder": "Schrijf een notitie…",
+    "loadError": "Notities laden mislukt"
   },
   "tasks": {
     "loading": "Taken laden…",

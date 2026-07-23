@@ -181,12 +181,15 @@ export default function NotesTab({
             <div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{labels.type}</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {/* §4 soft-tint (audit r4): mirrors the channel pills below — active is
+                    tinted (never a solid fill), inactive uses the surface token (the old
+                    literal 'white' was invisible-on-dark). */}
                 {noteTypes.map(nt => (
                   <button key={nt.value} onClick={() => setType(nt.value)}
                     style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer',
-                      border: `1px solid ${type === nt.value ? 'var(--color-primary)' : 'var(--border)'}`,
-                      background: type === nt.value ? 'var(--color-primary)' : 'white',
-                      color: type === nt.value ? 'white' : 'var(--text)', fontWeight: type === nt.value ? 600 : 400 }}>
+                      border: `1px solid ${type === nt.value ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}`,
+                      background: type === nt.value ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'var(--surface)',
+                      color: type === nt.value ? 'var(--color-primary)' : 'var(--text)', fontWeight: type === nt.value ? 600 : 400 }}>
                     {nt.label}
                   </button>
                 ))}

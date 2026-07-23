@@ -141,7 +141,8 @@
     "new": "Neue Notiz",
     "type": "Typ",
     "empty": "Noch keine Notizen.",
-    "placeholder": "Notiz schreiben…"
+    "placeholder": "Notiz schreiben…",
+    "loadError": "Notizen konnten nicht geladen werden"
   },
   "tasks": {
     "loading": "Aufgaben werden geladen…",

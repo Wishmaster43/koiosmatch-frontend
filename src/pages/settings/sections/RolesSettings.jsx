@@ -23,7 +23,7 @@ import { BTN_H } from '@/config/buttonMetrics'
 // One role's branch TEMPLATE — the starting set new users with this role inherit
 // (USERS-ROLES-LOC-1 / BranchAssignmentController::roleBranches). Existing users
 // keep their own set once created; this only edits the template row.
-function RoleBranchTemplate({ roleId }) {
+export function RoleBranchTemplate({ roleId }) {
   const { t } = useTranslation('settings')
   const locationOptions = useLocations()
   const [branchIds, setBranchIds] = useState([])

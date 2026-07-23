@@ -273,7 +273,8 @@ export default function DashboardLayout() {
               className="text-xs rounded-md px-3 py-1.5"
               style={{ background: 'var(--hover-bg)', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
             >
-              Uitloggen
+              {/* §5: reuse the existing auth key — one source per label (audit r4). */}
+              {t('auth:signOut')}
             </button>
           </div>
         </div>
