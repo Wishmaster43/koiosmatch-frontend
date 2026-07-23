@@ -29,8 +29,10 @@ function stepTime(step: RunStep): string | null {
 export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory }: {
   workflowId?: string | number; liveRun?: RunRow | null; onClose: () => void
   // LOGS-DRILL-1 (Danny 23-07 "MEER INFORMATIE of klik naar geschiedenis"): jump
-  // from a run row to the Geschiedenis tab with this run's full detail drawer open.
-  onOpenHistory?: (runId: string | number) => void
+  // from a run row to the Geschiedenis tab with this run's full detail drawer
+  // open. The WHOLE row travels along, so the drawer opens even when this run
+  // falls outside the history list's page (verify finding).
+  onOpenHistory?: (run: RunRow) => void
 }) {
   const { t } = useTranslation('reports')
   // New run-control strings live in the workflows namespace (this wave's keys).
@@ -135,7 +137,7 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                 {/* LOGS-DRILL-1: full run detail lives on the Geschiedenis tab. */}
                 {onOpenHistory && run.id != null && (
                   <button type="button" title={t('runs.openHistory')} aria-label={t('runs.openHistory')}
-                    onClick={() => onOpenHistory(run.id as string | number)}
+                    onClick={() => onOpenHistory(run)}
                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                              width: 24, height: 24, borderRadius: 6, border: '1px solid var(--border)',
                              background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>

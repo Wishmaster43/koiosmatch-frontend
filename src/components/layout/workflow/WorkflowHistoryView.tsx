@@ -22,9 +22,9 @@ const TD: CSSProperties = { padding: '12px 16px', fontSize: 13, color: 'var(--te
 export default function WorkflowHistoryView({ workflowId, initialRun }: {
   workflowId?: string | number
   // LOGS-DRILL-1: arriving from the Logs panel's history-jump — auto-open this
-  // run's drawer. A fresh object per jump (compared by identity), so the same
-  // run re-opens on a second jump while a closed drawer never self-reopens.
-  initialRun?: { id: string | number } | null
+  // run's drawer. A fresh wrapper object per jump (compared by identity), so the
+  // same run re-opens on a second jump while a closed drawer never self-reopens.
+  initialRun?: { row: RunRow } | null
 }) {
   const { t } = useTranslation('reports')
   // Runs are scoped to this workflow; the drawer opens above the editor overlay.
@@ -32,14 +32,13 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
   const [drill, setDrill] = useState<RunRow | null>(null)
 
   // LOGS-DRILL-1: open the requested run exactly once per jump (object identity).
-  const consumedRun = useRef<{ id: string | number } | null>(null)
+  // Prefer the freshly fetched list row; the carried row is the fallback so a run
+  // outside this page still opens instead of silently no-oping (verify finding).
+  const consumedRun = useRef<{ row: RunRow } | null>(null)
   useEffect(() => {
     if (initialRun == null || loading || consumedRun.current === initialRun) return
-    const match = rows.find(r => String(r.id) === String(initialRun.id))
-    if (match) {
-      consumedRun.current = initialRun
-      setDrill(match)
-    }
+    consumedRun.current = initialRun
+    setDrill(rows.find(r => String(r.id) === String(initialRun.row.id)) ?? initialRun.row)
   }, [initialRun, loading, rows])
 
   return (

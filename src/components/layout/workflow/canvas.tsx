@@ -182,8 +182,11 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
         >
           {busy ? <Loader2 size={10} className="animate-spin" /> : <Play size={10} />}
         </button>
-        {/* Status badge — live run (success/failed) or a stored test-run output */}
-        {(done || failed || !!data.output) && (
+        {/* Status badge — live run (success/failed) or a stored test-run output.
+            Suppressed while the counter badge occupies the same corner (verify
+            finding): the green ring already encodes success; failed always shows
+            here since the counter never renders on a failed step. */}
+        {badgeCount == null && (done || failed || !!data.output) && (
           <div style={{
             position: 'absolute', top: -4, right: -4,
             width: 16, height: 16, borderRadius: '50%',
