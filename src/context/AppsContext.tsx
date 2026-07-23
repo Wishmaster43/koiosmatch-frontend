@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode, ComponentType } from 'react'
+import { Sparkles } from 'lucide-react'
 import api from '../lib/api'
 import { useAuth } from './AuthContext'
 // Real brand logos (local assets, §7 CSP) for the connectors that have one.
@@ -51,6 +52,12 @@ interface AppsValue {
   isAppEnabled: (appId: string) => boolean
   loading: boolean
 }
+
+// Koios-AI tiles: the lucide Sparkles icon, each in its own brand colour (Danny 23-07).
+/* eslint-disable no-restricted-syntax -- seed DATA hex: AI-app brand colours, not UI styling */
+const AiPlannerMark = ({ size = 24 }: { size?: number }) => <Sparkles size={size} color="#7C3AED" />
+const AiRecruiterMark = ({ size = 24 }: { size?: number }) => <Sparkles size={size} color="#DB2777" />
+/* eslint-enable no-restricted-syntax */
 
 const AppsContext = createContext<AppsValue | null>(null)
 
@@ -183,6 +190,7 @@ export const AVAILABLE_APPS: AppDef[] = [
   // visibility server-side (FolderVisibility) — toggle off = folder + workflows hidden.
   {
     id:          'ai_planner',
+    Mark:        AiPlannerMark,
     label:       'AI Planner',
     description: 'AI-planner: diensten aanbieden, reminders, gewerkte diensten en statuswijzigingen. Toont de map "AI Planner" in Workflows.',
     icon:        '🤖',
@@ -194,6 +202,7 @@ export const AVAILABLE_APPS: AppDef[] = [
   },
   {
     id:          'ai_recruiter',
+    Mark:        AiRecruiterMark,
     label:       'AI Recruiter',
     description: 'AI-recruiter: kennismaking en automatische reacties op kandidaat-berichten. Toont de map "AI Recruiter" in Workflows.',
     icon:        '🎯',
