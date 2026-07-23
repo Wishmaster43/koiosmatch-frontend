@@ -218,8 +218,10 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div ref={panelRef} role="dialog" aria-modal="true" tabIndex={-1}
-        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', maxWidth: 940,
-        boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', maxHeight: '90vh' }}>
+        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', maxWidth: 1060,
+        // 940/90vh forced an inner scroll on a normal screen (Danny 23-07: "klein
+        // stukje groter zodat je niet hoeft te scrollen") — wider + taller cap.
+        boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', maxHeight: '94vh' }}>
 
         {/* ── Form panel — full width; the phase choice is a compact segmented row in
             the header (Danny r2: de linkerkolom verspilde ~260px aan twee knoppen) ── */}
