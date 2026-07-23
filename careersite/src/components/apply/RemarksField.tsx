@@ -1,4 +1,4 @@
-import { strings } from '@/strings'
+import { strings } from '../../strings'
 
 interface RemarksFieldProps {
   value: string

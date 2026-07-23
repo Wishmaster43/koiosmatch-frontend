@@ -252,6 +252,9 @@
   "motivation": {
     "title": "Motivatie"
   },
+  "interviewConsent": {
+    "given": "Interview-toestemming gegeven op {{date}}"
+  },
   "archived": {
     "toggle": "Gearchiveerd",
     "since": "Gearchiveerd op {{date}}",

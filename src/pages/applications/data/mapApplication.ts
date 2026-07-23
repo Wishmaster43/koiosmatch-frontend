@@ -184,6 +184,9 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     // MOTIVATIE-ZICHTBAAR-1: the careersite motivation letter, null-safe until
     // CMBE emits `cover_letter` on the detail resource (honest-gated in the tab).
     coverLetter: raw.cover_letter ?? null,
+    // INTERVIEW-CONSENT-PERSIST-1: null-safe read of the consent timestamp —
+    // stays null when no consent was given or the field was hidden on apply.
+    interviewConsentGivenAt: raw.interview_consent_given_at ?? null,
     // Rejection trail (reason + toelichting/note + channel/sent_at) — S9 finding:
     // this was NEVER mapped, so a rejected application always showed just the
     // "Afgewezen" badge with no reason/note, even though ApplicationDetailResource

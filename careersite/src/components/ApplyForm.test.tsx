@@ -187,6 +187,51 @@ describe('ApplyForm — photo client validation', () => {
   })
 })
 
+describe('ApplyForm — interview consent payload (INTERVIEW-CONSENT-PERSIST-1)', () => {
+  it('carries interviewConsent=true in the payload when the box is ticked and the setting is not hidden', async () => {
+    const user = userEvent.setup()
+    render(
+      <ApplyForm tenant="acme" reference="REF-1" applicationSettings={{ ...BASE_SETTINGS, interview_consent: 'optional' }} />,
+    )
+    await fillRequiredFields(user)
+    await user.click(screen.getByRole('checkbox', { name: strings.apply.interviewConsent.label }))
+    await user.click(screen.getByRole('checkbox', { name: strings.apply.consentLabel }))
+    await user.click(screen.getByRole('button', { name: strings.apply.submit }))
+
+    expect(await screen.findByText(strings.apply.success('APP-1'))).toBeTruthy()
+    const [, , payload] = mockedApply.mock.calls[0]
+    expect(payload.interview_consent).toBe(true)
+  })
+
+  it('carries interviewConsent=false in the payload when the box is left unticked but the setting is not hidden', async () => {
+    const user = userEvent.setup()
+    render(
+      <ApplyForm tenant="acme" reference="REF-1" applicationSettings={{ ...BASE_SETTINGS, interview_consent: 'optional' }} />,
+    )
+    await fillRequiredFields(user)
+    await user.click(screen.getByRole('checkbox', { name: strings.apply.consentLabel }))
+    await user.click(screen.getByRole('button', { name: strings.apply.submit }))
+
+    expect(await screen.findByText(strings.apply.success('APP-1'))).toBeTruthy()
+    const [, , payload] = mockedApply.mock.calls[0]
+    expect(payload.interview_consent).toBe(false)
+  })
+
+  // Hidden means the field never reaches the payload at all — undefined, not a
+  // stray `false` — so the api layer's own omission logic never fires unnecessarily.
+  it('never resolves interviewConsent when the setting hides the field (the BASE_SETTINGS default)', async () => {
+    const user = userEvent.setup()
+    render(<ApplyForm tenant="acme" reference="REF-1" applicationSettings={BASE_SETTINGS} />)
+    await fillRequiredFields(user)
+    await user.click(screen.getByRole('checkbox', { name: strings.apply.consentLabel }))
+    await user.click(screen.getByRole('button', { name: strings.apply.submit }))
+
+    expect(await screen.findByText(strings.apply.success('APP-1'))).toBeTruthy()
+    const [, , payload] = mockedApply.mock.calls[0]
+    expect(payload.interview_consent).toBeUndefined()
+  })
+})
+
 describe('ApplyForm — payload assembly (address, remarks, phone, repeatable entries)', () => {
   it('joins the selected country dial code and carries address/remarks/experience/education into the payload', async () => {
     const user = userEvent.setup()

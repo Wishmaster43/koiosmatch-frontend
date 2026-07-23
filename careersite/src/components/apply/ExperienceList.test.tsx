@@ -3,8 +3,8 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ExperienceList } from './ExperienceList'
-import { strings } from '@/strings'
-import type { ExperienceEntry } from '@/types'
+import { strings } from '../../strings'
+import type { ExperienceEntry } from '../../types'
 
 // Thin controlled-state wrapper mirroring how ApplyForm itself owns `entries` —
 // lets the test drive the real add/edit/remove flow while observing onChange.

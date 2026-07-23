@@ -224,4 +224,20 @@ describe('mapApplicationDetail', () => {
       expect(mapApplicationDetail({ id: 9, cover_letter: null }).coverLetter).toBeNull()
     })
   })
+
+  // INTERVIEW-CONSENT-PERSIST-1: the applicant's consent-tick timestamp, null-safe.
+  describe('interviewConsentGivenAt (INTERVIEW-CONSENT-PERSIST-1)', () => {
+    it('maps interview_consent_given_at to interviewConsentGivenAt', () => {
+      expect(mapApplicationDetail({ id: 10, interview_consent_given_at: '2026-07-20T10:00:00Z' }).interviewConsentGivenAt)
+        .toBe('2026-07-20T10:00:00Z')
+    })
+
+    it('defaults to null when interview_consent_given_at is absent', () => {
+      expect(mapApplicationDetail({ id: 11 }).interviewConsentGivenAt).toBeNull()
+    })
+
+    it('defaults to null when interview_consent_given_at is explicitly null', () => {
+      expect(mapApplicationDetail({ id: 12, interview_consent_given_at: null }).interviewConsentGivenAt).toBeNull()
+    })
+  })
 })

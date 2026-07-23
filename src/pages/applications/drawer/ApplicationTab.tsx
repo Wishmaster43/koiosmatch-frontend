@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X } from 'lucide-react'
+import { Edit2, Save, X, ShieldCheck } from 'lucide-react'
+import { useDateFormat } from '@/lib/datetime'
 import EntityLink from '@/components/ui/EntityLink'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
@@ -72,6 +73,7 @@ interface ApplicationTabProps {
  */
 export default function ApplicationTab({ application: a, onReject, onAdjustScore, onLinkVacancy, onUpdateSource }: ApplicationTabProps) {
   const { t } = useTranslation(['applications', 'common'])
+  const { formatDateTime } = useDateFormat()
   // In-place edit of the vacancy link + Bron (S7) — one shared pencil → picker/
   // input → diskette/✕ (§3A house pattern, mirrors KlantTab). Vacancy options
   // only load while editing.
@@ -193,6 +195,17 @@ export default function ApplicationTab({ application: a, onReject, onAdjustScore
         <SectionCard title={t('motivation.title')}>
           <SafeHtml html={a.coverLetter} style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.5 }} />
         </SectionCard>
+      )}
+
+      {/* INTERVIEW-CONSENT-PERSIST-1: the applicant's (AI-)interview consent tick
+          from the public apply form — a calm, one-line AVG evidence row. Honest-
+          gated on the timestamp being non-null (no consent given, or the vacancy's
+          setting hid the field entirely) — no row at all rather than a fake state. */}
+      {a.interviewConsentGivenAt && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-muted)' }}>
+          <ShieldCheck size={12} />
+          <span>{t('interviewConsent.given', { date: formatDateTime(a.interviewConsentGivenAt) })}</span>
+        </div>
       )}
 
       {/* Koios AI advisory — phase progress + vacancy-link completeness (§3A blueprint). */}

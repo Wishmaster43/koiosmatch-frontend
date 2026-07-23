@@ -140,6 +140,46 @@ describe('api client — request construction', () => {
     expect(body.get('experiences[0][company]')).toBeNull()
   })
 
+  // INTERVIEW-CONSENT-PERSIST-1: the checked/unchecked tick becomes the literal
+  // string '1'/'0' — the one wire format Laravel's `accepted` (required setting)
+  // AND `boolean` (optional setting) rules both parse.
+  it('sends interview_consent as the string "1" when the applicant ticked the box', async () => {
+    const mockFetch = vi.mocked(fetch)
+    mockFetch.mockResolvedValue(mockJsonResponse({ status: 'applied', reference: 'APP-1' }, 201))
+    await applyToVacancy('acme', 'REF-1', {
+      first_name: 'Jane', last_name: 'Doe', email: 'jane@example.com', phone: '0612345678',
+      website: '', interview_consent: true,
+    })
+    const [, init] = mockFetch.mock.calls[0]
+    const body = init?.body as FormData
+    expect(body.get('interview_consent')).toBe('1')
+  })
+
+  it('sends interview_consent as the string "0" when the applicant left the box unchecked', async () => {
+    const mockFetch = vi.mocked(fetch)
+    mockFetch.mockResolvedValue(mockJsonResponse({ status: 'applied', reference: 'APP-1' }, 201))
+    await applyToVacancy('acme', 'REF-1', {
+      first_name: 'Jane', last_name: 'Doe', email: 'jane@example.com', phone: '0612345678',
+      website: '', interview_consent: false,
+    })
+    const [, init] = mockFetch.mock.calls[0]
+    const body = init?.body as FormData
+    expect(body.get('interview_consent')).toBe('0')
+  })
+
+  // A hidden setting resolves to `undefined` upstream (ApplyForm) — the field must
+  // never reach the multipart body at all in that case (never a stray '0').
+  it('omits interview_consent entirely when the caller passes no value', async () => {
+    const mockFetch = vi.mocked(fetch)
+    mockFetch.mockResolvedValue(mockJsonResponse({ status: 'applied', reference: 'APP-1' }, 201))
+    await applyToVacancy('acme', 'REF-1', {
+      first_name: 'Jane', last_name: 'Doe', email: 'jane@example.com', phone: '0612345678', website: '',
+    })
+    const [, init] = mockFetch.mock.calls[0]
+    const body = init?.body as FormData
+    expect(body.get('interview_consent')).toBeNull()
+  })
+
   it('throws ApiError carrying the status, never the raw response body', async () => {
     const mockFetch = vi.mocked(fetch)
     mockFetch.mockResolvedValue(mockJsonResponse('secret internal error trace', 500))

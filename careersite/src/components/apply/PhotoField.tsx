@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { strings } from '@/strings'
+import { strings } from '../../strings'
 
 interface PhotoFieldProps {
   photo: File | null

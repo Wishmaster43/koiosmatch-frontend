@@ -115,6 +115,13 @@ function buildApplyFormData(payload: ApplyPayload): FormData {
   if (payload.city) formData.set('city', payload.city)
   if (payload.photo) formData.set('photo', payload.photo)
   if (payload.remarks) formData.set('remarks', payload.remarks)
+  // INTERVIEW-CONSENT-PERSIST-1: '1'/'0' satisfies both Laravel's `accepted`
+  // rule (required setting) and its `boolean` rule (optional setting) — sent
+  // only when the caller resolved a real value (hidden setting → undefined,
+  // never appended, mirroring the honeypot-free omission pattern above).
+  if (payload.interview_consent !== undefined) {
+    formData.set('interview_consent', payload.interview_consent ? '1' : '0')
+  }
   appendEntries(formData, 'experiences', payload.experiences ?? [])
   appendEntries(formData, 'educations', payload.educations ?? [])
   formData.set('website', payload.website)

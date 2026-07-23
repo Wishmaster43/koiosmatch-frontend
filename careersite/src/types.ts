@@ -124,6 +124,10 @@ export interface ApplyPayload {
   // Profile photo — defaults to hidden (AVG); only sent when the vacancy opted in.
   photo?: File | null
   remarks?: string
+  // INTERVIEW-CONSENT-PERSIST-1: the applicant's tick for the (AI-)interview
+  // consent — undefined when the vacancy's setting hides the field entirely
+  // (never sent, mirrors how photo/remarks stay unset rather than blank).
+  interview_consent?: boolean
   experiences?: ExperienceEntry[]
   educations?: EducationEntry[]
   // Honeypot — must stay empty; a filled value marks the submission as a bot to the backend.

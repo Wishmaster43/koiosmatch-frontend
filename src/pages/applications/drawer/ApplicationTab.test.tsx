@@ -229,4 +229,19 @@ describe('ApplicationTab', () => {
       expect(screen.queryByText('motivation.title')).toBeNull()
     })
   })
+
+  // INTERVIEW-CONSENT-PERSIST-1 (Danny 23-07): the consent-tick evidence row is
+  // honest-gated — no row at all until CMBE puts a real timestamp on the field.
+  describe('Interview consent row (INTERVIEW-CONSENT-PERSIST-1)', () => {
+    it('renders the consent row with the formatted date when interviewConsentGivenAt is present', () => {
+      renderTab(<ApplicationTab application={app({ interviewConsentGivenAt: '2026-07-20T10:00:00Z' })} />)
+      // The mocked useDateFormat.formatDateTime echoes the raw value (see mock above).
+      expect(screen.getByText('interviewConsent.given')).toBeInTheDocument()
+    })
+
+    it('renders nothing when interviewConsentGivenAt is null', () => {
+      renderTab(<ApplicationTab application={app({ interviewConsentGivenAt: null })} />)
+      expect(screen.queryByText('interviewConsent.given')).toBeNull()
+    })
+  })
 })

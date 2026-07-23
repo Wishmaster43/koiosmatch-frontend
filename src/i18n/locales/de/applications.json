@@ -241,6 +241,9 @@
   "motivation": {
     "title": "Motivationsschreiben"
   },
+  "interviewConsent": {
+    "given": "Interview-Zustimmung erteilt am {{date}}"
+  },
   "archived": {
     "toggle": "Archiviert",
     "since": "Archiviert am {{date}}",

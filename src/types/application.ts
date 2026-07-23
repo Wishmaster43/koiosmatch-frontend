@@ -128,6 +128,11 @@ export interface ApplicationDetail extends Application {
   // applications.cover_letter. Null until CMBE puts it (sanitised) on the
   // ApplicationDetailResource — the tab honest-gates on its presence.
   coverLetter: string | null
+  // INTERVIEW-CONSENT-PERSIST-1: the applicant's consent tick timestamp from the
+  // public apply form (applications.interview_consent_given_at). Null when no
+  // consent was given (or the vacancy's setting hides the field) — the drawer
+  // honest-gates its AVG-evidence row on this being non-null.
+  interviewConsentGivenAt: string | null
 }
 
 /** A raw candidate as the API nests it under an application. */
@@ -239,6 +244,8 @@ export interface ApiApplication {
   // MOTIVATIE-ZICHTBAAR-1: the careersite apply's motivation letter (raw HTML,
   // sanitised through SafeHtml before render) — awaited on ApplicationDetailResource.
   cover_letter?: string | null
+  // INTERVIEW-CONSENT-PERSIST-1: the consent-tick timestamp (ApplicationDetailResource).
+  interview_consent_given_at?: string | null
   [k: string]: unknown
 }
 

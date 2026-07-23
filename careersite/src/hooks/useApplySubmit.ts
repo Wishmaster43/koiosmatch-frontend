@@ -24,6 +24,9 @@ export interface ApplyFormValues {
   educations: EducationEntry[]
   // Honeypot — always sent, expected empty; a real visitor never sees or fills this field.
   website: string
+  // INTERVIEW-CONSENT-PERSIST-1: undefined when the vacancy's setting hides the
+  // field (never sent); otherwise the checkbox's real checked state.
+  interviewConsent?: boolean
 }
 
 interface ApplySubmitState {
@@ -57,6 +60,9 @@ export function useApplySubmit(tenant: string | undefined, reference: string | u
         experiences: values.experiences,
         educations: values.educations,
         website: values.website,
+        // INTERVIEW-CONSENT-PERSIST-1: passed through as-is (boolean or undefined) —
+        // the api layer decides the wire format ('1'/'0'), this hook just forwards it.
+        interview_consent: values.interviewConsent,
       })
       setState({ status: 'success', errorMessage: null, reference: res.reference })
     } catch {

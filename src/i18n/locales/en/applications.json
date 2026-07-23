@@ -252,6 +252,9 @@
   "motivation": {
     "title": "Motivation"
   },
+  "interviewConsent": {
+    "given": "Interview consent given on {{date}}"
+  },
   "archived": {
     "toggle": "Archived",
     "since": "Archived on {{date}}",

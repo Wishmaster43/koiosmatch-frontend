@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { strings } from '@/strings'
-import { useEntryDraft } from '@/hooks/useEntryDraft'
-import { dateToMonth, monthToDate } from '@/lib/monthDate'
-import type { ExperienceEntry } from '@/types'
+import { strings } from '../../strings'
+import { useEntryDraft } from '../../hooks/useEntryDraft'
+import { dateToMonth, monthToDate } from '../../lib/monthDate'
+import type { ExperienceEntry } from '../../types'
 
 interface ExperienceListProps {
   entries: ExperienceEntry[]

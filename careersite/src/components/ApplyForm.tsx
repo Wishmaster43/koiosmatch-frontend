@@ -159,6 +159,10 @@ export function ApplyForm({ tenant, reference, applicationSettings }: ApplyFormP
       experiences,
       educations,
       website,
+      // INTERVIEW-CONSENT-PERSIST-1: only resolved to a real value when the field is
+      // actually shown (mirrors every other settings-gated field) — a hidden setting
+      // must never leak the checkbox's default state into the request.
+      interviewConsent: applicationSettings.interview_consent !== 'hidden' ? interviewConsent : undefined,
     })
   }
 

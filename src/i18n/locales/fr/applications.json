@@ -241,6 +241,9 @@
   "motivation": {
     "title": "Lettre de motivation"
   },
+  "interviewConsent": {
+    "given": "Consentement à l'entretien donné le {{date}}"
+  },
   "archived": {
     "toggle": "Archivées",
     "since": "Archivé le {{date}}",

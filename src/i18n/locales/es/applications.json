@@ -241,6 +241,9 @@
   "motivation": {
     "title": "Carta de motivación"
   },
+  "interviewConsent": {
+    "given": "Consentimiento para la entrevista otorgado el {{date}}"
+  },
   "archived": {
     "toggle": "Archivadas",
     "since": "Archivado el {{date}}",

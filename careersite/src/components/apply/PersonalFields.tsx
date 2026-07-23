@@ -1,4 +1,4 @@
-import { strings } from '@/strings'
+import { strings } from '../../strings'
 import { COUNTRY_CODES } from './countryCodes'
 
 export interface PersonalFieldsValues {
