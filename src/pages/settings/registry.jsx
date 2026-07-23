@@ -37,6 +37,7 @@ import { LastContactTypesSettings } from './sections/CandidateCommSettings'
 import NoteTypesSettings from './sections/NoteTypesSettings'
 import { CandidateConversionSettings } from './sections/CandidateConversionSettings'
 import NumberingSettings from './sections/NumberingSettings'
+import OrganisationPolicySettings from './sections/OrganisationPolicySettings'
 import { CustomerStatusesSettings, LocationStatusesSettings, DepartmentStatusesSettings, ContactStatusesSettings } from './sections/CustomerSettings'
 import PoolsSettings from './sections/PoolsSettings'
 import { LanguageListSettings, LanguageLevelSettings } from './sections/LanguageSettings'
@@ -124,6 +125,8 @@ export const NAV_GROUPS = [
       { id: 'branding', icon: Palette, component: BrandSettings },
       // NUMMER-1: prefix/padding/start per entity for the human-readable reference numbers.
       { id: 'numbering', icon: Hash, component: NumberingSettings },
+      // Org-wide policies (MFA enforcement, …) — own sub-menu next to numbering (Danny 23-07).
+      { id: 'org_policy', icon: Shield, component: OrganisationPolicySettings },
     ],
   },
   {

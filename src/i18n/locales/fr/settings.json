@@ -197,7 +197,8 @@
     "nt_contact": "Contacts",
     "nt_opportunity": "Opportunités",
     "action_rules": "Règles d'action",
-    "vacancy_generation": "Génération d'annonces"
+    "vacancy_generation": "Génération d'annonces",
+    "org_policy": "Politique d'organisation"
   },
   "kpis": {
     "title": "Paramètres KPI",

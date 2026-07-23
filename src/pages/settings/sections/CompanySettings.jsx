@@ -9,7 +9,6 @@ import { useIndustries } from '@/lib/useIndustries'
 // locales the profile picker offers — never a diverging local list.
 import { LANGUAGES as APP_LANGUAGES } from '@/pages/auth/profileParts'
 import { BTN_H } from '@/config/buttonMetrics'
-import MfaEnforcementSetting from './MfaEnforcementSetting'
 
 // Option lists (data — kept as-is; only labels are translated). Industries are
 // now tenant-configurable (Settings → Personalisation → Industries).
@@ -196,10 +195,9 @@ export default function CompanySettings() {
           </Row>
         </div>
       )}
-      {/* Organisation-wide MFA policy (admin-only, self-gated) — moved here from the
-          personal security screen: an org policy is a company setting, not a profile
-          item (Danny 16-07). */}
-      <MfaEnforcementSetting />
+      {/* Organisation policies (MFA enforcement, …) live in their OWN sub-menu now:
+          Settings → Bedrijf → Organisatiebeleid (Danny 23-07 — no longer crammed
+          under the company-profile form). */}
     </div>
   )
 }
