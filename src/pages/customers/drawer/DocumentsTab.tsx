@@ -8,17 +8,25 @@
 import { useState, useRef } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Plus, X, FileText, Pencil, Eye } from 'lucide-react'
+import { Search, Plus, X, FileText, Pencil, Eye, Download } from 'lucide-react'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from '@/components/ui/SectionCard'
 import { useEntityDocuments, type EntityDoc } from '@/hooks/useEntityDocuments'
+import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import type { Id } from '@/types/common'
 
 interface PendingFile { file: File; objectUrl: string; name: string; size: string }
 
 // Split a filename into base + extension so rename never touches the extension.
 const splitExt = (fn: string) => { const m = fn.match(/\.[^./\\]+$/); return { base: m ? fn.slice(0, -m[0].length) : fn, ext: m ? m[0] : '' } }
+
+// Stable per-row selection key: the real id, or the row index for not-yet-persisted rows.
+const docKey = (d: EntityDoc, i: number): string => String(d.id ?? 'idx-' + i)
+// A row can be downloaded once the server (or a local blob) has given it a url.
+const docUrl = (d: EntityDoc): string | undefined => d.download_url ?? d.objectUrl
+// Grid used by both the header row and every data row — one source so they never drift.
+const DOC_GRID_COLUMNS = '18px 1fr 80px 100px'
 
 export default function DocumentsTab({ customerId }: { customerId: Id | undefined }) {
   const { t } = useTranslation('customers')
@@ -31,7 +39,34 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
   const [renamingId,  setRenamingId]  = useState<Id | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [docSearch,   setDocSearch]   = useState('')
+  // Bulk-download selection, keyed by docKey — cleared once a download batch starts.
+  const [selected, setSelected] = useState<Set<string>>(new Set())
   const fileRef = useRef<HTMLInputElement>(null)
+
+  // Rows currently visible under the search filter, with their original index kept.
+  const filteredDocs = docs.map((d, i) => ({ ...d, _i: i }))
+    .filter(d => !docSearch || (d.name ?? d.file_name ?? '').toLowerCase().includes(docSearch.toLowerCase()) || (d.type ?? '').toLowerCase().includes(docSearch.toLowerCase()))
+  const filteredDownloadableKeys = filteredDocs.filter(d => docUrl(d)).map(d => docKey(d, d._i))
+  const allFilteredSelected = filteredDownloadableKeys.length > 0 && filteredDownloadableKeys.every(k => selected.has(k))
+
+  // Select-all toggles every currently-filtered downloadable row at once.
+  const toggleSelectAll = () => {
+    setSelected(prev => {
+      const next = new Set(prev)
+      if (allFilteredSelected) filteredDownloadableKeys.forEach(k => next.delete(k))
+      else filteredDownloadableKeys.forEach(k => next.add(k))
+      return next
+    })
+  }
+  const toggleSelectedRow = (key: string) => {
+    setSelected(prev => { const next = new Set(prev); if (next.has(key)) next.delete(key); else next.add(key); return next })
+  }
+  // Start the sequential download for every selected doc, in list order, then clear.
+  const downloadSelected = async () => {
+    const items = docs.map((d, i) => ({ d, key: docKey(d, i) })).filter(({ key }) => selected.has(key)).map(({ d }) => ({ url: docUrl(d), name: d.name ?? d.file_name }))
+    await downloadFilesSequentially(items)
+    setSelected(new Set())
+  }
 
   // Send the pending file to the server (an optimistic row appears immediately).
   const doUpload = () => {
@@ -48,6 +83,11 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
   }
   // Preview opens the signed capability URL (persisted) or the local blob (pending).
   const preview = (d: EntityDoc) => { const url = d.download_url ?? d.objectUrl; if (url) window.open(url, '_blank', 'noopener,noreferrer') }
+  // Remove a doc and prune its selection key too, so a stale key never lingers.
+  const doRemove = (d: EntityDoc, i: number) => {
+    setSelected(prev => { const next = new Set(prev); next.delete(docKey(d, i)); return next })
+    remove(d.id)
+  }
 
   return (
     <div>
@@ -60,6 +100,15 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
               style={{ border: 'none', outline: 'none', fontSize: 11, color: 'var(--text)', background: 'none', width: 110 }} />
             {docSearch && <button onClick={() => setDocSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={11} /></button>}
           </div>
+          {/* Soft-tint bulk-download action (§4) — only shown once something is selected. */}
+          {selected.size > 0 && (
+            <button onClick={downloadSelected}
+              style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer',
+                background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)', color: 'var(--color-primary)',
+                border: '1px solid color-mix(in srgb, var(--color-primary) 45%, transparent)' }}>
+              <Download size={11} /> {t('documents.downloadSelected', { count: selected.size })}
+            </button>
+          )}
           <button onClick={() => fileRef.current?.click()}
             style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
             <Plus size={11} /> {t('documents.add')}
@@ -93,14 +142,24 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
         )}
         {docs.length === 0 && !pendingFile && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('documents.empty')}</div>}
         {docs.length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 100px', padding: '4px 10px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 4 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: DOC_GRID_COLUMNS, alignItems: 'center', padding: '4px 10px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 4 }}>
+            {/* Select-all operates on the currently filtered, downloadable rows only. */}
+            <input type="checkbox" aria-label={t('documents.selectAll')} checked={allFilteredSelected} onChange={toggleSelectAll}
+              ref={el => { if (el) el.indeterminate = !allFilteredSelected && filteredDownloadableKeys.some(k => selected.has(k)) }}
+              style={{ accentColor: 'var(--color-primary)' }} />
             <span>{t('documents.name')}</span><span>{t('documents.type')}</span><span>{t('documents.size')}</span>
           </div>
         )}
-        {docs
-          .filter(d => !docSearch || (d.name ?? d.file_name ?? '').toLowerCase().includes(docSearch.toLowerCase()) || (d.type ?? '').toLowerCase().includes(docSearch.toLowerCase()))
-          .map((d, i) => (
-            <div key={String(d.id ?? i)} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 100px', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', marginBottom: 6 }}>
+        {filteredDocs.map(d => {
+            const i = d._i
+            const key = docKey(d, i)
+            const downloadable = Boolean(docUrl(d))
+            return (
+            <div key={String(d.id ?? i)} style={{ display: 'grid', gridTemplateColumns: DOC_GRID_COLUMNS, alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', marginBottom: 6 }}>
+              {/* Row checkbox — disabled while the doc has no downloadable url yet (pending upload). */}
+              <input type="checkbox" aria-label={t('documents.selectOne', { name: d.name ?? d.file_name ?? '' })}
+                checked={downloadable && selected.has(key)} disabled={!downloadable} onChange={() => toggleSelectedRow(key)}
+                style={{ accentColor: 'var(--color-primary)' }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
                 <div style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, background: docColor(d.type), display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FileText size={13} color="white" /></div>
                 <div style={{ minWidth: 0, flex: 1 }}>
@@ -123,11 +182,12 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
                 <div style={{ display: 'flex' }}>
                   <button onClick={() => { setRenamingId(d.id ?? null); setRenameValue(splitExt(String(d.name ?? d.file_name ?? '')).base) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Pencil size={12} /></button>
                   <button onClick={() => preview(d)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={12} /></button>
-                  <button onClick={() => remove(d.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>
+                  <button onClick={() => doRemove(d, i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>
                 </div>
               </div>
             </div>
-          ))
+            )
+          })
         }
         <input ref={fileRef} type="file" style={{ display: 'none' }}
           onChange={(e: ChangeEvent<HTMLInputElement>) => {

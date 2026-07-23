@@ -282,7 +282,10 @@
     "docType": "Documenttype",
     "name": "Naam",
     "type": "Type",
-    "size": "Grootte"
+    "size": "Grootte",
+    "selectAll": "Alles selecteren",
+    "selectOne": "Selecteer {{name}}",
+    "downloadSelected": "Download ({{count}})"
   },
   "priceAgreements": {
     "add": "Prijsafspraak toevoegen",

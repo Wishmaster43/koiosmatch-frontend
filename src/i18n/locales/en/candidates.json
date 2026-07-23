@@ -659,6 +659,9 @@
     "download": "Download",
     "loadingPreview": "Loading preview…",
     "pdfPageLabel": "Page {{page}} of {{total}}",
+    "selectAll": "Select all",
+    "selectOne": "Select {{name}}",
+    "downloadSelected": "Download ({{count}})",
     "types": {
       "cv": "CV",
       "id": "ID",

@@ -282,7 +282,10 @@
     "docType": "Document type",
     "name": "Name",
     "type": "Type",
-    "size": "Size"
+    "size": "Size",
+    "selectAll": "Select all",
+    "selectOne": "Select {{name}}",
+    "downloadSelected": "Download ({{count}})"
   },
   "priceAgreements": {
     "add": "Add price agreement",

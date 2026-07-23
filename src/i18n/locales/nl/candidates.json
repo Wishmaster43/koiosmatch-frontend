@@ -659,6 +659,9 @@
     "download": "Downloaden",
     "loadingPreview": "Preview laden…",
     "pdfPageLabel": "Pagina {{page}} van {{total}}",
+    "selectAll": "Alles selecteren",
+    "selectOne": "Selecteer {{name}}",
+    "downloadSelected": "Download ({{count}})",
     "types": {
       "cv": "CV",
       "id": "ID-bewijs",

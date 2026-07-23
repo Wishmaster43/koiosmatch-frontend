@@ -282,7 +282,10 @@
     "docType": "Dokumenttyp",
     "name": "Name",
     "type": "Typ",
-    "size": "Größe"
+    "size": "Größe",
+    "selectAll": "Alle auswählen",
+    "selectOne": "{{name}} auswählen",
+    "downloadSelected": "Herunterladen ({{count}})"
   },
   "priceAgreements": {
     "add": "Preisvereinbarung hinzufügen",

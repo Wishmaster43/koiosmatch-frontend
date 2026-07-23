@@ -652,6 +652,9 @@
     "download": "Herunterladen",
     "loadingPreview": "Vorschau wird geladen…",
     "pdfPageLabel": "Seite {{page}} von {{total}}",
+    "selectAll": "Alle auswählen",
+    "selectOne": "{{name}} auswählen",
+    "downloadSelected": "Herunterladen ({{count}})",
     "types": {
       "cv": "CV",
       "id": "Ausweis",

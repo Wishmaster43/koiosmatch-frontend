@@ -652,6 +652,9 @@
     "download": "Descargar",
     "loadingPreview": "Cargando vista previa…",
     "pdfPageLabel": "Página {{page}} de {{total}}",
+    "selectAll": "Seleccionar todo",
+    "selectOne": "Seleccionar {{name}}",
+    "downloadSelected": "Descargar ({{count}})",
     "types": {
       "cv": "CV",
       "id": "Identificación",
