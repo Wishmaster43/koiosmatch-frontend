@@ -26,17 +26,18 @@ import { ColorBadge } from '../components/SettingsControls'
  */
 const KEY = 'candidate_vacancy_tab'
 
-const row = { display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderBottom: '1px solid var(--border)' }
-const block = { border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }
+// Flat rows under the sub-tab bar — never a bordered card behind sub-tabs
+// (Danny 23-07: "we hebben geen grid achter sub-tabjes").
+const row = { display: 'flex', alignItems: 'center', gap: 10, padding: '8px 4px' }
 
 // One checkbox-list block, shared by all four sub-tabs — the phase/status/
 // contract-form/vacancy-status editors are visually identical, only the source
 // list + toggle handler differ.
 function LookupCheckboxBlock({ items, selected, onToggle }) {
   return (
-    <div style={block}>
-      {items.map((it, i) => (
-        <label key={it.value} style={i === items.length - 1 ? { ...row, borderBottom: 'none' } : row}>
+    <div>
+      {items.map(it => (
+        <label key={it.value} style={row}>
           <input type="checkbox" checked={selected.includes(it.value)} onChange={() => onToggle(it.value)}
             style={{ cursor: 'pointer', width: 16, height: 16 }} />
           {/* eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome */}
