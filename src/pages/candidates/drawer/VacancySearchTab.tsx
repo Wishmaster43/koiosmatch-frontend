@@ -59,7 +59,7 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
     rows, loading, error, retry, radiusKm, setRadiusKm,
     functions: selectedFunctions, setFunctions,
     statuses: selectedStatuses, setStatuses,
-    noLocation, matchOf,
+    noLocation,
   } = useVacancySearch(candidate)
 
   // A row/marker pick now SELECTS a vacancy (summary card) instead of navigating
@@ -93,8 +93,6 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   }
 
   const selectedRow = rows.find(r => r.id === selectedId) ?? null
-  // The merged LIVE score for the selected row, if the match-explorer entry exists.
-  const selectedMatch = selectedRow ? matchOf(selectedRow.id) : undefined
   const selectVacancy = (id: Id) => setSelectedId(id)
 
   const toggleFunction = (name: string) =>
@@ -135,8 +133,9 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   const mapPane: ReactNode = (
     <RadiusMapPanel padded={false} points={points} center={center} radiusKm={radiusKm}
       // Larger viewport offset (Danny 23-07, live feedback) — the drawer chrome
-      // above the tab was pushing the map tall enough to force page scroll.
-      mapHeight={'clamp(320px, calc(100vh - 580px), 680px)'}
+      // above the tab was pushing the map tall enough to force page scroll;
+      // matches the vacancy-side CandidateSearchTab's own map height 1:1.
+      mapHeight={'clamp(340px, calc(100vh - 540px), 720px)'}
       centerMarker={{ label: candidate.name ?? '', sub: t('vacancySearch.centerHome') }}
       onRadiusChange={setRadiusKm}
       // The candidate's home pin stays fixed — re-centring by clicking the map must
@@ -173,15 +172,15 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
       {description && <p style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.4, margin: 0 }}>{description}</p>}
       {/* Read-only LIVE score (CMBE MATCH-EXPLORER-1 fase 2+3) — no onSave, so
           MatchScoreBlock renders without its edit/adjust controls. */}
-      {selectedMatch && (
+      {selectedRow.score != null && (
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 10 }}>
-          <MatchScoreBlock score={selectedMatch.score} criteria={selectedMatch.criteria} />
+          <MatchScoreBlock score={selectedRow.score} criteria={selectedRow.criteria} />
         </div>
       )}
-      {selectedMatch?.aiAdviceReason && (
+      {selectedRow.aiAdviceReason && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, color: 'var(--text-muted)' }}>
           <KoiosAiMark size={16} title={t('vacancySearch.aiAdvised')} />
-          <span>{selectedMatch.aiAdviceReason}</span>
+          <span>{selectedRow.aiAdviceReason}</span>
         </div>
       )}
     </div>
@@ -204,8 +203,6 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
       {/* The selected vacancy renders as the card above — drop its list row (no duplicate). */}
       {rows.filter(r => r.id !== selectedId).map(r => {
         const isSelected = r.id === selectedId
-        // Merged LIVE score for this row, if the match-explorer scored this vacancy.
-        const rowMatch = matchOf(r.id)
         return (
           // Row = div[role=button] (not <button>: the title nests EntityLink's own
           // button+anchor, and interactive-inside-interactive is invalid HTML).
@@ -223,7 +220,7 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
                   signals a Koios-advised match (MATCH-EXPLORER-1 fase 2+3). */}
               <div style={{ fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}
                 onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
-                {rowMatch?.aiAdvised && <KoiosAiMark size={16} title={rowMatch.aiAdviceReason ?? t('vacancySearch.aiAdvised')} />}
+                {r.aiAdvised && <KoiosAiMark size={16} title={r.aiAdviceReason ?? t('vacancySearch.aiAdvised')} />}
                 <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
                   <EntityLink page="vacancies" id={r.id} title={t('vacancySearch.openInApp')}>{r.title}</EntityLink>
                 </span>
@@ -232,9 +229,9 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
                 {[r.customer, r.city].filter(Boolean).join(' · ') || '—'}
               </div>
             </div>
-            {(rowMatch?.score != null || r.distanceKm != null) && (
+            {(r.score != null || r.distanceKm != null) && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                {rowMatch?.score != null && <ScorePill score={rowMatch.score} />}
+                {r.score != null && <ScorePill score={r.score} />}
                 {r.distanceKm != null && (
                   <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
                     {r.distanceKm.toFixed(1)} km
