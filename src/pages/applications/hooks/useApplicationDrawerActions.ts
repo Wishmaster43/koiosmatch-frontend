@@ -18,7 +18,7 @@ import { mapApplication, mapApplicationDetail } from '../data/mapApplication'
 import { bucketOfPhase } from '../data/applicationsShared'
 import type { Application, ApplicationDetail } from '@/types/application'
 import type { RejectPayload } from '../drawer/RejectionBlock'
-import type { Criterion } from '../drawer/MatchScoreBlock'
+import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { Id } from '@/types/common'
 import type { LookupItem } from '@/context/LookupsContext'
 

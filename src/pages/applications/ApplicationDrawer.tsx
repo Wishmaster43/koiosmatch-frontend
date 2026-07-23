@@ -23,7 +23,7 @@ import { peekReturnTab, clearReturnTab } from './drawer/constants'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { ApplicationDetail } from '@/types/application'
 import type { RejectPayload } from './drawer/RejectionBlock'
-import type { Criterion } from './drawer/MatchScoreBlock'
+import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { Id } from '@/types/common'
 
 // The tab order (matches the screenshots). 'extra' (§3A(f)) is appended below

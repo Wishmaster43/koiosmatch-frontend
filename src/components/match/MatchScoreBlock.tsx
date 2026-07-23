@@ -1,3 +1,5 @@
+// Promoted from pages/applications/drawer (23-07): the match-explorer tabs reuse
+// the same score ring + criteria breakdown — one shared source (§3A).
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, ChevronUp, Pencil, Save, X } from 'lucide-react'
