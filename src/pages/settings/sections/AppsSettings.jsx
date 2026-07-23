@@ -100,15 +100,17 @@ export default function AppsSettings() {
               opacity: !canEdit && !on ? 0.6 : 1,
             }}>
               <div style={{ flexShrink: 0, width: 44, height: 44, borderRadius: 10, overflow: 'hidden',
-                             background: app.image ? 'var(--surface)' : app.color,
-                             border: app.image ? '1px solid var(--border)' : 'none',
+                             background: (app.image || app.Mark) ? 'var(--surface)' : app.color,
+                             border: (app.image || app.Mark) ? '1px solid var(--border)' : 'none',
                              display: 'flex', alignItems: 'center', justifyContent: 'center',
                              filter: soon ? 'grayscale(1)' : 'none', opacity: soon ? 0.55 : 1 }}>
-                {app.image
-                  ? <img src={app.image} alt={app.label} width={34} height={34} style={{ objectFit: 'contain' }} />
-                  : <span style={{ fontSize: 15, fontWeight: 800, color: '#FFFFFF', letterSpacing: '0.02em' }}>
-                      {app.label.replace(/-koppeling$/, '').slice(0, 2).toUpperCase()}
-                    </span>}
+                {app.Mark
+                  ? <app.Mark size={34} />
+                  : app.image
+                    ? <img src={app.image} alt={app.label} width={34} height={34} style={{ objectFit: 'contain' }} />
+                    : <span style={{ fontSize: 15, fontWeight: 800, color: '#FFFFFF', letterSpacing: '0.02em' }}>
+                        {app.label.slice(0, 2).toUpperCase()}
+                      </span>}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

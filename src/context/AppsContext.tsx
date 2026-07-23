@@ -1,10 +1,17 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import type { ReactNode } from 'react'
+import type { ReactNode, ComponentType } from 'react'
 import api from '../lib/api'
 import { useAuth } from './AuthContext'
 // Real brand logos (local assets, §7 CSP) for the connectors that have one.
-import shiftmanagerLogo from '@/assets/integrations/shiftmanager.png'
 import helloflexLogo from '@/assets/integrations/helloflex.png'
+import shiftmanagerLogo from '@/assets/integrations/shiftmanager.png'
+import aelioLogo from '@/assets/integrations/aelio.png'
+import intusLogo from '@/assets/integrations/intus.png'
+import sdbLogo from '@/assets/integrations/sdb.png'
+import elanzaLogo from '@/assets/integrations/elanza.png'
+import onsLogo from '@/assets/integrations/ons.png'
+import easyflexLogo from '@/assets/integrations/easyflex.png'
+import afasLogo from '@/assets/integrations/afas.png'
 
 /**
  * AppsContext — which paid add-on "apps" are enabled for the current tenant.
@@ -32,6 +39,8 @@ export interface AppDef {
   group: 'planning' | 'backoffice' | 'koios_ai'
   // Real brand image (local asset) — rendered instead of the emoji when present.
   image?: string
+  // Crisp vector mark component (preferred over image when the system's favicon is tiny).
+  Mark?: ComponentType<{ size?: number }>
   // Not built yet: the toggle renders greyed-out + a "binnenkort" chip (honest, §3).
   comingSoon?: boolean
 }
@@ -55,8 +64,8 @@ export const AVAILABLE_APPS: AppDef[] = [
   // ---- Planning (volgorde Danny 23-07) --------------------------------------
   {
     id:          'shiftmanager',
-    label:       'Shiftmanager-koppeling',
-    description: 'Koppeling met Shiftmanager voor diensten, planning en kandidaten (POST/PATCH — aanmaken en bijwerken).',
+    label:       'Shiftmanager',
+    description: 'Koppeling met Shiftmanager voor diensten, planning en kandidaten.',
     icon:        '🗂️',
     image:       shiftmanagerLogo,
     group:       'planning',
@@ -71,6 +80,7 @@ export const AVAILABLE_APPS: AppDef[] = [
     description: 'Koppeling met Aelio voor dienstenbeheer en personeelsplanning.',
     icon:        '🗓️',
     group:       'planning',
+    image:       aelioLogo,
     color:       '#0F766E',
     bg:          '#F0FDFA',
     border:      '#99F6E4',
@@ -82,6 +92,7 @@ export const AVAILABLE_APPS: AppDef[] = [
     description: 'Koppeling met Intus planning voor het ophalen van diensten en kandidaten.',
     icon:        '📅',
     group:       'planning',
+    image:       intusLogo,
     color:       '#0369A1',
     bg:          '#F0F9FF',
     border:      '#BAE6FD',
@@ -93,6 +104,7 @@ export const AVAILABLE_APPS: AppDef[] = [
     description: 'Koppeling met SDB planning voor diensten en roosters.',
     icon:        '🗓️',
     group:       'planning',
+    image:       sdbLogo,
     color:       '#7E22CE',
     bg:          '#FAF5FF',
     border:      '#E9D5FF',
@@ -105,6 +117,7 @@ export const AVAILABLE_APPS: AppDef[] = [
     description: 'Koppeling met Elanza voor diensten en kandidaatbeheer.',
     icon:        '📋',
     group:       'planning',
+    image:       elanzaLogo,
     color:       '#B45309',
     bg:          'var(--color-warning-bg)',
     border:      '#FDE68A',
@@ -116,6 +129,7 @@ export const AVAILABLE_APPS: AppDef[] = [
     description: 'Koppeling met ONS (Nedap) voor planning en roosters.',
     icon:        '📆',
     group:       'planning',
+    image:       onsLogo,
     color:       '#334155',
     bg:          '#F8FAFC',
     border:      '#E2E8F0',
@@ -128,7 +142,7 @@ export const AVAILABLE_APPS: AppDef[] = [
     // 'hf' — the backend allow-list (ModuleSettingController::VALID_APPS) and the
     // module flag both use the §10 hf-slug; 'helloflex' 422'd on every toggle.
     id:          'hf',
-    label:       'HelloFlex-koppeling',
+    label:       'HelloFlex',
     description: 'Backoffice-koppeling met HelloFlex (verloning, facturatie, contracten).',
     icon:        '🟡',
     image:       helloflexLogo,
@@ -144,6 +158,7 @@ export const AVAILABLE_APPS: AppDef[] = [
     description: 'Backoffice-koppeling met EasyFlex (verloning en facturatie).',
     icon:        '💶',
     group:       'backoffice',
+    image:       easyflexLogo,
     color:       '#0E7490',
     bg:          '#ECFEFF',
     border:      '#A5F3FC',
@@ -156,6 +171,7 @@ export const AVAILABLE_APPS: AppDef[] = [
     description: 'Backoffice-koppeling met AFAS (HRM, verloning en facturatie).',
     icon:        '🧾',
     group:       'backoffice',
+    image:       afasLogo,
     color:       '#1D4ED8',
     bg:          'var(--color-secondary-bg)',
     border:      '#BFDBFE',
