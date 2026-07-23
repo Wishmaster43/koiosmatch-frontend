@@ -198,7 +198,10 @@
     "nt_opportunity": "Chancen",
     "action_rules": "Aktionsregeln",
     "vacancy_generation": "Stellenanzeigen-Generierung",
-    "org_policy": "Organisationsrichtlinien"
+    "org_policy": "Organisationsrichtlinien",
+    "apps_planning": "Verknüpfungen: Planung",
+    "apps_backoffice": "Verknüpfungen: Backoffice",
+    "apps_koios_ai": "Verknüpfungen: Koios AI"
   },
   "kpis": {
     "title": "KPI-Einstellungen",

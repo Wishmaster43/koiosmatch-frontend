@@ -9,15 +9,13 @@ import { useAuth } from '@/context/AuthContext'
 import { useApps, AVAILABLE_APPS } from '@/context/AppsContext'
 import { canAccessPage } from '@/lib/access'
 
-export default function AppsSettings() {
+export default function AppsSettings({ group = 'planning' }) {
   const { t } = useTranslation('settings')
   const { enabled, setApps } = useApps()
   const auth                        = useAuth()
   const { hasPermission }           = auth
   const [saving, setSaving]         = useState(null)
   const [saved,  setSaved]          = useState(null)
-  // APPS-GROUPS-1 (Danny 23-07): subtabs Planning / Backoffice / Koios AI.
-  const [tab, setTab]               = useState('planning')
   // APPS-SUPERADMIN-1 (Danny 23-07 403): connectors are PLATFORM-provisioned — the
   // backend refuses everyone but a super admin (by design, 2026-06-23), so a tenant
   // admin must see honest disabled toggles + a notice, never a clickable 403.
@@ -68,21 +66,8 @@ export default function AppsSettings() {
         </div>
       )}
 
-      {/* APPS-GROUPS-1: subtab bar — Planning / Backoffice / Koios AI. */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
-        {[['planning', t('apps.tabPlanning')], ['backoffice', t('apps.tabBackoffice')], ['koios_ai', t('apps.tabKoiosAi')]].map(([id, label]) => (
-          <button key={id} type="button" onClick={() => setTab(id)}
-            style={{ padding: '7px 14px', fontSize: 13, fontWeight: 600, borderRadius: 8,
-                     border: `1px solid ${tab === id ? 'var(--color-primary)' : 'var(--border)'}`,
-                     background: tab === id ? 'var(--color-primary-bg, var(--hover-bg))' : 'var(--surface)',
-                     color: tab === id ? 'var(--color-primary)' : 'var(--text-muted)', cursor: 'pointer' }}>
-            {label}
-          </button>
-        ))}
-      </div>
-
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {AVAILABLE_APPS.filter(app => app.group === tab).map(app => {
+        {AVAILABLE_APPS.filter(app => app.group === group).map(app => {
           const on = enabled.includes(app.id)
           const isSaving = saving === app.id
           const isSaved  = saved  === app.id
