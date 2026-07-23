@@ -3,7 +3,8 @@ import ShiftManagerMark from '../components/ui/ShiftManagerMark'
 
 export default {
   type:  'sm_candidates',
-  app:   'shiftmanager',
+  // GET/lees-kant: gate op de rapporten-MODULE 'sm' (Danny 23-07); de connector-app gate alleen de POST/PATCH-koppelkant.
+  module: 'sm',
   category: 'ShiftManager',
   label: 'Kandidaten',
   Icon:  ShiftManagerMark,

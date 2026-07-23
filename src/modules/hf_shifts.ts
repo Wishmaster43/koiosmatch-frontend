@@ -3,7 +3,8 @@ import HelloFlexMark from '../components/ui/HelloFlexMark'
 
 export default {
   type:  'hf_shifts',
-  app:   'helloflex',
+  // GET/lees-kant: gate op de rapporten-MODULE 'hf' (Danny 23-07); 'helloflex' was bovendien nooit een geldige app-key.
+  module: 'hf',
   category: 'HelloFlex',
   label: 'Diensten',
   Icon:  HelloFlexMark,
