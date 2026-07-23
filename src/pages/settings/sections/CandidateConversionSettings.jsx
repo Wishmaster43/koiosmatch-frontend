@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { SelectField } from '../components/SettingsKit'
+import SearchSelect from '@/components/ui/SearchSelect'
 import { useLookups } from '@/context/LookupsContext'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
@@ -44,11 +44,15 @@ export function CandidateConversionSettings() {
     <div style={{ maxWidth: 560 }}>
       <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('candidateConversion.title')}</div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('candidateConversion.subtitle')}</div>
-      <SelectField value={value} onChange={save}
+      {/* Searchable single-pick dropdown, like every other lookup filter (Danny 23-07). */}
+      <SearchSelect closeOnToggle width={300}
         options={[
           { value: 'none', label: t('candidateConversion.none') },
           ...plainStatuses.map(s => ({ value: s.value, label: s.label })),
-        ]} />
+        ]}
+        selected={[value]}
+        onToggle={next => { if (next !== value) save(next) }}
+        triggerLabel={value === 'none' ? t('candidateConversion.none') : (plainStatuses.find(s => s.value === value)?.label ?? value)} />
     </div>
   )
 }

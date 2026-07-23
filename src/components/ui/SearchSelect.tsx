@@ -46,10 +46,12 @@ interface SearchSelectProps {
   // Anchor the dropdown to the trigger's right edge for right-aligned triggers
   // (keeps the menu inside the drawer). Default 'left' = current behaviour.
   menuAlign?: 'left' | 'right'
+  // Opt-in: close the menu after a pick — single-select dropdowns (Conversie).
+  closeOnToggle?: boolean
 }
 
 export default function SearchSelect({
-  triggerLabel, options = [], selected = [], onToggle, searchable = true, width = 280, onSearch, renderTrigger, menuAlign = 'left',
+  triggerLabel, options = [], selected = [], onToggle, searchable = true, width = 280, onSearch, renderTrigger, menuAlign = 'left', closeOnToggle = false,
 }: SearchSelectProps) {
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
@@ -129,7 +131,7 @@ export default function SearchSelect({
             {shown.map(o => {
               const isSel = selected.includes(o.value)
               return (
-                <button key={o.value} onClick={() => onToggle(o.value)}
+                <button key={o.value} onClick={() => { onToggle(o.value); if (closeOnToggle) setOpen(false) }}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
                     padding: '9px 12px', fontSize: 12, textAlign: 'left', cursor: 'pointer', border: 'none',
                     background: isSel ? 'var(--color-primary-bg)' : 'none', color: 'var(--text)' }}>

@@ -167,9 +167,11 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
                 activeLabel={t('common.default')} inactiveLabel={t('common.setDefault')} />
             )}
             <div style={{ flex: 1 }} />
-            <button onClick={() => openEdit(item)} title={t('lookups.edit')}
+            {/* Locked (system) list: edit greyed out too — fully read-only rows (Danny 23-07). */}
+            <button onClick={() => openEdit(item)} title={t('lookups.edit')} disabled={locked}
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       background: 'var(--border)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)' }}>
+                       background: 'var(--border)', border: 'none', borderRadius: 6,
+                       cursor: locked ? 'not-allowed' : 'pointer', color: 'var(--text-muted)', opacity: locked ? 0.45 : 1 }}>
               <Pencil size={11} />
             </button>
             {!locked && <button onClick={() => remove(item)} disabled={deleting === item.id || inUse(item)}
