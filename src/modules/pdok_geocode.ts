@@ -16,8 +16,10 @@ export default {
   color:    '#1B4C8C',
   bg:       '#E8F0FA',
   schema: [
-    // Single-candidate path: the trigger supplies the candidate; bulk leaves this empty.
-    { key: 'candidate_id', label: 'Kandidaat', type: 'text', placeholder: '{{trigger.candidate_id}}', help: 'Meestal {{trigger.candidate_id}} (knop of adreswijziging levert de kandidaat). Leeg = de kandidaten uit de vorige stap (bulk).' },
+    // Single-candidate path: the trigger supplies the candidate; bulk leaves this
+    // empty. NO placeholder (Danny 23-07 ×2): grey example text reads as a set
+    // value — the empty field is the real "all candidates from the previous step".
+    { key: 'candidate_id', label: 'Kandidaat', type: 'text', help: 'Leeg = alle kandidaten uit de vorige stap (bulk). Alleen vullen voor één kandidaat: {{trigger.candidate_id}} (drill-down-knop of adreswijziging).' },
     // Bulk safety: skip candidates that already carry coordinates (protects PDOK).
     { key: 'only_missing', label: 'Alleen zonder coördinaten', type: 'boolean', help: 'Sla kandidaten over die al coördinaten hebben — aan te raden bij bulk.' },
   ],

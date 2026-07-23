@@ -915,7 +915,6 @@
     "Welk veld uit de vorige module bevat de array om over te itereren": "Quel champ du module précédent contient le tableau à parcourir.",
     "Welk veld wordt gebruikt als identifier in de volgende module": "Quel champ sert d’identifiant dans le module suivant.",
     "Wordt voor de instructies ingevoegd Gebruik dit voor tenant-brede regels": "Inséré avant les instructions. À utiliser pour des règles valables pour tout le tenant.",
-    "Meestal {{triggercandidate_id}} (knop of adreswijziging levert de kandidaat) Leeg = de kandidaten uit de vorige stap (bulk)": "Généralement {{trigger.candidate_id}} (le bouton ou le changement d'adresse fournit le candidat). Vide = les candidats de l'étape précédente (bulk).",
     "Sla kandidaten over die al coördinaten hebben — aan te raden bij bulk": "Ignorer les candidats ayant déjà des coordonnées — recommandé en bulk.",
     "Leeg = alle statussen (blacklist is altijd uitgesloten)": "Vide = tous les statuts (la liste noire est toujours exclue).",
     "Leeg = alle fases (lead / kandidaat / …)": "Vide = toutes les phases (lead / candidat / …).",
@@ -924,7 +923,8 @@
     "Leeg = veiligheidsplafond (10000)": "Vide = plafond de sécurité (10 000).",
     "Alleen relevant wanneer de gekoppelde entiteit een klant is": "Pertinent uniquement lorsque l'entité liée est un client.",
     "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Ignorer les enregistrements déjà liés à ce système — recommandé en bulk.",
-    "Leeg = geen contactfilter (alle kandidaten komen mee)": "Vide = aucun filtre de contact (tous les candidats sont inclus)."
+    "Leeg = geen contactfilter (alle kandidaten komen mee)": "Vide = aucun filtre de contact (tous les candidats sont inclus).",
+    "Leeg = alle kandidaten uit de vorige stap (bulk) Alleen vullen voor één kandidaat {{triggercandidate_id}} (drill-down-knop of adreswijziging)": "Vide = tous les candidats de l'étape précédente (bulk). À remplir uniquement pour un seul candidat : {{trigger.candidate_id}} (bouton de détail ou changement d'adresse)."
   },
   "triggers": {
     "events": {
