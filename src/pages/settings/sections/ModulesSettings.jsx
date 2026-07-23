@@ -31,10 +31,10 @@ const TIERS = [
 // MODULES-ICONS-1 (Danny 23-07): every row carries an icon — the reporting add-ons
 // show the REAL brand logo of the system they report on.
 const ADDONS = [
-  { id: 'reports', name: 'Rapporten Koios Match',  Icon: BarChart2 },
-  { id: 'sm',    name: 'Rapportage Shiftmanager',  image: shiftmanagerLogo },
-  { id: 'hf',    name: 'Rapportage HelloFlex',     image: helloflexLogo },
-  { id: 'plan',  name: 'Planning',                 Icon: CalendarDays },
+  { id: 'reports', name: 'Rapporten Koios Match',  Icon: BarChart2,          desc: 'Eigen Koios Match-rapportages en inzichten.' },
+  { id: 'sm',    name: 'Rapportage Shiftmanager',  image: shiftmanagerLogo,  desc: 'Rapportages en GET-syncs op Shiftmanager-data (diensten, klanten, kandidaten).' },
+  { id: 'hf',    name: 'Rapportage HelloFlex',     image: helloflexLogo,     desc: 'Rapportages en GET-syncs op HelloFlex-data.' },
+  { id: 'plan',  name: 'Planning',                 Icon: CalendarDays,       desc: 'Eigen plannings­module: orders, diensten en inplanning.' },
 ]
 
 // Legacy package string → new base tier (display only; the backend sends {package, addons}
@@ -163,7 +163,7 @@ export default function ModulesSettings() {
           return (
             <div key={addon.id}
               onClick={disabled ? undefined : () => toggleAddon(addon.id)}
-              style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
+              style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px',
                 borderRadius: 10, cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.55 : 1,
                 background: on ? 'var(--color-success-bg)' : 'var(--surface)',
                 border: `1px solid ${on ? 'var(--color-success)' : 'var(--border)'}` }}>
@@ -176,7 +176,10 @@ export default function ModulesSettings() {
               {addon.image
                 ? <img src={addon.image} alt="" width={18} height={18} style={{ flexShrink: 0, objectFit: 'contain', borderRadius: 4 }} />
                 : <addon.Icon size={16} color={on ? 'var(--color-success)' : 'var(--text-muted)'} style={{ flexShrink: 0 }} />}
-              <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{t(`modules.addon.${addon.id}`, { defaultValue: addon.name })}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t(`modules.addon.${addon.id}`, { defaultValue: addon.name })}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`modules.addonDesc.${addon.id}`, { defaultValue: addon.desc })}</div>
+              </div>
               {disabled && (
                 <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-info)',
                   background: 'var(--color-info-bg)', borderRadius: 999, padding: '2px 8px' }}>
