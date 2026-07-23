@@ -208,6 +208,11 @@ same validation/UX, lookups via `useX()` hooks (never hardcoded option lists).
   button per page** — that is exactly how eight pages drifted into five different styles (solid
   fills, grey-inactive, border-only). Pass `active` / `onToggle` / `label` / `color` / `icon`;
   the §4 soft-tint is baked in. One component ⇒ one look, forever.
+- **`ViewModeToggle`** (`components/ui/ViewModeToggle`) — the ONE icon-only view switcher
+  (table⇄board⇄map …); **`softPill`** (`pages/candidates/drawer/constants`) — the shared
+  soft-tint style for selection pills inside the candidate drawer. Both exist because the
+  2026-07-22/23 audit rounds found the same solid-fill pill hand-rolled 6+ times; a new
+  toggle/pill reuses these, never a fresh inline copy.
 - **Soft-chip convention** (everywhere — table + drawer): coloured chips =
   `color + '1A'` background, `color` text, `color + '55'` border. Never solid fills.
 - **In-place edit pattern:** a pencil toggles to diskette (save) + ✕ (cancel), shown
@@ -531,12 +536,23 @@ never label it "Matched"; "matched" is the *application* bucket, a different axi
   StrictMode's dubbele mount vergiftigde zo de preflight-cache app-breed
   (2026-07-17); een gedeelde cache wil het RESULTAAT, de alive-guard beschermt de
   state al.
+- **Every entity-keyed load effect carries an AbortController/alive guard** (a fast
+  id switch must never let the previous entity's stale response win — audit 2026-07-23
+  fixed four customer hooks missing it). **A boolean mount-ref MUST be re-armed in the
+  effect SETUP** (`mountedRef.current = true; return () => { … = false }`): StrictMode
+  runs setup→cleanup→setup in dev, so a cleanup-only effect leaves the ref permanently
+  false and silently kills every poll/refresh (the PDOK "needs CMD+R" bug, 2026-07-22).
 - Keep an eye on bundle size; lazy-load heavy deps (charts) per route.
 
 ---
 
 ## 10. Data Layer
 
+- **Laravel serialises DECIMAL columns as JSON strings** ("53.2185923") — numeric API
+  fields (lat/lng/distance/rates) are coerced tolerantly in the mappers via
+  `lib/coords.toCoord`-style helpers, never `typeof x === 'number'` checks (that
+  exact check nulled real coordinates app-wide, PDOK-LATLNG-1 2026-07-22). The BE
+  float-casts its resources too, but the FE stays tolerant by contract.
 - One configured **axios client** in `lib/` with interceptors: attach
   CSRF/credentials, normalize errors, handle 401 (redirect to login) and 403
   (forbidden UI) centrally.
