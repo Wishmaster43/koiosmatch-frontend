@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ApplyForm } from './ApplyForm'
 import { strings } from '../strings'
@@ -53,5 +53,42 @@ describe('ApplyForm — consent gate + honeypot', () => {
     expect(payload.website).toBe('')
     expect(payload.first_name).toBe('Jane')
     expect(payload.email).toBe('jane@example.com')
+  })
+
+  // Danny 23-07: motivation moved from a plain textarea to the rich-text editor —
+  // this proves the submitted payload carries the editor's HTML, not plain text.
+  it('submits the rich-text motivation as HTML', async () => {
+    const user = userEvent.setup()
+    render(<ApplyForm tenant="acme" reference="REF-1" />)
+    await fillRequiredFields(user)
+    await user.click(screen.getByRole('checkbox'))
+
+    const editor = screen.getByRole('textbox', { name: strings.apply.motivation })
+    editor.innerHTML = '<p><strong>Zeer</strong> gemotiveerd</p>'
+    fireEvent.input(editor)
+
+    await user.click(screen.getByRole('button', { name: strings.apply.submit }))
+
+    expect(await screen.findByText(strings.apply.success('APP-1'))).toBeTruthy()
+    const [, , payload] = mockedApply.mock.calls[0]
+    expect(payload.motivation).toBe('<p><strong>Zeer</strong> gemotiveerd</p>')
+  })
+
+  // The 5000-char BE limit is checked on the TEXT content, not the HTML markup — a long
+  // plain-text motivation must still block submission even though our own tags are short.
+  it('blocks submission when the motivation text exceeds 5000 characters', async () => {
+    const user = userEvent.setup()
+    render(<ApplyForm tenant="acme" reference="REF-1" />)
+    await fillRequiredFields(user)
+    await user.click(screen.getByRole('checkbox'))
+
+    const editor = screen.getByRole('textbox', { name: strings.apply.motivation })
+    editor.innerHTML = `<p>${'a'.repeat(5001)}</p>`
+    fireEvent.input(editor)
+
+    await user.click(screen.getByRole('button', { name: strings.apply.submit }))
+
+    expect(await screen.findByText(strings.apply.validation.motivationLength)).toBeTruthy()
+    expect(mockedApply).not.toHaveBeenCalled()
   })
 })

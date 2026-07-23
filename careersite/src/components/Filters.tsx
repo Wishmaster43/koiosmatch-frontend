@@ -12,6 +12,8 @@ interface FiltersProps {
 export function Filters({ city, hours, onCityChange, onHoursChange }: FiltersProps) {
   return (
     <form className="filters" role="search" onSubmit={(event) => event.preventDefault()}>
+      {/* Card title so the sidebar reads as a filter bar (Danny 23-07). */}
+      <h2 className="filters__title">{strings.list.filters.title}</h2>
       <label className="filters__field">
         <span>{strings.list.filters.cityLabel}</span>
         <input

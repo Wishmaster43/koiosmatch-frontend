@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { strings } from '../strings'
 import { validateCvFile } from '../lib/validateFile'
+import { validateMotivationLength } from '../lib/richText'
 import { useApplySubmit } from '../hooks/useApplySubmit'
+import { RichTextArea } from './RichTextArea'
 
 interface ApplyFormProps {
   tenant: string
@@ -13,6 +15,7 @@ interface FieldErrors {
   lastName?: string
   email?: string
   phone?: string
+  motivation?: string
   cv?: string
   consent?: string
 }
@@ -65,6 +68,8 @@ export function ApplyForm({ tenant, reference }: ApplyFormProps) {
     if (!email.trim()) next.email = strings.apply.validation.required
     else if (!EMAIL_PATTERN.test(email)) next.email = strings.apply.validation.email
     if (!phone.trim()) next.phone = strings.apply.validation.required
+    const motivationError = validateMotivationLength(motivation)
+    if (motivationError) next.motivation = motivationError
     if (!consent) next.consent = strings.apply.validation.consent
     return next
   }
@@ -107,10 +112,8 @@ export function ApplyForm({ tenant, reference }: ApplyFormProps) {
         {errors.phone ? <span className="field-error">{errors.phone}</span> : null}
       </label>
 
-      <label className="apply-form__field">
-        <span>{strings.apply.motivation}</span>
-        <textarea value={motivation} onChange={(event) => setMotivation(event.target.value)} rows={4} />
-      </label>
+      <RichTextArea id="apply-motivation" label={strings.apply.motivation} value={motivation} onChange={setMotivation} />
+      {errors.motivation ? <span className="field-error">{errors.motivation}</span> : null}
 
       <label className="apply-form__field">
         <span>{strings.apply.cv}</span>

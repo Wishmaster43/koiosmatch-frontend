@@ -22,6 +22,7 @@ export const strings = {
     title: 'Openstaande vacatures',
     filtersLabel: 'Vacaturefilters',
     filters: {
+      title: 'Filters',
       cityLabel: 'Stad',
       cityPlaceholder: 'Bijv. Utrecht',
       hoursLabel: 'Uren per week (min.)',
@@ -54,6 +55,13 @@ export const strings = {
     email: 'E-mailadres',
     phone: 'Telefoonnummer',
     motivation: 'Motivatie (optioneel)',
+    // Rich-text toolbar tooltips/aria-labels (Danny 23-07 — RichTextArea, dependency-free).
+    richText: {
+      bold: 'Vet',
+      italic: 'Cursief',
+      bulletList: 'Opsommingslijst',
+      numberedList: 'Genummerde lijst',
+    },
     cv: 'CV (pdf of docx, max. 5MB, optioneel)',
     consentLabel:
       'Ik ga akkoord dat mijn gegevens worden gebruikt om mijn sollicitatie te behandelen. Zie de privacyverklaring van deze werkgever.',
@@ -67,6 +75,7 @@ export const strings = {
       fileType: 'Alleen pdf of docx-bestanden zijn toegestaan.',
       fileSize: 'Het bestand mag maximaal 5MB zijn.',
       consent: 'Bevestig dat je akkoord gaat om te kunnen versturen.',
+      motivationLength: 'Motivatie mag maximaal 5000 tekens bevatten.',
     },
   },
 } as const
