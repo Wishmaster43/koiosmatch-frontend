@@ -157,42 +157,44 @@ describe('IntegrationsTab · PDOK manual "Bijwerken" (CAND-PDOK-GEOCODE-FE-1, ca
   })
 })
 
-describe('IntegrationsTab · HelloFlex card visibility (module OR app)', () => {
-  it('stays hidden when neither the module nor the app flag is on', () => {
+describe('IntegrationsTab · HelloFlex card visibility (CONNECTOR APP ONLY — Danny 23-07)', () => {
+  it('stays hidden when the app flag is off', () => {
     render(<IntegrationsTab c={baseCandidate()} />)
     expect(screen.queryByAltText('integrations.helloflex.alt')).toBeNull()
   })
 
-  it('shows via the module flag alone, with a "Koppelen" button when not linked', () => {
+  it('stays hidden on the REPORTS module alone — rapporten is anders dan een koppeling', () => {
+    // GATING-MATRIX: the hf module is the read/reports side; it must NOT reveal
+    // the koppel-card (Yesway: hf module on, hf app off → no HelloFlex card).
     mockUseAuth.mockReturnValue({ hasModule: (m: string) => m === 'hf' })
     render(<IntegrationsTab c={baseCandidate()} />)
-    expect(screen.getByAltText('integrations.helloflex.alt')).toBeInTheDocument()
-    expect(screen.getByText('integrations.helloflex.notLinked')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /integrations.common.linkButton/ })).toBeInTheDocument()
+    expect(screen.queryByAltText('integrations.helloflex.alt')).toBeNull()
   })
 
-  it('shows via the app/koppeling flag alone', () => {
+  it('shows via the app/koppeling flag, with a "Koppelen" button when not linked', () => {
     // APPS-HF-SLUG-1: the connector flag is the backend's 'hf' slug (the sync
     // endpoint's { system: 'helloflex' } below is a different, unchanged contract).
     mockUseApps.mockReturnValue({ isAppEnabled: (a: string) => a === 'hf' })
     render(<IntegrationsTab c={baseCandidate()} />)
     expect(screen.getByAltText('integrations.helloflex.alt')).toBeInTheDocument()
+    expect(screen.getByText('integrations.helloflex.notLinked')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /integrations.common.linkButton/ })).toBeInTheDocument()
   })
 })
 
-describe('IntegrationsTab · Shiftmanager card visibility (module OR app)', () => {
-  it('stays hidden when neither signal is on', () => {
+describe('IntegrationsTab · Shiftmanager card visibility (CONNECTOR APP ONLY — Danny 23-07)', () => {
+  it('stays hidden when the app flag is off', () => {
     render(<IntegrationsTab c={baseCandidate()} />)
     expect(screen.queryByAltText('integrations.shiftmanager.alt')).toBeNull()
   })
 
-  it('shows via the module flag alone', () => {
+  it('stays hidden on the REPORTS module alone', () => {
     mockUseAuth.mockReturnValue({ hasModule: (m: string) => m === 'sm' })
     render(<IntegrationsTab c={baseCandidate()} />)
-    expect(screen.getByAltText('integrations.shiftmanager.alt')).toBeInTheDocument()
+    expect(screen.queryByAltText('integrations.shiftmanager.alt')).toBeNull()
   })
 
-  it('shows via the app/koppeling flag alone', () => {
+  it('shows via the app/koppeling flag', () => {
     mockUseApps.mockReturnValue({ isAppEnabled: (a: string) => a === 'shiftmanager' })
     render(<IntegrationsTab c={baseCandidate()} />)
     expect(screen.getByAltText('integrations.shiftmanager.alt')).toBeInTheDocument()
@@ -201,7 +203,8 @@ describe('IntegrationsTab · Shiftmanager card visibility (module OR app)', () =
 
 describe('IntegrationsTab · not-linked state — real "Koppelen" button, never auto-fires', () => {
   beforeEach(() => {
-    mockUseAuth.mockReturnValue({ hasModule: () => true })
+    // Both connector apps on — the koppel-cards gate on the APP, never the module.
+    mockUseApps.mockReturnValue({ isAppEnabled: () => true })
   })
 
   it('shows a "Koppelen" button for both systems and never calls the API on mount', () => {
@@ -245,7 +248,7 @@ describe('IntegrationsTab · not-linked state — real "Koppelen" button, never 
 
 describe('IntegrationsTab · failed state (KOPPELINGEN-META-1 last_error)', () => {
   it('shows the failed chip, the last_error reason and a retry button', () => {
-    mockUseAuth.mockReturnValue({ hasModule: (m: string) => m === 'hf' })
+    mockUseApps.mockReturnValue({ isAppEnabled: (a: string) => a === 'hf' })
     const c = baseCandidate({ helloflexLink: link({ status: 'failed', lastError: 'HelloFlex-credentials ontbreken (Settings → Integraties)' }) })
     render(<IntegrationsTab c={c} />)
     expect(screen.getByText('integrations.common.statusFailed')).toBeInTheDocument()
@@ -256,7 +259,7 @@ describe('IntegrationsTab · failed state (KOPPELINGEN-META-1 last_error)', () =
 
 describe('IntegrationsTab · Shiftmanager linked state (who/when + manual sync)', () => {
   beforeEach(() => {
-    mockUseAuth.mockReturnValue({ hasModule: (m: string) => m === 'sm' })
+    mockUseApps.mockReturnValue({ isAppEnabled: (a: string) => a === 'shiftmanager' })
   })
 
   const linkedCandidate = () => baseCandidate({

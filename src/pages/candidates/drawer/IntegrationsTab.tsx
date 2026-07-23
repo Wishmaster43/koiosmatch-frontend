@@ -108,15 +108,15 @@ export default function IntegrationsTab({ c, onUpdate }: {
 }) {
   const { t } = useTranslation('candidates')
   const { formatDateTime } = useDateFormat()
-  // Module OR app/koppeling flag unlocks the card — never AND (a tenant can enable
-  // either signal first); mirrors SettingsPage's passesModuleOrApp.
+  // GATING-MATRIX (Danny 23-07): the koppel-cards gate on the CONNECTOR APP ONLY —
+  // the sm/hf MODULE is the read/reports side and must NOT reveal the koppelen
+  // surface (Yesway: hf module on, hf app off → no HelloFlex card).
   const auth = useAuth()
-  const hasModule = auth?.hasModule ?? (() => false)
   const hasPermission = auth?.hasPermission ?? (() => false)
   const apps = useApps()
   const isAppEnabled = apps?.isAppEnabled ?? (() => false)
-  const showHelloflex = hasModule('hf') || isAppEnabled('hf')
-  const showShiftmanager = hasModule('sm') || isAppEnabled('shiftmanager')
+  const showHelloflex = isAppEnabled('hf')
+  const showShiftmanager = isAppEnabled('shiftmanager')
 
   // CAND-PDOK-GEOCODE-FE-1: manual "Bijwerken" trigger for the async geocode
   // workflow (POST .../geocode, 202 queued). Once it resolves we poll the
