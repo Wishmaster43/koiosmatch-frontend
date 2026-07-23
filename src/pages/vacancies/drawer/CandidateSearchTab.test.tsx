@@ -2,10 +2,10 @@
  * CandidateSearchTab — Match-zoeker fase 1 (vacancy side). Proves the REQUEST
  * (§13): GET /candidates with the vacancy's own lat/lng/radius and the default
  * function preselected, the noLocation guard skipping the fetch entirely, a
- * status-chip toggle refiring with the new param, and an error state whose
- * retry button re-fires the same request. The map is stubbed (leaflet does not
- * run under jsdom); api's `unwrapList` stays real so the envelope-unwrap logic
- * is genuinely exercised.
+ * status toggle (via the searchable SearchSelect dropdown) refiring with the
+ * new param, and an error state whose retry button re-fires the same request.
+ * The map is stubbed (leaflet does not run under jsdom); api's `unwrapList`
+ * stays real so the envelope-unwrap logic is genuinely exercised.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -86,12 +86,15 @@ describe('CandidateSearchTab · no location', () => {
   })
 })
 
-describe('CandidateSearchTab · status chip toggle', () => {
+describe('CandidateSearchTab · status toggle via the searchable dropdown', () => {
   it('refires the request with the newly toggled status added', async () => {
     mockGet.mockResolvedValue({ data: { data: [] } })
     render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
 
+    // Open the "Inzetbaarheid" SearchSelect (trigger restates the label + the
+    // 1 pre-selected default), then check the second status option.
+    await userEvent.click(screen.getByRole('button', { name: 'Inzetbaarheid (1)' }))
     await userEvent.click(screen.getByRole('button', { name: 'Niet beschikbaar' }))
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))

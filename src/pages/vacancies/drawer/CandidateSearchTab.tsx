@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import MatchExplorerLayout from '@/components/match/MatchExplorerLayout'
 import RadiusMapPanel from '@/components/map/RadiusMapPanel'
-import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import SearchSelect from '@/components/ui/SearchSelect'
 import { useCandidateSearch } from '../hooks/useCandidateSearch'
 import { useFunctions } from '@/lib/useFunctions'
 import { useLookups } from '@/context/LookupsContext'
@@ -12,7 +12,6 @@ import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
 const filterLabel: CSSProperties = { fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
-const chipRow: CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 6 }
 const rowStyle: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 10px', borderRadius: 8, cursor: 'pointer' }
 
 /**
@@ -52,23 +51,23 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
     .filter(r => r.lat != null && r.lng != null)
     .map(r => ({ id: r.id, lat: r.lat as number, lng: r.lng as number, label: r.name, sub: [r.functionTitle, r.city].filter(Boolean).join(' · ') }))
 
+  // Searchable checklist dropdowns (shared SearchSelect, §3A — never a hand-rolled
+  // chip row) — replaces the QuickViewToggle chip rows so a long tenant function/
+  // status lookup stays usable instead of wrapping across many chip lines. The
+  // trigger restates the field label and appends the selected count once >0.
   const filtersRow = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div>
         <span style={filterLabel}>{t('candidateSearch.functions')}</span>
-        <div style={chipRow}>
-          {functionOptions.map(fn => (
-            <QuickViewToggle key={fn} active={selectedFunctions.includes(fn)} onToggle={() => toggleFunction(fn)} label={fn} />
-          ))}
-        </div>
+        <SearchSelect
+          triggerLabel={<>{t('candidateSearch.functions')}{selectedFunctions.length > 0 && ` (${selectedFunctions.length})`}</>}
+          options={functionOptions} selected={selectedFunctions} onToggle={toggleFunction} width={240} />
       </div>
       <div>
         <span style={filterLabel}>{t('candidateSearch.statuses')}</span>
-        <div style={chipRow}>
-          {statusOptions.map(s => (
-            <QuickViewToggle key={s.value} active={selectedStatuses.includes(s.value)} onToggle={() => toggleStatus(s.value)} label={s.label} color={s.color} />
-          ))}
-        </div>
+        <SearchSelect
+          triggerLabel={<>{t('candidateSearch.statuses')}{selectedStatuses.length > 0 && ` (${selectedStatuses.length})`}</>}
+          options={statusOptions.map(s => ({ value: s.value, label: s.label }))} selected={selectedStatuses} onToggle={toggleStatus} width={240} />
       </div>
     </div>
   )

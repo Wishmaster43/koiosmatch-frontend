@@ -29,6 +29,9 @@ vi.mock('./drawer/NotesTab', () => ({ default: () => null }))
 vi.mock('./drawer/StatisticsTab', () => ({ default: () => null }))
 vi.mock('./drawer/MatchingTab', () => ({ default: () => null }))
 vi.mock('./drawer/VacancyChangelogPopover', () => ({ default: () => null }))
+// Own dedicated fetch/map/lookup tests already cover CandidateSearchTab itself —
+// stub it here so this tab-bar/autoExpand guard stays isolated (mirrors the rest).
+vi.mock('./drawer/CandidateSearchTab', () => ({ default: () => <div>candidate-search-tab-content</div> }))
 // The tab under test — a distinguishable marker proves DescriptionTab (not some
 // stale DetailsTab sub-tab) renders behind the new main tab.
 vi.mock('./drawer/DescriptionTab', () => ({ default: () => <div>description-tab-content</div> }))
@@ -47,5 +50,26 @@ describe('VacancyDrawer · Beschrijving main tab (Danny 21-07)', () => {
     render(<VacancyDrawer vacancy={vacancy} onClose={vi.fn()} />)
     await user.click(screen.getByRole('button', { name: 'Beschrijving' }))
     expect(screen.getByText('description-tab-content')).toBeInTheDocument()
+  })
+})
+
+describe('VacancyDrawer · "Kandidaten zoeken" autoExpand (Danny 23-07)', () => {
+  it('widens the drawer on activating the tab and restores it on leaving', async () => {
+    const user = userEvent.setup()
+    const onToggleExpand = vi.fn()
+    const { rerender } = render(
+      <VacancyDrawer vacancy={vacancy} onClose={vi.fn()} expanded={false} onToggleExpand={onToggleExpand} />,
+    )
+
+    // Activating the map+list tab requests the wider drawer width.
+    await user.click(screen.getByRole('button', { name: 'Kandidaten zoeken' }))
+    expect(screen.getByText('candidate-search-tab-content')).toBeInTheDocument()
+    expect(onToggleExpand).toHaveBeenCalledTimes(1)
+
+    // Simulate the parent applying the requested width, then leave the tab —
+    // the previous (collapsed) width is restored.
+    rerender(<VacancyDrawer vacancy={vacancy} onClose={vi.fn()} expanded onToggleExpand={onToggleExpand} />)
+    await user.click(screen.getByRole('button', { name: 'Details' }))
+    expect(onToggleExpand).toHaveBeenCalledTimes(2)
   })
 })

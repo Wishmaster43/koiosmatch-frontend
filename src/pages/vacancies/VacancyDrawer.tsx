@@ -33,7 +33,7 @@ interface DrawerUser { id: Id; name: string }
 // Tab list — config only; each renders one small component (one per tab/section).
 // Details is the FIRST tab (Danny 2026-07-04 — reverses R-7's pinned-above-the-tabs
 // layout: "Details moet gewoon eerste tabje zijn", the pinned editor crowded the drawer).
-const TABS: { id: string; tKey: string; render: (v: VacancyDetail, onUpdate?: UpdateFn) => ReactNode }[] = [
+const TABS: { id: string; tKey: string; autoExpand?: boolean; render: (v: VacancyDetail, onUpdate?: UpdateFn) => ReactNode }[] = [
   { id: 'details',    tKey: 'details',    render: (v, onUpdate) => <DetailsTab vacancy={v} onUpdate={onUpdate} /> },
   // Beschrijving — its OWN main tab now (Danny 21-07: moved out of Details' sub-tabs,
   // right after Details so the vacancy text still reads next to the field grid).
@@ -42,7 +42,9 @@ const TABS: { id: string; tKey: string; render: (v: VacancyDetail, onUpdate?: Up
   { id: 'matching',   tKey: 'matching',   render: (v, onUpdate) => <MatchingTab vacancy={v} onUpdate={onUpdate} /> },
   // Match-zoeker fase 1 (vacancy side, Danny 23-07): candidates matching this
   // vacancy's radius/function/status filters, map + list side by side.
-  { id: 'candidateSearch', tKey: 'candidateSearch', render: v => <CandidateSearchTab vacancy={v} /> },
+  // autoExpand (Danny 23-07): the map+list layout is unusable in the narrow
+  // drawer width, so this tab widens the drawer while active and restores on leave.
+  { id: 'candidateSearch', tKey: 'candidateSearch', autoExpand: true, render: v => <CandidateSearchTab vacancy={v} /> },
   // VAC-AGENT-1 (Danny 21-07): its own tab — the agent picker + the read-only
   // interview flow that agent carries; placed right after matching (both feed the
   // application flow) and before publishing.
@@ -135,7 +137,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
           <span />
         </div>
       }
-      tabs={visibleTabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), render: () => tab.render(v, onUpdate) }))}
+      tabs={visibleTabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), autoExpand: tab.autoExpand, render: () => tab.render(v, onUpdate) }))}
       header={({ setActiveTab }) => (
         <>
         <EntityHeader
