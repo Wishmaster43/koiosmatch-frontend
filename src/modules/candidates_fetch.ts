@@ -16,7 +16,9 @@ export default {
     { key: 'phase',          label: 'Fase',                   type: 'multiselect', source: 'candidate_phases',   help: 'Leeg = alle fases (lead / kandidaat / …).' },
     { key: 'candidate_types', label: 'Contractvorm',          type: 'multiselect', source: 'candidate_types',    help: 'Bijv. alleen uitzendkrachten of ZZP\'ers. Leeg = alle contractvormen.' },
     { key: 'city',           label: 'Plaats',                 type: 'multiselect', help: 'Leeg = alle plaatsen.' },
-    { key: 'last_contact_before_months', label: 'Geen contact sinds (maanden)', type: 'number', placeholder: '6', help: 'Leeg = geen contactfilter (alle kandidaten komen mee).' },
+    // No placeholder here (Danny 23-07): a grey example "6" reads as a set value,
+    // while an EMPTY field is the real "all candidates" state the hint describes.
+    { key: 'last_contact_before_months', label: 'Geen contact sinds (maanden)', type: 'number', help: 'Leeg = geen contactfilter (alle kandidaten komen mee).' },
     { key: 'whatsapp_consent', label: 'Alleen met WhatsApp-toestemming', type: 'boolean' },
     { key: 'limit',          label: 'Max. aantal',            type: 'number', help: 'Leeg = veiligheidsplafond (10.000).' },
   ],
