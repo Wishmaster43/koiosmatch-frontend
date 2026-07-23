@@ -12,7 +12,12 @@ export const Field = FieldJs as ComponentType<{ label?: ReactNode; required?: bo
 export const TextField = TextFieldJs as ComponentType<{ value?: string; onChange?: (v: string) => void; placeholder?: string; type?: string; error?: boolean; style?: CSSProperties }>
 export const SelectField = SelectFieldJs as ComponentType<{ value?: string; onChange?: (v: string) => void; placeholder?: string; options?: Array<{ value: string; label: string } | string> }>
 // Searchable combobox (drill-down pattern) — still untyped JS, same cast as ProfileTab.
-export const CreatableSelect = CreatableSelectJs as unknown as ComponentType<Record<string, unknown>>
+const RawCreatableSelect = CreatableSelectJs as unknown as ComponentType<Record<string, unknown>>
+// Modal comboboxes match the text-input footprint (Danny 23-07: 'functietitel en
+// geslacht zijn kleiner in hoogte' — 6px/12px trigger vs 8px/13px inputs).
+export const CreatableSelect: ComponentType<Record<string, unknown>> = (props) => (
+  <RawCreatableSelect style={{ padding: '8px 11px', borderRadius: 8, fontSize: 13 }} {...props} />
+)
 
 // A plain value/label pair — the shape every lookup-backed dropdown option boils down to.
 export interface FieldOption { value: string; label: string }

@@ -84,7 +84,8 @@ export default function CreatableSelect({
         style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', width: '100%',
           boxSizing: 'border-box', border: '1px solid var(--border)', borderRadius: 6,
           background: 'var(--surface)', cursor: 'pointer', ...style }}>
-        <span style={{ fontSize: 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden',
+        {/* The trigger label follows an explicit style.fontSize (modal-sized fields). */}
+        <span style={{ fontSize: (style as { fontSize?: number } | undefined)?.fontSize ?? 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden',
           textOverflow: 'ellipsis', color: (current || value) ? 'var(--text)' : 'var(--text-muted)' }}>
           {current?.label ?? value ?? placeholder ?? '-'}
         </span>

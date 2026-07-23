@@ -4,7 +4,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import type { FormState } from '../AddCandidateModal'
-import { Field, SelectField, CreatableSelect, cardHead, cardBox, type FieldOption } from './fields'
+import { Field, CreatableSelect, cardHead, cardBox, type FieldOption } from './fields'
 
 interface WorkCardProps {
   form: FormState
@@ -26,8 +26,9 @@ export default function WorkCard({ form, set, isReq, allowFreeEntry, functions, 
           placeholder={t('modal.fields.functionPlaceholder')} options={functions} menuWidth={280} />
         </Field>
         <Field label={t('modal.fields.owner')}>
-          <SelectField value={String(form.ownerId)} onChange={v => set('ownerId', v)}
-            placeholder={t('common:select')} options={ownerOptions} />
+          {/* Searchable like every other lookup picker (Danny 23-07); ids stay the value. */}
+          <CreatableSelect value={String(form.ownerId) || null} onChange={(v: string) => set('ownerId', v)}
+            allowCreate={false} placeholder={t('common:select')} options={ownerOptions} menuWidth={280} />
         </Field>
       </div>
     </div>
