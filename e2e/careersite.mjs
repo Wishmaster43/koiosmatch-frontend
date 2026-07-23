@@ -142,10 +142,45 @@ async function applyFormBlocksInvalidSubmit({ page, errors }) {
   expect(fresh.length === 0, `formulier-check gaf fouten: ${fresh.join(' | ')}`)
 }
 
+// Flow 4: formulier-v2 (CAREERSITE-APPLY-2) — the repeatable experience/education
+// sections are never settings-gated (they always accept entries), so their add
+// buttons must always render; photo/remarks/interview-consent ARE per-vacancy
+// settings, so those are tolerant checks (log the seeded state, never fail on
+// either outcome). No submit click here — no POST can fire from this flow.
+async function applyFormShowsFormulierV2Sections({ page, errors }) {
+  if (ctx.listState !== 'kaarten') {
+    console.log('   SKIP: geen vacature beschikbaar om formulier-v2-secties op te testen.')
+    return
+  }
+  const at = errors.length
+  await page.goto(`${APP}/${TENANT}/vacatures`, { waitUntil: 'networkidle' })
+  const card = page.locator('.vacancy-card').first()
+  await card.waitFor({ timeout: 8000 })
+  await card.click()
+  await page.waitForLoadState('networkidle')
+  await page.locator('#solliciteren').scrollIntoViewIfNeeded()
+
+  // Repeatable sections are unconditionally accepted server-side — always present.
+  const experienceButton = page.locator('.apply-form button', { hasText: 'Werkervaring toevoegen' })
+  expect(await experienceButton.count() > 0, 'formulier mist de "Werkervaring toevoegen"-knop (nooit settings-gated)')
+  const educationButton = page.locator('.apply-form button', { hasText: 'Opleiding toevoegen' })
+  expect(await educationButton.count() > 0, 'formulier mist de "Opleiding toevoegen"-knop (nooit settings-gated)')
+
+  // Settings-gated fields — tolerant: report what the seeded vacancy shows, never fail either way.
+  const fileInputCount = await page.locator('.apply-form input[type="file"]').count()
+  console.log(`   bestandsvelden (cv + evt. foto) zichtbaar: ${fileInputCount}`)
+  const remarksVisible = await page.locator('.apply-form textarea').count()
+  console.log(`   "vragen of opmerkingen"-veld zichtbaar: ${remarksVisible > 0 ? 'ja' : 'nee (settings: hidden)'}`)
+
+  const fresh = errors.slice(at)
+  expect(fresh.length === 0, `formulier-v2-sectiecheck gaf fouten: ${fresh.join(' | ')}`)
+}
+
 const FLOWS = [
   ['lijst-rendert', listRenders],
   ['detail-en-seo', detailAndSeo],
   ['apply-form-client-validatie', applyFormBlocksInvalidSubmit],
+  ['apply-form-formulier-v2-secties', applyFormShowsFormulierV2Sections],
 ]
 
 const filter = process.argv[2]

@@ -322,7 +322,8 @@ a {
 }
 
 .apply-form__field input,
-.apply-form__field textarea {
+.apply-form__field textarea,
+.apply-form__field select {
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -330,6 +331,125 @@ a {
   font-family: inherit;
   background: var(--bg);
   color: var(--text);
+}
+
+.apply-form__field textarea {
+  resize: vertical;
+}
+
+/* Required-field marker (formulier-v2) — CSS-only asterisk so the accessible
+   name computed from the label's text content never changes; aria-required on
+   the control itself carries the meaning for assistive tech. */
+.required-marker::after {
+  content: ' *';
+  color: var(--danger);
+}
+
+/* Two-up field row (first/last name, address pairs) — one column on mobile,
+   side-by-side from 560px up (formulier-v2). */
+.apply-form__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 560px) {
+  .apply-form__row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Address fieldset — reset the browser default border/padding so it reads as a
+   plain grouped block, matching every other apply-form field. */
+.apply-form__fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.apply-form__section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.apply-form__section-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.apply-form__hint {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* Phone field — country-code <select> + local number input as one visual row. */
+.phone-field {
+  display: flex;
+  gap: 8px;
+}
+
+.phone-field__code {
+  flex: 0 0 auto;
+  width: 92px;
+}
+
+.phone-field__local {
+  flex: 1;
+}
+
+/* Photo preview thumbnail + remove button. */
+.photo-field__preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.photo-field__thumb {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+/* Repeatable experience/education entry — compact card once added. */
+.entry-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: 13px;
+}
+
+.entry-card__actions {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+/* Inline add/edit sub-form for a repeatable entry — never a modal. */
+.entry-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.entry-form__actions {
+  display: flex;
+  gap: 8px;
 }
 
 .apply-form__consent {

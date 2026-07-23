@@ -78,6 +78,68 @@ describe('api client — request construction', () => {
     expect(body.get('website')).toBe('')
   })
 
+  // Formulier-v2: address/photo/remarks/experiences/educations join the multipart
+  // body as Laravel-style nested keys — this is the ONE place the real (unmocked)
+  // buildApplyFormData runs, since ApplyForm.test.tsx mocks applyToVacancy itself.
+  it('applyToVacancy nests experiences/educations as Laravel array keys and includes address/photo/remarks', async () => {
+    const mockFetch = vi.mocked(fetch)
+    mockFetch.mockResolvedValue(mockJsonResponse({ status: 'applied', reference: 'APP-1' }, 201))
+    const photo = new File(['data'], 'photo.jpg', { type: 'image/jpeg' })
+    await applyToVacancy('acme', 'REF-1', {
+      first_name: 'Jane',
+      last_name: 'Doe',
+      email: 'jane@example.com',
+      phone: '+310612345678',
+      street: 'Kerkstraat',
+      house_number: '12',
+      postcode: '1234AB',
+      city: 'Utrecht',
+      photo,
+      remarks: 'Een vraag',
+      experiences: [
+        { company: 'Acme Zorg', title: 'Verpleegkundige', location: '', start_date: '', end_date: '', responsibilities: '', achievements: '' },
+      ],
+      educations: [{ name: 'Diploma verpleegkunde', organisation: '', issued_at: '', license_number: '' }],
+      website: '',
+    })
+
+    const [, init] = mockFetch.mock.calls[0]
+    const body = init?.body as FormData
+    expect(body.get('street')).toBe('Kerkstraat')
+    expect(body.get('house_number')).toBe('12')
+    expect(body.get('postcode')).toBe('1234AB')
+    expect(body.get('city')).toBe('Utrecht')
+    expect(body.get('photo')).toBe(photo)
+    expect(body.get('remarks')).toBe('Een vraag')
+    expect(body.get('experiences[0][company]')).toBe('Acme Zorg')
+    expect(body.get('experiences[0][title]')).toBe('Verpleegkundige')
+    expect(body.get('educations[0][name]')).toBe('Diploma verpleegkunde')
+    // Blank optional sub-fields are omitted entirely, never sent as an empty string.
+    expect(body.get('experiences[0][location]')).toBeNull()
+    expect(body.get('educations[0][organisation]')).toBeNull()
+  })
+
+  // A vacancy with every new optional field left empty must never send blank
+  // strings/empty arrays for them — CLAUDE.md's "omit, don't send blank" rule.
+  it('omits address/photo/remarks/experiences/educations entirely when not provided', async () => {
+    const mockFetch = vi.mocked(fetch)
+    mockFetch.mockResolvedValue(mockJsonResponse({ status: 'applied', reference: 'APP-1' }, 201))
+    await applyToVacancy('acme', 'REF-1', {
+      first_name: 'Jane',
+      last_name: 'Doe',
+      email: 'jane@example.com',
+      phone: '+310612345678',
+      website: '',
+    })
+
+    const [, init] = mockFetch.mock.calls[0]
+    const body = init?.body as FormData
+    expect(body.get('street')).toBeNull()
+    expect(body.get('photo')).toBeNull()
+    expect(body.get('remarks')).toBeNull()
+    expect(body.get('experiences[0][company]')).toBeNull()
+  })
+
   it('throws ApiError carrying the status, never the raw response body', async () => {
     const mockFetch = vi.mocked(fetch)
     mockFetch.mockResolvedValue(mockJsonResponse('secret internal error trace', 500))

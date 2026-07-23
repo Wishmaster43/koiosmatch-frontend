@@ -40,11 +40,28 @@ export interface VacancySummary {
   published_at: string
 }
 
+// One apply-form field's visibility (CareerVacancyDetailResource::applyFormSettings).
+export type ApplicationFieldSetting = 'required' | 'optional' | 'hidden'
+
+// Per-vacancy apply-form field visibility (CAREERSITE-APPLY-2). The backend always
+// answers with all five keys filled — this type is Partial because the FE tolerates
+// a missing object/key too (lib/applySettings.ts fills the documented defaults).
+export interface ApplicationSettings {
+  cv: ApplicationFieldSetting
+  cover_letter: ApplicationFieldSetting
+  photo: ApplicationFieldSetting
+  remarks: ApplicationFieldSetting
+  interview_consent: ApplicationFieldSetting
+}
+
 // GET /public/{tenant}/vacancies/{ref} — summary fields plus the full detail body.
 export interface VacancyDetail extends VacancySummary {
   description: string
   employment_type: string | null
   remote_allowed: boolean
+  // Tolerant: may be missing entirely or miss individual keys on an older response —
+  // always read through getApplicationSettings() rather than indexing this directly.
+  application_settings?: Partial<ApplicationSettings>
   json_ld: Record<string, unknown>
 }
 
@@ -69,6 +86,27 @@ export interface PaginatedResponse<T> {
   links: PaginationLinks
 }
 
+// One repeatable work-experience row (CAREERSITE-APPLY-2). Dates are stored as
+// full 'YYYY-MM-DD' strings (the <input type="month"> UI normalizes to day 01)
+// since that is what the backend's `date` validation rule reliably parses.
+export interface ExperienceEntry {
+  company: string
+  title: string
+  location: string
+  start_date: string
+  end_date: string
+  responsibilities: string
+  achievements: string
+}
+
+// One repeatable education row (CAREERSITE-APPLY-2).
+export interface EducationEntry {
+  name: string
+  organisation: string
+  issued_at: string
+  license_number: string
+}
+
 // POST /public/{tenant}/vacancies/{ref}/apply — multipart request body.
 export interface ApplyPayload {
   first_name: string
@@ -77,6 +115,17 @@ export interface ApplyPayload {
   phone: string
   motivation?: string
   cv?: File | null
+  // Address block (CAREERSITE-APPLY-2) — always optional; the backend only fills
+  // BLANK candidate fields, so an empty value is simply omitted, never sent blank.
+  street?: string
+  house_number?: string
+  postcode?: string
+  city?: string
+  // Profile photo — defaults to hidden (AVG); only sent when the vacancy opted in.
+  photo?: File | null
+  remarks?: string
+  experiences?: ExperienceEntry[]
+  educations?: EducationEntry[]
   // Honeypot — must stay empty; a filled value marks the submission as a bot to the backend.
   website: string
 }

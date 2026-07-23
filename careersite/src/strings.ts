@@ -54,7 +54,13 @@ export const strings = {
     lastName: 'Achternaam',
     email: 'E-mailadres',
     phone: 'Telefoonnummer',
-    motivation: 'Motivatie (optioneel)',
+    // Accessible name for the dependency-free EU country-code <select> next to the
+    // phone input (formulier-v2) — distinct from `phone` so screen readers announce
+    // the two controls separately even though they visually form one field.
+    phoneCountryCodeLabel: 'Landcode telefoonnummer',
+    // Base label only — required/optional now shows via the shared `*` marker
+    // (settings-driven, formulier-v2), never a hardcoded "(optioneel)" suffix.
+    motivation: 'Motivatie',
     // Rich-text toolbar tooltips/aria-labels (Danny 23-07 — RichTextArea, dependency-free).
     richText: {
       bold: 'Vet',
@@ -62,7 +68,63 @@ export const strings = {
       bulletList: 'Opsommingslijst',
       numberedList: 'Genummerde lijst',
     },
-    cv: 'CV (pdf of docx, max. 5MB, optioneel)',
+    cv: 'CV (pdf of docx, max. 5MB)',
+    // Address block (formulier-v2, CAREERSITE-APPLY-2) — always optional, the
+    // backend only fills blank candidate fields so there is no required variant.
+    address: {
+      sectionTitle: 'Adres (optioneel)',
+      street: 'Straat',
+      houseNumber: 'Huisnummer',
+      postcode: 'Postcode',
+      city: 'Plaats',
+    },
+    // Profile photo — hidden by default (AVG); only rendered when the vacancy opts in.
+    photo: {
+      label: 'Pasfoto',
+      removeLabel: 'Foto verwijderen',
+      previewAlt: 'Voorvertoning van de geüploade foto',
+      avgNote:
+        'Deze foto wordt alleen gebruikt voor je sollicitatie en behandeld volgens de privacyverklaring van deze werkgever.',
+    },
+    // Repeatable work-experience entries (jaicob-style reference form, formulier-v2).
+    experience: {
+      sectionTitle: 'Werkervaring',
+      addButton: '+ Werkervaring toevoegen',
+      company: 'Bedrijfsnaam',
+      title: 'Functietitel',
+      location: 'Locatie',
+      startDate: 'Startdatum',
+      endDate: 'Einddatum',
+      responsibilities: 'Verantwoordelijkheden',
+      achievements: 'Prestaties',
+      saveButton: 'Toevoegen',
+      saveEditButton: 'Opslaan',
+      cancelButton: 'Annuleren',
+      editLabel: 'Werkervaring bewerken',
+      removeLabel: 'Werkervaring verwijderen',
+      companyRequired: 'Vul een bedrijfsnaam in.',
+    },
+    // Repeatable education entries.
+    education: {
+      sectionTitle: 'Opleiding',
+      addButton: '+ Opleiding toevoegen',
+      name: 'Naam / diploma',
+      organisation: 'Organisatie / school',
+      issuedDate: 'Datum uitgifte',
+      licenseNumber: 'Licentienummer',
+      saveButton: 'Toevoegen',
+      saveEditButton: 'Opslaan',
+      cancelButton: 'Annuleren',
+      editLabel: 'Opleiding bewerken',
+      removeLabel: 'Opleiding verwijderen',
+      nameRequired: 'Vul een naam of diploma in.',
+    },
+    remarks: {
+      label: 'Vragen of opmerkingen',
+    },
+    interviewConsent: {
+      label: 'Ik ga akkoord dat Koios AI mij mag interviewen als onderdeel van deze sollicitatie.',
+    },
     consentLabel:
       'Ik ga akkoord dat mijn gegevens worden gebruikt om mijn sollicitatie te behandelen. Zie de privacyverklaring van deze werkgever.',
     submit: 'Verstuur sollicitatie',
@@ -76,6 +138,10 @@ export const strings = {
       fileSize: 'Het bestand mag maximaal 5MB zijn.',
       consent: 'Bevestig dat je akkoord gaat om te kunnen versturen.',
       motivationLength: 'Motivatie mag maximaal 5000 tekens bevatten.',
+      photoFileType: 'Alleen jpg, jpeg, png of webp-bestanden zijn toegestaan.',
+      photoFileSize: 'Het bestand mag maximaal 4MB zijn.',
+      remarksLength: 'Mag maximaal 2000 tekens bevatten.',
+      interviewConsentRequired: 'Bevestig dat je akkoord gaat om te kunnen versturen.',
     },
   },
 } as const

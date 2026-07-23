@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useVacancy } from '../hooks/useVacancy'
 import { SafeHtml } from '../components/SafeHtml'
 import { ApplyForm } from '../components/ApplyForm'
+import { getApplicationSettings } from '../lib/applySettings'
 import { toJsonLdString } from '../lib/jsonLd'
 import { formatHours, formatSalary } from '../lib/format'
 import { strings } from '../strings'
@@ -65,7 +66,11 @@ export function VacancyDetailPage() {
       <script type="application/ld+json">{toJsonLdString(vacancy.json_ld)}</script>
 
       <section className="vacancy-detail__apply" id="solliciteren">
-        <ApplyForm tenant={tenant ?? ''} reference={vacancy.reference_number} />
+        <ApplyForm
+          tenant={tenant ?? ''}
+          reference={vacancy.reference_number}
+          applicationSettings={getApplicationSettings(vacancy)}
+        />
       </section>
     </article>
   )

@@ -82,8 +82,25 @@ export async function fetchVacancy(tenant: string, reference: string): Promise<V
   return (json as { data?: VacancyDetail }).data ?? (json as VacancyDetail)
 }
 
+// Appends a repeatable entry array as Laravel-style nested keys
+// (`experiences[0][company]`, …) — only non-empty scalar fields are sent per
+// entry, so an entry's blank optional sub-fields are simply omitted rather
+// than sent as explicit blanks. Generic + unconstrained (rather than
+// `Record<string, string>`) because ExperienceEntry/EducationEntry are plain
+// interfaces with no index signature — TS only allows the Object.entries read
+// via an internal cast, not via a Record-typed parameter at the call site.
+function appendEntries<T extends object>(formData: FormData, key: string, entries: T[]): void {
+  entries.forEach((entry, index) => {
+    Object.entries(entry as Record<string, string>).forEach(([field, value]) => {
+      if (value) formData.set(`${key}[${index}][${field}]`, value)
+    })
+  })
+}
+
 // Builds the multipart body for an application — the honeypot field is always
 // included (empty for real applicants), never logged (CLAUDE.md §8: no PII in logs).
+// Every new optional field (address/photo/remarks/experiences/educations) is
+// omitted entirely when empty — never sent as a blank string/empty array.
 function buildApplyFormData(payload: ApplyPayload): FormData {
   const formData = new FormData()
   formData.set('first_name', payload.first_name)
@@ -92,6 +109,14 @@ function buildApplyFormData(payload: ApplyPayload): FormData {
   formData.set('phone', payload.phone)
   if (payload.motivation) formData.set('motivation', payload.motivation)
   if (payload.cv) formData.set('cv', payload.cv)
+  if (payload.street) formData.set('street', payload.street)
+  if (payload.house_number) formData.set('house_number', payload.house_number)
+  if (payload.postcode) formData.set('postcode', payload.postcode)
+  if (payload.city) formData.set('city', payload.city)
+  if (payload.photo) formData.set('photo', payload.photo)
+  if (payload.remarks) formData.set('remarks', payload.remarks)
+  appendEntries(formData, 'experiences', payload.experiences ?? [])
+  appendEntries(formData, 'educations', payload.educations ?? [])
   formData.set('website', payload.website)
   return formData
 }

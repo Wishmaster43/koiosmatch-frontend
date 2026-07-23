@@ -6,6 +6,10 @@ interface RichTextAreaProps {
   label: string
   value: string
   onChange: (html: string) => void
+  // Settings-driven required marker (CAREERSITE-APPLY-2) — shows a visual asterisk
+  // (CSS-only, so the accessible name computed from `label` never changes) and
+  // sets aria-required on the editor itself.
+  required?: boolean
 }
 
 // One toolbar command: the execCommand name paired with its i18n aria-label/tooltip.
@@ -28,7 +32,7 @@ const COMMANDS: ToolbarCommand[] = [
 // the app boundary). execCommand is deprecated but still universally supported by browsers
 // for exactly this basic bold/italic/list use case; every call is feature-detected so a
 // future browser without it degrades to a harmless no-op instead of a crash.
-export function RichTextArea({ id, label, value, onChange }: RichTextAreaProps) {
+export function RichTextArea({ id, label, value, onChange, required = false }: RichTextAreaProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const [activeCommands, setActiveCommands] = useState<Record<string, boolean>>({})
   const labelId = `${id}-label`
@@ -81,7 +85,11 @@ export function RichTextArea({ id, label, value, onChange }: RichTextAreaProps) 
 
   return (
     <div className="apply-form__field rich-text">
-      <span id={labelId} className="rich-text__label" onClick={() => editorRef.current?.focus()}>
+      <span
+        id={labelId}
+        className={required ? 'rich-text__label required-marker' : 'rich-text__label'}
+        onClick={() => editorRef.current?.focus()}
+      >
         {label}
       </span>
       <div className="rich-text__toolbar" role="toolbar" aria-label={label}>
@@ -110,6 +118,7 @@ export function RichTextArea({ id, label, value, onChange }: RichTextAreaProps) 
         role="textbox"
         aria-multiline="true"
         aria-labelledby={labelId}
+        aria-required={required || undefined}
         suppressContentEditableWarning
         onInput={handleInput}
         onKeyDown={handleKeyDown}
