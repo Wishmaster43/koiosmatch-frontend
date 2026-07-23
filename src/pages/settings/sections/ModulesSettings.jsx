@@ -167,18 +167,18 @@ export default function ModulesSettings() {
                 borderRadius: 10, cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.55 : 1,
                 background: on ? 'var(--color-success-bg)' : 'var(--surface)',
                 border: `1px solid ${on ? 'var(--color-success)' : 'var(--border)'}` }}>
-              {/* Switch */}
-              <div style={{ width: 34, height: 20, borderRadius: 999, flexShrink: 0, position: 'relative',
-                background: on ? 'var(--color-success)' : 'var(--border)', transition: 'background 0.15s' }}>
-                <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#fff', position: 'absolute',
-                  top: 2, left: on ? 16 : 2, transition: 'left 0.15s' }} />
-              </div>
               {addon.image
                 ? <img src={addon.image} alt="" width={18} height={18} style={{ flexShrink: 0, objectFit: 'contain', borderRadius: 4 }} />
                 : <addon.Icon size={16} color={on ? 'var(--color-success)' : 'var(--text-muted)'} style={{ flexShrink: 0 }} />}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t(`modules.addon.${addon.id}`, { defaultValue: addon.name })}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`modules.addonDesc.${addon.id}`, { defaultValue: addon.desc })}</div>
+              </div>
+              {/* Switch — rechts, zoals op de apps-pagina (Danny 23-07). */}
+              <div style={{ width: 34, height: 20, borderRadius: 999, flexShrink: 0, position: 'relative',
+                background: on ? 'var(--color-success)' : 'var(--border)', transition: 'background 0.15s' }}>
+                <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#fff', position: 'absolute',
+                  top: 2, left: on ? 16 : 2, transition: 'left 0.15s' }} />
               </div>
               {disabled && (
                 <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-info)',
