@@ -924,7 +924,7 @@
     "Alleen relevant wanneer de gekoppelde entiteit een klant is": "Alleen relevant wanneer de gekoppelde entiteit een klant is.",
     "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk.",
     "Leeg = geen contactfilter (alle kandidaten komen mee)": "Leeg = geen contactfilter (alle kandidaten komen mee).",
-    "Leeg of {{id}} = alle kandidaten uit de vorige stap (bulk) Voor één kandidaat {{triggercandidate_id}} (drill-down-knop of adreswijziging)": "Leeg of {{id}} = alle kandidaten uit de vorige stap (bulk). Voor één kandidaat: {{trigger.candidate_id}} (drill-down-knop of adreswijziging)."
+    "{{kandidaatid}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook) Voor één kandidaat {{triggercandidate_id}} (drill-down-knop of adreswijziging)": "{{kandidaat.id}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook). Voor één kandidaat: {{trigger.candidate_id}} (drill-down-knop of adreswijziging)."
   },
   "triggers": {
     "events": {
