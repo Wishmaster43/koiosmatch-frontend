@@ -129,7 +129,7 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
 
   const mapPane: ReactNode = (
     <RadiusMapPanel padded={false} points={points} center={center} radiusKm={radiusKm}
-      mapHeight={620}
+      mapHeight={'clamp(340px, calc(100vh - 470px), 760px)'}
       centerMarker={{ label: candidate.name ?? '', sub: t('vacancySearch.centerHome') }}
       onRadiusChange={setRadiusKm}
       // The candidate's home pin stays fixed — re-centring by clicking the map must
