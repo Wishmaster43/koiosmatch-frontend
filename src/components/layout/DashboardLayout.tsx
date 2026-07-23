@@ -273,8 +273,9 @@ export default function DashboardLayout() {
               className="text-xs rounded-md px-3 py-1.5"
               style={{ background: 'var(--hover-bg)', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
             >
-              {/* §5: reuse the existing auth key — one source per label (audit r4). */}
-              {t('auth:signOut')}
+              {/* §5: reuse the existing auth key — one source per label (audit r4;
+                  it lives under mfaGate but is the generic "Uitloggen" label). */}
+              {t('auth:mfaGate.signOut')}
             </button>
           </div>
         </div>
