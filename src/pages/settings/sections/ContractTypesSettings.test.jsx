@@ -20,6 +20,7 @@ vi.mock('@/lib/api', async () => {
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 
+// eslint-disable-next-line no-restricted-syntax -- DATA: a fixture contract type's tenant-picked colour, not a style rule.
 const type = (over = {}) => ({ id: 'ct1', name: 'Fase 1-2', color: '#3B8FD4', default_duration_days: 30, ...over })
 
 afterEach(() => vi.clearAllMocks())

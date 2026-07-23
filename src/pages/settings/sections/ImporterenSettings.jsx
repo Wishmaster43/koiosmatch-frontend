@@ -104,8 +104,10 @@ export default function ImporterenSettings() {
 
           {step === 2 && (
             <div style={{ padding: '20px 0' }}>
+              {/* eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this success-banner border shade; kept literal to avoid changing the rendered tone */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'var(--color-success-bg)', border: '1px solid #BBF7D0', borderRadius: 8, marginBottom: 16 }}>
                 <Check size={14} style={{ color: 'var(--color-success)' }} />
+                {/* eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this success-banner text shade; kept literal to avoid changing the rendered tone */}
                 <span style={{ fontSize: 13, color: '#166534', fontWeight: 500 }}>{file?.name}</span>
                 <button onClick={reset} aria-label={t('common:close')} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={13} /></button>
               </div>

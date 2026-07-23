@@ -5,6 +5,7 @@ describe('mapVacancy', () => {
   it('maps a snake_case API row with nested objects', () => {
     const row = mapVacancy({
       id: 'v1', code: '00107', title: 'Verpleegkundige | Den Haag',
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       status: { value: 'open', label: 'Open', color: '#79B58E' },
       leads_count: 5, applications_count: 12, published: true,
       owner: { id: 'u1', name: 'Kelly van Vliet', avatar_color: '#abc' },
@@ -12,6 +13,7 @@ describe('mapVacancy', () => {
       tags: ['zorg'], created_at: '2026-06-16',
     })
     expect(row).toMatchObject({
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       id: 'v1', code: '00107', statusValue: 'open', statusLabel: 'Open', statusColor: '#79B58E',
       leadsCount: 5, applicationsCount: 12, published: true,
       clientId: 'c1', clientName: 'Yesway zorg',
@@ -100,6 +102,7 @@ describe('mapVacancyDetail', () => {
       salary_min: 2500, salary_max: 3200, salary_period: 'p/m',
       application_settings: { cv: 'required' },
       channels: [{ value: 'career', label: 'Carrière-pagina', published: true }],
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       applications: [{ id: 'a1', candidate: { id: 'c1', name: 'Rosa Tijssen' }, phase: { value: 'hired', label: 'Aangenomen', color: '#79B58E' }, source: 'Werkzoeken' }],
     })
     expect(detail.contractTypes).toEqual(['freelance', 'payroll'])

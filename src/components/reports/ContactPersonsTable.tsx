@@ -220,6 +220,7 @@ export default function ContactPersonsTable() {
                         borderRadius: 999, padding: '3px 10px', fontSize: 11, fontWeight: 500,
                         background: isPlanning ? 'var(--color-success-bg)' : 'var(--hover-bg)',
                         color:      isPlanning ? 'var(--color-success)'  : 'var(--text-muted)',
+                        // eslint-disable-next-line no-restricted-syntax -- DATA: success-border companion colour, mirrors the same literal used app-wide (e.g. ApiKeyDetail, WebhookCreate) — kept consistent rather than diverging here
                         border:     `1px solid ${isPlanning ? '#BBF7D0' : 'var(--border)'}`,
                       }}>
                         {isPlanning

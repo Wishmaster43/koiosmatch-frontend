@@ -10,6 +10,7 @@ vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEnti
 
 // The lookup's own fetch/resolution is out of scope — a controlled meta resolver
 // lets the test assert the card prefers it over the raw backend-resolved stage.
+// eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
 const metaOf = vi.fn((v?: string) => (v === 'open' ? { value: 'open', label: 'Open (lookup)', color: '#123456', is_closed: false } : undefined))
 vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => ({ statuses: [], metaOf }) }))
 
@@ -44,6 +45,7 @@ describe('MatchesTab', () => {
 
   it('resolves Fase from useMatchStatuses — the slug wins over the raw backend-resolved stage label', () => {
     render(<MatchesTab c={candidate([
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       { id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway', status: 'open', stage: 'Fallback stage', stageColor: '#999999' },
     ])} />)
     expect(metaOf).toHaveBeenCalledWith('open')
@@ -53,6 +55,7 @@ describe('MatchesTab', () => {
 
   it('falls back to the raw stage label when the status slug has no lookup match', () => {
     render(<MatchesTab c={candidate([
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       { id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway', status: 'unknown-slug', stage: 'Fallback stage', stageColor: '#999999' },
     ])} />)
     expect(screen.getByText('Fallback stage')).toBeInTheDocument()

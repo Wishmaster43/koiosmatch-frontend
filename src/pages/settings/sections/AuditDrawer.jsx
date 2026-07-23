@@ -97,6 +97,7 @@ export function AuditDrawer({ entry, onClose }) {
           {p.payload && Object.keys(p.payload).length > 0 && (
             <div>
               <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>{t('audit.http.payload')}</div>
+              {/* eslint-disable-next-line no-restricted-syntax -- fixed dark code-block theme for the JSON payload preview, intentionally independent of the app's light/dark tokens */}
               <pre style={{ fontSize: 11, fontFamily: 'monospace', background: '#1E1E2E', color: '#A8E6CF',
                              borderRadius: 8, padding: '10px 14px', overflow: 'auto', maxHeight: 200,
                              margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>

@@ -72,6 +72,7 @@ export default function WebhookCreate({ onBack, onCreated }) {
         {result ? (
           // Phase 2 — one-time signing secret reveal.
           <div>
+            {/* eslint-disable no-restricted-syntax -- no exact/close index.css token match for these success-banner border/text shades; kept literal to avoid changing the rendered tone */}
             <div style={{ background: 'var(--color-success-bg)', border: '1px solid #BBF7D0', borderRadius: 10, padding: 16, marginBottom: 16 }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: '#166534', marginBottom: 8 }}>{t('webhooks.outgoing.secretOnce')}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -83,6 +84,7 @@ export default function WebhookCreate({ onBack, onCreated }) {
               </div>
               <p style={{ fontSize: 11, color: '#166534', marginTop: 8 }}>{t('webhooks.outgoing.signingHint')}</p>
             </div>
+            {/* eslint-enable no-restricted-syntax */}
             <button onClick={onBack}
               style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
               {t('webhooks.outgoing.done')}

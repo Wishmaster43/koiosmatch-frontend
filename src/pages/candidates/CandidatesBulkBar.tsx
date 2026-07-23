@@ -63,7 +63,7 @@ export default function CandidatesBulkBar({
   const pools = useTenantPools()
 
   // Build the menu option lists from props/state.
-  const poolOptions = pools.map(p => ({ value: p.id ?? p.name ?? '', label: p.name, color: p.color || '#6B7280' }))
+  const poolOptions = pools.map(p => ({ value: p.id ?? p.name ?? '', label: p.name, color: p.color || 'var(--text-muted)' }))
   const userOptions = users.map(u => ({ value: u.id, label: u.name }))
   const stageOptions = funnelTypes.map(f => ({ value: f.value, label: f.label, color: f.color }))
   const typeOptions = candidateTypes.map(ct => ({ value: ct.value, label: ct.label, color: ct.color }))

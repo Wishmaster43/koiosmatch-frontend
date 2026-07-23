@@ -9,12 +9,15 @@ import { Phone, Mail, MessageCircle, Users } from 'lucide-react'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
 
-// Icon + colour per outreach channel (soft-chip convention).
+// Icon + colour per outreach channel (soft-chip convention) — fixed channel enum,
+// not a tenant lookup, so these are DATA (mirrors a categorical palette, not styling).
+/* eslint-disable no-restricted-syntax -- DATA: fixed per-channel colour map (incl. WhatsApp's real brand green), not UI styling */
 const CHANNEL_META: Record<string, { icon: typeof Phone; color: string }> = {
   call:     { icon: Phone,         color: '#2563EB' },
   email:    { icon: Mail,          color: '#D97706' },
   whatsapp: { icon: MessageCircle, color: '#25D366' },
 }
+/* eslint-enable no-restricted-syntax */
 
 export interface OutreachColumn { key: string; label: string; color: string }
 

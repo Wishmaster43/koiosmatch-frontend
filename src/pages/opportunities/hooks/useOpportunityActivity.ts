@@ -32,7 +32,8 @@ export function useOpportunityActivity(id?: Id): { items: OpportunityActivityEve
       .catch(err => {
         if (err?.code === 'ERR_CANCELED') return
         // 404 = endpoint not built yet → treat as empty (calm), not a hard error.
-        if (err?.response?.status && err.response.status !== 404) setError(true)
+        // Audit r5: no-response network failures DO count as errors (no truthy-status guard).
+        if (err?.response?.status !== 404) setError(true)
         setItems([])
       })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })

@@ -15,6 +15,7 @@ export interface BreakdownRow {
 }
 export interface DonutDatum { name: string; value: number; key: string; color: string }
 
+// eslint-disable-next-line no-restricted-syntax -- fixed chart colour series (DATA), not UI styling: needs more distinct hues than the semantic token set provides
 export const BREAKDOWN_PALETTE = ['#1B60A9', '#19A5CA', '#F0AB00', '#16A34A', '#EF4444', '#6366F1', '#94A3B8']
 
 // Rows → donut data, valued on HOURS (Danny: alles op uren), top 7 by hours.

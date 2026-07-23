@@ -38,6 +38,7 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
           // click filters to that phase once the BE phase filter lands (PHASE-FILTER-1).
           if (!v) {
             const entry = phases?.[0]
+            // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
             return { value: '__none', label: entry?.label ?? t('drawer.noStatus'), color: entry?.color ?? '#8A94A6', count: o.count }
           }
           const m = metaOf(statuses, v)

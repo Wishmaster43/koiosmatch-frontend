@@ -17,5 +17,6 @@ const APPROVAL_COLOR: Record<string, string> = {
 export default function MatchApprovalBadge({ status }: { status?: string }) {
   const { t } = useTranslation('matches')
   if (!status) return null
+  // eslint-disable-next-line no-restricted-syntax -- DATA fallback for an unmapped status, not a UI colour choice (mirrors Avatar.tsx's identical constant)
   return <SoftChip label={t(`approval.status.${status}`)} color={APPROVAL_COLOR[status] ?? '#9CA3AF'} round />
 }

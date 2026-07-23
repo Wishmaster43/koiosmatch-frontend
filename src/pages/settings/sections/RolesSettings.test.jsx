@@ -183,6 +183,7 @@ describe('RolesSettings — appearance save reverts on failure', () => {
     await user.selectOptions(select, 'recruitment')
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      // eslint-disable-next-line no-restricted-syntax -- DATA: the fixture role's tenant-picked colour, not a style rule.
       '/roles/r1', { color: '#3B8FD4', icon: 'shield', dashboard_type: 'recruitment' }))
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('roles.appearanceSaveFailed')))
     // Reverted: the select falls back to the original (empty) dashboard type.

@@ -37,6 +37,9 @@ const PREVIEW_CANDIDATE = {
 // Live HTML mock of the PDF; `t` is the candidates translate fn (cv.* labels).
 // Print palette + accent defaults/presets are fixed CV data (mirrors the always-light PDF, independent of app theme) — hexes stay literal by design.
 function CvHtmlPreview({ settings, t }) {
+  /* eslint-disable no-restricted-syntax -- DATA/fixed template design: this whole preview renders the always-light CV/PDF export
+     (accent-colour defaults mirror the brand tokens; the rest is the document's own fixed print palette), so it must render
+     identically regardless of the recruiter's own app light/dark theme — it intentionally does not follow --text/--color-* tokens. */
   const color1  = settings.primaryColor   ?? '#19A5CA'
   const color2  = settings.secondaryColor ?? '#1B60A9'
   const c       = PREVIEW_CANDIDATE
@@ -176,6 +179,7 @@ function CvHtmlPreview({ settings, t }) {
       </div>
     </div>
   )
+  /* eslint-enable no-restricted-syntax */
 }
 
 export default function CvTemplateSettings() {
@@ -270,12 +274,14 @@ export default function CvTemplateSettings() {
               <div key={key} style={{ marginBottom: 14 }}>
                 <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 7 }}>{label}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  {/* eslint-disable-next-line no-restricted-syntax -- DATA: default accent-colour value mirroring the brand primary token, not UI chrome */}
                   <input type="color" value={settings[key] ?? '#19A5CA'} onChange={e => save({ [key]: e.target.value })}
                     style={{ width: 34, height: 34, border: '1px solid var(--border)', borderRadius: 7, cursor: 'pointer', padding: 2, flexShrink: 0 }} />
                   <input type="text" value={settings[key] ?? ''} onChange={e => /^#[0-9A-Fa-f]{0,6}$/.test(e.target.value) && save({ [key]: e.target.value })}
                     style={{ ...fieldStyle, width: 96, fontFamily: 'monospace', fontSize: 12 }} />
                 </div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {/* eslint-disable-next-line no-restricted-syntax -- DATA: fixed swatch palette offered for the CV template accent colour */}
                   {['#19A5CA','#1B60A9','#F0AB00','#10B981','#EF4444','#8B5CF6','#F97316','#1F2937'].map(col => (
                     <button key={col} onClick={() => save({ [key]: col })}
                       style={{ width: 22, height: 22, borderRadius: '50%', background: col, border: settings[key] === col ? '3px solid var(--text)' : '2px solid transparent', cursor: 'pointer', flexShrink: 0 }} />

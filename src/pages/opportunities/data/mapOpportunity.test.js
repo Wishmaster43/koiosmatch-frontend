@@ -6,6 +6,7 @@ describe('mapOpportunity', () => {
     const row = mapOpportunity({
       id: 'o1', title: 'Zorggroep Noord',
       customer: { id: 'c1', name: 'Zorggroep Noord BV' },
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       stage_label: 'Voorstel', stage_color: '#6E8FD6',
       value: 42000,
       owner: { id: 'u1', name: 'Kelly van Vliet' },
@@ -13,6 +14,7 @@ describe('mapOpportunity', () => {
     })
     expect(row).toMatchObject({
       id: 'o1', title: 'Zorggroep Noord', client: 'Zorggroep Noord BV',
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       stage: 'Voorstel', stageColor: '#6E8FD6', value: 42000,
       owner: 'Kelly van Vliet', date: '2026-06-16', initials: 'ZN',
     })
@@ -21,10 +23,12 @@ describe('mapOpportunity', () => {
   it('extracts label + color from the nested API stage object', () => {
     const row = mapOpportunity({
       id: 'o1b', title: 'Deal Z',
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       stage: { value: 'proposal', label: 'Voorstel', color: '#6E8FD6' },
     })
     expect(row.stage).toBe('Voorstel')
     expect(row.stageValue).toBe('proposal')
+    // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
     expect(row.stageColor).toBe('#6E8FD6')
   })
 
@@ -33,6 +37,7 @@ describe('mapOpportunity', () => {
       id: 'o1c', title: 'Deal Q', currency: 'EUR',
       customer: { id: 'c9', name: 'Klant Q' },
       owner: { id: 'u9', name: 'Sam' },
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       stage: { value: 'won', label: 'Gewonnen', color: '#79B58E' },
       expected_close_at: '2026-08-01',
     })
@@ -50,6 +55,7 @@ describe('mapOpportunity', () => {
     })
     expect(row).toMatchObject({
       title: 'Deal Y', client: 'Klant Y', stage: 'Lead',
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       value: 15000, owner: 'Sam', date: '2026-07-01', stageColor: '#6E8FD6',
     })
   })
@@ -102,6 +108,7 @@ describe('mapOpportunity', () => {
     expect(row.title).toBe('—')
     expect(row.client).toBe('—')
     expect(row.stage).toBe('')
+    // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
     expect(row.stageColor).toBe('#6E8FD6')
     expect(row.value).toBeNull()
     expect(row.owner).toBe('')

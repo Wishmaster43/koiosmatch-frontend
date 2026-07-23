@@ -39,6 +39,9 @@ const AppsContext = createContext<AppsValue | null>(null)
 // Integration connectors (external planning APIs). WhatsApp and AI Agent are
 // NOT here — they are modules managed via the Modules settings tab (accessible_pages).
 // These apps are only available to tenants on package 3 ("Alles").
+// Each connector carries its own distinguishing brand colour (icon/border/bg) —
+// seed DATA mirroring the external system's own palette, not UI styling.
+/* eslint-disable no-restricted-syntax -- seed DATA hex: connector brand palette, not UI styling */
 export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'shiftmanager',
@@ -116,6 +119,7 @@ export const AVAILABLE_APPS: AppDef[] = [
     monthly:     true,
   },
 ]
+/* eslint-enable no-restricted-syntax */
 
 export function AppsProvider({ children }: { children: ReactNode }) {
   // List of enabled app IDs. Seeded synchronously from the localStorage cache so

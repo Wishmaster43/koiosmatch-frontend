@@ -1,0 +1,15 @@
+# Public career site — crawlers are welcome everywhere; there is nothing to hide
+# behind auth on this surface (CLAUDE.md §7: a different trust boundary than the
+# admin app, which is never crawlable and never linked from here).
+User-agent: *
+Allow: /
+
+# No `Sitemap:` directive here on purpose. Vacancy data — and therefore any
+# sitemap — is per TENANT (the backend already serves one at
+# GET /api/public/{tenant}/sitemap.xml, see CareerFeedController@sitemap), while
+# this file is a single static asset shared by every tenant hosted under this
+# domain (see README.md "Hosting notes"). It cannot enumerate every tenant's
+# sitemap URL without already knowing every tenant slug at build time. Real
+# per-tenant wiring needs either a per-tenant robots.txt generated at the
+# hosting/reverse-proxy layer, or a small dynamic endpoint listing active
+# tenants — tracked as a deliberate follow-up in README.md, not faked here.

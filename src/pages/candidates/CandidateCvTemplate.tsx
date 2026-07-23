@@ -11,6 +11,10 @@ function fmtDate(d?: string | number | null, locale = 'nl-NL'): string {
 }
 
 function makeStyles(color: string, color2: string) {
+  // PDF document colours: @react-pdf/renderer renders this StyleSheet outside the
+  // DOM/CSS cascade (it produces an actual PDF file), so var(--color-*) tokens
+  // cannot resolve here — these are fixed document-style constants, not UI hex.
+  /* eslint-disable no-restricted-syntax -- PDF StyleSheet colours; react-pdf renders outside the CSS cascade so design tokens cannot resolve here */
   return StyleSheet.create({
     page: { fontFamily: 'Helvetica', backgroundColor: '#FFFFFF', fontSize: 10, color: '#1F2937' },
 
@@ -72,6 +76,7 @@ function makeStyles(color: string, color2: string) {
     footer: { position: 'absolute', bottom: 16, left: 40, right: 40, flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: '#F1F5F9', borderTopStyle: 'solid', paddingTop: 6 },
     footerText: { fontSize: 7.5, color: '#CBD5E1' },
   })
+  /* eslint-enable no-restricted-syntax */
 }
 
 type CvStyles = ReturnType<typeof makeStyles>
@@ -141,8 +146,12 @@ interface CvDocumentProps {
 }
 
 export function CvDocument({ c, settings = {}, locale = 'nl-NL', t }: CvDocumentProps) {
+  // Fallback brand colours (mirror --color-primary/--color-info) for tenants with
+  // no CV theme configured — react-pdf cannot resolve var(--color-*) CSS tokens.
+  /* eslint-disable no-restricted-syntax -- PDF fallback colours; react-pdf cannot resolve var(--color-*) tokens */
   const color  = settings.primaryColor   ?? '#19A5CA'
   const color2 = settings.secondaryColor ?? '#1B60A9'
+  /* eslint-enable no-restricted-syntax */
   const S = makeStyles(color, color2)
   const fmt = (d?: string | number | null) => fmtDate(d, locale)
   const L = (k: string, opts?: Record<string, unknown>): string => (t ? t(`cv.${k}`, opts) : interp(CV_NL[k] ?? k, opts))

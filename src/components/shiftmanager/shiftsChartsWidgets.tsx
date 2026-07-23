@@ -38,12 +38,12 @@ export function BarChartWidget({ data, bars, onBarClick }: {
   return (
     <ResponsiveContainer width="100%" height={280}>
       <BarChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-        <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#64748b" }} />
-        <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#64748b" }} />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+        <XAxis dataKey="label" tick={{ fontSize: 12, fill: "var(--text-muted)" }} />
+        <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "var(--text-muted)" }} />
         {/* nl-NL thousands separator + force the series order (Totaal · Niet ingevuld · Geen
             kandidaat · Prognose · Werkelijk) instead of recharts' default alphabetical sort. */}
-        <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 13 }}
+        <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", fontSize: 13 }}
           formatter={(value) => formatNumber(Number(value) || 0)}
           itemSorter={(item) => bars.findIndex(b => b.dataKey === (item as { dataKey?: unknown }).dataKey)} />
         <Legend
@@ -80,9 +80,9 @@ export function YearIndicator({ years, colors }: { years: number[]; colors?: (st
       {years.map((y, i) => {
         const tint = colors?.[i]
         return (
-          <span key={y} className="flex items-center gap-1.5 text-xs" style={{ color: tint ? undefined : '#64748b', opacity: tint ? 1 : YEAR_OPACITY[i] }}>
+          <span key={y} className="flex items-center gap-1.5 text-xs" style={{ color: tint ? undefined : 'var(--text-muted)', opacity: tint ? 1 : YEAR_OPACITY[i] }}>
             <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2,
-                           background: tint ?? '#64748b', opacity: tint ? 1 : YEAR_OPACITY[i] }} />
+                           background: tint ?? 'var(--text-muted)', opacity: tint ? 1 : YEAR_OPACITY[i] }} />
             {y}
           </span>
         )

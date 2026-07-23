@@ -19,6 +19,7 @@ export function lookupNames(res: AxiosResponse): string[] {
 }
 
 /** Normalise option rows → {id?, value, label, color}; drop inactive, sort by order. */
+// eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
 export function normalizeOptions(raw: unknown, fallback: LookupOption[] | null = null, defaultColor = '#9CA3AF'): LookupOption[] | null {
   if (!Array.isArray(raw) || raw.length === 0) return fallback
   const order = (it: Record<string, unknown>) => Number(it.order ?? it.sort_order ?? it.position ?? 0)
@@ -58,6 +59,7 @@ export function sortActiveRows(raw: unknown): Record<string, unknown>[] {
  * (e.g. task statuses fell back with `is_done: false`).
  */
 export function makeMetaResolver<T extends { value: string; label: string; color?: string }>(
+  // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
   list: T[], fallbackColor = '#9CA3AF', extra: Partial<T> = {},
 ) {
   return (v?: string | null): T =>

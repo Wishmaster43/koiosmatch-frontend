@@ -165,6 +165,7 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
 
           {/* Error message */}
           {shown.error_message && (
+            // eslint-disable-next-line no-restricted-syntax -- DATA: danger-border companion colour, mirrors the same literal used in MessageDrawer/EmailSettings/WhatsAppSettings
             <div style={{ background: 'var(--color-danger-bg)', border: '1px solid #FCA5A5', borderRadius: 8,
                           padding: '12px 14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>

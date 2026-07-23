@@ -26,7 +26,7 @@ export default function WorkflowHistoryView({ workflowId }: { workflowId?: strin
   const [drill, setDrill] = useState<RunRow | null>(null)
 
   return (
-    <div style={{ flex: 1, overflow: 'auto', padding: '20px 24px', background: '#F5F5F7' }}>
+    <div style={{ flex: 1, overflow: 'auto', padding: '20px 24px', background: 'var(--bg)' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
 
         {/* Header */}

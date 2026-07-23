@@ -28,6 +28,7 @@ export default function VacanciesMapView({ rows, center, radiusKm, onCenterChang
     .map(v => ({
       id: v.id as Id, lat: v.lat as number, lng: v.lng as number, label: v.title,
       sub: [v.city, v.distanceKm != null ? t('common:map.kmAway', { km: v.distanceKm }) : null].filter(Boolean).join(' · '),
+      // eslint-disable-next-line no-restricted-syntax -- DATA fallback marker colour, not a UI colour choice (mirrors Avatar.tsx's identical constant)
       color: v.statusColor || '#9CA3AF',
     }))
 

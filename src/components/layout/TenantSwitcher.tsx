@@ -13,6 +13,7 @@ import type { Tenant } from '@/types/api'
 // App-default primary (mirror of :root --color-primary in index.css — keep in sync):
 // the effective brand of a tenant that never set a custom colour. We can't use the
 // CSS var here — it resolves to the ACTIVE tenant's brand, not the listed one's.
+// eslint-disable-next-line no-restricted-syntax -- DATA: frozen snapshot of the app-default brand, must NOT resolve via the active tenant's CSS var
 const APP_DEFAULT_PRIMARY = '#19A5CA'
 
 const tenantInitials = (name?: string) =>

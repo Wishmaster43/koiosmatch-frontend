@@ -18,6 +18,7 @@ vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() })
 
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 
+// eslint-disable-next-line no-restricted-syntax -- DATA: a fixture funnel stage's tenant-picked colour, not a style rule.
 const stage = (over = {}) => ({ id: 'f1', value: 'applied', label: 'Gesolliciteerd', color: '#3B8FD4', is_default: false, ...over })
 
 afterEach(() => vi.clearAllMocks())
@@ -72,6 +73,7 @@ describe('CandidateLookupsSettings — funnel stage default singleton', () => {
 
   it('does not render the DefaultToggle on the contract-forms (candidate_types) block', async () => {
     api.get.mockResolvedValue({ data: {
+      // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture contract-form's tenant-picked colour, not a style rule.
       candidate_types: [{ id: 'c1', value: 'zzp', label: 'ZZP', color: '#3B8FD4' }],
     } })
     render(<ContractFormsSettings />)
@@ -88,6 +90,7 @@ describe('CandidateLookupsSettings — funnel stage default singleton', () => {
 // request AND the rolled-back state, never only that a callback fired).
 describe('CandidateLookupsSettings — colour + reorder revert on failure', () => {
   it('reverts the colour and notifies when the colour PUT fails', async () => {
+    // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture contract-form's tenant-picked colour, not a style rule.
     api.get.mockResolvedValue({ data: { candidate_types: [{ id: 'c1', value: 'zzp', label: 'ZZP', color: '#3B8FD4' }] } })
     api.put.mockRejectedValue(new Error('network down'))
     const { notifyError } = await import('@/lib/notify')
@@ -103,6 +106,7 @@ describe('CandidateLookupsSettings — colour + reorder revert on failure', () =
     await user.click(preset)
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      // eslint-disable-next-line no-restricted-syntax -- DATA: asserting the preset colour the test picked, not a style rule.
       '/settings/candidate-lookups/candidate-types/c1', { label: 'ZZP', color: '#64748B' }))
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.saveFailed')))
     // Reverted: the swatch shows the original colour again, not the rejected one.
@@ -110,10 +114,12 @@ describe('CandidateLookupsSettings — colour + reorder revert on failure', () =
   })
 
   it('reverts the order and notifies when the reorder PUT fails', async () => {
+    /* eslint-disable no-restricted-syntax -- DATA: fixture contract-forms' tenant-picked colours, not a style rule. */
     api.get.mockResolvedValue({ data: { candidate_types: [
       { id: 'c1', value: 'zzp', label: 'ZZP', color: '#3B8FD4' },
       { id: 'c2', value: 'payroll', label: 'Payroll', color: '#6E8FD6' },
     ] } })
+    /* eslint-enable no-restricted-syntax */
     api.put.mockRejectedValue(new Error('network down'))
     const { notifyError } = await import('@/lib/notify')
     const { container } = render(<ContractFormsSettings />)

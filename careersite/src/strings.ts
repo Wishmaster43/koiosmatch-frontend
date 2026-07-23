@@ -9,6 +9,10 @@ export const strings = {
     title: 'Geen tenant gekozen',
     body: 'Deze pagina toont vacatures per werkgever. Gebruik de link die je van je werkgever hebt gekregen, bijvoorbeeld /jouw-bedrijf/vacatures.',
   },
+  inactive: {
+    title: 'Deze vacaturesite is niet actief',
+    body: 'Deze werkgever heeft de vacaturesite nog niet ingeschakeld. Kom later terug of neem contact op met de werkgever.',
+  },
   notFound: {
     title: 'Pagina niet gevonden',
     body: 'Deze pagina bestaat niet (meer). Controleer de link of ga terug naar het vacature-overzicht.',

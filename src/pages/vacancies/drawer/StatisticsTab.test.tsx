@@ -18,11 +18,13 @@ import nlVacancies from '@/i18n/locales/nl/vacancies.json'
 const mockNavigate = vi.fn()
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ navigate: mockNavigate }) }))
 
+/* eslint-disable no-restricted-syntax -- test fixture hex, not UI styling */
 const PHASES = [
   { value: 'applied', label: 'Gesolliciteerd', color: '#94A3B8' },
   { value: 'hired',   label: 'Aangenomen',     color: '#79B58E' },
   { value: 'rejected', label: 'Afgewezen',     color: '#D98A8A' },
 ]
+/* eslint-enable no-restricted-syntax */
 vi.mock('@/context/VacancyLookupsContext', () => ({ useVacancyLookups: () => ({ phases: PHASES }) }))
 
 describe('StatisticsTab · empty state', () => {
@@ -39,10 +41,12 @@ describe('StatisticsTab · V25 real data (derived from the detail applications a
       id: 'v1', title: 'Test', leads_count: 4, created_at: '2026-06-01T00:00:00Z',
       // Note: NO applications_by_phase on this raw payload — mirrors the real
       // GET /vacancies/{id} response (VacancyController::show() never attaches it).
+      /* eslint-disable no-restricted-syntax -- test fixture hex, not UI styling */
       applications: [
         { id: 'a1', candidate: { id: 'c1', name: 'Rosa Tijssen' }, phase: { value: 'applied', label: 'Gesolliciteerd', color: '#94A3B8' } },
         { id: 'a2', candidate: { id: 'c2', name: 'Kelly van Vliet' }, phase: { value: 'hired', label: 'Aangenomen', color: '#79B58E' } },
       ],
+      /* eslint-enable no-restricted-syntax */
     })
     render(<StatisticsTab vacancy={v} />)
 
@@ -61,6 +65,7 @@ describe('StatisticsTab · V25 real data (derived from the detail applications a
     vi.setSystemTime(now)
     const v = mapVacancyDetail({
       id: 'v1', title: 'Test', leads_count: 2, created_at: '2026-07-01T00:00:00Z',
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       applications: [{ id: 'a1', candidate: { id: 'c1', name: 'Rosa Tijssen' }, phase: { value: 'applied', label: 'Gesolliciteerd', color: '#94A3B8' } }],
       channels: [
         { value: 'career', label: 'Carrière-pagina', published: true },
@@ -80,6 +85,7 @@ describe('StatisticsTab · V25 real data (derived from the detail applications a
   it('a phase legend row navigates to Sollicitaties pre-filtered on this vacancy + stage', async () => {
     const v = mapVacancyDetail({
       id: 'v42', title: 'Test', leads_count: 1,
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       applications: [{ id: 'a1', candidate: { id: 'c1', name: 'Rosa' }, phase: { value: 'applied', label: 'Gesolliciteerd', color: '#94A3B8' } }],
     })
     render(<StatisticsTab vacancy={v} />)

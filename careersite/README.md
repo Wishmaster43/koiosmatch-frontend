@@ -66,12 +66,29 @@ Copy `careersite/.env.example` to `careersite/.env` and adjust:
 - The apply form includes a hidden honeypot field (`website`, always empty for real
   visitors) and a mandatory AVG consent checkbox that gates the actual network
   request — see `src/components/ApplyForm.tsx`.
+- **CAREER-SITE-ACTIVE.** `GET /public/{tenant}/site` always answers (even for a
+  tenant that never opted in) and always carries an `active` flag; the DATA
+  endpoints (vacancies/apply/feeds/sitemap) 404 while it is `false`. `theme.tsx`
+  reads that flag and `TenantLayout` renders a calm, tenant-neutral "deze
+  vacaturesite is niet actief" notice instead of the generic error state — see
+  `src/strings.ts` `inactive` and the `'inactive'` branch in `useSiteTheme`/`TenantLayout`.
+- **Filters + pagination are URL-persisted.** `VacancyListPage` reads/writes
+  `?stad=&uren=&pagina=` via `useSearchParams` (see `src/pages/VacancyListPage.tsx`),
+  so sharing, refreshing or navigating back reproduces the same filtered/paged view.
+  Typing and paging use `replace` (never `push`), so the browser history isn't
+  flooded with one entry per keystroke/page.
 
 ## Follow-ups (not built here)
 
 - Multi-locale copy: `src/strings.ts` is a single NL module, structured so a real
   i18n layer (react-i18next, mirroring the admin app) can replace it without
   touching call sites — out of scope for this MVP.
-- No URL-persisted filters/pagination (deep-linking a filtered/paged list) — filters
-  and page are local component state today.
-- No `next`/`prev` "sitemap" or robots.txt generation — left to the hosting layer.
+- **Per-tenant sitemap wiring is not built here.** `public/robots.txt` is one static
+  file, shared by every tenant hosted under this domain, allowing all crawlers but
+  deliberately carrying no `Sitemap:` directive. The backend already serves a real
+  per-tenant sitemap at `GET /api/public/{tenant}/sitemap.xml`
+  (`CareerFeedController@sitemap`), but a single static file cannot enumerate every
+  tenant's sitemap URL without already knowing every tenant slug at build time.
+  Wiring this up for real needs either a per-tenant robots.txt generated at the
+  hosting/reverse-proxy layer, or a small dynamic endpoint that lists active
+  tenants — not faked here.

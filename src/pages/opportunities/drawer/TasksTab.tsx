@@ -65,6 +65,7 @@ export default function TasksTab({ opportunity: o }: { opportunity: Opportunity 
             // payloads sent a bare string — resolve both, never render the object raw.
             const st = task.status as { label?: string; value?: string; color?: string } | string | null | undefined
             const statusLabel = task.status_label ?? (typeof st === 'object' ? st?.label ?? st?.value : st)
+            // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
             const color = task.status_color || (typeof st === 'object' ? st?.color : null) || '#9CA3AF'
             const due = (task.completed_at ?? task.due_at ?? task.due_date) as string | null | undefined
             return (

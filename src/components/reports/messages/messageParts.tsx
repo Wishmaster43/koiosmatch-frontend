@@ -20,13 +20,16 @@ export function formatDT(dt?: string | number | Date | null) {
 export interface BadgeMeta { bg: string; color: string; Icon: LucideIcon }
 
 // Channel → colour + icon. Label = t('messages.channel.<key>').
+/* eslint-disable no-restricted-syntax -- fixed channel→colour mapping (DATA), mirrors the lookup-colour pattern used elsewhere; these shades have no exact token equivalent */
 export const CHANNEL_META: Record<string, BadgeMeta> = {
   whatsapp: { bg: '#ECFDF5', color: '#059669', Icon: MessageCircle },
   email:    { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)', Icon: Mail },
   sms:      { bg: '#F5F3FF', color: '#6D28D9', Icon: Phone },
 }
+/* eslint-enable no-restricted-syntax */
 
 // Status → colour + icon. Label = t('messages.status.<key>').
+/* eslint-disable no-restricted-syntax -- fixed status→colour mapping (DATA), mirrors the lookup-colour pattern used elsewhere; these shades have no exact token equivalent */
 export const STATUS_META: Record<string, BadgeMeta> = {
   sent:       { bg: 'var(--color-success-bg)', color: 'var(--color-success)', Icon: CheckCheck  },
   delivered:  { bg: '#ECFDF5', color: '#059669', Icon: CheckCheck  },
@@ -35,6 +38,7 @@ export const STATUS_META: Record<string, BadgeMeta> = {
   pending:    { bg: 'var(--hover-bg)', color: 'var(--text-muted)', Icon: Clock     },
   bounced:    { bg: 'var(--color-warning-bg)', color: '#C2410C', Icon: AlertTriangle },
 }
+/* eslint-enable no-restricted-syntax */
 
 export function ChannelBadge({ channel }: { channel?: string }) {
   const { t } = useTranslation('reports')

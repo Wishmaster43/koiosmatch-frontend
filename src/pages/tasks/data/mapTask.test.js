@@ -5,8 +5,11 @@ describe('mapTask', () => {
   it('maps a row with nested lookup objects + assignee + links', () => {
     const row = mapTask({
       id: 't1', title: 'Bel kandidaat',
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       type: { value: 'call', label: 'Belafspraak', color: '#5FB0AC' },
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       status: { value: 'todo', label: 'TeDoen', color: '#D98A8A', is_done: false },
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       priority: { value: 'high', label: 'Hoog', color: '#D98A8A' },
       assignee: { id: 'u1', name: 'Danny Polak', avatar_color: '#abc' },
       owner: { id: 'u2', name: 'Kelly van Vliet' },

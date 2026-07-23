@@ -41,6 +41,7 @@ const app = (over: Partial<ApplicationDetail> = {}) => ({
   id: 1, candidateId: 7,
   candidate: {
     name: 'Jan Jansen', initials: 'JJ', function: '',
+    // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
     statusLabel: 'Beschikbaar', statusColor: '#2E7D32',
     gender: '', nationality: '', dob: '', email: '', phone: '', address: '', summary: '',
   },

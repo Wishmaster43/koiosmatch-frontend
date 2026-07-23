@@ -6,10 +6,12 @@ import type { ChartDatum, TipProps } from './chartTypes'
 import ErrorBoundary from '../ui/ErrorBoundary'
 import { useNumberFormat } from '@/lib/formatters'
 
+/* eslint-disable no-restricted-syntax -- fixed chart colour series, not UI styling: needs more distinct hues than the semantic token set provides */
 const DEFAULT_COLORS = [
   'var(--color-primary)','#10B981','#3B8FD4','var(--color-warning)',
   'var(--color-danger)','#8B5CF6','#06B6D4','#84CC16','#F97316','#EC4899',
 ]
+/* eslint-enable no-restricted-syntax */
 
 // `unit` is an optional label appended to the count tooltip (e.g. "12 candidates").
 // `formatNumber` is passed in (the tooltip is a plain function, not a component,

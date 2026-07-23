@@ -14,6 +14,9 @@ import type { Id } from '@/types/common'
 
 // Soft phase chip in the funnel-phase colour (shared soft-chip convention).
 function PhaseChip({ label, color }: { label: ReactNode; color?: string | null }) {
+  // Fallback swatch colour, consumed below via hex+alpha string concatenation
+  // (soft-chip convention) — cannot become a CSS var without restructuring that.
+  // eslint-disable-next-line no-restricted-syntax -- fallback swatch hex, consumed as hex+alpha string concat below
   const c = color ?? '#9CA3AF'
   return (
     <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99,

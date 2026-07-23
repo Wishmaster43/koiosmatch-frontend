@@ -80,7 +80,7 @@ export function MonthView({ current, shifts, today, onDayClick }: ViewProps) {
                   style={{ borderRight: di < 6 ? '1px solid var(--border)' : 'none',
                     padding: '6px 6px 4px', background: outside ? 'var(--bg)' : 'var(--surface)',
                     cursor: 'pointer', minHeight: 110, position: 'relative' }}
-                  onMouseEnter={e => { if (!isToday) e.currentTarget.style.background = outside ? '#f0f0f0' : 'var(--hover-bg)' }}
+                  onMouseEnter={e => { if (!isToday) e.currentTarget.style.background = 'var(--hover-bg)' }}
                   onMouseLeave={e => e.currentTarget.style.background = outside ? 'var(--bg)' : 'var(--surface)' }>
                   <div style={{
                     width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',

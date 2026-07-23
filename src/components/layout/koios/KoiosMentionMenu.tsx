@@ -166,7 +166,7 @@ export default function KoiosMentionMenu({
               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)' }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'none' }}>
               <div style={{ width: 28, height: 28, borderRadius: 8, flexShrink: 0,
-                background: 'linear-gradient(135deg,var(--color-primary-bg),#F3E8FF)',
+                background: 'linear-gradient(135deg,var(--color-primary-bg),var(--color-violet-bg))',
                 display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-primary)' }}>@</span>
               </div>

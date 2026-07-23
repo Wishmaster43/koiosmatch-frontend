@@ -51,6 +51,7 @@ export function Block({ title, action, onAction, children }: { title?: ReactNode
 }
 
 export function Avatar({ initials, size = 28 }: { initials: string; size?: number }) {
+  // eslint-disable-next-line no-restricted-syntax -- DATA: avatar colour-cycling palette, not UI element styling
   const colors = ['var(--color-primary)','var(--color-secondary)','var(--color-success)','var(--color-warning)','var(--color-danger)','#8B5CF6','#EC4899']
   const color  = colors[initials.charCodeAt(0) % colors.length]
   return (

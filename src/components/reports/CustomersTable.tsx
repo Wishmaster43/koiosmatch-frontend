@@ -122,6 +122,7 @@ export default function CustomersTable() {
 
       {error && (
         <div style={{ padding: '10px 14px', marginBottom: 12, fontSize: 13, color: 'var(--color-danger)',
+                      // eslint-disable-next-line no-restricted-syntax -- DATA: danger-border companion colour paired with the danger-bg tokens above; no exact token match for this specific soft-border shade
                       background: 'var(--color-danger-bg)', border: '1px solid #FECACA', borderRadius: 8 }}>
           {t('customers.loadError')}
         </div>

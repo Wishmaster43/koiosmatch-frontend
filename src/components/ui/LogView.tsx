@@ -75,6 +75,7 @@ export default function LogView<Row>({
 
       {error && (
         <div style={{ padding: '12px 14px', borderRadius: 10, background: 'var(--color-warning-bg)',
+          // eslint-disable-next-line no-restricted-syntax -- no close-enough warning-contrast token for this alert box border/text; tracked as a token-set follow-up (mirrors KoiosRadar.tsx precedent)
           border: '1px solid #FDE68A', fontSize: 13, color: '#92400E', marginBottom: 12 }}>
           {error}
         </div>

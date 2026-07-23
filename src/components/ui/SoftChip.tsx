@@ -20,6 +20,7 @@ interface SoftChipProps {
 }
 
 export default function SoftChip({ label, color, dot = false, title, round = false, size = 11 }: SoftChipProps) {
+  // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar's NEUTRAL_AVATAR / TitleBadge's identical constant)
   const c = color ?? '#9CA3AF'
   return (
     <span title={title} style={{ display: 'inline-flex', alignItems: 'center', gap: 5,

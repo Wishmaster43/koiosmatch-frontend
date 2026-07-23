@@ -33,6 +33,7 @@ interface OpportunitiesTableProps {
 
 // Calm neutral avatar tint — colour carries no meaning here, so all bubbles match
 // (mirrors the candidate table's default; per-initial colours would be noise).
+// eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors the shared Avatar.tsx constant)
 const NEUTRAL_AVATAR = '#9CA3AF'
 
 // OpportunitiesTable — declares columns only; the shared DataTable owns sorting + states.

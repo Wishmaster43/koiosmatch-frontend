@@ -72,7 +72,8 @@ describe('useShiftDepartments', () => {
     mockedGet.mockResolvedValue({ data: { data: [{ id: 'd1', name: 'Watertorenlocatie' }] } })
     const { result } = renderHook(() => useShiftDepartments('cust1'), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
-    expect(mockedGet).toHaveBeenCalledWith('/customers/cust1/departments')
+    // The load is abortable since audit r4 — the GET carries an AbortSignal config.
+    expect(mockedGet).toHaveBeenCalledWith('/customers/cust1/departments', expect.objectContaining({ signal: expect.anything() }))
     expect(result.current.departments).toEqual([{ id: 'd1', name: 'Watertorenlocatie' }])
   })
 })

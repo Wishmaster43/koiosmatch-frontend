@@ -179,6 +179,7 @@ export function SkeletonRows({ n = 3 }) {
         <div key={i} style={{ ...CARD, height: 58, overflow: 'hidden', position: 'relative' }}>
           <div className="km-skeleton" style={{
             position: 'absolute', inset: 0,
+            // eslint-disable-next-line no-restricted-syntax -- no semantic index.css token for this loading-shimmer gradient; kept literal to avoid changing the rendered animation
             background: 'linear-gradient(90deg,#F8FAFC 25%,#EEF2F6 37%,#F8FAFC 63%)',
             backgroundSize: '400% 100%', animation: 'km-shimmer 1.4s ease infinite',
           }} />

@@ -105,6 +105,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
 
       {/* One-time secret banner after regenerate */}
       {secret && (
+        /* eslint-disable no-restricted-syntax -- no exact/close index.css token match for these success-banner border/text shades; kept literal to avoid changing the rendered tone */
         <div style={{ background: 'var(--color-success-bg)', border: '1px solid #BBF7D0', borderRadius: 10, padding: 14, margin: '14px 0' }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: '#166534', marginBottom: 8 }}>{t('webhooks.outgoing.secretOnce')}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -115,6 +116,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
           </div>
           <button onClick={() => setSecret(null)} style={{ marginTop: 8, fontSize: 12, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>{t('webhooks.outgoing.dismiss')}</button>
         </div>
+        /* eslint-enable no-restricted-syntax */
       )}
 
       {/* Details card (name + url) */}

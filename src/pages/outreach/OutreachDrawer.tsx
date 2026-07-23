@@ -35,7 +35,8 @@ import type { Id } from '@/types/common'
 
 // Campaign status → semantic colour for the header badge (draft calm, done success).
 const STATUS_COLOR: Record<string, string> = {
-  draft: '#94A3B8', active: '#19A5CA', done: '#16A34A',
+  // eslint-disable-next-line no-restricted-syntax -- DATA: fixed status colour map, no token matches this specific calm grey
+  draft: '#94A3B8', active: 'var(--color-primary)', done: 'var(--color-success)',
 }
 
 interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: string; email?: string }
@@ -119,6 +120,7 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{name}</span>
                 {/* Status badge — colour-coded, read-only (was the body StatusPill, §3A(c)). */}
+                {/* eslint-disable-next-line no-restricted-syntax -- DATA: matches STATUS_COLOR's own "draft calm" fallback shade, no token available */}
                 <TitleBadge label={t(`status.${st}`, { defaultValue: st })} color={STATUS_COLOR[st] ?? '#94A3B8'} />
               </div>
               {/* W2 delivered: the detail (incl. targets) now loads for an archived

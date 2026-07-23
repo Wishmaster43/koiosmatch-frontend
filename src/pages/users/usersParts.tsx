@@ -30,12 +30,14 @@ export const SUPER_ADMIN_COLOR = 'var(--color-violet)'
 
 // Role → fallback colour + icon (data palette; a backend-supplied role colour wins).
 // Label = t('roles.<name>') (default → user).
+/* eslint-disable no-restricted-syntax -- DATA: role fallback colour palette, a backend-supplied colour always wins */
 const ROLE_META: Record<string, { color: string; icon: LucideIcon }> = {
   super_admin:   { color: SUPER_ADMIN_COLOR, icon: ShieldCheck },
   tenant_admin:  { color: '#1D4ED8', icon: Shield },
   planner:       { color: '#065F46', icon: User },
   default:       { color: '#6B7280', icon: User },
 }
+/* eslint-enable no-restricted-syntax */
 // Exported so NewUserModal can label roles the same way (seeded roles get the
 // translated name; custom tenant roles fall back to their own raw name).
 // FIX (was `users.roles.<name>`, a dead key — users.json has no top-level "users"

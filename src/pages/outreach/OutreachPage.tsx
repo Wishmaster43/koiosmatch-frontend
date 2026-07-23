@@ -13,6 +13,7 @@ import { useAuth } from '@/context/AuthContext'
 import InsightsRow from '@/components/insights/InsightsRow'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import ViewModeToggle from '@/components/ui/ViewModeToggle'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { useOutreachCampaigns } from './hooks/useOutreachCampaigns'
@@ -26,6 +27,7 @@ import OutreachDrawer from './OutreachDrawer'
 import { BTN_H } from '@/config/buttonMetrics'
 
 // Fixed status enum (not a tenant lookup) → board columns, donut + colours (hex for the chart).
+/* eslint-disable no-restricted-syntax -- DATA: fixed status/channel colour maps (incl. WhatsApp's real brand green), not UI styling */
 const STATUSES = [
   { key: 'draft',  color: '#9CA3AF' },
   { key: 'active', color: '#16A34A' },
@@ -36,6 +38,7 @@ const CHANNELS = [
   { key: 'email',    color: '#D97706' },
   { key: 'whatsapp', color: '#25D366' },
 ]
+/* eslint-enable no-restricted-syntax */
 
 const statusKey  = (c: Campaign) => c.status ?? 'draft'
 const channelKey = (c: Campaign) => c.channel ?? 'call'
@@ -126,7 +129,7 @@ export default function OutreachPage() {
       onClick: () => { setSelectedStatus([]); setSelectedChannel([]); setKpiTargets(false) },
       // Reset-to-all tile — clickable, but never highlighted (no filter = nothing active).
       active: false },
-    { key: 'active',  label: t('kpi.active'),  value: campaigns.filter((c) => statusKey(c) === 'active').length, sub: t('kpi.activeSub'), color: '#16A34A',
+    { key: 'active',  label: t('kpi.active'),  value: campaigns.filter((c) => statusKey(c) === 'active').length, sub: t('kpi.activeSub'), color: 'var(--color-success)',
       onClick: () => pickStatus('active'), active: selectedStatus.length === 1 && selectedStatus[0] === 'active' },
     { key: 'targets', label: t('kpi.targets'), value: campaigns.reduce((n, c) => n + targetsOf(c), 0),           sub: t('kpi.targetsSub'), color: 'var(--color-primary)',
       onClick: () => setKpiTargets(v => !v), active: kpiTargets },
@@ -187,12 +190,6 @@ export default function OutreachPage() {
     )
   }
 
-  // View-toggle icon button styling.
-  const iconBtn = (active: boolean) => ({
-    padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer', display: 'flex',
-    background: active ? 'var(--color-primary)' : 'var(--surface)', color: active ? '#fff' : 'var(--text)',
-  })
-
   return (
     <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -213,11 +210,13 @@ export default function OutreachPage() {
             {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}
             <QuickViewToggle active={showArchived} onToggle={() => setShowArchived((v) => !v)}
               label={t('view.archived')} color="var(--color-archive)" icon={Archive} />
-            {/* Table / board view toggle */}
-            <div style={{ display: 'flex', gap: 4 }}>
-              <button onClick={() => setView('table')} title={t('view.table')} aria-label={t('view.table')} style={iconBtn(view === 'table')}><LayoutList size={16} /></button>
-              <button onClick={() => setView('board')} title={t('view.board')} aria-label={t('view.board')} style={iconBtn(view === 'board')}><Kanban size={16} /></button>
-            </div>
+            {/* Table / board view toggle — shared ViewModeToggle (§4, audit r5: this was
+                the last hand-rolled solid-fill switcher after MatchesPage/TasksPage/
+                ApplicationsPage moved to the shared component). */}
+            <ViewModeToggle value={view} onChange={setView} options={[
+              { id: 'table', icon: LayoutList, label: t('view.table') },
+              { id: 'board', icon: Kanban, label: t('view.board') },
+            ]} />
           </div>
         </div>
 

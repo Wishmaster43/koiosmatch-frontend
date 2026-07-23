@@ -66,6 +66,7 @@ export function FieldInput({ field, value, onChange, variables, config }: {
                 padding: '3px 10px', borderRadius: 999, fontSize: 12,
                 background: active ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
                 color:      active ? 'var(--color-primary)'    : 'var(--text-muted)',
+                // eslint-disable-next-line no-restricted-syntax -- no matching token hue close enough for this active-chip border; tracked as a token-set follow-up (mirrors KoiosRadar.tsx precedent)
                 border:     `1px solid ${active ? '#C4C0F0' : 'var(--border)'}`,
                 cursor: 'pointer',
               }}>

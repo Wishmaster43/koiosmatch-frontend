@@ -8,6 +8,7 @@ import type { ShiftSeries } from '@/types/shiftmanager'
 // Series key + colour; labels come from i18n via t('charts.series.<key>').
 // Brand-aligned palette (Danny: black for Totaal is niet mooi): Totaal = brand blue,
 // Niet ingevuld = brand gold, Geen kandidaat = red, Prognose = indigo, Werkelijk = green.
+/* eslint-disable no-restricted-syntax -- fixed chart colour series (DATA), not UI styling: needs more distinct hues than the semantic token set provides */
 export const SERIES: ShiftSeries[] = [
   { key: "totaal",         color: "#1B60A9" },
   { key: "niet_ingevuld",  color: "#F0AB00" },
@@ -15,6 +16,7 @@ export const SERIES: ShiftSeries[] = [
   { key: "prognose",       color: "#6366f1" },
   { key: "werkelijk",      color: "#10b981" },
 ]
+/* eslint-enable no-restricted-syntax */
 
 // Locale-aware short month name for index 0–11 (used for chart axis labels).
 export const monthAbbr = (i: number) => new Date(2000, i, 1).toLocaleString('nl-NL', { month: "short" })

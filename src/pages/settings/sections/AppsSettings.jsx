@@ -40,8 +40,10 @@ export default function AppsSettings() {
 
   return (
     <div style={{ maxWidth: 680 }}>
-      {/* Package context banner — shown when the active tenant is NOT on package 3 yet. */}
+      {/* Package context banner — shown when the active tenant is NOT on package 3 yet.
+          Sky shades have no exact/close index.css token match; kept literal to avoid changing the rendered tone. */}
       {!tenantHasConnectors && (
+        /* eslint-disable no-restricted-syntax -- no exact/close index.css token match for these banner sky shades; kept literal to avoid changing the rendered tone */
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 16px',
                       background: '#F0F9FF', border: '1px solid #BAE6FD', borderRadius: 10, marginBottom: 16 }}>
           <AlertTriangle size={15} color="#0369A1" style={{ flexShrink: 0, marginTop: 1 }} />
@@ -50,6 +52,7 @@ export default function AppsSettings() {
             <div style={{ fontSize: 12, color: '#0284C7', marginTop: 2 }}>{t('apps.notOnPkg3Desc')}</div>
           </div>
         </div>
+        /* eslint-enable no-restricted-syntax */
       )}
 
       {!canEdit && (

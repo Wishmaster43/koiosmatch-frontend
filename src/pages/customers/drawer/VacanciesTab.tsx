@@ -66,6 +66,7 @@ export default function VacanciesTab({ customerId, params }: { customerId?: Id; 
 
   const columns: Column<VacancyRow>[] = [
     { key: 'title', header: t('vacancies.col.title'), sortable: true, sortValue: v => v.title, render: v => <EntityLink page="vacancies" id={v.id}>{v.title}</EntityLink> },
+    // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
     { key: 'status', header: t('vacancies.col.status'), render: v => <StatusPill label={v.status.label} color={v.status.color || '#9CA3AF'} /> },
     { key: 'applications', header: t('vacancies.col.applications'), align: 'right', cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, sortable: true, sortValue: v => v.applications, render: v => v.applications },
   ]

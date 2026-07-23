@@ -33,6 +33,7 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
     // Status carries its own label + colour from the tenant lookup.
     statusValue: status.value ?? v.status_value ?? (typeof v.status === 'string' ? v.status : null),
     statusLabel: status.label ?? v.status_label ?? '',
+    // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar.tsx's identical constant)
     statusColor: status.color ?? v.status_color ?? '#9CA3AF',
     leadsCount: v.leads_count ?? v.leadsCount ?? 0,
     applicationsCount: v.applications_count ?? v.applicationsCount ?? sumPhases(byPhase),
@@ -201,6 +202,7 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
         candidateInitials: cand.initials ?? (name !== '—' ? initialsOf(name) : '?'),
         phaseValue: phase.value ?? a.phase_key ?? a.stage ?? null,
         phaseLabel: phase.label ?? a.phase_label ?? '',
+        // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar.tsx's identical constant)
         phaseColor: phase.color ?? a.phase_color ?? '#9CA3AF',
         source: a.source ?? '',
         created: a.created_at ?? '',

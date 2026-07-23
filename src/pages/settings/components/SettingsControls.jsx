@@ -23,7 +23,7 @@ function ColorPickerPopup({ color, onChange, onClose }) {
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {COLOR_PRESETS.map(c => (
           <button key={c} onClick={() => apply(c)}
-            style={{ width: 26, height: 26, borderRadius: 6, background: c, border: c === hex ? '2px solid #111827' : '2px solid transparent', cursor: 'pointer' }} />
+            style={{ width: 26, height: 26, borderRadius: 6, background: c, border: c === hex ? '2px solid var(--text)' : '2px solid transparent', cursor: 'pointer' }} />
         ))}
       </div>
     </div>
@@ -50,7 +50,7 @@ export function PermissionToggle({ checked, onChange, ...rest }) {
   return (
     <button {...rest} onClick={onChange}
       style={{ width: 32, height: 18, borderRadius: 999, border: 'none', cursor: 'pointer',
-               background: checked ? 'var(--color-primary)' : '#E5E7EB', position: 'relative',
+               background: checked ? 'var(--color-primary)' : 'var(--border)', position: 'relative',
                transition: 'background 0.15s', flexShrink: 0 }}>
       <div style={{ position: 'absolute', top: 2, left: checked ? 16 : 2, width: 14, height: 14,
                     borderRadius: '50%', background: 'white', transition: 'left 0.15s',
@@ -114,9 +114,12 @@ export function DragList({ items, onReorder, renderItem }) {
           onDrop={handleDrop}
           onDragEnd={() => { setDragIdx(null); setOverIdx(null) }}
           style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0',
+                   // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this row divider/drag-over tint; kept literal to avoid changing the rendered tone
                    borderBottom: '1px solid #F3F4F6', opacity: dragIdx === i ? 0.4 : 1,
+                   // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this drag-over highlight tint; kept literal to avoid changing the rendered tone
                    background: overIdx === i && dragIdx !== i ? '#F0F9FF' : 'transparent',
                    borderRadius: 6, transition: 'background 0.1s' }}>
+          {/* eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this grip-icon grey; kept literal to avoid changing the rendered tone */}
           <GripVertical size={14} style={{ color: '#D1D5DB', cursor: 'grab', flexShrink: 0 }} />
           {renderItem(item, i)}
         </div>

@@ -16,13 +16,15 @@ import type { ReportCandidate } from '@/types/reports'
 // Colored status pill (actief / nietactief / extern / ...) for a record.
 function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
+  /* eslint-disable no-restricted-syntax -- fixed status→colour mapping (DATA), mirrors the lookup-colour pattern used elsewhere; these shades have no exact token equivalent */
   const styles: Record<string, { bg: string; color: string }> = {
     actief:     { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
     nietactief: { bg: 'var(--color-warning-bg)', color: '#C2410C' },
     extern:     { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
-    intake:     { bg: '#FAF5FF', color: '#7C3AED' },
+    intake:     { bg: '#FAF5FF', color: 'var(--color-violet)' },
     verwijderd: { bg: 'var(--color-danger-bg)', color: 'var(--color-danger)' },
   }
+  /* eslint-enable no-restricted-syntax */
   const key = (status || '').toLowerCase()
   const s = styles[key] || { bg: 'var(--hover-bg)', color: 'var(--text-muted)' }
   const label = status ? t(`candidates.status.${key}`, { defaultValue: status }) : t('candidates.unknown')

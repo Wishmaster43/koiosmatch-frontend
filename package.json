@@ -14,6 +14,7 @@
     "test:watch": "vitest",
     "prepare": "git config core.hooksPath .githooks || true",
     "smoke": "node e2e/run.mjs",
+    "smoke:career": "node e2e/careersite.mjs",
     "dev:career": "vite --config careersite/vite.config.ts",
     "build:career": "vite build --config careersite/vite.config.ts",
     "test:career": "vitest run --config careersite/vite.config.ts"

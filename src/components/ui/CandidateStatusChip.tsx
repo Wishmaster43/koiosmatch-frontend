@@ -36,6 +36,7 @@ export default function CandidateStatusChip({ status, phase, plain = false, fall
     if (phase != null && phase === phases[0]?.value) return <span style={{ color: 'var(--text-muted)' }}>—</span>
     if (!fallbackLabel) return <span style={{ color: 'var(--text-muted)' }}>—</span>
     if (plain) return <span style={{ fontSize: 12.5, color: 'var(--text)' }}>{fallbackLabel}</span>
+    // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar's NEUTRAL_AVATAR / TitleBadge's identical constant)
     return <SoftChip label={fallbackLabel} color={fallbackColor || '#9CA3AF'} round={round} />
   }
   // Slug present: apply the model-v2 rule — a Lead is not deployable, so no chip.

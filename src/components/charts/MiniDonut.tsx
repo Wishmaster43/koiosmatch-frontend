@@ -9,10 +9,12 @@ import ErrorBoundary from '../ui/ErrorBoundary'
 import { useLocale } from '@/lib/datetime'
 import { formatNumber, formatNumberCompact } from '@/lib/formatters'
 
+/* eslint-disable no-restricted-syntax -- fixed chart colour series, not UI styling: needs more distinct hues than the semantic token set provides */
 const DEFAULT_COLORS = [
   'var(--color-primary)', '#10B981', '#3B8FD4', 'var(--color-warning)',
   'var(--color-danger)', '#8B5CF6', '#06B6D4', '#84CC16', '#F97316', '#EC4899',
 ]
+/* eslint-enable no-restricted-syntax */
 
 function MiniTooltip({ active, payload, total }: TipProps & { total?: number }) {
   if (!active || !payload?.length) return null

@@ -132,6 +132,7 @@ export function useDashboardViewModel({
       { key: 'matches',       label: t('chart.series.matches'),      color: 'var(--color-accent)' },
       { key: 'uitKandidaten', label: t('chart.series.candidatesOut'),       color: 'var(--color-danger)' },
       { key: 'uitAfgewezen',  label: t('chart.series.applicationsRejected'), color: 'var(--color-warning)' },
+      // eslint-disable-next-line no-restricted-syntax -- DATA: chart series colour (matches-ended, neutral grey), no exact design-token match
       { key: 'uitBeeindigd',  label: t('chart.series.matchesEnded'),         color: '#9CA3AF' },
       { key: 'netto',         label: t('chart.series.net'),                  color: 'var(--text)', line: true },
     ].filter(s => present.has(s.key))

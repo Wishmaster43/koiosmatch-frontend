@@ -281,9 +281,12 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
             gap:            expanded ? 9 : 0,
             padding:        expanded ? '7px 10px' : '7px',
             justifyContent: expanded ? 'flex-start' : 'center',
+            // Koios AI brand gradient: primary + violet token (mirrors KoiosHeader/KoiosMentionMenu).
             background: koiosOpen
-              ? 'linear-gradient(135deg, var(--color-primary), #8B5CF6)'
-              : 'linear-gradient(135deg, var(--color-primary)20, #8B5CF620)',
+              ? 'linear-gradient(135deg, var(--color-primary), var(--color-violet))'
+              // color-mix — a var() cannot take a hex-alpha suffix ('var(--x)20' is
+              // invalid CSS, the declaration was silently dropped; audit-consolidatie 23-07).
+              : 'linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 12%, transparent), color-mix(in srgb, var(--color-violet) 12%, transparent))',
             color: '#fff',
           }}
         >

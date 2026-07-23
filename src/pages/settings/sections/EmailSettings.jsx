@@ -126,6 +126,7 @@ export default function EmailSettings({ context = 'klanten' }) {
         <div style={{ marginBottom: 14, padding: '10px 14px', borderRadius: 8, fontSize: 13,
                       display: 'flex', alignItems: 'center', gap: 8,
                       background: testResult.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
+                      // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for these result-banner border shades; kept literal to avoid changing the rendered tone
                       border: `1px solid ${testResult.ok ? '#86EFAC' : '#FCA5A5'}`,
                       color: testResult.ok ? 'var(--color-success)' : 'var(--color-danger)' }}>
           {testResult.ok ? <Check size={14} /> : <AlertTriangle size={14} />}
@@ -163,6 +164,7 @@ export default function EmailSettings({ context = 'klanten' }) {
 
           {(provider === 'gmail' || provider === 'office') && (
             <div style={{ marginTop: 14, padding: '12px 14px', background: 'var(--color-warning-bg)',
+                          // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this warning-banner border/text shade; kept literal to avoid changing the rendered tone
                           border: '1px solid #FDE68A', borderRadius: 8, fontSize: 12, color: '#92400E' }}>
               <strong>{t('email.oauthWarningTitle')}</strong> {t('email.oauthWarning', { provider: provider === 'gmail' ? 'Google' : 'Microsoft' })}
             </div>

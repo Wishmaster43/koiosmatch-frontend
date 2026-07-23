@@ -8,11 +8,14 @@ import type { SVGProps } from 'react'
  * Dutch-orange centre — "adres → punt op de kaart" in one glyph. Props mirror the
  * lucide icon contract (`size`, `color`) so it drops in anywhere an icon fits.
  */
+/* eslint-disable no-restricted-syntax -- DATA: PDOK-navy + Dutch-flag orange brand colours for this own-design vector mark, not a themeable UI colour */
 const PDOK_NAVY = '#1E3A5F'
 const NL_ORANGE = '#FF7700'
+/* eslint-enable no-restricted-syntax */
 
 type PdokMarkProps = { size?: number; color?: string; pin?: string; dot?: string; title?: string } & SVGProps<SVGSVGElement>
 
+// eslint-disable-next-line no-restricted-syntax -- DATA: fixed white pin, must read against the solid brand-colour tile in any theme, not a themeable UI colour
 export default function PdokMark({ size = 24, color = PDOK_NAVY, pin = '#FFFFFF', dot = NL_ORANGE, title = 'PDOK', ...rest }: PdokMarkProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 96 96" fill="none"

@@ -8,10 +8,12 @@
 // Exported so avatarColor.ts (ShiftManager department/contact/location avatars)
 // consumes this SAME palette — one hash, one colour, app-wide (was two drifting
 // 6- vs 7-colour arrays).
+/* eslint-disable no-restricted-syntax -- DATA: avatar colour-hash palette entries (mixed with token entries), not a themeable UI colour choice */
 export const AVATAR_COLORS = [
   'var(--color-primary)', 'var(--color-secondary)', 'var(--color-success)',
   'var(--color-warning)', 'var(--color-danger)', '#8B5CF6', '#EC4899',
 ]
+/* eslint-enable no-restricted-syntax */
 
 // Neutral grey fallback for "no colour assigned" avatars/markers — candidates
 // table/drawer/map view each redeclared this hex locally; one shared constant

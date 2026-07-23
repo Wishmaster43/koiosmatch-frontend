@@ -33,13 +33,13 @@ export default function RadiusMap({ center, radiusKm, points, onCenterChange, on
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <ClickToCenter onPick={onCenterChange} />
-        {/* The search radius around the chosen centre. */}
+        {/* The search radius around the chosen centre — the fixed, tenant-invariant map token (§4). */}
         <Circle center={[center.lat, center.lng]} radius={radiusKm * 1000}
-          pathOptions={{ color: '#4A90D9', fillColor: '#4A90D9', fillOpacity: 0.08, weight: 1.5 }} />
+          pathOptions={{ color: 'var(--color-map)', fillColor: 'var(--color-map)', fillOpacity: 0.08, weight: 1.5 }} />
         {points.map(p => (
           <CircleMarker key={String(p.id)} center={[p.lat, p.lng]} radius={7}
             eventHandlers={onPickPoint ? { click: () => onPickPoint(p.id) } : undefined}
-            pathOptions={{ color: '#fff', weight: 1.5, fillColor: p.color ?? '#4A90D9', fillOpacity: 0.95 }}>
+            pathOptions={{ color: '#fff', weight: 1.5, fillColor: p.color ?? 'var(--color-map)', fillOpacity: 0.95 }}>
             <Tooltip direction="top" offset={[0, -6]}>
               <strong>{p.label}</strong>{p.sub ? <><br />{p.sub}</> : null}
             </Tooltip>

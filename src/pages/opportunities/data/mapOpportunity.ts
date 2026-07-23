@@ -33,6 +33,7 @@ export function mapOpportunity(o: ApiOpportunity): Opportunity {
     clientId:   customer?.id ?? o.customer_id ?? o.client_id ?? null,
     stage:      stageObj?.label ?? (typeof o.stage === 'string' ? o.stage : null) ?? o.stage_label ?? o.status ?? '',
     stageValue: stageObj?.value ?? o.stage_value ?? null,
+    // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
     stageColor: stageObj?.color ?? o.stage_color ?? '#6E8FD6',
     value:      num(rawValue),
     currency:   o.currency ?? 'EUR',
@@ -51,10 +52,12 @@ export function mapOpportunity(o: ApiOpportunity): Opportunity {
     endDate:          o.end_date ?? null,
     serviceType:      svc?.label ?? (typeof o.service_type === 'string' ? o.service_type : '') ?? '',
     serviceTypeValue: svc?.value ?? null,
+    // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
     serviceTypeColor: svc?.color ?? '#9CA3AF',
     serviceTypeId:    svc?.id ?? o.service_type_id ?? null,
     agreementType:      agr?.label ?? (typeof o.agreement_type === 'string' ? o.agreement_type : '') ?? '',
     agreementTypeValue: agr?.value ?? null,
+    // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
     agreementTypeColor: agr?.color ?? '#9CA3AF',
     agreementTypeId:    agr?.id ?? o.agreement_type_id ?? null,
     location:      loc?.name ?? o.location_name ?? '',

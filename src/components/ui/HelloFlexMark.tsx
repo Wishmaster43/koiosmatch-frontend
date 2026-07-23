@@ -11,11 +11,13 @@ import type { SVGProps } from 'react'
  * Note: simplified brand mark (the full wordmark is illegible at icon sizes) —
  * swap the SVG body for the official vector when available.
  */
+// eslint-disable-next-line no-restricted-syntax -- DATA: HelloFlex brand-mark colour, must match their logo exactly, not a themeable UI colour
 const HF_TEAL = '#3E7C8C'
 
 // Props mirror the lucide icon contract so the mark is interchangeable with one.
 type HelloFlexMarkProps = { size?: number; color?: string; cut?: string; title?: string } & SVGProps<SVGSVGElement>
 
+// eslint-disable-next-line no-restricted-syntax -- DATA: fixed white monogram, must read against the solid brand-colour fill in any theme, not a themeable UI colour
 export default function HelloFlexMark({ size = 24, color = HF_TEAL, cut = '#FFFFFF', title = 'HelloFlex', ...rest }: HelloFlexMarkProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 96 96" fill="none"

@@ -176,11 +176,13 @@ export default function SettingsPage() {
           {/* Search trigger */}
           <button onClick={() => setSearchOpen(true)} style={{
             display: 'flex', alignItems: 'center', gap: 8, width: '100%', height: 34, padding: '0 10px',
+            // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this hairline border; kept literal to avoid changing the rendered tone
             marginBottom: 16, border: '1px solid #EEF0F3', borderRadius: 9, background: 'var(--hover-bg)',
             cursor: 'pointer', color: 'var(--text-muted)',
           }}>
             <Search size={14} />
             <span style={{ fontSize: 13 }}>{t('shell.search')}</span>
+            {/* eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this shortcut-hint grey; kept literal to avoid changing the rendered tone */}
             <kbd style={{ marginLeft: 'auto', fontSize: 11, fontFamily: 'inherit', color: '#C4C4CF' }}>⌘K</kbd>
           </button>
 

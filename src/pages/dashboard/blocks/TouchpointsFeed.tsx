@@ -13,6 +13,7 @@ import type { Touchpoint } from '@/types/dashboard'
 
 // Backend type slug → icon + i18n key.
 const META: Record<string, { Icon: LucideIcon; key: string; color: string }> = {
+  // eslint-disable-next-line no-restricted-syntax -- DATA: per-type colour map (fixed backend touchpoint enum), no token covers this exact accent
   birthday:      { Icon: Cake,         key: 'birthday',      color: '#EC4899' },
   first_workday: { Icon: CalendarPlus, key: 'firstWorkday',  color: 'var(--color-success)' },
   back_available:{ Icon: RotateCcw,    key: 'backAvailable', color: 'var(--color-primary)' },

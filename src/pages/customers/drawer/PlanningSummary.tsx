@@ -33,7 +33,7 @@ export default function PlanningSummary({ customerId, params }: { customerId: Id
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {/* "Currently at work" tile */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px', background: 'var(--surface)' }}>
-        <div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--color-success-bg, #ECFDF5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--color-success-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Users size={16} color="var(--color-success)" />
         </div>
         <div>

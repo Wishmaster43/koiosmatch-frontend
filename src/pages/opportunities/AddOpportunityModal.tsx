@@ -288,8 +288,8 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
           </button>
           <button onClick={handleSubmit} disabled={!canSubmit || saving}
             style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-              background: (canSubmit && !saving) ? 'var(--color-primary)' : '#E5E7EB',
-              color: (canSubmit && !saving) ? 'white' : '#9CA3AF',
+              background: (canSubmit && !saving) ? 'var(--color-primary)' : 'var(--border)',
+              color: (canSubmit && !saving) ? 'white' : 'var(--text-muted)',
               cursor: (canSubmit && !saving) ? 'pointer' : 'not-allowed' }}>
             {isEdit
               ? (saving ? t('modal.saving') : t('modal.save'))

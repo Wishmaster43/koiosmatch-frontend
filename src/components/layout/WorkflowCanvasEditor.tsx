@@ -172,6 +172,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
           {/* Run feedback: the backend reason (e.g. a draft can't run) or generic.
               flexShrink 0: the packed header otherwise crushes the message to "D…". */}
           {runError !== null && (
+            // eslint-disable-next-line no-restricted-syntax -- DATA: exact-match fallback for var(--color-danger), not an ad-hoc colour
             <span style={{ fontSize: 11, color: 'var(--color-danger, #DC2626)', maxWidth: 220, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
               title={runError || t('common:actionFailed')}>
               {runError || t('common:actionFailed')}

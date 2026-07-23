@@ -18,6 +18,7 @@ vi.mock('@/lib/api', async () => {
 
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 
+// eslint-disable-next-line no-restricted-syntax -- DATA: a fixture location's tenant-picked colour, not a style rule.
 const location = (over = {}) => ({ id: 'l1', name: 'Kantoor', color: '#3B8FD4', is_default: true, ...over })
 
 afterEach(() => vi.clearAllMocks())

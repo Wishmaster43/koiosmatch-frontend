@@ -252,7 +252,10 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const [view, setView] = usePageMemory<'table' | 'board'>('matches.view', 'table')
   // Scroll container for row virtualization — DataTable virtualizes against it.
   const tableScrollRef = useRef<HTMLDivElement>(null)
+  // Fallback column swatch colour, consumed via hex+alpha string concatenation in
+  // MatchesBoard (column.color + '20') — cannot become a CSS var without restructuring that.
   const stageColumns: BoardColumn[] = useMemo(
+    // eslint-disable-next-line no-restricted-syntax -- fallback swatch hex, consumed as hex+alpha string concat in MatchesBoard
     () => matchStatuses.map(st => ({ key: st.value, label: st.label, color: st.color ?? '#6B7280' })), [matchStatuses])
 
   // Drag a card to another column → change the match's STATUS (optimistic + persist;

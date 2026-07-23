@@ -33,6 +33,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   // no handles, so ReactFlow drops every touching edge (the error#008 spam) and
   // the step becomes invisible/uneditable.
   const meta = (data.type ? MODULE_META[data.type] : undefined)
+    // eslint-disable-next-line no-restricted-syntax -- DATA: mirrors the module registry's colour/bg swatch shape (src/modules/*.ts), a fixed neutral for an unrecognised module type, not a themeable UI colour
     ?? { label: data.type ?? 'Onbekend', Icon: HelpCircle, color: '#64748B', bg: '#F1F5F9', category: 'Onbekend' }
   // The registry types Icon narrowly (size only); lucide icons also take `color`.
   const Icon = meta.Icon as unknown as LucideIcon
@@ -207,7 +208,7 @@ function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data }:
   // `{conditions,logic}` object and the newer nested OR-group array.
   const filterCount = countEdgeFilterConditions(data?.filters)
   const hasFilters = filterCount > 0
-  const stroke = hasFilters ? '#7C3AED' : (selected ? 'var(--color-primary)' : 'var(--border)')
+  const stroke = hasFilters ? 'var(--color-violet)' : (selected ? 'var(--color-primary)' : 'var(--border)')
   return (
     <>
       <BaseEdge id={id} path={path} style={{ stroke, strokeWidth: hasFilters ? 2.5 : 2, strokeDasharray: hasFilters ? '6 3' : undefined }} />
@@ -225,7 +226,7 @@ function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data }:
             </div>
           )}
           {hasFilters && (
-            <div style={{ fontSize: 9, background: '#7C3AED', color: 'white', borderRadius: 999, padding: '1px 6px', fontWeight: 700 }}>
+            <div style={{ fontSize: 9, background: 'var(--color-violet)', color: 'white', borderRadius: 999, padding: '1px 6px', fontWeight: 700 }}>
               {t('canvas.filterCount', { count: filterCount })}
             </div>
           )}
@@ -236,9 +237,9 @@ function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data }:
             <Plus size={11} />
           </button>
           <button onClick={() => onFilter && onFilter(id)} title={t('canvas.filterTitle')} aria-label={t('canvas.filterTitle')}
-            style={{ width: 22, height: 22, borderRadius: '50%', background: hasFilters ? '#F3E8FF' : 'var(--surface)', border: `1.5px solid ${hasFilters ? '#7C3AED' : 'var(--border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: hasFilters ? '#7C3AED' : 'var(--text-muted)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#7C3AED'; e.currentTarget.style.color = '#7C3AED' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = hasFilters ? '#7C3AED' : 'var(--border)'; e.currentTarget.style.color = hasFilters ? '#7C3AED' : 'var(--text-muted)' }}>
+            style={{ width: 22, height: 22, borderRadius: '50%', background: hasFilters ? 'var(--color-violet-bg)' : 'var(--surface)', border: `1.5px solid ${hasFilters ? 'var(--color-violet)' : 'var(--border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: hasFilters ? 'var(--color-violet)' : 'var(--text-muted)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-violet)'; e.currentTarget.style.color = 'var(--color-violet)' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = hasFilters ? 'var(--color-violet)' : 'var(--border)'; e.currentTarget.style.color = hasFilters ? 'var(--color-violet)' : 'var(--text-muted)' }}>
             <Filter size={11} />
           </button>
           <button onClick={() => onDelete && onDelete(id)} title={t('canvas.deleteEdge')} aria-label={t('canvas.deleteEdge')}

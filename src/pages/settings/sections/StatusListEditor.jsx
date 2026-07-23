@@ -29,6 +29,7 @@ import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/
 // Omitted (default), a 404 stays silently swallowed like every other lookup here.
 export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null, flagField = null, numberField = null, defaultField = null, withIcon = false, allowAdd = true, showRank = false, entity = null, notFoundNotice = null }) {
   const { t } = useTranslation('settings')
+  // eslint-disable-next-line no-restricted-syntax -- DATA: default swatch colour pre-filled for a newly created lookup row, not UI chrome
   const emptyDraft = () => ({ name: '', color: '#3B8FD4', ...(withIcon ? { icon: '' } : {}), ...(extraField ? { [extraField.key]: extraField.default } : {}), ...(numberField ? { [numberField.key]: numberField.default } : {}), ...(flagField ? { [flagField.key]: false } : {}) })
   // Lookups differ in their display field: name (phases/status) vs label/value (genders/languages).
   const labelOf = (i) => i.name ?? i.label ?? i.value ?? ''
@@ -76,6 +77,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
   const openCreate = () => { setEditing(null); setDraft(emptyDraft()); setShowModal(true) }
   const openEdit = (item) => {
     setEditing(item)
+    // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
     setDraft({ name: labelOf(item), color: item.color ?? '#3B8FD4',
       ...(withIcon ? { icon: item.icon ?? '' } : {}),
       ...(extraField ? { [extraField.key]: item[extraField.key] ?? extraField.default } : {}),
@@ -248,9 +250,11 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                            color: 'var(--text)', background: 'var(--surface)', border: '1px solid var(--border)',
                            borderRadius: 6, flexShrink: 0, outline: 'none' }} />
               )}
+              {/* eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome */}
               {withColor && <ColorSwatch color={item.color ?? '#6B7280'} onChange={c => updateColor(item, c)} />}
               {withIcon && item.icon && <span style={{ display: 'inline-flex', flexShrink: 0, color: 'var(--text-muted)' }}><LookupIcon icon={item.icon} size={14} /></span>}
               {withColor
+                // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
                 ? <ColorBadge label={labelOf(item)} color={item.color ?? '#6B7280'} />
                 : <span style={{ fontSize: 13, color: 'var(--text)' }}>{labelOf(item)}</span>}
               {flagField && item[flagField.key] && (

@@ -21,6 +21,7 @@ interface WorkflowCardProps { workflow: Workflow; onRun: (id?: string | number) 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> = {
   active:   { bg: 'var(--color-success-bg)', color: 'var(--color-success)', dot: 'var(--color-success)' },
   draft:    { bg: 'var(--hover-bg)', color: 'var(--text-muted)', dot: 'var(--text-muted)' },
+  // eslint-disable-next-line no-restricted-syntax -- DATA: per-status colour map (inactive badge shade), no exact token matches this specific orange
   inactive: { bg: 'var(--color-warning-bg)', color: '#C2410C', dot: '#F97316' },
 }
 

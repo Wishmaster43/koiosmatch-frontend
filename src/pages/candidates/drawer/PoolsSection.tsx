@@ -54,6 +54,10 @@ export default function PoolsSection({ c }: { c: Candidate }) {
                   .map((p, i) => {
                     const id = p.id ?? p.name
                     const selected = has(id)
+                    // Fallback swatch colour, consumed below via hex+alpha string
+                    // concatenation (soft-chip convention) — cannot become a CSS
+                    // var without restructuring that string-based alpha suffix.
+                    // eslint-disable-next-line no-restricted-syntax -- fallback swatch hex, consumed as hex+alpha string concat below
                     const color = p.color || '#6B7280'
                     return (
                       <button key={p.id ?? p.name ?? i} onClick={() => toggle(p)}
@@ -82,6 +86,10 @@ export default function PoolsSection({ c }: { c: Candidate }) {
           : (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {pools.map((p, i) => {
+                // Fallback swatch colour, consumed below via hex+alpha string
+                // concatenation (soft-chip convention) — cannot become a CSS
+                // var without restructuring that string-based alpha suffix.
+                // eslint-disable-next-line no-restricted-syntax -- fallback swatch hex, consumed as hex+alpha string concat below
                 const color = p.color || '#6B7280'
                 const ai = p.source === 'koios'
                 return (

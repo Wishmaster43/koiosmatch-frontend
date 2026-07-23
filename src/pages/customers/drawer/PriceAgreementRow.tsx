@@ -50,6 +50,7 @@ export default function PriceAgreementRow({ agreement, onSave, onDelete }: {
   const save = () => { onSave(agreement.id, draftToPayload(draft)); setEditing(false) }
   const remove = () => confirm(t('priceAgreements.confirmDelete'), () => onDelete(agreement.id), { danger: true })
 
+  // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
   const caoColor = agreement.cao ? (colorOf(agreement.cao) ?? '#6B7280') : undefined
   const margin = (agreement.purchaseRate != null && agreement.saleRate != null) ? agreement.saleRate - agreement.purchaseRate : null
 

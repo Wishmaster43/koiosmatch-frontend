@@ -20,6 +20,7 @@ vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() })
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 
+// eslint-disable-next-line no-restricted-syntax -- DATA: a fixture type's tenant-picked colour, not a style rule.
 const type = (over = {}) => ({ id: 't1', name: 'Intake', color: '#3B8FD4', is_default: false, ...over })
 
 afterEach(() => { vi.clearAllMocks(); vi.unstubAllGlobals() })

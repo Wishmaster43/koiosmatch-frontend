@@ -64,10 +64,12 @@ export default function DetailsTab({ opportunity: o, onUpdate }: DetailsTabProps
       serviceTypeId:      svc?.id ?? null,
       serviceTypeValue:   (v.serviceType as string) || null,
       serviceType:        svc?.label ?? '',
+      // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
       serviceTypeColor:   svc?.color ?? '#9CA3AF',
       agreementTypeId:    agr?.id ?? null,
       agreementTypeValue: (v.agreementType as string) || null,
       agreementType:      agr?.label ?? '',
+      // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
       agreementTypeColor: agr?.color ?? '#9CA3AF',
     })
   }

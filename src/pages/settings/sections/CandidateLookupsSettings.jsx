@@ -40,7 +40,9 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
   const isStatusBlock = slug === 'statuses'
   const isFunnelBlock = slug === 'funnel-types'
 
+  // eslint-disable-next-line no-restricted-syntax -- DATA: default swatch colour pre-filled for a newly created lookup row, not UI chrome
   const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', requires_appointment: false, requires_reason: false, requires_match: false, expects_return_date: false, is_match: false, is_rejected: false })
+  // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
   const openEdit = (it) => setModal({ mode: 'edit', id: it.id, value: it.value, label: it.label, color: it.color ?? '#6B7280',
     requires_appointment: it.requires_appointment === true, requires_reason: it.requires_reason === true,
     requires_match: it.requires_match === true, expects_return_date: it.expects_return_date === true,
@@ -139,20 +141,22 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
         onReorder={reorder}
         renderItem={(item) => (
           <>
+            {/* eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome */}
             <ColorSwatch color={item.color ?? '#6B7280'} onChange={c => updateColor(item, c)} />
+            {/* eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome */}
             <ColorBadge label={item.label} color={item.color ?? '#6B7280'} />
             <code style={{ fontSize: 11, color: 'var(--text-muted)' }}>{item.value}</code>
             {/* Reason badge: marks a status that requires a reason when set (e.g. Inactive). */}
             {isStatusBlock && item.requires_reason && (
               <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-warning)',
-                             background: 'var(--color-warning-bg, #FEF3C7)', padding: '2px 7px', borderRadius: 999 }}>
+                             background: 'var(--color-warning-bg)', padding: '2px 7px', borderRadius: 999 }}>
                 {t('lookups.reasonBadge')}
               </span>
             )}
             {/* Appointment badge: marks the funnel stage that requires a planned intake. */}
             {isFunnelBlock && item.requires_appointment && (
               <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary)',
-                             background: 'var(--color-primary-bg, #EEF2FF)', padding: '2px 7px', borderRadius: 999 }}>
+                             background: 'var(--color-primary-bg)', padding: '2px 7px', borderRadius: 999 }}>
                 {t('lookups.appointmentBadge')}
               </span>
             )}

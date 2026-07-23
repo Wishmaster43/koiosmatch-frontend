@@ -30,6 +30,7 @@ function BundleBlock({ label, value }: { label: string; value: unknown }) {
       </div>
       {text == null
         ? <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('runs.drawer.noData')}</div>
+        // eslint-disable-next-line no-restricted-syntax -- DATA: intentional fixed dark terminal-style output block (matches the config-panel execution output styling per the file comment above), not a themeable UI colour
         : <pre style={{ fontSize: 11, lineHeight: 1.6, color: '#E2E8F0', background: '#1E293B', borderRadius: 8,
                         padding: 10, overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
             {text}

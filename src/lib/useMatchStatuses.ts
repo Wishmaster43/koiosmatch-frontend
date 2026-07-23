@@ -15,10 +15,12 @@ import { unwrapList } from '@/lib/api'
 
 export interface MatchStatus { value: string; label: string; color?: string; is_closed: boolean }
 
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 export const DEFAULT_MATCH_STATUSES: MatchStatus[] = [
   { value: 'open',   label: 'Open',       color: '#6FA8C4', is_closed: false },
   { value: 'closed', label: 'Afgesloten', color: '#79B58E', is_closed: true },
 ]
+/* eslint-enable no-restricted-syntax */
 
 // Normalise an API row to the UI shape (value/label tolerant, flag coerced).
 const toStatus = (r: Record<string, unknown>): MatchStatus => ({

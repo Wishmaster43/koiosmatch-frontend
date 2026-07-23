@@ -13,7 +13,7 @@ const iStyle: CSSProperties = {
   color: 'var(--text)', boxSizing: 'border-box', outline: 'none',
 }
 const selectStyle: CSSProperties = { ...iStyle, appearance: 'none', paddingRight: 30, cursor: 'pointer' }
-const chevron: CSSProperties = { position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', pointerEvents: 'none' }
+const chevron: CSSProperties = { position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }
 
 function Label({ children, required }: { children: ReactNode; required?: boolean }) {
   return (

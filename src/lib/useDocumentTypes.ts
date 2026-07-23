@@ -17,6 +17,7 @@ import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
 
 // Seed defaults (labels NL, colours = the previous DOC_COLORS map) — API overrides per tenant.
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 export const DEFAULT_DOCUMENT_TYPES: LookupOption[] = [
   { value: 'CV',          label: 'CV',          color: 'var(--color-secondary)' },
   { value: 'ID-bewijs',   label: 'ID-bewijs',   color: '#8B5CF6' },
@@ -26,7 +27,9 @@ export const DEFAULT_DOCUMENT_TYPES: LookupOption[] = [
   { value: 'Certificaat', label: 'Certificaat', color: '#EC4899' },
   { value: 'Overig',      label: 'Overig',      color: '#6B7280' },
 ]
+/* eslint-enable no-restricted-syntax */
 
+// eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
 const FALLBACK_COLOR = '#6B7280'
 const norm = (s?: unknown) => (s ?? '').toString().trim().toLowerCase()
 

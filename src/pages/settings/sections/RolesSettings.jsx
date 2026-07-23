@@ -123,6 +123,7 @@ function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }) {
   const [draftName, setDraftName]   = useState(role.name)
   const [saving,    setSaving]      = useState(false)
 
+  // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a role without one stored yet, not UI chrome
   const color    = localRole.color || '#6B7280'
   const iconName = localRole.icon || 'shield'
 
@@ -327,6 +328,7 @@ export default function RolesSettings() {
           const permCount = role.permissions?.length ?? 0
           const userCount = role.users_count ?? 0
           const canDelete = userCount === 0
+          // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a role without one stored yet, not UI chrome
           const color = role.color || '#6B7280'
           return (
             <div key={role.id}

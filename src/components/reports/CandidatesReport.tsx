@@ -24,8 +24,11 @@ import DrillDownDrawer     from './DrillDownDrawer'
 import { useRightPanel }   from '@/context/RightPanelContext'
 
 // Chart color configuration
+/* eslint-disable no-restricted-syntax -- fixed chart colour series, not UI styling: needs more distinct hues than the semantic token set provides */
 const LOGIN_COLORS = ['#0064d2','#3b82f6','#93c5fd','#FDE68A','#FCA5A5','var(--color-danger)','#F97316','#D1D5DB']
+/* eslint-enable no-restricted-syntax */
 const MONTH_COLOR  = 'var(--color-primary)'
+// eslint-disable-next-line no-restricted-syntax -- DATA: distinct chart accent so the cities chart reads apart from the per-month/week charts on the same page (both otherwise use --color-primary)
 const SAP_BLUE     = '#0064d2' // Used as the primary house color
 const END_COLOR    = 'var(--color-danger)'
 
@@ -279,6 +282,7 @@ export default function CandidatesReport() {
           <div className="min-w-0 p-6 bg-[var(--surface)] border border-[var(--border)] shadow-sm rounded-xl">
             <BarChartCard
               title={`${t('report.charts.endPerMonth')}${selectedYear ? ` (${selectedYear})` : ''}`}
+              // eslint-disable-next-line no-restricted-syntax -- DATA: lighter tint than END_COLOR (--color-danger) so this monthly bar visually differs from the weekly line below it
               data={endMonthData} colors={['#FCA5A5']} height={260}
               onBarClick={handleEndMonthDrillDown} showAverage
             />

@@ -7,8 +7,10 @@
  * Note: hand-traced approximation — swap the two <rect> links for the official
  * vector when available.
  */
+/* eslint-disable no-restricted-syntax -- DATA: Intus brand-mark colours, must match their logo exactly, not a themeable UI colour */
 const INTUS_NAVY   = '#0E3A53'
 const INTUS_ORANGE = '#F18A00'
+/* eslint-enable no-restricted-syntax */
 
 // Props mirror the lucide icon contract (color is intentionally omitted: two-tone).
 interface IntusMarkProps {

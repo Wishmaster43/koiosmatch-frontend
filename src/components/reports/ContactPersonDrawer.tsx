@@ -63,6 +63,7 @@ export default function ContactPersonDrawer({ contact, onClose }: { contact: Rep
                     borderRadius: 999, padding: '2px 8px', fontSize: 11, fontWeight: 500,
                     background: isPlanning ? 'var(--color-success-bg)' : 'var(--hover-bg)',
                     color:      isPlanning ? 'var(--color-success)'  : 'var(--text-muted)',
+                    // eslint-disable-next-line no-restricted-syntax -- DATA: success-border companion colour, mirrors the same literal used app-wide (e.g. ApiKeyDetail, WebhookCreate) — kept consistent rather than diverging here
                     border:     `1px solid ${isPlanning ? '#BBF7D0' : 'var(--border)'}`,
                   }}>
                     <MessageCircle size={10} />
@@ -84,7 +85,7 @@ export default function ContactPersonDrawer({ contact, onClose }: { contact: Rep
 
         {/* Customer banner */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px',
-                      background: '#F8F9FF', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+                      background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <Building2 size={13} color="var(--text-muted)" />
           <span style={{ fontSize: 12, color: 'var(--text)', fontWeight: 500 }}>
             {contact.customer_name ?? '—'}

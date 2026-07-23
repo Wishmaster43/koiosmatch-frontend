@@ -42,6 +42,8 @@ export function mapMatch(m: RawMatch): MatchRow {
     // stage axis once the R-1b resource replaced stage with status (broken board).
     stage:      m.stage_label ?? m.stage ?? '',
     status:     m.status ?? '',
+    // Seed fallback when the tenant's match-status lookup carries no colour of its own.
+    // eslint-disable-next-line no-restricted-syntax -- seed DATA fallback, not UI styling; no semantic token matches this hue
     stageColor: m.stage_color ?? '#6E8FD6',
     owner:      m.owner?.name ?? m.owner_name ?? '',
     // Owner avatar (§3A) — the resource already carries avatar_color; only the

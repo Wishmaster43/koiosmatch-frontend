@@ -14,6 +14,7 @@ import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 
 // Neutral grey fallback (§3A owner-cell convention) when the mapper has no colour.
+// eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar.tsx's identical constant)
 const NEUTRAL_AVATAR = '#9CA3AF'
 
 interface MatchesTableProps {

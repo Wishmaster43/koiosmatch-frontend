@@ -142,6 +142,7 @@ export default function OpportunityDrawer({
         <EntityHeader
           label={t('drawer.entityLabel')}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
+          // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors the shared Avatar.tsx NEUTRAL_AVATAR constant)
           avatar={{ initials: o.initials, soft: true, color: '#9CA3AF' }}
           renderTitle={renderTitle}
           titleActions={<>

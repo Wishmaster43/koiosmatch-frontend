@@ -35,24 +35,30 @@ interface TaskLookupsValue {
 
 // ── Seed defaults (English slugs, tenant-editable labels/colours) ─────────────
 
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 const DEFAULT_TASK_STATUSES: TaskLookupItem[] = [
   { value: 'todo',        label: 'TeDoen',         color: '#D98A8A', is_done: false },
   { value: 'in_progress', label: 'In behandeling', color: '#DDA071', is_done: false },
   { value: 'done',        label: 'Afgerond',       color: '#79B58E', is_done: true },
 ]
+/* eslint-enable no-restricted-syntax */
 
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 const DEFAULT_TASK_TYPES: TaskLookupItem[] = [
   { value: 'task',  label: 'Taak',       color: '#6E8FD6' },
   { value: 'call',  label: 'Belafspraak', color: '#5FB0AC' },
   { value: 'email', label: 'E-mail',     color: '#A98AD1' },
   { value: 'note',  label: 'Notitie',    color: '#DDA071' },
 ]
+/* eslint-enable no-restricted-syntax */
 
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 const DEFAULT_TASK_PRIORITIES: TaskLookupItem[] = [
   { value: 'low',    label: 'Laag',    color: '#79B58E', is_default: false },
   { value: 'normal', label: 'Normaal', color: '#DDA071', is_default: true },
   { value: 'high',   label: 'Hoog',    color: '#D98A8A', is_default: false },
 ]
+/* eslint-enable no-restricted-syntax */
 
 // Tolerant truthy check — the backend may send a real bool, 1/0 or "true"/"false".
 const truthy = (v: unknown) => v === true || v === 1 || v === '1' || v === 'true'
@@ -65,6 +71,7 @@ function normalize(raw: unknown, fallback: TaskLookupItem[]): TaskLookupItem[] {
     .map(it => ({
       value: String(it.value ?? it.key ?? it.id),
       label: String(it.label ?? it.name ?? it.value ?? it.key),
+      // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
       color: (it.color as string) ?? '#6B7280',
       is_done: truthy(it.is_done),
       is_default: truthy(it.is_default),
@@ -97,6 +104,7 @@ export function TaskLookupsProvider({ children }: { children: ReactNode }) {
 
   const value: TaskLookupsValue = {
     statuses, types, priorities, loading,
+    // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
     statusMeta:   makeMetaResolver(statuses, '#9CA3AF', { is_done: false }),
     typeMeta:     makeMetaResolver(types),
     priorityMeta: makeMetaResolver(priorities),

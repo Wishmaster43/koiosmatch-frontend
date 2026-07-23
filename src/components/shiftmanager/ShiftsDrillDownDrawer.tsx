@@ -22,6 +22,7 @@ const EMPTY_META: LocationMeta = new Map()
 const STATUS_META: Record<string, { bg: string; color: string }> = {
   in_process:         { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)' },
   completed:          { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
+  // eslint-disable-next-line no-restricted-syntax -- DATA: fixed status→colour mapping, mirrors the lookup-colour pattern used elsewhere; no exact token equivalent for this shade
   open:               { bg: 'var(--color-warning-bg)', color: '#C2410C' },
   verwijderd:         { bg: 'var(--color-danger-bg)', color: 'var(--color-danger)' },
   niet_factureerbaar: { bg: 'var(--hover-bg)', color: 'var(--text-muted)' },

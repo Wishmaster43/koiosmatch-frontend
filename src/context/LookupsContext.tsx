@@ -60,6 +60,7 @@ interface LookupsValue {
 
 // Slugs are English/stable (they match the backend); labels/colours are
 // per-tenant configurable and normally come from GET /settings/candidate-lookups.
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 export const DEFAULT_CANDIDATE_TYPES: LookupItem[] = [
   { value: 'on_call',     label: 'Oproepkracht',  color: '#6E8FD6' },
   { value: 'freelance',   label: 'ZZP',           color: '#5FB0AC' },
@@ -68,19 +69,23 @@ export const DEFAULT_CANDIDATE_TYPES: LookupItem[] = [
   { value: 'secondment',  label: 'Detachering',   color: '#6FA8C4' },
   { value: 'on_demand',   label: 'Demand',        color: '#C98BBA' },
 ]
+/* eslint-enable no-restricted-syntax */
 
 // Phase = relationship lifecycle (single value), seed Lead → Candidate. NEW axis
 // (model v2, split out of the old "status"). Lead → Candidate via automation.
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 export const DEFAULT_PHASES: LookupItem[] = [
   { value: 'lead',      label: 'Lead',      color: '#94A3B8', is_default: true },
   { value: 'candidate', label: 'Kandidaat', color: '#79B58E' },
 ]
+/* eslint-enable no-restricted-syntax */
 
 // Application pipeline (per application). `invited` is the intake stage that
 // carries `requires_appointment` once configured (see §3B / C-22). `hired` carries
 // is_match (drives the "matched" bucket + side-effects) and `rejected` carries
 // is_rejected (drives the "rejected" bucket) — never matched/detected by the literal
 // key elsewhere (A1); a tenant may rename either slug and the flag still resolves.
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 export const DEFAULT_FUNNEL_TYPES: LookupItem[] = [
   { value: 'applied',  label: 'Gesolliciteerd',     color: '#94A3B8' },
   { value: 'invited',  label: 'Uitgenodigd/Intake', color: '#8C86D9', requires_appointment: true },
@@ -88,11 +93,13 @@ export const DEFAULT_FUNNEL_TYPES: LookupItem[] = [
   { value: 'hired',    label: 'Aangenomen',         color: '#79B58E', is_match: true },
   { value: 'rejected', label: 'Afgewezen',          color: '#D98A8A', is_rejected: true },
 ]
+/* eslint-enable no-restricted-syntax */
 
 // Deployability / "status" (single value), model v2 (decision 2026-06-29): "can I
 // deploy them now?". Absorbs the old availability axis. `placed` requires a linked
 // Match; `blacklist` is a status value (not a separate flag) that asks for a reason.
 // Lead/Candidate moved to PHASES.
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 export const DEFAULT_STATUSES: LookupItem[] = [
   { value: 'available',   label: 'Beschikbaar',      color: '#79B58E' },
   { value: 'placed',      label: 'Geplaatst',        color: '#6E8FD6', requires_match: true },
@@ -104,15 +111,18 @@ export const DEFAULT_STATUSES: LookupItem[] = [
   { value: 'leave',       label: 'Verlof',           color: '#6FA8C4', requires_reason: true, expects_return_date: true },
   { value: 'blacklist',   label: 'Blacklist',        color: '#D14B4B', requires_reason: true, is_blacklist: true },
 ]
+/* eslint-enable no-restricted-syntax */
 
 // Availability is a SEPARATE axis from the lifecycle status (a candidate can be
 // "Sollicitant" and "Ziek" at once). Backed by /availability-options.
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 const DEFAULT_AVAILABILITY: LookupItem[] = [
   { value: 'available',   label: 'Beschikbaar',      color: '#79B58E' },
   { value: 'unavailable', label: 'Niet beschikbaar', color: '#8A94A6' },
   { value: 'sick',        label: 'Ziek',             color: '#D98A8A' },
   { value: 'leave',       label: 'Verlof',           color: '#6FA8C4' },
 ]
+/* eslint-enable no-restricted-syntax */
 
 // Normalise a raw API list: keep active items, sort by order, fall back to seed.
 // ALL flag fields are carried through (§3B — flag-driven): is_applicant + funnel's
@@ -130,6 +140,7 @@ function normalize(raw: unknown, fallback: LookupItem[]): LookupItem[] {
     return seed?.[key] === true
   }
   return sortActiveRows(raw)
+    // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
     .map(it => ({ value: String(it.value), label: String(it.label ?? it.value), color: (it.color as string) ?? '#6B7280',
       requires_reason: flag(it, 'requires_reason'),
       requires_match: flag(it, 'requires_match'),
@@ -175,10 +186,15 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
   }, [user?.id])
 
   // value → item helpers (with a neutral fallback so the UI never crashes).
+  // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
   const typeMeta   = makeMetaResolver(candidateTypes, '#6B7280')
+  // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
   const phaseMeta  = makeMetaResolver(phases, '#9CA3AF')
+  // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
   const funnelMeta = makeMetaResolver(funnelTypes, '#6B7280')
+  // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
   const statusMeta = makeMetaResolver(statuses, '#9CA3AF')
+  // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
   const availabilityMeta = makeMetaResolver(availability, '#9CA3AF')
 
   const value: LookupsValue = {

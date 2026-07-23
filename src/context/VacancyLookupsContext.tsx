@@ -36,6 +36,7 @@ interface VacancyLookupsValue {
 
 // ── Seed defaults (English slugs, tenant-editable labels/colours) ─────────────
 
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 const DEFAULT_VACANCY_STATUSES: VacancyLookupItem[] = [
   { value: 'open',    label: 'Open',       color: '#79B58E' },
   { value: 'online',  label: 'Online',     color: '#6E8FD6' },
@@ -43,8 +44,10 @@ const DEFAULT_VACANCY_STATUSES: VacancyLookupItem[] = [
   { value: 'paused',  label: 'Gepauzeerd', color: '#C9AC64' },
   { value: 'closed',  label: 'Gesloten',   color: '#8A94A6' },
 ]
+/* eslint-enable no-restricted-syntax */
 
 // Application funnel phases — the KPI cards + the breakdown on a vacancy.
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 const DEFAULT_VACANCY_PHASES: VacancyLookupItem[] = [
   { value: 'applied',  label: 'Gesolliciteerd', color: '#94A3B8' },
   { value: 'accepted', label: 'Geaccepteerd',   color: '#8C86D9' },
@@ -53,20 +56,25 @@ const DEFAULT_VACANCY_PHASES: VacancyLookupItem[] = [
   { value: 'hired',    label: 'Aangenomen',     color: '#79B58E' },
   { value: 'rejected', label: 'Afgewezen',      color: '#D98A8A' },
 ]
+/* eslint-enable no-restricted-syntax */
 
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 const DEFAULT_SENIORITY_LEVELS: VacancyLookupItem[] = [
   { value: 'starter',      label: 'Starter',      color: '#94A3B8' },
   { value: 'medior',       label: 'Medior',       color: '#6FA8C4' },
   { value: 'professional', label: 'Professional', color: '#79B58E' },
   { value: 'senior',       label: 'Senior',       color: '#A98AD1' },
 ]
+/* eslint-enable no-restricted-syntax */
 
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 const DEFAULT_EDUCATION_LEVELS: VacancyLookupItem[] = [
   { value: 'vmbo', label: 'VMBO', color: '#94A3B8' },
   { value: 'mbo',  label: 'MBO',  color: '#6FA8C4' },
   { value: 'hbo',  label: 'HBO',  color: '#79B58E' },
   { value: 'wo',   label: 'WO',   color: '#A98AD1' },
 ]
+/* eslint-enable no-restricted-syntax */
 
 // Job boards. `value` is the stable slug; `published` state lives per vacancy.
 const DEFAULT_CHANNELS: VacancyLookupItem[] = [
@@ -87,6 +95,7 @@ function normalize(raw: unknown, fallback: VacancyLookupItem[], pinId = false): 
     .map(it => ({
       value: String((pinId ? it.id : undefined) ?? it.value ?? it.key ?? it.id),
       label: String(it.label ?? it.name ?? it.value ?? it.key),
+      // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
       color: (it.color as string) ?? '#6B7280',
     }))
 }

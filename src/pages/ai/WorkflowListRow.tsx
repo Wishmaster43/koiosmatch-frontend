@@ -59,6 +59,7 @@ function StepIconStack({ steps }: { steps: WorkflowStep[] }) {
         const meta = step.type ? MODULE_META[step.type] : undefined
         const Icon = (meta?.Icon ?? HelpCircle) as unknown as LucideIcon
         const label = t(`modules.${step.type}`, { defaultValue: meta?.label ?? step.type })
+        // eslint-disable-next-line no-restricted-syntax -- DATA: fallback mirrors the module registry's own colour when a step type is missing from it, not UI styling
         return <StepBubble key={step.id ?? i} Icon={Icon} color={meta?.color ?? '#64748B'} bg={meta?.bg ?? 'var(--hover-bg)'} offset={i} title={label} />
       })}
       {extra > 0 && (

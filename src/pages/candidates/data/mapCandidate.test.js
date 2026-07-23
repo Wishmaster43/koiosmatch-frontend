@@ -31,9 +31,11 @@ describe('mapCandidate — candidateTypes (multi-value)', () => {
 
 describe('mapCandidate — funnel flat fields (regression)', () => {
   it('maps funnel_type/label/color → stage/stageLabel/stageColor', () => {
+    // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
     const r = mapCandidate({ funnel_type: 'hired', funnel_label: 'Aangenomen', funnel_color: '#16A34A' })
     expect(r.stage).toBe('hired')
     expect(r.stageLabel).toBe('Aangenomen')
+    // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
     expect(r.stageColor).toBe('#16A34A')
   })
   it('null label/color when not in a procedure', () => {

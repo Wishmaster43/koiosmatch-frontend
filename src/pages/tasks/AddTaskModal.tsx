@@ -338,7 +338,7 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
           </button>
           <button onClick={isEdit ? handleUpdate : handleSubmit} disabled={!canSubmit}
             style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-              background: canSubmit ? 'var(--color-primary)' : '#E5E7EB', color: canSubmit ? '#fff' : '#9CA3AF',
+              background: canSubmit ? 'var(--color-primary)' : 'var(--border)', color: canSubmit ? '#fff' : 'var(--text-muted)',
               cursor: canSubmit ? 'pointer' : 'not-allowed' }}>
             {saving ? t('modal.saving') : isEdit ? t('modal.save') : t('modal.create')}
           </button>

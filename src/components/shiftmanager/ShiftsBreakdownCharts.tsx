@@ -30,10 +30,11 @@ function HBars({ rows, unit, offset, empty }: { rows: BreakdownRow[]; unit: 'hou
   return (
     <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
       <BarChart data={data} layout="vertical" barCategoryGap="22%" margin={{ top: 4, right: 28, left: 8, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-        <XAxis type="number" tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={fmt} />
+        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
+        <XAxis type="number" tick={{ fontSize: 11, fill: 'var(--text-muted)' }} tickFormatter={fmt} />
+        {/* eslint-disable-next-line no-restricted-syntax -- DATA: deliberately darker than --text-muted for legibility of long customer/function labels on horizontal bars; no close token for this specific shade */}
         <YAxis type="category" dataKey="label" width={180} tick={{ fontSize: 11, fill: '#334155' }} />
-        <Tooltip formatter={fmt} contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 13 }} />
+        <Tooltip formatter={fmt} contentStyle={{ borderRadius: 10, border: '1px solid var(--border)', fontSize: 13 }} />
         <Bar dataKey="value" radius={[0, 4, 4, 0]} isAnimationActive={false}>
           {data.map((_, i) => <Cell key={i} fill={BREAKDOWN_PALETTE[(i + offset) % BREAKDOWN_PALETTE.length]} />)}
         </Bar>

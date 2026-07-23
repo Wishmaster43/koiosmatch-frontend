@@ -27,8 +27,10 @@ const TEMPLATE_STATUS_META = {
 
 // Connection status → colour. Label = t('whatsapp.status<Active|Inactive|Expired>').
 const STATUS_CONN = {
+  // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this connection-status border shade; kept literal to avoid changing the rendered tone
   active:   { dotColor: 'var(--color-success)', border: '#86EFAC', bg: 'var(--color-success-bg)', labelColor: 'var(--color-success)' },
   inactive: { dotColor: 'var(--text-muted)',              border: 'var(--border)', bg: 'var(--hover-bg)', labelColor: 'var(--text-muted)' },
+  // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this connection-status border shade; kept literal to avoid changing the rendered tone
   expired:  { dotColor: 'var(--color-danger)',  border: '#FCA5A5', bg: 'var(--color-danger-bg)', labelColor: 'var(--color-danger)' },
 }
 
@@ -137,6 +139,7 @@ export default function WhatsAppSettings() {
         <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, fontSize: 12,
                       background: syncMsg.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
                       color: syncMsg.ok ? 'var(--color-success)' : 'var(--color-danger)',
+                      // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for these result-banner border shades; kept literal to avoid changing the rendered tone
                       border: `1px solid ${syncMsg.ok ? '#86EFAC' : '#FCA5A5'}` }}>
           {syncMsg.text}
         </div>
@@ -147,6 +150,7 @@ export default function WhatsAppSettings() {
       <div>
         {noConn ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 18px',
+                        // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this danger-banner border shade; kept literal to avoid changing the rendered tone
                         background: 'var(--color-danger-bg)', border: '1px solid #FCA5A5', borderRadius: 12 }}>
             <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--color-danger)', flexShrink: 0 }} />
             <div>

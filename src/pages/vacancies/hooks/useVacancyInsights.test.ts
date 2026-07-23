@@ -28,6 +28,7 @@ describe('useVacancyInsights · published donut (V27)', () => {
     const { result } = renderHook(() => useVacancyInsights({ stats, vacancies: [], statuses: [], phases, statusMeta, t }))
     expect(result.current.publishedData).toEqual([
       { name: 'publishedState.yes', key: 'published', color: 'var(--color-success)', value: 7 },
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, asserts the hook's own DATA-annotated fallback colour
       { name: 'publishedState.no', key: 'unpublished', color: '#9CA3AF', value: 3 },
     ])
   })
@@ -45,6 +46,7 @@ describe('useVacancyInsights · published donut (V27)', () => {
     const { result } = renderHook(() => useVacancyInsights({ stats: {}, vacancies, statuses: [], phases, statusMeta, t }))
     expect(result.current.publishedData).toEqual([
       { name: 'publishedState.yes', key: 'published', color: 'var(--color-success)', value: 1 },
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, asserts the hook's own DATA-annotated fallback colour
       { name: 'publishedState.no', key: 'unpublished', color: '#9CA3AF', value: 1 },
     ])
   })
@@ -77,36 +79,43 @@ describe('useVacancyInsights · functie donut (V28)', () => {
 })
 
 // VAC-KPI-REDESIGN 22-07: the 6 funnel-KPI cards collapsed into one funnel donut.
+/* eslint-disable no-restricted-syntax -- test fixture hex, not UI styling */
 const testPhases = [
   { value: 'applied',  label: 'Gesolliciteerd', color: '#94A3B8' },
   { value: 'invited',  label: 'Uitgenodigd',    color: '#6FA8C4' },
   { value: 'hired',    label: 'Aangenomen',     color: '#79B58E' },
 ]
+/* eslint-enable no-restricted-syntax */
 
 describe('useVacancyInsights · funnel donut (VAC-KPI-REDESIGN)', () => {
   it('builds one segment per tenant phase, labelled/coloured from the phase lookup', () => {
     const stats = { by_phase: [{ value: 'applied', count: 5 }, { value: 'invited', count: 2 }, { value: 'hired', count: 1 }] }
     const { result } = renderHook(() => useVacancyInsights({ stats, vacancies: [], statuses: [], phases: testPhases, statusMeta, t }))
+    /* eslint-disable no-restricted-syntax -- test fixture hex, asserts against the testPhases fixture colours above */
     expect(result.current.funnelData).toEqual([
       { name: 'Gesolliciteerd', key: 'applied', color: '#94A3B8', value: 5 },
       { name: 'Uitgenodigd', key: 'invited', color: '#6FA8C4', value: 2 },
       { name: 'Aangenomen', key: 'hired', color: '#79B58E', value: 1 },
     ])
+    /* eslint-enable no-restricted-syntax */
   })
 
   it('drops a zero-count phase instead of showing a dead donut segment', () => {
     const stats = { by_phase: [{ value: 'applied', count: 5 }, { value: 'invited', count: 0 }] }
     const { result } = renderHook(() => useVacancyInsights({ stats, vacancies: [], statuses: [], phases: testPhases, statusMeta, t }))
+    // eslint-disable-next-line no-restricted-syntax -- test fixture hex, asserts against the testPhases fixture colours above
     expect(result.current.funnelData).toEqual([{ name: 'Gesolliciteerd', key: 'applied', color: '#94A3B8', value: 5 }])
   })
 
   it('falls back to summing applicationsByPhase on the loaded rows when stats.by_phase is missing', () => {
     const vacancies = [vacancy({ applicationsByPhase: { applied: 3, hired: 1 } }), vacancy({ applicationsByPhase: { applied: 2 } })]
     const { result } = renderHook(() => useVacancyInsights({ stats: {}, vacancies, statuses: [], phases: testPhases, statusMeta, t }))
+    /* eslint-disable no-restricted-syntax -- test fixture hex, asserts against the testPhases fixture colours above */
     expect(result.current.funnelData).toEqual([
       { name: 'Gesolliciteerd', key: 'applied', color: '#94A3B8', value: 5 },
       { name: 'Aangenomen', key: 'hired', color: '#79B58E', value: 1 },
     ])
+    /* eslint-enable no-restricted-syntax */
   })
 
   // The "Sollicitaties totaal" KPI (VAC-KPI-REDESIGN proposal) sums the same
@@ -124,6 +133,7 @@ describe('useVacancyInsights · AI-agent donut (VAC-KPI-REDESIGN, VAC-STATS-BYAG
     const { result } = renderHook(() => useVacancyInsights({ stats, vacancies: [], statuses: [], phases: [], statusMeta, t }))
     expect(result.current.agentData).toEqual([
       { name: 'Kelly', key: 'a1', color: 'var(--color-primary)', value: 4 },
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, asserts the hook's own DATA-annotated fallback colour
       { name: 'insights.noAgent', key: '__none', color: '#9CA3AF', value: 2 },
     ])
   })
@@ -137,6 +147,7 @@ describe('useVacancyInsights · AI-agent donut (VAC-KPI-REDESIGN, VAC-STATS-BYAG
     const { result } = renderHook(() => useVacancyInsights({ stats: {}, vacancies, statuses: [], phases: [], statusMeta, t }))
     expect(result.current.agentData).toEqual([
       { name: 'Kelly', key: 'agent1', color: 'var(--color-primary)', value: 2 },
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, asserts the hook's own DATA-annotated fallback colour
       { name: 'insights.noAgent', key: '__none', color: '#9CA3AF', value: 1 },
     ])
   })

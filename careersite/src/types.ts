@@ -1,13 +1,18 @@
 // Shared response shapes for the public career-site API (CAREER-1 backend contract).
 // Hand-written: this is a standalone app with no generated api-generated.ts of its own.
 
-// GET /public/{tenant}/site
+// GET /public/{tenant}/site — always answers (even when the site is off), so the
+// public app can render a branded "not available" state instead of a generic error.
 export interface SiteInfo {
   tenant: string
   name: string
   brand_color: string | null
   logo_url: string | null
   address: string | null
+  // CAREER-SITE-ACTIVE: whether the tenant switched its public career site on
+  // (default OFF/opt-in). When false, the data endpoints (vacancies/apply/feeds)
+  // 404 — the frontend must gate on this flag rather than treat it as an error.
+  active: boolean
 }
 
 export interface HoursRange {

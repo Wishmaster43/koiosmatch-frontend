@@ -10,6 +10,7 @@
 import { describe, it, expect } from 'vitest'
 import { resolveStatusSegment, buildVacancyPatch } from './vacanciesShared'
 
+// eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
 const statusMeta = (v: string) => (v === 's1' ? { label: 'Open', color: '#79B58E' } : {})
 const NO_STATUS = 'Geen status'
 const UNKNOWN = 'Onbekend'
@@ -22,16 +23,20 @@ describe('resolveStatusSegment', () => {
 
   it('resolves via the live tenant lookup when it knows the status id', () => {
     const seg = resolveStatusSegment({ value: 's1', count: 3 }, statusMeta, new Map(), NO_STATUS, UNKNOWN)
+    // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
     expect(seg).toMatchObject({ name: 'Open', color: '#79B58E', value: 3, key: 's1' })
   })
 
   it('falls back to a loaded row carrying the same status id when the current lookup misses it (VAC-SEED-1: two status sets)', () => {
+    // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
     const rowMeta = new Map([['s2', { label: 'Gepauzeerd', color: '#C9AC64' }]])
     const seg = resolveStatusSegment({ value: 's2', count: 2 }, statusMeta, rowMeta, NO_STATUS, UNKNOWN)
+    // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
     expect(seg).toMatchObject({ name: 'Gepauzeerd', color: '#C9AC64', key: 's2' })
   })
 
   it('falls back to the backend-resolved label before ever assuming "no status"', () => {
+    // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
     const seg = resolveStatusSegment({ value: 's3', count: 1, label: 'Concept', color: '#94A3B8' }, statusMeta, new Map(), NO_STATUS, UNKNOWN)
     expect(seg.name).toBe('Concept')
   })

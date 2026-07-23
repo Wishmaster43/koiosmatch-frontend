@@ -44,11 +44,13 @@ export function resolveStatusSegment(
   unknownLabel: string,
 ): StatusDonutSegment {
   const v = raw.value ?? raw.status
+  // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar.tsx's identical constant)
   if (v == null) return { name: noStatusLabel, value: raw.count ?? 0, key: '__none', color: '#9CA3AF' }
   const key = String(v)
   const m = statusMeta(key)
   const rm = rowMeta.get(key)
   const name = m.label || rm?.label || raw.label || unknownLabel
+  // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar.tsx's identical constant)
   const color = (m.label ? m.color : rm?.color) ?? raw.color ?? '#9CA3AF'
   return { name, value: raw.count ?? 0, key, color: color as string }
 }

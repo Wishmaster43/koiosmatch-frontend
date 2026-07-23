@@ -83,6 +83,7 @@ export function useVacancyInsights({ stats, vacancies, statuses, phases, statusM
         .map(o => ({
           name: o.value ? t('publishedState.yes') : t('publishedState.no'),
           key: o.value ? 'published' : 'unpublished',
+          // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar.tsx's identical constant)
           color: o.value ? 'var(--color-success)' : '#9CA3AF',
           value: o.count ?? 0,
         }))
@@ -92,6 +93,7 @@ export function useVacancyInsights({ stats, vacancies, statuses, phases, statusM
     const unpublishedCount = vacancies.length - publishedCount
     const out: Aggregate[] = []
     if (publishedCount > 0)   out.push({ name: t('publishedState.yes'), key: 'published',   color: 'var(--color-success)', value: publishedCount })
+    // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar.tsx's identical constant)
     if (unpublishedCount > 0) out.push({ name: t('publishedState.no'),  key: 'unpublished', color: '#9CA3AF',              value: unpublishedCount })
     return out
   }, [s, vacancies, t])
@@ -160,6 +162,7 @@ export function useVacancyInsights({ stats, vacancies, statuses, phases, statusM
         .map(o => ({
           name: o.id == null ? t('insights.noAgent') : (o.name || '—'),
           key: o.id == null ? '__none' : String(o.id),
+          // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar.tsx's identical constant)
           color: o.id == null ? '#9CA3AF' : 'var(--color-primary)',
           value: o.count ?? 0,
         }))
@@ -176,6 +179,7 @@ export function useVacancyInsights({ stats, vacancies, statuses, phases, statusM
       }
     })
     const out = Object.values(m)
+    // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar.tsx's identical constant)
     if (noAgentCount > 0) out.push({ name: t('insights.noAgent'), key: '__none', color: '#9CA3AF', value: noAgentCount })
     return out
   }, [s, vacancies, t])

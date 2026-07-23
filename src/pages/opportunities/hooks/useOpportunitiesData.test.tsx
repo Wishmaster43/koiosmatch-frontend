@@ -14,6 +14,7 @@ import { useOpportunitiesData } from './useOpportunitiesData'
 
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 vi.mock('@/lib/useOpportunityStages', () => ({
+  // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
   useOpportunityStages: () => ({ stages: [], stageMeta: () => ({ value: '', label: '', color: '#9CA3AF' }) }),
 }))
 vi.mock('@/lib/api', async () => {

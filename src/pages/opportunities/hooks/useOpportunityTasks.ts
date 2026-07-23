@@ -33,7 +33,9 @@ export function useOpportunityTasks(id?: Id): { items: OpportunityTask[]; loadin
       .then(res => setItems(unwrapList<OpportunityTask>(res).rows))
       .catch(err => {
         if (err?.code === 'ERR_CANCELED') return
-        if (err?.response?.status && err.response.status !== 404) setError(true)
+        // Audit r5: no-response network failures count as errors too (the old
+        // truthy-status guard silently rendered them as "empty" — 404 stays calm).
+        if (err?.response?.status !== 404) setError(true)
         setItems([])
       })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })

@@ -28,6 +28,7 @@ export default function CustomersMapView({ rows, statusColor, center, radiusKm, 
     .map(c => ({
       id: c.id as Id, lat: c.lat as number, lng: c.lng as number, label: c.name,
       sub: [c.city, c.distanceKm != null ? t('common:map.kmAway', { km: c.distanceKm }) : null].filter(Boolean).join(' · '),
+      // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
       color: statusColor(c.status) ?? '#9CA3AF',
     }))
 

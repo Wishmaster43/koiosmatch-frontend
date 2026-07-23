@@ -16,12 +16,14 @@ import { unwrapList } from '@/lib/api'
 
 export interface OutreachStatus { value: string; label: string; color?: string; is_reached: boolean }
 
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 export const DEFAULT_OUTREACH_STATUSES: OutreachStatus[] = [
   { value: 'todo',      label: 'Te doen',       color: '#94A3B8', is_reached: false },
   { value: 'contacted', label: 'Benaderd',      color: '#6E8FD6', is_reached: true },
   { value: 'answered',  label: 'Beantwoord',    color: '#79B58E', is_reached: true },
   { value: 'skipped',   label: 'Overgeslagen',  color: '#DDA071', is_reached: false },
 ]
+/* eslint-enable no-restricted-syntax */
 
 // Normalise an API row to the UI shape (value/label tolerant, flag coerced).
 const toStatus = (r: Record<string, unknown>): OutreachStatus => ({

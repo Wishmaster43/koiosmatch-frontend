@@ -7,15 +7,19 @@ import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { BTN_H } from '@/config/buttonMetrics'
 
 // Preset swatches are tenant brand-colour DATA (persisted as brand_color) — literal hex by design, never tokens.
+/* eslint-disable no-restricted-syntax -- DATA: fixed swatch palette offered to tenants in the brand-colour picker */
 const BRAND_COLOR_PRESETS = [
   '#3B8FD4', '#19A5CA', '#0EA5E9', '#10B981', '#D97706',
   '#DC2626', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316',
 ]
+/* eslint-enable no-restricted-syntax */
 
 export default function BrandSettings() {
   const { t } = useTranslation('settings')
   const auth = useAuth()
+  // eslint-disable-next-line no-restricted-syntax -- DATA: default brand colour value, not UI styling
   const [primaryColor, setPrimaryColor]   = useState('#3B8FD4') // default brand colour (data, not styling)
+  // eslint-disable-next-line no-restricted-syntax -- DATA: typeable hex mirror of primaryColor's default
   const [hexDraft,     setHexDraft]       = useState('#3B8FD4') // typeable hex mirror of primaryColor
   const [logoPreview,  setLogoPreview]    = useState(null)
   const [logoFile,     setLogoFile]       = useState(null)

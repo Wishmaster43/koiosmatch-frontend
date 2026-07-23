@@ -46,6 +46,7 @@ function SectionHead({ children, style }: { children: ReactNode; style?: CSSProp
 // per-candidate "colour" field exists (or should — see the hook file header
 // for why favourite/ranking data isn't faked), this replaces that need for
 // both the avatar and the scheduled-candidate accent border.
+// eslint-disable-next-line no-restricted-syntax -- DATA: avatar colour-cycling palette, not UI element styling
 const AVATAR_COLORS = ['var(--color-primary)', 'var(--color-secondary)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-danger)', '#8B5CF6', '#EC4899']
 function colorFor(initials: string) {
   return AVATAR_COLORS[initials.charCodeAt(0) % AVATAR_COLORS.length]
@@ -84,6 +85,7 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
   const [candidate,   setCandidate]   = useState<ShiftCandidateOption | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [color,       setColor]       = useState('var(--color-success)')
+  // eslint-disable-next-line no-restricted-syntax -- DATA: shift-colour picker palette, not UI element styling
   const COLORS = ['var(--color-success)','var(--color-primary)','var(--color-warning)','var(--color-danger)','var(--color-secondary)','#8B5CF6']
 
   // Real lookups (PLAN-LOOKUP-1) — see ./hooks/useShiftLookups for sourcing.

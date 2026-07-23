@@ -80,6 +80,7 @@ export default function SettingsSearch({ open, onClose, groups, onSelect }) {
                 {Icon && <Icon size={15} style={{ flexShrink: 0, color: isActive ? 'var(--color-primary)' : 'var(--text-muted)' }} />}
                 <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{e.label}</span>
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>{e.group}</span>
+                {/* eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this shortcut-hint grey; kept literal to avoid changing the rendered tone */}
                 {isActive && <CornerDownLeft size={13} style={{ color: '#C4C4CF', flexShrink: 0 }} />}
               </button>
             )

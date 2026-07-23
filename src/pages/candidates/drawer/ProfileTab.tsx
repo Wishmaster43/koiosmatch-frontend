@@ -26,6 +26,7 @@ type ProfileKey = 'gender' | 'nationality' | 'dob' | 'placeOfBirth' | 'email' | 
   | 'street' | 'houseNumber' | 'houseNumberSuffix' | 'postalCode' | 'city' | 'province' | 'country' | 'linkedin'
 type ProfileForm = Record<ProfileKey, string>
 
+// eslint-disable-next-line no-restricted-syntax -- LinkedIn's official brand blue, not a themeable UI colour
 function LinkedinIcon({ size = 12, color = '#0A66C2' }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill={color} xmlns="http://www.w3.org/2000/svg">
@@ -207,6 +208,7 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
     if (key === 'linkedin') {
       return v
         ? <a href={v.startsWith('http') ? v : `https://${v}`} target="_blank" rel="noopener noreferrer"
+            // eslint-disable-next-line no-restricted-syntax -- LinkedIn's official brand blue, not a themeable UI colour
             style={{ fontSize: 12, color: '#0A66C2', textDecoration: 'none' }}
             onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
             onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
@@ -280,6 +282,7 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
   const field = (key: ProfileKey, label: string) => (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
       <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 120, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
+        {/* eslint-disable-next-line no-restricted-syntax -- LinkedIn's official brand blue, not a themeable UI colour */}
         {key === 'linkedin' && <LinkedinIcon size={12} color="#0A66C2" />}
         {label}{isReq(key) && <span style={{ color: 'var(--color-danger)' }}> *</span>}
       </span>

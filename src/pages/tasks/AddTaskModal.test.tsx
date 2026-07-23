@@ -21,8 +21,11 @@ const FAIL_ID = 'task-fail'
 const TASK_DETAIL_RAW = {
   id: EDIT_ID,
   title: 'Bel kandidaat terug',
+  // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
   type: { value: 'call', label: 'Belafspraak', color: '#5FB0AC' },
+  // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
   status: { value: 'todo', label: 'Te doen', color: '#D98A8A', is_done: false },
+  // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
   priority: { value: 'normal', label: 'Normaal', color: '#DDA071' },
   assignee: { id: 'user-9', name: 'Danny' },
   due_date: '2026-07-25',
@@ -43,8 +46,11 @@ const PRIORITY_ROWS = [{ id: 'prio-uuid-1', value: 'normal', label: 'Normaal' }]
 // values, unchanged across renders). Fresh array literals per call would make the
 // "seed defaults" effect's [statuses,types,priorities] deps change every render →
 // infinite render loop → the worker OOMs and the whole file reports as errored.
+// eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
 const LK_STATUSES = [{ value: 'todo', label: 'Te doen', color: '#D98A8A' }]
+// eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
 const LK_TYPES = [{ value: 'call', label: 'Belafspraak', color: '#5FB0AC' }]
+// eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
 const LK_PRIORITIES = [{ value: 'normal', label: 'Normaal', color: '#DDA071' }]
 const LK_VALUE = { statuses: LK_STATUSES, types: LK_TYPES, priorities: LK_PRIORITIES, defaultPriority: 'normal' }
 vi.mock('@/context/TaskLookupsContext', () => ({ useTaskLookups: () => LK_VALUE }))

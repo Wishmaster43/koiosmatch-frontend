@@ -27,6 +27,7 @@ export type NoteTypeEntity = 'candidate' | 'application' | 'match' | 'task' | 'c
 // Seed defaults. VALUES are the API slugs (mirror the backend note_types seed) — the old
 // Dutch-label-as-value fallback made a note 422 ("type invalid") whenever the lookup hadn't
 // loaded yet (smoke-suite catch, 2026-07-03). Labels stay NL for display.
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 export const DEFAULT_NOTE_TYPES: LookupOption[] = [
   { value: 'general',     label: 'Algemeen' },
   { value: 'intake',      label: 'Intake' },
@@ -40,6 +41,7 @@ export const DEFAULT_NOTE_TYPES: LookupOption[] = [
   // Lifecycle events (archived/restored/trashed) the BE writes centrally (TIJDLIJN-LC-1).
   { value: 'lifecycle', label: 'Dossier', color: '#64748B' },
 ]
+/* eslint-enable no-restricted-syntax */
 
 // Note types the backend writes automatically (not hand-authored) — rendered as a
 // calm system-event row in the thread, never with an edit pencil (N-1-FE).

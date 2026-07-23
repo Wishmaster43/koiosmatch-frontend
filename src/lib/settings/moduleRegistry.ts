@@ -20,6 +20,10 @@ export interface ModuleBlock { id: string; type: 'kpi'; label: string; icon: Luc
 export interface ModuleDef { label: string; blocks: ModuleBlock[] }
 
 // type: 'kpi' for now (charts/tables can be added later with their own renderers).
+// Block colours mix design tokens with fixed module-category swatches (e.g. the violet/
+// emerald pair also used in modules/filter.ts, modules/ai_agent.ts, messageParts.tsx) —
+// DATA: extra category hues kept distinct from the core semantic tokens, not ad-hoc styling.
+/* eslint-disable no-restricted-syntax -- DATA: module/KPI-block colour swatches, mirrors the module registry convention (src/modules/*.ts), not themeable UI colour */
 export const MODULES: Record<string, ModuleDef> = {
   customers: {
     label: 'Customers',
@@ -58,6 +62,7 @@ export const MODULES: Record<string, ModuleDef> = {
     ],
   },
 }
+/* eslint-enable no-restricted-syntax */
 
 /** Modules exposed in the Settings → Views area (order matters for the nav). */
 export const VIEW_MODULE_IDS = ['customers', 'planning', 'sales', 'candidates']

@@ -18,11 +18,13 @@ import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
 
 // Soft palette — matches the calm light/dark scheme used across lookups.
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 export const DEFAULT_GENDERS: LookupOption[] = [
   { value: 'male',   label: 'Man',     color: '#3B8FD4' },
   { value: 'female', label: 'Vrouw',   color: '#E06C9F' },
   { value: 'other',  label: 'Overig',  color: '#6FB98F' },
 ]
+/* eslint-enable no-restricted-syntax */
 
 const norm = (s?: unknown) => (s ?? '').toString().trim().toLowerCase()
 

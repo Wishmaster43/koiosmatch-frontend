@@ -30,6 +30,7 @@ export const CV_DEFAULT_SECTIONS: CvSection[] = [
   { id: 'preferences',  label: 'Preferences',     enabled: false },
 ]
 
+/* eslint-disable no-restricted-syntax -- seed DATA: default CV brand colours until a tenant customises, not UI styling */
 const DEFAULTS: CvSettings = {
   primaryColor:   '#19A5CA',
   secondaryColor: '#1B60A9',
@@ -37,6 +38,7 @@ const DEFAULTS: CvSettings = {
   companyName:    '',
   sections:       CV_DEFAULT_SECTIONS,
 }
+/* eslint-enable no-restricted-syntax */
 
 // Settings-blob key (tenant-scoped, JSON-encoded).
 const SETTINGS_KEY = 'candidate_cv_template'
