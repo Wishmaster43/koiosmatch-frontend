@@ -15,12 +15,15 @@ export function Header({ site, loading, tenant }: HeaderProps) {
   return (
     <header className="site-header">
       <Link to={`/${tenant}/vacatures`} className="site-header__brand" aria-label={site?.name ?? strings.header.fallbackName}>
+        {/* Logo OR text name — never both: most tenant logos are wordmarks, so
+            logo + text rendered the name twice (Danny 23-07: "Yesway 2x"). */}
         {site?.logo_url ? (
-          <img src={site.logo_url} alt="" className="site-header__logo" />
-        ) : null}
-        <span className="site-header__name">
-          {loading ? ' ' : (site?.name ?? strings.header.fallbackName)}
-        </span>
+          <img src={site.logo_url} alt={site?.name ?? strings.header.fallbackName} className="site-header__logo" />
+        ) : (
+          <span className="site-header__name">
+            {loading ? ' ' : (site?.name ?? strings.header.fallbackName)}
+          </span>
+        )}
       </Link>
     </header>
   )

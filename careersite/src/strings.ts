@@ -20,6 +20,7 @@ export const strings = {
   },
   list: {
     title: 'Openstaande vacatures',
+    filtersLabel: 'Vacaturefilters',
     filters: {
       cityLabel: 'Stad',
       cityPlaceholder: 'Bijv. Utrecht',

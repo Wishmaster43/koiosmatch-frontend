@@ -71,11 +71,15 @@ export async function fetchVacancies(
 }
 
 // GET /public/{tenant}/vacancies/{ref} — full detail incl. sanitized HTML + JobPosting JSON-LD.
+// The endpoint wraps the record in Laravel's { data: {...} } resource envelope — unwrap it
+// (tolerantly, in case the envelope ever disappears). Danny 23-07: the un-unwrapped object
+// made every field undefined and the detail page rendered blank.
 export async function fetchVacancy(tenant: string, reference: string): Promise<VacancyDetail> {
   const res = await fetch(publicUrl(tenant, `/vacancies/${encodeURIComponent(reference)}`), {
     credentials: 'omit',
   })
-  return parseJsonOrThrow<VacancyDetail>(res)
+  const json = await parseJsonOrThrow<{ data?: VacancyDetail } | VacancyDetail>(res)
+  return (json as { data?: VacancyDetail }).data ?? (json as VacancyDetail)
 }
 
 // Builds the multipart body for an application — the honeypot field is always

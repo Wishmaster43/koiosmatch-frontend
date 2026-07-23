@@ -81,11 +81,19 @@ export function VacancyListPage() {
   return (
     <div className="vacancy-list-page">
       <h1>{strings.list.title}</h1>
-      <Filters city={city} hours={hours} onCityChange={handleCityChange} onHoursChange={handleHoursChange} />
-      <VacancyList tenant={tenant ?? ''} status={status} vacancies={vacancies} onRetry={refetch} />
-      {meta ? (
-        <Pagination currentPage={meta.current_page} lastPage={meta.last_page} onPageChange={handlePageChange} />
-      ) : null}
+      {/* Danny 23-07: filters live in a LEFT sidebar on desktop (stacked above the
+          list on mobile) — the two-column grid lives in .vacancy-list-layout. */}
+      <div className="vacancy-list-layout">
+        <aside className="vacancy-list-side" aria-label={strings.list.filtersLabel}>
+          <Filters city={city} hours={hours} onCityChange={handleCityChange} onHoursChange={handleHoursChange} />
+        </aside>
+        <div className="vacancy-list-main">
+          <VacancyList tenant={tenant ?? ''} status={status} vacancies={vacancies} onRetry={refetch} />
+          {meta ? (
+            <Pagination currentPage={meta.current_page} lastPage={meta.last_page} onPageChange={handlePageChange} />
+          ) : null}
+        </div>
+      </div>
     </div>
   )
 }

@@ -103,18 +103,31 @@ a {
   margin-top: 4px;
 }
 
-/* Filters bar — mobile-first: stacked fields, side by side from tablet width up. */
+/* List layout — filters in a LEFT sidebar on desktop, stacked on mobile (Danny 23-07). */
+.vacancy-list-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (min-width: 760px) {
+  .vacancy-list-layout {
+    grid-template-columns: 240px 1fr;
+    gap: 28px;
+  }
+  .vacancy-list-side {
+    position: sticky;
+    top: 16px;
+  }
+}
+
+/* Filters — stacked fields (they live in the left sidebar / above the list on mobile). */
 .filters {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin: 16px 0 24px;
-}
-
-@media (min-width: 640px) {
-  .filters {
-    flex-direction: row;
-  }
 }
 
 .filters__field {
