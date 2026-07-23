@@ -128,6 +128,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.reload()
   }, [])
 
+  // TENANT-TAB-1 (Danny 23-07 "elke kandidaat 404t op demo"): localStorage is
+  // SHARED across tabs, and the api client reads active_tenant per request. A
+  // switch in tab A left tab B rendering the OLD tenant's rows while its new
+  // requests already carried the NEW X-Tenant → every detail click 404'd
+  // ("rij verwijderd"), and worse: cross-tenant display state (AVG). The
+  // storage event fires only in OTHER tabs — hard-reload them too, exactly
+  // like the switching tab itself.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'active_tenant' && e.oldValue !== null && e.newValue !== null && e.newValue !== e.oldValue) {
+        window.location.reload()
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
+
   /**
    * Populate the tenant list + active tenant based on the user's role.
    * - super_admin → load ALL tenants and select the saved/first one.

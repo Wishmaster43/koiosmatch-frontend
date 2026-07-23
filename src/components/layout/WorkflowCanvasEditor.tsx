@@ -71,8 +71,9 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   // Top-level editor view: the node diagram, or this workflow's run history.
   const [view, setView] = useState<'diagram' | 'history'>('diagram')
   // LOGS-DRILL-1 (Danny 23-07): jumping from a Logs-panel row lands on the
-  // Geschiedenis tab with that run's detail drawer already open.
-  const [historyRunId, setHistoryRunId] = useState<string | number | null>(null)
+  // Geschiedenis tab with that run's detail drawer already open. A FRESH object
+  // per click, so jumping to the same run twice re-opens the drawer too.
+  const [historyRun, setHistoryRun] = useState<{ id: string | number } | null>(null)
   // Output fields of upstream modules the selected node may reference as tokens.
   const upstreamVariables = getUpstreamVariables(selectedNode?.id)
   // Backend bundle-shape catalog (output_fields + emits per module type) for the
@@ -242,7 +243,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
         {/* ── Body ── */}
         {view === 'history' ? (
           <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-            <WorkflowHistoryView workflowId={workflow.id} initialRunId={historyRunId} />
+            <WorkflowHistoryView workflowId={workflow.id} initialRun={historyRun} />
           </div>
         ) : (
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
@@ -298,7 +299,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
           <div style={{ width: (showLogs || widePanelActive) ? 640 : 440, flexShrink: 0, background: 'var(--surface)', borderLeft: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'width 0.2s ease' }}>
             {showLogs
               ? <LogsPanel workflowId={workflow.id} liveRun={liveRun} onClose={() => setShowLogs(false)}
-                  onOpenHistory={runId => { setHistoryRunId(runId); setView('history') }} />
+                  onOpenHistory={runId => { setHistoryRun({ id: runId }); setView('history') }} />
               : <ConfigPanel node={selectedNode} onUpdate={updateNodeConfig} onDelete={deleteNode}
                   variables={upstreamVariables}
                   onTabChange={tab => setWidePanelActive(MANAGE_TABS.includes(tab))} />

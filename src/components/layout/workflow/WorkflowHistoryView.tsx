@@ -19,27 +19,28 @@ const TH: CSSProperties = { padding: '10px 16px', textAlign: 'left', fontSize: 1
 const TD: CSSProperties = { padding: '12px 16px', fontSize: 13, color: 'var(--text)',
   borderBottom: '1px solid var(--hover-bg)' }
 
-export default function WorkflowHistoryView({ workflowId, initialRunId }: {
+export default function WorkflowHistoryView({ workflowId, initialRun }: {
   workflowId?: string | number
   // LOGS-DRILL-1: arriving from the Logs panel's history-jump — auto-open this
-  // run's drawer once the rows are in (once; closing it never re-opens it).
-  initialRunId?: string | number | null
+  // run's drawer. A fresh object per jump (compared by identity), so the same
+  // run re-opens on a second jump while a closed drawer never self-reopens.
+  initialRun?: { id: string | number } | null
 }) {
   const { t } = useTranslation('reports')
   // Runs are scoped to this workflow; the drawer opens above the editor overlay.
   const { rows, loading } = useReportList<RunRow>(workflowId != null ? `/workflows/${workflowId}/runs` : '/workflow-runs')
   const [drill, setDrill] = useState<RunRow | null>(null)
 
-  // LOGS-DRILL-1: open the requested run exactly once per initialRunId value.
-  const consumedRunId = useRef<string | number | null>(null)
+  // LOGS-DRILL-1: open the requested run exactly once per jump (object identity).
+  const consumedRun = useRef<{ id: string | number } | null>(null)
   useEffect(() => {
-    if (initialRunId == null || loading || consumedRunId.current === initialRunId) return
-    const match = rows.find(r => String(r.id) === String(initialRunId))
+    if (initialRun == null || loading || consumedRun.current === initialRun) return
+    const match = rows.find(r => String(r.id) === String(initialRun.id))
     if (match) {
-      consumedRunId.current = initialRunId
+      consumedRun.current = initialRun
       setDrill(match)
     }
-  }, [initialRunId, loading, rows])
+  }, [initialRun, loading, rows])
 
   return (
     <div style={{ flex: 1, overflow: 'auto', padding: '20px 24px', background: 'var(--bg)' }}>
