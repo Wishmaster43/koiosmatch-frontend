@@ -366,8 +366,11 @@
       "error": "Mensaje de error",
       "workflowFallback": "Workflow #{{id}}",
       "attempts": "Intento {{count}}",
-      "nextAttempt": "Próximo intento a las {{time}}"
-    }
+      "nextAttempt": "Próximo intento a las {{time}}",
+      "runId": "ID de ejecución",
+      "copyId": "Haz clic para copiar el ID"
+    },
+    "openHistory": "Ver en el historial"
   },
   "messageDetail": "Detalle del mensaje"
 }

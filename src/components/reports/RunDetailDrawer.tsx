@@ -141,11 +141,24 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
               { label: t('runs.drawer.candidate'), value: shown.candidate
                   ? `${shown.candidate.name || '—'}${shown.candidate.reference_number ? ` (${shown.candidate.reference_number})` : ''}`
                   : null },
+              // RUN-GUID-1 (Danny 23-07 "GUID ID ERBIJ"): the run's GUID, monospace +
+              // click-to-copy, so a run is referable in support/debug conversations.
+              { label: t('runs.drawer.runId'), value: shown.id != null ? String(shown.id) : null, mono: true },
             ].filter(r => r.value && r.value !== '—').map(r => (
               <div key={r.label} style={{ display: 'flex', gap: 8, padding: '7px 0',
                                           borderBottom: '1px solid var(--hover-bg)' }}>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 140, flexShrink: 0 }}>{r.label}</span>
-                <span style={{ fontSize: 12, color: 'var(--text)' }}>{r.value}</span>
+                {'mono' in r && r.mono ? (
+                  <button type="button" title={t('runs.drawer.copyId')}
+                    onClick={() => { void navigator.clipboard?.writeText(String(r.value)) }}
+                    style={{ fontSize: 11.5, color: 'var(--text)', fontFamily: "'JetBrains Mono', monospace",
+                             background: 'none', border: 'none', padding: 0, cursor: 'copy',
+                             textAlign: 'left', wordBreak: 'break-all' }}>
+                    {r.value}
+                  </button>
+                ) : (
+                  <span style={{ fontSize: 12, color: 'var(--text)' }}>{r.value}</span>
+                )}
               </div>
             ))}
           </div>

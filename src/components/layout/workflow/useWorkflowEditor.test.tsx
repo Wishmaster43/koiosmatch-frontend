@@ -358,12 +358,35 @@ describe('useWorkflowEditor · NODE-PROGRESS-1 live progress mapping', () => {
     const { result } = renderHook(
       () => useWorkflowEditor({ workflow: wf(steps), onSave: vi.fn(), initialRunId: 'r1' }), { wrapper })
 
-    // The poll lands → each node carries its live status, progress and item count.
+    // The poll lands → each node carries its live status, progress and item count,
+    // plus runActive (the run is still live, so a sub-100% arc may keep filling).
     await waitFor(() => {
       const n1 = result.current.nodesWithFirst.find(n => n.id === 'n1')
       const n2 = result.current.nodesWithFirst.find(n => n.id === 'n2')
-      expect(n1?.data).toMatchObject({ status: 'running', isRunning: true, progress: { done: 38, total: 120 } })
+      expect(n1?.data).toMatchObject({ status: 'running', isRunning: true, progress: { done: 38, total: 120 }, runActive: true })
       expect(n2?.data).toMatchObject({ status: 'success', progress: null, itemsTotal: 57 })
+    })
+  })
+
+  it('marks runActive false on a terminal run so a partial arc can never freeze', async () => {
+    // Terminal run whose fan-out step stopped short (12/40): the badge data stays,
+    // but runActive=false tells the canvas to drop the (now frozen) partial arc.
+    const run = {
+      id: 'r2', status: 'success',
+      steps: [{ step_id: 'n1', status: 'success', progress: { done: 12, total: 40 }, items_total: 40 }],
+    }
+    vi.mocked(api.get).mockImplementation(async (url: string) =>
+      url.includes('/workflow-runs/') ? { data: { data: run } } : { data: { data: [] } })
+
+    const { result } = renderHook(
+      () => useWorkflowEditor({
+        workflow: wf([{ id: 'n1', type: 'candidates', config: {}, position: { x: 0, y: 0 } }]),
+        onSave: vi.fn(), initialRunId: 'r2',
+      }), { wrapper })
+
+    await waitFor(() => {
+      const n1 = result.current.nodesWithFirst.find(n => n.id === 'n1')
+      expect(n1?.data).toMatchObject({ status: 'success', progress: { done: 12, total: 40 }, runActive: false })
     })
   })
 })

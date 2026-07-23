@@ -6,7 +6,7 @@
  * each step card shows its own timestamp + its OWN output slice (StepOutputSlice).
  */
 import { useState, useEffect } from 'react'
-import { X, List, ChevronDown } from 'lucide-react'
+import { X, List, ChevronDown, History } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { StatusBadge, formatDT, formatDuration } from '@/components/reports/runFormat'
@@ -26,7 +26,12 @@ function stepTime(step: RunStep): string | null {
   return to && to !== from ? `${from} → ${to}` : from
 }
 
-export default function LogsPanel({ workflowId, liveRun, onClose }: { workflowId?: string | number; liveRun?: RunRow | null; onClose: () => void }) {
+export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory }: {
+  workflowId?: string | number; liveRun?: RunRow | null; onClose: () => void
+  // LOGS-DRILL-1 (Danny 23-07 "MEER INFORMATIE of klik naar geschiedenis"): jump
+  // from a run row to the Geschiedenis tab with this run's full detail drawer open.
+  onOpenHistory?: (runId: string | number) => void
+}) {
   const { t } = useTranslation('reports')
   // New run-control strings live in the workflows namespace (this wave's keys).
   const { t: tw } = useTranslation('workflows')
@@ -127,6 +132,16 @@ export default function LogsPanel({ workflowId, liveRun, onClose }: { workflowId
                       style={{ flexShrink: 0, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
                   )}
                 </button>
+                {/* LOGS-DRILL-1: full run detail lives on the Geschiedenis tab. */}
+                {onOpenHistory && run.id != null && (
+                  <button type="button" title={t('runs.openHistory')} aria-label={t('runs.openHistory')}
+                    onClick={() => onOpenHistory(run.id as string | number)}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                             width: 24, height: 24, borderRadius: 6, border: '1px solid var(--border)',
+                             background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <History size={12} />
+                  </button>
+                )}
                 {/* Stop — only while the run can still be cancelled (running/waiting). */}
                 {stoppable && (
                   <StopRunButton runId={run.id as string | number} compact

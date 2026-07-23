@@ -4,7 +4,7 @@
  * (started · trigger · status · duration) and opens the shared RunDetailDrawer
  * (run meta + per-step INPUT/OUTPUT) on row click. Handles the four UI states.
  */
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Loader2, History, Play, Clock as ClockIcon } from 'lucide-react'
@@ -19,11 +19,27 @@ const TH: CSSProperties = { padding: '10px 16px', textAlign: 'left', fontSize: 1
 const TD: CSSProperties = { padding: '12px 16px', fontSize: 13, color: 'var(--text)',
   borderBottom: '1px solid var(--hover-bg)' }
 
-export default function WorkflowHistoryView({ workflowId }: { workflowId?: string | number }) {
+export default function WorkflowHistoryView({ workflowId, initialRunId }: {
+  workflowId?: string | number
+  // LOGS-DRILL-1: arriving from the Logs panel's history-jump — auto-open this
+  // run's drawer once the rows are in (once; closing it never re-opens it).
+  initialRunId?: string | number | null
+}) {
   const { t } = useTranslation('reports')
   // Runs are scoped to this workflow; the drawer opens above the editor overlay.
   const { rows, loading } = useReportList<RunRow>(workflowId != null ? `/workflows/${workflowId}/runs` : '/workflow-runs')
   const [drill, setDrill] = useState<RunRow | null>(null)
+
+  // LOGS-DRILL-1: open the requested run exactly once per initialRunId value.
+  const consumedRunId = useRef<string | number | null>(null)
+  useEffect(() => {
+    if (initialRunId == null || loading || consumedRunId.current === initialRunId) return
+    const match = rows.find(r => String(r.id) === String(initialRunId))
+    if (match) {
+      consumedRunId.current = initialRunId
+      setDrill(match)
+    }
+  }, [initialRunId, loading, rows])
 
   return (
     <div style={{ flex: 1, overflow: 'auto', padding: '20px 24px', background: 'var(--bg)' }}>

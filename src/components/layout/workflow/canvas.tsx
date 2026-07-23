@@ -49,7 +49,10 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   const progress = data.progress as { done: number; total: number } | null | undefined
   const itemsTotal = data.itemsTotal as number | null | undefined
   const frac = progress && progress.total > 0 ? Math.min(1, progress.done / progress.total) : null
-  const arcActive = !failed && (Boolean(data.isRunning) || (frac != null && frac < 1))
+  // The sub-100% arc may only persist past step-success while the run is still
+  // being polled (a delivering fan-out): once the run is terminal the poll stops,
+  // so a partial ring would freeze forever — then only the badge remains.
+  const arcActive = !failed && (Boolean(data.isRunning) || (frac != null && frac < 1 && Boolean(data.runActive)))
   // Live counter while looping; the processed total (Make's "38") once finished.
   const badgeCount = arcActive
     ? (progress?.done ?? null)

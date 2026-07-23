@@ -10,6 +10,7 @@ import { addEdge, useNodesState, useEdgesState } from '@xyflow/react'
 import type { Connection } from '@xyflow/react'
 import { uid, mkEdge, NODE_W, NODE_H, stepsToFlow, flowToSteps } from './serialization'
 import { useWorkflowRunControl } from './useWorkflowRunControl'
+import { TERMINAL } from './useWorkflowRun'
 import { useOutputSeeding } from './useOutputSeeding'
 import { buildVarFields, computeWorkflowSnapshot } from './workflowEditorUtils'
 import type { Workflow, FlowNode, FlowEdge, FlowNodeData, EdgeFilters, ScheduleConfig,
@@ -349,6 +350,10 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     const status: Record<string, string> = {}
     const progress: Record<string, { done: number; total: number }> = {}
     const itemsTotal: Record<string, number> = {}
+    // Whether the polled run is still live: once it reaches a terminal state the
+    // poll stops, so a sub-100% arc could never fill further — the canvas then
+    // shows only the badge, never a frozen partial ring.
+    const runActive = liveRun != null && !TERMINAL.has(String(liveRun.status))
     ;(liveRun?.steps ?? []).forEach(s => {
       const id = s.step_id != null ? String(s.step_id) : undefined
       if (!id) return
@@ -356,7 +361,7 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
       if (s.progress && s.progress.total > 0) progress[id] = s.progress
       if (typeof s.items_total === 'number') itemsTotal[id] = s.items_total
     })
-    return { status, progress, itemsTotal }
+    return { status, progress, itemsTotal, runActive }
   }, [liveRun])
 
   const nodesWithFirst = nodes.map(n => ({
@@ -368,6 +373,7 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
       status: stepLive.status[n.id],
       progress: stepLive.progress[n.id] ?? null,
       itemsTotal: stepLive.itemsTotal[n.id] ?? null,
+      runActive: stepLive.runActive,
     },
   }))
 

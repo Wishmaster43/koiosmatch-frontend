@@ -366,8 +366,11 @@
       "error": "Foutmelding",
       "workflowFallback": "Workflow #{{id}}",
       "attempts": "Poging {{count}}",
-      "nextAttempt": "Volgende poging om {{time}}"
-    }
+      "nextAttempt": "Volgende poging om {{time}}",
+      "runId": "Run-ID",
+      "copyId": "Klik om het ID te kopiëren"
+    },
+    "openHistory": "Bekijk in geschiedenis"
   },
   "messageDetail": "Berichtdetail"
 }
