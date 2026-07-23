@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, FileText } from 'lucide-react'
-import { useDocumentTypes } from '@/lib/useDocumentTypes'
+import { X } from 'lucide-react'
+import { useDocumentTypes, resolveDocTypeIcon } from '@/lib/useDocumentTypes'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import PdfPreview from './PdfPreview'
 
@@ -18,8 +18,8 @@ interface CandidateDoc {
 
 export default function DocPreviewModal({ doc, onClose }: { doc?: CandidateDoc | null; onClose: () => void }) {
   const { t } = useTranslation('candidates')
-  // Document type label + colour from the tenant lookup (seed fallback).
-  const { labelOf: docTypeLabel, colorOf: docColor } = useDocumentTypes()
+  // Document type label + colour + icon from the tenant lookup (seed fallback).
+  const { labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes()
   // Hooks run unconditionally (before the `!doc` early return) — Rules of Hooks.
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   // A pdf.js render failure falls back to the same download link used for
@@ -28,6 +28,8 @@ export default function DocPreviewModal({ doc, onClose }: { doc?: CandidateDoc |
   if (!doc) return null
   const url = doc.objectUrl ?? doc.url
   const typeLabel = docTypeLabel(doc.type)
+  // The type's own curated icon (fallback FileText), matching the Documents list tile.
+  const DocIcon = resolveDocTypeIcon(docTypeIcon(doc.type))
   const showPdfPreview = isPdf(doc.name) && !pdfFailed
   return (
     <div onClick={e => e.target === e.currentTarget && onClose()}
@@ -39,7 +41,7 @@ export default function DocPreviewModal({ doc, onClose }: { doc?: CandidateDoc |
         <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid var(--border)', gap: 10 }}>
           <div style={{ width: 28, height: 28, borderRadius: 6, background: docColor(doc.type),
             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <FileText size={13} color="white" />
+            <DocIcon size={13} color="white" />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name ?? doc.file_name}</div>

@@ -8,8 +8,8 @@
 import { useState, useRef } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Plus, X, FileText, Pencil, Eye, Download, Trash2 } from 'lucide-react'
-import { useDocumentTypes } from '@/lib/useDocumentTypes'
+import { Search, Plus, X, Pencil, Eye, Download, Trash2 } from 'lucide-react'
+import { useDocumentTypes, resolveDocTypeIcon } from '@/lib/useDocumentTypes'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from '@/components/ui/SectionCard'
 import { useEntityDocuments, type EntityDoc } from '@/hooks/useEntityDocuments'
@@ -35,7 +35,7 @@ const DOC_GRID_COLUMNS = '18px 1fr 80px 100px'
 export default function DocumentsTab({ customerId }: { customerId: Id | undefined }) {
   const { t } = useTranslation('customers')
   const { formatDate } = useDateFormat()
-  const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor } = useDocumentTypes()
+  const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes()
   // List + optimistic upload/rename/delete against /customers/{id}/documents.
   const { docs, upload, rename, remove } = useEntityDocuments('customers', customerId)
   const [pending,     setPending]     = useState<PendingItem[]>([])
@@ -223,6 +223,9 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
             const i = d._i
             const key = docKey(d, i)
             const downloadable = Boolean(docUrl(d))
+            // The type's own curated icon (fallback FileText) — so rows stand out per type.
+            // Optional-chained: older test mocks of useDocumentTypes don't stub iconOf.
+            const DocIcon = resolveDocTypeIcon(docTypeIcon?.(d.type))
             return (
             <div key={String(d.id ?? i)} style={{ display: 'grid', gridTemplateColumns: DOC_GRID_COLUMNS, alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', marginBottom: 6 }}>
               {/* Row checkbox — disabled while the doc has no downloadable url yet (pending upload). */}
@@ -230,7 +233,7 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
                 checked={downloadable && selected.has(key)} disabled={!downloadable} onChange={() => toggleSelectedRow(key)}
                 style={{ accentColor: 'var(--color-primary)' }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                <div style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, background: docColor(d.type), display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FileText size={13} color="white" /></div>
+                <div style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, background: docColor(d.type), display: 'flex', alignItems: 'center', justifyContent: 'center' }}><DocIcon size={13} color="white" /></div>
                 <div style={{ minWidth: 0, flex: 1 }}>
                   {renamingId === d.id
                     ? <div style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>

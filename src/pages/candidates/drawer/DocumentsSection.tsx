@@ -1,11 +1,11 @@
 import { useState, useRef } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, X, FileText, Pencil, Eye, Download, Trash2 } from 'lucide-react'
+import { Search, X, Pencil, Eye, Download, Trash2 } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { sectionBlock } from './constants'
-import { useDocumentTypes } from '@/lib/useDocumentTypes'
+import { useDocumentTypes, resolveDocTypeIcon } from '@/lib/useDocumentTypes'
 import { useDateFormat } from '@/lib/datetime'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import DocPreviewModal from './DocPreviewModal'
@@ -52,8 +52,8 @@ const DOC_GRID_COLUMNS = '18px 1fr 80px 100px'
 export default function DocumentsSection({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
-  // Document types + colours from the tenant lookup (seed fallback until /document-types lands).
-  const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor } = useDocumentTypes()
+  // Document types + colours + icons from the tenant lookup (seed fallback until /document-types lands).
+  const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes()
   const [docs,        setDocs]        = useState<DocItem[]>(c.documents ?? [])
   const [pending,      setPending]     = useState<PendingItem[]>([])
   const [renamingDoc, setRenamingDoc] = useState<number | null>(null)
@@ -252,6 +252,9 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
           const i = d._i
           const key = docKey(d, i)
           const downloadable = Boolean(docUrl(d))
+          // The type's own curated icon (fallback FileText) — so rows stand out per type.
+          // Optional-chained: older test mocks of useDocumentTypes don't stub iconOf.
+          const DocIcon = resolveDocTypeIcon(docTypeIcon?.(d.type))
           return (
             <div key={i} style={{ display: 'grid', gridTemplateColumns: DOC_GRID_COLUMNS, alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', marginBottom: 6 }}>
               {/* Row checkbox — disabled while the doc has no downloadable url yet (pending upload). */}
@@ -259,7 +262,7 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
                 checked={downloadable && selected.has(key)} disabled={!downloadable} onChange={() => toggleSelectedRow(key)}
                 style={{ accentColor: 'var(--color-primary)' }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                <div style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, background: docColor(d.type), display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FileText size={13} color="white" /></div>
+                <div style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, background: docColor(d.type), display: 'flex', alignItems: 'center', justifyContent: 'center' }}><DocIcon size={13} color="white" /></div>
                 <div style={{ minWidth: 0, flex: 1 }}>
                   {renamingDoc === i
                     ? <div style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>

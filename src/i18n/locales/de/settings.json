@@ -140,6 +140,7 @@
     "vacancy_education": "Ausbildung",
     "vacancy_channels": "Jobbörsen",
     "vacancy_matching": "Matching",
+    "vacancy_candidate_tab": "Kandidatensuche-Tab",
     "match_templates": "Match-Profile",
     "task_statuses": "Status",
     "matches": "Matches",
@@ -1606,7 +1607,8 @@
   "documentTypes": {
     "title": "Dokumenttypen",
     "subtitle": "Kategorien und Farben für Kandidatendokumente (Lebenslauf, Ausweis, Diplom, …).",
-    "add": "Typ hinzufügen"
+    "add": "Typ hinzufügen",
+    "icon": "Symbol"
   },
   "requiredFields": {
     "title": "Pflichtfelder",
@@ -1620,6 +1622,13 @@
     "statusesTitle": "Ausblenden bei Einsatzbereitschaft",
     "typesTitle": "Sichtbar bei Vertragsform",
     "vacancyStatusesTitle": "Stellenstatus im Tab"
+  },
+  "candidateTab": {
+    "title": "Kandidatensuche-Tab bei Stellen",
+    "subtitle": "Legen Sie fest, wann der Tab „Kandidaten suchen“ im Stellen-Drilldown sichtbar ist und welche Kandidaten standardmäßig angezeigt werden.",
+    "vacancyStatusesTitle": "Sichtbar bei Stellenstatus",
+    "candidateStatusesTitle": "Einsatzbereitschaft im Tab",
+    "contractFormsTitle": "Vertragsformen im Tab"
   },
   "viewConfig": {
     "title": "{{label}}-Ansicht",

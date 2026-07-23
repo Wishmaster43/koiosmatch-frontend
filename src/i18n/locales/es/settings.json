@@ -140,6 +140,7 @@
     "vacancy_education": "Formación",
     "vacancy_channels": "Portales de empleo",
     "vacancy_matching": "Matching",
+    "vacancy_candidate_tab": "Pestaña Buscar candidatos",
     "match_templates": "Perfiles de matching",
     "task_statuses": "Estados",
     "matches": "Coincidencias",
@@ -1606,7 +1607,8 @@
   "documentTypes": {
     "title": "Tipos de documento",
     "subtitle": "Categorías y colores para documentos de candidatos (CV, identificación, diploma, …).",
-    "add": "Añadir tipo"
+    "add": "Añadir tipo",
+    "icon": "Icono"
   },
   "requiredFields": {
     "title": "Campos obligatorios",
@@ -1620,6 +1622,13 @@
     "statusesTitle": "Ocultar según la disponibilidad",
     "typesTitle": "Visible según la forma contractual",
     "vacancyStatusesTitle": "Estados de vacante en la pestaña"
+  },
+  "candidateTab": {
+    "title": "Pestaña Buscar candidatos en vacantes",
+    "subtitle": "Decide cuándo la pestaña «Buscar candidatos» es visible en el detalle de la vacante y qué candidatos se preseleccionan por defecto.",
+    "vacancyStatusesTitle": "Visible según el estado de la vacante",
+    "candidateStatusesTitle": "Disponibilidad preseleccionada en la pestaña",
+    "contractFormsTitle": "Formas contractuales preseleccionadas en la pestaña"
   },
   "viewConfig": {
     "title": "Vista {{label}}",

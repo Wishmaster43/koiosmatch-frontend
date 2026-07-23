@@ -137,6 +137,7 @@
     "vacancy_fields": "Aangepaste velden",
     "vacancy_app_defaults": "Sollicitatie-instellingen",
     "vacancy_matching": "Matching",
+    "vacancy_candidate_tab": "Kandidaten zoeken-tabblad",
     "match_templates": "Matchprofielen",
     "task_statuses": "Statussen",
     "matches": "Matches",
@@ -1625,7 +1626,8 @@
   "documentTypes": {
     "title": "Documenttypes",
     "subtitle": "Categorieën en kleuren voor kandidaatdocumenten (cv, id-bewijs, diploma, …).",
-    "add": "Type toevoegen"
+    "add": "Type toevoegen",
+    "icon": "Icoon"
   },
   "requiredFields": {
     "title": "Verplichte velden",
@@ -1639,6 +1641,13 @@
     "statusesTitle": "Verbergen bij inzetbaarheid",
     "typesTitle": "Zichtbaar bij contractvorm",
     "vacancyStatusesTitle": "Vacaturestatussen in het tabblad"
+  },
+  "candidateTab": {
+    "title": "Kandidaten zoeken-tabblad bij vacatures",
+    "subtitle": "Bepaal wanneer het tabblad 'Kandidaten zoeken' in de vacature-drilldown zichtbaar is en welke kandidaten standaard getoond worden.",
+    "vacancyStatusesTitle": "Zichtbaar bij vacaturestatus",
+    "candidateStatusesTitle": "Inzetbaarheid in het tabblad",
+    "contractFormsTitle": "Contractvormen in het tabblad"
   },
   "viewConfig": {
     "title": "{{label}} weergave",

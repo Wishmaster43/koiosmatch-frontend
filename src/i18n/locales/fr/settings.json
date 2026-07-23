@@ -140,6 +140,7 @@
     "vacancy_education": "Formation",
     "vacancy_channels": "Sites d'emploi",
     "vacancy_matching": "Matching",
+    "vacancy_candidate_tab": "Onglet Recherche de candidats",
     "match_templates": "Profils de matching",
     "task_statuses": "Statuts",
     "matches": "Correspondances",
@@ -1606,7 +1607,8 @@
   "documentTypes": {
     "title": "Types de document",
     "subtitle": "Catégories et couleurs pour les documents candidats (CV, pièce d'identité, diplôme, …).",
-    "add": "Ajouter un type"
+    "add": "Ajouter un type",
+    "icon": "Icône"
   },
   "requiredFields": {
     "title": "Champs requis",
@@ -1620,6 +1622,13 @@
     "statusesTitle": "Masquer selon la disponibilité",
     "typesTitle": "Visible selon la forme contractuelle",
     "vacancyStatusesTitle": "Statuts de poste dans l'onglet"
+  },
+  "candidateTab": {
+    "title": "Onglet Recherche de candidats sur les postes",
+    "subtitle": "Décidez quand l'onglet « Recherche de candidats » est visible dans la fiche détaillée du poste et quels candidats sont présélectionnés par défaut.",
+    "vacancyStatusesTitle": "Visible selon le statut du poste",
+    "candidateStatusesTitle": "Disponibilité présélectionnée dans l'onglet",
+    "contractFormsTitle": "Formes contractuelles présélectionnées dans l'onglet"
   },
   "viewConfig": {
     "title": "Vue {{label}}",

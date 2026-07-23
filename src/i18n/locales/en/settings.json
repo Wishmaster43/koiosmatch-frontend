@@ -137,6 +137,7 @@
     "vacancy_fields": "Custom fields",
     "vacancy_app_defaults": "Application settings",
     "vacancy_matching": "Matching",
+    "vacancy_candidate_tab": "Find-candidates tab",
     "match_templates": "Match profiles",
     "task_statuses": "Statuses",
     "matches": "Matches",
@@ -1625,7 +1626,8 @@
   "documentTypes": {
     "title": "Document types",
     "subtitle": "Categories and colours for candidate documents (CV, ID, diploma, …).",
-    "add": "Add type"
+    "add": "Add type",
+    "icon": "Icon"
   },
   "requiredFields": {
     "title": "Required fields",
@@ -1639,6 +1641,13 @@
     "statusesTitle": "Hide for deployability status",
     "typesTitle": "Visible for contract form",
     "vacancyStatusesTitle": "Vacancy statuses in the tab"
+  },
+  "candidateTab": {
+    "title": "Find-candidates tab on vacancies",
+    "subtitle": "Decide when the 'Find candidates' tab is visible in the vacancy drill-down and which candidates are preselected by default.",
+    "vacancyStatusesTitle": "Visible for vacancy status",
+    "candidateStatusesTitle": "Deployability preselected in the tab",
+    "contractFormsTitle": "Contract forms preselected in the tab"
   },
   "viewConfig": {
     "title": "{{label}} view",

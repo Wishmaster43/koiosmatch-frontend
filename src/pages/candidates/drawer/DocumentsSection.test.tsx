@@ -20,18 +20,24 @@ vi.mock('@/lib/api', () => ({
   },
   unwrap: (r: { data?: { data?: unknown } }) => r?.data?.data,
 }))
-// A fixed 2-type tenant lookup — the real hook's fetch/cache plumbing is irrelevant here.
+// A fixed 2-type tenant lookup — the real hook's fetch/cache plumbing is irrelevant
+// here. Keeps the real resolveDocTypeIcon/DOC_TYPE_ICON_MAP (importOriginal) since
+// DocumentsSection renders the row tile through it — only the hook itself is stubbed.
 /* eslint-disable no-restricted-syntax -- mock fixture DATA, not UI styling */
-vi.mock('@/lib/useDocumentTypes', () => ({
-  useDocumentTypes: () => ({
-    types: [
-      { value: 'CV', label: 'CV', color: '#4F46E5' },
-      { value: 'Diploma', label: 'Diploma', color: '#F59E0B' },
-    ],
-    labelOf: (v?: string) => v ?? '',
-    colorOf: () => '#4F46E5',
-  }),
-}))
+vi.mock('@/lib/useDocumentTypes', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/useDocumentTypes')>()
+  return {
+    ...actual,
+    useDocumentTypes: () => ({
+      types: [
+        { value: 'CV', label: 'CV', color: '#4F46E5' },
+        { value: 'Diploma', label: 'Diploma', color: '#F59E0B' },
+      ],
+      labelOf: (v?: string) => v ?? '',
+      colorOf: () => '#4F46E5',
+    }),
+  }
+})
 /* eslint-enable no-restricted-syntax */
 vi.mock('@/lib/datetime', () => ({
   useDateFormat: () => ({ formatDate: (v: string) => `d(${v})`, formatDateTime: (v: string) => `dt(${v})`, locale: 'nl-NL' }),
