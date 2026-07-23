@@ -10,7 +10,7 @@ export default function SettingsTabs({ items, active, onSelect }) {
   if (items.length <= 1) return null
 
   return (
-    <div role="tablist" style={{
+    <div role="tablist" className="no-scrollbar" style={{
       display: 'flex', gap: 4, borderBottom: '1px solid var(--border)',
       marginBottom: 24, overflowX: 'auto',
     }}>

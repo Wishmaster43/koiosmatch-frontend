@@ -156,3 +156,8 @@ body {
    EntityLink) keep their own colour. */
 a:not([class]) { color: var(--color-primary); text-decoration: none; }
 a:not([class]):hover { text-decoration: underline; }
+
+/* Scrollable tab rows stay swipeable but never draw the grey scrollbar strip
+   under the tabs (Danny 23-07: "tabel-lijntje" achter (sub)tabjes hoort nergens). */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

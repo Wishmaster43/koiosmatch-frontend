@@ -9,7 +9,7 @@ export interface SubTab { id: string; label: ReactNode }
 
 export default function SubTabBar({ tabs, active, onChange }: { tabs: SubTab[]; active: string; onChange: (id: string) => void }) {
   return (
-    <div role="tablist" style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', marginBottom: 4, overflowX: 'auto' }}>
+    <div role="tablist" className="no-scrollbar" style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', marginBottom: 4, overflowX: 'auto' }}>
       {tabs.map(sub => (
         <button key={sub.id} role="tab" aria-selected={active === sub.id} onClick={() => onChange(sub.id)}
           style={{ padding: '6px 12px', fontSize: 12, whiteSpace: 'nowrap', background: 'none', border: 'none',
