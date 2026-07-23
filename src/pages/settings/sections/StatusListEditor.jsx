@@ -5,6 +5,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import IconPickerControl from './IconPickerControl'
 import LookupIcon from '@/components/ui/LookupIcon'
 import { AlertTriangle, Check, Save, Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
@@ -27,7 +28,7 @@ import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/
 // yet 404s on GET — pass a calm i18n message and the editor shows it instead of an
 // empty list + live CRUD buttons that would silently fail (§3 no fake affordances).
 // Omitted (default), a 404 stays silently swallowed like every other lookup here.
-export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null, flagField = null, numberField = null, defaultField = null, withIcon = false, allowAdd = true, showRank = false, entity = null, notFoundNotice = null }) {
+export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null, flagField = null, numberField = null, defaultField = null, withIcon = false, iconPicker = null, allowAdd = true, showRank = false, entity = null, notFoundNotice = null }) {
   const { t } = useTranslation('settings')
   // eslint-disable-next-line no-restricted-syntax -- DATA: default swatch colour pre-filled for a newly created lookup row, not UI chrome
   const emptyDraft = () => ({ name: '', color: '#3B8FD4', ...(withIcon ? { icon: '' } : {}), ...(extraField ? { [extraField.key]: extraField.default } : {}), ...(numberField ? { [numberField.key]: numberField.default } : {}), ...(flagField ? { [flagField.key]: false } : {}) })
@@ -117,6 +118,14 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
       if (e?.response?.status === 409) setItems(p => p.map(x => x.id === item.id ? { ...x, in_use: true } : x))
       else notifyError(t('statusList.deleteFailed'))
     } finally { setDeleting(null) }
+  }
+
+  // Optimistic per-row icon update (iconPicker mode) — same revert rule as colour.
+  const updateIcon = async (item, icon) => {
+    const previous = items
+    setItems(p => p.map(x => x.id === item.id ? { ...x, icon } : x))
+    try { await api.put(`${endpoint}/${item.id}`, { ...item, icon }) }
+    catch { setItems(previous); notifyError(t('statusList.saveFailed')) }
   }
 
   const updateColor = async (item, color) => {
@@ -253,6 +262,12 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
               {/* eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome */}
               {withColor && <ColorSwatch color={item.color ?? '#6B7280'} onChange={c => updateColor(item, c)} />}
               {withIcon && item.icon && <span style={{ display: 'inline-flex', flexShrink: 0, color: 'var(--text-muted)' }}><LookupIcon icon={item.icon} size={14} /></span>}
+              {/* Curated icon picker IN the row, next to the colour (Danny 23-07). */}
+              {iconPicker && (
+                // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
+                <IconPickerControl icons={iconPicker.icons} resolve={iconPicker.resolve} value={item.icon}
+                  color={item.color ?? '#6B7280'} label={labelOf(item)} onPick={icon => updateIcon(item, icon)} />
+              )}
               {withColor
                 // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
                 ? <ColorBadge label={labelOf(item)} color={item.color ?? '#6B7280'} />

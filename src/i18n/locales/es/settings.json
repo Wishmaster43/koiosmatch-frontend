@@ -200,7 +200,8 @@
     "nt_opportunity": "Oportunidades",
     "action_rules": "Reglas de acción",
     "vacancy_generation": "Generación de vacantes",
-    "org_policy": "Política de organización"
+    "org_policy": "Política de organización",
+    "career_site": "Sitio de empleo"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -375,10 +376,6 @@
     "streetPlaceholder": "Nombre de la calle",
     "houseNumber": "Número",
     "houseNumberSuffix": "Complemento",
-    "careerSiteActive": "Sitio de carreras activo",
-    "careerSiteOn": "Activado — sitio público de vacantes visible",
-    "careerSiteOff": "Desactivado — sitio público no accesible",
-    "careerSiteHint": "Activa o desactiva el sitio de carreras público (…/{tenant}/vacatures) para este cliente. Tu elección se guarda; el sitio público la respetará en cuanto el backend la aplique.",
     "bannerUploadFailed": "Error al subir el banner"
   },
   "locations": {
@@ -2114,5 +2111,12 @@
     "delete": "Eliminar",
     "deleteBlocked": "No se puede eliminar — el bloque está en uso.",
     "confirmDelete": "¿Eliminar el bloque \"{{name}}\"?"
+  },
+  "careerSite": {
+    "title": "Sitio de empleo",
+    "subtitle": "El sitio público de vacantes de este inquilino.",
+    "on": "Activado — sitio público visible",
+    "off": "Desactivado — sitio público inaccesible",
+    "hint": "Activa o desactiva el sitio público de empleo (…/{tenant}/vacatures). El backend lo aplica de inmediato: desactivado = el sitio muestra un aviso y las solicitudes quedan cerradas."
   }
 }

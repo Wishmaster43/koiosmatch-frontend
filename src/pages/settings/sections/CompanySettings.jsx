@@ -54,8 +54,6 @@ const EMPTY = {
   company_street: '', company_house_number: '', company_house_number_suffix: '',
   company_postcode: '', company_city: '', company_province: '',
   company_language: 'Nederlands', company_currency: 'Euro (€)', company_timezone: 'Europa/Amsterdam',
-  // Opt-in, default OFF (§3B — never default a tenant into a new behavior).
-  career_site_active: false,
 }
 
 export default function CompanySettings() {
@@ -85,9 +83,6 @@ export default function CompanySettings() {
         company_language: s.company_language ?? 'Nederlands',
         company_currency: s.company_currency ?? 'Euro (€)',
         company_timezone: s.company_timezone ?? 'Europa/Amsterdam',
-        // Booleans round-trip through the settings store as strings (settingsApi
-        // stringifies on save), so coerce every truthy legacy/string form here.
-        career_site_active: [true, 1, '1', 'true'].includes(s.career_site_active),
       }))
       // Never trust a stored blob: URL — it only ever worked in the browser tab
       // that created it (session-local object URL) and is dead in every other
@@ -178,21 +173,6 @@ export default function CompanySettings() {
           <Row label={t('company.language')}><Select value={form.company_language} onChange={v => set('company_language', v)} options={LANGUAGES} /></Row>
           <Row label={t('company.currency')}><Select value={form.company_currency} onChange={v => set('company_currency', v)} options={CURRENCIES} /></Row>
           <Row label={t('company.timezone')}><Select value={form.company_timezone} onChange={v => set('company_timezone', v)} options={TIMEZONES} /></Row>
-
-          {/* Opt-in toggle only — this persists the tenant's preference today; the
-              public career site does not yet enforce it (backend ticket CAREER-SITE-ACTIVE
-              is still open), so this is an honest gate, not a live switch (§3). */}
-          <Row label={t('company.careerSiteActive')}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text)', cursor: 'pointer' }}>
-                <input type="checkbox" checked={form.career_site_active}
-                  onChange={e => set('career_site_active', e.target.checked)}
-                  style={{ accentColor: 'var(--color-primary)' }} />
-                {form.career_site_active ? t('company.careerSiteOn') : t('company.careerSiteOff')}
-              </label>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('company.careerSiteHint')}</p>
-            </div>
-          </Row>
         </div>
       )}
       {/* Organisation policies (MFA enforcement, …) live in their OWN sub-menu now:

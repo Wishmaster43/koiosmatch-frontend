@@ -200,7 +200,8 @@
     "nt_opportunity": "Opportunities",
     "action_rules": "Action rules",
     "vacancy_generation": "Vacancy generation",
-    "org_policy": "Organisation policy"
+    "org_policy": "Organisation policy",
+    "career_site": "Career site"
   },
   "kpis": {
     "title": "KPI settings",
@@ -394,10 +395,6 @@
     "streetPlaceholder": "Street name",
     "houseNumber": "House number",
     "houseNumberSuffix": "Addition",
-    "careerSiteActive": "Career site active",
-    "careerSiteOn": "On — public vacancy site visible",
-    "careerSiteOff": "Off — public site not reachable",
-    "careerSiteHint": "Turn the public career site (…/{tenant}/vacatures) on or off for this tenant. Your choice is saved; the public site will respect it once the backend enforces it.",
     "bannerUploadFailed": "Banner upload failed"
   },
   "locations": {
@@ -2114,5 +2111,12 @@
     "delete": "Delete",
     "deleteBlocked": "Cannot delete — block is in use.",
     "confirmDelete": "Delete block \"{{name}}\"?"
+  },
+  "careerSite": {
+    "title": "Career site",
+    "subtitle": "This tenant's public vacancy site.",
+    "on": "On — public vacancy site visible",
+    "off": "Off — public site unreachable",
+    "hint": "Turn the public career site (…/{tenant}/vacatures) on or off. The backend enforces it immediately: off = the public site shows a calm inactive notice and applying is closed."
   }
 }

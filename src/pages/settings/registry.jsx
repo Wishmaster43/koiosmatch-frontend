@@ -19,7 +19,7 @@ import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays, Car,
   ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Hash, Key, LayoutGrid,
   ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Megaphone, Package, Palette, Percent, Phone, Scale, Shield, SlidersHorizontal, Sparkles, Star,
-  Boxes, Store, Tags, Target, Upload, UserCheck, Users, Webhook, XCircle,
+  Boxes, Globe, Store, Tags, Target, Upload, UserCheck, Users, Webhook, XCircle,
 } from 'lucide-react'
 import CustomFieldsSettings from './sections/CustomFieldsSettings'
 import VacancyGenerationSettings from './sections/VacancyGenerationSettings'
@@ -38,6 +38,7 @@ import NoteTypesSettings from './sections/NoteTypesSettings'
 import { CandidateConversionSettings } from './sections/CandidateConversionSettings'
 import NumberingSettings from './sections/NumberingSettings'
 import OrganisationPolicySettings from './sections/OrganisationPolicySettings'
+import CareerSiteSettings from './sections/CareerSiteSettings'
 import { CustomerStatusesSettings, LocationStatusesSettings, DepartmentStatusesSettings, ContactStatusesSettings } from './sections/CustomerSettings'
 import PoolsSettings from './sections/PoolsSettings'
 import { LanguageListSettings, LanguageLevelSettings } from './sections/LanguageSettings'
@@ -129,6 +130,8 @@ export const NAV_GROUPS = [
       { id: 'numbering', icon: Hash, component: NumberingSettings },
       // Org-wide policies (MFA enforcement, …) — own sub-menu next to numbering (Danny 23-07).
       { id: 'org_policy', icon: Shield, component: OrganisationPolicySettings },
+      // Career site — its own sub-tab (Danny 23-07), out of the company-profile form.
+      { id: 'career_site', icon: Globe, component: CareerSiteSettings },
     ],
   },
   {

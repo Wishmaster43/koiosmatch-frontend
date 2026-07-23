@@ -29,7 +29,7 @@ const BASE = '/settings/candidate-lookups'
 const slugify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
 
 // One lookup list (contract forms / funnel stages / statuses) with inline CRUD.
-export function LookupBlock({ slug, title, subtitle, items, setItems }) {
+export function LookupBlock({ slug, title, subtitle, items, setItems, locked = false }) {
   const { t } = useTranslation('settings')
   const [modal,    setModal]    = useState(null) // null | { mode, id?, value, label, color, is_applicant, requires_appointment }
   const [busy,     setBusy]     = useState(false)
@@ -128,12 +128,12 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>
         </div>
         {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-        <button onClick={openAdd}
+        {!locked && <button onClick={openAdd}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
                    background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
           <Plus size={13} /> {t('lookups.add')}
-        </button>
+        </button>}
       </div>
 
       <DragList
@@ -172,13 +172,13 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
                        background: 'var(--border)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)' }}>
               <Pencil size={11} />
             </button>
-            <button onClick={() => remove(item)} disabled={deleting === item.id || inUse(item)}
+            {!locked && <button onClick={() => remove(item)} disabled={deleting === item.id || inUse(item)}
               title={inUse(item) ? t('lookups.inUse') : undefined}
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
                        background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-danger)',
                        cursor: inUse(item) ? 'not-allowed' : 'pointer', opacity: inUse(item) ? 0.4 : 1 }}>
               {deleting === item.id ? <RefreshCw size={11} className="animate-spin" /> : <Trash2 size={11} />}
-            </button>
+            </button>}
           </>
         )}
       />
@@ -307,7 +307,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
 
 // One candidate-lookup type rendered as its own settings tab. Each tab loads the
 // combined endpoint and renders only its slice, so the tabs stay independent.
-function CandidateLookupSection({ typeKey, slug }) {
+function CandidateLookupSection({ typeKey, slug, locked = false }) {
   const { t } = useTranslation('settings')
   const [items,   setItems]   = useState([])
   const [loading, setLoading] = useState(true)
@@ -323,7 +323,7 @@ function CandidateLookupSection({ typeKey, slug }) {
     <div style={{ maxWidth: 640 }}>
       {loading
         ? <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
-        : <LookupBlock slug={slug} title={t(`lookups.${typeKey}.title`)} subtitle={t(`lookups.${typeKey}.subtitle`)} items={items} setItems={setItems} />}
+        : <LookupBlock slug={slug} title={t(`lookups.${typeKey}.title`)} subtitle={t(`lookups.${typeKey}.subtitle`)} items={items} setItems={setItems} locked={locked} />}
     </div>
   )
 }
@@ -340,7 +340,9 @@ export function FunnelStagesSettings() {
 
 // Candidate phase (relationship lifecycle: Lead → Kandidaat) — model v2 axis.
 export function CandidatePhasesSettings() {
-  return <CandidateLookupSection typeKey="phases" slug="phases" />
+  // Lead/Kandidaat are SYSTEM values (automations + the matrix depend on them):
+  // no add, no delete — rename/colour only (Danny 23-07; BE guard ticketed).
+  return <CandidateLookupSection typeKey="phases" slug="phases" locked />
 }
 
 // Candidate deployability ("status": Beschikbaar/Geplaatst/… ) — model v2 axis.

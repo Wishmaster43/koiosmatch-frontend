@@ -200,7 +200,8 @@
     "nt_opportunity": "Kansen",
     "action_rules": "Actieregels",
     "vacancy_generation": "Vacaturegeneratie",
-    "org_policy": "Organisatiebeleid"
+    "org_policy": "Organisatiebeleid",
+    "career_site": "Carrière-site"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -394,10 +395,6 @@
     "streetPlaceholder": "Straatnaam",
     "houseNumber": "Huisnummer",
     "houseNumberSuffix": "Toevoegsel",
-    "careerSiteActive": "Carrière-site actief",
-    "careerSiteOn": "Aan — publieke vacaturesite zichtbaar",
-    "careerSiteOff": "Uit — publieke site niet bereikbaar",
-    "careerSiteHint": "Zet de publieke carrière-site (…/{tenant}/vacatures) aan of uit voor deze tenant. Je keuze wordt bewaard; de publieke site respecteert 'm zodra de backend het afdwingt.",
     "bannerUploadFailed": "Banner uploaden mislukt"
   },
   "locations": {
@@ -2114,5 +2111,12 @@
     "delete": "Verwijderen",
     "deleteBlocked": "Kan niet verwijderd worden — blok is in gebruik.",
     "confirmDelete": "Blok \"{{name}}\" verwijderen?"
+  },
+  "careerSite": {
+    "title": "Carrière-site",
+    "subtitle": "De publieke vacaturesite van deze tenant.",
+    "on": "Aan — publieke vacaturesite zichtbaar",
+    "off": "Uit — publieke site niet bereikbaar",
+    "hint": "Zet de publieke carrière-site (…/{tenant}/vacatures) aan of uit. De backend dwingt dit direct af: uit = de publieke site toont een nette niet-actief-melding en solliciteren is dicht."
   }
 }

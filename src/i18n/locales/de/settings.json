@@ -200,7 +200,8 @@
     "nt_opportunity": "Chancen",
     "action_rules": "Aktionsregeln",
     "vacancy_generation": "Stellenanzeigen-Generierung",
-    "org_policy": "Organisationsrichtlinien"
+    "org_policy": "Organisationsrichtlinien",
+    "career_site": "Karriereseite"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -375,10 +376,6 @@
     "streetPlaceholder": "Straßenname",
     "houseNumber": "Hausnummer",
     "houseNumberSuffix": "Zusatz",
-    "careerSiteActive": "Karriereseite aktiv",
-    "careerSiteOn": "An — öffentliche Stellenseite sichtbar",
-    "careerSiteOff": "Aus — öffentliche Seite nicht erreichbar",
-    "careerSiteHint": "Schalte die öffentliche Karriereseite (…/{tenant}/vacatures) für diesen Mandanten ein oder aus. Deine Wahl wird gespeichert; die öffentliche Seite berücksichtigt sie, sobald das Backend sie durchsetzt.",
     "bannerUploadFailed": "Banner-Upload fehlgeschlagen"
   },
   "locations": {
@@ -2114,5 +2111,12 @@
     "delete": "Löschen",
     "deleteBlocked": "Kann nicht gelöscht werden — Block wird verwendet.",
     "confirmDelete": "Block „{{name}}\" löschen?"
+  },
+  "careerSite": {
+    "title": "Karriereseite",
+    "subtitle": "Die öffentliche Stellenseite dieses Mandanten.",
+    "on": "An — öffentliche Stellenseite sichtbar",
+    "off": "Aus — öffentliche Seite nicht erreichbar",
+    "hint": "Schaltet die öffentliche Karriereseite (…/{tenant}/vacatures) ein oder aus. Das Backend erzwingt dies sofort: aus = die Seite zeigt einen Hinweis und Bewerbungen sind geschlossen."
   }
 }
