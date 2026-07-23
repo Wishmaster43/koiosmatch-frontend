@@ -224,6 +224,7 @@
       "background": "Parcours",
       "work": "Travail",
       "match": "Match",
+      "vacancySearch": "Postes",
       "planning": "Planning",
       "preferences": "Préférences",
       "zzp": "Indépendant",
@@ -792,6 +793,13 @@
   },
   "map": {
     "pointCount": "{{count}} candidats sur la carte"
+  },
+  "vacancySearch": {
+    "noLocation": "Ce candidat n'a pas encore de coordonnées de localisation — mettez d'abord à jour l'adresse, la carte apparaîtra ensuite ici.",
+    "statuses": "Statut du poste",
+    "functions": "Fonction",
+    "onMap": "{{count}} postes sur la carte",
+    "empty": "Aucun poste trouvé avec ces filtres."
   },
   "erase": {
     "trashView": "Corbeille",

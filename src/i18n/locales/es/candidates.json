@@ -224,6 +224,7 @@
       "background": "Trayectoria",
       "work": "Trabajo",
       "match": "Match",
+      "vacancySearch": "Vacantes",
       "planning": "Planificación",
       "preferences": "Preferencias",
       "zzp": "Autónomo",
@@ -792,6 +793,13 @@
   },
   "map": {
     "pointCount": "{{count}} candidatos en el mapa"
+  },
+  "vacancySearch": {
+    "noLocation": "Este candidato aún no tiene coordenadas de ubicación — actualiza primero la dirección, luego aparecerá el mapa aquí.",
+    "statuses": "Estado de la vacante",
+    "functions": "Función",
+    "onMap": "{{count}} vacantes en el mapa",
+    "empty": "No se han encontrado vacantes con estos filtros."
   },
   "erase": {
     "trashView": "Papelera",

@@ -231,6 +231,7 @@
       "background": "Achtergrond",
       "work": "Werk",
       "match": "Match",
+      "vacancySearch": "Vacatures",
       "planning": "Planning",
       "preferences": "Voorkeuren",
       "zzp": "ZZP",
@@ -792,6 +793,13 @@
   },
   "map": {
     "pointCount": "{{count}} kandidaten op de kaart"
+  },
+  "vacancySearch": {
+    "noLocation": "Deze kandidaat heeft nog geen locatie(-coördinaten) — werk eerst het adres bij, dan verschijnt hier de kaart.",
+    "statuses": "Vacaturestatus",
+    "functions": "Functie",
+    "onMap": "{{count}} vacatures op de kaart",
+    "empty": "Geen vacatures gevonden binnen deze filters."
   },
   "erase": {
     "trashView": "Prullenbak",

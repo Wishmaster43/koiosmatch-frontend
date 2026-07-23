@@ -22,6 +22,7 @@ import { useCandidateHeaderEdit } from './hooks/useCandidateHeaderEdit'
 import ProfilePanel from './drawer/ProfilePanel'
 import BackgroundTab from './drawer/BackgroundTab'
 import WorkTab from './drawer/WorkTab'
+import VacancySearchTab from './drawer/VacancySearchTab'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useCustomFields } from '@/lib/useCustomFields'
 import PlanningPanel from './drawer/PlanningPanel'
@@ -56,6 +57,9 @@ const TABS = [
   { id: 'profile',        tKey: 'profile'       },
   { id: 'background',     tKey: 'background'    },
   { id: 'work',           tKey: 'match'         },
+  // Match-zoeker fase 1b: OPEN vacancies around the candidate's home location
+  // (mirrors vacancies/drawer/CandidateSearchTab, the vacancy-side counterpart).
+  { id: 'vacancySearch',  tKey: 'vacancySearch' },
   { id: 'planning',       tKey: 'planning'      },
   { id: 'preferences',    tKey: 'preferences'   },
   { id: 'administration', tKey: 'zzp'           },
@@ -161,6 +165,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       case 'profile':        return <ProfilePanel c={mergedC} autoEditSignal={profileEditSignal} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
       case 'background':     return <BackgroundTab c={mergedC} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
       case 'work':           return <WorkTab c={c} />
+      case 'vacancySearch':  return <VacancySearchTab candidate={c} />
       case 'planning':       return <PlanningPanel c={c} />
       case 'preferences':    return <PreferencesTab c={c}
         onSave={(p: unknown) => {

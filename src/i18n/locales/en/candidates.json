@@ -231,6 +231,7 @@
       "background": "Background",
       "work": "Work",
       "match": "Match",
+      "vacancySearch": "Vacancies",
       "planning": "Planning",
       "preferences": "Preferences",
       "zzp": "Freelance",
@@ -792,6 +793,13 @@
   },
   "map": {
     "pointCount": "{{count}} candidates on the map"
+  },
+  "vacancySearch": {
+    "noLocation": "This candidate has no location coordinates yet — update the address first, then the map will appear here.",
+    "statuses": "Vacancy status",
+    "functions": "Function",
+    "onMap": "{{count}} vacancies on the map",
+    "empty": "No vacancies found within these filters."
   },
   "erase": {
     "trashView": "Trash",

@@ -224,6 +224,7 @@
       "background": "Hintergrund",
       "work": "Arbeit",
       "match": "Match",
+      "vacancySearch": "Stellen",
       "planning": "Planung",
       "preferences": "Präferenzen",
       "zzp": "Freiberufler",
@@ -792,6 +793,13 @@
   },
   "map": {
     "pointCount": "{{count}} Kandidaten auf der Karte"
+  },
+  "vacancySearch": {
+    "noLocation": "Dieser Kandidat hat noch keine Standortkoordinaten — aktualisieren Sie zuerst die Adresse, dann erscheint hier die Karte.",
+    "statuses": "Stellenstatus",
+    "functions": "Funktion",
+    "onMap": "{{count}} Stellen auf der Karte",
+    "empty": "Keine Stellen innerhalb dieser Filter gefunden."
   },
   "erase": {
     "trashView": "Papierkorb",
