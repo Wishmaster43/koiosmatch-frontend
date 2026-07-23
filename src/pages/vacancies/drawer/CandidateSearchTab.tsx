@@ -1,0 +1,123 @@
+import type { CSSProperties } from 'react'
+import { useTranslation } from 'react-i18next'
+import MatchExplorerLayout from '@/components/match/MatchExplorerLayout'
+import RadiusMapPanel from '@/components/map/RadiusMapPanel'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import { useCandidateSearch } from '../hooks/useCandidateSearch'
+import { useFunctions } from '@/lib/useFunctions'
+import { useLookups } from '@/context/LookupsContext'
+import { useNavigation } from '@/context/NavigationContext'
+import { toCoord } from '@/lib/coords'
+import type { VacancyDetail } from '@/types/vacancy'
+import type { Id } from '@/types/common'
+
+const filterLabel: CSSProperties = { fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
+const chipRow: CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 6 }
+const rowStyle: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 10px', borderRadius: 8, cursor: 'pointer' }
+
+/**
+ * CandidateSearchTab — Match-zoeker fase 1 (vacancy side): the vacancy's own
+ * location as the search origin, candidates matching radius/function/status
+ * filters plotted on the shared RadiusMap + listed side by side (§3A blueprint:
+ * thin container, all data via the hook, one small component per tab).
+ */
+export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail }) {
+  const { t } = useTranslation('vacancies')
+  const { functions: functionOptions } = useFunctions()
+  const { statuses: statusOptions } = useLookups()
+  // Cross-entity deep link (EntityLink's own mechanism — NavigationContext.openEntity):
+  // this switches the app to the candidates page AND opens the record's drawer there,
+  // the same path every "open X" affordance in the app already uses.
+  const { openEntity } = useNavigation()
+  const {
+    rows, loading, error, retry, radiusKm, setRadiusKm,
+    functions: selectedFunctions, setFunctions,
+    statuses: selectedStatuses, setStatuses,
+    noLocation,
+  } = useCandidateSearch(vacancy)
+
+  // Honest empty state — no dead map/filters when the vacancy has no coordinates yet.
+  if (noLocation) {
+    return <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{t('candidateSearch.noLocation')}</div>
+  }
+
+  const openCandidate = (id: Id) => openEntity('candidates', id)
+  const toggleFunction = (name: string) =>
+    setFunctions(selectedFunctions.includes(name) ? selectedFunctions.filter(f => f !== name) : [...selectedFunctions, name])
+  const toggleStatus = (value: string) =>
+    setStatuses(selectedStatuses.includes(value) ? selectedStatuses.filter(s => s !== value) : [...selectedStatuses, value])
+
+  const center = { lat: toCoord(vacancy.lat) as number, lng: toCoord(vacancy.lng) as number }
+  const points = rows
+    .filter(r => r.lat != null && r.lng != null)
+    .map(r => ({ id: r.id, lat: r.lat as number, lng: r.lng as number, label: r.name, sub: [r.functionTitle, r.city].filter(Boolean).join(' · ') }))
+
+  const filtersRow = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div>
+        <span style={filterLabel}>{t('candidateSearch.functions')}</span>
+        <div style={chipRow}>
+          {functionOptions.map(fn => (
+            <QuickViewToggle key={fn} active={selectedFunctions.includes(fn)} onToggle={() => toggleFunction(fn)} label={fn} />
+          ))}
+        </div>
+      </div>
+      <div>
+        <span style={filterLabel}>{t('candidateSearch.statuses')}</span>
+        <div style={chipRow}>
+          {statusOptions.map(s => (
+            <QuickViewToggle key={s.value} active={selectedStatuses.includes(s.value)} onToggle={() => toggleStatus(s.value)} label={s.label} color={s.color} />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+
+  const mapPane = (
+    <RadiusMapPanel padded={false} points={points} center={center} radiusKm={radiusKm}
+      onRadiusChange={setRadiusKm}
+      // The vacancy pin stays fixed — re-centring by clicking the map must never
+      // move the search origin away from the vacancy's own address.
+      onCenterChange={() => {}}
+      onPick={openCandidate}
+      pointsLabel={t('candidateSearch.onMap', { count: points.length })} />
+  )
+
+  // Four explicit states: loading, error (+ retry), empty, success list.
+  const listPane = loading ? (
+    <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</div>
+  ) : error ? (
+    <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('common:error.body')}</span>
+      <button onClick={retry} style={{ alignSelf: 'flex-start', fontSize: 12, fontWeight: 600, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+        {t('common:error.retry')}
+      </button>
+    </div>
+  ) : rows.length === 0 ? (
+    <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{t('candidateSearch.empty')}</div>
+  ) : (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      {rows.map(r => (
+        // Native <button> (semantic HTML first, §6) — full width so it reads as one row.
+        <button key={String(r.id)} type="button" onClick={() => openCandidate(r.id)}
+          style={{ ...rowStyle, width: '100%', border: 'none', background: 'transparent', textAlign: 'left', font: 'inherit' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--hover-bg)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {[r.functionTitle, r.city].filter(Boolean).join(' · ') || '—'}
+            </div>
+          </div>
+          {r.distanceKm != null && (
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>
+              {r.distanceKm.toFixed(1)} km
+            </span>
+          )}
+        </button>
+      ))}
+    </div>
+  )
+
+  return <MatchExplorerLayout filters={filtersRow} map={mapPane} list={listPane} />
+}

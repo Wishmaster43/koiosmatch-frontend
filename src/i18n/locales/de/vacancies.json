@@ -113,6 +113,7 @@
       "description": "Beschreibung",
       "applicants": "Bewerbungen",
       "matching": "Matching",
+      "candidateSearch": "Kandidaten suchen",
       "aiagent": "KI-Agent",
       "publishing": "Veröffentlichen",
       "documents": "Dokumente",
@@ -271,6 +272,13 @@
     "candidate": "Kandidat",
     "planIntake": "Intake planen",
     "addApplication": "Bewerbung"
+  },
+  "candidateSearch": {
+    "noLocation": "Diese Vakanz hat noch keine Standortkoordinaten — aktualisieren Sie zuerst die Adresse, dann erscheint hier die Karte.",
+    "functions": "Funktion",
+    "statuses": "Einsetzbarkeit",
+    "onMap": "{{count}} Kandidaten auf der Karte",
+    "empty": "Keine Kandidaten innerhalb dieser Filter gefunden."
   },
   "statistics": {
     "title": "Konversion",

@@ -21,6 +21,7 @@ import TimelineTab from './drawer/TimelineTab'
 import NotesTab from './drawer/NotesTab'
 import StatisticsTab from './drawer/StatisticsTab'
 import MatchingTab from './drawer/MatchingTab'
+import CandidateSearchTab from './drawer/CandidateSearchTab'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useVacancyCustomFields } from '@/lib/useVacancyCustomFields'
 import type { VacancyDetail } from '@/types/vacancy'
@@ -39,6 +40,9 @@ const TABS: { id: string; tKey: string; render: (v: VacancyDetail, onUpdate?: Up
   { id: 'description', tKey: 'description', render: (v, onUpdate) => <DescriptionTab vacancy={v} onUpdate={onUpdate} /> },
   { id: 'applicants', tKey: 'applicants', render: v => <ApplicantsTab vacancy={v} /> },
   { id: 'matching',   tKey: 'matching',   render: (v, onUpdate) => <MatchingTab vacancy={v} onUpdate={onUpdate} /> },
+  // Match-zoeker fase 1 (vacancy side, Danny 23-07): candidates matching this
+  // vacancy's radius/function/status filters, map + list side by side.
+  { id: 'candidateSearch', tKey: 'candidateSearch', render: v => <CandidateSearchTab vacancy={v} /> },
   // VAC-AGENT-1 (Danny 21-07): its own tab — the agent picker + the read-only
   // interview flow that agent carries; placed right after matching (both feed the
   // application flow) and before publishing.

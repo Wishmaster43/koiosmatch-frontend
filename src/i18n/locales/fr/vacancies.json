@@ -113,6 +113,7 @@
       "description": "Description",
       "applicants": "Candidatures",
       "matching": "Matching",
+      "candidateSearch": "Rechercher des candidats",
       "aiagent": "Agent IA",
       "publishing": "Publier",
       "documents": "Documents",
@@ -271,6 +272,13 @@
     "candidate": "Candidat",
     "planIntake": "Planifier un entretien",
     "addApplication": "Candidature"
+  },
+  "candidateSearch": {
+    "noLocation": "Cette vacance n'a pas encore de coordonnées de localisation — mettez d'abord à jour l'adresse, la carte apparaîtra ensuite ici.",
+    "functions": "Fonction",
+    "statuses": "Disponibilité",
+    "onMap": "{{count}} candidats sur la carte",
+    "empty": "Aucun candidat trouvé avec ces filtres."
   },
   "statistics": {
     "title": "Conversion",

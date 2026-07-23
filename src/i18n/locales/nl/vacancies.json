@@ -113,6 +113,7 @@
       "description": "Beschrijving",
       "applicants": "Sollicitaties",
       "matching": "Matching",
+      "candidateSearch": "Kandidaten zoeken",
       "aiagent": "AI-agent",
       "publishing": "Publiceren",
       "extra": "Extra",
@@ -271,6 +272,13 @@
     "candidate": "Kandidaat",
     "planIntake": "Intake plannen",
     "addApplication": "Sollicitatie"
+  },
+  "candidateSearch": {
+    "noLocation": "Deze vacature heeft nog geen locatie(-coördinaten) — werk eerst het adres bij, dan verschijnt hier de kaart.",
+    "functions": "Functie",
+    "statuses": "Inzetbaarheid",
+    "onMap": "{{count}} kandidaten op de kaart",
+    "empty": "Geen kandidaten gevonden binnen deze filters."
   },
   "statistics": {
     "title": "Conversie",

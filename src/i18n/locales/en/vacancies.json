@@ -113,6 +113,7 @@
       "description": "Description",
       "applicants": "Applications",
       "matching": "Matching",
+      "candidateSearch": "Find candidates",
       "aiagent": "AI agent",
       "publishing": "Publish",
       "extra": "Extra",
@@ -271,6 +272,13 @@
     "candidate": "Candidate",
     "planIntake": "Plan intake",
     "addApplication": "Application"
+  },
+  "candidateSearch": {
+    "noLocation": "This vacancy has no location (coordinates) yet — update the address first, then the map appears here.",
+    "functions": "Function",
+    "statuses": "Availability",
+    "onMap": "{{count}} candidates on the map",
+    "empty": "No candidates found within these filters."
   },
   "statistics": {
     "title": "Conversion",
