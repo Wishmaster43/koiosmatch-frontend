@@ -12,6 +12,9 @@ import api, { unwrapList } from '@/lib/api'
 import { toCoord } from '@/lib/coords'
 import { canonicalizeToOptions, lookupValue } from '@/lib/lookupUtils'
 import { useLookups } from '@/context/LookupsContext'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { getCandidateTabDefaults } from '../lib/candidateTabVisibility'
+import type { CandidateTabConfig } from '../lib/candidateTabVisibility'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -54,15 +57,19 @@ interface RawMatchRow {
 export function useCandidateSearch(vacancy: VacancyDetail) {
   const { statuses, candidateTypes } = useLookups()
 
-  // Soft DEFAULT against the tenant's seed — never a hardcoded vocabulary: preselect
-  // whichever status option reads as "available" by value or label, if the tenant
-  // has one; otherwise no default (empty selection = all statuses).
-  const defaultStatus = statuses.find(s => /beschikbaar|available/i.test(`${s.value} ${s.label}`))
+  // Tenant defaults for this tab (Settings → Vacature → Kandidaten zoeken-tabblad,
+  // same vacancy_candidate_tab key the drawer's visibility gate reads); a stored
+  // (even empty) array wins over the exact-match seed default.
+  const allSettings = useAllSettings()
+  const candidateTabCfg = getJsonSetting<CandidateTabConfig | null>(allSettings, 'vacancy_candidate_tab', null)
+  const tabDefaults = getCandidateTabDefaults([], statuses, candidateTypes)
+  const defaultStatusValues = candidateTabCfg?.candidate_statuses ?? tabDefaults.candidate_statuses
+  const defaultContractForms = candidateTabCfg?.contract_forms ?? tabDefaults.contract_forms
 
   const [radiusKm, setRadiusKm]           = useState(30)
   const [functions, setFunctions]         = useState<string[]>(vacancy.category ? [vacancy.category] : [])
-  const [statusSel, setStatusSel]         = useState<string[]>(defaultStatus ? [defaultStatus.value] : [])
-  const [contractForms, setContractForms] = useState<string[]>([])
+  const [statusSel, setStatusSel]         = useState<string[]>(defaultStatusValues)
+  const [contractForms, setContractForms] = useState<string[]>(defaultContractForms)
 
   // The tab is NOT remounted when a different vacancy is opened (EntityDrawer only
   // keys its tab body by the active TAB id, not the entity) — re-derive the filter
@@ -74,8 +81,8 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
     setPrevId(vacancy.id)
     setRadiusKm(30)
     setFunctions(vacancy.category ? [vacancy.category] : [])
-    setStatusSel(defaultStatus ? [defaultStatus.value] : [])
-    setContractForms([])
+    setStatusSel(defaultStatusValues)
+    setContractForms(defaultContractForms)
   }
 
   // Converge the selection onto the lookup's canonical values once the API rows

@@ -50,6 +50,11 @@ vi.mock('@/lib/useFunctions', () => ({
 // Two tenant status options (mirrors DEFAULT_STATUSES) + two contract-form
 // options (mirrors DEFAULT_CANDIDATE_TYPES) — 'available' is the one the
 // hook's soft default should match by value.
+const settingsRef = vi.hoisted(() => ({ current: {} as Record<string, unknown> }))
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/settings/useAllSettings')>('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => settingsRef.current }
+})
 vi.mock('@/context/LookupsContext', () => ({
   useLookups: () => ({
     /* eslint-disable no-restricted-syntax -- seed DATA mirroring the DEFAULT_* seeds, not a UI colour choice */

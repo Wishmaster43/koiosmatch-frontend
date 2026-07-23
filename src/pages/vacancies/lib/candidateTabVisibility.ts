@@ -58,12 +58,12 @@ export function getCandidateTabDefaults(
   const defaultVacancyStatuses = vacancyStatuses.map(s => s.value)
   // Soft default (seed-based, regex — never a hardcoded vocabulary): whichever
   // deployability status reads as "available" preselects the candidate filter.
-  // Note: this is a substring match, so a seed value/label containing "available"
-  // as part of a longer word (e.g. "unavailable"/"niet beschikbaar") also matches —
+  // EXACT match (trimmed) — a substring test would also hit "Niet beschikbaar"/
+  // "unavailable", silently preselecting the opposite of what Danny wants —
   // acceptable since this is only a SOFT, tenant-overridable default (Settings
   // always wins once configured), not a hard business rule.
   const defaultCandidateStatuses = candidateStatuses
-    .filter(s => /beschikbaar|available/i.test(s.value) || /beschikbaar|available/i.test(s.label))
+    .filter(s => /^\s*(beschikbaar|available)\s*$/i.test(s.value) || /^\s*(beschikbaar|available)\s*$/i.test(s.label))
     .map(s => s.value)
   // No contract-form restriction by default — nothing preselected means every
   // contract form is included in the search results.

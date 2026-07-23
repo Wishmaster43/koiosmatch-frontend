@@ -34,11 +34,11 @@ describe('getCandidateTabDefaults', () => {
     expect(d.vacancy_statuses).toEqual(['open', 'online', 'concept', 'paused', 'closed'])
   })
   // The status reading as "available" preselects the candidate filter — a
-  // substring match, so "unavailable"/"niet beschikbaar" also match (documented
-  // known behaviour: a soft, tenant-overridable default, never a hard rule).
-  it('preselects the deployability statuses reading as (un)available, excludes sick/leave', () => {
+  // EXACT match: "unavailable"/"Niet beschikbaar" must NOT ride along (that
+  // substring quirk preselected the opposite of the intended default, 23-07).
+  it('preselects only the exactly-"available" status — never unavailable/sick/leave', () => {
     const d = getCandidateTabDefaults(vacancyStatuses, candidateStatuses, candidateTypes)
-    expect(d.candidate_statuses).toEqual(['available', 'unavailable'])
+    expect(d.candidate_statuses).toEqual(['available'])
   })
   // No contract-form restriction by default — nothing preselected means all candidates.
   it('defaults contract_forms to an empty (unrestricted) array', () => {
