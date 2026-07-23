@@ -15,6 +15,7 @@ import {
 import { TextFieldWithVars } from './VariablePicker'
 import { fieldLabel, fieldPlaceholder, optionLabel } from './moduleI18n'
 import WhatsappTemplateField from './WhatsappTemplateField'
+import MultiSelectField from './MultiSelectField'
 
 export function FieldInput({ field, value, onChange, variables, config }: {
   field: WorkflowField; value?: unknown; onChange: OnChange; variables?: WorkflowVarGroup[]
@@ -53,29 +54,9 @@ export function FieldInput({ field, value, onChange, variables, config }: {
     )
   }
   if (field.type === 'multiselect') {
-    const selected: unknown[] = Array.isArray(value) ? value : []
-    return (
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-        {(field.options ?? []).map(optRaw => {
-          const opt = optRaw as string
-          const active = selected.includes(opt)
-          return (
-            <button key={opt} type="button"
-              onClick={() => onChange(field.key, active ? selected.filter(v => v !== opt) : [...selected, opt])}
-              style={{
-                padding: '3px 10px', borderRadius: 999, fontSize: 12,
-                background: active ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
-                color:      active ? 'var(--color-primary)'    : 'var(--text-muted)',
-                // eslint-disable-next-line no-restricted-syntax -- no matching token hue close enough for this active-chip border; tracked as a token-set follow-up (mirrors KoiosRadar.tsx precedent)
-                border:     `1px solid ${active ? '#C4C0F0' : 'var(--border)'}`,
-                cursor: 'pointer',
-              }}>
-              {optionLabel(t, opt)}
-            </button>
-          )
-        })}
-      </div>
-    )
+    // WF-MULTISELECT-1 (Danny 23-07): searchable multi-select — tenant lookups via
+    // `source` (statussen/fases/contractvormen), static options, or free entry (Plaats).
+    return <MultiSelectField field={field} value={value} onChange={onChange} />
   }
   if (field.type === 'select') {
     return (

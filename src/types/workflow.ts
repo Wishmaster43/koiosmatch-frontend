@@ -145,6 +145,8 @@ export interface WorkflowField {
   label?: string
   fields?: Array<string | FieldOption>
   options?: Array<string | FieldOption>
+  // WF-MULTISELECT-1: tenant-lookup source for multiselect (candidate_statuses/phases/types).
+  source?: string
   default?: unknown
   placeholder?: string
   [k: string]: unknown
