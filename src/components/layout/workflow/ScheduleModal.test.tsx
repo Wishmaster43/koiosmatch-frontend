@@ -19,13 +19,31 @@ vi.mock('@/lib/api', async () => {
 })
 
 describe('ScheduleModal · event trigger', () => {
-  it('selecting the event type reveals the event picker with the catalogue options', () => {
+  it('selecting the event type reveals the searchable picker with the FULL catalogue', () => {
+    // TRIGGER-POPUP-2: the picker is a searchable combobox now — opening it must
+    // list every dispatched event key (Danny 23-07 "alle events erbij").
     render(<ScheduleModal onSave={vi.fn()} onClose={vi.fn()} />)
     fireEvent.click(screen.getByText('scheduleModal.trigger.event'))
-    const select = screen.getByLabelText('scheduleModal.eventLabel') as HTMLSelectElement
-    expect(select).toBeInTheDocument()
-    const options = Array.from(select.options).map(o => o.value)
+    const input = screen.getByLabelText('scheduleModal.eventLabel') as HTMLInputElement
+    expect(input).toBeInTheDocument()
+    fireEvent.focus(input)
+    const options = screen.getAllByRole('option').map(o => o.getAttribute('data-event-key'))
     expect(options).toEqual([...WORKFLOW_EVENT_KEYS])
+  })
+
+  it('typing in the picker filters the catalogue and clicking an option selects it', () => {
+    const onSave = vi.fn()
+    render(<ScheduleModal onSave={onSave} onClose={vi.fn()} />)
+    fireEvent.click(screen.getByText('scheduleModal.trigger.event'))
+    const input = screen.getByLabelText('scheduleModal.eventLabel') as HTMLInputElement
+    fireEvent.focus(input)
+    // Raw-key search works too (i18n is not initialized here, so labels are raw keys).
+    fireEvent.change(input, { target: { value: 'match.created' } })
+    const options = screen.getAllByRole('option')
+    expect(options).toHaveLength(1)
+    fireEvent.click(options[0])
+    fireEvent.click(screen.getByText('scheduleModal.save'))
+    expect(onSave).toHaveBeenCalledWith('Event', { schedule_type: 'event', event: 'match.created' })
   })
 
   it('Save on the event type calls onSave with trigger_type-ready shape { event: <key> }', () => {
@@ -38,8 +56,9 @@ describe('ScheduleModal · event trigger', () => {
 
   it('reopening on an existing Event trigger preselects its stored event key', () => {
     render(<ScheduleModal trigger="Event" scheduleConfig={{ event: 'candidate.birthday' }} onSave={vi.fn()} onClose={vi.fn()} />)
-    const select = screen.getByLabelText('scheduleModal.eventLabel') as HTMLSelectElement
-    expect(select.value).toBe('candidate.birthday')
+    // Closed combobox shows the selected event's label (raw i18n key in tests).
+    const input = screen.getByLabelText('scheduleModal.eventLabel') as HTMLInputElement
+    expect(input.value).toBe('triggers.events.candidate_birthday')
   })
 })
 

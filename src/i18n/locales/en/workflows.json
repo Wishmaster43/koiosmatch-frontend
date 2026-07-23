@@ -932,7 +932,12 @@
       "application_stage_changed": "Application stage changed",
       "match_created": "Match created",
       "appointment_upcoming": "Appointment upcoming",
-      "facebook_lead_received": "Facebook lead received"
+      "facebook_lead_received": "Facebook lead received",
+      "candidate_created": "Candidate created",
+      "candidate_address_changed": "Candidate address changed",
+      "candidate_reactivated": "Candidate reactivated",
+      "candidate_retention_due": "Candidate retention due",
+      "backoffice_link_updated": "Back-office link updated"
     }
   }
 }

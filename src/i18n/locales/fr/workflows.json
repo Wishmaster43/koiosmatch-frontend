@@ -932,7 +932,12 @@
       "application_stage_changed": "Étape de candidature modifiée",
       "match_created": "Match créé",
       "appointment_upcoming": "Rendez-vous à venir",
-      "facebook_lead_received": "Lead Facebook reçu"
+      "facebook_lead_received": "Lead Facebook reçu",
+      "candidate_created": "Candidat créé",
+      "candidate_address_changed": "Adresse du candidat modifiée",
+      "candidate_reactivated": "Candidat réactivé",
+      "candidate_retention_due": "Délai de conservation du candidat échu",
+      "backoffice_link_updated": "Lien back-office mis à jour"
     }
   }
 }

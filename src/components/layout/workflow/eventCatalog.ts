@@ -14,11 +14,19 @@
  * template-only today, not a general-purpose picker option yet).
  */
 export const WORKFLOW_EVENT_KEYS = [
+  // Danny 23-07 ("alle events erbij"): the COMPLETE dispatched vocabulary —
+  // verified against every WorkflowDispatcher::dispatch() call site in
+  // koiosmatch-api (TriggerModule::configSchema mirrors this same list).
   'application.stage_changed',
   'match.created',
+  'candidate.created',
   'candidate.birthday',
+  'candidate.address_changed',
+  'candidate.reactivated',
+  'candidate.retention_due',
   'appointment.upcoming',
   'facebook.lead_received',
+  'backoffice.link.updated',
 ] as const
 
 export type WorkflowEventKey = (typeof WORKFLOW_EVENT_KEYS)[number]

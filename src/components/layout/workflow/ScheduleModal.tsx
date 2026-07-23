@@ -6,11 +6,11 @@
  * All visible text runs through i18n (workflows:scheduleModal.*); day/month names
  * come from Intl (locale-aware) so there are no hardcoded NL arrays.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
-import { X, CalendarDays, Play, Zap, Bell, Webhook } from 'lucide-react'
+import { X, CalendarDays, Play, Zap, Bell, Webhook, Search, ChevronDown, Check } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { unwrapList } from '@/lib/api'
@@ -55,6 +55,71 @@ export function scheduleLabel(t: TFunction, locale: string, trigger?: string, cf
   if (ty === 'quarterly') return t('scheduleModal.label.quarterlyAt', { time })
   if (ty === 'yearly')    return t('scheduleModal.label.yearlyAt', { month: monthName(locale, (cfg.month ?? 1) - 1), day: cfg.day_of_month ?? 1, time })
   return t('scheduleModal.label.scheduled')
+}
+
+// ── Searchable event combobox (TRIGGER-POPUP-2, Danny 23-07) ──────────────────
+// Single-select with a filter input: the catalogue holds every dispatched
+// domain event, so the picker must scale beyond a plain <select>.
+function EventCombobox({ value, onChange, label }: {
+  value: string; onChange: (key: string) => void; label: string
+}) {
+  const { t } = useTranslation('workflows')
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const boxRef = useRef<HTMLDivElement>(null)
+
+  const labelFor = (key: string) => t(`triggers.events.${eventKeyToI18nKey(key)}`)
+  const filtered = WORKFLOW_EVENT_KEYS.filter(key =>
+    !search || labelFor(key).toLowerCase().includes(search.toLowerCase()) || key.includes(search.toLowerCase()))
+
+  return (
+    <div ref={boxRef} style={{ position: 'relative' }}
+      onBlur={e => { if (!boxRef.current?.contains(e.relatedTarget as Node)) setOpen(false) }}>
+      {/* Control: the selected event, or the live filter while open. */}
+      <div onClick={() => setOpen(true)}
+        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', borderRadius: 8,
+                 border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'text' }}>
+        <Search size={13} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+        <input value={open ? search : labelFor(value)} aria-label={label}
+          placeholder={labelFor(value)}
+          onFocus={() => { setOpen(true); setSearch('') }}
+          onChange={e => { setSearch(e.target.value); setOpen(true) }}
+          onKeyDown={e => { if (e.key === 'Escape') setOpen(false) }}
+          style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent',
+                   fontSize: 13, color: 'var(--text)' }} />
+        <ChevronDown size={13} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+      </div>
+
+      {/* Dropdown: every catalogued event, filtered as you type. */}
+      {open && (
+        <div role="listbox" aria-label={label}
+          style={{ position: 'absolute', zIndex: 30, top: '100%', left: 0, right: 0, marginTop: 4,
+                   maxHeight: 260, overflowY: 'auto', borderRadius: 8, border: '1px solid var(--border)',
+                   background: 'var(--surface)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+          {filtered.length === 0 ? (
+            <div style={{ padding: '9px 12px', fontSize: 12, color: 'var(--text-muted)' }}>
+              {t('fields.multiselectNoResults', { defaultValue: 'Geen resultaten.' })}
+            </div>
+          ) : filtered.map(key => {
+            const active = key === value
+            return (
+              <button key={key} type="button" role="option" aria-selected={active} data-event-key={key}
+                onMouseDown={e => e.preventDefault() /* keep focus so blur doesn't close first */}
+                onClick={() => { onChange(key); setOpen(false); setSearch('') }}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left',
+                         padding: '9px 12px', border: 'none', cursor: 'pointer', fontSize: 13,
+                         background: active ? 'var(--color-primary-bg)' : 'transparent',
+                         color: active ? 'var(--color-primary)' : 'var(--text)' }}>
+                <span style={{ width: 14, flexShrink: 0, display: 'flex' }}>{active && <Check size={13} />}</span>
+                <span style={{ flex: 1 }}>{labelFor(key)}</span>
+                <span style={{ fontSize: 10.5, color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>{key}</span>
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
 }
 
 // ── Schedule Modal ────────────────────────────────────────────────────────────
@@ -125,13 +190,25 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
 
   const inputStyle: CSSProperties = { padding: '6px 10px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }
   const selectStyle: CSSProperties = { ...inputStyle, cursor: 'pointer' }
+  // TRIGGER-POPUP-2 (Danny 23-07 "groter en overzichtelijker"): each config group
+  // sits in its own bordered section card with a small uppercase header.
+  const sectionStyle: CSSProperties = { border: '1px solid var(--border)', borderRadius: 12, padding: 16, background: 'var(--surface)' }
+  const sectionLabel: CSSProperties = { display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
+
+  // Live preview for EVERY trigger type — the same scheduleLabel the node shows.
+  const previewTrigger = type === 'manual' ? 'Handmatig' : type === 'instant' ? 'Direct'
+    : type === 'event' ? 'Event' : type === 'webhook' ? 'Webhook' : 'Scheduled'
+  const previewCfg: ScheduleConfig | null = type === 'event' ? { schedule_type: 'event', event: eventKey }
+    : type === 'webhook' ? { schedule_type: 'webhook', agent: agentName }
+    : type === 'scheduled' ? { schedule_type: sType, interval_value: +intVal, interval_unit: intUnit, time, times, days_of_week: dow, day_of_month: dom, month }
+    : null
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)' }}
       onClick={onClose}>
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('scheduleModal.title')} tabIndex={-1}
-        style={{ width: 560, background: 'var(--surface)', borderRadius: 16, boxShadow: '0 8px 40px rgba(0,0,0,0.2)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}
+        style={{ width: 'min(820px, 94vw)', background: 'var(--surface)', borderRadius: 16, boxShadow: '0 8px 40px rgba(0,0,0,0.2)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}>
 
         {/* Header */}
@@ -145,8 +222,8 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
 
         <div style={{ overflowY: 'auto', flex: 1, padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-          {/* Trigger type selector */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: 8 }}>
+          {/* Trigger type selector — roomier cards in the wider modal (TRIGGER-POPUP-2) */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: 10 }}>
             {[
               { id: 'manual',    label: t('scheduleModal.trigger.manual'),    desc: t('scheduleModal.trigger.manualDesc'),    Icon: Play },
               { id: 'instant',   label: t('scheduleModal.trigger.instant'),   desc: t('scheduleModal.trigger.instantDesc'),   Icon: Zap },
@@ -158,35 +235,31 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
             ].map(({ id, label, desc, Icon: Ic }: { id: string; label: string; desc: string; Icon: LucideIcon }) => (
               <button key={id} type="button" onClick={() => setType(id)}
                 style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                  padding: '14px 12px', borderRadius: 10, cursor: 'pointer',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
+                  padding: '16px 12px', borderRadius: 12, cursor: 'pointer',
                   border: `2px solid ${type === id ? 'var(--color-primary)' : 'var(--border)'}`,
                   background: type === id ? 'var(--color-primary-bg)' : 'var(--surface)',
                 }}>
-                <Ic size={20} color={type === id ? 'var(--color-primary)' : 'var(--text-muted)'} />
+                <Ic size={22} color={type === id ? 'var(--color-primary)' : 'var(--text-muted)'} />
                 <span style={{ fontSize: 13, fontWeight: 600, color: type === id ? 'var(--color-primary)' : 'var(--text)' }}>{label}</span>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center' }}>{desc}</span>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.35 }}>{desc}</span>
               </button>
             ))}
           </div>
 
-          {/* Event picker — the event catalogue seed (BIRTHDAY-FLOW-2); grows with the BE catalogue */}
+          {/* Event picker — searchable, the COMPLETE dispatched catalogue (TRIGGER-POPUP-2) */}
           {type === 'event' && (
-            <div>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>{t('scheduleModal.eventLabel')}</label>
-              <select value={eventKey} onChange={e => setEventKey(e.target.value)} aria-label={t('scheduleModal.eventLabel')} style={selectStyle}>
-                {WORKFLOW_EVENT_KEYS.map(key => (
-                  <option key={key} value={key}>{t(`triggers.events.${eventKeyToI18nKey(key)}`)}</option>
-                ))}
-              </select>
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>{t('scheduleModal.eventHint')}</p>
+            <div style={sectionStyle}>
+              <label style={sectionLabel}>{t('scheduleModal.eventLabel')}</label>
+              <EventCombobox value={eventKey} onChange={setEventKey} label={t('scheduleModal.eventLabel')} />
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>{t('scheduleModal.eventHint')}</p>
             </div>
           )}
 
           {/* Webhook (AI-agent) picker — one agent, one own webhook (AI-AGENTS-3) */}
           {type === 'webhook' && (
-            <div>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>{t('scheduleModal.agentLabel')}</label>
+            <div style={sectionStyle}>
+              <label style={sectionLabel}>{t('scheduleModal.agentLabel')}</label>
               {agentsLoading ? (
                 <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('scheduleModal.agentLoading')}</p>
               ) : agents.length === 0 ? (
@@ -203,12 +276,13 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
             </div>
           )}
 
-          {/* Schedule type */}
+          {/* Schedule type — one section card: frequency row + its detail fields */}
           {type === 'scheduled' && (
-            <>
+            <div style={{ ...sectionStyle, display: 'flex', flexDirection: 'column', gap: 18 }}>
               <div>
-                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>{t('scheduleModal.frequency')}</label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+                <label style={sectionLabel}>{t('scheduleModal.frequency')}</label>
+                {/* One row of six in the wider modal (TRIGGER-POPUP-2). */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6 }}>
                   {[
                     { id: 'interval',  label: t('scheduleModal.freq.interval') },
                     { id: 'daily',     label: t('scheduleModal.freq.daily') },
@@ -219,7 +293,7 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
                   ].map(o => (
                     <button key={o.id} type="button" onClick={() => setSType(o.id)}
                       style={{
-                        padding: '7px 4px', borderRadius: 8, fontSize: 12, fontWeight: sType === o.id ? 600 : 400,
+                        padding: '8px 4px', borderRadius: 8, fontSize: 12, fontWeight: sType === o.id ? 600 : 400,
                         border: `1.5px solid ${sType === o.id ? 'var(--color-primary)' : 'var(--border)'}`,
                         background: sType === o.id ? 'var(--color-primary-bg)' : 'var(--surface)',
                         color: sType === o.id ? 'var(--color-primary)' : 'var(--text)',
@@ -300,7 +374,8 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div>
                     <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('scheduleModal.dayOfMonth')}</label>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {/* Calendar-shaped 7-column day grid (TRIGGER-POPUP-2). */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 34px)', gap: 6 }}>
                       {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
                         <button key={d} type="button" onClick={() => setDom(d)}
                           style={{
@@ -350,19 +425,17 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
                 </div>
               )}
 
-              {/* Preview */}
-              <div style={{ background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px' }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>{t('scheduleModal.preview')}</div>
-                <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>
-                  {scheduleLabel(t, locale, 'Scheduled', {
-                    schedule_type: sType,
-                    interval_value: +intVal, interval_unit: intUnit,
-                    time, times, days_of_week: dow, day_of_month: dom, month,
-                  })}
-                </div>
-              </div>
-            </>
+            </div>
           )}
+
+          {/* Preview — ALWAYS visible, for every trigger type (TRIGGER-POPUP-2):
+              exactly the label the trigger node will show after saving. */}
+          <div style={{ background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>{t('scheduleModal.preview')}</div>
+            <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>
+              {scheduleLabel(t, locale, previewTrigger, previewCfg)}
+            </div>
+          </div>
         </div>
 
         {/* Footer */}

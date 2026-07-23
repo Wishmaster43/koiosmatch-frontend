@@ -932,7 +932,12 @@
       "application_stage_changed": "Sollicitatiefase gewijzigd",
       "match_created": "Match aangemaakt",
       "appointment_upcoming": "Afspraak nadert",
-      "facebook_lead_received": "Facebook-lead ontvangen"
+      "facebook_lead_received": "Facebook-lead ontvangen",
+      "candidate_created": "Kandidaat aangemaakt",
+      "candidate_address_changed": "Adres kandidaat gewijzigd",
+      "candidate_reactivated": "Kandidaat gereactiveerd",
+      "candidate_retention_due": "Bewaartermijn kandidaat verstreken",
+      "backoffice_link_updated": "Backoffice-koppeling bijgewerkt"
     }
   }
 }
