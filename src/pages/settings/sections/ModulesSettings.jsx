@@ -9,27 +9,32 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, RefreshCw, Save } from 'lucide-react'
+import { Check, RefreshCw, Save, Package, Rocket, Crown, BarChart2, CalendarDays } from 'lucide-react'
+// Real brand logos for the reporting add-ons (local assets, §7 CSP).
+import shiftmanagerLogo from '@/assets/integrations/shiftmanager.png'
+import helloflexLogo from '@/assets/integrations/helloflex.png'
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { BTN_H } from '@/config/buttonMetrics'
 
 // Base tiers (the "size bar"). `desc` lists what each tier adds over the previous one.
 const TIERS = [
-  { id: 'core',       name: 'Koios Core',       desc: 'ATS + CRM' },
-  { id: 'pro',        name: 'Koios Pro',        desc: '+ Koios AI + AI Agents + Workflows + WhatsApp Business' },
-  { id: 'enterprise', name: 'Koios Enterprise', desc: '+ REST API + Insights+ + Connectors + SLA' },
+  { id: 'core',       name: 'Koios Core',       desc: 'ATS + CRM',                                              Icon: Package },
+  { id: 'pro',        name: 'Koios Pro',        desc: '+ Koios AI + AI Agents + Workflows + WhatsApp Business', Icon: Rocket },
+  { id: 'enterprise', name: 'Koios Enterprise', desc: '+ REST API + Insights+ + Connectors + SLA',              Icon: Crown },
 ]
 
 // Add-ons (toggle on top of any tier). Each id maps 1:1 to a module key the backend
 // must surface in tenant.modules (/auth/me) so the UI gate (lib/access.ts) can hide/show it.
 // 'sm_ai' (Shiftmanager AI Planner) is retired (Danny 2026-07-02): no distinct surface, so it
 // is no longer offered here — legacy tenants keep working (it still resolves to shiftmanager).
+// MODULES-ICONS-1 (Danny 23-07): every row carries an icon — the reporting add-ons
+// show the REAL brand logo of the system they report on.
 const ADDONS = [
-  { id: 'reports', name: 'Rapporten Koios Match' },
-  { id: 'sm',    name: 'Rapportage Shiftmanager' },
-  { id: 'hf',    name: 'Rapportage HelloFlex' },
-  { id: 'plan',  name: 'Planning' },
+  { id: 'reports', name: 'Rapporten Koios Match',  Icon: BarChart2 },
+  { id: 'sm',    name: 'Rapportage Shiftmanager',  image: shiftmanagerLogo },
+  { id: 'hf',    name: 'Rapportage HelloFlex',     image: helloflexLogo },
+  { id: 'plan',  name: 'Planning',                 Icon: CalendarDays },
 ]
 
 // Legacy package string → new base tier (display only; the backend sends {package, addons}
@@ -136,6 +141,7 @@ export default function ModulesSettings() {
                 background: active ? 'var(--color-primary)' : 'transparent' }}>
                 {active && <Check size={11} color="#fff" />}
               </div>
+              <tier.Icon size={17} color={active ? 'var(--color-primary)' : 'var(--text-muted)'} style={{ flexShrink: 0, marginTop: 1 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{tier.name}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`modules.tierDesc.${tier.id}`, { defaultValue: tier.desc })}</div>
@@ -167,6 +173,9 @@ export default function ModulesSettings() {
                 <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#fff', position: 'absolute',
                   top: 2, left: on ? 16 : 2, transition: 'left 0.15s' }} />
               </div>
+              {addon.image
+                ? <img src={addon.image} alt="" width={18} height={18} style={{ flexShrink: 0, objectFit: 'contain', borderRadius: 4 }} />
+                : <addon.Icon size={16} color={on ? 'var(--color-success)' : 'var(--text-muted)'} style={{ flexShrink: 0 }} />}
               <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{t(`modules.addon.${addon.id}`, { defaultValue: addon.name })}</span>
               {disabled && (
                 <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-info)',
