@@ -290,7 +290,12 @@
     "size": "Tamaño",
     "selectAll": "Seleccionar todo",
     "selectOne": "Seleccionar {{name}}",
-    "downloadSelected": "Descargar ({{count}})"
+    "downloadSelected": "Descargar ({{count}})",
+    "preview": "Vista previa",
+    "deleteTitle": "Eliminar documento",
+    "deleteOneMessage": "¿Estás seguro? '{{name}}' se eliminará definitivamente — esto no se puede deshacer.",
+    "deleteManyMessage": "¿Estás seguro? Se eliminarán definitivamente {{count}} documentos — esto no se puede deshacer.",
+    "deleteSelected": "Eliminar ({{count}})"
   },
   "priceAgreements": {
     "add": "Añadir acuerdo de tarifas",

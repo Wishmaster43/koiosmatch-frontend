@@ -661,6 +661,10 @@
     "selectAll": "Alle auswählen",
     "selectOne": "{{name}} auswählen",
     "downloadSelected": "Herunterladen ({{count}})",
+    "deleteTitle": "Dokument löschen",
+    "deleteOneMessage": "Bist du sicher? '{{name}}' wird endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
+    "deleteManyMessage": "Bist du sicher? {{count}} Dokumente werden endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
+    "deleteSelected": "Löschen ({{count}})",
     "types": {
       "cv": "CV",
       "id": "Ausweis",

@@ -8,12 +8,13 @@
 import { useState, useRef } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Plus, X, FileText, Pencil, Eye, Download } from 'lucide-react'
+import { Search, Plus, X, FileText, Pencil, Eye, Download, Trash2 } from 'lucide-react'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from '@/components/ui/SectionCard'
 import { useEntityDocuments, type EntityDoc } from '@/hooks/useEntityDocuments'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import type { Id } from '@/types/common'
 
 // A queued-but-not-yet-uploaded file, each with its own document type (BUGFIX
@@ -43,6 +44,9 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
   const [docSearch,   setDocSearch]   = useState('')
   // Bulk-download selection, keyed by docKey — cleared once a download batch starts.
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  // Pending delete confirmation — a single row (doc + its resolved index) or the
+  // whole bulk selection; nothing is removed until the shared ConfirmDialog is confirmed.
+  const [confirmDelete, setConfirmDelete] = useState<{ kind: 'one'; doc: EntityDoc; index: number } | { kind: 'many' } | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   // Rows currently visible under the search filter, with their original index kept.
@@ -104,6 +108,21 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
     setSelected(prev => { const next = new Set(prev); next.delete(docKey(d, i)); return next })
     remove(d.id)
   }
+  // Bulk-delete every selected doc — one remove() call per row (the hook does its
+  // own optimistic filter/revert), then clear the selection.
+  const removeSelected = () => {
+    const toRemove = docs.map((d, i) => ({ d, key: docKey(d, i) })).filter(({ key }) => selected.has(key))
+    toRemove.forEach(({ d }) => remove(d.id))
+    setSelected(new Set())
+  }
+  // Runs the staged single/bulk delete once the destructive confirm is accepted.
+  const confirmDeleteAction = () => {
+    if (confirmDelete?.kind === 'one') doRemove(confirmDelete.doc, confirmDelete.index)
+    else if (confirmDelete?.kind === 'many') removeSelected()
+    setConfirmDelete(null)
+  }
+  // File name shown in the single-delete confirm message (empty once the dialog is closed).
+  const confirmDeleteName = confirmDelete?.kind === 'one' ? String(confirmDelete.doc.name ?? confirmDelete.doc.file_name ?? '') : ''
 
   return (
     <div>
@@ -116,14 +135,22 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
               style={{ border: 'none', outline: 'none', fontSize: 11, color: 'var(--text)', background: 'none', width: 110 }} />
             {docSearch && <button onClick={() => setDocSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={11} /></button>}
           </div>
-          {/* Soft-tint bulk-download action (§4) — only shown once something is selected. */}
+          {/* Soft-tint bulk-download + bulk-delete actions (§4) — only shown once something is selected. */}
           {selected.size > 0 && (
-            <button onClick={downloadSelected}
-              style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer',
-                background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)', color: 'var(--color-primary)',
-                border: '1px solid color-mix(in srgb, var(--color-primary) 45%, transparent)' }}>
-              <Download size={11} /> {t('documents.downloadSelected', { count: selected.size })}
-            </button>
+            <>
+              <button onClick={downloadSelected}
+                style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer',
+                  background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)', color: 'var(--color-primary)',
+                  border: '1px solid color-mix(in srgb, var(--color-primary) 45%, transparent)' }}>
+                <Download size={11} /> {t('documents.downloadSelected', { count: selected.size })}
+              </button>
+              <button onClick={() => setConfirmDelete({ kind: 'many' })}
+                style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer',
+                  background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)', color: 'var(--color-danger)',
+                  border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
+                <Trash2 size={11} /> {t('documents.deleteSelected', { count: selected.size })}
+              </button>
+            </>
           )}
           <button onClick={() => fileRef.current?.click()}
             style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -215,16 +242,25 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
                       </div>
                     : <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name ?? d.file_name}</span>
                   }
-                  {d.created_at && <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{formatDate(d.created_at, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>}
+                  {/* Added by whom + when (shown when the backend provides them). */}
+                  {(() => {
+                    const by = (typeof d.uploaded_by === 'object' ? d.uploaded_by?.name : d.uploaded_by)
+                      ?? (typeof d.created_by === 'object' ? d.created_by?.name : d.created_by) ?? ''
+                    const when = d.uploaded_at ?? d.created_at
+                    if (!by && !when) return null
+                    return <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                      {by}{by && when ? ' · ' : ''}{when ? formatDate(when, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
+                    </div>
+                  })()}
                 </div>
               </div>
               <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99, background: docColor(d.type) + '18', color: docColor(d.type), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.type ? docTypeLabel(d.type) : '—'}</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{d.size ?? ''}</span>
                 <div style={{ display: 'flex' }}>
-                  <button onClick={() => { setRenamingId(d.id ?? null); setRenameValue(splitExt(String(d.name ?? d.file_name ?? '')).base) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Pencil size={12} /></button>
-                  <button onClick={() => preview(d)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={12} /></button>
-                  <button onClick={() => doRemove(d, i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>
+                  <button aria-label={t('common:edit')} onClick={() => { setRenamingId(d.id ?? null); setRenameValue(splitExt(String(d.name ?? d.file_name ?? '')).base) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Pencil size={12} /></button>
+                  <button aria-label={t('documents.preview')} onClick={() => preview(d)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={12} /></button>
+                  <button aria-label={t('common:remove')} onClick={() => setConfirmDelete({ kind: 'one', doc: d, index: i })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>
                 </div>
               </div>
             </div>
@@ -244,6 +280,16 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
             setPending(prev => [...prev, ...items])
             e.target.value = ''
           }} />
+        {/* One shared destructive-confirm dialog for both single and bulk delete (never a native confirm()). */}
+        <ConfirmDialog
+          open={!!confirmDelete}
+          danger
+          title={t('documents.deleteTitle')}
+          message={confirmDelete?.kind === 'many' ? t('documents.deleteManyMessage', { count: selected.size }) : t('documents.deleteOneMessage', { name: confirmDeleteName })}
+          confirmLabel={t('common:remove')}
+          onConfirm={confirmDeleteAction}
+          onCancel={() => setConfirmDelete(null)}
+        />
       </div>
     </div>
   )

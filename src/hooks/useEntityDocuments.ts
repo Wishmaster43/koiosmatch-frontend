@@ -18,6 +18,10 @@ export interface EntityDoc {
   id?: Id; name?: string; file_name?: string; type?: string
   size?: string | number; url?: string; download_url?: string
   objectUrl?: string; created_at?: string
+  // Uploader/creation metadata (type-only for now — backend emits the name later,
+  // ticket DOC-UPLOADER-1; render tolerantly against both shapes in the meantime).
+  uploaded_by?: string | { name?: string }; created_by?: string | { name?: string }
+  uploaded_at?: string
 }
 
 // A persisted doc has a real (UUID) id; an optimistic row carries a `tmp-…` id.

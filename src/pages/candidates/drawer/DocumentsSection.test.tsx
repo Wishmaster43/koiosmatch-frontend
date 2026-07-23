@@ -5,7 +5,7 @@
  * its own POST with its own `type`, not just that a callback fired.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import DocumentsSection from './DocumentsSection'
 import api from '@/lib/api'
@@ -151,11 +151,26 @@ describe('DocumentsSection · rename/delete persist for UUID server docs', () =>
     expect(api.patch).toHaveBeenCalledWith('/candidates/c1/documents/a1b2c3d4-uuid', { name: 'cv-nieuw.pdf' })
   })
 
-  it('delete DELETEs the per-id route for a UUID doc', async () => {
+  it('delete asks for confirmation, then DELETEs the per-id route for a UUID doc (Danny 23-07)', async () => {
     const user = userEvent.setup()
     render(<DocumentsSection c={withDoc()} />)
     await user.click(screen.getByRole('button', { name: 'common:remove' }))
+    // The row X only STAGES the delete — the ConfirmDialog gates the actual request.
+    expect(api.delete).not.toHaveBeenCalled()
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: 'common:remove' }))
     expect(api.delete).toHaveBeenCalledWith('/candidates/c1/documents/a1b2c3d4-uuid')
+  })
+
+  it('cancelling the delete confirmation never fires a request', async () => {
+    const user = userEvent.setup()
+    render(<DocumentsSection c={withDoc()} />)
+    await user.click(screen.getByRole('button', { name: 'common:remove' }))
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: 'cancel' }))
+    expect(api.delete).not.toHaveBeenCalled()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByText('cv.pdf')).toBeInTheDocument()
   })
 
   it('a temp (negative numeric) optimistic id still never fires a server call', async () => {
@@ -163,6 +178,45 @@ describe('DocumentsSection · rename/delete persist for UUID server docs', () =>
     const tempDoc = { id: -1753280000000, name: 'pending.pdf', type: 'CV', objectUrl: 'blob:pending.pdf' }
     render(<DocumentsSection c={{ id: 'c1', documents: [tempDoc] } as unknown as Candidate} />)
     await user.click(screen.getByRole('button', { name: 'common:remove' }))
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: 'common:remove' }))
     expect(api.delete).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * Bulk delete (Danny 23-07): the checkbox selection's delete action goes through
+ * the SAME shared ConfirmDialog — never a native confirm(). Asserts the REQUEST:
+ * one DELETE per selected, persisted doc, and the rows drop from the list.
+ */
+describe('DocumentsSection · bulk delete', () => {
+  const docA = { id: 'uuid-a', name: 'a.pdf', type: 'CV', size: '10 KB', url: '/api/candidates/c1/documents/uuid-a/download' }
+  const docB = { id: 'uuid-b', name: 'b.pdf', type: 'CV', size: '20 KB', url: '/api/candidates/c1/documents/uuid-b/download' }
+  const withDocs = (): Candidate => ({ id: 'c1', documents: [docA, docB] } as unknown as Candidate)
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal('URL', { createObjectURL: vi.fn(), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('selecting both rows and confirming deletes both via their per-id routes', async () => {
+    const user = userEvent.setup()
+    render(<DocumentsSection c={withDocs()} />)
+
+    // Tick both row checkboxes (the header select-all checkbox is index 0).
+    const checkboxes = screen.getAllByRole('checkbox')
+    await user.click(checkboxes[1])
+    await user.click(checkboxes[2])
+
+    await user.click(screen.getByRole('button', { name: 'documents.deleteSelected' }))
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: 'common:remove' }))
+
+    expect(api.delete).toHaveBeenCalledTimes(2)
+    expect(api.delete).toHaveBeenCalledWith('/candidates/c1/documents/uuid-a')
+    expect(api.delete).toHaveBeenCalledWith('/candidates/c1/documents/uuid-b')
+    expect(screen.queryByText('a.pdf')).not.toBeInTheDocument()
+    expect(screen.queryByText('b.pdf')).not.toBeInTheDocument()
   })
 })

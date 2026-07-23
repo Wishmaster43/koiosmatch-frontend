@@ -5,7 +5,7 @@
  * PER queued file, each with its own type, not just that a callback fired.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import DocumentsTab from './DocumentsTab'
 import { useEntityDocuments } from '@/hooks/useEntityDocuments'
@@ -113,5 +113,68 @@ describe('DocumentsTab · multi-file upload queue', () => {
     expect(screen.queryAllByText('a.pdf')).toHaveLength(0)
     // The single remaining item's name now shows twice (summary header + row) — that's fine.
     expect(screen.getAllByText('b.pdf').length).toBeGreaterThan(0)
+  })
+})
+
+/**
+ * Delete confirmation (Danny 23-07): the row X only STAGES the delete — the
+ * shared ConfirmDialog (never window.confirm) gates the actual remove() call.
+ * Mirrors the candidates DocumentsSection behaviour on the customer entity.
+ */
+describe('DocumentsTab · delete confirmation', () => {
+  const docA = { id: 'doc-a', name: 'a.pdf', type: 'CV', size: '10 KB', download_url: '/dl/a' }
+  const docB = { id: 'doc-b', name: 'b.pdf', type: 'CV', size: '20 KB', download_url: '/dl/b' }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal('URL', { createObjectURL: vi.fn(), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('single delete: stages then confirms before calling remove()', async () => {
+    const remove = vi.fn()
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [docA], upload: vi.fn(), rename: vi.fn(), remove })
+    const user = userEvent.setup()
+    render(<DocumentsTab customerId="cust-1" />)
+
+    await user.click(screen.getByRole('button', { name: 'common:remove' }))
+    // The row X only STAGES the delete — the ConfirmDialog gates the actual call.
+    expect(remove).not.toHaveBeenCalled()
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: 'common:remove' }))
+    expect(remove).toHaveBeenCalledWith('doc-a')
+  })
+
+  it('cancelling the delete confirmation never calls remove()', async () => {
+    const remove = vi.fn()
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [docA], upload: vi.fn(), rename: vi.fn(), remove })
+    const user = userEvent.setup()
+    render(<DocumentsTab customerId="cust-1" />)
+
+    await user.click(screen.getByRole('button', { name: 'common:remove' }))
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: 'cancel' }))
+    expect(remove).not.toHaveBeenCalled()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('bulk delete: selecting both rows and confirming calls remove() for each', async () => {
+    const remove = vi.fn()
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [docA, docB], upload: vi.fn(), rename: vi.fn(), remove })
+    const user = userEvent.setup()
+    render(<DocumentsTab customerId="cust-1" />)
+
+    // Tick both row checkboxes (the header select-all checkbox is index 0).
+    const checkboxes = screen.getAllByRole('checkbox')
+    await user.click(checkboxes[1])
+    await user.click(checkboxes[2])
+
+    await user.click(screen.getByRole('button', { name: 'documents.deleteSelected' }))
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: 'common:remove' }))
+
+    expect(remove).toHaveBeenCalledTimes(2)
+    expect(remove).toHaveBeenCalledWith('doc-a')
+    expect(remove).toHaveBeenCalledWith('doc-b')
   })
 })

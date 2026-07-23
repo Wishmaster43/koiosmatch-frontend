@@ -668,6 +668,10 @@
     "selectAll": "Select all",
     "selectOne": "Select {{name}}",
     "downloadSelected": "Download ({{count}})",
+    "deleteTitle": "Delete document",
+    "deleteOneMessage": "Are you sure? '{{name}}' will be permanently deleted — this cannot be undone.",
+    "deleteManyMessage": "Are you sure? {{count}} documents will be permanently deleted — this cannot be undone.",
+    "deleteSelected": "Delete ({{count}})",
     "types": {
       "cv": "CV",
       "id": "ID",

@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, X, FileText, Pencil, Eye, Download } from 'lucide-react'
+import { Search, X, FileText, Pencil, Eye, Download, Trash2 } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { sectionBlock } from './constants'
@@ -10,6 +10,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import DocPreviewModal from './DocPreviewModal'
 import DrawerAddButton from './DrawerAddButton'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -61,6 +62,9 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
   const [previewDoc,  setPreviewDoc]  = useState<DocItem | null>(null)
   // Bulk-download selection, keyed by docKey — cleared once a download batch starts.
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  // Pending delete confirmation — a single row (by index) or the whole bulk
+  // selection; nothing is removed until the shared ConfirmDialog is confirmed.
+  const [confirmDelete, setConfirmDelete] = useState<{ kind: 'one'; index: number } | { kind: 'many' } | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   // Rows currently visible under the search filter, with their original index kept.
@@ -135,6 +139,22 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
     setDocs(docs.filter((_, j) => j !== i))
     if (isPersisted(id)) api.delete(`/candidates/${c.id}/documents/${id}`).catch(() => notifyError(t('common:actionFailed')))
   }
+  // Bulk-delete every selected, persisted doc: resolve the rows by key FIRST (before
+  // any state mutation), one DELETE per persisted id, then drop them all in one filter.
+  const removeSelected = () => {
+    const toRemove = docs.map((d, i) => ({ d, key: docKey(d, i) })).filter(({ key }) => selected.has(key))
+    toRemove.forEach(({ d }) => { if (isPersisted(d.id)) api.delete(`/candidates/${c.id}/documents/${d.id}`).catch(() => notifyError(t('common:actionFailed'))) })
+    setDocs(prev => prev.filter((d, i) => !selected.has(docKey(d, i))))
+    setSelected(new Set())
+  }
+  // Runs the staged single/bulk delete once the destructive confirm is accepted.
+  const confirmDeleteAction = () => {
+    if (confirmDelete?.kind === 'one') removeDoc(confirmDelete.index)
+    else if (confirmDelete?.kind === 'many') removeSelected()
+    setConfirmDelete(null)
+  }
+  // File name shown in the single-delete confirm message (empty once the dialog is closed).
+  const confirmDeleteName = confirmDelete?.kind === 'one' ? String(docs[confirmDelete.index]?.name ?? docs[confirmDelete.index]?.file_name ?? '') : ''
 
   return (
     <div>
@@ -147,14 +167,22 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
               style={{ border: 'none', outline: 'none', fontSize: 11, color: 'var(--text)', background: 'none', width: 110 }} />
             {docSearch && <button onClick={() => setDocSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={11} /></button>}
           </div>
-          {/* Soft-tint bulk-download action (§4) — only shown once something is selected. */}
+          {/* Soft-tint bulk-download + bulk-delete actions (§4) — only shown once something is selected. */}
           {selected.size > 0 && (
-            <button onClick={downloadSelected}
-              style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer',
-                background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)', color: 'var(--color-primary)',
-                border: '1px solid color-mix(in srgb, var(--color-primary) 45%, transparent)' }}>
-              <Download size={11} /> {t('documents.downloadSelected', { count: selected.size })}
-            </button>
+            <>
+              <button onClick={downloadSelected}
+                style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer',
+                  background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)', color: 'var(--color-primary)',
+                  border: '1px solid color-mix(in srgb, var(--color-primary) 45%, transparent)' }}>
+                <Download size={11} /> {t('documents.downloadSelected', { count: selected.size })}
+              </button>
+              <button onClick={() => setConfirmDelete({ kind: 'many' })}
+                style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer',
+                  background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)', color: 'var(--color-danger)',
+                  border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
+                <Trash2 size={11} /> {t('documents.deleteSelected', { count: selected.size })}
+              </button>
+            </>
           )}
           <DrawerAddButton onClick={() => fileRef.current?.click()} label={t('common:add')} />
         </div>
@@ -262,7 +290,7 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
                 <div style={{ display: 'flex' }}>
                   <button aria-label={t('common:edit')} onClick={() => { setRenamingDoc(i); setRenameValue(splitExt(String(d.name ?? d.file_name ?? '')).base) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Pencil size={12} /></button>
                   <button aria-label={t('documents.preview')} onClick={() => setPreviewDoc(d)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={12} /></button>
-                  <button aria-label={t('common:remove')} onClick={() => removeDoc(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>
+                  <button aria-label={t('common:remove')} onClick={() => setConfirmDelete({ kind: 'one', index: i })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>
                 </div>
               </div>
             </div>
@@ -283,6 +311,16 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
           e.target.value = ''
         }} />
       {previewDoc && <DocPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
+      {/* One shared destructive-confirm dialog for both single and bulk delete (never a native confirm()). */}
+      <ConfirmDialog
+        open={!!confirmDelete}
+        danger
+        title={t('documents.deleteTitle')}
+        message={confirmDelete?.kind === 'many' ? t('documents.deleteManyMessage', { count: selected.size }) : t('documents.deleteOneMessage', { name: confirmDeleteName })}
+        confirmLabel={t('common:remove')}
+        onConfirm={confirmDeleteAction}
+        onCancel={() => setConfirmDelete(null)}
+      />
       </div>
     </div>
   )

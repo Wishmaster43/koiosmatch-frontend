@@ -661,6 +661,10 @@
     "selectAll": "Tout sélectionner",
     "selectOne": "Sélectionner {{name}}",
     "downloadSelected": "Télécharger ({{count}})",
+    "deleteTitle": "Supprimer le document",
+    "deleteOneMessage": "Es-tu sûr ? '{{name}}' sera définitivement supprimé — cette action est irréversible.",
+    "deleteManyMessage": "Es-tu sûr ? {{count}} documents seront définitivement supprimés — cette action est irréversible.",
+    "deleteSelected": "Supprimer ({{count}})",
     "types": {
       "cv": "CV",
       "id": "Pièce d'identité",

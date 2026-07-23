@@ -290,7 +290,12 @@
     "size": "Grootte",
     "selectAll": "Alles selecteren",
     "selectOne": "Selecteer {{name}}",
-    "downloadSelected": "Download ({{count}})"
+    "downloadSelected": "Download ({{count}})",
+    "preview": "Voorbeeld",
+    "deleteTitle": "Document verwijderen",
+    "deleteOneMessage": "Weet je het zeker? '{{name}}' wordt definitief verwijderd — dit kan niet ongedaan worden gemaakt.",
+    "deleteManyMessage": "Weet je het zeker? {{count}} documenten worden definitief verwijderd — dit kan niet ongedaan worden gemaakt.",
+    "deleteSelected": "Verwijder ({{count}})"
   },
   "priceAgreements": {
     "add": "Prijsafspraak toevoegen",

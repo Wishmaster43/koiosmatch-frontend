@@ -290,7 +290,12 @@
     "size": "Größe",
     "selectAll": "Alle auswählen",
     "selectOne": "{{name}} auswählen",
-    "downloadSelected": "Herunterladen ({{count}})"
+    "downloadSelected": "Herunterladen ({{count}})",
+    "preview": "Vorschau",
+    "deleteTitle": "Dokument löschen",
+    "deleteOneMessage": "Bist du sicher? '{{name}}' wird endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
+    "deleteManyMessage": "Bist du sicher? {{count}} Dokumente werden endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
+    "deleteSelected": "Löschen ({{count}})"
   },
   "priceAgreements": {
     "add": "Preisvereinbarung hinzufügen",
