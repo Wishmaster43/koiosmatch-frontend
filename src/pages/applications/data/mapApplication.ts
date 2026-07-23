@@ -181,6 +181,9 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     aiScore: raw.ai_match_score ?? null,
     // Tenant custom-field values (§3B "Eigen velden").
     customFields: raw.custom_fields ?? {},
+    // MOTIVATIE-ZICHTBAAR-1: the careersite motivation letter, null-safe until
+    // CMBE emits `cover_letter` on the detail resource (honest-gated in the tab).
+    coverLetter: raw.cover_letter ?? null,
     // Rejection trail (reason + toelichting/note + channel/sent_at) — S9 finding:
     // this was NEVER mapped, so a rejected application always showed just the
     // "Afgewezen" badge with no reason/note, even though ApplicationDetailResource

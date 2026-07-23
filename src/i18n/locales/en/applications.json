@@ -249,6 +249,9 @@
     "aiAuto": "Hard criteria failed — auto-rejection eligible.",
     "aiConfirm": "Review and confirm before a message is sent."
   },
+  "motivation": {
+    "title": "Motivation"
+  },
   "archived": {
     "toggle": "Archived",
     "since": "Archived on {{date}}",

@@ -238,6 +238,9 @@
     "aiAuto": "Criterios estrictos no cumplidos — apto para rechazo automático.",
     "aiConfirm": "Revisa y confirma antes de enviar un mensaje."
   },
+  "motivation": {
+    "title": "Carta de motivación"
+  },
   "archived": {
     "toggle": "Archivadas",
     "since": "Archivado el {{date}}",

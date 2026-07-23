@@ -124,6 +124,10 @@ export interface ApplicationDetail extends Application {
   rejection?: { reason_label?: string; [k: string]: unknown }
   // Tenant custom-field values (§3B "Eigen velden" — the drawer's gated Extra tab).
   customFields: Record<string, unknown>
+  // MOTIVATIE-ZICHTBAAR-1: the careersite apply's motivation letter, written to
+  // applications.cover_letter. Null until CMBE puts it (sanitised) on the
+  // ApplicationDetailResource — the tab honest-gates on its presence.
+  coverLetter: string | null
 }
 
 /** A raw candidate as the API nests it under an application. */
@@ -232,6 +236,9 @@ export interface ApiApplication {
   ai_match_score?: number | null
   // Tenant custom-field values (§3B "Eigen velden").
   custom_fields?: Record<string, unknown>
+  // MOTIVATIE-ZICHTBAAR-1: the careersite apply's motivation letter (raw HTML,
+  // sanitised through SafeHtml before render) — awaited on ApplicationDetailResource.
+  cover_letter?: string | null
   [k: string]: unknown
 }
 

@@ -238,6 +238,9 @@
     "aiAuto": "Harte Kriterien nicht erfüllt — für Auto-Ablehnung geeignet.",
     "aiConfirm": "Prüfen und bestätigen, bevor eine Nachricht gesendet wird."
   },
+  "motivation": {
+    "title": "Motivationsschreiben"
+  },
   "archived": {
     "toggle": "Archiviert",
     "since": "Archiviert am {{date}}",

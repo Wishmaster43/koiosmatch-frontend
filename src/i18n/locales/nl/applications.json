@@ -249,6 +249,9 @@
     "aiAuto": "Harde criteria niet gehaald — auto-afwijzen mogelijk.",
     "aiConfirm": "Beoordeel en bevestig voordat er een bericht uitgaat."
   },
+  "motivation": {
+    "title": "Motivatie"
+  },
   "archived": {
     "toggle": "Gearchiveerd",
     "since": "Gearchiveerd op {{date}}",

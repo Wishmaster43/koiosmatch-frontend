@@ -209,4 +209,24 @@ describe('ApplicationTab', () => {
       expect(screen.getByLabelText('drawer.cv.view')).toBeInTheDocument()
     })
   })
+
+  // MOTIVATIE-ZICHTBAAR-1 (Danny 23-07): the careersite motivation letter is
+  // honest-gated — no block at all until CMBE emits `coverLetter`.
+  describe('Motivation section (MOTIVATIE-ZICHTBAAR-1)', () => {
+    it('renders the motivation section when coverLetter is present', () => {
+      renderTab(<ApplicationTab application={app({ coverLetter: '<p>Ik solliciteer graag op deze functie.</p>' })} />)
+      expect(screen.getByText('motivation.title')).toBeInTheDocument()
+      expect(screen.getByText('Ik solliciteer graag op deze functie.')).toBeInTheDocument()
+    })
+
+    it('renders nothing when coverLetter is null', () => {
+      renderTab(<ApplicationTab application={app({ coverLetter: null })} />)
+      expect(screen.queryByText('motivation.title')).toBeNull()
+    })
+
+    it('renders nothing when coverLetter is an empty string', () => {
+      renderTab(<ApplicationTab application={app({ coverLetter: '' })} />)
+      expect(screen.queryByText('motivation.title')).toBeNull()
+    })
+  })
 })

@@ -238,6 +238,9 @@
     "aiAuto": "Critères stricts non remplis — éligible au refus automatique.",
     "aiConfirm": "Vérifiez et confirmez avant l'envoi d'un message."
   },
+  "motivation": {
+    "title": "Lettre de motivation"
+  },
   "archived": {
     "toggle": "Archivées",
     "since": "Archivé le {{date}}",

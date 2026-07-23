@@ -5,6 +5,8 @@ import { Edit2, Save, X } from 'lucide-react'
 import EntityLink from '@/components/ui/EntityLink'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+import SectionCard from '@/components/ui/SectionCard'
+import SafeHtml from '@/components/ui/SafeHtml'
 import { buildApplicationAdviceInsights } from './applicationAiInsights'
 import MatchScoreBlock from './MatchScoreBlock'
 import type { Criterion } from './MatchScoreBlock'
@@ -181,6 +183,17 @@ export default function ApplicationTab({ application: a, onReject, onAdjustScore
           </div>
         </div>
       </div>
+
+      {/* MOTIVATIE-ZICHTBAAR-1 (Danny 23-07): the careersite apply's motivation
+          letter, surfaced for the recruiter — honest-gated on `coverLetter`
+          being non-empty (no dead chrome while CMBE hasn't shipped it on the
+          detail resource yet). It can carry HTML from the public site, so it
+          renders through the shared SafeHtml/DOMPurify (§7), never raw. */}
+      {a.coverLetter && (
+        <SectionCard title={t('motivation.title')}>
+          <SafeHtml html={a.coverLetter} style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.5 }} />
+        </SectionCard>
+      )}
 
       {/* Koios AI advisory — phase progress + vacancy-link completeness (§3A blueprint). */}
       <KoiosAdviceBlock namespace="applications" insights={buildApplicationAdviceInsights(a, t)} />

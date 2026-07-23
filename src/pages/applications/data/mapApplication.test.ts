@@ -208,4 +208,20 @@ describe('mapApplicationDetail', () => {
   it('dashes to empty when neither location nor city is present', () => {
     expect(mapApplicationDetail({ id: 6 }).vacancy.location).toBe('')
   })
+
+  // MOTIVATIE-ZICHTBAAR-1: the careersite apply's motivation letter, null-safe
+  // until CMBE ships `cover_letter` on the detail resource.
+  describe('coverLetter (MOTIVATIE-ZICHTBAAR-1)', () => {
+    it('maps cover_letter to coverLetter', () => {
+      expect(mapApplicationDetail({ id: 7, cover_letter: '<p>Ik solliciteer graag…</p>' }).coverLetter).toBe('<p>Ik solliciteer graag…</p>')
+    })
+
+    it('defaults to null when cover_letter is absent', () => {
+      expect(mapApplicationDetail({ id: 8 }).coverLetter).toBeNull()
+    })
+
+    it('defaults to null when cover_letter is explicitly null', () => {
+      expect(mapApplicationDetail({ id: 9, cover_letter: null }).coverLetter).toBeNull()
+    })
+  })
 })
