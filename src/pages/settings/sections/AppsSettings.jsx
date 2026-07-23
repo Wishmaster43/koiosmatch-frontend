@@ -9,13 +9,16 @@ import { useAuth } from '@/context/AuthContext'
 import { useApps, AVAILABLE_APPS } from '@/context/AppsContext'
 import { canAccessPage } from '@/lib/access'
 
-export default function AppsSettings({ group = 'planning' }) {
+export default function AppsSettings() {
   const { t } = useTranslation('settings')
   const { enabled, setApps } = useApps()
   const auth                        = useAuth()
   const { hasPermission }           = auth
   const [saving, setSaving]         = useState(null)
   const [saved,  setSaved]          = useState(null)
+  // APPS-GROUPS-3 (Danny 23-07): ONE shell entry, with an internal LINE tab strip —
+  // the exact taakbeheer/ApiKeyDetail pattern, never boxed pills.
+  const [tab, setTab]               = useState('planning')
   // APPS-SUPERADMIN-1 (Danny 23-07 403): connectors are PLATFORM-provisioned — the
   // backend refuses everyone but a super admin (by design, 2026-06-23), so a tenant
   // admin must see honest disabled toggles + a notice, never a clickable 403.
@@ -66,8 +69,23 @@ export default function AppsSettings({ group = 'planning' }) {
         </div>
       )}
 
+      {/* Tab strip — same look as JobQueueSettings/ApiKeyDetail's inline tabs. */}
+      <div role="tablist" style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
+        {[['planning', t('apps.tabPlanning')], ['backoffice', t('apps.tabBackoffice')], ['koios_ai', t('apps.tabKoiosAi')]].map(([id, label]) => {
+          const active = id === tab
+          return (
+            <button key={id} role="tab" aria-selected={active} onClick={() => setTab(id)}
+              style={{ padding: '9px 14px', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 13,
+                fontWeight: active ? 600 : 500, color: active ? 'var(--color-primary)' : 'var(--text-muted)',
+                borderBottom: `2px solid ${active ? 'var(--color-primary)' : 'transparent'}`, marginBottom: -1 }}>
+              {label}
+            </button>
+          )
+        })}
+      </div>
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {AVAILABLE_APPS.filter(app => app.group === group).map(app => {
+        {AVAILABLE_APPS.filter(app => app.group === tab).map(app => {
           const on = enabled.includes(app.id)
           const isSaving = saving === app.id
           const isSaved  = saved  === app.id

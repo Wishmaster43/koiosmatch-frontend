@@ -408,11 +408,7 @@ export const NAV_GROUPS = [
     key: 'superadmin', icon: Shield,
     items: [
       { id: 'modules', icon: Package, component: ModulesSettings, superAdminOnly: true },
-      // APPS-GROUPS-2 (Danny 23-07 "WhatsApp is leading"): the koppeling-groups are
-      // REAL shell subtabs (registry items), not a custom in-page tab bar.
-      { id: 'apps_planning', icon: AppWindow, render: () => <AppsSettings group="planning" />, superAdminOnly: true },
-      { id: 'apps_backoffice', icon: AppWindow, render: () => <AppsSettings group="backoffice" />, superAdminOnly: true },
-      { id: 'apps_koios_ai', icon: AppWindow, render: () => <AppsSettings group="koios_ai" />, superAdminOnly: true },
+      { id: 'apps', icon: AppWindow, component: AppsSettings, superAdminOnly: true },
       { id: 'usage', icon: BarChart2, component: TenantUsageSettings, superAdminOnly: true },
       // Taakbeheer (T4.1, extended QUEUE-VIEW-1) — queue/job health, backlog list, failure log.
       { id: 'admin_jobs', icon: ListChecks, component: JobQueueSettings, superAdminOnly: true },

@@ -198,10 +198,7 @@
     "nt_opportunity": "Opportunities",
     "action_rules": "Action rules",
     "vacancy_generation": "Vacancy generation",
-    "org_policy": "Organisation policy",
-    "apps_planning": "Connectors: planning",
-    "apps_backoffice": "Connectors: back office",
-    "apps_koios_ai": "Connectors: Koios AI"
+    "org_policy": "Organisation policy"
   },
   "kpis": {
     "title": "KPI settings",

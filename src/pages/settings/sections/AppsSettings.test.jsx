@@ -28,8 +28,9 @@ beforeEach(() => { mockPut.mockReset(); mockNotifyError.mockReset(); mockSetApps
 describe('AppsSettings', () => {
   it("enabling HelloFlex PUTs the backend 'hf' slug, never 'helloflex'", async () => {
     mockPut.mockResolvedValue({})
-    // APPS-GROUPS-2: the shell renders the subtabs; HelloFlex lives in the backoffice group.
-    render(<AppsSettings group="backoffice" />)
+    render(<AppsSettings />)
+    // APPS-GROUPS-3: HelloFlex lives under the internal Backoffice line-tab.
+    fireEvent.click(screen.getByRole('tab', { name: 'apps.tabBackoffice' }))
     // Click every ENABLED toggle on this tab (coming-soon toggles are disabled by
     // design): at least one PUT carries 'hf' and none ever carries 'helloflex'.
     for (const b of screen.getAllByTitle('apps.enable')) fireEvent.click(b)
@@ -42,7 +43,7 @@ describe('AppsSettings', () => {
 
   it('surfaces the server message on a failed toggle instead of silently swallowing it', async () => {
     mockPut.mockRejectedValue({ response: { data: { message: 'Ongeldige app(s): x' } } })
-    render(<AppsSettings group="planning" />)
+    render(<AppsSettings />)
     fireEvent.click(screen.getAllByTitle('apps.enable')[0])
     await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Ongeldige app(s): x'))
     expect(mockSetApps).not.toHaveBeenCalled()

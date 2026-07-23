@@ -198,10 +198,7 @@
     "nt_opportunity": "Kansen",
     "action_rules": "Actieregels",
     "vacancy_generation": "Vacaturegeneratie",
-    "org_policy": "Organisatiebeleid",
-    "apps_planning": "Koppelingen: planning",
-    "apps_backoffice": "Koppelingen: backoffice",
-    "apps_koios_ai": "Koppelingen: Koios AI"
+    "org_policy": "Organisatiebeleid"
   },
   "kpis": {
     "title": "KPI-instellingen",
