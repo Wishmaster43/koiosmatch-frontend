@@ -10,6 +10,9 @@ import { useState, useEffect } from 'react'
 import api, { unwrapList } from '@/lib/api'
 import { toCoord } from '@/lib/coords'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { getVacancyTabDefaults } from '../lib/vacancyTabVisibility'
+import type { VacancyTabConfig } from '../lib/vacancyTabVisibility'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -37,17 +40,27 @@ interface RawVacancyRow {
   lat?: unknown; lng?: unknown; distance_km?: unknown
 }
 
+// Per-candidate travel preference (Danny 23-07): the radius default follows the
+// candidate's OWN `preferences.max_travel_km`, falling back to a calm 30km when
+// that isn't set (or isn't a usable positive number).
+function defaultRadiusKm(candidate: Candidate): number {
+  const pref = Number((candidate.preferences as { max_travel_km?: unknown } | undefined)?.max_travel_km)
+  return Number.isFinite(pref) && pref > 0 ? pref : 30
+}
+
 export function useVacancySearch(candidate: Candidate) {
   const { statuses } = useVacancyLookups()
+  // Tenant default vacancy-status preselection (Settings → Candidate →
+  // Vacatures-tabblad, same `candidate_vacancy_tab` key the tab-visibility gate
+  // reads) — kept in ONE place (this hook) so every consumer sees the same
+  // pre-checked statuses; a stored (even empty) array always wins over the seed.
+  const allSettings = useAllSettings()
+  const vacancyTabCfg = getJsonSetting<VacancyTabConfig | null>(allSettings, 'candidate_vacancy_tab', null)
+  const defaultStatusValues = vacancyTabCfg?.vacancy_statuses ?? getVacancyTabDefaults([], [], [], statuses).vacancy_statuses
 
-  // Soft DEFAULT against the tenant's seed — never a hardcoded vocabulary: preselect
-  // whichever status option reads as "open" by value or label, if the tenant has
-  // one; otherwise no default (empty selection = all statuses).
-  const defaultStatus = statuses.find(s => /open/i.test(`${s.value} ${s.label}`))
-
-  const [radiusKm, setRadiusKm]   = useState(30)
+  const [radiusKm, setRadiusKm]   = useState(() => defaultRadiusKm(candidate))
   const [functions, setFunctions] = useState<string[]>(candidate.title ? [candidate.title] : [])
-  const [statusSel, setStatusSel] = useState<string[]>(defaultStatus ? [defaultStatus.value] : [])
+  const [statusSel, setStatusSel] = useState<string[]>(defaultStatusValues)
 
   // The tab is NOT remounted when a different candidate is opened (EntityDrawer only
   // keys its tab body by the active TAB id, not the entity) — re-derive the filter
@@ -57,9 +70,9 @@ export function useVacancySearch(candidate: Candidate) {
   const [prevId, setPrevId] = useState<Id | undefined>(candidate.id)
   if (candidate.id !== prevId) {
     setPrevId(candidate.id)
-    setRadiusKm(30)
+    setRadiusKm(defaultRadiusKm(candidate))
     setFunctions(candidate.title ? [candidate.title] : [])
-    setStatusSel(defaultStatus ? [defaultStatus.value] : [])
+    setStatusSel(defaultStatusValues)
   }
 
   const [rows, setRows]           = useState<VacancySearchRow[]>([])

@@ -1617,7 +1617,9 @@
     "title": "Stellen-Tab bei Kandidaten",
     "subtitle": "Legen Sie fest, wann der Tab „Stellen“ im Kandidaten-Drilldown sichtbar ist.",
     "phasesTitle": "Sichtbar bei Phase",
-    "statusesTitle": "Ausblenden bei Einsatzbereitschaft"
+    "statusesTitle": "Ausblenden bei Einsatzbereitschaft",
+    "typesTitle": "Sichtbar bei Vertragsform",
+    "vacancyStatusesTitle": "Stellenstatus im Tab"
   },
   "viewConfig": {
     "title": "{{label}}-Ansicht",

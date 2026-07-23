@@ -1636,7 +1636,9 @@
     "title": "Vacatures-tabblad bij kandidaten",
     "subtitle": "Bepaal wanneer het tabblad 'Vacatures' in de kandidaat-drilldown zichtbaar is.",
     "phasesTitle": "Zichtbaar bij fase",
-    "statusesTitle": "Verbergen bij inzetbaarheid"
+    "statusesTitle": "Verbergen bij inzetbaarheid",
+    "typesTitle": "Zichtbaar bij contractvorm",
+    "vacancyStatusesTitle": "Vacaturestatussen in het tabblad"
   },
   "viewConfig": {
     "title": "{{label}} weergave",

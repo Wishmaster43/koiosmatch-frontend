@@ -1617,7 +1617,9 @@
     "title": "Pestaña Vacantes en candidatos",
     "subtitle": "Decide cuándo la pestaña «Vacantes» es visible en el detalle del candidato.",
     "phasesTitle": "Visible según la fase",
-    "statusesTitle": "Ocultar según la disponibilidad"
+    "statusesTitle": "Ocultar según la disponibilidad",
+    "typesTitle": "Visible según la forma contractual",
+    "vacancyStatusesTitle": "Estados de vacante en la pestaña"
   },
   "viewConfig": {
     "title": "Vista {{label}}",

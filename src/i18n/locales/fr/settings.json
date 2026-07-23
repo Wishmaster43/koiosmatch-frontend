@@ -1617,7 +1617,9 @@
     "title": "Onglet Postes chez les candidats",
     "subtitle": "Décidez quand l'onglet « Postes » est visible dans la fiche détaillée du candidat.",
     "phasesTitle": "Visible selon la phase",
-    "statusesTitle": "Masquer selon la disponibilité"
+    "statusesTitle": "Masquer selon la disponibilité",
+    "typesTitle": "Visible selon la forme contractuelle",
+    "vacancyStatusesTitle": "Statuts de poste dans l'onglet"
   },
   "viewConfig": {
     "title": "Vue {{label}}",

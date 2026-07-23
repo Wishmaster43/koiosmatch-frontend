@@ -1,15 +1,18 @@
 /**
  * VacancySearchTab — Match-zoeker fase 1b (candidate side). Proves the REQUEST
- * (§13): GET /vacancies with the candidate's own lat/lng/radius and the default
- * function preselected, the noLocation guard skipping the fetch entirely, a
- * status-chip toggle refiring with the new param, and an error state whose
- * retry button re-fires the same request. The map is stubbed (leaflet does not
- * run under jsdom); api's `unwrapList` stays real so the envelope-unwrap logic
- * is genuinely exercised.
+ * (§13): GET /vacancies with the candidate's own lat/lng/radius (from the
+ * candidate's OWN travel preference) and the default function preselected, the
+ * status preselection following the tenant `candidate_vacancy_tab` setting, the
+ * noLocation guard skipping the fetch entirely, a status-toggle refiring with the
+ * new param, an error state whose retry button re-fires the same request, and the
+ * summary-card selection flow (row click selects instead of navigating; its two
+ * actions open in-app / in a new window). The map is stubbed (leaflet does not
+ * run under jsdom); api's `unwrapList`/`unwrap` stay real so the envelope-unwrap
+ * logic is genuinely exercised.
  */
 import type { ReactNode } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Real i18next instance so t() resolves actual locale strings, not raw keys.
 import '@/i18n'
@@ -39,7 +42,7 @@ vi.mock('@/lib/useFunctions', () => ({
 
 // Provider stub (renders children as-is, mirrors it being only page-scoped
 // around VacanciesPage) + two tenant status options — 'open' is the one the
-// hook's soft default should match by value.
+// tenant setting/soft-default should match by value.
 vi.mock('@/context/VacancyLookupsContext', () => ({
   VacancyLookupsProvider: ({ children }: { children: ReactNode }) => children,
   /* eslint-disable no-restricted-syntax -- seed DATA mirroring DEFAULT_VACANCY_STATUSES, not a UI colour choice */
@@ -48,19 +51,34 @@ vi.mock('@/context/VacancyLookupsContext', () => ({
       { value: 'open', label: 'Open', color: '#79B58E' },
       { value: 'closed', label: 'Gesloten', color: '#8A94A6' },
     ],
+    statusMeta: (v?: string | null) => ({ value: v ?? '', label: v === 'open' ? 'Open' : 'Gesloten', color: '#79B58E' }),
   }),
   /* eslint-enable no-restricted-syntax */
 }))
 
-const candidateWithLocation = { id: 'cand1', lat: 52.09, lng: 5.12, title: 'Verzorgende IG' } as unknown as Candidate
-const candidateNoLocation = { id: 'cand2', lat: null, lng: null, title: '' } as unknown as Candidate
+// Cross-entity navigation — spied so the in-app "open" action can be asserted
+// without a real NavigationProvider mounted.
+const openEntityMock = vi.hoisted(() => vi.fn())
+vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: openEntityMock }) }))
+
+// Mutable tenant settings blob (Danny 23-07: `candidate_vacancy_tab.vacancy_statuses`
+// drives the default status preselection) — a hoisted ref so individual tests can
+// set it before rendering; reset to "nothing saved" in beforeEach.
+const settingsRef = vi.hoisted(() => ({ current: {} as Record<string, unknown> }))
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/settings/useAllSettings')>('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => settingsRef.current }
+})
+
+const candidateWithLocation = { id: 'cand1', lat: 52.09, lng: 5.12, title: 'Verzorgende IG', preferences: {} } as unknown as Candidate
+const candidateNoLocation = { id: 'cand2', lat: null, lng: null, title: '', preferences: {} } as unknown as Candidate
 
 const rawRows = [
   { id: 'v2', title: 'Verpleegkundige | Utrecht', customer_name: 'Zorggroep A', city: 'Utrecht', status: 'open', lat: '52.10', lng: '5.13', distance_km: '5.2' },
   { id: 'v1', title: 'Verzorgende IG | Amersfoort', customer_name: 'Zorggroep B', city: 'Amersfoort', status: 'open', lat: '52.20', lng: '5.40', distance_km: '1.1' },
 ]
 
-beforeEach(() => { vi.clearAllMocks() })
+beforeEach(() => { vi.clearAllMocks(); settingsRef.current = {} })
 
 describe('VacancySearchTab · fetch + defaults', () => {
   it('fires GET /vacancies with the candidate coords + default filters, rows sorted by distance', async () => {
@@ -81,6 +99,40 @@ describe('VacancySearchTab · fetch + defaults', () => {
   })
 })
 
+describe('VacancySearchTab · radius default from the candidate travel preference', () => {
+  it('uses preferences.max_travel_km as the initial radius when set', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: [] } })
+    const candidateWithTravelPref = { ...candidateWithLocation, preferences: { max_travel_km: 45 } } as unknown as Candidate
+    render(<VacancySearchTab candidate={candidateWithTravelPref} />)
+
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/vacancies', {
+      params: { lat: 52.09, lng: 5.12, radius: 45, status: ['open'], function_title: ['Verzorgende IG'], per_page: 200 },
+      signal: expect.anything(),
+    }))
+  })
+
+  it('falls back to 30 when max_travel_km is missing/invalid', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: [] } })
+    const candidateWithBadPref = { ...candidateWithLocation, preferences: { max_travel_km: 0 } } as unknown as Candidate
+    render(<VacancySearchTab candidate={candidateWithBadPref} />)
+
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ params: expect.objectContaining({ radius: 30 }) })))
+  })
+})
+
+describe('VacancySearchTab · status preselection follows the tenant setting', () => {
+  it('preselects the configured vacancy_statuses instead of the /open/i seed default', async () => {
+    settingsRef.current = { candidate_vacancy_tab: JSON.stringify({ vacancy_statuses: ['closed'] }) }
+    mockGet.mockResolvedValueOnce({ data: { data: [] } })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/vacancies', {
+      params: { lat: 52.09, lng: 5.12, radius: 30, status: ['closed'], function_title: ['Verzorgende IG'], per_page: 200 },
+      signal: expect.anything(),
+    }))
+  })
+})
+
 describe('VacancySearchTab · no location', () => {
   it('shows the calm notice and never fetches', async () => {
     render(<VacancySearchTab candidate={candidateNoLocation} />)
@@ -89,13 +141,19 @@ describe('VacancySearchTab · no location', () => {
   })
 })
 
-describe('VacancySearchTab · status chip toggle', () => {
+describe('VacancySearchTab · status filter (searchable dropdown)', () => {
   it('refires the request with the newly toggled status added', async () => {
     mockGet.mockResolvedValue({ data: { data: [] } })
     render(<VacancySearchTab candidate={candidateWithLocation} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
 
-    await userEvent.click(screen.getByRole('button', { name: 'Gesloten' }))
+    // Statuses are a searchable SearchSelect checklist now, not chips — open the
+    // ONE scoped to the "Vacaturestatus" label (the functions dropdown reads the
+    // same trigger text when exactly one option is selected too).
+    const statusesLabel = screen.getByText(nl.vacancySearch.statuses)
+    const statusesTrigger = within(statusesLabel.parentElement as HTMLElement).getByRole('button')
+    await userEvent.click(statusesTrigger)
+    await userEvent.click(await screen.findByRole('button', { name: 'Gesloten' }))
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
     expect(mockGet).toHaveBeenLastCalledWith('/vacancies', {
@@ -115,5 +173,50 @@ describe('VacancySearchTab · error + retry', () => {
     await userEvent.click(retryBtn)
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
+  })
+})
+
+describe('VacancySearchTab · row selection shows a summary card, not an immediate navigation', () => {
+  it('clicking a row selects it (renders the card + its lazy-fetched snippet) instead of navigating', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
+    // The description-snippet lazy fetch (GET /vacancies/{id}) — tolerant, omitted on error.
+    mockGet.mockResolvedValueOnce({ data: { description: '<p>Korte omschrijving van de vacature.</p>' } })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+
+    await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
+    await userEvent.click(screen.getByText('Verzorgende IG | Amersfoort'))
+
+    expect(openEntityMock).not.toHaveBeenCalled()
+    // The card renders the title again (once in the row, once in the card) plus the snippet.
+    await waitFor(() => expect(screen.getAllByText('Verzorgende IG | Amersfoort').length).toBeGreaterThan(1))
+    await waitFor(() => expect(screen.getByText('Korte omschrijving van de vacature.')).toBeInTheDocument())
+  })
+
+  it('the in-app open button calls openEntity for the selected vacancy', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
+    mockGet.mockResolvedValueOnce({ data: { description: '' } })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+
+    await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
+    await userEvent.click(screen.getByText('Verzorgende IG | Amersfoort'))
+
+    const openBtn = await screen.findByText(nl.vacancySearch.openInApp)
+    await userEvent.click(openBtn)
+    expect(openEntityMock).toHaveBeenCalledWith('vacancies', 'v1')
+  })
+
+  it('the external-link button opens a new window at the #vacancies?open=<id> URL', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
+    mockGet.mockResolvedValueOnce({ data: { description: '' } })
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+
+    await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
+    await userEvent.click(screen.getByText('Verzorgende IG | Amersfoort'))
+
+    const externalBtn = await screen.findByLabelText(nl.vacancySearch.openNewWindow)
+    await userEvent.click(externalBtn)
+    expect(openSpy).toHaveBeenCalledWith(`${window.location.origin}${window.location.pathname}#vacancies?open=v1`, '_blank', 'noopener,noreferrer')
+    openSpy.mockRestore()
   })
 })

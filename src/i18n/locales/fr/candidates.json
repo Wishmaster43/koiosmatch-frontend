@@ -799,7 +799,9 @@
     "statuses": "Statut du poste",
     "functions": "Fonction",
     "onMap": "{{count}} postes sur la carte",
-    "empty": "Aucun poste trouvé avec ces filtres."
+    "empty": "Aucun poste trouvé avec ces filtres.",
+    "openNewWindow": "Ouvrir dans une nouvelle fenêtre",
+    "openInApp": "Aller au poste"
   },
   "erase": {
     "trashView": "Corbeille",

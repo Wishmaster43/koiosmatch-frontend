@@ -1636,7 +1636,9 @@
     "title": "Vacancies tab on candidates",
     "subtitle": "Decide when the 'Vacancies' tab is visible in the candidate drill-down.",
     "phasesTitle": "Visible for phase",
-    "statusesTitle": "Hide for deployability status"
+    "statusesTitle": "Hide for deployability status",
+    "typesTitle": "Visible for contract form",
+    "vacancyStatusesTitle": "Vacancy statuses in the tab"
   },
   "viewConfig": {
     "title": "{{label}} view",

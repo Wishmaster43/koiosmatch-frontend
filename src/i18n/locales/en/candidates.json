@@ -799,7 +799,9 @@
     "statuses": "Vacancy status",
     "functions": "Function",
     "onMap": "{{count}} vacancies on the map",
-    "empty": "No vacancies found within these filters."
+    "empty": "No vacancies found within these filters.",
+    "openNewWindow": "Open in new window",
+    "openInApp": "Go to vacancy"
   },
   "erase": {
     "trashView": "Trash",

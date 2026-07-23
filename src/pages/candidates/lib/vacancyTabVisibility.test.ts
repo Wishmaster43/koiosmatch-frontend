@@ -19,6 +19,10 @@ const statuses = [
   { value: 'leave', label: 'Verlof' },
   { value: 'blacklist', label: 'Blacklist', is_blacklist: true },
 ]
+const candidateTypes = [
+  { value: 'freelance', label: 'ZZP' },
+  { value: 'temp_agency', label: 'Uitzendkracht' },
+]
 
 describe('getVacancyTabDefaults', () => {
   // The seed default excludes Lead (regex on value/label) and hides for anything
@@ -67,5 +71,30 @@ describe('isVacancyTabVisible — vocabulary drift & compare tolerance', () => {
   })
   it('an empty/missing phase or status on the candidate never blocks visibility', () => {
     expect(isVacancyTabVisible(null, { phase: null, status: null }, phases, statuses)).toBe(true)
+  })
+})
+
+describe('isVacancyTabVisible — contract-form (candidate type) gate', () => {
+  it('no tenant config + no candidate types → visible (nothing to gate on)', () => {
+    expect(isVacancyTabVisible(null, { phase: 'candidate', status: 'available', candidateTypes: [] }, phases, statuses, candidateTypes)).toBe(true)
+  })
+  it('one matching type out of an allowed set → visible', () => {
+    const cfg = { candidate_types: ['freelance'] }
+    expect(isVacancyTabVisible(cfg, { phase: 'candidate', status: 'available', candidateTypes: ['freelance', 'temp_agency'] }, phases, statuses, candidateTypes)).toBe(true)
+  })
+  it('all candidate types unchecked (explicit empty allowed set) → hidden', () => {
+    const cfg = { candidate_types: [] }
+    expect(isVacancyTabVisible(cfg, { phase: 'candidate', status: 'available', candidateTypes: ['freelance'] }, phases, statuses, candidateTypes)).toBe(false)
+  })
+  it('none of the candidate types are in the allowed set → hidden', () => {
+    const cfg = { candidate_types: ['temp_agency'] }
+    expect(isVacancyTabVisible(cfg, { phase: 'candidate', status: 'available', candidateTypes: ['freelance'] }, phases, statuses, candidateTypes)).toBe(false)
+  })
+  it('a candidate type not in the tenant lookup (drift) stays visible', () => {
+    const cfg = { candidate_types: ['temp_agency'] }
+    expect(isVacancyTabVisible(cfg, { phase: 'candidate', status: 'available', candidateTypes: ['renamed_slug'] }, phases, statuses, candidateTypes)).toBe(true)
+  })
+  it('no explicit cfg → default allows every current tenant type', () => {
+    expect(isVacancyTabVisible(null, { phase: 'candidate', status: 'available', candidateTypes: ['freelance'] }, phases, statuses, candidateTypes)).toBe(true)
   })
 })

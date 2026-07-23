@@ -799,7 +799,9 @@
     "statuses": "Stellenstatus",
     "functions": "Funktion",
     "onMap": "{{count}} Stellen auf der Karte",
-    "empty": "Keine Stellen innerhalb dieser Filter gefunden."
+    "empty": "Keine Stellen innerhalb dieser Filter gefunden.",
+    "openNewWindow": "In neuem Fenster öffnen",
+    "openInApp": "Zur Stelle gehen"
   },
   "erase": {
     "trashView": "Papierkorb",

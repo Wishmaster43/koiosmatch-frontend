@@ -106,9 +106,10 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const allSettings = useAllSettings()
   const coloredByGender = getBoolSetting(allSettings, 'candidate_avatar_colored_by_gender', false)
   const avatarColor = coloredByGender ? (genderColor(c?.gender) ?? NEUTRAL_AVATAR) : NEUTRAL_AVATAR
-  // Tenant-configurable Vacatures-tab visibility (Danny 23-07): phases/statuses
-  // gate via the shared vacancyTabVisibility helper; null cfg falls back to seed defaults.
-  const { phases: tenantPhases, statuses: tenantStatuses } = useLookups()
+  // Tenant-configurable Vacatures-tab visibility (Danny 23-07): phases/statuses/
+  // contract-form gate via the shared vacancyTabVisibility helper; null cfg falls
+  // back to seed defaults.
+  const { phases: tenantPhases, statuses: tenantStatuses, candidateTypes: tenantCandidateTypes } = useLookups()
   const vacancyTabCfg = getJsonSetting<VacancyTabConfig | null>(allSettings, 'candidate_vacancy_tab', null)
   const { hasModule, isSuperAdmin, hasRole } = useAuth() as unknown as { hasModule: (m: string) => boolean; isSuperAdmin: () => boolean; hasRole: (r: string) => boolean }
   // Hard delete is admin-only (Danny 2026-07-03) — the backend re-checks (§7: UI gating is UX).
@@ -160,10 +161,10 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     // Match tab is ALWAYS shown (2026-07-08): it holds the "+ Solliciteren" /
     // "+ Intake plannen" actions, so a Lead with no application yet still needs it.
     if (tab.id === 'administration') return isFreelancer
-    // Vacatures (vacancySearch) is tenant-gated per phase + deployability status
-    // (Settings → Candidate → Vacatures-tabblad) — e.g. off by default for a Lead
-    // or an Unavailable candidate, but always tenant-configurable.
-    if (tab.id === 'vacancySearch')  return isVacancyTabVisible(vacancyTabCfg, c, tenantPhases, tenantStatuses)
+    // Vacatures (vacancySearch) is tenant-gated per phase + deployability status +
+    // contract form (Settings → Candidate → Vacatures-tabblad) — e.g. off by
+    // default for a Lead or an Unavailable candidate, but always tenant-configurable.
+    if (tab.id === 'vacancySearch')  return isVacancyTabVisible(vacancyTabCfg, c, tenantPhases, tenantStatuses, tenantCandidateTypes)
     return true
   })
   // 'Extra' appears only when the tenant has ≥1 active candidate custom field (§3A(f)).
@@ -256,7 +257,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           </span>
         </div>
       }
-      tabs={tabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), autoExpand: tab.id === 'planning', render: (setTab?: (id: string) => void) => renderTabContent(tab.id, setTab) }))}
+      tabs={tabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), autoExpand: tab.id === 'planning' || tab.id === 'vacancySearch', render: (setTab?: (id: string) => void) => renderTabContent(tab.id, setTab) }))}
       header={({ setActiveTab }) => (
         <EntityHeader
           label={t('drawer.entityLabel')}

@@ -799,7 +799,9 @@
     "statuses": "Vacaturestatus",
     "functions": "Functie",
     "onMap": "{{count}} vacatures op de kaart",
-    "empty": "Geen vacatures gevonden binnen deze filters."
+    "empty": "Geen vacatures gevonden binnen deze filters.",
+    "openNewWindow": "Open in nieuw venster",
+    "openInApp": "Ga naar vacature"
   },
   "erase": {
     "trashView": "Prullenbak",
