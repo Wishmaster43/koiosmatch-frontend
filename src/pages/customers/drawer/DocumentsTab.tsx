@@ -16,7 +16,10 @@ import { useEntityDocuments, type EntityDoc } from '@/hooks/useEntityDocuments'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import type { Id } from '@/types/common'
 
-interface PendingFile { file: File; objectUrl: string; name: string; size: string }
+// A queued-but-not-yet-uploaded file, each with its own document type (BUGFIX
+// 23-07: a multi-file pick used to collapse to a single pending slot, so picking
+// 5 files silently uploaded only 1 — now every picked file gets its own queue entry).
+interface PendingItem { file: File; objectUrl: string; name: string; size: string; type: string }
 
 // Split a filename into base + extension so rename never touches the extension.
 const splitExt = (fn: string) => { const m = fn.match(/\.[^./\\]+$/); return { base: m ? fn.slice(0, -m[0].length) : fn, ext: m ? m[0] : '' } }
@@ -34,8 +37,7 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
   const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor } = useDocumentTypes()
   // List + optimistic upload/rename/delete against /customers/{id}/documents.
   const { docs, upload, rename, remove } = useEntityDocuments('customers', customerId)
-  const [pendingFile, setPendingFile] = useState<PendingFile | null>(null)
-  const [pendingType, setPendingType] = useState('CV')
+  const [pending,     setPending]     = useState<PendingItem[]>([])
   const [renamingId,  setRenamingId]  = useState<Id | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [docSearch,   setDocSearch]   = useState('')
@@ -68,12 +70,26 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
     setSelected(new Set())
   }
 
-  // Send the pending file to the server (an optimistic row appears immediately).
-  const doUpload = () => {
-    if (!pendingFile) return
-    upload(pendingFile.file, pendingType, pendingFile.name, pendingFile.objectUrl)
-    setPendingFile(null)
+  // Send every queued file to the server — one upload() call per item, each with
+  // its OWN type — so a multi-file pick uploads all of them, not just the first.
+  const uploadAll = () => {
+    if (!pending.length) return
+    const items = pending
+    setPending([])
+    for (const item of items) upload(item.file, item.type, item.name, item.objectUrl)
   }
+  // Set one item's doc type (its own select) without touching the others.
+  const setItemType = (idx: number, type: string) => setPending(items => items.map((it, i) => (i === idx ? { ...it, type } : it)))
+  // Apply-to-all chip: set the SAME type on every queued item at once.
+  const setAllTypes = (type: string) => setPending(items => items.map(it => ({ ...it, type })))
+  // Drop one queued item and revoke its blob preview URL so it never leaks.
+  const removePending = (idx: number) => setPending(items => {
+    const target = items[idx]
+    if (target) URL.revokeObjectURL(target.objectUrl)
+    return items.filter((_, i) => i !== idx)
+  })
+  // Cancel the whole queue: revoke every blob URL, then clear.
+  const cancelPending = () => { pending.forEach(p => URL.revokeObjectURL(p.objectUrl)); setPending([]) }
 
   // Commit a rename: re-attach the original extension, then persist by id.
   const doRename = (d: EntityDoc, base: string) => {
@@ -116,31 +132,57 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
         </div>
       </div>
       <div style={sectionBlock}>
-        {pendingFile && (
+        {pending.length > 0 && (
           <div style={{ border: '1px solid var(--color-primary)', borderRadius: 10, padding: 12, marginBottom: 10, background: 'var(--color-primary-bg)' }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>
-              {pendingFile.name} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({pendingFile.size})</span>
+              {/* Single file keeps the old name+size header; a multi-pick shows a count instead. */}
+              {pending.length === 1
+                ? <>{pending[0].name} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({pending[0].size})</span></>
+                : t('documents.pendingCount', { count: pending.length })}
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('documents.docType')}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>
+              {pending.length > 1 ? t('documents.applyTypeToAll') : t('documents.docType')}
+            </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
-              {/* §4 soft-tint (audit r4): active = tinted, never a solid primary fill. */}
-              {docTypes.map(dt => (
-                <button key={dt.value} onClick={() => setPendingType(dt.value)}
-                  style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer', fontWeight: pendingType === dt.value ? 600 : 400,
-                    border: `1px solid ${pendingType === dt.value ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}`,
-                    background: pendingType === dt.value ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'var(--surface)',
-                    color: pendingType === dt.value ? 'var(--color-primary)' : 'var(--text)' }}>{dt.label}</button>
+              {/* §4 soft-tint (audit r4): active = tinted, never a solid primary fill.
+                  A chip is "active" only when EVERY queued item already shares that type. */}
+              {docTypes.map(dt => {
+                const active = pending.length > 0 && pending.every(p => p.type === dt.value)
+                return (
+                  <button key={dt.value} onClick={() => setAllTypes(dt.value)}
+                    style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer', fontWeight: active ? 600 : 400,
+                      border: `1px solid ${active ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}`,
+                      background: active ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'var(--surface)',
+                      color: active ? 'var(--color-primary)' : 'var(--text)' }}>{dt.label}</button>
+                )
+              })}
+            </div>
+            {/* One compact row per queued file — its own type select + remove. */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
+              {pending.map((item, idx) => (
+                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{item.size}</span>
+                  <select aria-label={t('documents.docTypeFor', { name: item.name })} value={item.type} onChange={e => setItemType(idx, e.target.value)}
+                    style={{ fontSize: 11, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)' }}>
+                    {docTypes.map(dt => <option key={dt.value} value={dt.value}>{dt.label}</option>)}
+                  </select>
+                  <button onClick={() => removePending(idx)} aria-label={t('common:remove')}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex', flexShrink: 0 }}><X size={12} /></button>
+                </div>
               ))}
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={doUpload}
-                style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--text)', color: 'white', border: 'none', cursor: 'pointer' }}>{t('documents.add')}</button>
-              <button onClick={() => { URL.revokeObjectURL(pendingFile.objectUrl); setPendingFile(null) }}
+              <button onClick={uploadAll}
+                style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--text)', color: 'white', border: 'none', cursor: 'pointer' }}>
+                {pending.length > 1 ? t('documents.addAll', { count: pending.length }) : t('documents.add')}
+              </button>
+              <button onClick={cancelPending}
                 style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'none', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('drawer.cancel')}</button>
             </div>
           </div>
         )}
-        {docs.length === 0 && !pendingFile && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('documents.empty')}</div>}
+        {docs.length === 0 && pending.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('documents.empty')}</div>}
         {docs.length > 0 && (
           <div style={{ display: 'grid', gridTemplateColumns: DOC_GRID_COLUMNS, alignItems: 'center', padding: '4px 10px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 4 }}>
             {/* Select-all operates on the currently filtered, downloadable rows only. */}
@@ -189,13 +231,17 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
             )
           })
         }
-        <input ref={fileRef} type="file" style={{ display: 'none' }}
+        <input ref={fileRef} type="file" style={{ display: 'none' }} multiple
           onChange={(e: ChangeEvent<HTMLInputElement>) => {
-            const file = e.target.files?.[0]
-            if (!file) return
-            const objectUrl = URL.createObjectURL(file)
-            setPendingFile({ file, objectUrl, name: file.name, size: Math.round(file.size / 1024) + ' KB' })
-            setPendingType('CV')
+            // Every picked file becomes its own queue entry (default type 'CV') —
+            // this is the actual bugfix: previously only files?.[0] was kept.
+            const files = Array.from(e.target.files ?? [])
+            if (!files.length) return
+            const items: PendingItem[] = files.map(file => ({
+              file, objectUrl: URL.createObjectURL(file), name: file.name,
+              size: Math.round(file.size / 1024) + ' KB', type: 'CV',
+            }))
+            setPending(prev => [...prev, ...items])
             e.target.value = ''
           }} />
       </div>
