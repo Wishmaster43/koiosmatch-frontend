@@ -799,7 +799,8 @@
     "statuses": "Estado de la vacante",
     "functions": "Función",
     "onMap": "{{count}} vacantes en el mapa",
-    "empty": "No se han encontrado vacantes con estos filtros."
+    "empty": "No se han encontrado vacantes con estos filtros.",
+    "centerHome": "Domicilio del candidato"
   },
   "erase": {
     "trashView": "Papelera",

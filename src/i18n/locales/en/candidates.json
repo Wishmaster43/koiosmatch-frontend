@@ -799,7 +799,8 @@
     "statuses": "Vacancy status",
     "functions": "Function",
     "onMap": "{{count}} vacancies on the map",
-    "empty": "No vacancies found within these filters."
+    "empty": "No vacancies found within these filters.",
+    "centerHome": "Candidate's home address"
   },
   "erase": {
     "trashView": "Trash",

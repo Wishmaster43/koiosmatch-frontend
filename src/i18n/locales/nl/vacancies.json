@@ -278,7 +278,8 @@
     "functions": "Functie",
     "statuses": "Inzetbaarheid",
     "onMap": "{{count}} kandidaten op de kaart",
-    "empty": "Geen kandidaten gevonden binnen deze filters."
+    "empty": "Geen kandidaten gevonden binnen deze filters.",
+    "centerVacancy": "Vacaturelocatie"
   },
   "statistics": {
     "title": "Conversie",

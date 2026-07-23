@@ -278,7 +278,8 @@
     "functions": "Función",
     "statuses": "Disponibilidad",
     "onMap": "{{count}} candidatos en el mapa",
-    "empty": "No se han encontrado candidatos con estos filtros."
+    "empty": "No se han encontrado candidatos con estos filtros.",
+    "centerVacancy": "Ubicación de la vacante"
   },
   "statistics": {
     "title": "Conversión",

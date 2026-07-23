@@ -799,7 +799,8 @@
     "statuses": "Stellenstatus",
     "functions": "Funktion",
     "onMap": "{{count}} Stellen auf der Karte",
-    "empty": "Keine Stellen innerhalb dieser Filter gefunden."
+    "empty": "Keine Stellen innerhalb dieser Filter gefunden.",
+    "centerHome": "Wohnadresse des Kandidaten"
   },
   "erase": {
     "trashView": "Papierkorb",

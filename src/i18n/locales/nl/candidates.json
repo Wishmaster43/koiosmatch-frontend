@@ -799,7 +799,8 @@
     "statuses": "Vacaturestatus",
     "functions": "Functie",
     "onMap": "{{count}} vacatures op de kaart",
-    "empty": "Geen vacatures gevonden binnen deze filters."
+    "empty": "Geen vacatures gevonden binnen deze filters.",
+    "centerHome": "Woonadres kandidaat"
   },
   "erase": {
     "trashView": "Prullenbak",

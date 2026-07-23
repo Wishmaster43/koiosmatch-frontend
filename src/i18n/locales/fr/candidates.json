@@ -799,7 +799,8 @@
     "statuses": "Statut du poste",
     "functions": "Fonction",
     "onMap": "{{count}} postes sur la carte",
-    "empty": "Aucun poste trouvé avec ces filtres."
+    "empty": "Aucun poste trouvé avec ces filtres.",
+    "centerHome": "Domicile du candidat"
   },
   "erase": {
     "trashView": "Corbeille",

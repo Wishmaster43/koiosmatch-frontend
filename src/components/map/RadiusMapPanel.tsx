@@ -10,7 +10,7 @@ import type { Id } from '@/types/common'
 
 export type { MapPoint }
 
-export default function RadiusMapPanel({ points, center, radiusKm, onCenterChange, onRadiusChange, onClearRadius, onPick, pointsLabel, padded = true }: {
+export default function RadiusMapPanel({ points, center, radiusKm, onCenterChange, onRadiusChange, onClearRadius, onPick, pointsLabel, padded = true, mapHeight, centerMarker }: {
   points: MapPoint[]
   center: { lat: number; lng: number }
   // 0 = straal inactive: show ALL points, no circle (the silent default-radius
@@ -25,6 +25,9 @@ export default function RadiusMapPanel({ points, center, radiusKm, onCenterChang
   pointsLabel?: string
   // Page padding around the panel; off when the host embeds it in a split layout.
   padded?: boolean
+  // Forwarded to RadiusMap: taller map in the drawer tabs + the distinct origin pin.
+  mapHeight?: number | string
+  centerMarker?: { label: string; sub?: string }
 }) {
   const { t } = useTranslation('common')
 
@@ -53,11 +56,12 @@ export default function RadiusMapPanel({ points, center, radiusKm, onCenterChang
           {pointsLabel ?? t('map.pointCount', { count: points.length })}
         </span>
       </div>
-      {/* The map fills the remaining pane height (min keeps it usable on small screens). */}
-      <div style={{ flex: 1, minHeight: 380, display: 'flex' }}>
+      {/* The map fills the remaining pane height; hosts (drawer tabs) can force a
+          taller map via mapHeight (Danny 23-07: "kaart kan langer"). */}
+      <div style={{ flex: 1, minHeight: mapHeight ?? 380, display: 'flex' }}>
         <div style={{ flex: 1 }}>
           <RadiusMap center={center} radiusKm={radiusKm} points={points} height="100%"
-            onCenterChange={onCenterChange} onPickPoint={onPick} />
+            onCenterChange={onCenterChange} onPickPoint={onPick} centerMarker={centerMarker} />
         </div>
       </div>
     </div>

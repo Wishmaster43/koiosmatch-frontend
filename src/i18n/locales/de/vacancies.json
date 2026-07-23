@@ -278,7 +278,8 @@
     "functions": "Funktion",
     "statuses": "Einsetzbarkeit",
     "onMap": "{{count}} Kandidaten auf der Karte",
-    "empty": "Keine Kandidaten innerhalb dieser Filter gefunden."
+    "empty": "Keine Kandidaten innerhalb dieser Filter gefunden.",
+    "centerVacancy": "Standort der Stelle"
   },
   "statistics": {
     "title": "Konversion",

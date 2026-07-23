@@ -278,7 +278,8 @@
     "functions": "Fonction",
     "statuses": "Disponibilité",
     "onMap": "{{count}} candidats sur la carte",
-    "empty": "Aucun candidat trouvé avec ces filtres."
+    "empty": "Aucun candidat trouvé avec ces filtres.",
+    "centerVacancy": "Lieu du poste"
   },
   "statistics": {
     "title": "Conversion",

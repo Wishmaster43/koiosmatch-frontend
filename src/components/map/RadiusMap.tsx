@@ -17,13 +17,16 @@ function ClickToCenter({ onPick }: { onPick?: (lat: number, lng: number) => void
   return null
 }
 
-export default function RadiusMap({ center, radiusKm, points, onCenterChange, onPickPoint, height = 520 }: {
+export default function RadiusMap({ center, radiusKm, points, onCenterChange, onPickPoint, height = 520, centerMarker }: {
   center: { lat: number; lng: number }
   radiusKm: number
   points: MapPoint[]
   onCenterChange?: (lat: number, lng: number) => void
   onPickPoint?: (id: Id) => void
   height?: number | string
+  // Optional distinct ORIGIN pin (Danny 23-07: candidate home / vacancy location
+  // must be visible next to the result pins) — absent on plain list-as-map pages.
+  centerMarker?: { label: string; sub?: string }
 }) {
   return (
     <div style={{ height, borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)' }}>
@@ -36,6 +39,15 @@ export default function RadiusMap({ center, radiusKm, points, onCenterChange, on
         {/* The search radius around the chosen centre — the fixed, tenant-invariant map token (§4). */}
         <Circle center={[center.lat, center.lng]} radius={radiusKm * 1000}
           pathOptions={{ color: 'var(--color-map)', fillColor: 'var(--color-map)', fillOpacity: 0.08, weight: 1.5 }} />
+        {/* Origin pin — bigger, primary-filled, so it reads apart from result pins. */}
+        {centerMarker && (
+          <CircleMarker center={[center.lat, center.lng]} radius={10}
+            pathOptions={{ color: '#fff', weight: 2.5, fillColor: 'var(--color-primary)', fillOpacity: 1 }}>
+            <Tooltip direction="top" offset={[0, -8]}>
+              <strong>{centerMarker.label}</strong>{centerMarker.sub ? <><br />{centerMarker.sub}</> : null}
+            </Tooltip>
+          </CircleMarker>
+        )}
         {points.map(p => (
           <CircleMarker key={String(p.id)} center={[p.lat, p.lng]} radius={7}
             eventHandlers={onPickPoint ? { click: () => onPickPoint(p.id) } : undefined}
