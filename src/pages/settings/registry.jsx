@@ -47,6 +47,7 @@ import FunctionsSettings from './sections/FunctionsSettings'
 import ContactFunctionsSettings from './sections/ContactFunctionsSettings'
 import { VacancyStatusSettings, VacancyPhaseSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings, VacancyApplicationDefaultsSettings } from './sections/VacancySettings'
 import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
+import VacancyCandidateTabSettings from './sections/VacancyCandidateTabSettings'
 import MatchTemplatesSettings from './sections/MatchTemplatesSettings'
 import MatchRatesSettings from './sections/MatchRatesSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
@@ -232,6 +233,9 @@ export const NAV_GROUPS = [
       // Vacancy custom fields moved to the shared "Eigen velden" group below.
       { id: 'vacancy_app_defaults', icon: ClipboardList, component: VacancyApplicationDefaultsSettings },
       { id: 'vacancy_matching', icon: Sparkles, component: VacancyMatchingSettings },
+      // Kandidaten zoeken-tab visibility + filter defaults (Danny 23-07): mirrors
+      // candidate_vacancy_tab — see VacancyCandidateTabSettings + candidateTabVisibility.ts.
+      { id: 'vacancy_candidate_tab', icon: Users, component: VacancyCandidateTabSettings },
       // Matchprofielen (MATCH-TEMPLATE-1) — reusable named weight presets the vacancy
       // Matching tab's picker reads (read-only there); managed here.
       { id: 'match_templates', icon: SlidersHorizontal, component: MatchTemplatesSettings },

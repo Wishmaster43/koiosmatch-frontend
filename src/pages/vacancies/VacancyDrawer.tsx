@@ -10,6 +10,9 @@ import { channelIcon } from './data/channelIcons'
 import VacancyChangelogPopover from './drawer/VacancyChangelogPopover'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { isCandidateTabVisible } from './lib/candidateTabVisibility'
+import type { CandidateTabConfig } from './lib/candidateTabVisibility'
 import { useDateFormat } from '@/lib/datetime'
 import DetailsTab from './drawer/DetailsTab'
 import DescriptionTab from './drawer/DescriptionTab'
@@ -94,7 +97,11 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
   const { formatDate, formatDateTime } = useDateFormat()
   // The Extra tab only shows when the tenant has defined vacancy custom fields.
   const { fields: customFieldDefs } = useVacancyCustomFields()
-  const visibleTabs = TABS.filter(tab => tab.id !== 'extra' || customFieldDefs.length > 0)
+  // Kandidaten zoeken-tab visibility gate (Danny 23-07): tenant-configurable per
+  // vacancy status via Settings → Vacatures → Kandidaten zoeken-tabblad (mirrors
+  // the candidate side's candidate_vacancy_tab / vacancyTabVisibility.ts).
+  const settingsValues = useAllSettings()
+  const candidateTabCfg = getJsonSetting<CandidateTabConfig | null>(settingsValues, 'vacancy_candidate_tab', null)
 
   // Tags are edited inline; seed from the record and reset when a different
   // vacancy is shown (adjust state during render — React's recommended pattern).
@@ -106,6 +113,12 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
   if (v?.id !== prevId) { setPrevId(v?.id); setTags(null); setEditingTitle(false); setTitleDraft('') }
 
   if (!v) return null
+
+  // Extra tab needs ≥1 tenant custom field; Kandidaten zoeken needs this vacancy's
+  // status allowed by the tenant-configured gate (default = every status, always visible).
+  const visibleTabs = TABS
+    .filter(tab => tab.id !== 'extra' || customFieldDefs.length > 0)
+    .filter(tab => tab.id !== 'candidateSearch' || isCandidateTabVisible(candidateTabCfg, { status: v.statusValue != null ? String(v.statusValue) : null }, statuses))
 
   const currentTags = tags ?? (v.tags as string[]) ?? []
   const setTagsAndSave = (next: string[]) => { setTags(next); onUpdate?.(v.id, { tags: next }) }
