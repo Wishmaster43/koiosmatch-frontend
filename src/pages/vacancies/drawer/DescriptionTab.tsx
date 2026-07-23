@@ -57,7 +57,9 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
       {descEditing
         ? <RichTextEditor key={descKey} value={description} onChange={setDescription} expanded={descExpanded} onToggleExpand={() => setDescExpanded(x => !x)} />
         : (v.description
-            ? <div style={{ ...blockStyle, padding: '10px 12px', maxHeight: 220, overflow: 'auto' }}><SafeHtml html={v.description} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} /></div>
+            // Full height — the block grows with the text; the drawer body scrolls
+            // when it overflows (Danny 23-07: no inner 220px scrollbox on a full tab).
+            ? <div style={{ ...blockStyle, padding: '10px 12px' }}><SafeHtml html={v.description} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} /></div>
             : <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>—</div>)}
     </div>
   )
