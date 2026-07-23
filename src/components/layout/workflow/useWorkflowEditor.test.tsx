@@ -14,6 +14,7 @@ import type { ReactNode } from 'react'
 import type { Connection } from '@xyflow/react'
 import { useWorkflowEditor } from './useWorkflowEditor'
 import type { Workflow, WorkflowStep } from '@/types/workflow'
+import api from '@/lib/api'
 
 // The mount effect fetches /webhooks through the default client — stub it, but
 // keep the real unwrap/unwrapList (importActual) so that call still resolves cleanly.
@@ -334,5 +335,35 @@ describe('useWorkflowEditor · getUpstreamVariables', () => {
     const { result } = setup([{ id: 'n1', type: 'candidates', config: {}, position: { x: 0, y: 0 } }])
     await waitFor(() => expect(result.current.nodesWithFirst).toHaveLength(1))
     expect(result.current.getUpstreamVariables(null)).toEqual([])
+  })
+})
+
+describe('useWorkflowEditor · NODE-PROGRESS-1 live progress mapping', () => {
+  it('maps the polled run steps (status + {done,total} progress + items_total) onto node data', async () => {
+    // Route the mocked GET: the polled run for /workflow-runs/r1, [] for the webhooks mount fetch.
+    const run = {
+      id: 'r1', status: 'running',
+      steps: [
+        { step_id: 'n1', status: 'running', progress: { done: 38, total: 120 }, items_total: null },
+        { step_id: 'n2', status: 'success', progress: null, items_total: 57 },
+      ],
+    }
+    vi.mocked(api.get).mockImplementation(async (url: string) =>
+      url.includes('/workflow-runs/') ? { data: { data: run } } : { data: { data: [] } })
+
+    const steps: WorkflowStep[] = [
+      { id: 'n1', type: 'candidates', config: {}, position: { x: 0, y: 180 }, next: [{ target: 'n2' }] },
+      { id: 'n2', type: 'email', config: {}, position: { x: 220, y: 180 } },
+    ]
+    const { result } = renderHook(
+      () => useWorkflowEditor({ workflow: wf(steps), onSave: vi.fn(), initialRunId: 'r1' }), { wrapper })
+
+    // The poll lands → each node carries its live status, progress and item count.
+    await waitFor(() => {
+      const n1 = result.current.nodesWithFirst.find(n => n.id === 'n1')
+      const n2 = result.current.nodesWithFirst.find(n => n.id === 'n2')
+      expect(n1?.data).toMatchObject({ status: 'running', isRunning: true, progress: { done: 38, total: 120 } })
+      expect(n2?.data).toMatchObject({ status: 'success', progress: null, itemsTotal: 57 })
+    })
   })
 })

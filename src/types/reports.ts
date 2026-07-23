@@ -68,6 +68,10 @@ export interface RunStep {
   items?: number
   // Router step: the per-route distribution (Fase 2) — "→ Dagdienst: 12/40".
   routing?: Array<{ to_label?: string; matched?: number; total?: number; filtered?: number }>
+  // NODE-PROGRESS-1: live loop progress ({done,total}) for the canvas node ring;
+  // null/absent = atomic step (the node shows an indeterminate spinner instead).
+  progress?: { done: number; total: number } | null
+  items_total?: number | null
   attempts?: number
   error?: string | null
   error_message?: string | null

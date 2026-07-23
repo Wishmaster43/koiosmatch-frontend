@@ -342,13 +342,21 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
 
   // WF-R3: map the polled run's steps (step_id → status) onto the nodes so the
   // canvas shows real per-step progress (running/success/failed) live.
-  const stepStatus = useMemo(() => {
-    const m: Record<string, string> = {}
+  // NODE-PROGRESS-1 (Danny 23-07): also carry the live {done,total} loop progress
+  // + the finished item count, so the node ring renders a Make-style progress arc
+  // with a counter badge ("38") instead of only a glow.
+  const stepLive = useMemo(() => {
+    const status: Record<string, string> = {}
+    const progress: Record<string, { done: number; total: number }> = {}
+    const itemsTotal: Record<string, number> = {}
     ;(liveRun?.steps ?? []).forEach(s => {
       const id = s.step_id != null ? String(s.step_id) : undefined
-      if (id && s.status) m[id] = String(s.status)
+      if (!id) return
+      if (s.status) status[id] = String(s.status)
+      if (s.progress && s.progress.total > 0) progress[id] = s.progress
+      if (typeof s.items_total === 'number') itemsTotal[id] = s.items_total
     })
-    return m
+    return { status, progress, itemsTotal }
   }, [liveRun])
 
   const nodesWithFirst = nodes.map(n => ({
@@ -356,8 +364,10 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     data: {
       ...n.data,
       isFirst: n.id === firstNodeId,
-      isRunning: n.id === runningNodeId || stepStatus[n.id] === 'running',
-      status: stepStatus[n.id],
+      isRunning: n.id === runningNodeId || stepLive.status[n.id] === 'running',
+      status: stepLive.status[n.id],
+      progress: stepLive.progress[n.id] ?? null,
+      itemsTotal: stepLive.itemsTotal[n.id] ?? null,
     },
   }))
 

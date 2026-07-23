@@ -42,6 +42,21 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   const failed = status === 'failed'
   const done   = status === 'success'
 
+  // NODE-PROGRESS-1 (Danny 23-07 "een rondje hoever hij is met lopen", Make-style):
+  // a circular progress arc IN the glow ring + a counter badge. Determinate when the
+  // step reports {done,total} loop progress; an indeterminate spinner otherwise. The
+  // arc also keeps filling after step-success while a fan-out is still delivering.
+  const progress = data.progress as { done: number; total: number } | null | undefined
+  const itemsTotal = data.itemsTotal as number | null | undefined
+  const frac = progress && progress.total > 0 ? Math.min(1, progress.done / progress.total) : null
+  const arcActive = !failed && (Boolean(data.isRunning) || (frac != null && frac < 1))
+  // Live counter while looping; the processed total (Make's "38") once finished.
+  const badgeCount = arcActive
+    ? (progress?.done ?? null)
+    : (done ? (itemsTotal ?? progress?.total ?? null) : null)
+  const ARC_R = 39
+  const ARC_C = 2 * Math.PI * ARC_R
+
   const handleRun = async (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
     setBusy(true)
@@ -102,6 +117,36 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
           style={{ width: 10, height: 10, background: 'var(--border)', border: '2px solid white', top: '38%' }} />
       )}
       <div style={{ position: 'relative' }}>
+        {/* NODE-PROGRESS-1: the progress arc, drawn exactly on the glow ring. Determinate
+            (filled fraction, smooth) with loop progress; an indeterminate spinner without. */}
+        {arcActive && (
+          <svg width={84} height={84} viewBox="0 0 84 84" aria-hidden
+            style={{ position: 'absolute', top: -6, left: -6, pointerEvents: 'none', zIndex: 3,
+                     transformOrigin: '50% 50%',
+                     animation: frac == null ? 'spin 1s linear infinite' : 'none' }}>
+            {/* Faint full-circle track so the remaining part of the ring stays visible. */}
+            {frac != null && (
+              <circle cx={42} cy={42} r={ARC_R} fill="none" stroke={meta.color} strokeOpacity={0.18} strokeWidth={4} />
+            )}
+            <circle cx={42} cy={42} r={ARC_R} fill="none" stroke={meta.color} strokeWidth={4}
+              strokeLinecap="round" strokeDasharray={ARC_C}
+              strokeDashoffset={frac == null ? ARC_C * 0.75 : ARC_C * (1 - frac)}
+              transform="rotate(-90 42 42)"
+              style={{ transition: frac != null ? 'stroke-dashoffset 0.4s ease' : 'none' }} />
+          </svg>
+        )}
+        {/* NODE-PROGRESS-1: Make-style counter badge — live count while looping, the
+            processed total after success. */}
+        {badgeCount != null && (
+          <span style={{ position: 'absolute', top: -9, right: -9, zIndex: 4,
+                         minWidth: 16, padding: '2px 6px', borderRadius: 999,
+                         display: 'flex', alignItems: 'center', justifyContent: 'center',
+                         background: meta.color, color: 'white', fontSize: 10, fontWeight: 700,
+                         fontFamily: "'JetBrains Mono', monospace", lineHeight: '14px',
+                         border: '2px solid var(--surface)', whiteSpace: 'nowrap' }}>
+            {badgeCount}
+          </span>
+        )}
         <div style={{
           width: 72, height: 72, borderRadius: '50%',
           background: meta.bg,
