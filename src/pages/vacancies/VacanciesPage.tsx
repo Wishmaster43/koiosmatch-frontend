@@ -156,7 +156,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // instead since useVacancyRecord.ts is out of scope for this change).
   const [drawerInitialTab, setDrawerInitialTab] = useState<string | undefined>(undefined)
   const openVacancy = (v: Parameters<typeof selectVacancy>[0]) => { setDrawerInitialTab(undefined); selectVacancy(v) }
-  const openCandidateSearch = (id: Id) => { setDrawerInitialTab('candidateSearch'); selectVacancy({ id } as Parameters<typeof selectVacancy>[0]) }
+  const openCandidateSearch = (id: Id) => { setDrawerInitialTab('candidateSearch'); selectVacancy({ id } as Parameters<typeof selectVacancy>[0], { forceOpen: true }) }
 
   // Open a vacancy drawer when arriving via a cross-entity link (intent).
   useOpenFromIntent(intent, (id) => openVacancy({ id } as Parameters<typeof selectVacancy>[0]))

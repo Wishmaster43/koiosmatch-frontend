@@ -36,8 +36,12 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
 
   // Light row first, then fetch the full detail (ref-guarded against races).
   const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setDetail(null); setDrawerExpanded(false) }
-  const selectVacancy = (v: Vacancy) => {
-    if (selected?.id === v.id) { closeDrawer(); return }
+  const selectVacancy = (v: Vacancy, opts?: { forceOpen?: boolean }) => {
+    // Re-clicking the SAME row toggles the drawer closed; an explicit deep-link
+    // (e.g. the Leads count → Kandidaten zoeken) always (re)opens instead
+    // (mirrors useCustomerRecord.selectCustomer's tab nuance).
+    if (selected?.id === v.id && !opts?.forceOpen) { closeDrawer(); return }
+    if (selected?.id === v.id && opts?.forceOpen) return
     selectedIdRef.current = v.id ?? null
     setSelected(v); setDetail(null); setDrawerExpanded(false)
     api.get(`/vacancies/${v.id}`)
