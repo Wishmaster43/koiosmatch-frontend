@@ -800,7 +800,8 @@
     "functions": "Funktion",
     "onMap": "{{count}} Stellen auf der Karte",
     "empty": "Keine Stellen innerhalb dieser Filter gefunden.",
-    "centerHome": "Wohnadresse des Kandidaten"
+    "centerHome": "Wohnadresse des Kandidaten",
+    "aiAdvised": "Von Koios empfohlen"
   },
   "erase": {
     "trashView": "Papierkorb",

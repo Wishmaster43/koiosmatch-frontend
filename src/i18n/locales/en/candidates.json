@@ -800,7 +800,8 @@
     "functions": "Function",
     "onMap": "{{count}} vacancies on the map",
     "empty": "No vacancies found within these filters.",
-    "centerHome": "Candidate's home address"
+    "centerHome": "Candidate's home address",
+    "aiAdvised": "Advised by Koios"
   },
   "erase": {
     "trashView": "Trash",

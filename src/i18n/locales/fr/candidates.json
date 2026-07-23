@@ -800,7 +800,8 @@
     "functions": "Fonction",
     "onMap": "{{count}} postes sur la carte",
     "empty": "Aucun poste trouvé avec ces filtres.",
-    "centerHome": "Domicile du candidat"
+    "centerHome": "Domicile du candidat",
+    "aiAdvised": "Conseillé par Koios"
   },
   "erase": {
     "trashView": "Corbeille",

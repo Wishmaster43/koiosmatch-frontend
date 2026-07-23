@@ -800,7 +800,8 @@
     "functions": "Función",
     "onMap": "{{count}} vacantes en el mapa",
     "empty": "No se han encontrado vacantes con estos filtros.",
-    "centerHome": "Domicilio del candidato"
+    "centerHome": "Domicilio del candidato",
+    "aiAdvised": "Recomendado por Koios"
   },
   "erase": {
     "trashView": "Papelera",

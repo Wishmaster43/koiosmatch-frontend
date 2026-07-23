@@ -6,8 +6,13 @@
  * noLocation guard skipping the fetch entirely, a status-toggle refiring with the
  * new param, an error state whose retry button re-fires the same request, and the
  * summary-card selection flow (row click selects instead of navigating; its two
- * actions open in-app / in a new window). The map is stubbed (leaflet does not
- * run under jsdom); api's `unwrapList`/`unwrap` stay real so the envelope-unwrap
+ * actions open in-app / in a new window). It also proves the LIVE score MERGE
+ * (CMBE MATCH-EXPLORER-1 fase 2+3, Danny 23-07): a second independent GET to
+ * /candidates/{id}/vacancy-matches joined onto the vacancy rows by id, a score
+ * pill only where a match entry exists, the shared MatchScoreBlock's criteria
+ * rendered read-only in the summary card, and a score-fetch failure never
+ * blocking the vacancy list itself. The map is stubbed (leaflet does not run
+ * under jsdom); api's `unwrapList`/`unwrap` stay real so the envelope-unwrap
  * logic is genuinely exercised.
  */
 import type { ReactNode } from 'react'
@@ -78,11 +83,42 @@ const rawRows = [
   { id: 'v1', title: 'Verzorgende IG | Amersfoort', customer_name: 'Zorggroep B', city: 'Amersfoort', status: 'open', lat: '52.20', lng: '5.40', distance_km: '1.1' },
 ]
 
-beforeEach(() => { vi.clearAllMocks(); settingsRef.current = {} })
+// The LIVE match-explorer merge (CMBE MATCH-EXPLORER-1 fase 2+3) — only v1 is
+// scored, so v2 proves the "no match entry ⇒ no pill" rule. Score/weight are
+// strings (Laravel decimal-cast wire quirk) to prove the tolerant coercion too.
+const rawMatchRows = [
+  {
+    vacancy: { id: 'v1' }, distance_km: '1.1', score: '82',
+    criteria: [{ key: 'distance', label: 'Reisafstand', score: '90', weight: '3', hard: false }],
+    ai_advised: true, ai_advice_reason: 'Beste match binnen 5 km en juiste functie.',
+  },
+]
+
+// URL-routed api.get stub. The hook now fires TWO independent GETs on mount
+// (/vacancies + /candidates/{id}/vacancy-matches), so a call-ORDER-based queue
+// (chained mockResolvedValueOnce) would be brittle — route by URL instead, with
+// calm empty-envelope defaults so a test only needs to override what it cares about.
+function stubApi(overrides: {
+  vacancies?: () => Promise<unknown>
+  matches?: () => Promise<unknown>
+  description?: () => Promise<unknown>
+} = {}) {
+  const vacancies = overrides.vacancies ?? (() => Promise.resolve({ data: { data: [] } }))
+  const matches = overrides.matches ?? (() => Promise.resolve({ data: { data: [] } }))
+  const description = overrides.description ?? (() => Promise.resolve({ data: {} }))
+  mockGet.mockImplementation((url: string) => {
+    if (url.includes('/vacancy-matches')) return matches()
+    if (url === '/vacancies') return vacancies()
+    if (url.startsWith('/vacancies/')) return description()
+    return Promise.reject(new Error(`stubApi: unexpected GET ${url}`))
+  })
+}
+
+beforeEach(() => { vi.clearAllMocks(); mockGet.mockReset(); settingsRef.current = {} })
 
 describe('VacancySearchTab · fetch + defaults', () => {
   it('fires GET /vacancies with the candidate coords + default filters, rows sorted by distance', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
+    stubApi({ vacancies: () => Promise.resolve({ data: { data: rawRows } }) })
     const { container } = render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
@@ -101,7 +137,7 @@ describe('VacancySearchTab · fetch + defaults', () => {
 
 describe('VacancySearchTab · radius default from the candidate travel preference', () => {
   it('uses preferences.max_travel_km as the initial radius when set', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: [] } })
+    stubApi()
     const candidateWithTravelPref = { ...candidateWithLocation, preferences: { max_travel_km: 45 } } as unknown as Candidate
     render(<VacancySearchTab candidate={candidateWithTravelPref} />)
 
@@ -112,7 +148,7 @@ describe('VacancySearchTab · radius default from the candidate travel preferenc
   })
 
   it('falls back to 30 when max_travel_km is missing/invalid', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: [] } })
+    stubApi()
     const candidateWithBadPref = { ...candidateWithLocation, preferences: { max_travel_km: 0 } } as unknown as Candidate
     render(<VacancySearchTab candidate={candidateWithBadPref} />)
 
@@ -123,7 +159,7 @@ describe('VacancySearchTab · radius default from the candidate travel preferenc
 describe('VacancySearchTab · status preselection follows the tenant setting', () => {
   it('preselects the configured vacancy_statuses instead of the /open/i seed default', async () => {
     settingsRef.current = { candidate_vacancy_tab: JSON.stringify({ vacancy_statuses: ['closed'] }) }
-    mockGet.mockResolvedValueOnce({ data: { data: [] } })
+    stubApi()
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/vacancies', {
@@ -143,9 +179,10 @@ describe('VacancySearchTab · no location', () => {
 
 describe('VacancySearchTab · status filter (searchable dropdown)', () => {
   it('refires the request with the newly toggled status added', async () => {
-    mockGet.mockResolvedValue({ data: { data: [] } })
+    stubApi()
     render(<VacancySearchTab candidate={candidateWithLocation} />)
-    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
+    // Two independent GETs fire on mount: the vacancy list + the live score merge.
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
 
     // Statuses are a searchable SearchSelect checklist now, not chips — open the
     // ONE scoped to the "Vacaturestatus" label (the functions dropdown reads the
@@ -155,7 +192,9 @@ describe('VacancySearchTab · status filter (searchable dropdown)', () => {
     await userEvent.click(statusesTrigger)
     await userEvent.click(await screen.findByRole('button', { name: 'Gesloten' }))
 
-    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
+    // Only the vacancy list refires — status/function aren't part of the
+    // match-merge contract (radius + candidate only), so that GET doesn't repeat.
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(3))
     expect(mockGet).toHaveBeenLastCalledWith('/vacancies', {
       params: { lat: 52.09, lng: 5.12, radius: 30, status: ['open', 'closed'], function_title: ['Verzorgende IG'], per_page: 200 },
       signal: expect.anything(),
@@ -165,22 +204,30 @@ describe('VacancySearchTab · status filter (searchable dropdown)', () => {
 
 describe('VacancySearchTab · error + retry', () => {
   it('shows the error state and retry re-fires the same request', async () => {
-    mockGet.mockRejectedValueOnce(new Error('network down'))
+    // Count only the /vacancies calls — the independent match-merge GET runs
+    // alongside and must not affect this assertion either way.
+    let vacanciesCalls = 0
+    stubApi({
+      vacancies: () => {
+        vacanciesCalls += 1
+        return vacanciesCalls === 1 ? Promise.reject(new Error('network down')) : Promise.resolve({ data: { data: [] } })
+      },
+    })
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     const retryBtn = await screen.findByRole('button', { name: 'Probeer opnieuw' })
-    mockGet.mockResolvedValueOnce({ data: { data: [] } })
     await userEvent.click(retryBtn)
 
-    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
+    await waitFor(() => expect(vacanciesCalls).toBe(2))
   })
 })
 
 describe('VacancySearchTab · row selection shows a summary card, not an immediate navigation', () => {
   it('clicking a row selects it (renders the card + its lazy-fetched snippet) instead of navigating', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
-    // The description-snippet lazy fetch (GET /vacancies/{id}) — tolerant, omitted on error.
-    mockGet.mockResolvedValueOnce({ data: { description: '<p>Korte omschrijving van de vacature.</p>' } })
+    stubApi({
+      vacancies: () => Promise.resolve({ data: { data: rawRows } }),
+      description: () => Promise.resolve({ data: { description: '<p>Korte omschrijving van de vacature.</p>' } }),
+    })
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
@@ -196,8 +243,7 @@ describe('VacancySearchTab · row selection shows a summary card, not an immedia
   })
 
   it('the in-app open button calls openEntity for the selected vacancy', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
-    mockGet.mockResolvedValueOnce({ data: { description: '' } })
+    stubApi({ vacancies: () => Promise.resolve({ data: { data: rawRows } }) })
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
@@ -211,8 +257,7 @@ describe('VacancySearchTab · row selection shows a summary card, not an immedia
   })
 
   it("the card title's trailing EntityLink anchor deep-links to #vacancies?open=<id> in a new tab", async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
-    mockGet.mockResolvedValueOnce({ data: { description: '' } })
+    stubApi({ vacancies: () => Promise.resolve({ data: { data: rawRows } }) })
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
@@ -230,8 +275,7 @@ describe('VacancySearchTab · row selection shows a summary card, not an immedia
     // The /vacancies list can embed the tenant lookup as {value,label,color};
     // unmapped it fell through makeMetaResolver's fallback INTO a rendered label.
     const objectStatusRows = [{ id: 'v9', title: 'Objectstatus | Test', customer_name: 'Zorggroep C', city: 'Breda', status: { value: 'open', label: 'Open', color: '#123456' }, lat: '51.5', lng: '4.7', distance_km: '2.0' }]
-    mockGet.mockResolvedValueOnce({ data: { data: objectStatusRows } })
-    mockGet.mockResolvedValueOnce({ data: { description: '' } })
+    stubApi({ vacancies: () => Promise.resolve({ data: { data: objectStatusRows } }) })
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     await waitFor(() => expect(screen.getByText('Objectstatus | Test')).toBeInTheDocument())
@@ -244,12 +288,69 @@ describe('VacancySearchTab · row selection shows a summary card, not an immedia
   })
 
   it('clicking the row TITLE navigates in-app (Match-style EntityLink), not the summary', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
+    stubApi({ vacancies: () => Promise.resolve({ data: { data: rawRows } }) })
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
     await userEvent.click(screen.getByText('Verzorgende IG | Amersfoort'))
 
     expect(openEntityMock).toHaveBeenCalledWith('vacancies', 'v1')
+  })
+})
+
+describe('VacancySearchTab · live match-explorer merge (CMBE MATCH-EXPLORER-1 fase 2+3)', () => {
+  it('fires GET /candidates/{id}/vacancy-matches with the radius param, independent of the vacancy list', async () => {
+    stubApi({ vacancies: () => Promise.resolve({ data: { data: rawRows } }) })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/candidates/cand1/vacancy-matches', {
+      params: { radius: 30, per_page: 100 },
+      signal: expect.anything(),
+    }))
+  })
+
+  it('renders a score pill only for the row with a merged match entry, none for the unmatched row', async () => {
+    stubApi({
+      vacancies: () => Promise.resolve({ data: { data: rawRows } }),
+      matches: () => Promise.resolve({ data: { data: rawMatchRows } }),
+    })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+
+    await waitFor(() => expect(screen.getByText('82%')).toBeInTheDocument())
+    // Only v1 (the matched row) gets a pill — v2 has no match-explorer entry.
+    expect(screen.getAllByText(/^\d+%$/)).toHaveLength(1)
+  })
+
+  it('selecting a matched row renders the shared MatchScoreBlock criteria, read-only, in the summary card', async () => {
+    stubApi({
+      vacancies: () => Promise.resolve({ data: { data: rawRows } }),
+      matches: () => Promise.resolve({ data: { data: rawMatchRows } }),
+    })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+
+    await waitFor(() => expect(screen.getByText('82%')).toBeInTheDocument())
+    await userEvent.click(screen.getByText('Zorggroep B · Amersfoort'))
+
+    // The criterion label comes from MatchScoreBlock's own render, proving the
+    // read-only score block received the merged criteria (no edit/adjust pencil,
+    // since VacancySearchTab passes no onSave).
+    await waitFor(() => expect(screen.getByText('Reisafstand')).toBeInTheDocument())
+    expect(screen.queryByTitle('Aanpassen')).not.toBeInTheDocument()
+    // The AI advice reason renders as its own one-line note under the score block.
+    expect(screen.getByText('Beste match binnen 5 km en juiste functie.')).toBeInTheDocument()
+  })
+
+  it('a score-fetch failure leaves the vacancy list intact — no error wall, no pills', async () => {
+    stubApi({
+      vacancies: () => Promise.resolve({ data: { data: rawRows } }),
+      matches: () => Promise.reject(new Error('scores unavailable')),
+    })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+
+    await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
+    expect(screen.getByText('Verpleegkundige | Utrecht')).toBeInTheDocument()
+    // No error state (retry button) and no score pill anywhere.
+    expect(screen.queryByRole('button', { name: 'Probeer opnieuw' })).not.toBeInTheDocument()
+    expect(screen.queryAllByText(/^\d+%$/)).toHaveLength(0)
   })
 })

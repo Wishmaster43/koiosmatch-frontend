@@ -800,7 +800,8 @@
     "functions": "Functie",
     "onMap": "{{count}} vacatures op de kaart",
     "empty": "Geen vacatures gevonden binnen deze filters.",
-    "centerHome": "Woonadres kandidaat"
+    "centerHome": "Woonadres kandidaat",
+    "aiAdvised": "Door Koios geadviseerd"
   },
   "erase": {
     "trashView": "Prullenbak",
