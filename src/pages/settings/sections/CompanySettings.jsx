@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, RefreshCw, Save } from 'lucide-react'
+import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { useIndustries } from '@/lib/useIndustries'
 // One language source for the whole app (Danny 14/7): the same five shipped
@@ -66,6 +68,7 @@ export default function CompanySettings() {
   const [saved,      setSaved]      = useState(false)
   const [saving,     setSaving]     = useState(false)
   const [loading,    setLoading]    = useState(true)
+  const bannerRef = useRef(null)
 
   useEffect(() => {
     loadSettings().then(s => {
@@ -96,15 +99,30 @@ export default function CompanySettings() {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
+  // BANNER-UPLOAD-1 (CMBE 23-07, mirrors /settings/logo): multipart POST persists
+  // the private path server-side; GET /settings mints a fresh signed URL (12h TTL).
+  // The response only feeds the preview — never store the signed URL in settings.
+  const handleBannerFile = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const fd = new FormData()
+    fd.append('banner', file)
+    try {
+      const res = await api.post('/settings/banner', fd)
+      if (res.data?.banner_url) setBannerUrl(res.data.banner_url)
+    } catch (err) {
+      // 422 = bad type/size or the SVG script-scan — show the backend's own message.
+      notifyError(err?.response?.data?.message ?? t('company.bannerUploadFailed'))
+    } finally {
+      e.target.value = ''
+    }
+  }
+
   const save = async () => {
     setSaving(true)
     try {
-      const payload = { ...form }
-      // The banner upload backend doesn't exist yet (no persisted-file endpoint
-      // mirroring the logo's /settings/logo) — never send a blob: URL, it would
-      // only break on reload/for another user (§3: no silent state drift).
-      if (bannerUrl && !bannerUrl.startsWith('blob:')) payload.company_banner_url = bannerUrl
-      await saveSettings(payload)
+      // company_banner_url is backend-owned now (BANNER-UPLOAD-1) — never sent here.
+      await saveSettings({ ...form })
       setSaved(true); setTimeout(() => setSaved(false), 2000)
     } catch { /* noop */ } finally { setSaving(false) }
   }
@@ -133,19 +151,16 @@ export default function CompanySettings() {
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '0 24px' }}>
           <Row label={t('company.banner')}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {bannerUrl && <img src={bannerUrl} alt="" style={{ width: '100%', maxWidth: 400, height: 100, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }} />}
+              {bannerUrl && <img src={bannerUrl} alt={t('company.banner')} style={{ width: '100%', maxWidth: 400, height: 100, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }} />}
               <div style={{ display: 'flex', gap: 8 }}>
-                {/* Honest gate (§3): no upload backend exists yet for the banner (unlike
-                    the logo's /settings/logo endpoint) — disabled rather than a fake
-                    affordance that silently breaks on reload/for another user. */}
-                <button disabled title={t('company.bannerUploadUnavailable')}
-                  style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7,
-                           background: 'var(--hover-bg)', cursor: 'not-allowed', color: 'var(--text-muted)', opacity: 0.6 }}>
+                {/* Real upload (BANNER-UPLOAD-1). No local "remove": clearing only the
+                    preview would reappear on reload — a delete needs its own endpoint. */}
+                <input ref={bannerRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" style={{ display: 'none' }} onChange={handleBannerFile} />
+                <button onClick={() => bannerRef.current?.click()}
+                  style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
                   {t('common.upload')}
                 </button>
-                {bannerUrl && <button onClick={() => setBannerUrl(null)} style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common.remove')}</button>}
               </div>
-              <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('company.bannerUploadUnavailable')}</p>
             </div>
           </Row>
           <Row label={t('company.industry')}><Select value={form.company_industry} onChange={v => set('company_industry', v)} options={industries} /></Row>

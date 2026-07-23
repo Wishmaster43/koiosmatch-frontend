@@ -395,7 +395,7 @@
     "careerSiteOn": "On — public vacancy site visible",
     "careerSiteOff": "Off — public site not reachable",
     "careerSiteHint": "Turn the public career site (…/{tenant}/vacatures) on or off for this tenant. Your choice is saved; the public site will respect it once the backend enforces it.",
-    "bannerUploadUnavailable": "Upload isn't available yet — coming once the upload backend exists."
+    "bannerUploadFailed": "Banner upload failed"
   },
   "locations": {
     "title": "Locations",

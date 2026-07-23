@@ -376,7 +376,7 @@
     "careerSiteOn": "Activé — site public des offres visible",
     "careerSiteOff": "Désactivé — site public inaccessible",
     "careerSiteHint": "Activez ou désactivez le site carrière public (…/{tenant}/vacatures) pour ce client. Votre choix est enregistré ; le site public en tiendra compte dès que le backend l'appliquera.",
-    "bannerUploadUnavailable": "Le téléversement n'est pas encore disponible — arrivera une fois le backend de téléversement en place."
+    "bannerUploadFailed": "Échec du téléversement de la bannière"
   },
   "locations": {
     "title": "Emplacements",

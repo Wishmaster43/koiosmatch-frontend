@@ -5,9 +5,10 @@
  * mocked out here — so the save assertion expects a real boolean.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
+import api from '@/lib/api'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import CompanySettings from './CompanySettings'
 
@@ -15,6 +16,13 @@ vi.mock('../lib/settingsApi', () => ({
   loadSettings: vi.fn(),
   saveSettings: vi.fn(),
 }))
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual('@/lib/api')
+  // get stays forever-pending: useIndustries (useCachedLookup) chains .finally on
+  // it at module scope — an undefined return would crash every render here.
+  return { ...actual, default: { get: vi.fn(() => new Promise(() => {})), post: vi.fn(), put: vi.fn() } }
+})
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 const t = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 
@@ -55,37 +63,54 @@ describe('CompanySettings — career site toggle', () => {
   })
 })
 
-// Audit finding (HIGH): the banner "upload" used to persist a session-local
-// blob: URL as company_banner_url — dead after reload/for another user. No real
-// upload endpoint exists for the banner (unlike the logo's /settings/logo), so
-// this is now an honest gate: the upload button stays disabled and a blob: URL
-// is never sent in the save payload, even if one lingers from before the fix.
-describe('CompanySettings — banner upload honest gate', () => {
-  it('renders the upload button disabled with a calm unavailable notice', async () => {
+// BANNER-UPLOAD-1 (CMBE 23-07): the banner now uploads for real — multipart POST
+// /settings/banner (field 'banner'), preview from the returned signed banner_url,
+// and company_banner_url is backend-owned (never in the settings-save payload).
+describe('CompanySettings — banner upload (BANNER-UPLOAD-1)', () => {
+  it('uploads the picked file as multipart field "banner" and previews the returned signed URL', async () => {
     loadSettings.mockResolvedValue({})
     saveSettings.mockResolvedValue(undefined)
+    api.post.mockResolvedValue({ data: { banner_url: 'https://api.test/files/tenant-banner/t1?sig=x' } })
     render(<CompanySettings />)
 
-    const uploadBtn = await screen.findByRole('button', { name: t('common.upload') })
-    expect(uploadBtn).toBeDisabled()
-    expect(screen.getAllByText(t('company.bannerUploadUnavailable')).length).toBeGreaterThan(0)
+    await screen.findByRole('button', { name: t('common.upload') })
+    const input = document.querySelector('input[type="file"]')
+    const file = new File(['x'], 'banner.png', { type: 'image/png' })
+    fireEvent.change(input, { target: { files: [file] } })
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings/banner', expect.any(FormData)))
+    const fd = api.post.mock.calls[0][1]
+    expect(fd.get('banner')).toBe(file)
+    await waitFor(() => expect(screen.getByRole('img')).toHaveAttribute('src', 'https://api.test/files/tenant-banner/t1?sig=x'))
   })
 
-  it('never renders or re-persists a legacy blob: URL loaded from settings', async () => {
+  it('surfaces the backend 422 message (bad type / SVG script-scan) via notifyError', async () => {
+    loadSettings.mockResolvedValue({})
+    saveSettings.mockResolvedValue(undefined)
+    api.post.mockRejectedValue({ response: { data: { message: 'SVG bevat scripts' } } })
+    const { notifyError } = await import('@/lib/notify')
+    render(<CompanySettings />)
+
+    await screen.findByRole('button', { name: t('common.upload') })
+    fireEvent.change(document.querySelector('input[type="file"]'), { target: { files: [new File(['x'], 'x.svg', { type: 'image/svg+xml' })] } })
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('SVG bevat scripts'))
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+  })
+
+  it('never renders a legacy blob: URL and never sends company_banner_url in the save payload', async () => {
     loadSettings.mockResolvedValue({ company_banner_url: 'blob:http://localhost/legacy-broken' })
     saveSettings.mockResolvedValue(undefined)
     const user = userEvent.setup()
     render(<CompanySettings />)
 
-    // A stale blob: URL is dead in every tab but the one that created it — it
-    // must not be shown as if it were a valid stored banner.
+    // A stale blob: row (pre-BANNER-UPLOAD-1 tenants) must not render as a banner;
+    // the backend cleans it on the first real upload.
     await screen.findByRole('button', { name: t('common.upload') })
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: t('common.save') }))
-
     await waitFor(() => expect(saveSettings).toHaveBeenCalled())
-    const payload = saveSettings.mock.calls[0][0]
-    expect(payload.company_banner_url).toBeUndefined()
+    expect(saveSettings.mock.calls[0][0].company_banner_url).toBeUndefined()
   })
 })

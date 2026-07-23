@@ -376,7 +376,7 @@
     "careerSiteOn": "Activado — sitio público de vacantes visible",
     "careerSiteOff": "Desactivado — sitio público no accesible",
     "careerSiteHint": "Activa o desactiva el sitio de carreras público (…/{tenant}/vacatures) para este cliente. Tu elección se guarda; el sitio público la respetará en cuanto el backend la aplique.",
-    "bannerUploadUnavailable": "La subida aún no está disponible — llegará en cuanto exista el backend de subida."
+    "bannerUploadFailed": "Error al subir el banner"
   },
   "locations": {
     "title": "Ubicaciones",

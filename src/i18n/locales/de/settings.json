@@ -376,7 +376,7 @@
     "careerSiteOn": "An — öffentliche Stellenseite sichtbar",
     "careerSiteOff": "Aus — öffentliche Seite nicht erreichbar",
     "careerSiteHint": "Schalte die öffentliche Karriereseite (…/{tenant}/vacatures) für diesen Mandanten ein oder aus. Deine Wahl wird gespeichert; die öffentliche Seite berücksichtigt sie, sobald das Backend sie durchsetzt.",
-    "bannerUploadUnavailable": "Hochladen ist noch nicht verfügbar — kommt, sobald das Upload-Backend existiert."
+    "bannerUploadFailed": "Banner-Upload fehlgeschlagen"
   },
   "locations": {
     "title": "Standorte",
