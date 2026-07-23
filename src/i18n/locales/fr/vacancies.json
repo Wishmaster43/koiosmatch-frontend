@@ -277,9 +277,13 @@
     "noLocation": "Cette vacance n'a pas encore de coordonnées de localisation — mettez d'abord à jour l'adresse, la carte apparaîtra ensuite ici.",
     "functions": "Fonction",
     "statuses": "Disponibilité",
+    "contractForms": "Forme de contrat",
     "onMap": "{{count}} candidats sur la carte",
     "empty": "Aucun candidat trouvé avec ces filtres.",
-    "centerVacancy": "Lieu du poste"
+    "centerVacancy": "Lieu du poste",
+    "refreshAdvice": "Actualiser l'avis Koios",
+    "adviceQueued": "L'avis est en cours de calcul — la liste va s'actualiser sous peu.",
+    "aiAdvised": "Recommandé par Koios"
   },
   "statistics": {
     "title": "Conversion",

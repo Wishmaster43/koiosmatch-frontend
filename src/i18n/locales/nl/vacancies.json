@@ -277,9 +277,13 @@
     "noLocation": "Deze vacature heeft nog geen locatie(-coördinaten) — werk eerst het adres bij, dan verschijnt hier de kaart.",
     "functions": "Functie",
     "statuses": "Inzetbaarheid",
+    "contractForms": "Contractvorm",
     "onMap": "{{count}} kandidaten op de kaart",
     "empty": "Geen kandidaten gevonden binnen deze filters.",
-    "centerVacancy": "Vacaturelocatie"
+    "centerVacancy": "Vacaturelocatie",
+    "refreshAdvice": "Koios-advies verversen",
+    "adviceQueued": "Advies wordt berekend — de lijst ververst zo.",
+    "aiAdvised": "Door Koios geadviseerd"
   },
   "statistics": {
     "title": "Conversie",

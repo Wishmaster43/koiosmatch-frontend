@@ -277,9 +277,13 @@
     "noLocation": "This vacancy has no location (coordinates) yet — update the address first, then the map appears here.",
     "functions": "Function",
     "statuses": "Availability",
+    "contractForms": "Contract form",
     "onMap": "{{count}} candidates on the map",
     "empty": "No candidates found within these filters.",
-    "centerVacancy": "Vacancy location"
+    "centerVacancy": "Vacancy location",
+    "refreshAdvice": "Refresh Koios advice",
+    "adviceQueued": "Advice is being calculated — the list will refresh shortly.",
+    "aiAdvised": "Advised by Koios"
   },
   "statistics": {
     "title": "Conversion",

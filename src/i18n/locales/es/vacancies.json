@@ -277,9 +277,13 @@
     "noLocation": "Esta vacante aún no tiene coordenadas de ubicación — actualiza primero la dirección, luego aparecerá el mapa aquí.",
     "functions": "Función",
     "statuses": "Disponibilidad",
+    "contractForms": "Forma de contrato",
     "onMap": "{{count}} candidatos en el mapa",
     "empty": "No se han encontrado candidatos con estos filtros.",
-    "centerVacancy": "Ubicación de la vacante"
+    "centerVacancy": "Ubicación de la vacante",
+    "refreshAdvice": "Actualizar el consejo de Koios",
+    "adviceQueued": "El consejo se está calculando — la lista se actualizará en breve.",
+    "aiAdvised": "Recomendado por Koios"
   },
   "statistics": {
     "title": "Conversión",

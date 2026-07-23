@@ -1,15 +1,18 @@
 /**
- * useCandidateSearch — Match-zoeker fase 1 (vacancy side): search the EXISTING
- * candidate pool around a vacancy's geocoded location, using the EXISTING
- * /candidates list endpoint's server-side filters (lat/lng/radius/function_title[]/
- * status[]) — no new backend. Mirrors the abort/alive idiom of
- * useVacancyActivity (AbortController per fetch, ignore a superseded response).
+ * useCandidateSearch — Match-zoeker fase 2/3 (vacancy side): the LIVE scored
+ * match endpoint (MATCH-EXPLORER-1) replaces the earlier fase-1 client-side
+ * radius search over /candidates. The backend now does the scoring, the radius
+ * filter (against the vacancy's own geocoded location) and the best-score-first
+ * sort — this hook only wires the filters + a tolerant, LOCAL row mapping.
+ * Mirrors the abort/alive idiom of useVacancyActivity (AbortController per
+ * fetch, ignore a superseded response).
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import api, { unwrapList } from '@/lib/api'
 import { toCoord } from '@/lib/coords'
 import { canonicalizeToOptions, lookupValue } from '@/lib/lookupUtils'
 import { useLookups } from '@/context/LookupsContext'
+import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -19,39 +22,47 @@ export interface CandidateSearchRow {
   city: string
   functionTitle: string
   status: string
+  statusLabel: string
+  statusColor: string | null
   lat: number | null
   lng: number | null
   distanceKm: number | null
+  score: number | null
+  criteria: Criterion[]
+  aiAdvised: boolean
+  aiAdviceReason: string | null
 }
 
-// Raw /candidates list row — read defensively (snake_case, tolerant of gaps).
-// Kept LOCAL on purpose: importing the candidate feature's own types/mapper would
-// be a cross-entity import (§2 — entity pages never reach into another entity's
-// internals), so this is a minimal, independent read of the same wire shape.
-interface RawCandidateRow {
-  id?: Id
-  name?: string; full_name?: string; first_name?: string; last_name?: string
-  city?: string; woonplaats?: string
-  function_title?: string
-  status?: unknown
-  lat?: unknown; lng?: unknown; distance_km?: unknown
+// Raw /vacancies/{id}/candidate-matches row — read defensively (snake_case,
+// tolerant of gaps). Kept LOCAL on purpose: importing the candidate feature's
+// own types/mapper would be a cross-entity import (§2 — entity pages never
+// reach into another entity's internals), so this is a minimal, independent
+// read of the same wire shape.
+interface RawMatchRow {
+  candidate?: {
+    id?: Id; name?: string; city?: string; function_title?: string
+    status?: unknown; status_label?: string; status_color?: string
+    lat?: unknown; lng?: unknown
+  }
+  distance_km?: unknown
+  score?: unknown
+  criteria?: unknown
+  ai_advised?: unknown
+  ai_advice_reason?: string | null
 }
-
-// Local, minimal name fallback chain (mirrors mapCandidate's without importing it).
-const nameOf = (r: RawCandidateRow): string =>
-  r.name || r.full_name || [r.first_name, r.last_name].filter(Boolean).join(' ') || '?'
 
 export function useCandidateSearch(vacancy: VacancyDetail) {
-  const { statuses } = useLookups()
+  const { statuses, candidateTypes } = useLookups()
 
   // Soft DEFAULT against the tenant's seed — never a hardcoded vocabulary: preselect
   // whichever status option reads as "available" by value or label, if the tenant
   // has one; otherwise no default (empty selection = all statuses).
   const defaultStatus = statuses.find(s => /beschikbaar|available/i.test(`${s.value} ${s.label}`))
 
-  const [radiusKm, setRadiusKm]     = useState(30)
-  const [functions, setFunctions]   = useState<string[]>(vacancy.category ? [vacancy.category] : [])
-  const [statusSel, setStatusSel]   = useState<string[]>(defaultStatus ? [defaultStatus.value] : [])
+  const [radiusKm, setRadiusKm]           = useState(30)
+  const [functions, setFunctions]         = useState<string[]>(vacancy.category ? [vacancy.category] : [])
+  const [statusSel, setStatusSel]         = useState<string[]>(defaultStatus ? [defaultStatus.value] : [])
+  const [contractForms, setContractForms] = useState<string[]>([])
 
   // The tab is NOT remounted when a different vacancy is opened (EntityDrawer only
   // keys its tab body by the active TAB id, not the entity) — re-derive the filter
@@ -64,6 +75,7 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
     setRadiusKm(30)
     setFunctions(vacancy.category ? [vacancy.category] : [])
     setStatusSel(defaultStatus ? [defaultStatus.value] : [])
+    setContractForms([])
   }
 
   // Converge the selection onto the lookup's canonical values once the API rows
@@ -71,6 +83,8 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
   // seed value while the checklist compared the API value, so no ✓ showed.
   const canonicalStatuses = canonicalizeToOptions(statusSel, statuses)
   if (canonicalStatuses.join(' ') !== statusSel.join(' ')) setStatusSel(canonicalStatuses)
+  const canonicalContractForms = canonicalizeToOptions(contractForms, candidateTypes)
+  if (canonicalContractForms.join(' ') !== contractForms.join(' ')) setContractForms(canonicalContractForms)
 
   const [rows, setRows]       = useState<CandidateSearchRow[]>([])
   const [loading, setLoading] = useState(false)
@@ -81,46 +95,90 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
   const lng = toCoord(vacancy.lng)
   const noLocation = lat == null || lng == null
 
+  // Pending "refetch after a queued advice refresh" timer (~10s) — a ref so it
+  // survives re-renders and can be cancelled both from refreshAdvice() (a second
+  // click) and the fetch effect's own cleanup below (unmount, or a param change
+  // that already triggers a fresh fetch of its own).
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   // Fetch on any param change; abortable so a fast filter edit never lets a
   // superseded response overwrite the latest one (§9 alive-guard).
   useEffect(() => {
     if (noLocation) { setRows([]); setLoading(false); setError(false); return }
     const ctrl = new AbortController()
     setLoading(true); setError(false)
-    api.get('/candidates', {
+    api.get(`/vacancies/${vacancy.id}/candidate-matches`, {
       params: {
-        lat, lng, radius: radiusKm,
-        ...(functions.length && { function_title: functions }),
+        radius: radiusKm,
         ...(statusSel.length && { status: statusSel }),
-        per_page: 200,
+        ...(functions.length && { function_title: functions }),
+        ...(contractForms.length && { contract_form: contractForms }),
+        per_page: 100,
       },
       signal: ctrl.signal,
     })
       .then(res => {
-        // Tolerant envelope unwrap (array | {data} | {data:{data}}).
-        const list = unwrapList<RawCandidateRow>(res).rows
-        const mapped: CandidateSearchRow[] = list.map(r => ({
-          id: r.id ?? '',
-          name: nameOf(r),
-          city: r.city ?? r.woonplaats ?? '',
-          functionTitle: r.function_title ?? '',
-          status: lookupValue(r.status),
-          lat: toCoord(r.lat), lng: toCoord(r.lng), distanceKm: toCoord(r.distance_km),
-        }))
-        // Closest first; rows without a resolved distance sort to the end.
-        mapped.sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))
+        // Tolerant envelope unwrap (the endpoint serves a standard paginator).
+        const list = unwrapList<RawMatchRow>(res).rows
+        const mapped: CandidateSearchRow[] = list.map(m => {
+          const c = m.candidate ?? {}
+          return {
+            id: c.id ?? '',
+            name: c.name ?? '?',
+            city: c.city ?? '',
+            functionTitle: c.function_title ?? '',
+            status: lookupValue(c.status),
+            statusLabel: c.status_label ?? '',
+            statusColor: c.status_color ?? null,
+            lat: toCoord(c.lat), lng: toCoord(c.lng),
+            distanceKm: toCoord(m.distance_km),
+            score: typeof m.score === 'number' ? m.score : Number(m.score) || null,
+            criteria: Array.isArray(m.criteria) ? (m.criteria as Criterion[]) : [],
+            aiAdvised: Boolean(m.ai_advised),
+            aiAdviceReason: m.ai_advice_reason ?? null,
+          }
+        })
+        // Server-sorted best score first (MatchExplorerService::candidateMatches)
+        // — never re-sort locally here, or the fase-2 ranking silently reverts to
+        // a plain distance order.
         setRows(mapped)
       })
       .catch(err => { if (err?.code !== 'ERR_CANCELED') setError(true) })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-  }, [noLocation, lat, lng, radiusKm, functions, statusSel, reloadKey])
+    return () => {
+      ctrl.abort()
+      // A param/vacancy change already triggers the fresh fetch above — a pending
+      // "refetch after advice" timer scheduled against the OLD filters must not
+      // ALSO fire (a redundant double fetch); on unmount there is nothing left to
+      // refresh into either.
+      if (refreshTimerRef.current) { clearTimeout(refreshTimerRef.current); refreshTimerRef.current = null }
+    }
+  }, [noLocation, vacancy.id, radiusKm, functions, statusSel, contractForms, reloadKey])
+
+  // Queue a batched Koios advice refresh (fase 3) for this vacancy's best
+  // matches. Resolves true on the server's 202 ack, false on any failure
+  // (throttle 429 included) — a 202 only ever means "queued", never "done"
+  // (§3 honesty: works live only once Anthropic credit is configured).
+  const refreshAdvice = async (): Promise<boolean> => {
+    try {
+      await api.post(`/vacancies/${vacancy.id}/candidate-matches/refresh-advice`)
+      // One auto-refetch ~10s later so a landed ai_advised verdict surfaces
+      // without the recruiter having to manually retry.
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current)
+      refreshTimerRef.current = setTimeout(() => setReloadKey(k => k + 1), 10000)
+      return true
+    } catch {
+      return false
+    }
+  }
 
   return {
     rows, loading, error, retry: () => setReloadKey(k => k + 1),
     radiusKm, setRadiusKm,
     functions, setFunctions,
     statuses: statusSel, setStatuses: setStatusSel,
+    contractForms, setContractForms,
     noLocation,
+    refreshAdvice,
   }
 }
