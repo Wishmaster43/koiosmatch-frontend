@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ExternalLink, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import MatchExplorerLayout from '@/components/match/MatchExplorerLayout'
 import RadiusMapPanel from '@/components/map/RadiusMapPanel'
 import EntityLink from '@/components/ui/EntityLink'
@@ -11,7 +11,6 @@ import api, { unwrap } from '@/lib/api'
 import { useVacancySearch } from '../hooks/useVacancySearch'
 import { useFunctions } from '@/lib/useFunctions'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
-import { useNavigation } from '@/context/NavigationContext'
 import { toCoord } from '@/lib/coords'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -53,10 +52,6 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   const { t } = useTranslation('candidates')
   const { functions: functionOptions } = useFunctions()
   const { statuses: statusOptions, statusMeta } = useVacancyLookups()
-  // Cross-entity deep link (EntityLink's own mechanism — NavigationContext.openEntity):
-  // this switches the app to the vacancies page AND opens the record's drawer there,
-  // the same path every "open X" affordance in the app already uses.
-  const { openEntity } = useNavigation()
   const {
     rows, loading, error, retry, radiusKm, setRadiusKm,
     functions: selectedFunctions, setFunctions,
@@ -96,11 +91,6 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
 
   const selectedRow = rows.find(r => r.id === selectedId) ?? null
   const selectVacancy = (id: Id) => setSelectedId(id)
-  const openInApp = (id: Id) => openEntity('vacancies', id)
-  // A new browser TAB via the same `?open=` hash contract useDrawerUrl reads —
-  // never navigates the current tab away from the candidate drawer.
-  const openInNewWindow = (id: Id) =>
-    window.open(`${window.location.origin}${window.location.pathname}#vacancies?open=${id}`, '_blank', 'noopener,noreferrer')
 
   const toggleFunction = (name: string) =>
     setFunctions(selectedFunctions.includes(name) ? selectedFunctions.filter(f => f !== name) : [...selectedFunctions, name])
@@ -153,7 +143,11 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
     <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 12, marginBottom: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{selectedRow.title}</div>
+          {/* The title IS the link (Danny 23-07): Match-style EntityLink — orange
+              name opens in-app, trailing icon a new tab. No separate action row. */}
+          <div style={{ fontSize: 13, fontWeight: 600 }}>
+            <EntityLink page="vacancies" id={selectedRow.id}>{selectedRow.title}</EntityLink>
+          </div>
           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{[selectedRow.customer, selectedRow.city].filter(Boolean).join(' · ') || '—'}</div>
         </div>
         <button onClick={() => setSelectedId(null)} aria-label={t('common:close')}
@@ -168,16 +162,6 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
         <StatusPill label={statusMeta(selectedRow.status).label} color={statusMeta(selectedRow.status).color} />
       </div>
       {description && <p style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.4, margin: 0 }}>{description}</p>}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 2 }}>
-        <button onClick={() => openInNewWindow(selectedRow.id)} title={t('vacancySearch.openNewWindow')} aria-label={t('vacancySearch.openNewWindow')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
-          <ExternalLink size={14} />
-        </button>
-        <button onClick={() => openInApp(selectedRow.id)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: 'var(--color-primary)', padding: 0 }}>
-          {t('vacancySearch.openInApp')}
-        </button>
-      </div>
     </div>
   )
 
@@ -195,7 +179,8 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
     <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{t('vacancySearch.empty')}</div>
   ) : (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      {rows.map(r => {
+      {/* The selected vacancy renders as the card above — drop its list row (no duplicate). */}
+      {rows.filter(r => r.id !== selectedId).map(r => {
         const isSelected = r.id === selectedId
         return (
           // Row = div[role=button] (not <button>: the title nests EntityLink's own

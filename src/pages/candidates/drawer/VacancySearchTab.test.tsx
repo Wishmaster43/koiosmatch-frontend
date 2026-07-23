@@ -188,8 +188,10 @@ describe('VacancySearchTab · row selection shows a summary card, not an immedia
     await userEvent.click(screen.getByText('Zorggroep B · Amersfoort'))
 
     expect(openEntityMock).not.toHaveBeenCalled()
-    // The card renders the title again (once in the row, once in the card) plus the snippet.
-    await waitFor(() => expect(screen.getAllByText('Verzorgende IG | Amersfoort').length).toBeGreaterThan(1))
+    // The card REPLACES the list row (Danny: no duplicate) — the title renders exactly
+    // once (in the card), and the card shows the joined customer · city line.
+    await waitFor(() => expect(screen.getAllByText('Zorggroep B · Amersfoort').length).toBeGreaterThan(0))
+    expect(screen.getAllByText('Verzorgende IG | Amersfoort')).toHaveLength(1)
     await waitFor(() => expect(screen.getByText('Korte omschrijving van de vacature.')).toBeInTheDocument())
   })
 
@@ -202,25 +204,26 @@ describe('VacancySearchTab · row selection shows a summary card, not an immedia
     // Click the ROW surface (subtitle) — the title itself is the navigate-link now.
     await userEvent.click(screen.getByText('Zorggroep B · Amersfoort'))
 
-    const openBtn = await screen.findByText(nl.vacancySearch.openInApp)
-    await userEvent.click(openBtn)
+    // The card title IS the in-app link now (EntityLink) — click the card's copy.
+    const titles = screen.getAllByRole('button', { name: 'Verzorgende IG | Amersfoort' })
+    await userEvent.click(titles[titles.length - 1])
     expect(openEntityMock).toHaveBeenCalledWith('vacancies', 'v1')
   })
 
-  it('the external-link button opens a new window at the #vacancies?open=<id> URL', async () => {
+  it("the card title's trailing EntityLink anchor deep-links to #vacancies?open=<id> in a new tab", async () => {
     mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
     mockGet.mockResolvedValueOnce({ data: { description: '' } })
-    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
     render(<VacancySearchTab candidate={candidateWithLocation} />)
 
     await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
     // Click the ROW surface (subtitle) — the title itself is the navigate-link now.
     await userEvent.click(screen.getByText('Zorggroep B · Amersfoort'))
 
-    const externalBtn = await screen.findByLabelText(nl.vacancySearch.openNewWindow)
-    await userEvent.click(externalBtn)
-    expect(openSpy).toHaveBeenCalledWith(`${window.location.origin}${window.location.pathname}#vacancies?open=v1`, '_blank', 'noopener,noreferrer')
-    openSpy.mockRestore()
+    // EntityLink renders a real target=_blank anchor with the ?open= deep link
+    // (match on href — the aria-label is the resolved common-namespace translation).
+    const anchors = (await screen.findAllByRole('link')).filter(a => (a.getAttribute('href') ?? '').includes('#vacancies?open=v1'))
+    expect(anchors.length).toBeGreaterThan(0)
+    expect(anchors[anchors.length - 1]).toHaveAttribute('target', '_blank')
   })
 
   it('renders the summary card even when the API embeds status as an OBJECT (23-07 crash)', async () => {
@@ -234,8 +237,9 @@ describe('VacancySearchTab · row selection shows a summary card, not an immedia
     await waitFor(() => expect(screen.getByText('Objectstatus | Test')).toBeInTheDocument())
     await userEvent.click(screen.getByText('Zorggroep C · Breda'))
 
-    // Card renders (title twice: row + card) and the status label is the STRING.
-    await waitFor(() => expect(screen.getAllByText('Objectstatus | Test').length).toBeGreaterThan(1))
+    // Card renders (and REPLACES the row — title exactly once) with the STRING label.
+    await waitFor(() => expect(screen.getAllByText('Zorggroep C · Breda').length).toBeGreaterThan(0))
+    expect(screen.getAllByText('Objectstatus | Test')).toHaveLength(1)
     expect(screen.getAllByText('Open').length).toBeGreaterThan(0)
   })
 

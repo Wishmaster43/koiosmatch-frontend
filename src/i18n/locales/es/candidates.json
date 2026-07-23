@@ -799,9 +799,7 @@
     "statuses": "Estado de la vacante",
     "functions": "Función",
     "onMap": "{{count}} vacantes en el mapa",
-    "empty": "No se han encontrado vacantes con estos filtros.",
-    "openNewWindow": "Abrir en nueva ventana",
-    "openInApp": "Ir a la vacante"
+    "empty": "No se han encontrado vacantes con estos filtros."
   },
   "erase": {
     "trashView": "Papelera",
