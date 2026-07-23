@@ -94,8 +94,8 @@ export default function AppsSettings() {
             <div key={app.id} style={{
               display: 'flex', alignItems: 'center', gap: 16,
               padding: '16px 18px', borderRadius: 12,
-              border: `1.5px solid ${on ? app.border : 'var(--border)'}`,
-              background: on ? app.bg : 'var(--surface)',
+              border: `1.5px solid ${on ? 'var(--color-success)' : 'var(--border)'}`,
+              background: on ? 'var(--color-success-bg)' : 'var(--surface)',
               transition: 'all 0.15s',
               opacity: !canEdit && !on ? 0.6 : 1,
             }}>
@@ -116,8 +116,8 @@ export default function AppsSettings() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{app.label}</span>
                   {on && (
-                    <span style={{ fontSize: 10, fontWeight: 600, color: app.color,
-                                   background: app.color + '18', borderRadius: 999, padding: '1px 7px' }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-success)',
+                                   background: 'var(--color-success-bg)', borderRadius: 999, padding: '1px 7px' }}>
                       {t('apps.active')}
                     </span>
                   )}
@@ -143,7 +143,7 @@ export default function AppsSettings() {
                 title={soon ? t('apps.comingSoon') : !canEdit ? t('apps.noRights') : on ? t('apps.disable') : t('apps.enable')}
                 style={{
                   width: 44, height: 24, borderRadius: 999, border: 'none', flexShrink: 0,
-                  background: on && !soon ? app.color : 'var(--border)',
+                  background: on && !soon ? 'var(--color-success)' : 'var(--border)',
                   cursor: canEdit && !soon ? 'pointer' : 'not-allowed',
                   position: 'relative', transition: 'background 0.2s',
                   opacity: isSaving ? 0.6 : 1,

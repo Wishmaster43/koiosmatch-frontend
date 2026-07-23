@@ -133,15 +133,15 @@ export default function ModulesSettings() {
             <div key={tier.id} onClick={() => setPkg(tier.id)}
               style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px', cursor: 'pointer',
                 borderRadius: 10, transition: 'border-color 0.12s, background 0.12s',
-                background: active ? 'var(--color-primary-bg)' : 'var(--surface)',
-                border: `1.5px solid ${active ? 'var(--color-primary)' : 'var(--border)'}` }}>
+                background: active ? 'var(--color-success-bg)' : 'var(--surface)',
+                border: `1.5px solid ${active ? 'var(--color-success)' : 'var(--border)'}` }}>
               <div style={{ width: 18, height: 18, borderRadius: '50%', flexShrink: 0, marginTop: 1,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                border: `2px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
-                background: active ? 'var(--color-primary)' : 'transparent' }}>
+                border: `2px solid ${active ? 'var(--color-success)' : 'var(--border)'}`,
+                background: active ? 'var(--color-success)' : 'transparent' }}>
                 {active && <Check size={11} color="#fff" />}
               </div>
-              <tier.Icon size={17} color={active ? 'var(--color-primary)' : 'var(--text-muted)'} style={{ flexShrink: 0, marginTop: 1 }} />
+              <tier.Icon size={17} color={active ? 'var(--color-success)' : 'var(--text-muted)'} style={{ flexShrink: 0, marginTop: 1 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{tier.name}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`modules.tierDesc.${tier.id}`, { defaultValue: tier.desc })}</div>
