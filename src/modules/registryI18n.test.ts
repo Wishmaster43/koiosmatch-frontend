@@ -23,7 +23,7 @@ const NEUTRAL = new Set([
   'nl', 'tr', 'status', 'available_again_date', 'shifts_offered',
   '{"key": "value"}', '<html>...</html>', '<table>...</table>', '(\\d+)',
   'https://api.intus.example/candidates', 'https://api.intus.example/shifts',
-  '{{trigger.session_id}}', 'flex@yesway.nu',
+  '{{trigger.session_id}}', '{{trigger.candidate_id}}', '6', 'flex@yesway.nu',
   '{{1.bedrag}}', '{{1.inhoud}}', '{{1.naam}}', '{{1.waarde}}',
 ])
 

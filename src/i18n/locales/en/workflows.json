@@ -914,7 +914,16 @@
     "Vereist dat \"onvolledige uitvoeringen opslaan\" is ingeschakeld in de workflow instellingen": "Requires \"store incomplete runs\" to be enabled in the workflow settings.",
     "Welk veld uit de vorige module bevat de array om over te itereren": "Which field from the previous module holds the array to iterate over.",
     "Welk veld wordt gebruikt als identifier in de volgende module": "Which field is used as the identifier in the next module.",
-    "Wordt voor de instructies ingevoegd Gebruik dit voor tenant-brede regels": "Inserted before the instructions. Use this for tenant-wide rules."
+    "Wordt voor de instructies ingevoegd Gebruik dit voor tenant-brede regels": "Inserted before the instructions. Use this for tenant-wide rules.",
+    "Meestal {{triggercandidate_id}} (knop of adreswijziging levert de kandidaat) Leeg = de kandidaten uit de vorige stap (bulk)": "Usually {{trigger.candidate_id}} (the button or address change supplies the candidate). Empty = the candidates from the previous step (bulk).",
+    "Sla kandidaten over die al coördinaten hebben — aan te raden bij bulk": "Skip candidates that already have coordinates — recommended for bulk.",
+    "Leeg = alle statussen (blacklist is altijd uitgesloten)": "Empty = all statuses (blacklist is always excluded).",
+    "Leeg = alle fases (lead / kandidaat / …)": "Empty = all phases (lead / candidate / …).",
+    "Bijv alleen uitzendkrachten of ZZP'ers Leeg = alle contractvormen": "E.g. only temp workers or freelancers. Empty = all contract forms.",
+    "Leeg = alle plaatsen": "Empty = all cities.",
+    "Leeg = veiligheidsplafond (10000)": "Empty = safety ceiling (10,000).",
+    "Alleen relevant wanneer de gekoppelde entiteit een klant is": "Only relevant when the linked entity is a customer.",
+    "Sla records over die al een koppeling met dit systeem hebben — aan te raden bij bulk": "Skip records that already have a link with this system — recommended for bulk."
   },
   "triggers": {
     "events": {
