@@ -175,6 +175,7 @@
     "candidate_skill_levels": "Skill levels",
     "wa_message_types": "Message types",
     "candidate_conversion": "Conversion",
+    "candidate_vacancy_tab": "Vacancies tab",
     "vacancy_display": "Table display",
     "match_display": "Table display",
     "outreach_display": "Table display",
@@ -1630,6 +1631,12 @@
     "title": "Required fields",
     "subtitle": "Mark which fields are required per phase. A required field shows a star and blocks saving when empty.",
     "field": "Field"
+  },
+  "vacancyTab": {
+    "title": "Vacancies tab on candidates",
+    "subtitle": "Decide when the 'Vacancies' tab is visible in the candidate drill-down.",
+    "phasesTitle": "Visible for phase",
+    "statusesTitle": "Hide for deployability status"
   },
   "viewConfig": {
     "title": "{{label}} view",

@@ -175,6 +175,7 @@
     "candidate_skill_levels": "Kompetenzstufen",
     "wa_message_types": "Nachrichtentypen",
     "candidate_conversion": "Konvertierung",
+    "candidate_vacancy_tab": "Stellen-Tab",
     "vacancy_display": "Tabellenansicht",
     "match_display": "Tabellenansicht",
     "outreach_display": "Tabellenansicht",
@@ -1611,6 +1612,12 @@
     "title": "Pflichtfelder",
     "subtitle": "Markieren Sie pro Phase, welche Felder Pflicht sind. Ein Pflichtfeld zeigt einen Stern und blockiert das Speichern, wenn es leer ist.",
     "field": "Feld"
+  },
+  "vacancyTab": {
+    "title": "Stellen-Tab bei Kandidaten",
+    "subtitle": "Legen Sie fest, wann der Tab „Stellen“ im Kandidaten-Drilldown sichtbar ist.",
+    "phasesTitle": "Sichtbar bei Phase",
+    "statusesTitle": "Ausblenden bei Einsatzbereitschaft"
   },
   "viewConfig": {
     "title": "{{label}}-Ansicht",

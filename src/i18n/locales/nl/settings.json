@@ -175,6 +175,7 @@
     "candidate_skill_levels": "Vaardigheidsniveaus",
     "wa_message_types": "Berichttypen",
     "candidate_conversion": "Conversie",
+    "candidate_vacancy_tab": "Vacatures-tabblad",
     "vacancy_display": "Tabelweergave",
     "match_display": "Tabelweergave",
     "outreach_display": "Tabelweergave",
@@ -1630,6 +1631,12 @@
     "title": "Verplichte velden",
     "subtitle": "Markeer per fase welke velden verplicht zijn. Een verplicht veld toont een ster en blokkeert opslaan als het leeg is.",
     "field": "Veld"
+  },
+  "vacancyTab": {
+    "title": "Vacatures-tabblad bij kandidaten",
+    "subtitle": "Bepaal wanneer het tabblad 'Vacatures' in de kandidaat-drilldown zichtbaar is.",
+    "phasesTitle": "Zichtbaar bij fase",
+    "statusesTitle": "Verbergen bij inzetbaarheid"
   },
   "viewConfig": {
     "title": "{{label}} weergave",

@@ -175,6 +175,7 @@
     "candidate_skill_levels": "Niveaux de compétence",
     "wa_message_types": "Types de messages",
     "candidate_conversion": "Conversion",
+    "candidate_vacancy_tab": "Onglet Postes",
     "vacancy_display": "Affichage du tableau",
     "match_display": "Affichage du tableau",
     "outreach_display": "Affichage du tableau",
@@ -1611,6 +1612,12 @@
     "title": "Champs requis",
     "subtitle": "Indiquez par phase quels champs sont requis. Un champ requis affiche une étoile et bloque l enregistrement s il est vide.",
     "field": "Champ"
+  },
+  "vacancyTab": {
+    "title": "Onglet Postes chez les candidats",
+    "subtitle": "Décidez quand l'onglet « Postes » est visible dans la fiche détaillée du candidat.",
+    "phasesTitle": "Visible selon la phase",
+    "statusesTitle": "Masquer selon la disponibilité"
   },
   "viewConfig": {
     "title": "Vue {{label}}",

@@ -15,10 +15,13 @@ import EntityHeaderJs from '@/components/drawer/EntityHeader'
 import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import GeocodeButton from '@/components/ui/GeocodeButton'
 import { useGenders } from '@/lib/useGenders'
-import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings, getBoolSetting, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { useAuth } from '@/context/AuthContext'
+import { useLookups } from '@/context/LookupsContext'
 import { useCandidateStatus } from './hooks/useCandidateStatus'
 import { useCandidateHeaderEdit } from './hooks/useCandidateHeaderEdit'
+import { isVacancyTabVisible } from './lib/vacancyTabVisibility'
+import type { VacancyTabConfig } from './lib/vacancyTabVisibility'
 import ProfilePanel from './drawer/ProfilePanel'
 import BackgroundTab from './drawer/BackgroundTab'
 import WorkTab from './drawer/WorkTab'
@@ -103,6 +106,10 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const allSettings = useAllSettings()
   const coloredByGender = getBoolSetting(allSettings, 'candidate_avatar_colored_by_gender', false)
   const avatarColor = coloredByGender ? (genderColor(c?.gender) ?? NEUTRAL_AVATAR) : NEUTRAL_AVATAR
+  // Tenant-configurable Vacatures-tab visibility (Danny 23-07): phases/statuses
+  // gate via the shared vacancyTabVisibility helper; null cfg falls back to seed defaults.
+  const { phases: tenantPhases, statuses: tenantStatuses } = useLookups()
+  const vacancyTabCfg = getJsonSetting<VacancyTabConfig | null>(allSettings, 'candidate_vacancy_tab', null)
   const { hasModule, isSuperAdmin, hasRole } = useAuth() as unknown as { hasModule: (m: string) => boolean; isSuperAdmin: () => boolean; hasRole: (r: string) => boolean }
   // Hard delete is admin-only (Danny 2026-07-03) — the backend re-checks (§7: UI gating is UX).
   const canHardDelete = isSuperAdmin() || hasRole('admin')
@@ -153,6 +160,10 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     // Match tab is ALWAYS shown (2026-07-08): it holds the "+ Solliciteren" /
     // "+ Intake plannen" actions, so a Lead with no application yet still needs it.
     if (tab.id === 'administration') return isFreelancer
+    // Vacatures (vacancySearch) is tenant-gated per phase + deployability status
+    // (Settings → Candidate → Vacatures-tabblad) — e.g. off by default for a Lead
+    // or an Unavailable candidate, but always tenant-configurable.
+    if (tab.id === 'vacancySearch')  return isVacancyTabVisible(vacancyTabCfg, c, tenantPhases, tenantStatuses)
     return true
   })
   // 'Extra' appears only when the tenant has ≥1 active candidate custom field (§3A(f)).

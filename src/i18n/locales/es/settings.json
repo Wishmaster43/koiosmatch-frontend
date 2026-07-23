@@ -175,6 +175,7 @@
     "candidate_skill_levels": "Niveles de habilidad",
     "wa_message_types": "Tipos de mensajes",
     "candidate_conversion": "Conversión",
+    "candidate_vacancy_tab": "Pestaña Vacantes",
     "vacancy_display": "Vista de tabla",
     "match_display": "Vista de tabla",
     "outreach_display": "Vista de tabla",
@@ -1611,6 +1612,12 @@
     "title": "Campos obligatorios",
     "subtitle": "Marque por fase qué campos son obligatorios. Un campo obligatorio muestra un asterisco y bloquea el guardado si está vacío.",
     "field": "Campo"
+  },
+  "vacancyTab": {
+    "title": "Pestaña Vacantes en candidatos",
+    "subtitle": "Decide cuándo la pestaña «Vacantes» es visible en el detalle del candidato.",
+    "phasesTitle": "Visible según la fase",
+    "statusesTitle": "Ocultar según la disponibilidad"
   },
   "viewConfig": {
     "title": "Vista {{label}}",

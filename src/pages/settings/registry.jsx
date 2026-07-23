@@ -57,6 +57,7 @@ import { SkillLevelSettings } from './sections/SkillLevelSettings'
 import { OutreachStatusSettings } from './sections/OutreachSettings'
 import RejectionSettings from './sections/RejectionSettings'
 import CandidateRequiredFieldsSettings from './sections/CandidateRequiredFieldsSettings'
+import CandidateVacancyTabSettings from './sections/CandidateVacancyTabSettings'
 import RetentionSettings from './sections/RetentionSettings'
 import CvTemplateSettings from './sections/CvTemplateSettings'
 import DocumentTypesSettings from './sections/DocumentTypesSettings'
@@ -167,6 +168,9 @@ export const NAV_GROUPS = [
       { id: 'candidate_display', icon: Palette, schema: candidateDisplay },
       // Conversion behaviour: default deployability status after Lead → Kandidaat.
       { id: 'candidate_conversion', icon: UserCheck, component: CandidateConversionSettings },
+      // Vacatures-tab visibility (Danny 23-07): per phase/status gate for the
+      // drawer's vacancySearch tab — see CandidateVacancyTabSettings + vacancyTabVisibility.ts.
+      { id: 'candidate_vacancy_tab', icon: Briefcase, component: CandidateVacancyTabSettings },
       { id: 'candidate_skill_levels', icon: BarChart2, component: SkillLevelSettings },
       // Candidate custom fields moved to the shared "Eigen velden" group below
       // (§3B custom-fields wave) — one CRUD implementation for every entity.
