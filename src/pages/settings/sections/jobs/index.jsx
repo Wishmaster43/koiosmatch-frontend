@@ -12,9 +12,11 @@ import { ListChecks } from 'lucide-react'
 import { useQueueSummary } from './useQueueSummary'
 import QueueOverviewTab from './QueueOverviewTab'
 import JobsTab from './JobsTab'
+import RecentJobsTab from './RecentJobsTab'
 import FailedJobsTab from './FailedJobsTab'
 
-const TABS = ['overview', 'jobs', 'failed']
+// TAAKBEHEER-HORIZON-1 fase 1: Recent = Horizon's zojuist-verwerkte jobs per tenant.
+const TABS = ['overview', 'recent', 'jobs', 'failed']
 
 export default function JobQueueSettings() {
   const { t } = useTranslation('settings')
@@ -46,6 +48,7 @@ export default function JobQueueSettings() {
       </div>
 
       {tab === 'overview' && <QueueOverviewTab summary={summary} phase={phase} onRefresh={refetch} onGoToFailed={() => setTab('failed')} />}
+      {tab === 'recent' && <RecentJobsTab />}
       {tab === 'jobs' && <JobsTab />}
       {tab === 'failed' && <FailedJobsTab />}
     </div>

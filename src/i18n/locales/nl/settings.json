@@ -1896,7 +1896,8 @@
     "tab": {
       "overview": "Overzicht",
       "jobs": "Taken",
-      "failed": "Mislukt"
+      "failed": "Mislukt",
+      "recent": "Recent"
     },
     "status": {
       "active": "Actief",
@@ -1958,7 +1959,27 @@
     },
     "truncatedNotice": "Alleen de nieuwste 5.000 mislukte taken worden getoond.",
     "driverWarning": "De wachtrij draait op \"{{driver}}\" — dit scherm kijkt naar de database-wachtrij en toont dan mogelijk niet de echte werkvoorraad.",
-    "actionFailed": "Actie mislukt — de taak bestaat mogelijk niet meer. Ververs de lijst."
+    "actionFailed": "Actie mislukt — de taak bestaat mogelijk niet meer. Ververs de lijst.",
+    "recent": {
+      "tenantFilter": "Tenant-filter",
+      "allTenants": "Alle tenants",
+      "jobSearch": "Zoek op jobnaam…",
+      "window": "Horizon bewaart dit venster ±1 uur",
+      "empty": "Geen recente jobs in het Horizon-venster.",
+      "colTime": "Tijd",
+      "colJob": "Job",
+      "colQueue": "Wachtrij",
+      "colTenant": "Tenant",
+      "colWorkflow": "Workflow",
+      "colStatus": "Status",
+      "colDuration": "Duur",
+      "status": {
+        "completed": "Geslaagd",
+        "failed": "Mislukt",
+        "pending": "In wachtrij",
+        "reserved": "Bezig"
+      }
+    }
   },
   "actionRules": {
     "title": "Actieregels",

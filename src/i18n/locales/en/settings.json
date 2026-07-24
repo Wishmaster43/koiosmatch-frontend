@@ -1896,7 +1896,8 @@
     "tab": {
       "overview": "Overview",
       "jobs": "Jobs",
-      "failed": "Failed"
+      "failed": "Failed",
+      "recent": "Recent"
     },
     "status": {
       "active": "Active",
@@ -1958,7 +1959,27 @@
     },
     "truncatedNotice": "Only the newest 5,000 failed jobs are shown.",
     "driverWarning": "The queue runs on \"{{driver}}\" — this screen inspects the database queue and may not reflect the real backlog.",
-    "actionFailed": "Action failed — the job may no longer exist. Refresh the list."
+    "actionFailed": "Action failed — the job may no longer exist. Refresh the list.",
+    "recent": {
+      "tenantFilter": "Tenant filter",
+      "allTenants": "All tenants",
+      "jobSearch": "Search job name…",
+      "window": "Horizon keeps this window ±1 hour",
+      "empty": "No recent jobs in the Horizon window.",
+      "colTime": "Time",
+      "colJob": "Job",
+      "colQueue": "Queue",
+      "colTenant": "Tenant",
+      "colWorkflow": "Workflow",
+      "colStatus": "Status",
+      "colDuration": "Duration",
+      "status": {
+        "completed": "Completed",
+        "failed": "Failed",
+        "pending": "Queued",
+        "reserved": "Running"
+      }
+    }
   },
   "actionRules": {
     "title": "Action rules",

@@ -1896,7 +1896,8 @@
     "tab": {
       "overview": "Resumen",
       "jobs": "Tareas",
-      "failed": "Fallidas"
+      "failed": "Fallidas",
+      "recent": "Reciente"
     },
     "status": {
       "active": "Activa",
@@ -1958,7 +1959,27 @@
     },
     "truncatedNotice": "Solo se muestran las 5.000 tareas fallidas más recientes.",
     "driverWarning": "La cola se ejecuta en «{{driver}}» — esta pantalla inspecciona la cola de base de datos y puede no reflejar el trabajo pendiente real.",
-    "actionFailed": "Acción fallida — es posible que la tarea ya no exista. Actualiza la lista."
+    "actionFailed": "Acción fallida — es posible que la tarea ya no exista. Actualiza la lista.",
+    "recent": {
+      "tenantFilter": "Filtro de tenant",
+      "allTenants": "Todos los tenants",
+      "jobSearch": "Buscar por nombre…",
+      "window": "Horizon conserva esta ventana ±1 hora",
+      "empty": "Sin trabajos recientes en la ventana de Horizon.",
+      "colTime": "Hora",
+      "colJob": "Trabajo",
+      "colQueue": "Cola",
+      "colTenant": "Tenant",
+      "colWorkflow": "Workflow",
+      "colStatus": "Estado",
+      "colDuration": "Duración",
+      "status": {
+        "completed": "Completado",
+        "failed": "Fallido",
+        "pending": "En cola",
+        "reserved": "En curso"
+      }
+    }
   },
   "actionRules": {
     "title": "Reglas de acción",

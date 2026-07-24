@@ -1896,7 +1896,8 @@
     "tab": {
       "overview": "Übersicht",
       "jobs": "Aufgaben",
-      "failed": "Fehlgeschlagen"
+      "failed": "Fehlgeschlagen",
+      "recent": "Aktuell"
     },
     "status": {
       "active": "Aktiv",
@@ -1958,7 +1959,27 @@
     },
     "truncatedNotice": "Es werden nur die neuesten 5.000 fehlgeschlagenen Jobs angezeigt.",
     "driverWarning": "Die Warteschlange läuft auf \"{{driver}}\" — dieser Bildschirm betrachtet die Datenbank-Warteschlange und zeigt dann möglicherweise nicht den echten Rückstand.",
-    "actionFailed": "Aktion fehlgeschlagen — der Job existiert möglicherweise nicht mehr. Aktualisiere die Liste."
+    "actionFailed": "Aktion fehlgeschlagen — der Job existiert möglicherweise nicht mehr. Aktualisiere die Liste.",
+    "recent": {
+      "tenantFilter": "Tenant-Filter",
+      "allTenants": "Alle Tenants",
+      "jobSearch": "Jobname suchen…",
+      "window": "Horizon behält dieses Fenster ±1 Stunde",
+      "empty": "Keine aktuellen Jobs im Horizon-Fenster.",
+      "colTime": "Zeit",
+      "colJob": "Job",
+      "colQueue": "Warteschlange",
+      "colTenant": "Tenant",
+      "colWorkflow": "Workflow",
+      "colStatus": "Status",
+      "colDuration": "Dauer",
+      "status": {
+        "completed": "Erfolgreich",
+        "failed": "Fehlgeschlagen",
+        "pending": "In Warteschlange",
+        "reserved": "Läuft"
+      }
+    }
   },
   "actionRules": {
     "title": "Aktionsregeln",
