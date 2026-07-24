@@ -86,6 +86,8 @@ export default function RecentJobsTab() {
               <th style={TH}>{t('jobs.recent.colJob')}</th>
               <th style={TH}>{t('jobs.recent.colQueue')}</th>
               <th style={TH}>{t('jobs.recent.colTenant')}</th>
+              <th style={TH}>{t('jobs.recent.colBy')}</th>
+              <th style={TH}>{t('jobs.recent.colSubject')}</th>
               <th style={TH}>{t('jobs.recent.colWorkflow')}</th>
               <th style={TH}>{t('jobs.recent.colStatus')}</th>
               <th style={TH}>{t('jobs.recent.colDuration')}</th>
@@ -99,6 +101,11 @@ export default function RecentJobsTab() {
                   <td style={{ ...TD, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{r.job}</td>
                   <td style={TD}>{r.queue}</td>
                   <td style={TD}>{r.tenant ?? '—'}</td>
+                  {/* JOB-PROVENANCE-1: wie vroeg het aan + over welk record het gaat. */}
+                  <td style={TD}>{r.requested_by ?? '—'}</td>
+                  <td style={{ ...TD, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>
+                    {r.subject ? `${r.subject.type} ${r.subject.reference}` : '—'}
+                  </td>
                   <td style={TD}>{r.workflow ?? '—'}</td>
                   <td style={TD}><StatusPill label={t(`jobs.recent.status.${r.status}`, r.status)} color={STATUS_COLOR[r.status] ?? 'var(--text-muted)'} /></td>
                   <td style={{ ...TD, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{formatDuration(r.runtime_ms)}</td>

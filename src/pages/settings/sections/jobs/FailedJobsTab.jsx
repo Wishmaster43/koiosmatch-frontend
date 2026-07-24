@@ -33,6 +33,10 @@ export default function FailedJobsTab() {
     { key: 'job', header: t('jobs.col.job'), render: (r) => <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{r.job}</span> },
     // TAAKBEHEER-HORIZON-1b: the workflow:<key> tag off the failing job's payload, or a dash when it isn't a workflow run.
     { key: 'workflow', header: t('jobs.col.workflow'), nowrap: true, render: (r) => r.workflow ?? '—' },
+    // JOB-PROVENANCE-1: wie de job aanvroeg + over welk record hij ging.
+    { key: 'requested_by', header: t('jobs.recent.colBy'), nowrap: true, render: (r) => r.requested_by ?? '—' },
+    { key: 'subject', header: t('jobs.recent.colSubject'), nowrap: true,
+      render: (r) => r.subject ? <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{r.subject.type} {r.subject.reference}</span> : '—' },
     { key: 'exception_summary', header: t('jobs.col.exception'),
       render: (r) => <span style={{ fontSize: 12, color: 'var(--color-danger)' }}>{r.exception_summary}</span> },
     { key: 'failed_at', header: t('jobs.col.failedAt'), nowrap: true, render: (r) => formatDT(r.failed_at) },

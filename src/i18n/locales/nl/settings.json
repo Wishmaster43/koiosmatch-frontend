@@ -1980,7 +1980,9 @@
         "failed": "Mislukt",
         "pending": "In wachtrij",
         "reserved": "Bezig"
-      }
+      },
+      "colBy": "Door",
+      "colSubject": "Onderwerp"
     },
     "metrics": {
       "byJob": "Per job",

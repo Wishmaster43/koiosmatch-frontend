@@ -1980,7 +1980,9 @@
         "failed": "Fehlgeschlagen",
         "pending": "In Warteschlange",
         "reserved": "Läuft"
-      }
+      },
+      "colBy": "Von",
+      "colSubject": "Betreff"
     },
     "metrics": {
       "byJob": "Nach Job",

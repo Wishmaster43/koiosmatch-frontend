@@ -1980,7 +1980,9 @@
         "failed": "Échoué",
         "pending": "En file",
         "reserved": "En cours"
-      }
+      },
+      "colBy": "Par",
+      "colSubject": "Sujet"
     },
     "metrics": {
       "byJob": "Par tâche",

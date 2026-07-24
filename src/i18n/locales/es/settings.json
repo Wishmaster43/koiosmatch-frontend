@@ -1980,7 +1980,9 @@
         "failed": "Fallido",
         "pending": "En cola",
         "reserved": "En curso"
-      }
+      },
+      "colBy": "Por",
+      "colSubject": "Asunto"
     },
     "metrics": {
       "byJob": "Por tarea",

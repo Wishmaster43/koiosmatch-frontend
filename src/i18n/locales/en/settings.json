@@ -1980,7 +1980,9 @@
         "failed": "Failed",
         "pending": "Queued",
         "reserved": "Running"
-      }
+      },
+      "colBy": "By",
+      "colSubject": "Subject"
     },
     "metrics": {
       "byJob": "By job",
