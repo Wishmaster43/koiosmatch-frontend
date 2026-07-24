@@ -50,7 +50,9 @@ export default function FinancialSection({
       </div>
       {/* Rate proposal hint — only fills EMPTY fields above (never overwrites input). */}
       <RateProposalHint proposal={proposal} />
-      <div style={row2}>
+      {/* Stacked full-width (Danny 24-07): side-by-side squeezed the billing-email
+          header until its button wrapped — each gets the card's full width now. */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {/* Cost centre — proposed from the customer/location cascade above; typing
             here freezes it (job 21/22 — never overwritten again after that). */}
         <F label={t('placement.costCenter')} error={errors.costCenter}>

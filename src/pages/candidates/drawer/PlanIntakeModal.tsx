@@ -341,11 +341,13 @@ export default function PlanIntakeModal({
               onChange={e => setDuration(Number(e.target.value) || 0)} style={input} />
             {errors.duration && <div style={errMsg}>{t('common:required')}</div>}
           </div>
-          <div style={{ width: 90 }}>
+          <div style={{ width: 110 }}>
             <div style={fieldLabel}>{t('work.endTime')}</div>
             {/* Read-only display, not an input — still box-modeled like one (padding +
                 transparent border, S24c) so it lines up with When/Duur in the same row. */}
-            <div style={{ padding: '8px 11px', border: '1px solid transparent', borderRadius: 8, boxSizing: 'border-box', display: 'flex', alignItems: 'center', fontSize: 13, color: endTime ? 'var(--text)' : 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>
+            {/* Read-only but BOXED like its row-mates — the floating "tot 19:15"
+                text read as broken layout (Danny 24-07). */}
+            <div style={{ padding: '8px 11px', border: '1px solid var(--border)', background: 'var(--hover-bg)', borderRadius: 8, boxSizing: 'border-box', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', fontSize: 13, color: endTime ? 'var(--text)' : 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>
               {endTime ? t('work.endTimeAt', { time: endTime }) : '—'}
             </div>
           </div>
@@ -355,12 +357,15 @@ export default function PlanIntakeModal({
         <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
           <div style={{ flex: 1 }}>
             <div style={fieldLabel}>{t('work.modality')}</div>
-            <SelectMenu style={fieldFootprint} value={whereValue || null} onChange={pickWhere} options={whereOptions} />
+            {/* Searchable (Danny 24-07: "Locatie ook!!") — same modal combobox as the rest. */}
+            <CreatableSelect style={fieldFootprint} value={whereValue || null} onChange={pickWhere}
+              allowCreate={false} options={whereOptions} menuWidth={260} />
             {(errors.modality || errors.locationId || errors.appointmentLocation) && <div style={errMsg}>{t('common:required')}</div>}
           </div>
           <div style={{ flex: 1 }}>
             <div style={fieldLabel}>{t('work.owner')}</div>
-            <SelectMenu style={fieldFootprint} value={ownerId || null} onChange={setOwnerId} placeholder={t('work.pickOwner')}
+            {/* Searchable (Danny 24-07: "recruiter zoekbare dropdown!"). */}
+            <CreatableSelect style={fieldFootprint} value={ownerId || null} onChange={setOwnerId} allowCreate={false} placeholder={t('work.pickOwner')} menuWidth={260}
               options={users.map(u => ({ value: String(u.id), label: userName(u) }))} />
             {errors.ownerId && <div style={errMsg}>{t('common:required')}</div>}
           </div>

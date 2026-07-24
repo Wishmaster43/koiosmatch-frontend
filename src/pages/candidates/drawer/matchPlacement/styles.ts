@@ -31,7 +31,9 @@ export const errMsg: React.CSSProperties = { fontSize: 11, color: 'var(--color-d
 // top-to-bottom — Danny's "lange smalle strook" complaint. Relaties keeps the
 // full panel width for its long-list searchable pickers; Contract/Financieel are
 // shorter, plain-input-heavy sections that pair up fine in half the width.
-export const twoColSections: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start' }
+// Financieel (right) gets the wider share (Danny 24-07: "financieel moet groter") —
+// its three-across rate row + billing block need the room; Contract/Opmerkingen don't.
+export const twoColSections: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1.35fr', gap: 24, alignItems: 'start' }
 
 // Consistent search-box width for the relational pickers below — the wide panel
 // gives the full-width Relaties row2 columns plenty of room, so a wider menu

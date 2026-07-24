@@ -22,7 +22,7 @@ export default function DrawerAddButton({ onClick, label, icon: Icon = Plus, dis
   return (
     <button onClick={onClick} disabled={disabled} title={title}
       style={{
-        display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px',
+        display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px', whiteSpace: 'nowrap',
         fontSize: 11.5, fontWeight: 500, borderRadius: 6,
         cursor: disabled ? 'not-allowed' : 'pointer',
         color: disabled ? 'var(--text-muted)' : 'var(--color-primary)',
