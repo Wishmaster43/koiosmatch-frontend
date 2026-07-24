@@ -44,6 +44,7 @@ import PoolsSettings from './sections/PoolsSettings'
 import { LanguageListSettings, LanguageLevelSettings } from './sections/LanguageSettings'
 import GenderSettings from './sections/GenderSettings'
 import IndustrySettings from './sections/IndustrySettings'
+import ProvincesSettings from './sections/ProvincesSettings'
 import FunctionsSettings from './sections/FunctionsSettings'
 import ContactFunctionsSettings from './sections/ContactFunctionsSettings'
 import { VacancyStatusSettings, VacancyPhaseSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings, VacancyApplicationDefaultsSettings } from './sections/VacancySettings'
@@ -149,6 +150,9 @@ export const NAV_GROUPS = [
     key: 'personalisation', icon: BookOpen,
     items: [
       { id: 'industries', icon: Factory, component: IndustrySettings },
+      // Regions per country (PROVINCES-1) — tenant CRUD + reorder, cascaded on the
+      // address country picker; sits next to Industries as a shared lookup.
+      { id: 'provinces', icon: MapPin, component: ProvincesSettings },
       { id: 'lang_languages', icon: Languages, component: LanguageListSettings },
       { id: 'lang_levels', icon: BarChart2, component: LanguageLevelSettings },
       { id: 'genders', icon: Users, component: GenderSettings },
