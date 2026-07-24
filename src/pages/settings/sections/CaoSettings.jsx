@@ -17,7 +17,7 @@ export default function CaoSettings() {
         subtitle={t('caoSettings.subtitle')}
         endpoint="/cao"
         addLabel={t('caoSettings.add')}
-        withColor={false}
+        withColor
       />
     </div>
   )
