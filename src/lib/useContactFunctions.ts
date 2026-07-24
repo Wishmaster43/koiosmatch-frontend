@@ -17,6 +17,7 @@
  */
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { useAllSettings, getBoolSetting } from './settings/useAllSettings'
 import { lookupNames } from './lookupUtils'
 
 export const DEFAULT_CONTACT_FUNCTIONS = [
@@ -41,11 +42,12 @@ const mapContactFunctions = (res: AxiosResponse): ContactFunctionsLookupData => 
 
 export function useContactFunctions() {
   const { data } = useCachedLookup('/contact-functions', mapContactFunctions, FALLBACK)
+  const settings = useAllSettings()
 
-  // No tenant toggle exists yet for this list, so default to creatable; the API
-  // flag wins the moment the backend sends one (same fallback chain as useFunctions.ts
-  // minus the Settings-toggle step, which has no UI for this list yet).
-  const allowFreeEntry = data.apiFreeEntry ?? true
+  // Same chain as useFunctions: the tenant Settings toggle wins, else the API's
+  // own flag, else creatable (this list's historical default — flipping it here
+  // would silently strict-lock never-configured tenants).
+  const allowFreeEntry = getBoolSetting(settings, 'contact_functions_allow_free_entry', data.apiFreeEntry ?? true)
 
   return { contactFunctions: data.contactFunctions, allowFreeEntry }
 }

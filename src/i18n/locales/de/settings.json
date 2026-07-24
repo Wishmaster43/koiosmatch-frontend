@@ -135,6 +135,7 @@
     "genders": "Geschlecht",
     "candidate_availability": "Verfügbarkeit",
     "industries": "Branchen",
+    "provinces": "Provinzen",
     "vacancy_employment": "Beschäftigungsart",
     "vacancy_seniority": "Senioritätslevel",
     "vacancy_education": "Ausbildung",
@@ -1596,6 +1597,15 @@
     "subtitle": "Verwalte die Branchen, die du im Unternehmensprofil auswählen kannst.",
     "add": "Branche hinzufügen"
   },
+  "provinces": {
+    "title": "Provinzen",
+    "subtitle": "Provinzen pro Land — verwendet in Adressfeldern und Filtern.",
+    "add": "Provinz hinzufügen",
+    "country": "Land",
+    "empty": "Noch keine Provinzen für dieses Land — füge die erste hinzu.",
+    "loadError": "Die Provinzen konnten nicht geladen werden.",
+    "retry": "Erneut versuchen"
+  },
   "genderSettings": {
     "title": "Geschlecht",
     "subtitle": "Geschlechter mit einer Farbe — bestimmt die Farbe des Kandidaten-Icons.",
@@ -1666,7 +1676,10 @@
     "title": "Kontaktfunktionen",
     "subtitle": "Verwalte die Funktionsliste für Kontaktpersonen bei Kunden (z. B. Standortleiter, Teamleiter).",
     "add": "Funktion hinzufügen",
-    "notAvailable": "Noch nicht verfügbar — diese Liste wird aktiv, sobald die Backend-Anbindung besteht."
+    "notAvailable": "Noch nicht verfügbar — diese Liste wird aktiv, sobald die Backend-Anbindung besteht.",
+    "freeEntry": "Freie Eingabe erlauben",
+    "freeEntryHint": "An: eine eigene Funktion kann eingetippt werden (Combobox). Aus: nur aus der Liste wählen (strikte Auswahl).",
+    "confirmFreeEntry": "Bist du sicher? Freie Eingabe erlaubt Kontaktfunktionen außerhalb der Liste — das kann die Datenqualität senken."
   },
   "customerDisplay": {
     "title": "Tabellenanzeige",

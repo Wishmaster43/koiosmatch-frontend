@@ -114,6 +114,7 @@
     "genders": "Geslacht",
     "candidate_availability": "Beschikbaarheid",
     "industries": "Industrieën",
+    "provinces": "Provincies",
     "shift_types": "Diensttypes",
     "availability": "Beschikbaarheid",
     "automatch": "Automatch-regels",
@@ -125,7 +126,7 @@
     "mod_helloflex": "HelloFlex",
     "contract_forms": "Contractvormen",
     "funnel_stages": "Funnelfasen",
-    "candidate_statuses": "Status",
+    "candidate_statuses": "Statussen",
     "lang_languages": "Talen",
     "lang_levels": "Niveaus",
     "vacancy_statuses": "Statussen",
@@ -1534,6 +1535,15 @@
     "subtitle": "Beheer de branches die je kunt kiezen bij je bedrijfsprofiel.",
     "add": "Industrie toevoegen"
   },
+  "provinces": {
+    "title": "Provincies",
+    "subtitle": "Provincies per land — gebruikt in adresvelden en filters.",
+    "add": "Provincie toevoegen",
+    "country": "Land",
+    "empty": "Nog geen provincies voor dit land — voeg de eerste toe.",
+    "loadError": "Kon de provincies niet laden.",
+    "retry": "Opnieuw proberen"
+  },
   "genderSettings": {
     "title": "Geslacht",
     "subtitle": "Geslachten met een kleur — bepaalt de kleur van het kandidaat-icoon.",
@@ -1666,7 +1676,10 @@
     "title": "Contactfuncties",
     "subtitle": "Beheer de functielijst voor contactpersonen bij klanten (bijv. Locatiemanager, Teamleider).",
     "add": "Functie toevoegen",
-    "notAvailable": "Nog niet beschikbaar — deze lijst wordt actief zodra de backend-koppeling er is."
+    "notAvailable": "Nog niet beschikbaar — deze lijst wordt actief zodra de backend-koppeling er is.",
+    "freeEntry": "Vrije invoer toestaan",
+    "freeEntryHint": "Aan: een eigen functie typen kan (combobox). Uit: alleen kiezen uit de lijst (strikte dropdown).",
+    "confirmFreeEntry": "Weet je het zeker? Vrije invoer laat gebruikers contactfuncties typen die niet in de lijst staan — dit kan de datakwaliteit verlagen."
   },
   "opportunityDisplay": {
     "title": "Tabelweergave",

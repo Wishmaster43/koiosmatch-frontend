@@ -117,7 +117,7 @@
     "mod_helloflex": "HelloFlex",
     "contract_forms": "Types de contrat",
     "funnel_stages": "Étapes de l'entonnoir",
-    "candidate_statuses": "Statut",
+    "candidate_statuses": "Statuts",
     "lang_languages": "Langues",
     "lang_levels": "Niveaux",
     "vacancy_statuses": "Statuts",
@@ -135,6 +135,7 @@
     "genders": "Genre",
     "candidate_availability": "Disponibilité",
     "industries": "Secteurs",
+    "provinces": "Provinces",
     "vacancy_employment": "Type de contrat",
     "vacancy_seniority": "Niveau d'expérience",
     "vacancy_education": "Formation",
@@ -1596,6 +1597,15 @@
     "subtitle": "Gérez les secteurs sélectionnables dans le profil d'entreprise.",
     "add": "Ajouter un secteur"
   },
+  "provinces": {
+    "title": "Provinces",
+    "subtitle": "Provinces par pays — utilisées dans les champs d'adresse et les filtres.",
+    "add": "Ajouter une province",
+    "country": "Pays",
+    "empty": "Pas encore de provinces pour ce pays — ajoutez la première.",
+    "loadError": "Impossible de charger les provinces.",
+    "retry": "Réessayer"
+  },
   "genderSettings": {
     "title": "Genre",
     "subtitle": "Genres avec une couleur — détermine la couleur de l'icône du candidat.",
@@ -1666,7 +1676,10 @@
     "title": "Fonctions des contacts",
     "subtitle": "Gérez la liste des fonctions pour les contacts chez les clients (ex. Responsable de site, Chef d'équipe).",
     "add": "Ajouter une fonction",
-    "notAvailable": "Pas encore disponible — cette liste s'active dès que la connexion backend est en place."
+    "notAvailable": "Pas encore disponible — cette liste s'active dès que la connexion backend est en place.",
+    "freeEntry": "Autoriser la saisie libre",
+    "freeEntryHint": "Activé : une fonction personnalisée peut être saisie (combobox). Désactivé : choix dans la liste uniquement (liste stricte).",
+    "confirmFreeEntry": "Es-tu sûr ? La saisie libre permet de saisir des fonctions hors liste — cela peut réduire la qualité des données."
   },
   "customerDisplay": {
     "title": "Affichage du tableau",

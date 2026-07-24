@@ -117,7 +117,7 @@
     "mod_helloflex": "HelloFlex",
     "contract_forms": "Tipos de contrato",
     "funnel_stages": "Etapas del embudo",
-    "candidate_statuses": "Estado",
+    "candidate_statuses": "Estados",
     "lang_languages": "Idiomas",
     "lang_levels": "Niveles",
     "vacancy_statuses": "Estados",
@@ -135,6 +135,7 @@
     "genders": "Género",
     "candidate_availability": "Disponibilidad",
     "industries": "Sectores",
+    "provinces": "Provincias",
     "vacancy_employment": "Tipo de contrato",
     "vacancy_seniority": "Nivel de experiencia",
     "vacancy_education": "Formación",
@@ -1596,6 +1597,15 @@
     "subtitle": "Gestiona los sectores seleccionables en el perfil de empresa.",
     "add": "Añadir sector"
   },
+  "provinces": {
+    "title": "Provincias",
+    "subtitle": "Provincias por país — usadas en los campos de dirección y filtros.",
+    "add": "Añadir provincia",
+    "country": "País",
+    "empty": "Aún no hay provincias para este país — añade la primera.",
+    "loadError": "No se pudieron cargar las provincias.",
+    "retry": "Reintentar"
+  },
   "genderSettings": {
     "title": "Género",
     "subtitle": "Géneros con un color — determina el color del icono del candidato.",
@@ -1666,7 +1676,10 @@
     "title": "Funciones de contacto",
     "subtitle": "Gestiona la lista de funciones para los contactos en los clientes (p. ej. Gerente de ubicación, Jefe de equipo).",
     "add": "Añadir función",
-    "notAvailable": "Aún no disponible — esta lista se activará en cuanto exista la conexión con el backend."
+    "notAvailable": "Aún no disponible — esta lista se activará en cuanto exista la conexión con el backend.",
+    "freeEntry": "Permitir entrada libre",
+    "freeEntryHint": "Activado: se puede escribir una función propia (combobox). Desactivado: solo elegir de la lista (desplegable estricto).",
+    "confirmFreeEntry": "¿Estás seguro? La entrada libre permite escribir funciones fuera de la lista — puede reducir la calidad de los datos."
   },
   "customerDisplay": {
     "title": "Vista de tabla",

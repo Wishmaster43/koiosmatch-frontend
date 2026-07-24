@@ -114,6 +114,7 @@
     "genders": "Gender",
     "candidate_availability": "Availability",
     "industries": "Industries",
+    "provinces": "Provinces",
     "shift_types": "Shift types",
     "availability": "Availability",
     "automatch": "Auto-match rules",
@@ -125,7 +126,7 @@
     "mod_helloflex": "HelloFlex",
     "contract_forms": "Contract types",
     "funnel_stages": "Funnel stages",
-    "candidate_statuses": "Status",
+    "candidate_statuses": "Statuses",
     "lang_languages": "Languages",
     "lang_levels": "Levels",
     "vacancy_statuses": "Statuses",
@@ -1534,6 +1535,15 @@
     "subtitle": "Manage the industries selectable in your company profile.",
     "add": "Add industry"
   },
+  "provinces": {
+    "title": "Provinces",
+    "subtitle": "Provinces per country — used in address fields and filters.",
+    "add": "Add province",
+    "country": "Country",
+    "empty": "No provinces yet for this country — add the first one.",
+    "loadError": "Could not load the provinces.",
+    "retry": "Retry"
+  },
   "genderSettings": {
     "title": "Gender",
     "subtitle": "Genders with a colour — drives the candidate icon colour.",
@@ -1666,7 +1676,10 @@
     "title": "Contact functions",
     "subtitle": "Manage the job-title list for customer contact persons (e.g. Location manager, Team lead).",
     "add": "Add function",
-    "notAvailable": "Not available yet — this list activates once the backend connection is live."
+    "notAvailable": "Not available yet — this list activates once the backend connection is live.",
+    "freeEntry": "Allow free entry",
+    "freeEntryHint": "On: a custom function can be typed (combobox). Off: pick from the list only (strict dropdown).",
+    "confirmFreeEntry": "Are you sure? Free entry lets users type contact functions that are not in the list — this can lower data quality."
   },
   "opportunityDisplay": {
     "title": "Table display",
