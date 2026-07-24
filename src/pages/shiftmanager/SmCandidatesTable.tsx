@@ -26,9 +26,11 @@ const dash = <span style={{ color: 'var(--text-muted)' }}>—</span>
 interface SmCandidatesTableProps {
   rows: ReportCandidate[]
   loading?: boolean
+  // Optional: the host opens the rich per-candidate drill-down on row click.
+  onRowClick?: (row: ReportCandidate) => void
 }
 
-export default function SmCandidatesTable({ rows, loading }: SmCandidatesTableProps) {
+export default function SmCandidatesTable({ rows, loading, onRowClick }: SmCandidatesTableProps) {
   const { t } = useTranslation(['shiftmanager', 'reports'])
   const { formatDate } = useDateFormat()
 
@@ -124,6 +126,7 @@ export default function SmCandidatesTable({ rows, loading }: SmCandidatesTablePr
       emptyText={t('candidates.empty', { ns: 'reports' })}
       stickyHeader
       defaultSort={{ key: 'name', dir: 'asc' }}
+      onRowClick={onRowClick}
     />
   )
 }

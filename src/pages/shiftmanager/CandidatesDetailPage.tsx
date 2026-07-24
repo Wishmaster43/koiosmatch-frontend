@@ -16,7 +16,9 @@ import { useReportCandidates } from '@/components/reports/useReportCandidates'
 import SmCandidatesInsightsRow from './SmCandidatesInsightsRow'
 import SmCandidatesTable from './SmCandidatesTable'
 import DrillDownDrawer from '@/components/reports/DrillDownDrawer'
+import CandidateDetailDrawer from '@/components/reports/CandidateDetailDrawer'
 import HeaderSearch from '@/components/ui/HeaderSearch'
+import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import PaginationBar from '@/components/ui/PaginationBar'
 import { filterSmCandidates } from './data/smCandidateFilters'
 import { featureNamesOf, registrationYearOf } from './data/smCandidateFields'
@@ -35,6 +37,9 @@ export default function CandidatesDetailPage() {
   // Controlled status filter so a KPI/donut click can drive the table.
   const [statusFilter, setStatusFilter] = useState<Array<string | number>>(['actief'])
   const [search, setSearch] = useState('')
+  // Remount-key for HeaderSearch so "wis alle filters" also empties the input
+  // (the native CandidatesToolbar idiom — HeaderSearch owns its own text state).
+  const [searchEpoch, setSearchEpoch] = useState(0)
   // RightPanel filter axes (jaar/functie/kenmerken) — restored from the old
   // reports table (its registerFilters left the page with the restyle; the native
   // blueprint keeps the right filter drawer, so these come back page-level).
@@ -44,6 +49,9 @@ export default function CandidatesDetailPage() {
   const [selectedFeatures, setSelectedFeatures] = useState<Array<string | number>>([])
   // Attention/new/no-shows/… cards open the rich drill-down with their own filtered subset.
   const [drill, setDrill] = useState<{ title: string; candidates: ReportCandidate[] } | null>(null)
+  // Row click opens the rich per-candidate drill-down (Danny 24-07: "ik mis de
+  // drill down" — the old reports table opened this drawer; restored blueprint-side).
+  const [detail, setDetail] = useState<ReportCandidate | null>(null)
 
   // Single-value status toggle — clicking the same status again clears it (mirrors
   // the native candidates page's donut/KPI pick-one behaviour).
@@ -85,6 +93,14 @@ export default function CandidatesDetailPage() {
     return () => unregisterFilters('candidates-table')
   }, [filterGroups, registerFilters, unregisterFilters])
 
+  // "Wis alle filters" — anything beyond the default view (status=actief) counts.
+  const anyFilterActive = Boolean(search) || selectedYears.length > 0 || selectedPositions.length > 0
+    || selectedFeatures.length > 0 || !(statusFilter.length === 1 && String(statusFilter[0]).toLowerCase() === 'actief')
+  const clearFilters = () => {
+    setStatusFilter(['actief']); setSearch(''); setSearchEpoch(e => e + 1)
+    setSelectedYears([]); setSelectedPositions([]); setSelectedFeatures([])
+  }
+
   return (
     <div style={{ padding: 24, height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* KPI row — status donut/cards filter the table, the rest drill down */}
@@ -99,11 +115,12 @@ export default function CandidatesDetailPage() {
       {/* Toolbar row — the one shared spacing spec (§4): identical KPI-row→button
           gap on every page. Search on the left, no other chrome. */}
       <div style={{ padding: '0 24px 12px', minHeight: 36, display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0 }}>
-        <HeaderSearch onSearch={setSearch} placeholder={t('candidates.search')} width={300} />
+        <HeaderSearch key={searchEpoch} onSearch={setSearch} placeholder={t('candidates.search')} width={300} />
+        <ClearFiltersButton active={anyFilterActive} onClear={clearFilters} />
       </div>
 
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', padding: '0 24px 16px', overflow: 'auto' }}>
-        <SmCandidatesTable rows={filtered} loading={loading} />
+        <SmCandidatesTable rows={filtered} loading={loading} onRowClick={setDetail} />
       </div>
 
       <PaginationBar
@@ -117,6 +134,9 @@ export default function CandidatesDetailPage() {
 
       {drill && (
         <DrillDownDrawer title={drill.title} candidates={drill.candidates} onClose={() => setDrill(null)} />
+      )}
+      {detail && (
+        <CandidateDetailDrawer candidate={detail} onClose={() => setDetail(null)} />
       )}
     </div>
   )

@@ -90,7 +90,9 @@ export default function SmCandidatesInsightsRow({
   const donuts: DonutSpec[] = [{
     key: 'status', title: t('candidates.cols.status', { ns: 'reports' }), data: statusData,
     onPick: d => { const k = pickKey(d); if (k) onStatusPick(k) },
-    active: pickedStatus != null,
+    // Never highlight the donut card itself — the picked status' own KPI card
+    // already carries the active border (Danny 24-07: "niet beide oranje").
+    active: false,
     onClear: onStatusClear,
     picked: pickedStatus ? t(`candidates.status.${pickedStatus}`, { ns: 'reports' }) : null,
   }]
