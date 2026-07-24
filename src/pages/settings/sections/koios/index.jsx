@@ -43,7 +43,8 @@ export default function KoiosSettings() {
       {phase === 'ready' && (
         <>
           <KoiosStatusCard status={settings?.status} t={t} />
-          <KoiosModelsCard models={settings?.models} t={t} />
+          <KoiosModelsCard models={settings?.models} t={t}
+            onChanged={(model) => setSettings((s) => ({ ...s, models: { ...s.models, active: model } }))} />
           <KoiosPricingCard pricing={settings?.pricing} currency={settings?.currency} locale={locale} t={t} />
         </>
       )}

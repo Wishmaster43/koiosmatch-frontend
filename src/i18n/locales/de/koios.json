@@ -16,7 +16,19 @@
   "models": {
     "title": "Modelle",
     "active": "Aktives Modell",
-    "selectable": "Auswählbare Modelle"
+    "selectable": "Auswählbare Modelle",
+    "pickHint": "Wähle die KI-Stufe für dein Büro — die Tarife stehen darunter.",
+    "tier": {
+      "snel": "Schnell",
+      "slim": "Smart",
+      "max": "Max"
+    },
+    "tierDesc": {
+      "snel": "Höchstes Volumen, niedrigster Tarif — ideal für Routinearbeit.",
+      "slim": "Der Standard: starke Qualität zum mittleren Tarif.",
+      "max": "Beste Qualität für die schwierigste Arbeit — höchster Tarif."
+    },
+    "saveError": "Modellwechsel fehlgeschlagen — bitte erneut versuchen."
   },
   "pricing": {
     "title": "Tarife",

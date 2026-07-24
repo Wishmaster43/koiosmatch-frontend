@@ -1,36 +1,74 @@
 /**
- * KoiosModelsCard — the active model (highlighted) plus the list of selectable
- * models. Model ids render in monospace as they are stable identifiers.
+ * KoiosModelsCard — MODEL-KIEZER-1 (Danny 24-07 GO, supersedes MODEL-1's fixed
+ * company model): the tenant PICKS their model as a package choice in customer
+ * language — Snel (Haiku) / Slim (Sonnet) / Max (Opus) — within the platform
+ * whitelist. The backend endpoint validates + audits; a model outside the
+ * whitelist can never be set. Rates live in the pricing card below this one.
  */
-const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
-const cardTitle = { fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }
-const label = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }
-const chip = { display: 'inline-block', padding: '4px 10px', borderRadius: 999, fontSize: 12, fontFamily: 'monospace',
-  border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)' }
+import { useState } from 'react'
+import { Zap, Sparkles, Crown, Check } from 'lucide-react'
+import { updateKoiosModel } from './koiosApi'
 
-export default function KoiosModelsCard({ models, t }) {
+const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
+const cardTitle = { fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }
+
+// Model id → customer-language tier. Unknown ids fall back to a plain id tile.
+const tierFor = (id) => {
+  if (id.includes('haiku')) return { key: 'snel', Icon: Zap, color: '#059669' }
+  if (id.includes('sonnet')) return { key: 'slim', Icon: Sparkles, color: '#2563EB' }
+  if (id.includes('opus') || id.includes('fable')) return { key: 'max', Icon: Crown, color: '#7C3AED' }
+  return { key: null, Icon: Sparkles, color: 'var(--text-muted)' }
+}
+
+export default function KoiosModelsCard({ models, t, onChanged }) {
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(null)
   const active = models?.active
   const selectable = models?.selectable ?? []
+
+  // Pick a tier — no optimism: wait for the server (it validates the whitelist).
+  const pick = async (model) => {
+    if (model === active || saving) return
+    setSaving(true); setError(null)
+    try {
+      await updateKoiosModel(model)
+      onChanged?.(model)
+    } catch {
+      setError(t('models.saveError'))
+    }
+    setSaving(false)
+  }
 
   return (
     <div style={card}>
       <div style={cardTitle}>{t('models.title')}</div>
+      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('models.pickHint')}</div>
 
-      <div style={label}>{t('models.active')}</div>
-      <span style={{ ...chip, borderColor: 'var(--color-primary)', color: 'var(--color-primary)', fontWeight: 600 }}>
-        {active ?? '—'}
-      </span>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(selectable.length || 1, 3)}, 1fr)`, gap: 10 }}>
+        {selectable.map((m) => {
+          const { key, Icon, color } = tierFor(m)
+          const on = m === active
+          return (
+            <button key={m} type="button" onClick={() => pick(m)} disabled={saving} aria-pressed={on}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6,
+                padding: '12px 14px', borderRadius: 10, cursor: on ? 'default' : 'pointer', textAlign: 'left',
+                border: `2px solid ${on ? color : 'var(--border)'}`,
+                background: on ? `color-mix(in srgb, ${color} 8%, transparent)` : 'var(--surface)' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%' }}>
+                <Icon size={15} color={color} />
+                <span style={{ fontSize: 13, fontWeight: 600, color: on ? color : 'var(--text)' }}>
+                  {key ? t(`models.tier.${key}`) : m}
+                </span>
+                {on && <Check size={14} color={color} style={{ marginLeft: 'auto' }} />}
+              </span>
+              {key && <span style={{ fontSize: 11.5, color: 'var(--text-muted)', lineHeight: 1.4 }}>{t(`models.tierDesc.${key}`)}</span>}
+              <span style={{ fontSize: 10.5, fontFamily: 'monospace', color: 'var(--text-muted)' }}>{m}</span>
+            </button>
+          )
+        })}
+      </div>
 
-      {selectable.length > 0 && (
-        <>
-          <div style={{ ...label, marginTop: 16 }}>{t('models.selectable')}</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {selectable.map(m => (
-              <span key={m} style={{ ...chip, fontWeight: m === active ? 600 : 400 }}>{m}</span>
-            ))}
-          </div>
-        </>
-      )}
+      {error && <div style={{ fontSize: 12, color: 'var(--color-danger)', marginTop: 10 }}>{error}</div>}
     </div>
   )
 }

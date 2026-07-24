@@ -16,7 +16,19 @@
   "models": {
     "title": "Modèles",
     "active": "Modèle actif",
-    "selectable": "Modèles sélectionnables"
+    "selectable": "Modèles sélectionnables",
+    "pickHint": "Choisissez le niveau d'IA pour votre agence — les tarifs sont ci-dessous.",
+    "tier": {
+      "snel": "Rapide",
+      "slim": "Malin",
+      "max": "Max"
+    },
+    "tierDesc": {
+      "snel": "Volume maximal, tarif le plus bas — parfait pour le routinier.",
+      "slim": "Le standard : grande qualité à tarif moyen.",
+      "max": "La meilleure qualité pour le plus difficile — tarif le plus élevé."
+    },
+    "saveError": "Le changement de modèle a échoué — réessayez."
   },
   "pricing": {
     "title": "Tarifs",

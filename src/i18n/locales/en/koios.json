@@ -16,7 +16,19 @@
   "models": {
     "title": "Models",
     "active": "Active model",
-    "selectable": "Selectable models"
+    "selectable": "Selectable models",
+    "pickHint": "Pick the AI tier for your agency — per-tier rates are below.",
+    "tier": {
+      "snel": "Fast",
+      "slim": "Smart",
+      "max": "Max"
+    },
+    "tierDesc": {
+      "snel": "Highest volume, lowest rate — great for routine work.",
+      "slim": "The default: strong quality at an average rate.",
+      "max": "Best quality for the hardest work — highest rate."
+    },
+    "saveError": "Changing the model failed — please try again."
   },
   "pricing": {
     "title": "Rates",

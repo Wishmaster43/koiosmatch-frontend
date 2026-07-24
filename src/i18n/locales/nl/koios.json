@@ -16,7 +16,19 @@
   "models": {
     "title": "Modellen",
     "active": "Actief model",
-    "selectable": "Selecteerbare modellen"
+    "selectable": "Selecteerbare modellen",
+    "pickHint": "Kies de AI-smaak voor jouw bureau — het tarief per smaak staat hieronder.",
+    "tier": {
+      "snel": "Snel",
+      "slim": "Slim",
+      "max": "Max"
+    },
+    "tierDesc": {
+      "snel": "Hoogste volume, laagste tarief — prima voor routinewerk.",
+      "slim": "De standaard: sterke kwaliteit tegen een gemiddeld tarief.",
+      "max": "Beste kwaliteit voor het moeilijkste werk — hoogste tarief."
+    },
+    "saveError": "Model wijzigen is niet gelukt — probeer het opnieuw."
   },
   "pricing": {
     "title": "Tarieven",
