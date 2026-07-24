@@ -149,9 +149,6 @@ export const NAV_GROUPS = [
     key: 'personalisation', icon: BookOpen,
     items: [
       { id: 'industries', icon: Factory, component: IndustrySettings },
-      // Candidate function list only (nav label "Functions (candidate)", FUNCTIONS-SPLIT-1) —
-      // contact-person job titles are the separate `contact_functions` item under `contacts`.
-      { id: 'functions', icon: Briefcase, component: FunctionsSettings },
       { id: 'lang_languages', icon: Languages, component: LanguageListSettings },
       { id: 'lang_levels', icon: BarChart2, component: LanguageLevelSettings },
       { id: 'genders', icon: Users, component: GenderSettings },
@@ -162,6 +159,10 @@ export const NAV_GROUPS = [
     // Candidate-specific settings (Danny: "Kandidaat").
     key: 'candidate', icon: Users,
     items: [
+      // Candidate function list — moved INTO the candidate group (Danny 24-07:
+      // "moet naar de kandidaat en kan gewoon Functies heten"); contact-person
+      // titles stay the separate contact_functions item under `contacts`.
+      { id: 'functions', icon: Briefcase, component: FunctionsSettings },
       { id: 'candidate_phases', icon: Target, component: CandidatePhasesSettings },
       { id: 'candidate_statuses', icon: Users, component: CandidateStatusesSettings },
       { id: 'contract_forms', icon: Tags, component: ContractFormsSettings },
