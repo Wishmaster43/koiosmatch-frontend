@@ -2172,5 +2172,6 @@
     "title": "CAO's",
     "subtitle": "Beheer de CAO-lijst (VVT, Ziekenhuizen, GGZ, …) voor prijsafspraken en matches.",
     "add": "CAO toevoegen"
-  }
+  },
+  "dashboardsItem": "Onderdeel"
 }

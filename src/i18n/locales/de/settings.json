@@ -2172,5 +2172,6 @@
     "title": "Tarifverträge",
     "subtitle": "Verwalte die Tarifvertragsliste für Preisvereinbarungen und Matches.",
     "add": "Tarifvertrag hinzufügen"
-  }
+  },
+  "dashboardsItem": "Element"
 }

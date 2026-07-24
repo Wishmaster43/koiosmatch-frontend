@@ -10,7 +10,6 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Shield, BarChart2, Users, ClipboardList, Target, Clock, Eye, Check } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import {
   DASHBOARD_TYPES, KPI_ROWS, DASHBOARD_TEMPLATES, KPI_LABEL_KEY, BLOCK_LABEL_KEY, canSwitchViews,
@@ -60,31 +59,88 @@ export default function DashboardsSettings() {
     })
   }
 
-  // A toggle chip = the shared QuickViewToggle (§4 soft-chip convention, one look everywhere):
-  // inactive still carries the accent (subtle tint, never grey), active = stronger tint +
-  // fontWeight 600 + a check mark, so ON/OFF reads at a glance instead of via strikethrough.
-  const Chip = ({ type, kind, id, label }: { type: string; kind: 'kpis' | 'blocks'; id: string; label: string }) => {
+  // DASH-MATRIX-1 (Danny 24-07 "een tabel of iets?"): the 7 stacked chip-cards became
+  // TWO matrix tables — rows = items, columns = dashboard types, cells = toggles.
+  // Same visual language as the roles/action-rule matrices Danny already uses.
+  const allKpis = [...new Set(DASHBOARD_TYPES.flatMap(type => KPI_ROWS[type] ?? []))]
+  const allBlocks = [...new Set(DASHBOARD_TYPES.flatMap(blocksFor))]
+
+  const stickyCell = {
+    position: 'sticky' as const, left: 0, background: 'var(--surface)', zIndex: 1,
+    textAlign: 'left' as const, padding: '8px 12px', borderBottom: '1px solid var(--hover-bg)',
+    fontSize: 12.5, color: 'var(--text)', whiteSpace: 'nowrap' as const,
+  }
+  const cell = { textAlign: 'center' as const, padding: '6px 8px', borderBottom: '1px solid var(--hover-bg)' }
+
+  // One toggle dot: check (on) / empty ring (off) / dash (not applicable for this type).
+  const Cell = ({ type, kind, id, applies }: { type: string; kind: 'kpis' | 'blocks'; id: string; applies: boolean }) => {
+    if (!applies) {
+      return <td style={cell}><span style={{ color: 'var(--border)' }}>—</span></td>
+    }
     const on = !isHidden(type, kind, id)
     return (
-      <QuickViewToggle
-        active={on}
-        onToggle={() => toggle(type, kind, id)}
-        label={label}
-        icon={on ? Check : undefined}
-        title={on ? t('dashboardsToggleOff') : t('dashboardsToggleOn')}
-      />
+      <td style={cell}>
+        <button type="button" onClick={() => toggle(type, kind, id)}
+          title={on ? t('dashboardsToggleOff') : t('dashboardsToggleOn')}
+          aria-pressed={on}
+          style={{ width: 24, height: 24, borderRadius: '50%', cursor: 'pointer', display: 'inline-flex',
+            alignItems: 'center', justifyContent: 'center',
+            border: `1.5px solid ${on ? 'var(--color-primary)' : 'var(--border)'}`,
+            background: on ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'transparent' }}>
+          {on && <Check size={13} color="var(--color-primary)" />}
+        </button>
+      </td>
     )
   }
 
-  // Section sub-header inside a type card (KPI's / Grafieken & lijsten) — one shared
-  // style so hierarchy reads consistently with the rest of Settings (mirrors TenantUsageSettings).
-  const SectionLabel = ({ children }: { children: string }) => (
-    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
-      letterSpacing: '0.05em', marginBottom: 8 }}>{children}</div>
+  const Matrix = ({ kind, rows, title, labelKey }: {
+    kind: 'kpis' | 'blocks'; rows: string[]; title: string; labelKey: Record<string, string>
+  }) => (
+    <section style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'var(--surface)', overflow: 'hidden' }}>
+      <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{title}</div>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr>
+              <th style={{ ...stickyCell, fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid var(--border)' }}>
+                {t('dashboardsItem')}
+              </th>
+              {DASHBOARD_TYPES.map(type => {
+                const Icon = TYPE_ICON[type]
+                return (
+                  <th key={type} title={t(`dashboardsDesc.${type}`)}
+                    style={{ ...cell, borderBottom: '1px solid var(--border)', padding: '10px 8px', minWidth: 76 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                      <Icon size={14} color="var(--color-primary)" />
+                      <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>
+                        {td(`types.${type}`)}
+                        {/* Super views (admin/management) may switch dashboards live. */}
+                        {canSwitchViews(type) && <span title={t('dashboardsCanSwitch')} style={{ color: 'var(--color-success)' }}> ●</span>}
+                      </span>
+                    </div>
+                  </th>
+                )
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(id => (
+              <tr key={id}>
+                <td style={stickyCell}>{labelKey[id] ? td(labelKey[id]) : id}</td>
+                {DASHBOARD_TYPES.map(type => (
+                  <Cell key={type} type={type} kind={kind} id={id}
+                    applies={kind === 'kpis' ? (KPI_ROWS[type] ?? []).includes(id) : blocksFor(type).includes(id)} />
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   )
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 860 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 1000 }}>
       {/* Intro — how toggling works + where to preview / couple roles. */}
       <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
         <p style={{ margin: 0 }}>{t('dashboardsIntro')}</p>
@@ -93,48 +149,8 @@ export default function DashboardsSettings() {
         <p style={{ margin: '2px 0 0' }}>· {t('dashboardsRoleHint')}</p>
       </div>
 
-      {/* One card per dashboard type. */}
-      {DASHBOARD_TYPES.map(type => {
-        const Icon = TYPE_ICON[type]
-        const kpis = KPI_ROWS[type] ?? []
-        const blocks = blocksFor(type)
-        return (
-          <section key={type} style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'var(--surface)', padding: 16 }}>
-            {/* Header: icon + type label + a "can switch" badge for the super views. A bottom
-                border separates it from the toggle sections so the card reads top-to-bottom. */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 12, marginBottom: 14, borderBottom: '1px solid var(--border)' }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Icon size={16} color="var(--color-primary)" />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{td(`types.${type}`)}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t(`dashboardsDesc.${type}`)}</div>
-              </div>
-              {canSwitchViews(type) && (
-                <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 999, color: 'var(--color-success)', background: 'color-mix(in srgb, var(--color-success) 14%, transparent)' }}>
-                  {t('dashboardsCanSwitch')}
-                </span>
-              )}
-            </div>
-
-            {/* KPI row — toggle each on/off. */}
-            <div style={{ marginBottom: 14 }}>
-              <SectionLabel>{t('dashboardsKpis')}</SectionLabel>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {kpis.map(id => <Chip key={id} type={type} kind="kpis" id={id} label={KPI_LABEL_KEY[id] ? td(KPI_LABEL_KEY[id]) : id} />)}
-              </div>
-            </div>
-
-            {/* Charts & lists — toggle each on/off. */}
-            <div>
-              <SectionLabel>{t('dashboardsBlocks')}</SectionLabel>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {blocks.map(id => <Chip key={id} type={type} kind="blocks" id={id} label={BLOCK_LABEL_KEY[id] ? td(BLOCK_LABEL_KEY[id]) : id} />)}
-              </div>
-            </div>
-          </section>
-        )
-      })}
+      <Matrix kind="kpis" rows={allKpis} title={t('dashboardsKpis')} labelKey={KPI_LABEL_KEY} />
+      <Matrix kind="blocks" rows={allBlocks} title={t('dashboardsBlocks')} labelKey={BLOCK_LABEL_KEY} />
     </div>
   )
 }

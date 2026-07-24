@@ -2172,5 +2172,6 @@
     "title": "Collective agreements (CLA)",
     "subtitle": "Manage the CLA list (VVT, hospitals, …) for price agreements and matches.",
     "add": "Add CLA"
-  }
+  },
+  "dashboardsItem": "Item"
 }

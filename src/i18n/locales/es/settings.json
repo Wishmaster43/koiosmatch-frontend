@@ -2172,5 +2172,6 @@
     "title": "Convenios colectivos",
     "subtitle": "Gestiona la lista de convenios para acuerdos de precios y matches.",
     "add": "Añadir convenio"
-  }
+  },
+  "dashboardsItem": "Elemento"
 }

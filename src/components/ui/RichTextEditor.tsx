@@ -27,12 +27,15 @@ interface RichTextEditorProps {
   onToggleExpand?: () => void
   labels?: Partial<EditorLabels>
   fill?: boolean
+  // MEMORY-RESIZE-1 (Danny 24-07 "txt veld niet groter maken?"): a drag-handle on
+  // the content area (CSS resize) so long free text gets room without expanding.
+  resizable?: boolean
   // Collapsed content height; inline row editors (experience/education desc) pass a
   // compact value so a one-line note doesn't open a huge block (Danny punt 48).
   minHeight?: number
 }
 
-export default function RichTextEditor({ value, onChange, expanded, onToggleExpand, labels = {}, fill = false, minHeight = 120 }: RichTextEditorProps) {
+export default function RichTextEditor({ value, onChange, expanded, onToggleExpand, labels = {}, fill = false, minHeight = 120, resizable = false }: RichTextEditorProps) {
   // Merge caller overrides over the i18n'd defaults (common:editor.*).
   const { t } = useTranslation('common')
   const lab = useMemo(() => ({
@@ -103,6 +106,13 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
           style={{ width: '100%', boxSizing: 'border-box', minHeight: expanded ? 320 : minHeight, padding: '10px 12px',
             fontSize: 12, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text)', background: 'var(--surface)',
             border: 'none', outline: 'none', resize: 'vertical', ...(fill ? { flex: 1 } : null) }} />
+      ) : resizable ? (
+        // Drag-to-grow: CSS resize needs an overflow container — the editor itself
+        // then fills whatever height the user drags this wrapper to.
+        <div style={{ resize: 'vertical', overflow: 'auto', minHeight: expanded ? 320 : minHeight }}>
+          <EditorContent editor={editor}
+            style={{ minHeight: '100%', padding: '10px 12px', fontSize: 13, color: 'var(--text)', cursor: 'text' }} />
+        </div>
       ) : (
         <EditorContent editor={editor} className={fill ? 'km-editor-fill' : undefined}
           style={{ minHeight: expanded ? 320 : minHeight, padding: '10px 12px', fontSize: 13, color: 'var(--text)', cursor: 'text',

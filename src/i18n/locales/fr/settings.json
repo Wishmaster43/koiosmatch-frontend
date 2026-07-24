@@ -2172,5 +2172,6 @@
     "title": "Conventions collectives",
     "subtitle": "Gérez la liste des conventions pour les accords tarifaires et les matchs.",
     "add": "Ajouter une convention"
-  }
+  },
+  "dashboardsItem": "Élément"
 }

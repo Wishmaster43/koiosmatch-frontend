@@ -14,8 +14,10 @@ export default function MemorySettings() {
   return (
     <SettingsScaffold title={t('memory.title')} subtitle={t('memory.subtitle')} maxWidth={640} form={form}>
       {/* House rule (CLAUDE.md 14/7): free text = rich-text editor, never a bare textarea. */}
+      {/* MEMORY-RESIZE-1: roomier default + a drag handle to grow it further. */}
       <RichTextEditor value={form.values.memory_notes}
         onChange={v => form.set('memory_notes', v)}
+        minHeight={240} resizable
         placeholder={t('memory.placeholder')} />
     </SettingsScaffold>
   )
