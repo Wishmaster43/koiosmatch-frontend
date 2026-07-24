@@ -454,7 +454,8 @@
     "consentRetentionOptIn": "Conservación ilimitada",
     "retentionUntil": "Conservado hasta {{date}}",
     "retentionUnlimited": "Conservado indefinidamente (consentimiento otorgado el {{date}})",
-    "retentionUnknown": "Periodo de conservación desconocido"
+    "retentionUnknown": "Periodo de conservación desconocido",
+    "retentionTitle": "Plazo de conservación RGPD"
   },
   "statistics": {
     "placements": "Colocaciones",

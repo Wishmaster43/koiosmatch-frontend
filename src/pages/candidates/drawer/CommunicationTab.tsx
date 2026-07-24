@@ -143,10 +143,17 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent }: { c: 
               )
             })}
 
-            {/* Retention opt-in (Block B, AVG-RET-2) — 4th consent item, now a REAL
-                toggle: CMBE-RET-A shipped the backend validation, so it works exactly
-                like the 3 channel checkboxes above. */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          </div>
+
+          {/* AVG-bewaartermijn — its OWN clearly bounded block (Danny 24-07: the
+              loose text line under the channel consents was unreadable). Titled
+              sub-block: the opt-in toggle + a soft-tint status card. */}
+          <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 8 }}>
+              {t('communication.retentionTitle')}
+            </div>
+            {/* Retention opt-in (Block B, AVG-RET-2) — a REAL toggle (CMBE-RET-A). */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
               <input type="checkbox" checked={!!c.consent.retentionOptIn}
                 onChange={e => setRetentionOptIn(e.target.checked)}
                 aria-label={t('communication.consentRetentionOptIn')}
@@ -158,19 +165,24 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent }: { c: 
                 </span>
               )}
             </div>
-
-            {/* Read-only "Bewaren tot" summary (Block A, AVG-RET-2) — the tenant's
-                retention windows applied server-side; role-gated (see canViewRetention
-                above) so it is hidden, not blank, for users without the permission. */}
-            {canViewRetention && (
-              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                {c.retentionExpiresAt
-                  ? t('communication.retentionUntil', { date: formatDate(c.retentionExpiresAt) })
-                  : c.consent.retentionOptIn
-                    ? t('communication.retentionUnlimited', { date: formatDate(c.consent.retentionConsentAt) })
-                    : t('communication.retentionUnknown')}
-              </span>
-            )}
+            {/* Read-only status card (Block A) — role-gated; soft-tint per state so
+                "Onbeperkt bewaren" reads as a clear block, never a loose sentence. */}
+            {canViewRetention && (() => {
+              const state = c.retentionExpiresAt ? 'until' : (c.consent.retentionOptIn ? 'unlimited' : 'unknown')
+              const tone = state === 'until' ? 'var(--color-info, var(--color-primary))' : state === 'unlimited' ? 'var(--color-success)' : 'var(--text-muted)'
+              const label = state === 'until'
+                ? t('communication.retentionUntil', { date: formatDate(c.retentionExpiresAt) })
+                : state === 'unlimited'
+                  ? t('communication.retentionUnlimited', { date: formatDate(c.consent.retentionConsentAt) })
+                  : t('communication.retentionUnknown')
+              return (
+                <div style={{ padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, color: tone,
+                  background: `color-mix(in srgb, ${tone} 10%, transparent)`,
+                  border: `1px solid color-mix(in srgb, ${tone} 35%, transparent)` }}>
+                  {label}
+                </div>
+              )
+            })()}
           </div>
         </SectionCard>
       )}

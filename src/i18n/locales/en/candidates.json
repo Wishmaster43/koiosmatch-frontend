@@ -461,7 +461,8 @@
     "consentRetentionOptIn": "Unlimited retention",
     "retentionUntil": "Retained until {{date}}",
     "retentionUnlimited": "Retained indefinitely (consent given on {{date}})",
-    "retentionUnknown": "Retention period unknown"
+    "retentionUnknown": "Retention period unknown",
+    "retentionTitle": "GDPR retention period"
   },
   "statistics": {
     "placements": "Matches",

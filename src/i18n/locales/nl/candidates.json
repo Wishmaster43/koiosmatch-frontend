@@ -461,7 +461,8 @@
     "consentRetentionOptIn": "Onbeperkt bewaren",
     "retentionUntil": "Bewaren tot {{date}}",
     "retentionUnlimited": "Onbeperkt bewaard (toestemming op {{date}})",
-    "retentionUnknown": "Bewaartermijn onbekend"
+    "retentionUnknown": "Bewaartermijn onbekend",
+    "retentionTitle": "AVG-bewaartermijn"
   },
   "statistics": {
     "placements": "Matches",

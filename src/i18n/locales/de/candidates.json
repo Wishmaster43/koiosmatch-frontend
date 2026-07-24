@@ -454,7 +454,8 @@
     "consentRetentionOptIn": "Unbegrenzte Aufbewahrung",
     "retentionUntil": "Aufbewahrt bis {{date}}",
     "retentionUnlimited": "Unbegrenzt aufbewahrt (Einwilligung am {{date}})",
-    "retentionUnknown": "Aufbewahrungsfrist unbekannt"
+    "retentionUnknown": "Aufbewahrungsfrist unbekannt",
+    "retentionTitle": "DSGVO-Aufbewahrungsfrist"
   },
   "statistics": {
     "placements": "Vermittlungen",
