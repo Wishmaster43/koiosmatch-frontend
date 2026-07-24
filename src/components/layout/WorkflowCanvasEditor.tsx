@@ -78,22 +78,21 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   // assigned in an effect, never during render (lint: no refs in render).
   useEffect(() => { confirmCloseRef.current = confirmClose })
   useEffect(() => {
-    const ignorePop = { current: false }
-    window.history.pushState({ kmWorkflowEditor: true }, '', window.location.href)
+    // StrictMode-safe (dev double-mount!): only push our entry when it isn't
+    // already on top, and NEVER history.back() in cleanup — the async pop there
+    // hit the remounted instance and closed the editor the moment it opened
+    // (Danny 24-07 "ik kan geen workflow meer aanklikken"). The one leftover
+    // entry after a normal close makes the next back a harmless same-page pop.
+    if (!(window.history.state as { kmWorkflowEditor?: boolean } | null)?.kmWorkflowEditor) {
+      window.history.pushState({ kmWorkflowEditor: true }, '', window.location.href)
+    }
     const onPop = () => {
-      if (ignorePop.current) { ignorePop.current = false; return }
       // Re-arm first so cancelling the confirm keeps the user in the editor.
       window.history.pushState({ kmWorkflowEditor: true }, '', window.location.href)
       confirmCloseRef.current()
     }
     window.addEventListener('popstate', onPop)
-    return () => {
-      window.removeEventListener('popstate', onPop)
-      // Clean close (X / opslaan & sluiten): consume our extra entry without
-      // re-triggering the layout's popstate-driven page switch.
-      ignorePop.current = true
-      window.history.back()
-    }
+    return () => window.removeEventListener('popstate', onPop)
   }, [])
 
   useEffect(() => {
