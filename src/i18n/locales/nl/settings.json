@@ -1206,7 +1206,8 @@
     "tabPlanning": "Planning",
     "tabBackoffice": "Backoffice",
     "tabKoiosAi": "Koios AI",
-    "comingSoon": "Binnenkort beschikbaar"
+    "comingSoon": "Binnenkort beschikbaar",
+    "tabTelefonie": "Telefonie"
   },
   "modules": {
     "loading": "Pakket ophalen…",

@@ -1206,7 +1206,8 @@
     "tabPlanning": "Planning",
     "tabBackoffice": "Back office",
     "tabKoiosAi": "Koios AI",
-    "comingSoon": "Coming soon"
+    "comingSoon": "Coming soon",
+    "tabTelefonie": "Telephony"
   },
   "modules": {
     "loading": "Loading package…",

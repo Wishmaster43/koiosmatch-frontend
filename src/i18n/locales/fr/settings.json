@@ -998,7 +998,8 @@
     "tabPlanning": "Planification",
     "tabBackoffice": "Back-office",
     "tabKoiosAi": "Koios AI",
-    "comingSoon": "Bientôt disponible"
+    "comingSoon": "Bientôt disponible",
+    "tabTelefonie": "Téléphonie"
   },
   "modules": {
     "loading": "Chargement du forfait…",

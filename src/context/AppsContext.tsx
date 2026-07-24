@@ -13,6 +13,16 @@ import elanzaLogo from '@/assets/integrations/elanza.png'
 import onsLogo from '@/assets/integrations/ons.png'
 import easyflexLogo from '@/assets/integrations/easyflex.png'
 import afasLogo from '@/assets/integrations/afas.png'
+// TELEFONIE-TAB-1 (Danny 24-07) + geadviseerde planning/backoffice-aanvullingen —
+// alle logo's lokaal opgeslagen (geen hotlinking, CSP §7).
+import threecxLogo from '@/assets/integrations/threecx.png'
+import teamsLogo from '@/assets/integrations/teams.png'
+import voysLogo from '@/assets/integrations/voys.png'
+import aircallLogo from '@/assets/integrations/aircall.png'
+import clevergigLogo from '@/assets/integrations/clevergig.png'
+import fleksLogo from '@/assets/integrations/fleks.png'
+import nocoreLogo from '@/assets/integrations/nocore.png'
+import pivotonLogo from '@/assets/integrations/pivoton.png'
 
 /**
  * AppsContext — which paid add-on "apps" are enabled for the current tenant.
@@ -37,7 +47,7 @@ export interface AppDef {
   border: string
   monthly: boolean
   // APPS-GROUPS-1 (Danny 23-07): the settings subtab this connector lives under.
-  group: 'planning' | 'backoffice' | 'koios_ai'
+  group: 'planning' | 'backoffice' | 'telefonie' | 'koios_ai'
   // Real brand image (local asset) — rendered instead of the emoji when present.
   image?: string
   // Crisp vector mark component (preferred over image when the system's favicon is tiny).
@@ -182,6 +192,117 @@ export const AVAILABLE_APPS: AppDef[] = [
     color:       '#1D4ED8',
     bg:          'var(--color-secondary-bg)',
     border:      '#BFDBFE',
+    monthly:     true,
+    comingSoon:  true,
+  },
+  // Geadviseerde planning-aanvullingen (CMBE 24-07): veelgebruikt in NL zorg-flex.
+  {
+    id:          'clevergig',
+    label:       'Clevergig',
+    description: 'Planning-koppeling met Clevergig (zorg-flex diensten en pools).',
+    icon:        '🩺',
+    group:       'planning',
+    image:       clevergigLogo,
+    color:       '#2563EB',
+    bg:          'var(--color-secondary-bg)',
+    border:      '#BFDBFE',
+    monthly:     true,
+    comingSoon:  true,
+  },
+  {
+    id:          'fleks',
+    label:       'Fleks',
+    description: 'Planning-koppeling met Fleks voor flexpools en dienstenbeheer.',
+    icon:        '🧩',
+    group:       'planning',
+    image:       fleksLogo,
+    color:       '#DB2777',
+    bg:          '#FDF2F8',
+    border:      '#FBCFE8',
+    monthly:     true,
+    comingSoon:  true,
+  },
+  // Geadviseerde backoffice-aanvullingen: de twee grote NL-flex-backoffices naast
+  // HelloFlex/EasyFlex/AFAS.
+  {
+    id:          'nocore',
+    label:       'Nocore',
+    description: 'Backoffice-koppeling met Nocore Flex (verloning en facturatie).',
+    icon:        '🏢',
+    group:       'backoffice',
+    image:       nocoreLogo,
+    color:       '#EA580C',
+    bg:          '#FFF7ED',
+    border:      '#FED7AA',
+    monthly:     true,
+    comingSoon:  true,
+  },
+  {
+    id:          'pivoton',
+    label:       'Pivoton',
+    description: 'Backoffice-koppeling met Pivoton (flex-administratie en verloning).',
+    icon:        '🔄',
+    group:       'backoffice',
+    image:       pivotonLogo,
+    color:       '#0891B2',
+    bg:          '#ECFEFF',
+    border:      '#A5F3FC',
+    monthly:     true,
+    comingSoon:  true,
+  },
+  // ---- Telefonie (Danny 24-07) ----------------------------------------------
+  // Nog geen koppeling gebouwd — alle vier grijs ("binnenkort") tot de eerste
+  // integratie landt. 3CX + Teams op Danny's verzoek; Voys + Aircall geadviseerd
+  // (NL-VoIP resp. recruitment-telefonie met veel ATS-integraties).
+  {
+    id:          'threecx',
+    label:       '3CX',
+    description: 'Telefonie-koppeling met 3CX: klikken-om-te-bellen en gesprekslog op het kandidaatdossier.',
+    icon:        '📞',
+    group:       'telefonie',
+    image:       threecxLogo,
+    color:       '#0059A9',
+    bg:          '#EFF6FF',
+    border:      '#BFDBFE',
+    monthly:     true,
+    comingSoon:  true,
+  },
+  {
+    id:          'teams',
+    label:       'Microsoft Teams',
+    description: 'Bellen via Teams Phone en gespreksnotities terug op het dossier.',
+    icon:        '💬',
+    group:       'telefonie',
+    image:       teamsLogo,
+    color:       '#5059C9',
+    bg:          '#EEF2FF',
+    border:      '#C7D2FE',
+    monthly:     true,
+    comingSoon:  true,
+  },
+  {
+    id:          'voys',
+    label:       'Voys',
+    description: 'Nederlandse VoIP-centrale (VoIPGRID): klikken-om-te-bellen en gesprekshistorie.',
+    icon:        '☎️',
+    group:       'telefonie',
+    image:       voysLogo,
+    color:       '#7C3AED',
+    bg:          '#F5F3FF',
+    border:      '#DDD6FE',
+    monthly:     true,
+    comingSoon:  true,
+  },
+  {
+    id:          'aircall',
+    label:       'Aircall',
+    description: 'Cloud-telefonie voor recruitmentteams: bellen, opnames en dossier-sync.',
+    icon:        '📱',
+    group:       'telefonie',
+    image:       aircallLogo,
+    color:       '#00B388',
+    bg:          '#ECFDF5',
+    border:      '#A7F3D0',
     monthly:     true,
     comingSoon:  true,
   },

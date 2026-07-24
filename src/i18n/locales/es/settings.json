@@ -998,7 +998,8 @@
     "tabPlanning": "Planificación",
     "tabBackoffice": "Back office",
     "tabKoiosAi": "Koios AI",
-    "comingSoon": "Próximamente"
+    "comingSoon": "Próximamente",
+    "tabTelefonie": "Telefonía"
   },
   "modules": {
     "loading": "Cargando paquete…",
