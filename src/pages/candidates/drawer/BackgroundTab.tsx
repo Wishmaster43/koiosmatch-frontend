@@ -28,7 +28,9 @@ const SkillsTab         = SkillsTabJs         as ComponentType<RelTabProps>
 const TO_API: Record<string, (v: RelItem) => Record<string, unknown>> = {
   experiences: v => ({
     function_title: v.title, employer: v.company, location: v.location,
-    start_date: v.start, end_date: v.current ? null : v.end,
+    // end_date rides along even when current=true (Danny 24-07) — a current job
+    // may carry a known end date; 'current' is a flag, not an eraser.
+    start_date: v.start, end_date: v.end ?? null,
     current: !!v.current, description: v.desc,
   }),
   educations: v => ({
@@ -61,7 +63,7 @@ export default function BackgroundTab({ c, onEditSave }: { c: Candidate; onEditS
   // Checkbox side-effects mirrored locally (the API mapper already applies them):
   // current → no end date, in progress → no diploma date, always-valid → no expiry.
   const NORMALIZE: Record<string, (v: RelItem) => RelItem> = {
-    experiences:    v => (v.current ? { ...v, end: null } : v),
+    experiences:    v => v,
     educations:     v => (v.inProgress ? { ...v, issued: null } : v),
     certifications: v => (v.noExpiry ? { ...v, expires: null } : v),
     skills:         v => v,

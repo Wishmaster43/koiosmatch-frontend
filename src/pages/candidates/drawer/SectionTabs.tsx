@@ -107,7 +107,9 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }: RelTabPro
     { key: 'company',  label: t('addFields.company'),        half: true },
     { key: 'location', label: t('addFields.location') },
     { key: 'start',    label: t('addFields.startDate'), half: true, date: true },
-    { key: 'end',      label: t('addFields.endDate'),   half: true, date: true, disabledWhen: 'current' },
+    // End date stays editable WITH 'current' checked (Danny 24-07: a known
+    // upcoming end date on a current job must be enterable).
+    { key: 'end',      label: t('addFields.endDate'),   half: true, date: true },
     { key: 'current',  label: t('addFields.currentJob'), checkbox: true },
   ]
   return (
