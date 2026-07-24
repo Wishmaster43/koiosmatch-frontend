@@ -84,10 +84,13 @@ export function useWorkflowsData(showArchived: boolean) {
     setEditingWorkflow(wf)
   }
 
-  // Closes the canvas editor and clears the 409 run focus with it.
+  // Closes the canvas editor and clears the 409 run focus with it; refetches the
+  // list (existing fetchTick) so the last-run/updated columns show what just ran
+  // inside the builder (LIST-FRESH-1, Danny 24-07 "sync gedaan maar staat er niet").
   const closeEditor = () => {
     setEditingWorkflow(null)
     setFocusRunId(null)
+    setFetchTick(v => v + 1)
   }
 
   const handleRun = async (id?: string | number) => {
