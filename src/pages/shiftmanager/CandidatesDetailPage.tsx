@@ -102,10 +102,11 @@ export default function CandidatesDetailPage() {
   // 'actief' preselection honestly counts as a filter; clearing shows all.
   const anyFilterActive = Boolean(search) || selectedYears.length > 0 || selectedPositions.length > 0
     || selectedFeatures.length > 0 || statusFilter.length > 0
-  // Clearing returns to the page's DEFAULT view — status Actief (Danny 24-07:
-  // "die moet gefilterd zijn op actief"), never an everything-dump.
+  // Two DIFFERENT things (Danny 24-07): page LOAD preselects Actief, but
+  // "wis alle filters" clears EVERYTHING — status included ("houdt status
+  // actief vast" was wrong) — after which button + dot disappear (unfiltered).
   const clearFilters = () => {
-    setStatusFilter(['actief']); setSearch(''); setSearchEpoch(e => e + 1)
+    setStatusFilter([]); setSearch(''); setSearchEpoch(e => e + 1)
     setSelectedYears([]); setSelectedPositions([]); setSelectedFeatures([])
   }
 
