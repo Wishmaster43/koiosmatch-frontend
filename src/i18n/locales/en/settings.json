@@ -202,7 +202,8 @@
     "action_rules": "Action rules",
     "vacancy_generation": "Vacancy generation",
     "org_policy": "Organisation policy",
-    "career_site": "Career site"
+    "career_site": "Career site",
+    "cao": "CLAs"
   },
   "kpis": {
     "title": "KPI settings",
@@ -2165,5 +2166,10 @@
     "on": "On — public vacancy site visible",
     "off": "Off — public site unreachable",
     "hint": "Turn the public career site (…/{tenant}/vacatures) on or off. The backend enforces it immediately: off = the public site shows a calm inactive notice and applying is closed."
+  },
+  "caoSettings": {
+    "title": "Collective agreements (CLA)",
+    "subtitle": "Manage the CLA list (VVT, hospitals, …) for price agreements and matches.",
+    "add": "Add CLA"
   }
 }

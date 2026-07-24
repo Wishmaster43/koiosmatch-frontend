@@ -202,7 +202,8 @@
     "action_rules": "Aktionsregeln",
     "vacancy_generation": "Stellenanzeigen-Generierung",
     "org_policy": "Organisationsrichtlinien",
-    "career_site": "Karriereseite"
+    "career_site": "Karriereseite",
+    "cao": "Tarifverträge"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -2165,5 +2166,10 @@
     "on": "An — öffentliche Stellenseite sichtbar",
     "off": "Aus — öffentliche Seite nicht erreichbar",
     "hint": "Schaltet die öffentliche Karriereseite (…/{tenant}/vacatures) ein oder aus. Das Backend erzwingt dies sofort: aus = die Seite zeigt einen Hinweis und Bewerbungen sind geschlossen."
+  },
+  "caoSettings": {
+    "title": "Tarifverträge",
+    "subtitle": "Verwalte die Tarifvertragsliste für Preisvereinbarungen und Matches.",
+    "add": "Tarifvertrag hinzufügen"
   }
 }

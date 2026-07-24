@@ -202,7 +202,8 @@
     "action_rules": "Reglas de acción",
     "vacancy_generation": "Generación de vacantes",
     "org_policy": "Política de organización",
-    "career_site": "Sitio de empleo"
+    "career_site": "Sitio de empleo",
+    "cao": "Convenios"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -2165,5 +2166,10 @@
     "on": "Activado — sitio público visible",
     "off": "Desactivado — sitio público inaccesible",
     "hint": "Activa o desactiva el sitio público de empleo (…/{tenant}/vacatures). El backend lo aplica de inmediato: desactivado = el sitio muestra un aviso y las solicitudes quedan cerradas."
+  },
+  "caoSettings": {
+    "title": "Convenios colectivos",
+    "subtitle": "Gestiona la lista de convenios para acuerdos de precios y matches.",
+    "add": "Añadir convenio"
   }
 }

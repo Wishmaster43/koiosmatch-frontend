@@ -202,7 +202,8 @@
     "action_rules": "Actieregels",
     "vacancy_generation": "Vacaturegeneratie",
     "org_policy": "Organisatiebeleid",
-    "career_site": "Carrière-site"
+    "career_site": "Carrière-site",
+    "cao": "CAO's"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -2165,5 +2166,10 @@
     "on": "Aan — publieke vacaturesite zichtbaar",
     "off": "Uit — publieke site niet bereikbaar",
     "hint": "Zet de publieke carrière-site (…/{tenant}/vacatures) aan of uit. De backend dwingt dit direct af: uit = de publieke site toont een nette niet-actief-melding en solliciteren is dicht."
+  },
+  "caoSettings": {
+    "title": "CAO's",
+    "subtitle": "Beheer de CAO-lijst (VVT, Ziekenhuizen, GGZ, …) voor prijsafspraken en matches.",
+    "add": "CAO toevoegen"
   }
 }

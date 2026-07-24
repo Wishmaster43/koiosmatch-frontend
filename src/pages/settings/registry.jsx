@@ -39,6 +39,7 @@ import { CandidateConversionSettings } from './sections/CandidateConversionSetti
 import NumberingSettings from './sections/NumberingSettings'
 import OrganisationPolicySettings from './sections/OrganisationPolicySettings'
 import CareerSiteSettings from './sections/CareerSiteSettings'
+import CaoSettings from './sections/CaoSettings'
 import { CustomerStatusesSettings, LocationStatusesSettings, DepartmentStatusesSettings, ContactStatusesSettings } from './sections/CustomerSettings'
 import PoolsSettings from './sections/PoolsSettings'
 import { LanguageListSettings, LanguageLevelSettings } from './sections/LanguageSettings'
@@ -206,6 +207,8 @@ export const NAV_GROUPS = [
     key: 'customers', icon: Building2,
     items: [
       { id: 'customer_statuses', icon: Tags, component: CustomerStatusesSettings },
+      // CAO lookup — feeds price agreements + the + Match popup (Danny 24-07).
+      { id: 'cao', icon: Scale, component: CaoSettings },
       { id: 'location_statuses', icon: MapPin, component: LocationStatusesSettings },
       { id: 'department_statuses', icon: Building2, component: DepartmentStatusesSettings },
       { id: 'customer_display', icon: Palette, schema: customerDisplay },

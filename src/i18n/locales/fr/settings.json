@@ -202,7 +202,8 @@
     "action_rules": "Règles d'action",
     "vacancy_generation": "Génération d'annonces",
     "org_policy": "Politique d'organisation",
-    "career_site": "Site carrière"
+    "career_site": "Site carrière",
+    "cao": "Conventions"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -2165,5 +2166,10 @@
     "on": "Activé — site public visible",
     "off": "Désactivé — site public inaccessible",
     "hint": "Active ou désactive le site carrière public (…/{tenant}/vacatures). Le backend l'applique immédiatement : désactivé = le site affiche un avis et les candidatures sont fermées."
+  },
+  "caoSettings": {
+    "title": "Conventions collectives",
+    "subtitle": "Gérez la liste des conventions pour les accords tarifaires et les matchs.",
+    "add": "Ajouter une convention"
   }
 }
