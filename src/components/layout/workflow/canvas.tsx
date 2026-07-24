@@ -46,7 +46,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   // a circular progress arc IN the glow ring + a counter badge. Determinate when the
   // step reports {done,total} loop progress; an indeterminate spinner otherwise. The
   // arc also keeps filling after step-success while a fan-out is still delivering.
-  const progress = data.progress as { done: number; total: number } | null | undefined
+  const progress = data.progress as { done: number; total: number; items?: number } | null | undefined
   const itemsTotal = data.itemsTotal as number | null | undefined
   const frac = progress && progress.total > 0 ? Math.min(1, progress.done / progress.total) : null
   // A QUEUED step during a live run spins a muted arc too (Danny 24-07 "geen glow
@@ -57,9 +57,11 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   const queued = status === 'pending' && Boolean(data.runActive)
   const arcActive = !failed && (Boolean(data.isRunning) || queued || (frac != null && frac < 1 && Boolean(data.runActive)))
   // Live counter while looping; the processed total (Make's "38") once finished.
+  // SYNC-PROGRESS-1: a paged sync carries `items` (records fetched so far) — that
+  // beats the page number as the live badge ("wat er binnenkomt", Danny 25-07).
   const badgeCount = arcActive
-    ? (progress?.done ?? null)
-    : (done ? (itemsTotal ?? progress?.total ?? null) : null)
+    ? (progress?.items ?? progress?.done ?? null)
+    : (done ? (itemsTotal ?? progress?.items ?? progress?.total ?? null) : null)
   const ARC_R = 39
   const ARC_C = 2 * Math.PI * ARC_R
 

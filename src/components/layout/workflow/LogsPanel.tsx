@@ -40,6 +40,13 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
   const [runs,     setRuns]     = useState<RunRow[]>([])
   const [loading,  setLoading]  = useState(true)
   const [expanded, setExpanded] = useState<string | number | null>(null)
+  // SYNC-PROGRESS-1: a 1s clock in STATE (never Date.now() in render — impure per
+  // the compiler lint) so a busy run's Duur ticks live.
+  const [nowTick, setNowTick] = useState(() => Date.now())
+  useEffect(() => {
+    const timer = setInterval(() => setNowTick(Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, [])
   // Per-run stop feedback (the 422 "already finished" reason from the backend).
   const [stopError, setStopError] = useState<{ id: string | number; message: string } | null>(null)
   // Bundle-shape catalog (output_fields per module type) for the per-step slices.
@@ -117,7 +124,14 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                       {formatDT(run.started_at ?? run.created_at)}
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                      {t('runs.drawer.candidates')}: {run.candidates_count ?? run.candidates ?? '—'} · {t('runs.drawer.duration')}: {formatDuration(run.duration_ms ?? run.duration)}
+                      {/* SYNC-PROGRESS-1: a BUSY run shows a live ticking elapsed (the 1s
+                          poll re-renders this) instead of "—" until it finishes. */}
+                      {t('runs.drawer.candidates')}: {run.candidates_count ?? run.candidates ?? '—'} · {t('runs.drawer.duration')}: {
+                        formatDuration(run.duration_ms ?? run.duration
+                          ?? (CANCELLABLE.has(String(run.status)) && (run.started_at ?? run.created_at)
+                            ? nowTick - new Date(String(run.started_at ?? run.created_at)).getTime()
+                            : null))
+                      }
                       {/* WF-LOG-WHO-1 (Danny 22-07): who requested it + which candidate it ran for. */}
                       {run.triggered_by ? ` · ${run.triggered_by}` : ''}
                       {run.candidate?.name ? ` · ${run.candidate.name}${run.candidate.reference_number ? ` (${run.candidate.reference_number})` : ''}` : ''}
