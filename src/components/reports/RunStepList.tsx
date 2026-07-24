@@ -8,6 +8,10 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronRight, ChevronDown, Zap, Clock } from 'lucide-react'
 import { formatDuration, StatusBadge } from './runFormat'
+// HIST-DETAIL-1 (Danny 24-07 "je kan niet zien welke kandidaten"): the history
+// drawer reuses the Logs panel's Make-style output table — one implementation.
+import StepOutputSlice from '@/components/layout/workflow/StepOutputSlice'
+import { useModuleCatalog } from '@/components/layout/workflow/useModuleCatalog'
 import type { RunStep } from '@/types/reports'
 
 // Pretty-print a data bundle as JSON, or null when there is nothing to show.
@@ -40,7 +44,7 @@ function BundleBlock({ label, value }: { label: string; value: unknown }) {
 }
 
 // One collapsible step card with its status, meta and expandable I/O bundles.
-function StepCard({ step, index }: { step: RunStep; index: number }) {
+function StepCard({ step, index, catalog }: { step: RunStep; index: number; catalog: Parameters<typeof StepOutputSlice>[0]['catalog'] }) {
   const { t } = useTranslation('reports')
   const [open, setOpen] = useState(false)
   const hasIO = step.input != null || step.output != null
@@ -83,6 +87,11 @@ function StepCard({ step, index }: { step: RunStep; index: number }) {
         <div style={{ fontSize: 11, color: 'var(--text-muted)', padding: '0 12px 10px 33px' }}>{step.message}</div>
       )}
 
+      {/* HIST-DETAIL-1: the one-line outcome ("466 gesynct") always visible. */}
+      {step.summary != null && step.summary !== '' && (
+        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success)', padding: '0 12px 10px 33px' }}>{String(step.summary)}</div>
+      )}
+
       {/* WF-R3 live meta: retry count, error and when the next attempt fires. */}
       {(Number(step.attempts ?? 0) > 1 || step.error || step.error_message || step.next_attempt_at) && (
         <div style={{ fontSize: 11, padding: '0 12px 10px 33px', display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -98,9 +107,11 @@ function StepCard({ step, index }: { step: RunStep; index: number }) {
         </div>
       )}
 
-      {/* Expanded I/O bundles */}
+      {/* Expanded detail: FIRST the readable Make-style output table (which
+          candidates, per column — HIST-DETAIL-1), then the raw I/O bundles. */}
       {open && hasIO && (
         <div style={{ padding: '0 12px 12px 33px' }}>
+          <StepOutputSlice step={step} catalog={catalog} />
           <BundleBlock label={t('runs.drawer.input')}  value={step.input} />
           <BundleBlock label={t('runs.drawer.output')} value={step.output} />
         </div>
@@ -110,9 +121,13 @@ function StepCard({ step, index }: { step: RunStep; index: number }) {
 }
 
 export default function RunStepList({ steps }: { steps: RunStep[] }) {
+  // Bundle-shape catalog (output_fields per module type) for the per-step slices —
+  // session-cached, same source as the Logs panel (HIST-DETAIL-1).
+  const { catalog } = useModuleCatalog()
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      {steps.map((step, i) => <StepCard key={i} step={step} index={i} />)}
+      {steps.map((step, i) => <StepCard key={i} step={step} index={i} catalog={catalog} />)}
     </div>
   )
 }

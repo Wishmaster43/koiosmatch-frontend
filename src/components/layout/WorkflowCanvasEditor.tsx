@@ -7,7 +7,7 @@
  * live in `./workflow/` (ModulePicker · ConfigPanel · LogsPanel · fields · canvas
  * · ScheduleModal). This component stays declarative: hook in, JSX out.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   ReactFlow, Background, Controls, MiniMap, ReactFlowProvider,
 } from '@xyflow/react'
@@ -67,6 +67,35 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
     if (liveRunActive) { confirm(t('editor.liveRunConfirm'), dirtyGuard); return }
     dirtyGuard()
   }
+
+  // NAV-BACK-BUILDER-1 (Danny 24-07 "browser-terug doet niets in de builder"):
+  // the editor is an overlay in page state, so browser-back only popped the
+  // router while the overlay stayed. Push our own history entry on open; a pop
+  // re-arms the entry and runs the exact same Close action (incl. the unsaved/
+  // live-run guards). A normal close consumes our entry silently.
+  const confirmCloseRef = useRef(confirmClose)
+  // Keep the ref on the latest closure (guards read live dirty/run state) —
+  // assigned in an effect, never during render (lint: no refs in render).
+  useEffect(() => { confirmCloseRef.current = confirmClose })
+  useEffect(() => {
+    const ignorePop = { current: false }
+    window.history.pushState({ kmWorkflowEditor: true }, '', window.location.href)
+    const onPop = () => {
+      if (ignorePop.current) { ignorePop.current = false; return }
+      // Re-arm first so cancelling the confirm keeps the user in the editor.
+      window.history.pushState({ kmWorkflowEditor: true }, '', window.location.href)
+      confirmCloseRef.current()
+    }
+    window.addEventListener('popstate', onPop)
+    return () => {
+      window.removeEventListener('popstate', onPop)
+      // Clean close (X / opslaan & sluiten): consume our extra entry without
+      // re-triggering the layout's popstate-driven page switch.
+      ignorePop.current = true
+      window.history.back()
+    }
+  }, [])
+
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
       // Tab close/refresh: warn on unsaved changes OR a live run (same honesty).

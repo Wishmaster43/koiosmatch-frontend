@@ -144,9 +144,11 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
           </svg>
         )}
         {/* NODE-PROGRESS-1: Make-style counter badge — live count while looping, the
-            processed total after success. */}
+            processed total after success. Top-LEFT (Danny 24-07 "getal niet goed te
+            lezen"): the first node's draggable START pill owns the top-right area,
+            so the counter sits left where it never collides, on any node. */}
         {badgeCount != null && (
-          <span style={{ position: 'absolute', top: -9, right: -9, zIndex: 4,
+          <span style={{ position: 'absolute', top: -9, left: -9, zIndex: 4,
                          minWidth: 16, padding: '2px 6px', borderRadius: 999,
                          display: 'flex', alignItems: 'center', justifyContent: 'center',
                          background: meta.color, color: 'white', fontSize: 10, fontWeight: 700,
