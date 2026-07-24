@@ -98,8 +98,10 @@ export default function CandidatesDetailPage() {
   // 'actief' preselection honestly counts as a filter; clearing shows all.
   const anyFilterActive = Boolean(search) || selectedYears.length > 0 || selectedPositions.length > 0
     || selectedFeatures.length > 0 || statusFilter.length > 0
+  // Clearing returns to the page's DEFAULT view — status Actief (Danny 24-07:
+  // "die moet gefilterd zijn op actief"), never an everything-dump.
   const clearFilters = () => {
-    setStatusFilter([]); setSearch(''); setSearchEpoch(e => e + 1)
+    setStatusFilter(['actief']); setSearch(''); setSearchEpoch(e => e + 1)
     setSelectedYears([]); setSelectedPositions([]); setSelectedFeatures([])
   }
 
