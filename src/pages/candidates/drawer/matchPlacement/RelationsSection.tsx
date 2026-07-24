@@ -6,11 +6,19 @@
  * and the branch-mismatch banner. Split out of MatchPlacementModal.tsx (audit
  * R1 item 1, MUST-SPLIT) — pure presentational, all state/handlers via props
  * from useMatchPlacementForm.
+ *
+ * Danny 24-07: Vestiging AND Recruiter are now searchable CreatableSelects
+ * (both were a plain SelectMenu); the contact picker shows "Naam —
+ * Functietitel" so same-named contacts stay distinguishable; the inline
+ * new-contact form gained a searchable Functie picker + phone/mobile fields
+ * and a duplicate-contact preflight message; the "+ nieuw" affordance is now
+ * the shared `DrawerAddButton` (the house soft-tint chip) instead of a bare
+ * text link. No plain SelectMenu is left in this section.
  */
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import SelectMenu from '@/components/ui/SelectMenu'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { FormField as F } from './FormField'
 import { lbl, errMsg, row2, row3Even, pickerMenuWidth, input } from './styles'
 import type { CascadeOption, CascadeLocation, CascadeDepartment, CustomerCascadeDetail } from '@/hooks/useCustomerCascade'
@@ -20,10 +28,19 @@ import type { LocationOption } from '@/lib/useLocations'
 import type { Id } from '@/types/common'
 
 interface UserLike { id?: Id; name?: string }
-interface NewContact { first_name: string; last_name: string; email: string; phone: string }
+interface NewContact { first_name: string; last_name: string; email: string; phone: string; mobile: string; function: string }
 
 // A relational option list → { value, label } pairs for the shared pickers.
 const opt = (arr: Array<{ id?: Id; name?: string }>) => arr.map(x => ({ value: String(x.id), label: x.name ?? '—' }))
+
+// A contact's function/job title — the key name varies by response shape (Danny
+// 24-07 live screenshot: same-named contacts were indistinguishable), so read it
+// tolerantly and never leave a dangling separator when it's absent.
+const contactFunctionOf = (c: CascadeOption) => c.function || c.function_title || c.position || c.job_title || ''
+const contactOpt = (arr: CascadeOption[]) => arr.map(c => {
+  const fn = contactFunctionOf(c)
+  return { value: String(c.id), label: fn ? `${c.name ?? '—'} — ${fn}` : (c.name ?? '—') }
+})
 
 export default function RelationsSection({
   t, errors,
@@ -33,6 +50,8 @@ export default function RelationsSection({
   departmentId, setDepartmentId, departments,
   contactId, setContactId, contacts,
   creatingContact, setCreatingContact, nc, setNc, saveContact,
+  duplicateContact, setDuplicateContact,
+  contactFunctions, contactFunctionsAllowFreeEntry,
   func, setFunc, functions,
   ownerId, setOwnerId, users,
   branchId, setBranchId, setBranchDirty, branchLocations,
@@ -48,6 +67,10 @@ export default function RelationsSection({
   contactId: string; setContactId: (v: string) => void; contacts: CascadeOption[]
   creatingContact: boolean; setCreatingContact: (v: boolean) => void
   nc: NewContact; setNc: Dispatch<SetStateAction<NewContact>>; saveContact: () => void
+  // Duplicate-contact preflight result (Danny 24-07) — set by saveContact() when
+  // the entered email/phone/mobile already matches a contact on this customer.
+  duplicateContact: CascadeOption | null; setDuplicateContact: (v: CascadeOption | null) => void
+  contactFunctions: string[]; contactFunctionsAllowFreeEntry: boolean
   func: string; setFunc: (v: string) => void; functions: string[]
   ownerId: string; setOwnerId: (v: string) => void; users: UserLike[]
   // Vestiging picker (7.4) — the TENANT's own establishments, distinct from the
@@ -95,8 +118,10 @@ export default function RelationsSection({
         <div>
           <div style={{ ...lbl, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>{t('placement.contact')}</span>
+            {/* House soft-tint chip (Danny 24-07 screenshot feedback) — the shared
+                DrawerAddButton, not a bare text link. */}
             {customerId && !creatingContact && (
-              <button onClick={() => setCreatingContact(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', fontSize: 11, fontWeight: 600, padding: 0 }}>+ {t('placement.newContact')}</button>
+              <DrawerAddButton onClick={() => setCreatingContact(true)} label={t('placement.newContact')} />
             )}
           </div>
           {creatingContact ? (
@@ -105,38 +130,63 @@ export default function RelationsSection({
                 <input value={nc.first_name} onChange={e => setNc(p => ({ ...p, first_name: e.target.value }))} placeholder={t('placement.firstName')} style={{ ...input, height: 30 }} />
                 <input value={nc.last_name} onChange={e => setNc(p => ({ ...p, last_name: e.target.value }))} placeholder={t('placement.lastName')} style={{ ...input, height: 30 }} />
               </div>
-              <input value={nc.email} onChange={e => setNc(p => ({ ...p, email: e.target.value }))} placeholder={t('placement.email')} style={{ ...input, height: 30 }} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                <input value={nc.email} onChange={e => setNc(p => ({ ...p, email: e.target.value }))} placeholder={t('placement.email')} style={{ ...input, height: 30 }} />
+                {/* Functie — searchable/creatable per the tenant's contact-function
+                    lookup (Danny 24-07 addendum), mirrors AddContactPersonModal. */}
+                <CreatableSelect value={nc.function || null} onChange={v => setNc(p => ({ ...p, function: v }))}
+                  allowCreate={contactFunctionsAllowFreeEntry} placeholder={t('placement.contactFunction')}
+                  options={contactFunctions.map(f => ({ value: f, label: f }))} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                <input type="tel" value={nc.phone} onChange={e => setNc(p => ({ ...p, phone: e.target.value }))} placeholder={t('placement.phone')} style={{ ...input, height: 30 }} />
+                <input type="tel" value={nc.mobile} onChange={e => setNc(p => ({ ...p, mobile: e.target.value }))} placeholder={t('placement.mobile')} style={{ ...input, height: 30 }} />
+              </div>
+              {/* Duplicate-contact preflight (Danny 24-07): blocks the save, names the
+                  existing match — the backend enforces no uniqueness on these fields. */}
+              {duplicateContact && (
+                <div role="alert" style={{ fontSize: 11.5, color: 'var(--color-warning)',
+                  background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
+                  border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)', borderRadius: 6, padding: '6px 8px' }}>
+                  {t('placement.duplicateContact', { name: duplicateContact.name ?? '—' })}
+                </div>
+              )}
               <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                <button onClick={() => { setCreatingContact(false); setNc({ first_name: '', last_name: '', email: '', phone: '' }) }} style={{ height: 28, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
+                <button onClick={() => { setCreatingContact(false); setDuplicateContact(null); setNc({ first_name: '', last_name: '', email: '', phone: '', mobile: '', function: '' }) }} style={{ height: 28, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
                 <button onClick={saveContact} disabled={!nc.first_name.trim() || !nc.last_name.trim()} style={{ height: 28, padding: '0 12px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 6, background: 'var(--color-primary)', color: '#fff', cursor: 'pointer', opacity: (nc.first_name.trim() && nc.last_name.trim()) ? 1 : 0.4 }}>{t('common:save')}</button>
               </div>
             </div>
           ) : (
             <CreatableSelect value={contactId || null} onChange={setContactId} allowCreate={false} menuWidth={pickerMenuWidth}
-              placeholder={customerId ? t('placement.pickContact') : t('placement.pickCustomerFirst')} options={opt(contacts)} />
+              placeholder={customerId ? t('placement.pickContact') : t('placement.pickCustomerFirst')} options={contactOpt(contacts)} />
           )}
           {errors.contactId && <div style={errMsg}>{t('common:required')}</div>}
         </div>
       </div>
       <div style={row3Even}>
         {/* Functie — searchable (tenant lookup, can run to dozens of job titles);
-            Recruiter/Vestiging stay a plain SelectMenu (small lists, not in job 18's
-            long-list scope). */}
+            Recruiter is now searchable too (Danny 24-07 addendum, same treatment as
+            Contractsoort/Vestiging/CAO) — stays optional exactly like before: no
+            pick = empty value, same placeholder, no dedicated clear affordance
+            (neither widget offers one; only the STARTING empty state carried the
+            "none" meaning, unchanged here). Vestiging (7.4) is searchable too
+            (point 2). */}
         <F label={t('placement.function')} error={errors.func}>
           <CreatableSelect value={func || null} onChange={setFunc} allowCreate={false}
             placeholder={t('placement.pickFunction')} menuWidth={pickerMenuWidth}
             options={functions.map(f => ({ value: f, label: f }))} />
         </F>
         <F label={t('placement.owner')} error={errors.ownerId}>
-          <SelectMenu value={ownerId || null} onChange={setOwnerId} placeholder={t('placement.optional')}
+          <CreatableSelect value={ownerId || null} onChange={setOwnerId} allowCreate={false}
+            placeholder={t('placement.optional')} menuWidth={pickerMenuWidth}
             options={users.map(u => ({ value: String(u.id), label: u.name ?? '—' }))} />
         </F>
         {/* Vestiging (7.4) — proposes from the customer's own branch, then the
             recruiter's, then the tenant default (useBranchDefault); editing it by
             hand freezes the proposal (setBranchDirty), same pattern as cost centre. */}
         <F label={t('placement.branch')} error={errors.branchId}>
-          <SelectMenu value={branchId || null} onChange={v => { setBranchDirty(true); setBranchId(v) }}
-            placeholder={t('placement.optional')}
+          <CreatableSelect value={branchId || null} onChange={v => { setBranchDirty(true); setBranchId(v) }}
+            allowCreate={false} menuWidth={pickerMenuWidth} placeholder={t('placement.optional')}
             options={branchLocations.map(l => ({ value: String(l.value), label: l.label }))} />
         </F>
       </div>

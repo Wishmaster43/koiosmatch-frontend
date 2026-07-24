@@ -13,6 +13,16 @@
  * dropdown, the matches drawer, the vacancy-generation matcher) that only need
  * the label list.
  *
+ * `is_default` (Danny 24-07, "voorstel waarde" for Contractsoort) reuses the same
+ * singleton flag as phases/appointment-types/-locations/funnel-stages
+ * (Settings → Matches → Contractsoort now passes StatusListEditor's
+ * `defaultField`) — useMatchPlacementForm preselects whichever type carries it,
+ * into an EMPTY field only. Honest-gated the same way as `default_duration_days`
+ * above: `/contract-types` was NOT one of the three lookups the backend shipped
+ * `is_default` for (LOOKUP-DEFAULT-1 covered appointment_types/-locations/
+ * application_stages only), so this reads `false` from every real API row until
+ * a backend follow-up adds the column — a no-op, never a crash, same gate.
+ *
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
  */
@@ -31,20 +41,20 @@ export const DEFAULT_CONTRACT_TYPES = [
   'Werving & Selectie',
 ]
 
-export interface ContractTypeOption { value: string; label: string; default_duration_days: number | null }
+export interface ContractTypeOption { value: string; label: string; default_duration_days: number | null; is_default: boolean }
 
-// Seed carries no duration — nothing to propose from until MATCH-CONTRACT-DURATION-1 ships the column.
+// Seed carries no duration/default — nothing to propose from until the backend ships either column.
 const DEFAULT_CONTRACT_TYPE_OPTIONS: ContractTypeOption[] =
-  DEFAULT_CONTRACT_TYPES.map(name => ({ value: name, label: name, default_duration_days: null }))
+  DEFAULT_CONTRACT_TYPES.map(name => ({ value: name, label: name, default_duration_days: null, is_default: false }))
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
 const mapContractTypeOptions = (res: AxiosResponse): ContractTypeOption[] | null => {
-  const rows = (unwrapList(res).rows) as Array<string | { name?: string; label?: string; value?: string; default_duration_days?: number | null }>
+  const rows = (unwrapList(res).rows) as Array<string | { name?: string; label?: string; value?: string; default_duration_days?: number | null; is_default?: boolean }>
   const options = rows
     .map(x => {
-      if (typeof x === 'string') return x ? { value: x, label: x, default_duration_days: null } : null
+      if (typeof x === 'string') return x ? { value: x, label: x, default_duration_days: null, is_default: false } : null
       const label = x.name ?? x.label ?? x.value ?? ''
-      return label ? { value: String(x.value ?? label), label, default_duration_days: x.default_duration_days ?? null } : null
+      return label ? { value: String(x.value ?? label), label, default_duration_days: x.default_duration_days ?? null, is_default: Boolean(x.is_default) } : null
     })
     .filter((o): o is ContractTypeOption => o !== null)
   return options.length ? options : null

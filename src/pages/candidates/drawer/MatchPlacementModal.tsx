@@ -25,6 +25,15 @@
  * `matchPlacement/{RelationsSection,ContractSection,FinancialSection}`. This file
  * only wires the hook to the shared drawer chrome (overlay/panel/focus-trap) and
  * composes the sections + footer.
+ *
+ * Danny 24-07 points 3/6: the panel now shares its exact frame footprint with
+ * AddCandidateModal (modalMetrics.ts, via matchPlacement/styles' panel), and each
+ * section renders as a titled CARD — the addmodal card idiom (`cardHead` +
+ * `cardBox` from `pages/candidates/addmodal/fields`, both live under
+ * pages/candidates so a direct cross-import is fine) — instead of a bare
+ * uppercase label over an unbordered block. Opmerkingen is its OWN card, left
+ * column, stacked under Contract — Financieel (the tallest section) sits alone
+ * on the right so the two columns balance visually (Danny 24-07 layout point).
  */
 import { X } from 'lucide-react'
 import { RateDeviationWarning } from './RateProposalNotice'
@@ -34,7 +43,9 @@ import { useMatchPlacementForm } from './matchPlacement/useMatchPlacementForm'
 import RelationsSection from './matchPlacement/RelationsSection'
 import ContractSection from './matchPlacement/ContractSection'
 import FinancialSection from './matchPlacement/FinancialSection'
-import { overlay, panel, sectionTitle, twoColSections } from './matchPlacement/styles'
+import RemarksSection from './matchPlacement/RemarksSection'
+import { overlay, panel, twoColSections } from './matchPlacement/styles'
+import { cardHead, cardBox } from '@/pages/candidates/addmodal/fields'
 import type { Id } from '@/types/common'
 
 export default function MatchPlacementModal({ candidateId: fixedCandidateId, onClose, onCreated }: {
@@ -64,51 +75,77 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
           <div style={{ marginBottom: 10 }}><ActionRuleBanner decision={form.matchRuleDecision} /></div>
         )}
 
-        {/* ── Relaties ── */}
-        <div style={sectionTitle}>{t('placement.relations')}</div>
-        <RelationsSection
-          t={t} errors={form.errors}
-          fixedCandidateId={form.fixedCandidateId} pickedCandidateId={form.pickedCandidateId} setPickedCandidateId={form.setPickedCandidateId}
-          candidateOptions={form.candidateOptions}
-          customerId={form.customerId} setCustomerId={form.setCustomerId} customerOptions={form.customerOptions}
-          locationId={form.locationId} setLocationId={form.setLocationId} locations={form.locations}
-          departmentId={form.departmentId} setDepartmentId={form.setDepartmentId} departments={form.departments}
-          contactId={form.contactId} setContactId={form.setContactId} contacts={form.contacts}
-          creatingContact={form.creatingContact} setCreatingContact={form.setCreatingContact} nc={form.nc} setNc={form.setNc} saveContact={form.saveContact}
-          func={form.func} setFunc={form.setFunc} functions={form.functions}
-          ownerId={form.ownerId} setOwnerId={form.setOwnerId} users={form.users}
-          branchId={form.branchId} setBranchId={form.setBranchId} setBranchDirty={form.setBranchDirty} branchLocations={form.branchLocations}
-          vacancyId={form.vacancyId} setVacancyId={form.setVacancyId} vacancyOptions={form.vacancyOptions}
-          branchMismatch={form.branchMismatch} candBranch={form.candBranch} detail={form.detail}
-          mismatchChoice={form.mismatchChoice} setMismatchChoice={form.setMismatchChoice}
-        />
-
-        {/* ── Contract + Financieel side by side (punt C.2.1) — Relaties above keeps
-            the full panel width for its searchable pickers; these two shorter,
-            plain-input-heavy sections pair up fine in half the width each. ── */}
-        <div style={twoColSections}>
+        {/* ── Titled cards (Danny 24-07 point 3) — the addmodal card idiom: an
+            11px uppercase muted heading above a bordered surface, mirroring the
+            drill-down ProfileTab exactly so both "wide form" modals read as one
+            system. Relaties stays full-width; Contract + Financieel pair up
+            side by side below it (kept from punt C.2.1). ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 4 }}>
           <div>
-            <div style={sectionTitle}>{t('placement.contract')}</div>
-            <ContractSection
-              t={t} errors={form.errors}
-              contractType={form.contractType} setContractType={form.setContractType} contractTypes={form.contractTypes}
-              cao={form.cao} setCao={form.setCao}
-              startDate={form.startDate} setStartDate={form.setStartDate}
-              endDate={form.endDate} setEndDate={form.setEndDate} setEndDateDirty={form.setEndDateDirty}
-              hours={form.hours} setHours={form.setHours}
-            />
+            <div style={cardHead}>{t('placement.relations')}</div>
+            <div style={cardBox}>
+              <RelationsSection
+                t={t} errors={form.errors}
+                fixedCandidateId={form.fixedCandidateId} pickedCandidateId={form.pickedCandidateId} setPickedCandidateId={form.setPickedCandidateId}
+                candidateOptions={form.candidateOptions}
+                customerId={form.customerId} setCustomerId={form.setCustomerId} customerOptions={form.customerOptions}
+                locationId={form.locationId} setLocationId={form.setLocationId} locations={form.locations}
+                departmentId={form.departmentId} setDepartmentId={form.setDepartmentId} departments={form.departments}
+                contactId={form.contactId} setContactId={form.setContactId} contacts={form.contacts}
+                creatingContact={form.creatingContact} setCreatingContact={form.setCreatingContact} nc={form.nc} setNc={form.setNc} saveContact={form.saveContact}
+                duplicateContact={form.duplicateContact} setDuplicateContact={form.setDuplicateContact}
+                contactFunctions={form.contactFunctions} contactFunctionsAllowFreeEntry={form.contactFunctionsAllowFreeEntry}
+                func={form.func} setFunc={form.setFunc} functions={form.functions}
+                ownerId={form.ownerId} setOwnerId={form.setOwnerId} users={form.users}
+                branchId={form.branchId} setBranchId={form.setBranchId} setBranchDirty={form.setBranchDirty} branchLocations={form.branchLocations}
+                vacancyId={form.vacancyId} setVacancyId={form.setVacancyId} vacancyOptions={form.vacancyOptions}
+                branchMismatch={form.branchMismatch} candBranch={form.candBranch} detail={form.detail}
+                mismatchChoice={form.mismatchChoice} setMismatchChoice={form.setMismatchChoice}
+              />
+            </div>
           </div>
-          <div>
-            <div style={sectionTitle}>{t('placement.financial')}</div>
-            <FinancialSection
-              t={t} errors={form.errors}
-              scale={form.scale} setScale={form.setScale} step={form.step} setStep={form.setStep}
-              purchase={form.purchase} setPurchase={form.setPurchase} sell={form.sell} setSell={form.setSell}
-              margin={form.margin} hasRates={form.hasRates} proposal={form.proposal}
-              costCenter={form.costCenter} setCostCenter={form.setCostCenter} setCostCenterDirty={form.setCostCenterDirty}
-              billingEmails={form.billingEmails} setBillingEmails={form.setBillingEmails} setBillingDirty={form.setBillingDirty}
-              remarks={form.remarks} setRemarks={form.setRemarks} remarksExpanded={form.remarksExpanded} setRemarksExpanded={form.setRemarksExpanded}
-            />
+
+          <div style={twoColSections}>
+            {/* Left column: Contract + Opmerkingen stacked — Opmerkingen collapsed
+                by default keeps this column's height close to Financieel's. */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <div style={cardHead}>{t('placement.contract')}</div>
+                <div style={cardBox}>
+                  <ContractSection
+                    t={t} errors={form.errors}
+                    contractType={form.contractType} setContractType={form.setContractType} contractTypes={form.contractTypes}
+                    cao={form.cao} setCao={form.setCao} caoOptions={form.caoOptions}
+                    startDate={form.startDate} setStartDate={form.setStartDate}
+                    endDate={form.endDate} setEndDate={form.setEndDate} setEndDateDirty={form.setEndDateDirty}
+                    hours={form.hours} setHours={form.setHours}
+                  />
+                </div>
+              </div>
+              <div>
+                <div style={cardHead}>{t('placement.remarks')}</div>
+                <div style={cardBox}>
+                  <RemarksSection
+                    t={t} remarks={form.remarks} setRemarks={form.setRemarks}
+                    remarksExpanded={form.remarksExpanded} setRemarksExpanded={form.setRemarksExpanded}
+                    remarksEditing={form.remarksEditing} setRemarksEditing={form.setRemarksEditing}
+                  />
+                </div>
+              </div>
+            </div>
+            <div>
+              <div style={cardHead}>{t('placement.financial')}</div>
+              <div style={cardBox}>
+                <FinancialSection
+                  t={t} errors={form.errors}
+                  scale={form.scale} setScale={form.setScale} step={form.step} setStep={form.setStep}
+                  purchase={form.purchase} setPurchase={form.setPurchase} sell={form.sell} setSell={form.setSell}
+                  margin={form.margin} hasRates={form.hasRates} proposal={form.proposal}
+                  costCenter={form.costCenter} setCostCenter={form.setCostCenter} setCostCenterDirty={form.setCostCenterDirty}
+                  billingEmails={form.billingEmails} setBillingEmails={form.setBillingEmails} setBillingDirty={form.setBillingDirty}
+                />
+              </div>
+            </div>
           </div>
         </div>
 

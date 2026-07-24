@@ -1,17 +1,18 @@
 /**
  * FinancialSection — the "Financieel" block of the placement form: schaal/trede,
- * purchase/sell rate + live margin, the rate-proposal hint, cost centre, billing
- * email(s) and the remarks rich-text block. Split out of MatchPlacementModal.tsx
- * (audit R1 item 1, MUST-SPLIT) — pure presentational, all state via props from
- * useMatchPlacementForm.
+ * purchase/sell rate + live margin, the rate-proposal hint, cost centre and
+ * billing email(s). Split out of MatchPlacementModal.tsx (audit R1 item 1,
+ * MUST-SPLIT) — pure presentational, all state via props from
+ * useMatchPlacementForm. Opmerkingen moved OUT into its own `RemarksSection`
+ * card (Danny 24-07 point: its own left-column block, collapsed by default).
  */
 import { X } from 'lucide-react'
 import type { TFunction } from 'i18next'
-import RichTextEditor from '@/components/ui/RichTextEditor'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { RateProposalHint } from '../RateProposalNotice'
 import type { RateProposal } from '@/pages/candidates/hooks/useRateProposal'
 import { FormField as F } from './FormField'
-import { input, row2, row3 } from './styles'
+import { input, row2, row3, lbl, errMsg } from './styles'
 
 export default function FinancialSection({
   t, errors,
@@ -20,7 +21,6 @@ export default function FinancialSection({
   margin, hasRates, proposal,
   costCenter, setCostCenter, setCostCenterDirty,
   billingEmails, setBillingEmails, setBillingDirty,
-  remarks, setRemarks, remarksExpanded, setRemarksExpanded,
 }: {
   t: TFunction; errors: Record<string, boolean>
   scale: string; setScale: (v: string) => void; step: string; setStep: (v: string) => void
@@ -28,7 +28,6 @@ export default function FinancialSection({
   margin: number; hasRates: boolean; proposal: RateProposal | null
   costCenter: string; setCostCenter: (v: string) => void; setCostCenterDirty: (v: boolean) => void
   billingEmails: string[]; setBillingEmails: (fn: (p: string[]) => string[]) => void; setBillingDirty: (v: boolean) => void
-  remarks: string; setRemarks: (v: string) => void; remarksExpanded: boolean; setRemarksExpanded: (fn: (v: boolean) => boolean) => void
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -58,7 +57,14 @@ export default function FinancialSection({
           <input value={costCenter} onChange={e => { setCostCenterDirty(true); setCostCenter(e.target.value) }}
             style={input} placeholder="KP-…" />
         </F>
-        <F label={t('placement.billingEmail')} error={errors.billingEmails}>
+        <div>
+          {/* Label row carries the "+ e-mail" action RIGHT-aligned (Danny 24-07) —
+              same placement as the Contactpersoon "+ nieuw" row in RelationsSection,
+              not left-aligned under the field. */}
+          <div style={{ ...lbl, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{t('placement.billingEmail')}</span>
+            <DrawerAddButton onClick={() => { setBillingDirty(true); setBillingEmails(p => [...p, '']) }} label={t('placement.addBillingEmail')} />
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {billingEmails.map((em, i) => (
               <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -70,17 +76,10 @@ export default function FinancialSection({
                 )}
               </div>
             ))}
-            <button onClick={() => { setBillingDirty(true); setBillingEmails(p => [...p, '']) }}
-              style={{ alignSelf: 'flex-start', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', fontSize: 12, fontWeight: 600, padding: 0 }}>+ {t('placement.addBillingEmail')}</button>
           </div>
-        </F>
+          {errors.billingEmails && <div style={errMsg}>{t('common:required')}</div>}
+        </div>
       </div>
-      {/* Opmerkingen — the shared rich-text block (house rule, CLAUDE.md §3A/§4),
-          not a bare textarea; stored/POSTed as sanitised HTML. */}
-      <F label={t('placement.remarks')} error={errors.remarks}>
-        <RichTextEditor value={remarks} onChange={setRemarks}
-          expanded={remarksExpanded} onToggleExpand={() => setRemarksExpanded(v => !v)} />
-      </F>
     </div>
   )
 }

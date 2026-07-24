@@ -27,6 +27,14 @@ export function MatchStatusSettings() {
  * form's end-date PROPOSAL (useEndDateProposal). Honest-gate: the backend
  * doesn't persist this column yet, so saved values are silently dropped until
  * it ships — same gate the field's own hook already documents.
+ *
+ * `defaultField` (Danny 24-07 point 4, "voorstel waarde") reuses the exact
+ * same is_default singleton toggle as appointment-types/-locations/funnel
+ * stages (LOOKUP-DEFAULT-1) — StatusListEditor's DefaultToggle promotes one
+ * row and clears the rest; the +Match form preselects whichever type is
+ * marked default (useMatchPlacementForm), into an empty field only. Contract
+ * types were NOT one of the three lookups the backend shipped is_default for
+ * yet — honest-gated like numberField above until a BE follow-up adds it.
  */
 export function ContractTypesSettings() {
   const { t } = useTranslation('settings')
@@ -34,7 +42,8 @@ export function ContractTypesSettings() {
     <div style={{ maxWidth: 640 }}>
       <StatusListEditor compact withColor title={t('matches.contractTypeTitle')} subtitle={t('matches.contractTypeSubtitle')}
         endpoint="/contract-types" addLabel={t('matches.contractTypeAdd')}
-        numberField={{ key: 'default_duration_days', label: t('matches.contractTypeDurationLabel'), default: null }} />
+        numberField={{ key: 'default_duration_days', label: t('matches.contractTypeDurationLabel'), default: null }}
+        defaultField={{ key: 'is_default' }} />
     </div>
   )
 }

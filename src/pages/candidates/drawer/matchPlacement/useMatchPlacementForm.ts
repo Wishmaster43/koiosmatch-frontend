@@ -14,6 +14,12 @@
  * 7.4) and the end-date proposal from contract type (useEndDateProposal, 7.1)
  * are their own sibling hooks too — same reason as useCascadeDefaults/
  * useBranchMismatch: each a self-contained propose-but-freeze-on-edit concern.
+ *
+ * Danny 24-07 additions: contract type/CAO are now lookup-backed (useContractTypes/
+ * useCao) instead of a free label/free text, with an is_default-driven PROPOSAL for
+ * contract type; the inline new-contact form gained function/phone/mobile fields
+ * (useContactFunctions) plus a client-side duplicate-contact preflight
+ * (findDuplicateContact, helpers.ts) since the backend enforces no such uniqueness.
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -25,6 +31,8 @@ import { useCustomerOptions } from '@/pages/vacancies/hooks/useCustomerOptions'
 import { useVacancyOptions } from '@/pages/candidates/hooks/useVacancyOptions'
 import { useFunctions } from '@/lib/useFunctions'
 import { useContractTypes } from '@/lib/useContractTypes'
+import { useContactFunctions } from '@/lib/useContactFunctions'
+import { useCao } from '@/lib/useCao'
 import { useLocations } from '@/lib/useLocations'
 import { useRateProposal } from '@/pages/candidates/hooks/useRateProposal'
 import { useActionRulePreflight } from '@/components/actionrules'
@@ -33,7 +41,8 @@ import { useBranchMismatch } from './useBranchMismatch'
 import { useCascadeDefaults } from './useCascadeDefaults'
 import { useBranchDefault } from './useBranchDefault'
 import { useEndDateProposal } from './useEndDateProposal'
-import { API_TO_FORM, todayISO } from './helpers'
+import { API_TO_FORM, todayISO, findDuplicateContact } from './helpers'
+import type { CascadeOption } from '@/hooks/useCustomerCascade'
 import type { Id } from '@/types/common'
 
 interface UserLike { id?: Id; name?: string }
@@ -62,6 +71,13 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, onClose, 
   const candidateId = fixedCandidateId ?? (pickedCandidateId || '')
   const { functions } = useFunctions()
   const { types: contractTypes, options: contractTypeOptions } = useContractTypes()
+  // CAO (Danny 24-07 point 5) — the same tenant lookup every other CAO field in
+  // the app already reads (customer price agreements, the match drawer's own
+  // contract edit); this form's CAO field used to be a bare free-text input.
+  const { types: caoOptions } = useCao()
+  // Contact function/job title (Danny 24-07 addendum) — the inline new-contact
+  // form's Functie picker; allowFreeEntry mirrors AddContactPersonModal exactly.
+  const { contactFunctions, allowFreeEntry: contactFunctionsAllowFreeEntry } = useContactFunctions()
   // Tenant establishments (7.4) — feeds both the Vestiging picker and its default proposal.
   const branchLocations = useLocations()
 
@@ -92,14 +108,32 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, onClose, 
 
   // Inline contact-create (Danny): when a customer has no matching contact, add one
   // and couple it to the picked location right here (POST /customers/{id}/contacts).
+  // function/phone/mobile (Danny 24-07 addendum) are all accepted by the backend's
+  // CustomerContactController::validateContact — verified directly against the
+  // koiosmatch-api source, never assumed.
   const [creatingContact, setCreatingContact] = useState(false)
-  const [nc, setNc] = useState({ first_name: '', last_name: '', email: '', phone: '' })
+  const [nc, setNc] = useState({ first_name: '', last_name: '', email: '', phone: '', mobile: '', function: '' })
+  // Duplicate-contact preflight result (Danny 24-07): set by saveContact() below
+  // when the entered email/phone/mobile already matches a contact already loaded
+  // for this customer; null once cleared (cancel, or a fresh non-duplicate attempt).
+  const [duplicateContact, setDuplicateContact] = useState<CascadeOption | null>(null)
   const [func, setFunc] = useState('')
   const [vacancyId, setVacancyId] = useState('')
   const [ownerId, setOwnerId] = useState('')
 
   // ── Contract ──
   const [contractType, setContractType] = useState('')
+  // Default contract-type PROPOSAL (Danny 24-07 point 4): a tenant can mark ONE
+  // contract type as its default via the shared StatusListEditor singleton flag
+  // (mirrors phases/appointment-types' is_default — see ContractTypesSettings and
+  // useContractTypes' is_default doc comment for the backend honest-gate). This
+  // only preselects an EMPTY field — a value the recruiter already picked wins.
+  useEffect(() => {
+    if (contractType) return
+    const def = contractTypeOptions.find(o => o.is_default)
+    if (def) setContractType(def.label)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the options list resolving, never to the recruiter's own pick
+  }, [contractTypeOptions])
   // Proposal, not a hard default — the recruiter can freely change it (job 19).
   const [startDate, setStartDate] = useState(todayISO)
   // End-date PROPOSAL (7.1): from the picked contract type's default duration —
@@ -119,6 +153,12 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, onClose, 
     useCascadeDefaults({ detail, locationId, departmentId })
   const [remarks, setRemarks] = useState('')
   const [remarksExpanded, setRemarksExpanded] = useState(false)
+  // Opmerkingen starts COLLAPSED (Danny 24-07: "dicht geklapt laten") — the
+  // RichTextEditor only renders once the recruiter explicitly opens it; never
+  // auto-opens. Mirrors the candidate profile summary / vacancy description's
+  // pencil-to-edit idiom (ProfileTab/DescriptionTab), simplified to a one-way
+  // reveal since a fresh create-form field has no prior saved value to preview.
+  const [remarksEditing, setRemarksEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   // 422 field errors (house pattern, mirrors AddCandidateModal/AddCustomerModal) +
   // a non-field fallback banner — replaces the old generic-toast-only handling.
@@ -205,12 +245,26 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, onClose, 
   // refetch the cascade (shared hook) and select the new contact.
   const saveContact = async () => {
     if (!customerId || !nc.first_name.trim() || !nc.last_name.trim()) return
+    // Duplicate preflight (Danny 24-07): block BEFORE posting when the email or
+    // either phone number already belongs to a contact already loaded for this
+    // customer — the backend does NOT enforce this uniqueness itself (verified:
+    // CustomerContactController::validateContact carries no unique: rule on
+    // email/phone/mobile, a real gap worth a backend ticket), so the FE is the
+    // only guard against creating a second record for the same person.
+    const dup = findDuplicateContact(nc, contacts)
+    if (dup) { setDuplicateContact(dup); return }
+    setDuplicateContact(null)
     try {
-      const r = await api.post(`/customers/${customerId}/contacts`, { ...nc, location_id: locationId || undefined })
+      // customer_location_id (NOT location_id — a silent-drop bug found while
+      // verifying the backend contract: CustomerContact's fillable/validated key
+      // is customer_location_id; the old `location_id` key was never recognised
+      // by CustomerContactController::validateContact, so the picked location
+      // never actually reached a newly created inline contact).
+      const r = await api.post(`/customers/${customerId}/contacts`, { ...nc, customer_location_id: locationId || undefined })
       const created = (unwrap(r)) as { id?: Id }
       await refetchCustomer()
       if (created?.id) setContactId(String(created.id))
-      setCreatingContact(false); setNc({ first_name: '', last_name: '', email: '', phone: '' })
+      setCreatingContact(false); setNc({ first_name: '', last_name: '', email: '', phone: '', mobile: '', function: '' })
       notifySuccess(t('placement.contactCreated'))
     } catch {
       notifyError(t('placement.contactFailed'))
@@ -220,18 +274,20 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, onClose, 
   return {
     t,
     fixedCandidateId, pickedCandidateId, setPickedCandidateId, candidateOptions,
-    users, customerOptions, vacancyOptions, functions, contractTypes,
+    users, customerOptions, vacancyOptions, functions, contractTypes, caoOptions,
+    contactFunctions, contactFunctionsAllowFreeEntry,
     matchRuleDecision,
     customerId, setCustomerId, detail, locations, departments, contacts,
     locationId, setLocationId, departmentId, setDepartmentId, contactId, setContactId,
     creatingContact, setCreatingContact, nc, setNc, saveContact,
+    duplicateContact, setDuplicateContact,
     func, setFunc, vacancyId, setVacancyId, ownerId, setOwnerId,
     branchId, setBranchId, setBranchDirty, branchLocations,
     branchMismatch, candBranch, mismatchChoice, setMismatchChoice,
     contractType, setContractType, startDate, setStartDate, endDate, setEndDate, setEndDateDirty, hours, setHours, cao, setCao,
     scale, setScale, step, setStep, purchase, setPurchase, sell, setSell,
     costCenter, setCostCenter, setCostCenterDirty, billingEmails, setBillingEmails, setBillingDirty,
-    remarks, setRemarks, remarksExpanded, setRemarksExpanded,
+    remarks, setRemarks, remarksExpanded, setRemarksExpanded, remarksEditing, setRemarksEditing,
     margin, hasRates,
     proposal, deviatesFromProposal, confirmDeviation, setConfirmDeviation,
     saving, errors, submitErr, handleSubmitClick,

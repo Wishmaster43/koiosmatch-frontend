@@ -2,22 +2,24 @@
  * ContractSection — the "Contract" block of the placement form: contract type,
  * CAO, start/end date and hours per week. Split out of MatchPlacementModal.tsx
  * (audit R1 item 1, MUST-SPLIT) — pure presentational, all state via props from
- * useMatchPlacementForm.
+ * useMatchPlacementForm. Contract type + CAO are searchable single-pick combos
+ * (Danny 24-07 points 1/5) — allowCreate={false}: both are tenant lookups, never
+ * a free-text create.
  */
 import type { TFunction } from 'i18next'
-import SelectMenu from '@/components/ui/SelectMenu'
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import { FormField as F } from './FormField'
-import { input, row2, row3 } from './styles'
+import { input, row2, row3, pickerMenuWidth } from './styles'
 
 export default function ContractSection({
   t, errors,
   contractType, setContractType, contractTypes,
-  cao, setCao,
+  cao, setCao, caoOptions,
   startDate, setStartDate, endDate, setEndDate, setEndDateDirty, hours, setHours,
 }: {
   t: TFunction; errors: Record<string, boolean>
   contractType: string; setContractType: (v: string) => void; contractTypes: string[]
-  cao: string; setCao: (v: string) => void
+  cao: string; setCao: (v: string) => void; caoOptions: Array<{ value: string; label: string }>
   startDate: string; setStartDate: (v: string) => void
   // endDate PROPOSES from the picked contract type's default duration (7.1) —
   // setEndDateDirty freezes it the instant the recruiter edits the field by hand.
@@ -27,11 +29,21 @@ export default function ContractSection({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={row2}>
+        {/* Contractsoort — searchable tenant lookup (Danny 24-07 point 1), was a
+            plain non-searchable SelectMenu; may PROPOSE a tenant-marked default
+            (useMatchPlacementForm, is_default) into an otherwise empty field. */}
         <F label={t('placement.contractType')} error={errors.contractType}>
-          <SelectMenu value={contractType || null} onChange={setContractType} placeholder={t('placement.pickContractType')}
+          <CreatableSelect value={contractType || null} onChange={setContractType} allowCreate={false}
+            placeholder={t('placement.pickContractType')} menuWidth={pickerMenuWidth}
             options={contractTypes.map(c => ({ value: c, label: c }))} />
         </F>
-        <F label={t('placement.cao')} error={errors.cao}><input value={cao} onChange={e => setCao(e.target.value)} style={input} placeholder="VVT" /></F>
+        {/* CAO — searchable tenant lookup (useCao, Settings → Klanten → CAO), was a
+            bare free-text input (Danny 24-07 point 5 finding) — never wired to the
+            lookup every other CAO field in the app already uses. */}
+        <F label={t('placement.cao')} error={errors.cao}>
+          <CreatableSelect value={cao || null} onChange={setCao} allowCreate={false}
+            placeholder={t('placement.pickCao')} menuWidth={pickerMenuWidth} options={caoOptions} />
+        </F>
       </div>
       {/* S24c: hours joins the date row (compact third column) — one row less to scroll. */}
       <div style={row3}>

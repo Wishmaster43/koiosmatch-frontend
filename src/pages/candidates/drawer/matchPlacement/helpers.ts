@@ -4,7 +4,7 @@
  * MUST-SPLIT) so the 422-mapping table and the cascade/date math don't live
  * inside a 500+ line component file.
  */
-import type { CustomerCascadeDetail } from '@/hooks/useCustomerCascade'
+import type { CustomerCascadeDetail, CascadeOption } from '@/hooks/useCustomerCascade'
 
 // 422 field-error keys are snake_case; map them back to this form's field/state names.
 export const API_TO_FORM: Record<string, string> = {
@@ -50,4 +50,29 @@ export function addDays(iso: string, days: number): string {
   d.setDate(d.getDate() + days)
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+// Normalise a contact's identifying fields for duplicate comparison — email
+// trimmed+lowercased, phone/mobile stripped of spaces/dashes (Danny 24-07: the
+// same number typed "06-1234 5678" vs "0612345678" must still be caught).
+const normEmail = (v?: string) => (v ?? '').trim().toLowerCase()
+const normPhone = (v?: string) => (v ?? '').replace(/[\s-]/g, '')
+
+// Duplicate preflight for the inline new-contact form: blocks BEFORE posting when
+// the email or either phone number already belongs to a contact already loaded for
+// this customer (the cascade's own contact list — no extra fetch). A number is
+// checked against BOTH the existing contact's phone AND mobile (the same number
+// commonly ends up in either field), never just its own-named counterpart.
+export function findDuplicateContact(
+  nc: { email: string; phone: string; mobile: string },
+  contacts: CascadeOption[],
+): CascadeOption | null {
+  const email = normEmail(nc.email)
+  const numbers = [normPhone(nc.phone), normPhone(nc.mobile)].filter(Boolean)
+  if (!email && numbers.length === 0) return null
+  return contacts.find(c => {
+    if (email && normEmail(c.email) === email) return true
+    const existingNumbers = [normPhone(c.phone), normPhone(c.mobile)].filter(Boolean)
+    return numbers.some(n => existingNumbers.includes(n))
+  }) ?? null
 }

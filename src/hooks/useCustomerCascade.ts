@@ -17,7 +17,17 @@ import { useState, useEffect } from 'react'
 import api, { unwrap } from '@/lib/api'
 import type { Id } from '@/types/common'
 
-export interface CascadeOption { id?: Id; name?: string }
+// Extra optional fields (Danny 24-07): the contact picker shows "Naam —
+// Functietitel" (dupes like two "Eva Bos" stay distinguishable) and the inline
+// create form duplicate-checks on email/phone/mobile against this same list —
+// both read tolerantly since the raw contact-function key name varies by response
+// shape. Optional so every OTHER consumer (locations/departments, which never
+// carry these) stays unaffected.
+export interface CascadeOption {
+  id?: Id; name?: string
+  function?: string; function_title?: string; position?: string; job_title?: string
+  email?: string; phone?: string; mobile?: string
+}
 // Department/location takeover-default fields (cost centre / billing email) —
 // optional because most callers' API responses don't carry them yet on
 // departments (a known backend gap noted where MatchPlacementModal reads them).

@@ -26,6 +26,7 @@ import { useFunctions } from '@/lib/useFunctions'
 import { useProvinces } from '@/hooks/useProvinces'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { BTN_H } from '@/config/buttonMetrics'
+import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 import ModalHeader from './addmodal/ModalHeader'
@@ -218,10 +219,10 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div ref={panelRef} role="dialog" aria-modal="true" tabIndex={-1}
-        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', maxWidth: 1060,
-        // 940/90vh forced an inner scroll on a normal screen (Danny 23-07: "klein
-        // stukje groter zodat je niet hoeft te scrollen") — wider + taller cap.
-        boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', maxHeight: '94vh' }}>
+        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', ...WIDE_MODAL,
+        // Shared footprint (Danny 24-07 point 6): the +Match popup now matches this
+        // exact frame too — src/components/ui/modalMetrics.ts is the ONE place to resize either.
+        boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex' }}>
 
         {/* ── Form panel — full width; the phase choice is a compact segmented row in
             the header (Danny r2: de linkerkolom verspilde ~260px aan twee knoppen) ── */}
