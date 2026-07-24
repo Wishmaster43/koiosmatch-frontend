@@ -411,6 +411,19 @@
     },
     "costCenter": "Kostenstelle"
   },
+  "candidatesPage": {
+    "kpi": {
+      "noShows": "No-Shows",
+      "noShowsSub": "Kandidaten mit mindestens 1 No-Show",
+      "cancellations": "Stornierungen",
+      "cancellationsSub": "Kandidaten mit mindestens 1 Stornierung",
+      "endingSoon": "Austritt < 30 Tage",
+      "endingSoonSub": "Austrittsdatum innerhalb von 30 Tagen"
+    },
+    "cols": {
+      "endEmployment": "Austrittsdatum"
+    }
+  },
   "monthlyKpi": {
     "averageCalc": "Durchschnittsberechnung"
   },

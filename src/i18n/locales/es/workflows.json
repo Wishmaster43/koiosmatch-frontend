@@ -938,7 +938,11 @@
       "candidate_address_changed": "Dirección del candidato modificada",
       "candidate_reactivated": "Candidato reactivado",
       "candidate_retention_due": "Plazo de conservación del candidato vencido",
-      "backoffice_link_updated": "Vínculo de back-office actualizado"
+      "backoffice_link_updated": "Vínculo de back-office actualizado",
+      "candidate_phase_changed": "Fase del candidato cambiada",
+      "candidate_status_changed": "Estado del candidato cambiado",
+      "candidate_type_changed": "Tipo de contrato del candidato cambiado",
+      "contract_signed": "Contrato firmado"
     }
   }
 }

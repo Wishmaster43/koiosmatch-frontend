@@ -1897,7 +1897,8 @@
       "overview": "Übersicht",
       "jobs": "Aufgaben",
       "failed": "Fehlgeschlagen",
-      "recent": "Aktuell"
+      "recent": "Aktuell",
+      "metrics": "Metriken"
     },
     "status": {
       "active": "Aktiv",
@@ -1937,7 +1938,8 @@
       "status": "Status",
       "exception": "Fehlermeldung",
       "failedAt": "Fehlgeschlagen am",
-      "actions": "Aktionen"
+      "actions": "Aktionen",
+      "workflow": "Workflow"
     },
     "empty": "Keine Aufgaben gefunden.",
     "emptyFailed": "Keine fehlgeschlagenen Aufgaben.",
@@ -1979,6 +1981,15 @@
         "pending": "In Warteschlange",
         "reserved": "Läuft"
       }
+    },
+    "metrics": {
+      "byJob": "Nach Job",
+      "byQueue": "Nach Warteschlange",
+      "colJob": "Job",
+      "colQueue": "Warteschlange",
+      "colThroughput": "Durchsatz",
+      "colRuntime": "Ø Dauer",
+      "empty": "Noch keine Metriken — Horizon erstellt alle 5 Minuten einen Snapshot."
     }
   },
   "actionRules": {

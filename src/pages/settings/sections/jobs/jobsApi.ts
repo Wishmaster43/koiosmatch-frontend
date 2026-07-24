@@ -45,6 +45,15 @@ export interface QueueSummary {
 export const fetchQueueSummary = (signal?: AbortSignal): Promise<QueueSummary> =>
   api.get('/admin/jobs', { signal }).then((res) => unwrap<QueueSummary>(res) ?? { by_queue: [], by_tenant: [] })
 
+// Hand-written — same reason as QueueSummary: no 2xx schema generated for this route.
+export interface JobMetricRow { name: string; throughput: number; runtime_ms_avg: number }
+export interface JobMetrics { jobs: JobMetricRow[]; queues: JobMetricRow[] }
+
+// GET /admin/jobs/metrics — TAAKBEHEER-HORIZON-1 fase 2: Horizon's snapshotted
+// per-job/per-queue throughput + average runtime (metadata only).
+export const fetchJobMetrics = (signal?: AbortSignal): Promise<JobMetrics> =>
+  api.get('/admin/jobs/metrics', { signal }).then((res) => unwrap<JobMetrics>(res) ?? { jobs: [], queues: [] })
+
 // GET /admin/jobs/list — individual pending/reserved jobs (paginated, max 100/page).
 // Returns the raw axios response (not pre-unwrapped) — the caller feeds it straight
 // into the shared `unwrapList` helper, which expects that exact shape (§10 dialect 3).

@@ -1897,7 +1897,8 @@
       "overview": "Aperçu",
       "jobs": "Tâches",
       "failed": "Échecs",
-      "recent": "Récent"
+      "recent": "Récent",
+      "metrics": "Métriques"
     },
     "status": {
       "active": "Actif",
@@ -1937,7 +1938,8 @@
       "status": "Statut",
       "exception": "Erreur",
       "failedAt": "Échouée le",
-      "actions": "Actions"
+      "actions": "Actions",
+      "workflow": "Workflow"
     },
     "empty": "Aucune tâche trouvée.",
     "emptyFailed": "Aucune tâche échouée.",
@@ -1979,6 +1981,15 @@
         "pending": "En file",
         "reserved": "En cours"
       }
+    },
+    "metrics": {
+      "byJob": "Par tâche",
+      "byQueue": "Par file",
+      "colJob": "Tâche",
+      "colQueue": "File",
+      "colThroughput": "Débit",
+      "colRuntime": "Durée moy.",
+      "empty": "Pas encore de métriques — Horizon prend un instantané toutes les 5 minutes."
     }
   },
   "actionRules": {

@@ -27,6 +27,10 @@ export const WORKFLOW_EVENT_KEYS = [
   'appointment.upcoming',
   'facebook.lead_received',
   'backoffice.link.updated',
+  'candidate.phase_changed',
+  'candidate.status_changed',
+  'candidate.type_changed',
+  'contract.signed',
 ] as const
 
 export type WorkflowEventKey = (typeof WORKFLOW_EVENT_KEYS)[number]

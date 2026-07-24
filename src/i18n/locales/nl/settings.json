@@ -1897,7 +1897,8 @@
       "overview": "Overzicht",
       "jobs": "Taken",
       "failed": "Mislukt",
-      "recent": "Recent"
+      "recent": "Recent",
+      "metrics": "Metrics"
     },
     "status": {
       "active": "Actief",
@@ -1937,7 +1938,8 @@
       "status": "Status",
       "exception": "Foutmelding",
       "failedAt": "Mislukt op",
-      "actions": "Acties"
+      "actions": "Acties",
+      "workflow": "Workflow"
     },
     "empty": "Geen taken gevonden.",
     "emptyFailed": "Geen mislukte taken.",
@@ -1979,6 +1981,15 @@
         "pending": "In wachtrij",
         "reserved": "Bezig"
       }
+    },
+    "metrics": {
+      "byJob": "Per job",
+      "byQueue": "Per wachtrij",
+      "colJob": "Job",
+      "colQueue": "Wachtrij",
+      "colThroughput": "Doorvoer",
+      "colRuntime": "Gem. duur",
+      "empty": "Nog geen metrics — Horizon snapshot draait elke 5 minuten."
     }
   },
   "actionRules": {

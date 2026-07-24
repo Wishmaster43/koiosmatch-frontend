@@ -411,6 +411,19 @@
     },
     "costCenter": "Cost center"
   },
+  "candidatesPage": {
+    "kpi": {
+      "noShows": "No-shows",
+      "noShowsSub": "Candidates with at least 1 no-show",
+      "cancellations": "Cancellations",
+      "cancellationsSub": "Candidates with at least 1 cancellation",
+      "endingSoon": "Leaving < 30 days",
+      "endingSoonSub": "End of employment within 30 days"
+    },
+    "cols": {
+      "endEmployment": "End of employment"
+    }
+  },
   "monthlyKpi": {
     "averageCalc": "Average calculation"
   },

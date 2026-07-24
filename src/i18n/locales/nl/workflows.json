@@ -938,7 +938,11 @@
       "candidate_address_changed": "Adres kandidaat gewijzigd",
       "candidate_reactivated": "Kandidaat gereactiveerd",
       "candidate_retention_due": "Bewaartermijn kandidaat verstreken",
-      "backoffice_link_updated": "Backoffice-koppeling bijgewerkt"
+      "backoffice_link_updated": "Backoffice-koppeling bijgewerkt",
+      "candidate_phase_changed": "Fase kandidaat gewijzigd",
+      "candidate_status_changed": "Status kandidaat gewijzigd",
+      "candidate_type_changed": "Contractvorm kandidaat gewijzigd",
+      "contract_signed": "Contract getekend"
     }
   }
 }

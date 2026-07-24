@@ -1897,7 +1897,8 @@
       "overview": "Resumen",
       "jobs": "Tareas",
       "failed": "Fallidas",
-      "recent": "Reciente"
+      "recent": "Reciente",
+      "metrics": "Métricas"
     },
     "status": {
       "active": "Activa",
@@ -1937,7 +1938,8 @@
       "status": "Estado",
       "exception": "Error",
       "failedAt": "Fallida el",
-      "actions": "Acciones"
+      "actions": "Acciones",
+      "workflow": "Flujo de trabajo"
     },
     "empty": "No se encontraron tareas.",
     "emptyFailed": "No hay tareas fallidas.",
@@ -1979,6 +1981,15 @@
         "pending": "En cola",
         "reserved": "En curso"
       }
+    },
+    "metrics": {
+      "byJob": "Por tarea",
+      "byQueue": "Por cola",
+      "colJob": "Tarea",
+      "colQueue": "Cola",
+      "colThroughput": "Rendimiento",
+      "colRuntime": "Duración media",
+      "empty": "Aún no hay métricas — Horizon toma una instantánea cada 5 minutos."
     }
   },
   "actionRules": {

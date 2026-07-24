@@ -938,7 +938,11 @@
       "candidate_address_changed": "Candidate address changed",
       "candidate_reactivated": "Candidate reactivated",
       "candidate_retention_due": "Candidate retention due",
-      "backoffice_link_updated": "Back-office link updated"
+      "backoffice_link_updated": "Back-office link updated",
+      "candidate_phase_changed": "Candidate phase changed",
+      "candidate_status_changed": "Candidate status changed",
+      "candidate_type_changed": "Candidate contract type changed",
+      "contract_signed": "Contract signed"
     }
   }
 }

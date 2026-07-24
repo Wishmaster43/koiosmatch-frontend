@@ -1897,7 +1897,8 @@
       "overview": "Overview",
       "jobs": "Jobs",
       "failed": "Failed",
-      "recent": "Recent"
+      "recent": "Recent",
+      "metrics": "Metrics"
     },
     "status": {
       "active": "Active",
@@ -1937,7 +1938,8 @@
       "status": "Status",
       "exception": "Error",
       "failedAt": "Failed at",
-      "actions": "Actions"
+      "actions": "Actions",
+      "workflow": "Workflow"
     },
     "empty": "No jobs found.",
     "emptyFailed": "No failed jobs.",
@@ -1979,6 +1981,15 @@
         "pending": "Queued",
         "reserved": "Running"
       }
+    },
+    "metrics": {
+      "byJob": "By job",
+      "byQueue": "By queue",
+      "colJob": "Job",
+      "colQueue": "Queue",
+      "colThroughput": "Throughput",
+      "colRuntime": "Avg. duration",
+      "empty": "No metrics yet — Horizon snapshots every 5 minutes."
     }
   },
   "actionRules": {

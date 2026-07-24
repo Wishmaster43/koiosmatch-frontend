@@ -411,6 +411,19 @@
     },
     "costCenter": "Kostenplaats"
   },
+  "candidatesPage": {
+    "kpi": {
+      "noShows": "No-shows",
+      "noShowsSub": "Kandidaten met minstens 1 no-show",
+      "cancellations": "Annuleringen",
+      "cancellationsSub": "Kandidaten met minstens 1 annulering",
+      "endingSoon": "Uitstroom < 30 dgn",
+      "endingSoonSub": "Uitschrijfdatum binnen 30 dagen"
+    },
+    "cols": {
+      "endEmployment": "Uitschrijfdatum"
+    }
+  },
   "monthlyKpi": {
     "averageCalc": "Gemiddelde berekening"
   },

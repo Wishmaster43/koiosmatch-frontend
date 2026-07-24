@@ -411,6 +411,19 @@
     },
     "costCenter": "Centro de costes"
   },
+  "candidatesPage": {
+    "kpi": {
+      "noShows": "No-shows",
+      "noShowsSub": "Candidatos con al menos 1 no-show",
+      "cancellations": "Cancelaciones",
+      "cancellationsSub": "Candidatos con al menos 1 cancelación",
+      "endingSoon": "Baja < 30 días",
+      "endingSoonSub": "Fecha de baja dentro de 30 días"
+    },
+    "cols": {
+      "endEmployment": "Fecha de baja"
+    }
+  },
   "monthlyKpi": {
     "averageCalc": "Cálculo de la media"
   },

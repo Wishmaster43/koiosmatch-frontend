@@ -938,7 +938,11 @@
       "candidate_address_changed": "Adresse des Kandidaten geändert",
       "candidate_reactivated": "Kandidat reaktiviert",
       "candidate_retention_due": "Aufbewahrungsfrist des Kandidaten abgelaufen",
-      "backoffice_link_updated": "Backoffice-Verknüpfung aktualisiert"
+      "backoffice_link_updated": "Backoffice-Verknüpfung aktualisiert",
+      "candidate_phase_changed": "Phase des Kandidaten geändert",
+      "candidate_status_changed": "Status des Kandidaten geändert",
+      "candidate_type_changed": "Vertragsform des Kandidaten geändert",
+      "contract_signed": "Vertrag unterzeichnet"
     }
   }
 }
