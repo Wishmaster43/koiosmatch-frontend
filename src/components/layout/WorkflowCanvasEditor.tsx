@@ -57,18 +57,26 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   // beforeunload guard covers the tab close/refresh/navigate-away case the
   // in-app confirm can't catch.
   const confirmClose = () => {
-    if (!isDirty()) { onClose(); return }
-    confirm(t('editor.unsavedConfirm'), onClose)
+    // RUN-VISIBILITY-1 (Danny 24-07): leaving while a run is LIVE gets an explicit
+    // confirm first — honest wording: the run keeps going server-side; stopping is
+    // a deliberate act via the Stoppen button, never a side-effect of closing.
+    const dirtyGuard = () => {
+      if (!isDirty()) { onClose(); return }
+      confirm(t('editor.unsavedConfirm'), onClose)
+    }
+    if (liveRunActive) { confirm(t('editor.liveRunConfirm'), dirtyGuard); return }
+    dirtyGuard()
   }
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
-      if (!isDirty()) return
+      // Tab close/refresh: warn on unsaved changes OR a live run (same honesty).
+      if (!isDirty() && !liveRunActive) return
       e.preventDefault()
       e.returnValue = ''
     }
     window.addEventListener('beforeunload', handler)
     return () => window.removeEventListener('beforeunload', handler)
-  }, [isDirty])
+  }, [isDirty, liveRunActive])
   // Top-level editor view: the node diagram, or this workflow's run history.
   const [view, setView] = useState<'diagram' | 'history'>('diagram')
   // LOGS-DRILL-1 (Danny 23-07): jumping from a Logs-panel row lands on the
@@ -221,8 +229,8 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
             {saved ? t('editor.saved') : t('editor.save')}
           </button>
 
-          {/* Opslaan & sluiten — terug naar overzicht */}
-          <button onClick={() => handleSave(true)}
+          {/* Opslaan & sluiten — terug naar overzicht (live-run guard eerst) */}
+          <button onClick={() => (liveRunActive ? confirm(t('editor.liveRunConfirm'), () => handleSave(true)) : handleSave(true))}
             style={{
               display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 500,
               background: 'var(--color-primary)', color: 'white',

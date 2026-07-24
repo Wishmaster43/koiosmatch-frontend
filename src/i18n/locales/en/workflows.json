@@ -21,7 +21,8 @@
     "saveClose": "Save & close",
     "addModule": "Add module",
     "closeTitle": "Close without saving",
-    "unsavedConfirm": "You have unsaved changes. Are you sure you want to close? Your changes will be lost."
+    "unsavedConfirm": "You have unsaved changes. Are you sure you want to close? Your changes will be lost.",
+    "liveRunConfirm": "A run is still in progress. It keeps running in the background if you close — use the Stop button to stop it. Close anyway?"
   },
   "fields": {
     "boolOn": "On",

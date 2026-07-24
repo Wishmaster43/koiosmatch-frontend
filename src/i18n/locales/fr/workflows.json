@@ -17,7 +17,8 @@
     "saveClose": "Enregistrer & fermer",
     "addModule": "Ajouter un module",
     "closeTitle": "Fermer sans enregistrer",
-    "unsavedConfirm": "Vous avez des modifications non enregistrées. Voulez-vous vraiment fermer ? Vos modifications seront perdues."
+    "unsavedConfirm": "Vous avez des modifications non enregistrées. Voulez-vous vraiment fermer ? Vos modifications seront perdues.",
+    "liveRunConfirm": "Une exécution est encore en cours. Elle continue en arrière-plan si vous fermez — utilisez le bouton Arrêter pour l'arrêter. Fermer quand même ?"
   },
   "fields": {
     "boolOn": "Activé",

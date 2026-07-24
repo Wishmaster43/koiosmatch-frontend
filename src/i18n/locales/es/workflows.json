@@ -17,7 +17,8 @@
     "saveClose": "Guardar y cerrar",
     "addModule": "Añadir módulo",
     "closeTitle": "Cerrar sin guardar",
-    "unsavedConfirm": "Tienes cambios sin guardar. ¿Seguro que quieres cerrar? Se perderán los cambios."
+    "unsavedConfirm": "Tienes cambios sin guardar. ¿Seguro que quieres cerrar? Se perderán los cambios.",
+    "liveRunConfirm": "Todavía hay una ejecución en curso. Seguirá ejecutándose en segundo plano si cierras — puedes detenerla con el botón Detener. ¿Cerrar de todos modos?"
   },
   "fields": {
     "boolOn": "Activado",

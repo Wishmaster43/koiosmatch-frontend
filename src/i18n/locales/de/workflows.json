@@ -17,7 +17,8 @@
     "saveClose": "Speichern & schließen",
     "addModule": "Modul hinzufügen",
     "closeTitle": "Ohne Speichern schließen",
-    "unsavedConfirm": "Sie haben ungespeicherte Änderungen. Möchten Sie wirklich schließen? Ihre Änderungen gehen dann verloren."
+    "unsavedConfirm": "Sie haben ungespeicherte Änderungen. Möchten Sie wirklich schließen? Ihre Änderungen gehen dann verloren.",
+    "liveRunConfirm": "Es läuft noch eine Ausführung. Sie läuft im Hintergrund weiter, wenn du schließt — stoppen kannst du sie mit der Stopp-Taste. Trotzdem schließen?"
   },
   "fields": {
     "boolOn": "An",

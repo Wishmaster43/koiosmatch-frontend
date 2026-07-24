@@ -5,8 +5,10 @@
  * running" single-flight conflict, and stopping it. Pure extraction — identical
  * behaviour, useWorkflowEditor stays the composer and callers are unchanged.
  */
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useWorkflowRun } from './useWorkflowRun'
+import api from '@/lib/api'
+import type { RunRow } from '@/types/reports'
 
 export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunStarted }: {
   workflowId: string | number | undefined
@@ -27,6 +29,30 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
   // RUN-CONTROL-1: true after a 409 "already running" — the header shows the
   // i18n "loopt al" feedback while the logs panel points at that run.
   const [runConflict,    setRunConflict]    = useState(initialRunId != null)
+
+  // RUN-VISIBILITY-1 (Danny 24-07 "opnieuw open en je ziet niet dat hij nog bezig
+  // is"): on mount, ADOPT a run that is still live for this workflow — the poll,
+  // node rings, Bezig-status and the stop button resume as if never closed.
+  const adopted = useRef(false)
+  useEffect(() => {
+    if (adopted.current || initialRunId != null || workflowId == null) return
+    adopted.current = true
+    let alive = true
+    Promise.resolve(api.get(`/workflows/${workflowId}/runs`))
+      .then(res => {
+        if (!alive) return
+        const body = res?.data as { data?: RunRow[] } | RunRow[] | undefined
+        const rows = (Array.isArray(body) ? body : body?.data ?? []) as RunRow[]
+        const live = rows.find(r => ['pending', 'running', 'waiting'].includes(String(r.status)))
+        if (live?.id != null) {
+          setActiveRunId(live.id)
+          onRunStarted?.() // reveal the run viewer so the busy state is visible
+        }
+      })
+      .catch(() => { /* quiet — adoption is a convenience, never an error */ })
+    return () => { alive = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workflowId])
 
   const handleRun = useCallback(async () => {
     setRunning(true)

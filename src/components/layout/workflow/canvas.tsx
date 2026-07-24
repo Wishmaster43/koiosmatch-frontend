@@ -49,10 +49,13 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   const progress = data.progress as { done: number; total: number } | null | undefined
   const itemsTotal = data.itemsTotal as number | null | undefined
   const frac = progress && progress.total > 0 ? Math.min(1, progress.done / progress.total) : null
-  // The sub-100% arc may only persist past step-success while the run is still
-  // being polled (a delivering fan-out): once the run is terminal the poll stops,
-  // so a partial ring would freeze forever — then only the badge remains.
-  const arcActive = !failed && (Boolean(data.isRunning) || (frac != null && frac < 1 && Boolean(data.runActive)))
+  // A QUEUED step during a live run spins a muted arc too (Danny 24-07 "geen glow
+  // geen cirkel" — his screenshot caught exactly the wachtrij window, which showed
+  // nothing). The sub-100% arc may only persist past step-success while the run is
+  // still being polled (a delivering fan-out): once the run is terminal the poll
+  // stops, so a partial ring would freeze forever — then only the badge remains.
+  const queued = status === 'pending' && Boolean(data.runActive)
+  const arcActive = !failed && (Boolean(data.isRunning) || queued || (frac != null && frac < 1 && Boolean(data.runActive)))
   // Live counter while looping; the processed total (Make's "38") once finished.
   const badgeCount = arcActive
     ? (progress?.done ?? null)
@@ -131,7 +134,9 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
             {frac != null && (
               <circle cx={42} cy={42} r={ARC_R} fill="none" stroke={meta.color} strokeOpacity={0.18} strokeWidth={4} />
             )}
+            {/* Queued (not yet running) spins muted; a live step spins full-colour. */}
             <circle cx={42} cy={42} r={ARC_R} fill="none" stroke={meta.color} strokeWidth={4}
+              strokeOpacity={queued && frac == null ? 0.4 : 1}
               strokeLinecap="round" strokeDasharray={ARC_C}
               strokeDashoffset={frac == null ? ARC_C * 0.75 : ARC_C * (1 - frac)}
               transform="rotate(-90 42 42)"
