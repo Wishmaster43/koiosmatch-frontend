@@ -54,6 +54,10 @@ export function useCustomerCascade(customerId: string) {
   // `alive` guard drops a response that resolves after a newer id was picked.
   useEffect(() => {
     if (!customerId) { setDetail(null); return }
+    // Clear immediately on a customer SWITCH too — the old customer's detail
+    // (and its branch) must never keep banners/pickers alive while the new
+    // detail is still loading (Danny 24-07: stale vestiging-melding).
+    setDetail(null)
     let alive = true
     api.get(`/customers/${customerId}`)
       .then(r => { if (alive) setDetail((unwrap(r)) as CustomerCascadeDetail) })

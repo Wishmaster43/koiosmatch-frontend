@@ -32,8 +32,13 @@ export function useBranchMismatch(candidateId: Id | string, detail: CustomerCasc
     return () => { alive = false }
   }, [candidateId])
 
-  // Mismatch only counts when BOTH sides actually carry a branch (§3B: nullable).
-  const branchMismatch = Boolean(candBranch?.id && detail?.branch_id && String(candBranch.id) !== String(detail.branch_id))
+  // Mismatch only counts when BOTH sides carry a branch AND the customer's
+  // branch has a resolvable NAME — "wijkt af van (—)" is an unbackable claim
+  // (Danny 24-07). Seeder guarantee (every customer/candidate on a branch) is
+  // ticketed BE-side; until then unknown = no banner.
+  const branchMismatch = Boolean(
+    candBranch?.id && detail?.branch_id && detail?.branch?.name
+    && String(candBranch.id) !== String(detail.branch_id))
 
   return { candBranch, mismatchChoice, setMismatchChoice, branchMismatch }
 }
