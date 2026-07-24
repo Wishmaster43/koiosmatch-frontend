@@ -6,6 +6,7 @@
  * carry `initials` to render an Avatar (e.g. the owner/recruiter picker), so one
  * component covers plain and avatar pickers alike.
  */
+import type { CSSProperties } from 'react'
 import { useState, useRef, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { ChevronDown, Check } from 'lucide-react'
@@ -24,9 +25,11 @@ interface SelectMenuProps {
   placeholder?: string
   leading?: ReactNode
   menuWidth?: number
+  // Optional trigger override (modal-sized fields honour style.fontSize too).
+  style?: CSSProperties
 }
 
-export default function SelectMenu({ value, options = [], onChange, placeholder, leading, menuWidth = 170 }: SelectMenuProps) {
+export default function SelectMenu({ value, options = [], onChange, placeholder, leading, menuWidth = 170, style }: SelectMenuProps) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -44,10 +47,10 @@ export default function SelectMenu({ value, options = [], onChange, placeholder,
     <div ref={ref} style={{ position: 'relative' }}>
       <button onClick={() => setOpen(o => !o)}
         style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', width: '100%',
-          border: '1px solid var(--border)', borderRadius: 7, background: 'var(--bg)', cursor: 'pointer' }}>
+          border: '1px solid var(--border)', borderRadius: 7, background: 'var(--bg)', cursor: 'pointer' , ...style }}>
         {leading}
         {current?.initials && <Avatar initials={current.initials} size={18} />}
-        <span style={{ fontSize: 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden',
+        <span style={{ fontSize: (style as { fontSize?: number } | undefined)?.fontSize ?? 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden',
           textOverflow: 'ellipsis', color: current ? 'var(--text)' : 'var(--text-muted)' }}>
           {current?.label ?? placeholder ?? '-'}
         </span>

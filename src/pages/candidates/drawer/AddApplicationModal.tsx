@@ -35,6 +35,10 @@ const panel: React.CSSProperties = { position: 'fixed', top: '50%', left: '50%',
 const fieldLabel: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }
 // Consistent searchable-menu width (mirrors PlanIntakeModal/MatchPlacementModal's vacancy picker).
 const pickerMenuWidth = 340
+// S24c (Danny 24-07): the exact "+ Kandidaat toevoegen" combobox footprint
+// (mirrors addmodal/fields.tsx's CreatableSelect wrapper) — every searchable
+// picker in this modal must render at the same height as the reference modal.
+const fieldFootprint: React.CSSProperties = { padding: '8px 11px', borderRadius: 8, fontSize: 13 }
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = { candidate_id: 'candidateId', vacancy_id: 'vacancyId', application_stage_id: 'phase' }
@@ -117,11 +121,13 @@ export default function AddApplicationModal({ candidateId, onClose, onCreated }:
           <div style={{ marginBottom: 14 }}><ActionRuleBanner decision={appRuleDecision} /></div>
         )}
 
-        {/* Vacancy — searchable pick-only combobox (S24b), mirrors PlanIntakeModal. */}
+        {/* Vacancy — searchable pick-only combobox (S24b), mirrors PlanIntakeModal.
+            S24c (Danny 24-07): resized to the AddCandidateModal text-input footprint
+            (padding '8px 11px' / fontSize 13) so every drawer combobox reads as one system. */}
         <div style={{ marginBottom: 14 }}>
           <div style={fieldLabel}>{t('work.vacancy')}</div>
           <CreatableSelect value={vacancyId || null} onChange={setVacancyId} placeholder={t('work.pickVacancy')}
-            allowCreate={false} menuWidth={pickerMenuWidth}
+            allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint}
             options={vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))} />
           {errors.vacancyId && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
         </div>
@@ -129,7 +135,7 @@ export default function AddApplicationModal({ candidateId, onClose, onCreated }:
         <div style={{ marginBottom: 20 }}>
           <div style={fieldLabel}>{t('work.phase')}</div>
           <CreatableSelect value={phaseId || null} onChange={setPhaseId} allowCreate={false} menuWidth={pickerMenuWidth}
-            options={stages.map(s => ({ value: s.id, label: s.label }))} />
+            style={fieldFootprint} options={stages.map(s => ({ value: s.id, label: s.label }))} />
           {errors.phase && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>

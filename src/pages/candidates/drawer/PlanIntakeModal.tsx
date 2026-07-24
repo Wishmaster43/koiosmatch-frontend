@@ -57,7 +57,13 @@ const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 
 // scroll container removes the clipping context instead of fighting it with z-index.
 const panel: React.CSSProperties = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 61, width: 440, maxWidth: '92vw', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: '0 20px 60px rgba(0,0,0,0.18)' }
 const fieldLabel: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }
-const input: React.CSSProperties = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
+// S24c (Danny 24-07): the exact "+ Kandidaat toevoegen" text-input footprint
+// (mirrors addmodal/fields.tsx's `inputStyle`) — was `height: 36, padding: '0 10px'`,
+// a taller footprint than the reference modal's inputs; padding now drives the
+// height the same way TextField does, so When/Duur render at the identical size.
+const input: React.CSSProperties = { width: '100%', padding: '8px 11px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
+// The exact combobox footprint (mirrors addmodal/fields.tsx's CreatableSelect wrapper).
+const fieldFootprint: React.CSSProperties = { padding: '8px 11px', borderRadius: 8, fontSize: 13 }
 const errMsg: React.CSSProperties = { fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
@@ -316,7 +322,7 @@ export default function PlanIntakeModal({
         {/* Type → proposes duration + modality. */}
         <div style={{ marginBottom: 14 }}>
           <div style={fieldLabel}>{t('work.appointmentType')}</div>
-          <SelectMenu value={type || null} onChange={pickType} placeholder={t('work.pickType')}
+          <SelectMenu style={fieldFootprint} value={type || null} onChange={pickType} placeholder={t('work.pickType')}
             options={typeOptions.map(x => ({ value: x.value, label: x.label }))} />
           {errors.type && <div style={errMsg}>{t('common:required')}</div>}
         </div>
@@ -337,7 +343,9 @@ export default function PlanIntakeModal({
           </div>
           <div style={{ width: 90 }}>
             <div style={fieldLabel}>{t('work.endTime')}</div>
-            <div style={{ height: 36, display: 'flex', alignItems: 'center', fontSize: 13, color: endTime ? 'var(--text)' : 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>
+            {/* Read-only display, not an input — still box-modeled like one (padding +
+                transparent border, S24c) so it lines up with When/Duur in the same row. */}
+            <div style={{ padding: '8px 11px', border: '1px solid transparent', borderRadius: 8, boxSizing: 'border-box', display: 'flex', alignItems: 'center', fontSize: 13, color: endTime ? 'var(--text)' : 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>
               {endTime ? t('work.endTimeAt', { time: endTime }) : '—'}
             </div>
           </div>
@@ -347,12 +355,12 @@ export default function PlanIntakeModal({
         <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
           <div style={{ flex: 1 }}>
             <div style={fieldLabel}>{t('work.modality')}</div>
-            <SelectMenu value={whereValue || null} onChange={pickWhere} options={whereOptions} />
+            <SelectMenu style={fieldFootprint} value={whereValue || null} onChange={pickWhere} options={whereOptions} />
             {(errors.modality || errors.locationId || errors.appointmentLocation) && <div style={errMsg}>{t('common:required')}</div>}
           </div>
           <div style={{ flex: 1 }}>
             <div style={fieldLabel}>{t('work.owner')}</div>
-            <SelectMenu value={ownerId || null} onChange={setOwnerId} placeholder={t('work.pickOwner')}
+            <SelectMenu style={fieldFootprint} value={ownerId || null} onChange={setOwnerId} placeholder={t('work.pickOwner')}
               options={users.map(u => ({ value: String(u.id), label: userName(u) }))} />
             {errors.ownerId && <div style={errMsg}>{t('common:required')}</div>}
           </div>
@@ -362,7 +370,7 @@ export default function PlanIntakeModal({
         <div style={{ marginBottom: 20 }}>
           <div style={fieldLabel}>{t('work.vacancyOptional')}</div>
           <CreatableSelect value={vacancyId || null} onChange={setVacancyId} placeholder={t('work.noVacancy')}
-            allowCreate={false} menuWidth={340}
+            allowCreate={false} menuWidth={340} style={fieldFootprint}
             options={[
               ...vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label })),
               ...(vacancyFallback ? [vacancyFallback] : []),
