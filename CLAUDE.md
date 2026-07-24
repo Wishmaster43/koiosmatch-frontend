@@ -669,9 +669,11 @@ Be honest. If something is not done, say so — do not pretend.
 - Prefer small reusable components over large ones.
 - Use the candidate's own UUID `id` for internal references, never ShiftManager's
   `external_id`.
-- **Subagent model policy (Danny 2026-07-22 — supersedes 2026-07-08/15/17):**
+- **Subagent model policy (Danny 2026-07-22 — supersedes 2026-07-08/15/17; fallback updated 2026-07-24):**
   The MANAGER runs **Fable 5 at reasoning effort high**; when Fable's budget is
-  exhausted, **Opus at high** takes over as manager. ALL execution agents stay on
+  exhausted, **Opus 5 (`claude-opus-5`) at high** takes over as the TEMPORARY
+  stand-in manager (newest Opus generation, Claude 5 family — supersedes the
+  generic "Opus" fallback that resolved to 4.x). ALL execution agents stay on
   cheap models at reasoning effort **low** — build/implementation on **Sonnet**
   (`refactorer` in `.claude/agents/`), search/scan/verify on **Haiku** (`sweeper`).
   The prompt compensates for effort: a low-effort agent gets measured facts, an
