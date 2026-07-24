@@ -93,11 +93,13 @@ export default function CandidatesDetailPage() {
     return () => unregisterFilters('candidates-table')
   }, [filterGroups, registerFilters, unregisterFilters])
 
-  // "Wis alle filters" — anything beyond the default view (status=actief) counts.
+  // "Wis alle filters" — shows only while the view is NARROWED (Danny 24-07:
+  // an empty status pick = show everything = nothing filtered). The initial
+  // 'actief' preselection honestly counts as a filter; clearing shows all.
   const anyFilterActive = Boolean(search) || selectedYears.length > 0 || selectedPositions.length > 0
-    || selectedFeatures.length > 0 || !(statusFilter.length === 1 && String(statusFilter[0]).toLowerCase() === 'actief')
+    || selectedFeatures.length > 0 || statusFilter.length > 0
   const clearFilters = () => {
-    setStatusFilter(['actief']); setSearch(''); setSearchEpoch(e => e + 1)
+    setStatusFilter([]); setSearch(''); setSearchEpoch(e => e + 1)
     setSelectedYears([]); setSelectedPositions([]); setSelectedFeatures([])
   }
 
