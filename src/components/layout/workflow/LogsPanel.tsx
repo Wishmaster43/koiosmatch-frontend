@@ -126,7 +126,10 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                     <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
                       {/* SYNC-PROGRESS-1: a BUSY run shows a live ticking elapsed (the 1s
                           poll re-renders this) instead of "—" until it finishes. */}
-                      {t('runs.drawer.candidates')}: {run.candidates_count ?? run.candidates ?? '—'} · {t('runs.drawer.duration')}: {
+                      {/* "Verwerkt" (neutral — a shifts sync has no candidates; Danny 25-07):
+                          the run counter, else the LIVE items from a paged step. */}
+                      {t('runs.drawer.processed')}: {(run.candidates_count ?? run.candidates)
+                        || Math.max(0, ...steps.map(s => s.progress?.items ?? 0)) || '—'} · {t('runs.drawer.duration')}: {
                         formatDuration(run.duration_ms ?? run.duration
                           ?? (CANCELLABLE.has(String(run.status)) && (run.started_at ?? run.created_at)
                             ? nowTick - new Date(String(run.started_at ?? run.created_at)).getTime()

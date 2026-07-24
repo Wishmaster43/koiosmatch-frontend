@@ -368,7 +368,8 @@
       "attempts": "Tentative {{count}}",
       "nextAttempt": "Prochaine tentative à {{time}}",
       "runId": "ID d'exécution",
-      "copyId": "Cliquez pour copier l'ID"
+      "copyId": "Cliquez pour copier l'ID",
+      "processed": "Traité"
     },
     "openHistory": "Voir dans l'historique"
   },

@@ -368,7 +368,8 @@
       "attempts": "Attempt {{count}}",
       "nextAttempt": "Next attempt at {{time}}",
       "runId": "Run ID",
-      "copyId": "Click to copy the ID"
+      "copyId": "Click to copy the ID",
+      "processed": "Processed"
     },
     "openHistory": "View in history"
   },

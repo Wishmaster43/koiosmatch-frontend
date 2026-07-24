@@ -368,7 +368,8 @@
       "attempts": "Poging {{count}}",
       "nextAttempt": "Volgende poging om {{time}}",
       "runId": "Run-ID",
-      "copyId": "Klik om het ID te kopiëren"
+      "copyId": "Klik om het ID te kopiëren",
+      "processed": "Verwerkt"
     },
     "openHistory": "Bekijk in geschiedenis"
   },
