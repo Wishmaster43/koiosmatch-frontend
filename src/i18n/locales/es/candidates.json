@@ -455,7 +455,10 @@
     "retentionUntil": "Conservado hasta {{date}}",
     "retentionUnlimited": "Conservado indefinidamente (consentimiento otorgado el {{date}})",
     "retentionUnknown": "Periodo de conservación desconocido",
-    "retentionTitle": "Plazo de conservación RGPD"
+    "retentionTitle": "Plazo de conservación RGPD",
+    "timelinePlacedAt": "Colocado en {{customer}}",
+    "timelineOngoing": "hoy",
+    "timelineVia": "vía {{name}}"
   },
   "statistics": {
     "placements": "Colocaciones",
@@ -892,6 +895,9 @@
     "create": "Crear match",
     "created": "Match creado",
     "failed": "Error al crear el match",
+    "editTitle": "Editar match",
+    "updated": "Match actualizado",
+    "unknownCustomer": "Cliente desconocido",
     "newContact": "nuevo",
     "contactCreated": "Contacto creado",
     "contactFailed": "Error al crear",

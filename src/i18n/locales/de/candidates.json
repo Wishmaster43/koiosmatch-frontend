@@ -455,7 +455,10 @@
     "retentionUntil": "Aufbewahrt bis {{date}}",
     "retentionUnlimited": "Unbegrenzt aufbewahrt (Einwilligung am {{date}})",
     "retentionUnknown": "Aufbewahrungsfrist unbekannt",
-    "retentionTitle": "DSGVO-Aufbewahrungsfrist"
+    "retentionTitle": "DSGVO-Aufbewahrungsfrist",
+    "timelinePlacedAt": "Platziert bei {{customer}}",
+    "timelineOngoing": "heute",
+    "timelineVia": "über {{name}}"
   },
   "statistics": {
     "placements": "Vermittlungen",
@@ -892,6 +895,9 @@
     "create": "Match erstellen",
     "created": "Match angelegt",
     "failed": "Match anlegen fehlgeschlagen",
+    "editTitle": "Match bearbeiten",
+    "updated": "Match aktualisiert",
+    "unknownCustomer": "Unbekannter Kunde",
     "newContact": "neu",
     "contactCreated": "Ansprechpartner angelegt",
     "contactFailed": "Anlegen fehlgeschlagen",

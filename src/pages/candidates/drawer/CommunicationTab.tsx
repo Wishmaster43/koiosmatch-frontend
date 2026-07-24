@@ -17,6 +17,17 @@ type AnyProps = Record<string, unknown>
 // Still-untyped JS components — accept any props at the boundary.
 const NotesTab = NotesTabJs as unknown as ComponentType<AnyProps>
 
+// MATCH-TIMELINE-EVENT-1 (point 3): resolves the match.created context fields from
+// a raw timeline item, tolerant of either shape — nested under `context`/`payload`
+// or flattened directly onto the event — since the exact wire shape isn't final
+// yet (CMBE ticket). Returns null for every OTHER timeline item, so nothing
+// renders differently until the backend actually ships the event.
+function placementContext(ev: Record<string, unknown>): Record<string, unknown> | null {
+  const ctx = (ev.context ?? ev.payload ?? ev) as Record<string, unknown>
+  const isPlacement = ev.type === 'match.created' || typeof ctx.customer_name === 'string'
+  return isPlacement ? ctx : null
+}
+
 /**
  * Communication tab — sub-tabs (Danny 2026-07-03, mirrors the Planning panel):
  * Toestemmingen · Taken · Notities · Tijdlijn · Conversaties. Each section renders
@@ -78,6 +89,38 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent }: { c: 
   const setRetentionOptIn = (val: boolean) =>
     onSave?.({ ...consent, retentionOptIn: val, retentionConsentAt: val ? new Date().toISOString() : null })
 
+  // MATCH-TIMELINE-EVENT-1 (point 3, Danny live P1): a "Geplaatst bij …" card for a
+  // match.created timeline event — every part is optional and skipped cleanly
+  // (never a dangling separator), mirroring the CandidateTasks createdLine idiom.
+  // Returns null for every OTHER timeline item, so NotesTab falls back to the
+  // plain `ev.text`/`ev.description` line unchanged (honest gate: nothing renders
+  // differently until the backend actually ships the event).
+  const renderPlacementTimeline = (ev: Record<string, unknown>) => {
+    const ctx = placementContext(ev)
+    if (!ctx) return null
+    const customer = typeof ctx.customer_name === 'string' ? ctx.customer_name : undefined
+    const location = typeof ctx.location_name === 'string' ? ctx.location_name : undefined
+    const contractType = typeof ctx.contract_type === 'string' ? ctx.contract_type : undefined
+    const start = typeof ctx.start_date === 'string' ? ctx.start_date : undefined
+    const end = typeof ctx.end_date === 'string' ? ctx.end_date : undefined
+    const via = (typeof ctx.recruiter_name === 'string' && ctx.recruiter_name)
+      || (typeof ctx.contact_name === 'string' ? ctx.contact_name : undefined)
+
+    const title = [customer ? t('communication.timelinePlacedAt', { customer }) : null, location]
+      .filter(Boolean).join(' — ')
+    const dateRange = start ? `${formatDate(start)} – ${end ? formatDate(end) : t('communication.timelineOngoing')}` : null
+    const meta = [contractType, dateRange, via ? t('communication.timelineVia', { name: via }) : null]
+      .filter(Boolean).join(' · ')
+
+    if (!title && !meta) return null // flagged but genuinely empty — fall back to the plain line
+    return (
+      <>
+        <div>{title}</div>
+        {meta && <div style={{ marginTop: 2, fontSize: 11, color: 'var(--text-muted)' }}>{meta}</div>}
+      </>
+    )
+  }
+
   // Shared NotesTab props — each sub-tab renders exactly one of its sections.
   const notesProps = {
     notes: userNotes, onAddNote: addNote, onEditNote: editUserNote,
@@ -86,6 +129,8 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent }: { c: 
     timelineInitials: c.initials,
     // Job A pencil on the "Statuswissel" timeline row — see the prop comment above.
     onEditStatusEvent,
+    // Point 3 — see renderPlacementTimeline above.
+    renderTimelineContent: renderPlacementTimeline,
     labels: {
       // No section titles (Danny addendum 4): notes/timeline/conversations each
       // render as the SOLE visible NotesTab section for their own sub-tab, whose

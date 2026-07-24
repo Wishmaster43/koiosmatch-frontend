@@ -25,8 +25,19 @@ vi.mock('./PlanIntakeModal', () => ({
     <div data-testid="plan-intake-modal" data-default-vacancy-id={defaultVacancyId ?? ''} data-existing-vacancy-id={existing?.vacancy_id ?? ''} />
   ),
 }))
+// MatchPlacementModal is a different file's scope (customer/vacancy/rate hooks) —
+// stand in with a marker exposing `editMatchId` + a trigger button for `onCreated`
+// (§13: this is how point 1's refresh-callback wiring and point 2's pencil wiring
+// below get exercised without mounting the real form).
+vi.mock('./MatchPlacementModal', () => ({
+  default: ({ editMatchId, onCreated }: { editMatchId?: string | number | null; onCreated: () => void }) => (
+    <div data-testid="match-placement-modal" data-edit-match-id={editMatchId ?? ''}>
+      <button onClick={onCreated}>trigger-match-created</button>
+    </div>
+  ),
+}))
 
-const candidate = (applications: unknown[]): Candidate => ({ id: 9, matches: [], applications } as unknown as Candidate)
+const candidate = (applications: unknown[], matches: unknown[] = []): Candidate => ({ id: 9, matches, applications } as unknown as Candidate)
 
 describe('WorkTab', () => {
   it('links the vacancy title internally (EntityLink) when there is an id but no external url', () => {
@@ -142,5 +153,47 @@ describe('WorkTab · INTAKE-VACANCY-ID-1 (vacancy_id wiring for the shared appoi
     const editButton = await screen.findByRole('button', { name: 'work.editIntake' })
     await user.click(editButton)
     expect(screen.getByTestId('plan-intake-modal')).toHaveAttribute('data-existing-vacancy-id', 'vac-1')
+  })
+})
+
+// Point 1 (Danny live P1 — "stale after match create"): a match/application/intake
+// create used to only refresh WorkTab's OWN local apps/appts state, leaving the
+// rest of the drawer (MatchesTab, header status, Ervaring) stale until reopen —
+// `reload()` now ALSO calls the `onRefresh` prop, which CandidateDrawer wires to
+// the page hook's `refreshRecord` (a pure GET+replace, never a PATCH).
+describe('WorkTab · shared record refresh after create (point 1, Danny live P1)', () => {
+  it('calls onRefresh in addition to its own local refetch after a match create', async () => {
+    const onRefresh = vi.fn()
+    const user = userEvent.setup()
+    render(<WorkTab c={candidate([])} onRefresh={onRefresh} />)
+    await user.click(screen.getByRole('tab', { name: 'sections.placements' }))
+    await user.click(screen.getByRole('button', { name: 'work.addMatch' }))
+    await user.click(screen.getByRole('button', { name: 'trigger-match-created' }))
+    // The shared-record refresh fires...
+    expect(onRefresh).toHaveBeenCalledTimes(1)
+    // ...alongside WorkTab's own existing local refetch (unchanged behaviour).
+    expect(api.get).toHaveBeenCalledWith('/candidates/9')
+  })
+
+  it('still calls onRefresh when the host omits it (optional prop, no crash)', async () => {
+    const user = userEvent.setup()
+    render(<WorkTab c={candidate([])} />)
+    await user.click(screen.getByRole('tab', { name: 'sections.placements' }))
+    await user.click(screen.getByRole('button', { name: 'work.addMatch' }))
+    await user.click(screen.getByRole('button', { name: 'trigger-match-created' }))
+    expect(api.get).toHaveBeenCalledWith('/candidates/9')
+  })
+})
+
+// Point 2 (Danny live P1): the pencil on a MatchesTab row reopens the SAME modal
+// with `editMatchId` set — WorkTab owns the state, MatchesTab only reports which
+// row was clicked.
+describe('WorkTab · pencil on a match row opens the edit modal (point 2)', () => {
+  it('opens MatchPlacementModal with editMatchId set to the clicked row', async () => {
+    const user = userEvent.setup()
+    render(<WorkTab c={candidate([], [{ id: 'match-7', vacancyTitle: 'Verpleegkundige', client: 'Yesway' }])} />)
+    await user.click(screen.getByRole('tab', { name: 'sections.placements' }))
+    await user.click(screen.getByRole('button', { name: 'common:edit' }))
+    expect(screen.getByTestId('match-placement-modal')).toHaveAttribute('data-edit-match-id', 'match-7')
   })
 })

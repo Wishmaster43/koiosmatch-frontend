@@ -34,8 +34,10 @@ const vacancyUrlOf = (s: AppRow) => {
 }
 
 /** Work tab — matches + paginated applications, with the two candidate actions
- *  (§3B two-action model): couple to a vacancy, or plan an intake. */
-export default function WorkTab({ c }: { c: Candidate }) {
+ *  (§3B two-action model): couple to a vacancy, or plan an intake.
+ *  `onRefresh` (Danny P1 "stale after match create"): replaces the DRAWER's shared
+ *  record (header status/phase, Ervaring, MatchesTab) after a create — see reload(). */
+export default function WorkTab({ c, onRefresh }: { c: Candidate; onRefresh?: () => Promise<void> | void }) {
   const { t, i18n } = useTranslation(['candidates', 'common'])
   const { formatDate, locale } = useDateFormat()
   // Local copy of the applications so a create shows immediately (re-fetched from
@@ -47,6 +49,8 @@ export default function WorkTab({ c }: { c: Candidate }) {
   const [modal, setModal] = useState<null | 'apply' | 'intake' | 'match'>(null)
   // The appointment being edited (pencil on the appointment line) → prefilled intake modal.
   const [editAppt, setEditAppt] = useState<ExistingAppointment | null>(null)
+  // The match being edited (pencil on a MatchesTab row) → MatchPlacementModal in EDIT mode.
+  const [editMatchId, setEditMatchId] = useState<Id | null>(null)
   // Reset the local list when the drawer switches to another candidate / fuller detail.
   useEffect(() => { setApps((c.applications ?? []) as unknown as AppRow[]); setPage(1) }, [c.id, c.applications])
   // Load the candidate's appointments once per candidate (separate structured entity).
@@ -58,7 +62,10 @@ export default function WorkTab({ c }: { c: Candidate }) {
     return () => { alive = false }
   }, [c.id])
 
-  // Re-fetch applications + appointments after a create so both show immediately.
+  // Re-fetch applications + appointments after a create so both show immediately,
+  // AND replace the drawer's shared record (Danny P1: a match/application/intake
+  // create used to leave MatchesTab/header status/Ervaring stale until reopen,
+  // since this tab only ever updated its OWN local apps/appts state below).
   const reload = async () => {
     try {
       const [detail, ap] = await Promise.all([
@@ -69,6 +76,7 @@ export default function WorkTab({ c }: { c: Candidate }) {
       setApps((fresh?.applications ?? []) as AppRow[]); setPage(1)
       setAppts((unwrapList(ap).rows) as Appt[])
     } catch { /* keep the current lists on a failed refresh */ }
+    await onRefresh?.()
   }
 
   // Icon per modality (office/remote/phone) for the appointment line.
@@ -124,7 +132,7 @@ export default function WorkTab({ c }: { c: Candidate }) {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 6 }}>
             <DrawerAddButton onClick={() => setModal('match')} label={t('work.addMatch')} />
           </div>
-          <MatchesTab c={c} />
+          <MatchesTab c={c} onEdit={setEditMatchId} />
         </div>
       )}
 
@@ -215,6 +223,10 @@ export default function WorkTab({ c }: { c: Candidate }) {
       {modal === 'intake' && <PlanIntakeModal     candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} defaultVacancyId={soleVacancyId} />}
       {modal === 'match'  && <MatchPlacementModal candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
       {editAppt && <PlanIntakeModal candidateId={c.id} existing={editAppt} onClose={() => setEditAppt(null)} onCreated={reload} />}
+      {/* Pencil on a MatchesTab row (point 2) — same modal, in EDIT mode: prefills
+          from GET /matches/{id} (the candidate's own embedded row is thin) and
+          PATCHes instead of POSTing. */}
+      {editMatchId != null && <MatchPlacementModal candidateId={c.id} editMatchId={editMatchId} onClose={() => setEditMatchId(null)} onCreated={reload} />}
     </div>
   )
 }

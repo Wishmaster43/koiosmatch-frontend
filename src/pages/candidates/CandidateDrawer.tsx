@@ -91,12 +91,17 @@ interface CandidateDrawerProps {
   // Merge (punt 4): page passes this only with candidates.delete; called with the
   // survivor id after a successful merge so the page reopens it fresh.
   onMerged?: (survivorId: Id) => void
+  // Pure record refresh (Danny P1 "stale after match create"): refetches + REPLACES
+  // this drawer's record from the page hook — never a PATCH. Forwarded to WorkTab so
+  // a match/application/intake create shows fresh data everywhere (MatchesTab, the
+  // header status/phase, Ervaring), not just in WorkTab's own local apps/appts state.
+  onRefresh?: (id: Id) => Promise<void> | void
   users?: AppUser[]
   // Deep-link: open on this tab (table contact-cell → communication, funnel-chip → work).
   initialTab?: string
 }
 
-export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, onArchive, onMarkDeletion, onRestore, onHardDelete, onMerged, users = [], initialTab }: CandidateDrawerProps) {
+export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, onArchive, onMarkDeletion, onRestore, onHardDelete, onMerged, onRefresh, users = [], initialTab }: CandidateDrawerProps) {
   const { t } = useTranslation('candidates')
   const { formatDate, formatDateTime } = useDateFormat() as { formatDate: (d?: string | null, opts?: Intl.DateTimeFormatOptions) => string; formatDateTime: (d?: string | null) => string }
   const { labelOf: lastContactLabel } = useLastContactTypes()
@@ -176,7 +181,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     switch (activeTab) {
       case 'profile':        return <ProfilePanel c={mergedC} autoEditSignal={profileEditSignal} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
       case 'background':     return <BackgroundTab c={mergedC} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
-      case 'work':           return <WorkTab c={c} />
+      case 'work':           return <WorkTab c={c} onRefresh={() => onRefresh?.(c.id)} />
       case 'vacancySearch':  return <VacancySearchTab candidate={c} />
       case 'planning':       return <PlanningPanel c={c} />
       case 'preferences':    return <PreferencesTab c={c}

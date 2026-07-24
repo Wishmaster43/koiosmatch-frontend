@@ -43,7 +43,7 @@ const contactOpt = (arr: CascadeOption[]) => arr.map(c => {
 })
 
 export default function RelationsSection({
-  t, errors,
+  t, errors, editing,
   fixedCandidateId, pickedCandidateId, setPickedCandidateId, candidateOptions,
   customerId, setCustomerId, customerOptions,
   locationId, setLocationId, locations,
@@ -59,6 +59,10 @@ export default function RelationsSection({
   branchMismatch, candBranch, detail, mismatchChoice, setMismatchChoice,
 }: {
   t: TFunction; errors: Record<string, boolean>
+  // Point 2 (Danny live P1): identity (candidate/vacancy) isn't accepted by the
+  // backend's PATCH — the vacancy field renders read-only while editing an
+  // existing match instead of a pick that would silently never persist (§3).
+  editing?: boolean
   fixedCandidateId?: Id; pickedCandidateId: string; setPickedCandidateId: (v: string) => void
   candidateOptions: Array<{ id?: Id; name?: string }>
   customerId: string; setCustomerId: (v: string) => void; customerOptions: CustomerOption[]
@@ -190,12 +194,24 @@ export default function RelationsSection({
             options={branchLocations.map(l => ({ value: String(l.value), label: l.label }))} />
         </F>
       </div>
-      {/* Vacature — searchable, mirrors PlanIntakeModal's vacancy picker. */}
-      <F label={t('placement.vacancyOptional')} error={errors.vacancyId}>
-        <CreatableSelect value={vacancyId || null} onChange={setVacancyId} allowCreate={false}
-          placeholder={t('placement.noVacancy')} menuWidth={340}
-          options={vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))} />
-      </F>
+      {/* Vacature — searchable, mirrors PlanIntakeModal's vacancy picker. Read-only
+          while editing: identity fields (candidate/vacancy) aren't accepted by the
+          backend's PATCH /matches/{id} (UpdateMatchRequest), so a pick here would
+          silently never persist — render the current value as plain text instead
+          of a fake-interactive control (§3, no fake affordances). */}
+      {editing ? (
+        <F label={t('placement.vacancyOptional')}>
+          <div style={{ ...input, display: 'flex', alignItems: 'center', background: 'var(--hover-bg)', color: vacancyId ? 'var(--text)' : 'var(--text-muted)' }}>
+            {vacancyOptions.find(v => String(v.value) === vacancyId)?.label ?? t('placement.noVacancy')}
+          </div>
+        </F>
+      ) : (
+        <F label={t('placement.vacancyOptional')} error={errors.vacancyId}>
+          <CreatableSelect value={vacancyId || null} onChange={setVacancyId} allowCreate={false}
+            placeholder={t('placement.noVacancy')} menuWidth={340}
+            options={vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))} />
+        </F>
+      )}
 
       {/* Vestiging-mismatch (fase 3): candidate branch ≠ customer branch → calm
           inline choice. Default: only this placement; opt-in: move the candidate. */}

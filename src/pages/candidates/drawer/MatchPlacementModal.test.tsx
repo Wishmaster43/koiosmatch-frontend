@@ -25,10 +25,11 @@
  * list — the backend enforces no such uniqueness, verified read-only).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, within, fireEvent } from '@testing-library/react'
+import { render, screen, within, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import MatchPlacementModal from './MatchPlacementModal'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 
 // A minimal customer fixture exercising the cost-centre cascade levels: the
 // customer's OWN cost centre/billing email/branch, a location that overrides
@@ -41,7 +42,12 @@ import api from '@/lib/api'
 // carries email/phone (the duplicate-preflight test's target); Eva Bos appears
 // TWICE with different functions (Danny 24-07 live screenshot: same-named
 // contacts must stay distinguishable via "Naam — Functietitel").
-const { mockCustomer } = vi.hoisted(() => ({
+// EDIT-MATCH-1 (point 2): the candidate.matches row is thin, so opening a match as
+// an edit fetches GET /matches/{id} — a mutable holder so individual tests can set
+// the fixture the mocked `api.get` below returns for that ONE url prefix; null (the
+// reset default) means "not in edit mode", which every OTHER test in this file is.
+const { mockCustomer, editMatchFixture } = vi.hoisted(() => ({
+  editMatchFixture: { current: null as Record<string, unknown> | null },
   mockCustomer: {
     id: 'cust-1', name: 'Zorggroep A',
     cost_center: 'KP-KLANT', billing_email: 'klant@factuur.nl', branch_id: 'branch-1',
@@ -87,6 +93,7 @@ vi.mock('@/lib/useContractTypes', () => ({ useContractTypes: useContractTypesMoc
 // Implementations (mockReturnValue/the vi.fn() bodies) are untouched by clearAllMocks.
 beforeEach(() => {
   vi.clearAllMocks()
+  editMatchFixture.current = null // every test defaults to create-mode unless it opts in
   useContractTypesMock.mockReturnValue({
     types: ['Fase 1-2 z.u.b. (Works)', 'ZZP Flex'],
     options: [
@@ -127,6 +134,8 @@ vi.mock('@/lib/api', async () => {
   const get = vi.fn((url: string) => {
     if (url.startsWith('/customers/')) return Promise.resolve({ data: { data: mockCustomer } })
     if (url.startsWith('/candidates/')) return Promise.resolve({ data: { data: { branch_id: null, location: null } } })
+    // EDIT-MATCH-1: only ever hit by editMatchId tests (editMatchFixture opts in).
+    if (url.startsWith('/matches/') && editMatchFixture.current) return Promise.resolve({ data: { data: editMatchFixture.current } })
     return Promise.resolve({ data: { data: [] } })
   })
   return {
@@ -647,5 +656,121 @@ describe('MatchPlacementModal · billing-email "+" button placement (Danny 24-07
     const before = screen.getAllByPlaceholderText(/placement\.billingEmail(Main|Extra)/).length
     await userEvent.setup().click(addBtn)
     expect(screen.getAllByPlaceholderText(/placement\.billingEmail(Main|Extra)/)).toHaveLength(before + 1)
+  })
+})
+
+// EDIT-MATCH-1 (point 2, Danny live P1): the pencil on a MatchesTab row reopens
+// this SAME form with `editMatchId` — the candidate's own embedded `matches` row
+// is thin (MATCH-EMBED-1, no placement fields), so this fetches GET /matches/{id}
+// once and prefills every field from it; submit PATCHes instead of POSTing.
+describe('MatchPlacementModal · edit mode (point 2, Danny live P1)', () => {
+  const editMatch = {
+    customer_id: 'cust-1', customer_location_id: 'loc-1', customer_department_id: null,
+    contact_id: null, branch_id: 'branch-1', vacancy_id: null,
+    owner: { id: 'u2', name: 'Sanne Planner' },
+    function_title: 'Verzorgende IG', contract_type: 'Fase 1-2 z.u.b. (Works)',
+    start_date: '2026-07-01', end_date: null, hours_per_week: 24,
+    cao: 'ggz', scale: null, step: null,
+    purchase_rate: 20, sell_rate: 28, cost_center: 'KP-EXISTING',
+    billing_emails: ['bestaand@factuur.nl'], remarks: null,
+  }
+
+  it('prefills the form from GET /matches/{id} — spot-checks customer/function/cost-centre', async () => {
+    editMatchFixture.current = editMatch
+    render(<MatchPlacementModal candidateId="cand-1" editMatchId="match-1" onClose={noop} onCreated={noop} />)
+    // Customer AND function prefill from the fetched record, not the thin row.
+    expect(await screen.findByRole('button', { name: 'Zorggroep A' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Verzorgende IG' })).toBeInTheDocument()
+    // Cost centre is a plain input — the loaded value must survive the cascade's
+    // OWN "propose from customer" effect (frozen via setCostCenterDirty(true)).
+    expect(screen.getByDisplayValue('KP-EXISTING')).toBeInTheDocument()
+  })
+
+  it('renders the vacancy field read-only (identity is not editable via PATCH)', async () => {
+    editMatchFixture.current = editMatch
+    render(<MatchPlacementModal candidateId="cand-1" editMatchId="match-1" onClose={noop} onCreated={noop} />)
+    await screen.findByRole('button', { name: 'Zorggroep A' })
+    // No interactive combobox for Vacature while editing — a plain text value instead.
+    expect(screen.queryByRole('button', { name: 'placement.noVacancy' })).toBeNull()
+    expect(screen.getByText('placement.noVacancy')).toBeInTheDocument()
+  })
+
+  it('submits a PATCH to /matches/{id} with the changed fields, never a POST', async () => {
+    editMatchFixture.current = editMatch
+    const user = userEvent.setup()
+    render(<MatchPlacementModal candidateId="cand-1" editMatchId="match-1" onClose={noop} onCreated={noop} />)
+    await screen.findByRole('button', { name: 'Zorggroep A' })
+    // Change one field by hand before saving.
+    const costInput = screen.getByDisplayValue('KP-EXISTING')
+    await user.clear(costInput)
+    await user.type(costInput, 'KP-NIEUW')
+
+    await user.click(screen.getByRole('button', { name: 'common:save' }))
+    expect(api.patch).toHaveBeenCalledWith('/matches/match-1', expect.objectContaining({
+      customer_id: 'cust-1', function_title: 'Verzorgende IG', cost_center: 'KP-NIEUW',
+    }))
+    // Identity fields never ride a PATCH (UpdateMatchRequest doesn't accept them).
+    const [, body] = vi.mocked(api.patch).mock.calls.find(c => c[0] === '/matches/match-1') ?? []
+    expect(body).not.toHaveProperty('candidate_id')
+    expect(body).not.toHaveProperty('vacancy_id')
+    expect(api.post).not.toHaveBeenCalledWith('/matches', expect.anything())
+  })
+})
+
+// Coordinator P1 add-on (interim bridge until CMBE ships MATCH-EXPERIENCE-AUTO-1):
+// the backend's MatchMaker already adds a work-experience entry on match creation,
+// but ONLY when a vacancy is attached — a direct placement with none silently gets
+// no CV entry. This bridges ONLY that gap on the FE, fire-and-tolerate.
+describe('MatchPlacementModal · interim work-experience bridge (until MATCH-EXPERIENCE-AUTO-1)', () => {
+  const pickCustomerAndFunction = async (user: ReturnType<typeof userEvent.setup>) => {
+    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
+    await user.click(screen.getByRole('button', { name: 'placement.pickFunction' }))
+    await user.click(await screen.findByRole('button', { name: 'Verzorgende IG' }))
+  }
+
+  it('fires POST /candidates/{id}/experiences with the mapped fields when no vacancy was picked', async () => {
+    const user = userEvent.setup()
+    render(<MatchPlacementModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await screen.findByRole('dialog')
+    await pickCustomerAndFunction(user)
+
+    await user.click(screen.getByRole('button', { name: 'placement.create' }))
+    expect(api.post).toHaveBeenCalledWith('/matches', expect.anything())
+    expect(api.post).toHaveBeenCalledWith('/candidates/cand-1/experiences', expect.objectContaining({
+      employer: 'Zorggroep A', function_title: 'Verzorgende IG', current: true,
+    }))
+  })
+
+  it('never fires the bridge in EDIT mode', async () => {
+    editMatchFixture.current = {
+      customer_id: 'cust-1', customer_location_id: null, customer_department_id: null,
+      contact_id: null, branch_id: null, vacancy_id: null, owner: null,
+      function_title: 'Verzorgende IG', contract_type: null, start_date: null, end_date: null,
+      hours_per_week: null, cao: null, scale: null, step: null, purchase_rate: null, sell_rate: null,
+      cost_center: null, billing_emails: [], remarks: null,
+    }
+    const user = userEvent.setup()
+    render(<MatchPlacementModal candidateId="cand-1" editMatchId="match-1" onClose={noop} onCreated={noop} />)
+    await screen.findByRole('button', { name: 'Zorggroep A' })
+    await user.click(screen.getByRole('button', { name: 'common:save' }))
+    expect(api.post).not.toHaveBeenCalledWith('/candidates/cand-1/experiences', expect.anything())
+  })
+
+  it('a failed experiences POST does not fail the match flow itself (fire-and-tolerate)', async () => {
+    vi.mocked(api.post)
+      .mockResolvedValueOnce({ data: { data: { id: 'match-9' } } }) // POST /matches succeeds
+      .mockRejectedValueOnce(new Error('boom'))                    // POST .../experiences fails
+    const onCreated = vi.fn()
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    render(<MatchPlacementModal candidateId="cand-1" onClose={onClose} onCreated={onCreated} />)
+    await screen.findByRole('dialog')
+    await pickCustomerAndFunction(user)
+
+    await user.click(screen.getByRole('button', { name: 'placement.create' }))
+    await waitFor(() => expect(onCreated).toHaveBeenCalled())
+    expect(onClose).toHaveBeenCalled()
+    expect(notifyError).toHaveBeenCalledWith('common:actionFailed')
   })
 })

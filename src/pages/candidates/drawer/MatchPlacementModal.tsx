@@ -48,25 +48,29 @@ import { overlay, panel, twoColSections } from './matchPlacement/styles'
 import { cardHead, cardBox } from '@/pages/candidates/addmodal/fields'
 import type { Id } from '@/types/common'
 
-export default function MatchPlacementModal({ candidateId: fixedCandidateId, onClose, onCreated }: {
+export default function MatchPlacementModal({ candidateId: fixedCandidateId, editMatchId, onClose, onCreated }: {
   // Fixed when opened from a candidate's Match tab; absent on the Matches page —
   // then a candidate picker appears at the top of RELATIES (Danny 2026-07-13).
   candidateId?: Id
+  // Set (point 2, Danny live P1) when opened from a MatchesTab row's pencil —
+  // prefills every field from the full record and PATCHes on submit instead of POST.
+  editMatchId?: Id
   onClose: () => void
   onCreated: () => void
 }) {
   // All state, effects, submit + 422-mapping live in the hook — this component
   // only wires it to the shared chrome and the three section components below.
-  const form = useMatchPlacementForm({ candidateId: fixedCandidateId, onClose, onCreated })
-  const { t } = form
+  const form = useMatchPlacementForm({ candidateId: fixedCandidateId, editMatchId, onClose, onCreated })
+  const { t, editing } = form
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
+  const title = t(editing ? 'placement.editTitle' : 'placement.title')
 
   return (
     <>
       <div style={overlay} onClick={onClose} />
-      <div ref={panelRef} style={panel} role="dialog" aria-modal="true" aria-label={t('placement.title')} tabIndex={-1}>
+      <div ref={panelRef} style={panel} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-          <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>{t('placement.title')}</span>
+          <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>{title}</span>
           <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
         </div>
 
@@ -85,7 +89,7 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
             <div style={cardHead}>{t('placement.relations')}</div>
             <div style={cardBox}>
               <RelationsSection
-                t={t} errors={form.errors}
+                t={t} errors={form.errors} editing={editing}
                 fixedCandidateId={form.fixedCandidateId} pickedCandidateId={form.pickedCandidateId} setPickedCandidateId={form.setPickedCandidateId}
                 candidateOptions={form.candidateOptions}
                 customerId={form.customerId} setCustomerId={form.setCustomerId} customerOptions={form.customerOptions}
@@ -168,7 +172,7 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
           <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
           <button onClick={form.handleSubmitClick} disabled={form.saving || !form.customerId || !form.func}
             style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: '#fff', cursor: (form.customerId && form.func) ? 'pointer' : 'default', opacity: (form.customerId && form.func) ? 1 : 0.4 }}>
-            {form.saving ? t('common:saving') : (form.deviatesFromProposal && form.confirmDeviation ? t('placement.rateProposal.deviationConfirm') : t('placement.create'))}
+            {form.saving ? t('common:saving') : (form.deviatesFromProposal && form.confirmDeviation ? t('placement.rateProposal.deviationConfirm') : t(editing ? 'common:save' : 'placement.create'))}
           </button>
         </div>
       </div>

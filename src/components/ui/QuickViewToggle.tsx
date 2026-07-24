@@ -22,14 +22,23 @@ interface QuickViewToggleProps {
   icon?: ComponentType<{ size?: number }>
   // Accessible title/tooltip; falls back to the label.
   title?: string
+  // Footprint (Danny 24-07, candidate Taken sub-tab): 'default' is the page-toolbar
+  // size used everywhere else (§4 spacing spec) — never regress that. 'compact'
+  // matches DrawerAddButton exactly (height 26, fontSize 11.5, padding 0 10px,
+  // borderRadius 6) for a drawer sub-tab toolbar sitting next to one; the soft-tint
+  // colouring is identical in both sizes.
+  size?: 'default' | 'compact'
 }
 
-export default function QuickViewToggle({ active, onToggle, label, color = 'var(--color-primary)', icon: Icon, title }: QuickViewToggleProps) {
+export default function QuickViewToggle({ active, onToggle, label, color = 'var(--color-primary)', icon: Icon, title, size = 'default' }: QuickViewToggleProps) {
+  const compact = size === 'compact'
   return (
     <button type="button" onClick={onToggle} title={title ?? label} aria-pressed={active}
       style={{
-        display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12,
-        fontWeight: active ? 600 : 500, borderRadius: 8, cursor: 'pointer', color,
+        display: 'inline-flex', alignItems: 'center', gap: 5,
+        ...(compact ? { height: 26, padding: '0 10px' } : { padding: '6px 12px' }),
+        fontSize: compact ? 11.5 : 12,
+        fontWeight: active ? 600 : 500, borderRadius: compact ? 6 : 8, cursor: 'pointer', color,
         background: `color-mix(in srgb, ${color} ${active ? 16 : 8}%, transparent)`,
         border: `1px solid color-mix(in srgb, ${color} ${active ? 50 : 28}%, transparent)`,
       }}>

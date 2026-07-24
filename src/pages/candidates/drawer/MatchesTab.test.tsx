@@ -74,4 +74,19 @@ describe('MatchesTab', () => {
     await user.click(openLink)
     expect(rememberReturnTab).toHaveBeenCalledWith(42, 'work')
   })
+
+  // Point 2 (Danny live P1): the pencil reopens the match as an edit (WorkTab owns
+  // the modal state) — only rendered when the host actually wires `onEdit`.
+  it('renders a pencil that reports the clicked match id via onEdit', async () => {
+    const onEdit = vi.fn()
+    const user = userEvent.setup()
+    render(<MatchesTab c={candidate([{ id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway' }])} onEdit={onEdit} />)
+    await user.click(screen.getByRole('button', { name: 'common:edit' }))
+    expect(onEdit).toHaveBeenCalledWith('m1')
+  })
+
+  it('renders no pencil when the host omits onEdit (no behaviour change)', () => {
+    render(<MatchesTab c={candidate([{ id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway' }])} />)
+    expect(screen.queryByRole('button', { name: 'common:edit' })).toBeNull()
+  })
 })

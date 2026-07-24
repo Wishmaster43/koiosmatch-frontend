@@ -234,3 +234,52 @@ describe('CommunicationTab · retention (AVG-RET-2, Danny 22-07 punt 8)', () => 
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ retentionOptIn: false, retentionConsentAt: null }))
   })
 })
+
+// Point 3 (MATCH-TIMELINE-EVENT-1): a tolerant pre-build — nothing renders
+// differently until a timeline item actually carries the match.created payload;
+// a plain item stays exactly as today (ev.text). Raw-key i18n in this file (no
+// real i18next instance, same as every other describe block above): interpolation
+// values still show up inline (built in JS, not via t()'s own substitution), only
+// the surrounding phrase renders as its raw key.
+describe('CommunicationTab · match.created timeline card (point 3, Danny live P1)', () => {
+  const goToTimeline = (user: ReturnType<typeof userEvent.setup>) =>
+    user.click(screen.getByRole('tab', { name: 'sections.timeline' }))
+
+  it('renders the readable placement card for a match.created timeline item', async () => {
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate({}, { timeline: [{
+      type: 'match.created', created_at: '2026-07-01T00:00:00.000Z',
+      customer_name: 'Zorggroep A', location_name: 'Locatie Noord',
+      contract_type: 'Fase 1-2 z.u.b. (Works)', start_date: '2026-07-01', end_date: null,
+      recruiter_name: 'Piet Recruiter',
+    } as unknown as Candidate['timeline'][number]] })} />)
+    await goToTimeline(user)
+    // The title/meta PHRASES are raw i18n keys here, but the VALUES they wrap
+    // (built in plain JS, not t()'s own interpolation) still show up inline.
+    expect(screen.getByText(/communication\.timelinePlacedAt/)).toBeInTheDocument()
+    expect(screen.getByText(/Locatie Noord/)).toBeInTheDocument()
+    expect(screen.getByText(/Fase 1-2 z\.u\.b\. \(Works\)/)).toBeInTheDocument()
+    expect(screen.getByText(/communication\.timelineOngoing/)).toBeInTheDocument() // no end_date → "ongoing"
+    expect(screen.getByText(/communication\.timelineVia/)).toBeInTheDocument()
+  })
+
+  it('a plain timeline item (no match.created payload) renders exactly as before', async () => {
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate({}, { timeline: [{ text: 'Bericht verstuurd', created_at: '2026-07-01T00:00:00.000Z' } as unknown as Candidate['timeline'][number]] })} />)
+    await goToTimeline(user)
+    expect(screen.getByText('Bericht verstuurd')).toBeInTheDocument()
+    expect(screen.queryByText(/communication\.timelinePlacedAt/)).toBeNull()
+  })
+
+  it('skips missing parts cleanly — no dangling separator when contract_type/dates are absent', async () => {
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate({}, { timeline: [{
+      type: 'match.created', created_at: '2026-07-01T00:00:00.000Z', customer_name: 'Zorggroep A',
+    } as unknown as Candidate['timeline'][number]] })} />)
+    await goToTimeline(user)
+    expect(screen.getByText(/communication\.timelinePlacedAt/)).toBeInTheDocument()
+    // No location/contract/dates/via — the meta line never renders at all.
+    expect(screen.queryByText(/communication\.timelineVia/)).toBeNull()
+    expect(screen.queryByText(/communication\.timelineOngoing/)).toBeNull()
+  })
+})

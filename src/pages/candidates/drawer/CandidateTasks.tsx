@@ -91,8 +91,10 @@ export default function CandidateTasks({ candidateId }: { candidateId: Id }) {
   const addAction = (
     <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 6 }}>
       <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <QuickViewToggle active={view === 'open'} onToggle={() => setView('open')} label={t('drawer.tasksOpen')} />
-        <QuickViewToggle active={view === 'history'} onToggle={() => setView('history')} label={t('drawer.tasksHistory')} />
+        {/* Compact footprint (Danny 24-07): matches the "+ Nieuwe taak" DrawerAddButton
+            next to it — was the taller page-toolbar default, visibly larger than its sibling. */}
+        <QuickViewToggle active={view === 'open'} onToggle={() => setView('open')} label={t('drawer.tasksOpen')} size="compact" />
+        <QuickViewToggle active={view === 'history'} onToggle={() => setView('history')} label={t('drawer.tasksHistory')} size="compact" />
       </span>
       <DrawerAddButton onClick={() => setAdding(true)} disabled={taskRuleBlocked}
         title={taskRuleBlocked ? taskRuleDecision?.message ?? undefined : undefined}

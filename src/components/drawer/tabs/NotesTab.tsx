@@ -63,12 +63,20 @@ interface NotesTabProps {
   // the only current caller). Hosts that omit it — every other entity/tab — render
   // no pencil at all; zero behaviour change for them (additive prop).
   onEditStatusEvent?: () => void
+  // Optional per-item content override (MATCH-TIMELINE-EVENT-1, point 3): when it
+  // returns a node for a given timeline item, that REPLACES the default text line
+  // inside the row's existing dot/avatar/date wrapper — keeps this shared tab
+  // entity-agnostic (the host owns the entity-specific i18n + field mapping;
+  // candidates' CommunicationTab is the first/only current caller). Returning
+  // null/undefined for an item falls back to the default `ev.text`/`ev.description`
+  // line — zero behaviour change for every event the host doesn't recognise.
+  renderTimelineContent?: (ev: TimelineItem) => ReactNode | null
 }
 
 export default function NotesTab({
   notes = [], systemNotes = [], timeline = [], noteTypes = [], chipTypes, channels = [], labels = {}, editorLabels,
   authorInitials, timelineName, timelineInitials, onAddNote, onEditNote,
-  showNotes = true, showTimeline = true, showConversations = true, onEditStatusEvent,
+  showNotes = true, showTimeline = true, showConversations = true, onEditStatusEvent, renderTimelineContent,
 }: NotesTabProps) {
   const [adding, setAdding]   = useState(false)
   const [editingIdx, setEditingIdx] = useState<number | null>(null)   // null = new; index = editing
@@ -288,7 +296,7 @@ export default function NotesTab({
                     <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{timelineName}</span>
                     <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{ev.time ?? ev.created_at}</span>
                   </div>
-                  <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: 'var(--text)' }}>{ev.text ?? ev.description}</div>
+                  <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: 'var(--text)' }}>{renderTimelineContent?.(ev) ?? (ev.text ?? ev.description)}</div>
                 </div>
               </div>
             ))

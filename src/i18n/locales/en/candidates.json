@@ -462,7 +462,10 @@
     "retentionUntil": "Retained until {{date}}",
     "retentionUnlimited": "Retained indefinitely (consent given on {{date}})",
     "retentionUnknown": "Retention period unknown",
-    "retentionTitle": "GDPR retention period"
+    "retentionTitle": "GDPR retention period",
+    "timelinePlacedAt": "Placed at {{customer}}",
+    "timelineOngoing": "present",
+    "timelineVia": "via {{name}}"
   },
   "statistics": {
     "placements": "Matches",
@@ -892,6 +895,9 @@
     "create": "Create match",
     "created": "Match created",
     "failed": "Creating match failed",
+    "editTitle": "Edit match",
+    "updated": "Match updated",
+    "unknownCustomer": "Unknown customer",
     "newContact": "new",
     "contactCreated": "Contact created",
     "contactFailed": "Creating contact failed",

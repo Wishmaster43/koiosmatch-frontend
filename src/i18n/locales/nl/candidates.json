@@ -462,7 +462,10 @@
     "retentionUntil": "Bewaren tot {{date}}",
     "retentionUnlimited": "Onbeperkt bewaard (toestemming op {{date}})",
     "retentionUnknown": "Bewaartermijn onbekend",
-    "retentionTitle": "AVG-bewaartermijn"
+    "retentionTitle": "AVG-bewaartermijn",
+    "timelinePlacedAt": "Geplaatst bij {{customer}}",
+    "timelineOngoing": "heden",
+    "timelineVia": "via {{name}}"
   },
   "statistics": {
     "placements": "Matches",
@@ -892,6 +895,9 @@
     "create": "Match aanmaken",
     "created": "Match aangemaakt",
     "failed": "Match aanmaken mislukt",
+    "editTitle": "Match bewerken",
+    "updated": "Match bijgewerkt",
+    "unknownCustomer": "Onbekende klant",
     "newContact": "nieuw",
     "contactCreated": "Contactpersoon aangemaakt",
     "contactFailed": "Contactpersoon aanmaken mislukt",

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Link2, ExternalLink } from 'lucide-react'
+import { Link2, ExternalLink, Pencil } from 'lucide-react'
 import SectionCard from '@/components/ui/SectionCard'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink, { buildEntityDeepLink } from '@/components/ui/EntityLink'
@@ -7,6 +7,7 @@ import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { rememberReturnTab } from './constants'
 import type { ReactNode } from 'react'
 import type { Candidate } from '@/types/candidate'
+import type { Id } from '@/types/common'
 import { isSafeUrl } from '@/lib/safeUrl'
 
 // Match score as a soft-coloured percentage (green ≥75, amber ≥50, red below).
@@ -19,10 +20,13 @@ function ScorePill({ value }: { value?: number | null }) {
 /**
  * MatchesTab — READ-ONLY view of the candidate's matches (decided model: a Match
  * is its own entity; the contract lives in HelloFlex, we only show its status).
- * No CRUD here — matches are created from the application funnel / direct-match
- * flow, not edited as a contract sub-entity on the candidate.
+ * Placement fields (customer/contract/financial) ARE editable via the pencil
+ * (point 2, Danny live P1) — it reopens the same MatchPlacementModal in EDIT mode
+ * (PATCH /matches/{id}); the lifecycle status itself still isn't touched here.
  */
-export default function MatchesTab({ c }: { c: Candidate }) {
+export default function MatchesTab({ c, onEdit }: { c: Candidate
+  // Opens the match in MatchPlacementModal as an edit (WorkTab owns the modal state).
+  onEdit?: (matchId: Id) => void }) {
   const { t } = useTranslation('candidates')
   // Match lifecycle lookup (R-1b) — resolves the "Fase" row's label/colour from the
   // status slug, same as MatchesTable/MatchDrawer; the backend-resolved stage/
@@ -63,6 +67,15 @@ export default function MatchesTab({ c }: { c: Candidate }) {
                 style={{ display: 'flex', color: 'var(--color-primary)', padding: 2 }}>
                 <ExternalLink size={12} />
               </a>
+            )}
+            {/* Point 2 (Danny live P1): edit this match's placement fields — reopens
+                MatchPlacementModal in EDIT mode (PATCH /matches/{id}). */}
+            {onEdit && m.id != null && (
+              <button type="button" onClick={() => onEdit(m.id as Id)}
+                title={t('common:edit')} aria-label={t('common:edit')}
+                style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2 }}>
+                <Pencil size={12} />
+              </button>
             )}
             {m.helloflex_contract_guid ? (
               <span title={t('matchesView.backofficeLinked')} style={{ display: 'flex', color: 'var(--color-primary)' }}><Link2 size={13} /></span>

@@ -20,8 +20,23 @@
  * contract type; the inline new-contact form gained function/phone/mobile fields
  * (useContactFunctions) plus a client-side duplicate-contact preflight
  * (findDuplicateContact, helpers.ts) since the backend enforces no such uniqueness.
+ *
+ * EDIT-MATCH-1 (point 2, Danny live P1): `editMatchId` reopens this SAME form as an
+ * edit. The candidate's own embedded `matches` row is thin (read-only display fields
+ * only — no placement/contract/financial columns, MATCH-EMBED-1), so this fetches the
+ * full GET /matches/{id} record once and prefills every field from it; submit then
+ * PATCHes instead of POSTing. Every "propose but freeze on edit" sibling hook
+ * (branch/end-date/cost-centre/billing-email) gets its own *Dirty flag forced true
+ * right after the prefill, so its propose-effect never overwrites the loaded value;
+ * `skipCascadeResetRef` guards the ONE local reset effect below (clears location/
+ * department/contact whenever `customerId` changes) so loading the match's own
+ * customer doesn't immediately wipe the location/department/contact it came with.
+ * Identity (candidate/vacancy) stays NOT editable here — UpdateMatchRequest's rules
+ * don't accept those two, mirroring the backend docblock — so the vacancy field
+ * renders read-only while editing (RelationsSection's `editing` prop) instead of a
+ * silently-dropped edit (§3: no fake affordances).
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
@@ -47,13 +62,30 @@ import type { Id } from '@/types/common'
 
 interface UserLike { id?: Id; name?: string }
 
-export function useMatchPlacementForm({ candidateId: fixedCandidateId, onClose, onCreated }: {
+// The GET /matches/{id} shape this hook prefills from (MatchDetailResource — the
+// list row's fields plus the full placement() block; see the backend resource).
+interface MatchEditDetail {
+  customer_id?: Id | null; customer_location_id?: Id | null; customer_department_id?: Id | null
+  contact_id?: Id | null; branch_id?: Id | null; vacancy_id?: Id | null
+  owner?: { id?: Id; name?: string } | null
+  function_title?: string | null; contract_type?: string | null
+  start_date?: string | null; end_date?: string | null; hours_per_week?: number | string | null
+  cao?: string | null; scale?: string | null; step?: string | null
+  purchase_rate?: number | string | null; sell_rate?: number | string | null
+  cost_center?: string | null; billing_emails?: string[] | null; remarks?: string | null
+}
+
+export function useMatchPlacementForm({ candidateId: fixedCandidateId, editMatchId, onClose, onCreated }: {
   // Fixed when opened from a candidate's Match tab; absent on the Matches page —
   // then a candidate picker appears at the top of RELATIES (Danny 2026-07-13).
   candidateId?: Id
+  // Set (EDIT-MATCH-1, point 2) when opened from a MatchesTab row's pencil —
+  // prefills every field from the full record and PATCHes on submit instead of POST.
+  editMatchId?: Id
   onClose: () => void
   onCreated: () => void
 }) {
+  const editing = Boolean(editMatchId)
   const { t } = useTranslation(['candidates', 'common'])
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   const customerOptions = useCustomerOptions(true)
@@ -96,9 +128,15 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, onClose, 
   const [locationId, setLocationId] = useState('')
   const [departmentId, setDepartmentId] = useState('')
   const [contactId, setContactId] = useState('')
+  // EDIT-MATCH-1: guards the reset below during the one-shot prefill (see the
+  // prefill effect further down) — picking a NEW customer still clears location/
+  // department/contact, but loading an existing match's own combination must not
+  // be wiped the instant customerId itself is set from the fetched record.
+  const skipCascadeResetRef = useRef(false)
   // Picking a (new) customer resets the dependent picks — cascade integrity.
   useEffect(() => {
     if (!customerId) return
+    if (skipCascadeResetRef.current) { skipCascadeResetRef.current = false; return }
     setLocationId(''); setDepartmentId(''); setContactId('')
   }, [customerId])
   const departments = locations.find(l => String(l.id) === locationId)?.departments ?? []
@@ -180,14 +218,60 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, onClose, 
   const margin = (Number(sell) || 0) - (Number(purchase) || 0)
   const hasRates = purchase !== '' && sell !== ''
 
-  // POST the placement. vacancy_id + department are optional; the rest form the
-  // contract layer (persisted once BE adds the columns — currently tolerated).
+  // EDIT-MATCH-1: fetch the full record once — the candidate's embedded `matches`
+  // row (MATCH-EMBED-1) carries none of the placement/contract/financial fields.
+  const [editDetail, setEditDetail] = useState<MatchEditDetail | null>(null)
+  useEffect(() => {
+    if (!editMatchId) return
+    let alive = true
+    api.get(`/matches/${editMatchId}`)
+      .then(r => { if (alive) setEditDetail((unwrap(r)) as MatchEditDetail) })
+      .catch(() => { if (alive) setSubmitErr(t('common:errorGeneric')) })
+    return () => { alive = false }
+  }, [editMatchId]) // eslint-disable-line react-hooks/exhaustive-deps -- t is stable (i18n)
+
+  // One-shot prefill once the record arrives — every *Dirty flag is forced true
+  // right after its value is set so the sibling "propose" hooks (branch/end-date/
+  // cost-centre/billing-email) never recompute over the loaded value; skipCascadeResetRef
+  // stops the customerId-change reset above from wiping location/department/contact.
+  useEffect(() => {
+    if (!editDetail) return
+    skipCascadeResetRef.current = true
+    setCustomerId(editDetail.customer_id != null ? String(editDetail.customer_id) : '')
+    setLocationId(editDetail.customer_location_id != null ? String(editDetail.customer_location_id) : '')
+    setDepartmentId(editDetail.customer_department_id != null ? String(editDetail.customer_department_id) : '')
+    setContactId(editDetail.contact_id != null ? String(editDetail.contact_id) : '')
+    setBranchId(editDetail.branch_id != null ? String(editDetail.branch_id) : ''); setBranchDirty(true)
+    setVacancyId(editDetail.vacancy_id != null ? String(editDetail.vacancy_id) : '')
+    setOwnerId(editDetail.owner?.id != null ? String(editDetail.owner.id) : '')
+    setFunc(editDetail.function_title ?? '')
+    setContractType(editDetail.contract_type ?? '')
+    setStartDate(editDetail.start_date ?? '')
+    setEndDate(editDetail.end_date ?? ''); setEndDateDirty(true)
+    setHours(editDetail.hours_per_week != null ? String(editDetail.hours_per_week) : '')
+    setCao(editDetail.cao ?? '')
+    setScale(editDetail.scale ?? '')
+    setStep(editDetail.step ?? '')
+    setPurchase(editDetail.purchase_rate != null ? String(editDetail.purchase_rate) : '')
+    setSell(editDetail.sell_rate != null ? String(editDetail.sell_rate) : '')
+    setCostCenter(editDetail.cost_center ?? ''); setCostCenterDirty(true)
+    setBillingEmails(editDetail.billing_emails?.length ? editDetail.billing_emails : [''])
+    setBillingDirty(true)
+    setRemarks(editDetail.remarks ?? '')
+    // Every setter above is a stable useState/sibling-hook setter — only react to a NEW record.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editDetail])
+
+  // POST (create) or PATCH (edit) the placement. vacancy_id + department are
+  // optional; the rest form the contract layer. Identity (candidate/vacancy) is
+  // NOT accepted by UpdateMatchRequest (mirrors the backend docblock) — the PATCH
+  // body below deliberately omits both, RelationsSection renders vacancy read-only
+  // while editing so the UI never implies an edit that silently drops (§3).
   const submit = async () => {
     if (!candidateId || !customerId || !func) return
     setSaving(true)
     setErrors({}); setSubmitErr(null)
-    const body: Record<string, unknown> = {
-      candidate_id: candidateId,
+    const placement = {
       customer_id: customerId,
       customer_location_id: locationId || null,
       customer_department_id: departmentId || null,
@@ -206,17 +290,48 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, onClose, 
       cost_center: costCenter || null,
       billing_emails: billingEmails.map(e => e.trim()).filter(Boolean),
       remarks: remarks || null,
-      ...(vacancyId ? { vacancy_id: vacancyId } : {}),
       ...(ownerId ? { owner_id: ownerId } : {}),
     }
+    const body: Record<string, unknown> = editing
+      ? placement // PATCH — no candidate_id/vacancy_id (identity stays fixed).
+      : { candidate_id: candidateId, ...placement, ...(vacancyId ? { vacancy_id: vacancyId } : {}) }
     try {
-      await api.post('/matches', body)
+      if (editing) await api.patch(`/matches/${editMatchId}`, body)
+      else         await api.post('/matches', body)
+
+      // INTERIM until MATCH-EXPERIENCE-AUTO-1 (CMBE) — remove this call when the BE
+      // automation lands, coordination-log entry exists. The backend's MatchMaker
+      // (koiosmatch-api) ALREADY adds a work-experience entry on match creation
+      // (addWorkExperience), but ONLY when a vacancy is attached to the match — a
+      // direct placement with NO vacancy (this form's own optional Vacature field
+      // left empty) silently gets none, ever. Bridge ONLY that gap: never fire when
+      // a vacancy WAS picked (the backend already handles that case in the same
+      // request — firing here too would duplicate the CV entry), and never on edit.
+      if (!editing && !vacancyId) {
+        const employer = customerOptions.find(o => String(o.value) === customerId)?.label || t('placement.unknownCustomer')
+        const locationName = locations.find(l => String(l.id) === locationId)?.name
+        try {
+          await api.post(`/candidates/${candidateId}/experiences`, {
+            employer,
+            function_title: func || null,
+            location: locationName || null,
+            start_date: startDate || null,
+            end_date: endDate || null,
+            current: !endDate,
+          })
+        } catch {
+          // Fire-and-tolerate (Danny live P1): a failed bridge-write must never fail
+          // the match flow itself — surface the standard toast, keep going.
+          notifyError(t('common:actionFailed'))
+        }
+      }
+
       // Mismatch resolution: recruiter chose to move the candidate's branch along.
       // Best-effort AFTER the placement (its failure must not lose the match).
       if (branchMismatch && mismatchChoice === 'candidate' && detail?.branch_id) {
         await api.patch(`/candidates/${candidateId}`, { location_id: detail.branch_id }).catch(() => {})
       }
-      notifySuccess(t('placement.created'))
+      notifySuccess(t(editing ? 'placement.updated' : 'placement.created'))
       onCreated(); onClose()
     } catch (err) {
       // Show field-level errors from 422 validation responses; fall back to the
@@ -272,7 +387,7 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, onClose, 
   }
 
   return {
-    t,
+    t, editing,
     fixedCandidateId, pickedCandidateId, setPickedCandidateId, candidateOptions,
     users, customerOptions, vacancyOptions, functions, contractTypes, caoOptions,
     contactFunctions, contactFunctionsAllowFreeEntry,

@@ -77,6 +77,20 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Pure record refresh — NEVER routed through patchCandidate/PATCH. Refetches the
+  // full detail and REPLACES the drawer's `detail` state directly, so match/
+  // application/intake creates (WorkTab's `reload`) show fresh data everywhere —
+  // MatchesTab, the header status/phase, Ervaring — without a hard refresh (Danny
+  // P1: WorkTab used to only update its OWN local apps/appts state, leaving the
+  // rest of the drawer, which reads the shared `c` record, stale until reopen).
+  const refreshRecord = useCallback(async (id: Id) => {
+    const full = await fetchDetail(id)
+    if (selectedIdRef.current !== id) return // drawer moved on to another candidate meanwhile
+    if (full && full !== 'gone') setDetail(full)
+    // fetchDetail is stable (hook, mirrors selectCandidate's own exhaustive-deps note above).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Shared shape of every lifecycle mutation: call → drop row → close → toast.
   // A 409 carrying the forward-compat `{ live }` guard payload opens the guard
   // modal instead of the generic failure toast (point 4 of the ARCHIVE-GUARD spec).
@@ -182,7 +196,7 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
 
   return {
     selected, setSelected, detail, setDetail, drawerExpanded, setDrawerExpanded, drawerTab,
-    selectCandidate, closeDrawer, patchCandidate,
+    selectCandidate, closeDrawer, patchCandidate, refreshRecord,
     archiveOne, restoreOne, markDeletionOne,
     archiveGuard, setArchiveGuard, resolveArchiveGuard,
     eraseTarget, setEraseTarget, hardDeleteOne, confirmHardDelete,

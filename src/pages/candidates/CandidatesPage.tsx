@@ -51,6 +51,10 @@ const CandidateDrawer = CandidateDrawerJs as ComponentType<{
   onToggleExpand: () => void; onUpdate: (id: Id, patch: Record<string, unknown>) => void
   onArchive?: (id: Id) => void; onMarkDeletion?: (id: Id) => void; onRestore?: (id: Id) => void; onHardDelete?: (id: Id) => void
   onMerged?: (survivorId: Id) => void
+  // Pure record refresh (P1 fix): refetches + replaces the drawer's record after a
+  // match/application/intake create, never routed through onUpdate/PATCH — see
+  // useCandidateDrawerActions.refreshRecord.
+  onRefresh?: (id: Id) => Promise<void> | void
   users: AppUser[]; initialTab?: string
 }>
 
@@ -207,7 +211,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // Drawer open/close + single-record lifecycle mutations (§0.3 split → hook).
   const {
     selected, setSelected, detail, setDetail, drawerExpanded, setDrawerExpanded, drawerTab,
-    selectCandidate, closeDrawer, patchCandidate,
+    selectCandidate, closeDrawer, patchCandidate, refreshRecord,
     archiveOne, restoreOne, markDeletionOne,
     archiveGuard, setArchiveGuard, resolveArchiveGuard,
     eraseTarget, setEraseTarget, hardDeleteOne, confirmHardDelete,
@@ -320,6 +324,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
           onMarkDeletion={markDeletionOne}
           onRestore={restoreOne}
           onHardDelete={hardDeleteOne}
+          onRefresh={refreshRecord}
           // Merge (punt 4): same permission as archive; after the merge the survivor
           // reopens fresh (selectCandidate refetches the full detail).
           onMerged={hasPermission('candidates.delete') ? (id) => selectCandidate({ id } as Candidate) : undefined}
