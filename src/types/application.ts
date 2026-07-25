@@ -121,7 +121,11 @@ export interface ApplicationDetail extends Application {
   aiScore: number | null
   // AI reject advice + the prior rejection summary (present once rejected).
   ai?: { advice?: string; advice_reason?: string; auto_reject_eligible?: boolean }
-  rejection?: { reason_label?: string; [k: string]: unknown }
+  // Rejection trail — ApplicationDetailResource::rejection() sends all five
+  // fields once rejected; channel/sent_at were dropped on the floor before
+  // (RejectionSummary now renders them), so they are typed properly here
+  // rather than escaping through the old index signature.
+  rejection?: { reason_id?: Id; reason_label?: string; note?: string; channel?: string; sent_at?: string | null }
   // Tenant custom-field values (§3B "Eigen velden" — the drawer's gated Extra tab).
   customFields: Record<string, unknown>
   // MOTIVATIE-ZICHTBAAR-1: the careersite apply's motivation letter, written to

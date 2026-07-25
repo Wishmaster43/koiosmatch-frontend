@@ -20,8 +20,7 @@ vi.mock('@/lib/datetime', () => ({
   useLocale: () => 'nl-NL',
 }))
 
-// RejectionBlock fetches the reasons on mount; the vacancy-link edit mode
-// (useVacancyLinkOptions) fetches /vacancies; S31's CvBlock fetches the linked
+// The vacancy-link edit mode (useVacancyLinkOptions) fetches /vacancies; S31's CvBlock fetches the linked
 // candidate's documents via React Query — stub the client so this file only
 // tests ApplicationTab's own wiring, not any dependency's internals.
 vi.mock('@/lib/api', () => ({
@@ -62,14 +61,17 @@ describe('ApplicationTab', () => {
     expect(screen.getByText('Verpleegkundige')).toBeInTheDocument()
   })
 
-  it('shows the rejection block for an active application', () => {
+  // Danny 25-07: the reject FORM moved out of this tab into a footer button +
+  // confirm modal (RejectionModal); this tab now only renders the read-only
+  // outcome (RejectionSummary, covered by its own test file) when rejected.
+  it('renders no rejection outcome for an active (not yet rejected) application', () => {
     renderTab(<ApplicationTab application={app()} />)
-    expect(screen.getByText('rejection.title')).toBeInTheDocument()
+    expect(screen.queryByText('rejection.rejected')).toBeNull()
   })
 
-  it('hides the rejection block once the application is a match', () => {
-    renderTab(<ApplicationTab application={app({ bucket: 'matched' })} />)
-    expect(screen.queryByText('rejection.title')).toBeNull()
+  it('renders the read-only rejection outcome once the application is rejected', () => {
+    renderTab(<ApplicationTab application={app({ bucket: 'rejected', rejection: { reason_label: 'Niet gekwalificeerd' } })} />)
+    expect(screen.getByText('rejection.rejected')).toBeInTheDocument()
   })
 
   it('hides the Details edit pencil when onLinkVacancy is not provided', () => {

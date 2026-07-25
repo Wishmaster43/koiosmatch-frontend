@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Unlink, ArchiveRestore, Edit2, Save, X } from 'lucide-react'
+import { Unlink, ArchiveRestore, Edit2, Save, X, XCircle } from 'lucide-react'
 import { useLookups } from '@/context/LookupsContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
@@ -19,11 +19,12 @@ import AppointmentsTab from './drawer/AppointmentsTab'
 import NotesTab from './drawer/NotesTab'
 import Timeline from './drawer/Timeline'
 import DetachReasonModal from './drawer/DetachReasonModal'
+import RejectionModal from './drawer/RejectionModal'
 import { peekReturnTab, clearReturnTab } from './drawer/constants'
 import { useApplicationCandidateEdit } from './hooks/useApplicationCandidateEdit'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { ApplicationDetail } from '@/types/application'
-import type { RejectPayload } from './drawer/RejectionBlock'
+import type { RejectPayload } from './drawer/RejectionModal'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { Id } from '@/types/common'
 
@@ -77,8 +78,13 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   const { formatDate, formatDateTime } = useDateFormat()
   // S15: the reason-required detach confirm modal (footer "Ontkoppelen").
   const [detachModalOpen, setDetachModalOpen] = useState(false)
+  // APP-REJECT-GUARD-1: the reject confirm modal — opened either from the
+  // footer "Afwijzen" button or from the phase picker when the picked phase
+  // IS the flagged is_rejected stage (a bare phase PATCH bypasses the required
+  // reason, see the meta.phase onChange below).
+  const [rejectModalOpen, setRejectModalOpen] = useState(false)
   // Funnel phases (Settings lookup) for the header phase picker; never hardcoded.
-  const { funnelTypes } = useLookups() as unknown as { funnelTypes: Array<{ value: string; label: string; color?: string }> }
+  const { funnelTypes } = useLookups() as unknown as { funnelTypes: Array<{ value: string; label: string; color?: string; is_rejected?: boolean }> }
   // The Extra tab only shows when the tenant has defined application custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('application')
   // NAV-BACK-1 tab-remember: a subtab stashed by CandidateTab/VacancyTab (or the
@@ -108,17 +114,22 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   ]
   const ownerValue = a.owner?.id != null && ownerInUsers ? String(a.owner.id) : '__current'
   // Standard picker widths (§3A blueprint: Status/Phase ~160 + Eigenaar ~190).
+  // APP-REJECT-GUARD-1: the funnel stage flagged is_rejected — never the literal
+  // 'rejected' key, a tenant may rename it. Picking it from the header requires
+  // a reason, so it opens the modal instead of PATCHing the phase directly.
+  const rejectedFunnelValue = funnelTypes.find(f => f.is_rejected)?.value
   const meta = [
     { key: 'phase', label: t('drawer.phase'), value: a.phaseKey,
       options: funnelTypes.map(f => ({ value: f.value, label: f.label })),
-      onChange: (v: string) => onPhaseChange?.(a.id, v), menuWidth: 170, width: 160 },
+      onChange: (v: string) => { if (v === rejectedFunnelValue) setRejectModalOpen(true); else onPhaseChange?.(a.id, v) },
+      menuWidth: 170, width: 160 },
     { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions,
       onChange: (v: string) => { if (v !== '__current') onOwnerChange?.(a.id, String(v)) }, menuWidth: 200, width: 190 },
   ]
   // Map a tab id to its content component.
   const renderTab = (id: string): ReactNode => {
     switch (id) {
-      case 'application':  return <ApplicationTab application={a} onReject={onReject} onAdjustScore={onAdjustScore} onLinkVacancy={onLinkVacancy} onUpdateSource={onUpdateSource} />
+      case 'application':  return <ApplicationTab application={a} onAdjustScore={onAdjustScore} onLinkVacancy={onLinkVacancy} onUpdateSource={onUpdateSource} />
       case 'candidate':    return <CandidateTab application={a} />
       case 'vacancy':      return <VacancyTab application={a} onLinkVacancy={onLinkVacancy} />
       case 'interviews':   return <InterviewsTab application={a} />
@@ -159,9 +170,22 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
                 <ArchiveRestore size={12} /> {t('restore.button')}
               </button>
             ) : canManage ? (
-              // No vacancy linked = nothing to detach — grey + disabled (Danny 13/7).
-              // S15: opens the reason-required confirm modal instead of detaching
-              // straight away (the BE 422s a bare DELETE now).
+              <>
+              {/* Afwijzen (Danny 25-07): the reject FORM moved out of the tab into
+                  this footer button + confirm modal — hidden once already rejected
+                  or matched (a placement can no longer be rejected). */}
+              {a.bucket !== 'rejected' && a.bucket !== 'matched' && (
+                <button onClick={() => setRejectModalOpen(true)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 5,
+                    fontSize: 12, fontWeight: 500, height: BTN_H, padding: '0 12px', borderRadius: 8,
+                    border: '1px solid var(--color-danger)', background: 'none',
+                    color: 'var(--color-danger)', cursor: 'pointer' }}>
+                  <XCircle size={12} /> {t('rejection.action')}
+                </button>
+              )}
+              {/* No vacancy linked = nothing to detach — grey + disabled (Danny 13/7).
+                  S15: opens the reason-required confirm modal instead of detaching
+                  straight away (the BE 422s a bare DELETE now). */}
               <button onClick={() => a.vacancyId != null && setDetachModalOpen(true)} disabled={a.vacancyId == null}
                 title={a.vacancyId == null ? t('detach.nothingLinked') : undefined}
                 style={{ display: 'flex', alignItems: 'center', gap: 5,
@@ -171,6 +195,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
                   cursor: a.vacancyId == null ? 'not-allowed' : 'pointer', opacity: a.vacancyId == null ? 0.6 : 1 }}>
                 <Unlink size={12} /> {t('detach.button')}
               </button>
+              </>
             ) : null}
           </div>
         </div>
@@ -240,6 +265,16 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
       <DetachReasonModal
         onCancel={() => setDetachModalOpen(false)}
         onConfirm={reason => { setDetachModalOpen(false); onDetach?.(a.id, reason) }}
+      />
+    )}
+    {/* Danny 25-07: the reject FORM — a footer button + confirm modal, mirroring
+        the detach flow above, opened either from "Afwijzen" or from the phase
+        picker (see meta.phase onChange). */}
+    {rejectModalOpen && (
+      <RejectionModal
+        application={a}
+        onCancel={() => setRejectModalOpen(false)}
+        onConfirm={payload => { setRejectModalOpen(false); onReject?.(a.id, payload) }}
       />
     )}
     </>

@@ -245,6 +245,8 @@
   },
   "rejection": {
     "title": "Afwijzing",
+    "action": "Afwijzen",
+    "modalTitle": "Sollicitatie afwijzen",
     "reason": "Reden",
     "reasonPlaceholder": "Selecteer reden",
     "note": "Toelichting",
@@ -255,7 +257,17 @@
     "aiAdvice": "Koios adviseert afwijzen",
     "aiAuto": "Harde criteria niet gehaald — auto-afwijzen mogelijk.",
     "aiConfirm": "Beoordeel en bevestig voordat er een bericht uitgaat.",
-    "done": "Sollicitatie afgewezen"
+    "done": "Sollicitatie afgewezen",
+    "sentOn": "Bericht verstuurd op {{date}}",
+    "notSent": "Nog geen bericht verstuurd",
+    "viaChannel": "via {{channel}}",
+    "channels": {
+      "email": "e-mail",
+      "whatsapp": "WhatsApp",
+      "phone": "telefoon",
+      "letter": "brief"
+    },
+    "noRecord": "Afgewezen zonder vastgelegde reden."
   },
   "motivation": {
     "title": "Motivatie"

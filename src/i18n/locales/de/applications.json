@@ -234,6 +234,8 @@
   },
   "rejection": {
     "title": "Ablehnung",
+    "action": "Ablehnen",
+    "modalTitle": "Bewerbung ablehnen",
     "reason": "Grund",
     "reasonPlaceholder": "Grund auswählen",
     "note": "Notiz",
@@ -244,7 +246,17 @@
     "aiAdvice": "Koios empfiehlt Ablehnung",
     "aiAuto": "Harte Kriterien nicht erfüllt — für Auto-Ablehnung geeignet.",
     "aiConfirm": "Prüfen und bestätigen, bevor eine Nachricht gesendet wird.",
-    "done": "Bewerbung abgelehnt"
+    "done": "Bewerbung abgelehnt",
+    "sentOn": "Nachricht gesendet am {{date}}",
+    "notSent": "Noch keine Nachricht gesendet",
+    "viaChannel": "über {{channel}}",
+    "channels": {
+      "email": "E-Mail",
+      "whatsapp": "WhatsApp",
+      "phone": "Telefon",
+      "letter": "Brief"
+    },
+    "noRecord": "Abgelehnt ohne erfassten Grund."
   },
   "motivation": {
     "title": "Motivationsschreiben"

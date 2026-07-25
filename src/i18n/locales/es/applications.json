@@ -234,6 +234,8 @@
   },
   "rejection": {
     "title": "Rechazo",
+    "action": "Rechazar",
+    "modalTitle": "Rechazar candidatura",
     "reason": "Motivo",
     "reasonPlaceholder": "Seleccionar un motivo",
     "note": "Nota",
@@ -244,7 +246,17 @@
     "aiAdvice": "Koios aconseja rechazar",
     "aiAuto": "Criterios estrictos no cumplidos — apto para rechazo automático.",
     "aiConfirm": "Revisa y confirma antes de enviar un mensaje.",
-    "done": "Candidatura rechazada"
+    "done": "Candidatura rechazada",
+    "sentOn": "Mensaje enviado el {{date}}",
+    "notSent": "Aún no se ha enviado ningún mensaje",
+    "viaChannel": "vía {{channel}}",
+    "channels": {
+      "email": "correo electrónico",
+      "whatsapp": "WhatsApp",
+      "phone": "teléfono",
+      "letter": "carta"
+    },
+    "noRecord": "Rechazada sin motivo registrado."
   },
   "motivation": {
     "title": "Carta de motivación"

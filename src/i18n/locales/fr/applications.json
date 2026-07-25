@@ -234,6 +234,8 @@
   },
   "rejection": {
     "title": "Refus",
+    "action": "Refuser",
+    "modalTitle": "Refuser la candidature",
     "reason": "Motif",
     "reasonPlaceholder": "Sélectionner un motif",
     "note": "Note",
@@ -244,7 +246,17 @@
     "aiAdvice": "Koios conseille le refus",
     "aiAuto": "Critères stricts non remplis — éligible au refus automatique.",
     "aiConfirm": "Vérifiez et confirmez avant l'envoi d'un message.",
-    "done": "Candidature rejetée"
+    "done": "Candidature rejetée",
+    "sentOn": "Message envoyé le {{date}}",
+    "notSent": "Aucun message envoyé pour l'instant",
+    "viaChannel": "via {{channel}}",
+    "channels": {
+      "email": "e-mail",
+      "whatsapp": "WhatsApp",
+      "phone": "téléphone",
+      "letter": "courrier"
+    },
+    "noRecord": "Rejeté sans motif enregistré."
   },
   "motivation": {
     "title": "Lettre de motivation"

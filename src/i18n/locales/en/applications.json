@@ -245,6 +245,8 @@
   },
   "rejection": {
     "title": "Rejection",
+    "action": "Reject",
+    "modalTitle": "Reject application",
     "reason": "Reason",
     "reasonPlaceholder": "Select a reason",
     "note": "Note",
@@ -255,7 +257,17 @@
     "aiAdvice": "Koios advises rejection",
     "aiAuto": "Hard criteria failed — auto-rejection eligible.",
     "aiConfirm": "Review and confirm before a message is sent.",
-    "done": "Application rejected"
+    "done": "Application rejected",
+    "sentOn": "Message sent on {{date}}",
+    "notSent": "No message sent yet",
+    "viaChannel": "via {{channel}}",
+    "channels": {
+      "email": "email",
+      "whatsapp": "WhatsApp",
+      "phone": "phone",
+      "letter": "letter"
+    },
+    "noRecord": "Rejected without a recorded reason."
   },
   "motivation": {
     "title": "Motivation"

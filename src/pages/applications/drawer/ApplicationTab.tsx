@@ -11,8 +11,7 @@ import SafeHtml from '@/components/ui/SafeHtml'
 import { buildApplicationAdviceInsights } from './applicationAiInsights'
 import MatchScoreBlock from '@/components/match/MatchScoreBlock'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
-import RejectionBlock from './RejectionBlock'
-import type { RejectPayload } from './RejectionBlock'
+import RejectionSummary from './RejectionSummary'
 import VacancyLinkField from './VacancyLinkField'
 import CvBlock from './CvBlock'
 import { useVacancyLinkOptions } from '../hooks/useVacancyLinkOptions'
@@ -37,7 +36,6 @@ const inputStyle = { width: '100%', padding: '7px 10px', fontSize: 13, borderRad
 
 interface ApplicationTabProps {
   application: ApplicationDetail
-  onReject?: (id: Id | undefined, payload: RejectPayload) => void
   onAdjustScore?: (id: Id | undefined, payload: { score: number | null; criteria: Criterion[] }) => void
   // Re-link (or unlink, null) the vacancy this application is coupled to (BE:
   // PATCH /applications/{id} vacancy_id, nullable). Klant is derived from the
@@ -71,7 +69,7 @@ interface ApplicationTabProps {
  * summary intentionally stays light (§3A: one shared surface, never fork the
  * same fields into two editors) and only adds the vacancy LINK here.
  */
-export default function ApplicationTab({ application: a, onReject, onAdjustScore, onLinkVacancy, onUpdateSource }: ApplicationTabProps) {
+export default function ApplicationTab({ application: a, onAdjustScore, onLinkVacancy, onUpdateSource }: ApplicationTabProps) {
   const { t } = useTranslation(['applications', 'common'])
   const { formatDateTime } = useDateFormat()
   // In-place edit of the vacancy link + Bron (S7) — one shared pencil → picker/
@@ -98,6 +96,11 @@ export default function ApplicationTab({ application: a, onReject, onAdjustScore
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      {/* Rejection outcome — read-only, shown on the FIRST drill-down screen
+          (Danny 25-07); the reject FORM itself moved to a footer button +
+          confirm modal (RejectionModal), opened from the drawer. */}
+      <RejectionSummary application={a} />
+
       {/* S31: the linked candidate's CV(s) at a glance — reuses the candidate
           Documents tab's own preview affordance. */}
       <CvBlock candidateId={a.candidateId} />
@@ -218,9 +221,6 @@ export default function ApplicationTab({ application: a, onReject, onAdjustScore
           source={a.matchSource} aiScore={a.aiScore}
           onSave={onAdjustScore ? payload => onAdjustScore(a.id, payload) : undefined} />
       </div>
-
-      {/* Rejection — hidden once the application is a placement (matched). */}
-      {a.bucket !== 'matched' && <RejectionBlock application={a} onReject={onReject} />}
     </div>
   )
 }
