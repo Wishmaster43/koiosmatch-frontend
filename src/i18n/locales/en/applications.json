@@ -254,7 +254,8 @@
     "rejected": "Rejected",
     "aiAdvice": "Koios advises rejection",
     "aiAuto": "Hard criteria failed — auto-rejection eligible.",
-    "aiConfirm": "Review and confirm before a message is sent."
+    "aiConfirm": "Review and confirm before a message is sent.",
+    "done": "Application rejected"
   },
   "motivation": {
     "title": "Motivation"

@@ -146,14 +146,41 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
 
   // Reject an application: move it to the FLAGGED is_rejected phase/bucket
   // optimistically — never the literal 'rejected' key (A1: a tenant may rename it).
+  // REJECT-HONEST-1 (audit 2026-07-25): this used to end in `.catch(() => {})`, so a
+  // refused reject (422 on a removed reason, lost permission, workflow failure) left
+  // the row and the drawer showing "Afgewezen" while nothing was rejected and no
+  // message went out — the recruiter believed the candidate had been told. Now it
+  // reconciles from the response (ApplicationController::reject returns the FULL
+  // detail, so reason label / channel / sent_at arrive server-resolved) and reverts
+  // BOTH surfaces plus surfaces the server's own message on failure — the same shape
+  // handleLinkVacancy already uses.
   const handleReject = (id: Id | undefined, payload: RejectPayload) => {
+    if (id == null) return
+    const before = applications.find(a => a.id === id) ?? wideRows.find(a => a.id === id)
+    const beforeSelected = selected && selected.id === id ? selected : null
     const rejectedKey = funnelTypes.find(f => f.is_rejected)?.value ?? 'rejected'
     const patch = { phaseKey: rejectedKey, bucket: bucketOfPhase(rejectedKey, funnelTypes),
       rejection: { reason_label: payload.reason_label, note: payload.note } }
     setApplications(prev => prev.map(a => a.id === id ? ({ ...a, ...patch } as Application) : a))
     setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...patch } as ApplicationDetail) : prev))
     // The message (channel + template) is sent by the rejection workflow.
-    api.post(`/applications/${id}/reject`, { reason_id: payload.reason_id, note: payload.note }).catch(() => {})
+    api.post(`/applications/${id}/reject`, { reason_id: payload.reason_id, note: payload.note })
+      .then(res => {
+        const fresh = decorate(mapApplicationDetail(unwrap(res), funnelTypes))
+        setApplications(prev => prev.map(a => a.id === id ? ({ ...a, phaseKey: fresh.phaseKey, bucket: fresh.bucket } as Application) : a))
+        setSelected(prev => (prev && prev.id === id ? fresh : prev))
+        notifySuccess(t('rejection.done'))
+      })
+      .catch(err => {
+        // Revert the exact fields we touched (not the whole row) so a parallel
+        // owner/phase edit made meanwhile is not clobbered.
+        if (before) {
+          const revert = { phaseKey: before.phaseKey, bucket: before.bucket }
+          setApplications(prev => prev.map(a => a.id === id ? ({ ...a, ...revert } as Application) : a))
+        }
+        if (beforeSelected) setSelected(prev => (prev && prev.id === id ? beforeSelected : prev))
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
   }
 
   // Manual match-score override on an application (per applicant); optimistic + PATCH.

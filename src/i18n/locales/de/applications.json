@@ -243,7 +243,8 @@
     "rejected": "Abgelehnt",
     "aiAdvice": "Koios empfiehlt Ablehnung",
     "aiAuto": "Harte Kriterien nicht erfüllt — für Auto-Ablehnung geeignet.",
-    "aiConfirm": "Prüfen und bestätigen, bevor eine Nachricht gesendet wird."
+    "aiConfirm": "Prüfen und bestätigen, bevor eine Nachricht gesendet wird.",
+    "done": "Bewerbung abgelehnt"
   },
   "motivation": {
     "title": "Motivationsschreiben"

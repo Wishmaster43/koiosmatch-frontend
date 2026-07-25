@@ -243,7 +243,8 @@
     "rejected": "Rechazado",
     "aiAdvice": "Koios aconseja rechazar",
     "aiAuto": "Criterios estrictos no cumplidos — apto para rechazo automático.",
-    "aiConfirm": "Revisa y confirma antes de enviar un mensaje."
+    "aiConfirm": "Revisa y confirma antes de enviar un mensaje.",
+    "done": "Candidatura rechazada"
   },
   "motivation": {
     "title": "Carta de motivación"

@@ -254,7 +254,8 @@
     "rejected": "Afgewezen",
     "aiAdvice": "Koios adviseert afwijzen",
     "aiAuto": "Harde criteria niet gehaald — auto-afwijzen mogelijk.",
-    "aiConfirm": "Beoordeel en bevestig voordat er een bericht uitgaat."
+    "aiConfirm": "Beoordeel en bevestig voordat er een bericht uitgaat.",
+    "done": "Sollicitatie afgewezen"
   },
   "motivation": {
     "title": "Motivatie"
