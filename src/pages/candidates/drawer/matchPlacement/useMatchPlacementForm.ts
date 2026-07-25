@@ -299,32 +299,10 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, editMatch
       if (editing) await api.patch(`/matches/${editMatchId}`, body)
       else         await api.post('/matches', body)
 
-      // INTERIM until MATCH-EXPERIENCE-AUTO-1 (CMBE) — remove this call when the BE
-      // automation lands, coordination-log entry exists. The backend's MatchMaker
-      // (koiosmatch-api) ALREADY adds a work-experience entry on match creation
-      // (addWorkExperience), but ONLY when a vacancy is attached to the match — a
-      // direct placement with NO vacancy (this form's own optional Vacature field
-      // left empty) silently gets none, ever. Bridge ONLY that gap: never fire when
-      // a vacancy WAS picked (the backend already handles that case in the same
-      // request — firing here too would duplicate the CV entry), and never on edit.
-      if (!editing && !vacancyId) {
-        const employer = customerOptions.find(o => String(o.value) === customerId)?.label || t('placement.unknownCustomer')
-        const locationName = locations.find(l => String(l.id) === locationId)?.name
-        try {
-          await api.post(`/candidates/${candidateId}/experiences`, {
-            employer,
-            function_title: func || null,
-            location: locationName || null,
-            start_date: startDate || null,
-            end_date: endDate || null,
-            current: !endDate,
-          })
-        } catch {
-          // Fire-and-tolerate (Danny live P1): a failed bridge-write must never fail
-          // the match flow itself — surface the standard toast, keep going.
-          notifyError(t('common:actionFailed'))
-        }
-      }
+      // MATCH-EXPERIENCE-AUTO-1 (CMBE, 2026-07-25): the backend's MatchMaker now
+      // writes the work-experience entry itself on every match create — with and
+      // without a vacancy — and is idempotent on employer+start date per candidate.
+      // The frontend must NOT post one anymore (the old interim bridge is removed).
 
       // Mismatch resolution: recruiter chose to move the candidate's branch along.
       // Best-effort AFTER the placement (its failure must not lose the match).

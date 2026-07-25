@@ -29,7 +29,6 @@ import { render, screen, within, fireEvent, waitFor } from '@testing-library/rea
 import userEvent from '@testing-library/user-event'
 import MatchPlacementModal from './MatchPlacementModal'
 import api from '@/lib/api'
-import { notifyError } from '@/lib/notify'
 
 // A minimal customer fixture exercising the cost-centre cascade levels: the
 // customer's OWN cost centre/billing email/branch, a location that overrides
@@ -717,11 +716,11 @@ describe('MatchPlacementModal · edit mode (point 2, Danny live P1)', () => {
   })
 })
 
-// Coordinator P1 add-on (interim bridge until CMBE ships MATCH-EXPERIENCE-AUTO-1):
-// the backend's MatchMaker already adds a work-experience entry on match creation,
-// but ONLY when a vacancy is attached — a direct placement with none silently gets
-// no CV entry. This bridges ONLY that gap on the FE, fire-and-tolerate.
-describe('MatchPlacementModal · interim work-experience bridge (until MATCH-EXPERIENCE-AUTO-1)', () => {
+// MATCH-EXPERIENCE-AUTO-1 (CMBE, 2026-07-25): the backend's MatchMaker now writes
+// the work-experience entry itself on every match create — with and without a
+// vacancy, idempotent on employer+start date — so the frontend must NEVER post
+// one. Replaces the old interim-bridge tests (which asserted the FE posted it).
+describe('MatchPlacementModal · never posts a work-experience entry (backend owns it, MATCH-EXPERIENCE-AUTO-1)', () => {
   const pickCustomerAndFunction = async (user: ReturnType<typeof userEvent.setup>) => {
     await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
     await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
@@ -729,20 +728,18 @@ describe('MatchPlacementModal · interim work-experience bridge (until MATCH-EXP
     await user.click(await screen.findByRole('button', { name: 'Verzorgende IG' }))
   }
 
-  it('fires POST /candidates/{id}/experiences with the mapped fields when no vacancy was picked', async () => {
+  it('never posts /candidates/{id}/experiences when creating a match (no vacancy picked)', async () => {
     const user = userEvent.setup()
     render(<MatchPlacementModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
     await screen.findByRole('dialog')
     await pickCustomerAndFunction(user)
 
     await user.click(screen.getByRole('button', { name: 'placement.create' }))
-    expect(api.post).toHaveBeenCalledWith('/matches', expect.anything())
-    expect(api.post).toHaveBeenCalledWith('/candidates/cand-1/experiences', expect.objectContaining({
-      employer: 'Zorggroep A', function_title: 'Verzorgende IG', current: true,
-    }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/matches', expect.anything()))
+    expect(api.post).not.toHaveBeenCalledWith('/candidates/cand-1/experiences', expect.anything())
   })
 
-  it('never fires the bridge in EDIT mode', async () => {
+  it('never posts /candidates/{id}/experiences when editing a match either', async () => {
     editMatchFixture.current = {
       customer_id: 'cust-1', customer_location_id: null, customer_department_id: null,
       contact_id: null, branch_id: null, vacancy_id: null, owner: null,
@@ -754,23 +751,7 @@ describe('MatchPlacementModal · interim work-experience bridge (until MATCH-EXP
     render(<MatchPlacementModal candidateId="cand-1" editMatchId="match-1" onClose={noop} onCreated={noop} />)
     await screen.findByRole('button', { name: 'Zorggroep A' })
     await user.click(screen.getByRole('button', { name: 'common:save' }))
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/matches/match-1', expect.anything()))
     expect(api.post).not.toHaveBeenCalledWith('/candidates/cand-1/experiences', expect.anything())
-  })
-
-  it('a failed experiences POST does not fail the match flow itself (fire-and-tolerate)', async () => {
-    vi.mocked(api.post)
-      .mockResolvedValueOnce({ data: { data: { id: 'match-9' } } }) // POST /matches succeeds
-      .mockRejectedValueOnce(new Error('boom'))                    // POST .../experiences fails
-    const onCreated = vi.fn()
-    const onClose = vi.fn()
-    const user = userEvent.setup()
-    render(<MatchPlacementModal candidateId="cand-1" onClose={onClose} onCreated={onCreated} />)
-    await screen.findByRole('dialog')
-    await pickCustomerAndFunction(user)
-
-    await user.click(screen.getByRole('button', { name: 'placement.create' }))
-    await waitFor(() => expect(onCreated).toHaveBeenCalled())
-    expect(onClose).toHaveBeenCalled()
-    expect(notifyError).toHaveBeenCalledWith('common:actionFailed')
   })
 })
