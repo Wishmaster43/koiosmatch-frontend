@@ -28,16 +28,21 @@ function placementContext(ev: Record<string, unknown>): Record<string, unknown> 
   return isPlacement ? ctx : null
 }
 
+// Known sub-tab ids (deep-link validation lives here, not in the drawer).
+const KNOWN_SUB_TABS = ['conversations', 'notes', 'tasks', 'timeline', 'consent'] as const
+
 /**
  * Communication tab — sub-tabs (Danny 2026-07-03, mirrors the Planning panel):
  * Toestemmingen · Taken · Notities · Tijdlijn · Conversaties. Each section renders
  * on its own; NotesTab is reused per-section via its show* flags (no duplication).
  */
-export default function CommunicationTab({ c, onSave, onEditStatusEvent }: { c: Candidate; onSave?: (consent: Record<string, unknown>) => void
+export default function CommunicationTab({ c, onSave, onEditStatusEvent, initialSubTab }: { c: Candidate; onSave?: (consent: Record<string, unknown>) => void
   // Optional (Danny 2026-07-20, job A): forwarded to the shared NotesTab so the
   // Tijdlijn "Statuswissel" row gets an edit pencil — only when the host (CandidateDrawer)
   // resolves the current status as reason/date-carrying. Additive prop, see NotesTab.
-  onEditStatusEvent?: () => void }) {
+  onEditStatusEvent?: () => void
+  // Deep-link sub-tab target (table cell click); validated below against KNOWN_SUB_TABS.
+  initialSubTab?: string }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   // Note categories from the tenant lookup, scoped to 'candidate' (NOTE-TYPES-2/3).
@@ -61,7 +66,11 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent }: { c: 
   const editUserNote = (fi: number, payload: { type: string; title: string; body: string; channel?: string }) =>
     editNote(userNotes[fi].__idx, payload)
   // Active sub-tab — notes is the daily surface, consent/tasks/timeline one click away.
-  const [subTab, setSubTab] = useState('notes')
+  // Deep-link default: an unknown/stale target falls back to Notities rather than
+  // blanking the tab — this component is the sub-tab validator.
+  const [subTab, setSubTab] = useState(
+    initialSubTab && (KNOWN_SUB_TABS as readonly string[]).includes(initialSubTab) ? initialSubTab : 'notes'
+  )
 
   // Channel consent (AVG) — nested `consent.{channel}_*` (C-11). Toggling saves the
   // full consent object; the server stamps `*_consent_at` on a flip (shown inline).

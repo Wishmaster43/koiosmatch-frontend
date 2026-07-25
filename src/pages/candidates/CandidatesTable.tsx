@@ -15,12 +15,18 @@ import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import LookupIcon from '@/components/ui/LookupIcon'
 import { KoiosAdvicePill } from '@/lib/koiosAdviceMeta'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { useCandidateAdvice } from '@/lib/useCandidateAdvice'
+import { contactTarget, funnelTarget, statusTarget, TARGET_CONVERSATIONS, TARGET_MATCHES, TARGET_POOLS, TARGET_PREFERENCES } from './data/candidateCellTargets'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
 // Plain-text cell (matches the function column) — the uniform style for all values.
 const plainCell: CSSProperties = { color: 'var(--text)', fontSize: 12 }
 const dash = <span style={{ color: 'var(--text-muted)' }}>—</span>
+
+// Shared reset style for every clickable cell wrapper — keeps the visual output
+// pixel-identical to a plain <span>/<div> while making the whole cell a real button.
+const cellButton: CSSProperties = { background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer', textAlign: 'left' }
 
 type LucideIcon = ComponentType<{ size?: number; title?: string; style?: CSSProperties }>
 
@@ -72,11 +78,14 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
   // LookupsContext is still untyped JS — cast its API to the meta shapes used here.
   const { funnelTypes, funnelMeta, statusMeta, phaseMeta, typeMeta } = useLookups() as unknown as {
     funnelTypes: Array<{ value: string }>
-    funnelMeta: (v: string) => { label: string; color: string }
-    statusMeta: (v: string) => { label: string; color: string }
+    funnelMeta: (v: string) => { label: string; color: string; is_match?: boolean }
+    statusMeta: (v: string) => { label: string; color: string; requires_match?: boolean; requires_reason?: boolean; expects_return_date?: boolean; is_blacklist?: boolean }
     phaseMeta: (v: string) => { label: string; color: string }
     typeMeta: (v: string) => { label: string; color: string }
   }
+  // Shared Koios advice resolver — the table and the drawer's "Koios AI adviseert"
+  // block now read the SAME source, so they can no longer disagree.
+  const adviceOf = useCandidateAdvice()
   const { colorOf: genderColor } = useGenders()
   const { labelOf: lastContactLabel, iconOf: lastContactIcon } = useLastContactTypes()
   // Tenant display settings (Settings → Candidate → Table display). All default off.
@@ -134,11 +143,17 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         key: 'status', header: t('columns.deployability'), sortable: true, sortValue: c => c.status ? statusMeta(c.status).label : '',
         // Lifecycle wins in the archived/trash views (ERASE-1): show a Gearchiveerd/
         // Verwijderd chip instead of the deployability status. Otherwise the shared chip.
-        render: c => c.lifecycle === 'pending_erase'
-          ? <SoftChip label={t('lifecycle.pendingErase')} color="var(--color-danger)" round />
-          : c.lifecycle === 'archived'
-            ? <SoftChip label={t('lifecycle.archived')} color="var(--text-muted)" round />
-            : <CandidateStatusChip status={c.status} phase={c.phase} plain={!colorStatus} round />,
+        render: c => {
+          if (c.lifecycle === 'pending_erase') return <SoftChip label={t('lifecycle.pendingErase')} color="var(--color-danger)" round />
+          if (c.lifecycle === 'archived') return <SoftChip label={t('lifecycle.archived')} color="var(--text-muted)" round />
+          const chip = <CandidateStatusChip status={c.status} phase={c.phase} plain={!colorStatus} round />
+          // requires_match -> Matches, requires_reason/expects_return_date/is_blacklist ->
+          // Voorkeuren (where the status window + edit pencil live); no flag -> plain click.
+          const target = c.status ? statusTarget(statusMeta(c.status)) : null
+          if (!target) return chip
+          const linkLabel = target === TARGET_MATCHES ? t('cellLinks.matches') : t('cellLinks.preferences')
+          return <button type="button" onClick={e => { e.stopPropagation(); onOpenTab?.(c, target) }} aria-label={linkLabel} style={cellButton}>{chip}</button>
+        },
       },
       { key: 'created', header: t('columns.createdAt'), nowrap: true, cellStyle: plainCell, sortable: true, sortValue: c => c.created, render: c => formatDate(c.created) },
       {
@@ -153,11 +168,12 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
           const Icon = !lookupIcon && c.lastContactType ? (CONTACT_TYPE_ICON[c.lastContactType] ?? HelpCircle) : null
           // Tooltip + subtle "· by whom" once the backend returns last_contact_by (graceful null).
           const tip = c.lastContactBy ? `${label} · ${c.lastContactBy}` : label
-          // Danny 2026-07-06: clicking the date/icon jumps STRAIGHT to Communicatie → Notities.
+          // Danny 2026-07-25: WhatsApp opens Conversaties, every other channel opens Notities.
+          const target = contactTarget(c.lastContactType)
+          const linkLabel = target === TARGET_CONVERSATIONS ? t('cellLinks.conversations') : t('cellLinks.notes')
           return (
-            <button onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'communication') }} title={tip}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--text)', fontSize: 12,
-                background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}>
+            <button type="button" onClick={e => { e.stopPropagation(); onOpenTab?.(c, target) }} title={tip} aria-label={linkLabel}
+              style={{ ...cellButton, display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--text)', fontSize: 12 }}>
               {formatDate(c.lastContactAt)}
               {lookupIcon && <span style={{ display: 'inline-flex', flexShrink: 0, opacity: 0.6 }}><LookupIcon icon={lookupIcon} size={12} /></span>}
               {Icon && <Icon size={12} style={{ flexShrink: 0, opacity: 0.6 }} />}
@@ -171,13 +187,15 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         render: c => {
           if (!c.stage) return dash
           // Chip from the API's flat funnel_label/funnel_color; the lookup is the fallback.
-          // Clicking jumps to the Werk tab — the application/match behind this stage.
+          // is_match (seed: Aangenomen) jumps to Matches, every other stage to Sollicitaties.
           const m = funnelMeta(c.stage)
           const label = c.stageLabel ?? m.label
-          const jump = (e: { stopPropagation: () => void }) => { e.stopPropagation(); onOpenTab?.(c, 'work') }
-          if (!colorFunnel) return <button onClick={jump} style={{ ...plainCell, background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}>{label}</button>
+          const target = funnelTarget(m)
+          const linkLabel = target === TARGET_MATCHES ? t('cellLinks.matches') : t('cellLinks.applications')
+          const jump = (e: { stopPropagation: () => void }) => { e.stopPropagation(); onOpenTab?.(c, target) }
+          if (!colorFunnel) return <button type="button" onClick={jump} aria-label={linkLabel} style={{ ...plainCell, ...cellButton }}>{label}</button>
           const color = c.stageColor ?? m.color
-          return <button onClick={jump} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}><SoftChip label={label} color={color} /></button>
+          return <button type="button" onClick={jump} aria-label={linkLabel} style={cellButton}><SoftChip label={label} color={color} /></button>
         },
       },
       {
@@ -186,16 +204,22 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         render: c => {
           const list = c.candidateTypes ?? []
           if (list.length === 0) return dash
-          if (!colorType) return <span style={plainCell}>{list.map(v => typeMeta(v).label).join(', ')}</span>
-          const shown = list.slice(0, 2)
-          return (
-            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-              {shown.map(v => { const m = typeMeta(v); return <SoftChip key={v} label={m.label} color={m.color} /> })}
-              {list.length > shown.length && (
-                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>+{list.length - shown.length}</span>
-              )}
-            </div>
-          )
+          // Contractvorm always opens the Voorkeuren tab (Danny 25/7 spec, no flag needed).
+          const jump = (e: { stopPropagation: () => void }) => { e.stopPropagation(); onOpenTab?.(c, TARGET_PREFERENCES) }
+          const content = !colorType
+            ? <span style={plainCell}>{list.map(v => typeMeta(v).label).join(', ')}</span>
+            : (() => {
+                const shown = list.slice(0, 2)
+                return (
+                  <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                    {shown.map(v => { const m = typeMeta(v); return <SoftChip key={v} label={m.label} color={m.color} /> })}
+                    {list.length > shown.length && (
+                      <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>+{list.length - shown.length}</span>
+                    )}
+                  </div>
+                )
+              })()
+          return <button type="button" onClick={jump} aria-label={t('cellLinks.preferences')} style={cellButton}>{content}</button>
         },
       },
       {
@@ -203,26 +227,33 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         render: c => {
           const pools = c.pools ?? []
           if (pools.length === 0) return dash
-          if (!colorPool) return <span style={plainCell}>{pools.map(p => p.name).filter(Boolean).join(', ')}</span>
-          const shown = pools.slice(0, 2)
-          return (
-            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-              {shown.map((p, i) => <SoftChip key={p.id ?? p.name ?? i} label={p.name} color={p.color || 'var(--text-muted)'} title={p.name} />)}
-              {pools.length > shown.length && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>+{pools.length - shown.length}</span>}
-            </div>
-          )
+          // Talentenpool always opens Match > Talentenpools (Danny 25/7 spec, no flag needed).
+          const jump = (e: { stopPropagation: () => void }) => { e.stopPropagation(); onOpenTab?.(c, TARGET_POOLS) }
+          const content = !colorPool
+            ? <span style={plainCell}>{pools.map(p => p.name).filter(Boolean).join(', ')}</span>
+            : (() => {
+                const shown = pools.slice(0, 2)
+                return (
+                  <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                    {shown.map((p, i) => <SoftChip key={p.id ?? p.name ?? i} label={p.name} color={p.color || 'var(--text-muted)'} title={p.name} />)}
+                    {pools.length > shown.length && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>+{pools.length - shown.length}</span>}
+                  </div>
+                )
+              })()
+          return <button type="button" onClick={jump} aria-label={t('cellLinks.pools')} style={cellButton}>{content}</button>
         },
       },
       {
-        key: 'koios', nowrap: true, sortable: true, sortValue: c => c.koiosAdvice?.action ?? '',
+        key: 'koios', nowrap: true, sortable: true, sortValue: c => adviceOf(c)?.action ?? '',
         header: (
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
             <KoiosAiMark size={16} />{t('columns.koios')}
           </span>
         ),
         // Shared pill renderer (lib/koiosAdviceMeta) — identical to the customers koios
-        // pill and the vacancies "published" pill (Danny 2026-07-14 unification).
-        render: c => <KoiosAdvicePill advice={c.koiosAdvice} colored={colorKoios}
+        // pill and the vacancies "published" pill (Danny 2026-07-14 unification). Reads the
+        // shared useCandidateAdvice() resolver, same source the drawer's advice block uses.
+        render: c => <KoiosAdvicePill advice={adviceOf(c)} colored={colorKoios}
           fallbackLabel={action => t(`koios.actions.${action}`, { defaultValue: action })} />,
       },
       {
@@ -237,7 +268,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
     ]
   }, [
     t, formatDate, funnelTypes, funnelMeta, statusMeta, phaseMeta, typeMeta,
-    genderColor, lastContactLabel, lastContactIcon,
+    genderColor, lastContactLabel, lastContactIcon, adviceOf,
     colorFunnel, colorType, colorPool, colorKoios, coloredByGender, colorStatus, colorPhase, colorOwner,
     onOpenTab,
   ])

@@ -39,6 +39,7 @@ import MergeCandidateModal from './drawer/MergeCandidateModal'
 import CandidateStatusModals from './drawer/CandidateStatusModals'
 import { CandidateTitle, CandidateHeaderActions, ArchivedBanner } from './drawer/CandidateHeaderBits'
 import { peekReturnTab, clearReturnTab } from './drawer/constants'
+import { parseTabTarget } from './drawer/tabTarget'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -159,6 +160,12 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const { fields: customFieldDefs } = useCustomFields('candidate')
   if (!c) return null
 
+  // Deep-link target (table cell click) or the NAV-BACK-1 remembered tab — parsed
+  // into a { tab, sub? } pair. The sub-tab is only handed to the tab it belongs to
+  // (guarded by tab id below), so e.g. a 'work:pools' target never leaks into
+  // CommunicationTab; the tab component itself still validates the sub id.
+  const deepLink = parseTabTarget(initialTab ?? rememberedTab)
+
   // Freelance (ZZP) tab shows when the candidate holds the freelance/ZZP type.
   const isFreelancer = (c.candidateTypes ?? []).some(v => ZZP_TYPE_SLUGS.includes(v))
   const tabs = TABS.filter(tab => {
@@ -181,7 +188,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     switch (activeTab) {
       case 'profile':        return <ProfilePanel c={mergedC} autoEditSignal={profileEditSignal} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
       case 'background':     return <BackgroundTab c={mergedC} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
-      case 'work':           return <WorkTab c={c} onRefresh={() => onRefresh?.(c.id)} />
+      case 'work':           return <WorkTab c={c} onRefresh={() => onRefresh?.(c.id)} initialSubTab={deepLink?.tab === 'work' ? deepLink.sub : undefined} />
       case 'vacancySearch':  return <VacancySearchTab candidate={c} />
       case 'planning':       return <PlanningPanel c={c} />
       case 'preferences':    return <PreferencesTab c={c}
@@ -200,7 +207,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         onEditStatus={status.canEditStatusReason ? status.openStatusEdit : undefined} />
       case 'administration': return <ZzpTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { zzp: p })} />
       case 'communication':  return <CommunicationTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { consent: p })}
-        onEditStatusEvent={status.canEditStatusReason ? status.openStatusEdit : undefined} />
+        onEditStatusEvent={status.canEditStatusReason ? status.openStatusEdit : undefined}
+        initialSubTab={deepLink?.tab === 'communication' ? deepLink.sub : undefined} />
       case 'documents':      return <DocumentsSection c={c} />
       // onUpdate lets the PDOK refresh push fresh lat/lng/provenance into the page
       // record (pure local merge — buildCandidatePatch maps none of those fields,
@@ -240,7 +248,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       entity={c}
       // An explicit deep-link (table cell / funnel-chip) always wins; otherwise
       // fall back to the NAV-BACK-1 remembered tab (see rememberedTab above).
-      initialTab={initialTab ?? rememberedTab ?? undefined}
+      initialTab={deepLink?.tab ?? undefined}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
       footer={

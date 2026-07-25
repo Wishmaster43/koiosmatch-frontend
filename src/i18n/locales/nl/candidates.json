@@ -29,7 +29,22 @@
       "add_to_pool": "Voeg toe aan pool",
       "contact": "Contacteer",
       "plan_intake": "Plan intake"
+    },
+    "reasons": {
+      "neverContacted": "Nog nooit contact geweest — neem contact op om dit dossier te activeren.",
+      "staleContact": "Langer dan {{months}} maanden geen contact geregistreerd — plan een belmoment.",
+      "leadNoApplication": "Lead zonder sollicitatie — plan een intake om te kwalificeren.",
+      "noPool": "Zit nog in geen enkele talentenpool — voeg toe zodat de kandidaat vindbaar is.",
+      "none": "Geen actie nodig — dit dossier is bij."
     }
+  },
+  "cellLinks": {
+    "conversations": "Open conversaties",
+    "notes": "Open notities",
+    "matches": "Open matches",
+    "applications": "Open sollicitaties",
+    "pools": "Open talentenpools",
+    "preferences": "Open voorkeuren"
   },
   "bulk": {
     "selected": "{{count}} geselecteerd",
@@ -699,7 +714,8 @@
     "matchText": "Op basis van het profiel is de verwachte beste match: Verzorgende IG en Helpende Plus bij zorginstellingen in de regio.",
     "engagementLabel": "Betrokkenheid",
     "engagementContacted": "Laatste contactmoment geregistreerd op {{date}}. Profiel is actief bewaakt.",
-    "engagementNone": "Geen recent contactmoment geregistreerd. Een follow-up verhoogt de kans op succesvolle plaatsing."
+    "engagementNone": "Geen recent contactmoment geregistreerd. Een follow-up verhoogt de kans op succesvolle plaatsing.",
+    "adviceNoneLabel": "Geen actie nodig"
   },
   "cv": {
     "contact": "Contact",

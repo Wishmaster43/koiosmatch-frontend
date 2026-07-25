@@ -692,7 +692,8 @@
     "matchText": "Según el perfil, la mejor coincidencia esperada es: Verzorgende IG y Helpende Plus en centros de atención de la región.",
     "engagementLabel": "Compromiso",
     "engagementContacted": "Último contacto registrado el {{date}}. Perfil monitorizado activamente.",
-    "engagementNone": "No hay contacto reciente registrado. Un seguimiento aumenta la probabilidad de una colocación exitosa."
+    "engagementNone": "No hay contacto reciente registrado. Un seguimiento aumenta la probabilidad de una colocación exitosa.",
+    "adviceNoneLabel": "No se requiere ninguna acción"
   },
   "cv": {
     "contact": "Contacto",
@@ -793,7 +794,22 @@
       "add_to_pool": "Añadir al grupo",
       "contact": "Contactar",
       "plan_intake": "Planificar entrevista"
+    },
+    "reasons": {
+      "neverContacted": "Nunca se ha registrado contacto — contacte para activar este expediente.",
+      "staleContact": "Sin contacto registrado desde hace más de {{months}} meses — programe una llamada.",
+      "leadNoApplication": "Lead sin solicitud — planifique una entrevista para calificarlo.",
+      "noPool": "Aún no está en ningún grupo de talento — añádalo para que sea localizable.",
+      "none": "No se requiere ninguna acción — este expediente está al día."
     }
+  },
+  "cellLinks": {
+    "notes": "Abrir notas",
+    "conversations": "Abrir conversaciones",
+    "matches": "Abrir matches",
+    "applications": "Abrir solicitudes",
+    "pools": "Abrir grupos de talento",
+    "preferences": "Abrir preferencias"
   },
   "map": {
     "pointCount": "{{count}} candidatos en el mapa"

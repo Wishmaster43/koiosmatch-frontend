@@ -22,7 +22,9 @@ export const ADVICE_META: Record<string, AdviceMeta> = {
   default:     { icon: Sparkles,     color: 'var(--text-muted)' },
 }
 
-export interface KoiosAdvice { action?: string | null; label?: string | null; reason?: string | null }
+// `source` tags WHO produced this advice ('rules' = the FE engine, or a future
+// backend engine's own tag) — the honest gate in useCandidateAdvice reads it.
+export interface KoiosAdvice { action?: string | null; label?: string | null; reason?: string | null; source?: string }
 
 const plainCell: CSSProperties = { color: 'var(--text)', fontSize: 12 }
 const dash = <span style={{ color: 'var(--text-muted)' }}>—</span>

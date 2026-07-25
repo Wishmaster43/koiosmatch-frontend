@@ -33,11 +33,14 @@ const vacancyUrlOf = (s: AppRow) => {
   return isSafeUrl(url) ? url : null
 }
 
+// Known sub-tab ids (deep-link validation lives here, not in the drawer).
+const KNOWN_SUB_TABS = ['applications', 'matches', 'pools'] as const
+
 /** Work tab — matches + paginated applications, with the two candidate actions
  *  (§3B two-action model): couple to a vacancy, or plan an intake.
  *  `onRefresh` (Danny P1 "stale after match create"): replaces the DRAWER's shared
  *  record (header status/phase, Ervaring, MatchesTab) after a create — see reload(). */
-export default function WorkTab({ c, onRefresh }: { c: Candidate; onRefresh?: () => Promise<void> | void }) {
+export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate; onRefresh?: () => Promise<void> | void; initialSubTab?: string }) {
   const { t, i18n } = useTranslation(['candidates', 'common'])
   const { formatDate, locale } = useDateFormat()
   // Local copy of the applications so a create shows immediately (re-fetched from
@@ -120,7 +123,11 @@ export default function WorkTab({ c, onRefresh }: { c: Candidate; onRefresh?: ()
     { id: 'matches',       label: t('sections.placements') },
     { id: 'pools',         label: t('sections.pools') },
   ].sort((a, b) => a.label.localeCompare(b.label, i18n.language))
-  const [subTab, setSubTab] = useState('applications')
+  // Deep-link default: an unknown/stale target falls back to Sollicitaties
+  // rather than blanking the tab — this component is the sub-tab validator.
+  const [subTab, setSubTab] = useState(
+    initialSubTab && (KNOWN_SUB_TABS as readonly string[]).includes(initialSubTab) ? initialSubTab : 'applications'
+  )
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

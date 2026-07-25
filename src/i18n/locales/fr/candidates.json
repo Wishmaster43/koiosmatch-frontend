@@ -692,7 +692,8 @@
     "matchText": "D'après le profil, la meilleure correspondance attendue est : Verzorgende IG et Helpende Plus dans les établissements de soins de la région.",
     "engagementLabel": "Engagement",
     "engagementContacted": "Dernier contact enregistré le {{date}}. Profil suivi activement.",
-    "engagementNone": "Aucun contact récent enregistré. Un suivi augmente les chances de placement réussi."
+    "engagementNone": "Aucun contact récent enregistré. Un suivi augmente les chances de placement réussi.",
+    "adviceNoneLabel": "Aucune action nécessaire"
   },
   "cv": {
     "contact": "Contact",
@@ -793,7 +794,22 @@
       "add_to_pool": "Ajouter au vivier",
       "contact": "Contacter",
       "plan_intake": "Planifier l'entretien"
+    },
+    "reasons": {
+      "neverContacted": "Aucun contact n'a jamais été enregistré — contactez pour activer ce dossier.",
+      "staleContact": "Aucun contact enregistré depuis plus de {{months}} mois — planifiez un appel.",
+      "leadNoApplication": "Lead sans candidature — planifiez un entretien pour le qualifier.",
+      "noPool": "Pas encore dans un vivier de talents — ajoutez-le pour qu'il soit trouvable.",
+      "none": "Aucune action nécessaire — ce dossier est à jour."
     }
+  },
+  "cellLinks": {
+    "notes": "Ouvrir les notes",
+    "conversations": "Ouvrir les conversations",
+    "matches": "Ouvrir les matches",
+    "applications": "Ouvrir les candidatures",
+    "pools": "Ouvrir les viviers de talents",
+    "preferences": "Ouvrir les préférences"
   },
   "map": {
     "pointCount": "{{count}} candidats sur la carte"

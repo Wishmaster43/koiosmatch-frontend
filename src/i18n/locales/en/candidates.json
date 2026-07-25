@@ -29,7 +29,22 @@
       "add_to_pool": "Add to pool",
       "contact": "Contact",
       "plan_intake": "Plan intake"
+    },
+    "reasons": {
+      "neverContacted": "No contact has ever been logged — reach out to activate this dossier.",
+      "staleContact": "No contact registered for more than {{months}} months — schedule a call.",
+      "leadNoApplication": "Lead with no application — plan an intake to qualify them.",
+      "noPool": "Not yet in any talent pool — add them so they can be found.",
+      "none": "No action needed — this dossier is up to date."
     }
+  },
+  "cellLinks": {
+    "conversations": "Open conversations",
+    "notes": "Open notes",
+    "matches": "Open matches",
+    "applications": "Open applications",
+    "pools": "Open talent pools",
+    "preferences": "Open preferences"
   },
   "bulk": {
     "selected": "{{count}} selected",
@@ -699,7 +714,8 @@
     "matchText": "Based on the profile, the expected best match is: Verzorgende IG and Helpende Plus at care institutions in the region.",
     "engagementLabel": "Engagement",
     "engagementContacted": "Last contact recorded on {{date}}. Profile is actively monitored.",
-    "engagementNone": "No recent contact recorded. A follow-up increases the chance of a successful placement."
+    "engagementNone": "No recent contact recorded. A follow-up increases the chance of a successful placement.",
+    "adviceNoneLabel": "No action needed"
   },
   "cv": {
     "contact": "Contact",
