@@ -104,7 +104,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const {
     selected, expanded, setExpanded, closeDrawer, selectApplication,
     handleMove, handleOwner, handleLinkVacancy, handleUpdateSource, handleReject,
-    handleAdjustScore, handleUpdateCustomFields, handleDetach, handleRestore,
+    handleAdjustScore, handleUpdateCustomFields, handleCandidateUpdated, handleDetach, handleRestore,
   } = useApplicationDrawerActions({ applications, wideRows, setApplications, setTotal, funnelTypes, users, bucket, decorate, t })
 
   // ── Bulk selection + mutations — §0.3 split (F1, audit R1): mirrors useCandidateBulkActions.
@@ -317,6 +317,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
         onDetach={handleDetach}
         onRestore={handleRestore}
         canManage={canManage}
+        onCandidateUpdated={handleCandidateUpdated}
       />
 
       {addOpen && <AddApplicationModal onClose={() => setAddOpen(false)} onCreated={handleCreated} />}

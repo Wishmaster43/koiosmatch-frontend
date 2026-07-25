@@ -100,7 +100,14 @@
     "openCandidate": "Open kandidaat",
     "openCustomer": "Klant openen",
     "pickVacancy": "Selecteer een vacature",
-    "noVacancy": "Geen vacature"
+    "noVacancy": "Geen vacature",
+    "editCandidate": "Kandidaatgegevens wijzigen",
+    "forVacancy": "Vacature",
+    "firstName": "Voornaam",
+    "middleName": "Tussenvoegsel",
+    "lastName": "Achternaam",
+    "functionTitle": "Functie",
+    "noFunction": "Nog geen functie ingevuld"
   },
   "matchScore": {
     "title": "Match score",

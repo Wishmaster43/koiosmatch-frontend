@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Unlink, ArchiveRestore } from 'lucide-react'
+import { Unlink, ArchiveRestore, Edit2, Save, X } from 'lucide-react'
 import { useLookups } from '@/context/LookupsContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
-import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import ApplicationChangelogPopover from './drawer/ApplicationChangelogPopover'
+import ApplicationHeaderTitle from './drawer/ApplicationHeaderTitle'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import ApplicationTab from './drawer/ApplicationTab'
 import CandidateTab from './drawer/CandidateTab'
@@ -20,11 +20,17 @@ import NotesTab from './drawer/NotesTab'
 import Timeline from './drawer/Timeline'
 import DetachReasonModal from './drawer/DetachReasonModal'
 import { peekReturnTab, clearReturnTab } from './drawer/constants'
+import { useApplicationCandidateEdit } from './hooks/useApplicationCandidateEdit'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { ApplicationDetail } from '@/types/application'
 import type { RejectPayload } from './drawer/RejectionBlock'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { Id } from '@/types/common'
+
+// Icon-button metrics for the header's edit/save/cancel toggles — same 28x28
+// footprint as CandidateHeaderBits' iconBtn (§4 consistency), kept local since
+// that constant isn't exported from the (out-of-scope) candidate file.
+const iconBtn = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 } as const
 
 // The tab order (matches the screenshots). 'extra' (§3A(f)) is appended below
 // only when the tenant has ≥1 active application custom field.
@@ -56,13 +62,17 @@ interface ApplicationDrawerProps {
   // by any caller — kept for parity/future deep-links; the return-tab memory below
   // covers the NAV-BACK-1 case this drawer actually needs today).
   initialTab?: string
+  // Danny 2026-07-25: header pencil edits the CANDIDATE's name/function from the
+  // application drill-down — reported so the page can merge the rename across
+  // every application row sharing this candidate (see useApplicationCandidateEdit).
+  onCandidateUpdated?: (candidateId: Id, patch: { candidateName: string; candidateFunction: string }) => void
 }
 
 /**
  * ApplicationDrawer — thin container: declares the header config + tab list and
  * wires them to the shared EntityDrawer shell. No heavy JSX, no business logic.
  */
-export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, onUpdateSource, users, onDetach, onRestore, canManage, onUpdateCustomFields, initialTab }: ApplicationDrawerProps) {
+export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, onUpdateSource, users, onDetach, onRestore, canManage, onUpdateCustomFields, initialTab, onCandidateUpdated }: ApplicationDrawerProps) {
   const { t } = useTranslation('applications')
   const { formatDate, formatDateTime } = useDateFormat()
   // S15: the reason-required detach confirm modal (footer "Ontkoppelen").
@@ -84,6 +94,9 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   useEffect(() => {
     if (rememberedTab && a?.id != null) clearReturnTab(a.id)
   }, [rememberedTab, a?.id])
+  // Header candidate-edit state (name + function) — called unconditionally
+  // (before the early return below), same rule as every other hook here.
+  const candidateEdit = useApplicationCandidateEdit(a?.candidateId ?? null, onCandidateUpdated)
   if (!a) return null
 
   // Header meta pickers — phase (funnel lookup) + recruiter (tenant users). The
@@ -169,24 +182,45 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
           avatar={{ initials: a.candidateInitials, soft: true }}
           renderTitle={() => (
-            <>
-              {/* S4 (Danny): no PHASE badge here — it duplicated the Fase meta picker
-                  below (the picker is the one source of truth for the phase). S21
-                  (Danny 21-07): the OUTCOME bucket badge added by F2/audit R1 is ALSO
-                  removed — flagged repeatedly ("kerstboom", "status klopt niet",
-                  "ACTIEF???") as confusing next to the candidate name and redundant
-                  with the Fase picker below, which already shows the position. The
-                  ApplicationBucketBadge component itself stays (bucket data still
-                  drives filters/insights elsewhere) — only this header render is gone. */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{a.candidateName}</span>
-                {/* S5/NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
-                <ReferenceNumberChip value={a.referenceNumber} />
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{a.vacancyTitle || '—'}</div>
-            </>
+            // S4/S21 (Danny): no phase/outcome badge here — it duplicated the Fase
+            // meta picker below and was flagged repeatedly ("kerstboom", "ACTIEF???").
+            // Danny 2026-07-25: the candidate's name + function are now editable from
+            // here (pencil in the header actions), mirroring the candidate drawer.
+            <ApplicationHeaderTitle
+              candidateName={a.candidateName} referenceNumber={a.referenceNumber}
+              candidateFunction={a.candidate?.function ?? ''} vacancyTitle={a.vacancyTitle}
+              editing={candidateEdit.editing} loading={candidateEdit.loading}
+              form={candidateEdit.form} setField={candidateEdit.setField}
+            />
           )}
           titleActions={<ApplicationChangelogPopover application={a} />}
+          actions={canManage && a.candidateId != null ? (
+            candidateEdit.editing ? (
+              <>
+                {/* Save (diskette) + cancel (✕) — same 28x28 icon-button pair as the
+                    candidate drawer's CandidateHeaderActions edit toggle (§4). */}
+                <button type="button" onClick={() => candidateEdit.saveEdit()} disabled={candidateEdit.saving}
+                  title={t('common:save')} aria-label={t('common:save')}
+                  style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none',
+                    opacity: candidateEdit.saving ? 0.7 : 1, cursor: candidateEdit.saving ? 'not-allowed' : 'pointer' }}>
+                  <Save size={14} />
+                </button>
+                <button type="button" onClick={candidateEdit.cancelEdit}
+                  title={t('common:cancel')} aria-label={t('common:cancel')}
+                  style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+                  <X size={14} />
+                </button>
+              </>
+            ) : (
+              // Idle → pencil. Gated on canManage AND a real candidateId (§3: no
+              // fake affordance when there is no honest edit target).
+              <button type="button" onClick={candidateEdit.startEdit}
+                title={t('drawer.editCandidate')} aria-label={t('drawer.editCandidate')}
+                style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+                <Edit2 size={13} />
+              </button>
+            )
+          ) : undefined}
           meta={meta}
         >
           {/* APP-DELETED-AT-1: the in-body archived banner, now the ONE shared

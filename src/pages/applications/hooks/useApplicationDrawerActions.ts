@@ -5,8 +5,10 @@
  * owner/vacancy-link/source edits, reject, manual score adjust, custom fields,
  * detach (soft-delete) and restore. List updates stay optimistic; the backend
  * re-validates (§3B). Candidate name/function editing was removed from the
- * Sollicitatie tab (Danny 21-07) — that is candidate-owned data, edited on the
- * candidate record itself, not from within an application.
+ * Sollicitatie TAB (Danny 21-07) — that stayed candidate-owned data. Danny
+ * 2026-07-25 brought it back as a HEADER pencil (not the tab): the actual PATCH
+ * lives in useApplicationCandidateEdit; handleCandidateUpdated below only
+ * merges the result into every application row sharing that candidate.
  */
 import { useState, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
@@ -14,6 +16,7 @@ import type { TFunction } from 'i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { initialsOf } from '@/lib/initials'
 import { mapApplication, mapApplicationDetail } from '../data/mapApplication'
 import { bucketOfPhase } from '../data/applicationsShared'
 import type { Application, ApplicationDetail } from '@/types/application'
@@ -170,6 +173,24 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
     api.patch(`/applications/${id}`, { custom_fields: merged }).catch(() => notifyError(t('common:actionFailed')))
   }
 
+  // Candidate name/function saved from the drawer HEADER pencil (Danny 25-07,
+  // useApplicationCandidateEdit already PATCHed /candidates/{id}) — merge the
+  // rename across every application row that shares this candidate, since
+  // several applications can point at one person and all their rows must
+  // update together. Also refreshes the open detail's nested candidate.function.
+  const handleCandidateUpdated = (candidateId: Id, patch: { candidateName: string; candidateFunction: string }) => {
+    const candidateInitials = initialsOf(patch.candidateName)
+    setApplications(prev => prev.map(a => a.candidateId === candidateId
+      ? { ...a, candidateName: patch.candidateName, candidateInitials }
+      : a))
+    setSelected(prev => (prev && prev.candidateId === candidateId
+      ? decorate({
+          ...prev, candidateName: patch.candidateName, candidateInitials,
+          candidate: { ...prev.candidate, function: patch.candidateFunction },
+        } as ApplicationDetail)
+      : prev))
+  }
+
   // Detach (soft-delete) an application: kept server-side, removed from the active
   // list. S15 (BE cb1e684): DELETE now REQUIRES a `reason` (422 without one) —
   // the drawer's DetachReasonModal collects it — and the backend writes it as a
@@ -226,6 +247,6 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
   return {
     selected, setSelected, expanded, setExpanded, closeDrawer, selectApplication,
     handleMove, handleOwner, handleLinkVacancy, handleUpdateSource, handleReject,
-    handleAdjustScore, handleUpdateCustomFields, handleDetach, handleRestore,
+    handleAdjustScore, handleUpdateCustomFields, handleCandidateUpdated, handleDetach, handleRestore,
   }
 }

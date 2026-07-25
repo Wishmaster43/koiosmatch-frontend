@@ -100,7 +100,14 @@
     "openCandidate": "Open candidate",
     "openCustomer": "Open client",
     "pickVacancy": "Select a vacancy",
-    "noVacancy": "No vacancy"
+    "noVacancy": "No vacancy",
+    "editCandidate": "Edit candidate details",
+    "forVacancy": "Vacancy",
+    "firstName": "First name",
+    "middleName": "Middle name",
+    "lastName": "Last name",
+    "functionTitle": "Function",
+    "noFunction": "No function set yet"
   },
   "matchScore": {
     "title": "Match score",

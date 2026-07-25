@@ -100,7 +100,14 @@
     "openCandidate": "Abrir candidato",
     "openCustomer": "Abrir cliente",
     "pickVacancy": "Selecciona una vacante",
-    "noVacancy": "Sin vacante"
+    "noVacancy": "Sin vacante",
+    "editCandidate": "Editar datos del candidato",
+    "forVacancy": "Vacante",
+    "firstName": "Nombre",
+    "middleName": "Partícula",
+    "lastName": "Apellido",
+    "functionTitle": "Función",
+    "noFunction": "Aún no se ha indicado ninguna función"
   },
   "matchScore": {
     "title": "Puntuación de match",
