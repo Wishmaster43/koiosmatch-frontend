@@ -82,6 +82,7 @@
     "vacancy": "Vacancy",
     "assessment_criteria": "Assessment criteria",
     "rejection": "Rejection reasons",
+    "application_proposal": "Proposals",
     "cv_template": "CV template",
     "view_customers": "Customers",
     "view_planning": "Planning",
@@ -653,6 +654,22 @@
     "saved": "Saved",
     "loading": "Loading…",
     "noReasons": "Add a rejection reason first."
+  },
+  "proposal": {
+    "title": "Propose candidate",
+    "subtitle": "Configure the subject and message a recruiter uses to propose a candidate to a customer contact.",
+    "subjectLabel": "Email subject",
+    "bodyLabel": "Message",
+    "tokensTitle": "Available tokens",
+    "tokensHint": "Use these tokens in the subject and message; they are filled in automatically.",
+    "setsPhaseLabel": "Automatically move the application to the Proposed phase",
+    "setsPhaseHint": "When on: recording a proposal automatically moves the application to the phase marked as 'Proposed'. When off: the recruiter changes the phase manually.",
+    "defaultVariantLabel": "Default CV variant",
+    "variantProposal": "Proposal CV (name visible, contact details hidden)",
+    "variantFull": "Full CV (with contact details)",
+    "notSentYet": "Koios does not send the proposal itself yet — the recruiter downloads the CV and sends it from their own mail program. The automatic, revocable share link follows once that capability ships.",
+    "saveFailed": "Save failed",
+    "saved": "Saved"
   },
   "assessment": {
     "title": "Assessment criteria",

@@ -9,6 +9,7 @@ import MatchScoreBlock from '@/components/match/MatchScoreBlock'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
 import RejectionSummary from './RejectionSummary'
 import CvBlock from './CvBlock'
+import ProposalsBlock from './propose/ProposalsBlock'
 import ApplicationDetailsCard from './ApplicationDetailsCard'
 import ApplicationStatusStrip from './ApplicationStatusStrip'
 import CompetitionBlock from './CompetitionBlock'
@@ -64,6 +65,10 @@ export default function ApplicationTab({ application: a, onAdjustScore, onLinkVa
 
       {/* S31: the linked candidate's CV at a glance — file name + upload date. */}
       <CvBlock candidateId={a.candidateId} />
+
+      {/* PROPOSE-STORE-1: the recorded-proposal history (recipient, cv variant,
+          sent/opened/revoked state) — hidden entirely until at least one exists. */}
+      <ProposalsBlock application={a} />
 
       {/* How busy is this vacancy, and where does this candidate stand among the
           other applicants (Danny 25-07 d). */}

@@ -60,6 +60,7 @@ import { AppointmentLocationSettings } from './sections/AppointmentLocationSetti
 import { SkillLevelSettings } from './sections/SkillLevelSettings'
 import { OutreachStatusSettings } from './sections/OutreachSettings'
 import RejectionSettings from './sections/RejectionSettings'
+import ProposalSettings from './sections/ProposalSettings'
 import CandidateRequiredFieldsSettings from './sections/CandidateRequiredFieldsSettings'
 import CandidateVacancyTabSettings from './sections/CandidateVacancyTabSettings'
 import RetentionSettings from './sections/RetentionSettings'
@@ -197,6 +198,7 @@ export const NAV_GROUPS = [
     items: [
       { id: 'funnel_stages', icon: Target, component: FunnelStagesSettings },
       { id: 'rejection', icon: XCircle, component: RejectionSettings },
+      { id: 'application_proposal', icon: Mail, component: ProposalSettings },
       { id: 'application_display', icon: Palette, schema: applicationDisplay },
     ],
   },

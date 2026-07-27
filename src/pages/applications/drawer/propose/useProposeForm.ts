@@ -1,0 +1,239 @@
+/**
+ * useProposeForm — all state + side effects behind ProposeCandidateModal (§3A:
+ * logic in hooks, no JSX here). Loads the customer's contacts and the FULL
+ * candidate record (the CV needs it), holds the form fields, prefills subject/
+ * body from the tenant's proposal templates (token interpolation), and drives
+ * submit(): CV download + POST /applications/{id}/propose (the real recording
+ * endpoint) + an optional funnel-phase move.
+ *
+ * Koios still never SENDS anything itself — the propose endpoint only records
+ * the proposal (recipient, cv variant, drafted subject/body); there is no
+ * share link yet (PROPOSE-SHARE-URL-1 open), so submit() only downloads a PDF
+ * client-side and records what happened, it never claims a message went out.
+ */
+import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
+import api, { unwrap } from '@/lib/api'
+import { notifyError, notifySuccess } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
+import { useLookups } from '@/context/LookupsContext'
+import { useCvSettings } from '@/lib/useCvSettings'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { useLocale } from '@/lib/datetime'
+import { mapCandidate } from '@/pages/candidates/data/mapCandidate'
+import { buildProposalCvBlob } from '@/lib/proposalCv'
+import type { CvCandidate } from '@/pages/candidates/CandidateCvTemplate'
+import type { ApplicationDetail } from '@/types/application'
+import type { Candidate } from '@/types/candidate'
+
+export interface ProposeContact { id: string; name: string; email: string; phone?: string }
+export type CvVariant = 'proposal' | 'full'
+export type ProposeDisabledReason = 'loading' | 'noCandidate' | 'noContact' | 'noConsent' | null
+
+// Tenant settings for the propose flow — JSON group 'application_proposal',
+// shared contract with the sibling CV+SETTINGS agent (Settings screen owns writes).
+interface ApplicationProposalSettings {
+  subject_template?: string
+  body_template?: string
+  sets_phase?: boolean
+  default_cv_variant?: CvVariant
+}
+
+// Fixed token names ({kandidaat} {vacature} {klant} {contact} {recruiter}) per
+// the shared contract — literal, never translated, so a tenant's own template
+// text works the same regardless of the recruiter's UI language.
+function fillTemplate(template: string, tokens: Record<string, string>): string {
+  return template.replace(/\{(kandidaat|vacature|klant|contact|recruiter)\}/g, (_m, key: string) => tokens[key] ?? '')
+}
+
+export function useProposeForm(application: ApplicationDetail) {
+  const { t } = useTranslation(['applications', 'common'])
+  const locale = useLocale()
+  // To invalidate the proposals-history query (ProposalsBlock) after a
+  // successful record, so the new entry shows up without a manual reload.
+  const queryClient = useQueryClient()
+  // Funnel stages, resolved BY FLAG (never a bare literal) — is_proposal is now
+  // emitted by the API (PROPOSE-FLAG-EXPOSE-1 shipped); the 'proposal' value
+  // fallback stays only for tenants whose lookup data predates the flag.
+  const { funnelTypes } = useLookups() as unknown as { funnelTypes: Array<{ value: string; label: string; is_proposal?: boolean }> }
+  const { settings: cvSettings } = useCvSettings() as { settings?: unknown }
+  const settingsValues = useAllSettings()
+  const proposalSettings = getJsonSetting<ApplicationProposalSettings>(settingsValues, 'application_proposal', {})
+
+  // Contacts — a direct fetch rather than useCustomerCascade: that shared hook
+  // exposes no loading flag, and this form must show an honest loading/error/
+  // empty state (§3) for the recipient picker.
+  const [contacts, setContacts] = useState<ProposeContact[]>([])
+  const [contactsLoading, setContactsLoading] = useState(true)
+  const [contactsError, setContactsError] = useState(false)
+
+  useEffect(() => {
+    const customerId = application.customerId
+    if (!customerId) { setContactsLoading(false); return }
+    let alive = true
+    setContactsLoading(true); setContactsError(false)
+    api.get(`/customers/${customerId}`)
+      .then(r => {
+        if (!alive) return
+        const raw = ((unwrap(r) as { contacts?: Array<{ id?: string; name?: string; email?: string; phone?: string }> })?.contacts) ?? []
+        setContacts(raw.map(c => ({ id: String(c.id ?? ''), name: c.name ?? '', email: c.email ?? '', phone: c.phone ?? '' })))
+      })
+      .catch(() => { if (alive) setContactsError(true) })
+      .finally(() => { if (alive) setContactsLoading(false) })
+    return () => { alive = false }
+  }, [application.customerId])
+
+  // The FULL candidate record — the application only carries a trimmed summary,
+  // but the CV template needs the real record. Alive-guarded (mirrors CandidateTab).
+  const [candidate, setCandidate] = useState<Candidate | null>(null)
+  const [candidateLoading, setCandidateLoading] = useState(true)
+  const [candidateError, setCandidateError] = useState(false)
+
+  useEffect(() => {
+    const candidateId = application.candidateId
+    if (!candidateId) { setCandidateLoading(false); return }
+    let alive = true
+    setCandidateLoading(true); setCandidateError(false)
+    api.get(`/candidates/${candidateId}`)
+      .then(r => { if (alive) setCandidate(mapCandidate(unwrap(r))) })
+      .catch(() => { if (alive) setCandidateError(true) })
+      .finally(() => { if (alive) setCandidateLoading(false) })
+    return () => { alive = false }
+  }, [application.candidateId])
+
+  // Form fields. Recipient defaults to the application's own contact when present.
+  const [recipientContactId, setRecipientContactId] = useState<string>(application.contact?.id != null ? String(application.contact.id) : '')
+  const [cvVariant, setCvVariant] = useState<CvVariant>(proposalSettings.default_cv_variant === 'full' ? 'full' : 'proposal')
+  const [includeMotivation, setIncludeMotivation] = useState(false)
+  const [subject, setSubject] = useState('')
+  const [body, setBody] = useState('')
+  const [consentConfirmed, setConsentConfirmed] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => () => { if (copyTimerRef.current) clearTimeout(copyTimerRef.current) }, [])
+
+  // The picked contact, falling back to the application's carried contact when
+  // the fresh customer fetch hasn't resolved (or failed) yet.
+  const recipient: ProposeContact | null = contacts.find(c => c.id === recipientContactId)
+    ?? (application.contact?.id != null && String(application.contact.id) === recipientContactId
+      ? { id: String(application.contact.id), name: application.contact.name, email: application.contact.email, phone: application.contact.phone }
+      : null)
+
+  // Prefill subject/body from the tenant templates ONCE (token interpolation) —
+  // never overwrite a recruiter's own edits after the first fill. Waits for the
+  // contacts fetch to settle so the {contact} token can resolve to a real name.
+  const prefilledRef = useRef(false)
+  useEffect(() => {
+    if (prefilledRef.current || contactsLoading) return
+    prefilledRef.current = true
+    const tokens = {
+      kandidaat: application.candidateName ?? '',
+      vacature: application.vacancyTitle ?? '',
+      klant: application.client ?? '',
+      contact: recipient?.name ?? '',
+      recruiter: application.owner?.name ?? '',
+    }
+    const subjectTpl = proposalSettings.subject_template || t('propose.defaultSubject')
+    const bodyTpl = proposalSettings.body_template || t('propose.defaultBody')
+    setSubject(fillTemplate(subjectTpl, tokens))
+    setBody(fillTemplate(bodyTpl, tokens))
+    // Deliberately narrow deps: this must fire exactly once, when contacts settle.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contactsLoading])
+
+  const hasMotivation = Boolean(application.coverLetter)
+
+  // Why the primary action is disabled — the modal renders this, never a bare
+  // greyed-out button with no explanation (§3 no fake affordances).
+  const disabledReason: ProposeDisabledReason =
+    (candidateLoading || contactsLoading) ? 'loading'
+    : !candidate ? 'noCandidate'
+    : !recipient ? 'noContact'
+    : !consentConfirmed ? 'noConsent'
+    : null
+
+  // Copy the drafted subject + a plain-text version of the (rich-text) body.
+  // The message as it is actually shared: the drafted body, plus the candidate's
+  // own motivation letter appended when the recruiter ticked it. Without this the
+  // "motivatiebrief meesturen" checkbox changed nothing at all — the /propose
+  // contract has no field for it, so the letter travels inside the message body
+  // (§3: a control must have a real effect, or not exist).
+  const composedBody = () => (includeMotivation && application.coverLetter
+    ? `${body}<hr />${application.coverLetter}`
+    : body)
+
+  const copyMessage = async () => {
+    const plainBody = composedBody().replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+    try {
+      await navigator.clipboard.writeText(`${subject}\n\n${plainBody}`)
+      setCopied(true)
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000)
+    } catch {
+      notifyError(t('common:actionFailed'))
+    }
+  }
+
+  // submit(): download the CV, RECORD the proposal via the real backend
+  // endpoint, and (only when the tenant setting is on) move the funnel phase.
+  // Any failing step surfaces the server message and returns false — never a
+  // false "sent"/"recorded" claim.
+  const submit = async (): Promise<boolean> => {
+    if (disabledReason || !candidate || submitting) return false
+    setSubmitting(true)
+    try {
+      // 1. Generate + download the CV PDF client-side — same blob → object-URL →
+      // <a download> pattern as CandidateHeaderBits' downloadCv, no server round-trip.
+      const blob = await buildProposalCvBlob({ candidate: candidate as unknown as CvCandidate, settings: cvSettings as never, locale, t, variant: cvVariant })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url; link.download = `CV - ${candidate.name ?? 'candidate'}.pdf`
+      document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url)
+
+      // 2. Record the proposal via the real endpoint (gate applications.update) —
+      // recipient, cv variant and the drafted subject/body. This only RECORDS
+      // the proposal; the backend does not send an e-mail itself.
+      await api.post(`/applications/${application.id}/propose`, {
+        contact_id: recipientContactId,
+        cv_variant: cvVariant,
+        subject,
+        // The recorded body is what was actually shared, motivation letter included
+        // when ticked — so the proposal history matches what the customer received.
+        body: composedBody(),
+      })
+      // Refresh the proposals-history block (ProposalsBlock shares this query
+      // key) so the freshly recorded proposal appears without a manual reload.
+      queryClient.invalidateQueries({ queryKey: ['applications', application.id, 'proposals'] })
+
+      // 3. Move the funnel phase to the is_proposal stage — only when the tenant
+      // opted in via Settings (application_proposal.sets_phase).
+      if (proposalSettings.sets_phase) {
+        const proposalStage = funnelTypes.find(f => f.is_proposal) ?? funnelTypes.find(f => f.value === 'proposal')
+        if (proposalStage) await api.patch(`/applications/${application.id}`, { phase_key: proposalStage.value })
+      }
+
+      notifySuccess(t('propose.recorded'))
+      return true
+    } catch (err) {
+      notifyError(extractApiError(err, t('common:actionFailed')))
+      return false
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return {
+    contacts, contactsLoading, contactsError,
+    candidateLoading, candidateError,
+    recipientContactId, setRecipientContactId, recipient,
+    cvVariant, setCvVariant,
+    includeMotivation, setIncludeMotivation, hasMotivation,
+    subject, setSubject, body, setBody,
+    consentConfirmed, setConsentConfirmed,
+    disabledReason, submitting, submit,
+    copyMessage, copied,
+  }
+}

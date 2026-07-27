@@ -82,6 +82,7 @@
     "vacancy": "Vacature",
     "assessment_criteria": "Beoordelingscriteria",
     "rejection": "Afwijsredenen",
+    "application_proposal": "Voorstellen",
     "cv_template": "CV-sjabloon",
     "view_customers": "Klanten",
     "view_planning": "Planning",
@@ -653,6 +654,22 @@
     "saved": "Opgeslagen",
     "loading": "Laden…",
     "noReasons": "Voeg eerst een afwijsreden toe."
+  },
+  "proposal": {
+    "title": "Kandidaat voorstellen",
+    "subtitle": "Stel het onderwerp en bericht in waarmee een recruiter een kandidaat voorstelt aan een klantcontact.",
+    "subjectLabel": "E-mail onderwerp",
+    "bodyLabel": "Bericht",
+    "tokensTitle": "Beschikbare tokens",
+    "tokensHint": "Gebruik deze tokens in onderwerp en bericht; ze worden automatisch ingevuld.",
+    "setsPhaseLabel": "Verplaats de sollicitatie automatisch naar de fase Voorgesteld",
+    "setsPhaseHint": "Wanneer aan: het vastleggen van een voorstel zet de sollicitatie automatisch in de fase die als 'Voorgesteld' is gemarkeerd. Wanneer uit: de recruiter wijzigt de fase zelf.",
+    "defaultVariantLabel": "Standaard CV-variant",
+    "variantProposal": "Voorstel-CV (naam zichtbaar, contactgegevens verborgen)",
+    "variantFull": "Volledig CV (met contactgegevens)",
+    "notSentYet": "Koios verstuurt het voorstel nog niet zelf — de recruiter downloadt het CV en verstuurt het vanuit het eigen mailprogramma. De automatische, herroepbare deellink volgt zodra deze functionaliteit gereed is.",
+    "saveFailed": "Opslaan mislukt",
+    "saved": "Opgeslagen"
   },
   "assessment": {
     "title": "Beoordelingscriteria",

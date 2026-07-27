@@ -79,6 +79,7 @@
     "candidate_status": "Statut candidat",
     "vacancy": "Offre",
     "rejection": "Motifs de refus",
+    "application_proposal": "Propositions",
     "cv_template": "Modèle de CV",
     "view_customers": "Clients",
     "view_planning": "Planning",
@@ -523,6 +524,22 @@
     "saved": "Enregistré",
     "loading": "Chargement…",
     "noReasons": "Ajoutez d'abord un motif de refus."
+  },
+  "proposal": {
+    "title": "Proposer le candidat",
+    "subtitle": "Configurez l'objet et le message utilisés par un recruteur pour proposer un candidat à un contact client.",
+    "subjectLabel": "Objet de l'e-mail",
+    "bodyLabel": "Message",
+    "tokensTitle": "Jetons disponibles",
+    "tokensHint": "Utilisez ces jetons dans l'objet et le message ; ils sont remplis automatiquement.",
+    "setsPhaseLabel": "Faire passer automatiquement la candidature à la phase Proposé",
+    "setsPhaseHint": "Si activé : l'enregistrement d'une proposition fait automatiquement passer la candidature à la phase marquée « Proposé ». Si désactivé : le recruteur change la phase lui-même.",
+    "defaultVariantLabel": "Variante de CV par défaut",
+    "variantProposal": "CV de proposition (nom visible, coordonnées masquées)",
+    "variantFull": "CV complet (avec coordonnées)",
+    "notSentYet": "Koios n'envoie pas encore la proposition lui-même — le recruteur télécharge le CV et l'envoie depuis sa propre messagerie. Le lien de partage automatique et révocable arrivera dès que cette fonctionnalité sera disponible.",
+    "saveFailed": "Échec de l'enregistrement",
+    "saved": "Enregistré"
   },
   "cvTemplate": {
     "title": "Modèle de CV",

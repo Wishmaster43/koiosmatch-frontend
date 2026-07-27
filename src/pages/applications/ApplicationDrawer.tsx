@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Unlink, ArchiveRestore, Edit2, Save, X, XCircle } from 'lucide-react'
+import { Unlink, ArchiveRestore, Edit2, Save, Send, X, XCircle } from 'lucide-react'
 import { useLookups } from '@/context/LookupsContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
@@ -20,6 +20,7 @@ import NotesTab from './drawer/NotesTab'
 import Timeline from './drawer/Timeline'
 import DetachReasonModal from './drawer/DetachReasonModal'
 import RejectionModal from './drawer/RejectionModal'
+import ProposeCandidateModal from './drawer/propose/ProposeCandidateModal'
 import { peekReturnTab, clearReturnTab } from './drawer/constants'
 import { useApplicationCandidateEdit } from './hooks/useApplicationCandidateEdit'
 import { BTN_H } from '@/config/buttonMetrics'
@@ -83,6 +84,9 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   // IS the flagged is_rejected stage (a bare phase PATCH bypasses the required
   // reason, see the meta.phase onChange below).
   const [rejectModalOpen, setRejectModalOpen] = useState(false)
+  // Danny 25-07: "propose to customer" — the CV-in-house-style + optional
+  // motivation letter flow, gated below on canManage + a linked candidate/customer.
+  const [proposeModalOpen, setProposeModalOpen] = useState(false)
   // Funnel phases (Settings lookup) for the header phase picker; never hardcoded.
   const { funnelTypes } = useLookups() as unknown as { funnelTypes: Array<{ value: string; label: string; color?: string; is_rejected?: boolean }> }
   // The Extra tab only shows when the tenant has defined application custom fields (§3A(f)).
@@ -126,6 +130,11 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
     { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions,
       onChange: (v: string) => { if (v !== '__current') onOwnerChange?.(a.id, String(v)) }, menuWidth: 200, width: 190 },
   ]
+  // Gate for the "Voorstellen aan klant" header action (Danny 25-07): needs both
+  // a candidate and a customer to propose to, and is pointless once archived or
+  // already rejected.
+  const canPropose = canManage && a.candidateId != null && a.customerId != null && !a.archived && a.bucket !== 'rejected'
+
   // Map a tab id to its content component.
   const renderTab = (id: string): ReactNode => {
     switch (id) {
@@ -220,31 +229,46 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
           )}
           titleActions={<ApplicationChangelogPopover application={a} />}
           actions={canManage && a.candidateId != null ? (
-            candidateEdit.editing ? (
-              <>
-                {/* Save (diskette) + cancel (✕) — same 28x28 icon-button pair as the
-                    candidate drawer's CandidateHeaderActions edit toggle (§4). */}
-                <button type="button" onClick={() => candidateEdit.saveEdit()} disabled={candidateEdit.saving}
-                  title={t('common:save')} aria-label={t('common:save')}
-                  style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none',
-                    opacity: candidateEdit.saving ? 0.7 : 1, cursor: candidateEdit.saving ? 'not-allowed' : 'pointer' }}>
-                  <Save size={14} />
+            <>
+              {/* "Voorstellen aan klant" — prepares the house-style CV + a drafted
+                  message and records it (no send capability yet, see the modal's
+                  own honest line). Outline style: sits next to the filled Save
+                  pencil toggle without competing for attention (§4 calm header). */}
+              {canPropose && (
+                <button type="button" onClick={() => setProposeModalOpen(true)}
+                  title={t('propose.trigger')} aria-label={t('propose.trigger')}
+                  style={{ display: 'flex', alignItems: 'center', gap: 5, height: BTN_H, padding: '0 10px',
+                    fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer',
+                    border: '1px solid var(--color-primary)', background: 'none', color: 'var(--color-primary)' }}>
+                  <Send size={12} /> {t('propose.trigger')}
                 </button>
-                <button type="button" onClick={candidateEdit.cancelEdit}
-                  title={t('common:cancel')} aria-label={t('common:cancel')}
+              )}
+              {candidateEdit.editing ? (
+                <>
+                  {/* Save (diskette) + cancel (✕) — same 28x28 icon-button pair as the
+                      candidate drawer's CandidateHeaderActions edit toggle (§4). */}
+                  <button type="button" onClick={() => candidateEdit.saveEdit()} disabled={candidateEdit.saving}
+                    title={t('common:save')} aria-label={t('common:save')}
+                    style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none',
+                      opacity: candidateEdit.saving ? 0.7 : 1, cursor: candidateEdit.saving ? 'not-allowed' : 'pointer' }}>
+                    <Save size={14} />
+                  </button>
+                  <button type="button" onClick={candidateEdit.cancelEdit}
+                    title={t('common:cancel')} aria-label={t('common:cancel')}
+                    style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+                    <X size={14} />
+                  </button>
+                </>
+              ) : (
+                // Idle → pencil. Gated on canManage AND a real candidateId (§3: no
+                // fake affordance when there is no honest edit target).
+                <button type="button" onClick={candidateEdit.startEdit}
+                  title={t('drawer.editCandidate')} aria-label={t('drawer.editCandidate')}
                   style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
-                  <X size={14} />
+                  <Edit2 size={13} />
                 </button>
-              </>
-            ) : (
-              // Idle → pencil. Gated on canManage AND a real candidateId (§3: no
-              // fake affordance when there is no honest edit target).
-              <button type="button" onClick={candidateEdit.startEdit}
-                title={t('drawer.editCandidate')} aria-label={t('drawer.editCandidate')}
-                style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
-                <Edit2 size={13} />
-              </button>
-            )
+              )}
+            </>
           ) : undefined}
           meta={meta}
         >
@@ -276,6 +300,11 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
         onCancel={() => setRejectModalOpen(false)}
         onConfirm={payload => { setRejectModalOpen(false); onReject?.(a.id, payload) }}
       />
+    )}
+    {/* Danny 25-07: propose-to-customer — CV in house style + optional motivation
+        letter, mounted only while open (mirrors the detach/reject modals above). */}
+    {proposeModalOpen && (
+      <ProposeCandidateModal application={a} onClose={() => setProposeModalOpen(false)} />
     )}
     </>
   )

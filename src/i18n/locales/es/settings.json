@@ -79,6 +79,7 @@
     "candidate_status": "Estado del candidato",
     "vacancy": "Vacante",
     "rejection": "Motivos de rechazo",
+    "application_proposal": "Propuestas",
     "cv_template": "Plantilla de CV",
     "view_customers": "Clientes",
     "view_planning": "Planificación",
@@ -523,6 +524,22 @@
     "saved": "Guardado",
     "loading": "Cargando…",
     "noReasons": "Añade primero un motivo de rechazo."
+  },
+  "proposal": {
+    "title": "Proponer candidato",
+    "subtitle": "Configura el asunto y el mensaje que un reclutador usa para proponer un candidato a un contacto del cliente.",
+    "subjectLabel": "Asunto del correo",
+    "bodyLabel": "Mensaje",
+    "tokensTitle": "Tokens disponibles",
+    "tokensHint": "Usa estos tokens en el asunto y el mensaje; se rellenan automáticamente.",
+    "setsPhaseLabel": "Mover automáticamente la solicitud a la fase Propuesto",
+    "setsPhaseHint": "Si está activado: registrar una propuesta mueve automáticamente la solicitud a la fase marcada como 'Propuesto'. Si está desactivado: el reclutador cambia la fase manualmente.",
+    "defaultVariantLabel": "Variante de CV predeterminada",
+    "variantProposal": "CV de propuesta (nombre visible, datos de contacto ocultos)",
+    "variantFull": "CV completo (con datos de contacto)",
+    "notSentYet": "Koios todavía no envía la propuesta por sí mismo: el reclutador descarga el CV y lo envía desde su propio programa de correo. El enlace de compartición automático y revocable llegará en cuanto esa funcionalidad esté disponible.",
+    "saveFailed": "Error al guardar",
+    "saved": "Guardado"
   },
   "cvTemplate": {
     "title": "Plantilla de CV",

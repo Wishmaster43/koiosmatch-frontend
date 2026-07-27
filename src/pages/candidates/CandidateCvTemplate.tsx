@@ -131,21 +131,28 @@ export interface CvCandidate {
   preferredFunctions?: string[]; shiftType?: string[]
   [k: string]: unknown
 }
-interface CvSettings {
+// Exported so the proposal-CV helper (src/lib/proposalCv.tsx) can type its args
+// against the same shapes without redeclaring them.
+export interface CvSettings {
   primaryColor?: string; secondaryColor?: string
   sections?: Array<{ id: string; enabled?: boolean }>
   logoUrl?: string | null; companyName?: string
 }
-type TranslateFn = (key: string, opts?: Record<string, unknown>) => string
+export type TranslateFn = (key: string, opts?: Record<string, unknown>) => string
 
 interface CvDocumentProps {
   c?: CvCandidate
   settings?: CvSettings
   locale?: string
   t?: TranslateFn
+  // Application-proposal CV variant (Danny 25-07): when true, omit phone, e-mail,
+  // home address and date of birth from the sidebar contact block. Name, photo,
+  // function, summary, experience, education, skills and languages stay untouched —
+  // the customer sees who they get but reaches them only through the agency.
+  redactContact?: boolean
 }
 
-export function CvDocument({ c, settings = {}, locale = 'nl-NL', t }: CvDocumentProps) {
+export function CvDocument({ c, settings = {}, locale = 'nl-NL', t, redactContact = false }: CvDocumentProps) {
   // Fallback brand colours (mirror --color-primary/--color-info) for tenants with
   // no CV theme configured — react-pdf cannot resolve var(--color-*) CSS tokens.
   /* eslint-disable no-restricted-syntax -- PDF fallback colours; react-pdf cannot resolve var(--color-*) tokens */
@@ -162,11 +169,15 @@ export function CvDocument({ c, settings = {}, locale = 'nl-NL', t }: CvDocument
   const name  = c?.name ?? [c?.firstName, c?.middleName, c?.lastName].filter(Boolean).join(' ') ?? L('nameFallback')
   const title = c?.title ?? c?.function ?? ''
 
+  // Contact block: the proposal variant drops phone/e-mail/address/dob (the four
+  // fields Danny named) while nationality — not a reach-out channel — stays; the
+  // SideSection above only renders when this list is non-empty, so an all-redacted
+  // candidate simply skips the block instead of showing an empty label/separator.
   const contact = [
-    c?.email       && [L('email'),       c.email],
-    c?.phone       && [L('phone'),       c.phone],
-    c?.address     && [L('residence'),   c.address],
-    c?.dob         && [L('born'),        fmt(c.dob)],
+    !redactContact && c?.email && [L('email'), c.email],
+    !redactContact && c?.phone && [L('phone'), c.phone],
+    !redactContact && c?.address && [L('residence'), c.address],
+    !redactContact && c?.dob && [L('born'), fmt(c.dob)],
     c?.nationality && [L('nationality'), c.nationality],
   ].filter(Boolean) as Array<[string, string]>
 

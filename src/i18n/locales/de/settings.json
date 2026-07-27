@@ -79,6 +79,7 @@
     "candidate_status": "Kandidatenstatus",
     "vacancy": "Stelle",
     "rejection": "Ablehnungsgründe",
+    "application_proposal": "Vorschläge",
     "cv_template": "Lebenslauf-Vorlage",
     "view_customers": "Kunden",
     "view_planning": "Planung",
@@ -523,6 +524,22 @@
     "saved": "Gespeichert",
     "loading": "Wird geladen…",
     "noReasons": "Füge zuerst einen Ablehnungsgrund hinzu."
+  },
+  "proposal": {
+    "title": "Kandidat vorschlagen",
+    "subtitle": "Legen Sie Betreff und Nachricht fest, mit denen ein Recruiter einen Kandidaten einem Kundenkontakt vorschlägt.",
+    "subjectLabel": "E-Mail-Betreff",
+    "bodyLabel": "Nachricht",
+    "tokensTitle": "Verfügbare Platzhalter",
+    "tokensHint": "Verwende diese Platzhalter in Betreff und Nachricht; sie werden automatisch ausgefüllt.",
+    "setsPhaseLabel": "Bewerbung automatisch in die Phase Vorgeschlagen verschieben",
+    "setsPhaseHint": "Wenn aktiviert: Das Erfassen eines Vorschlags verschiebt die Bewerbung automatisch in die als „Vorgeschlagen\" markierte Phase. Wenn deaktiviert: Der Recruiter ändert die Phase selbst.",
+    "defaultVariantLabel": "Standard-CV-Variante",
+    "variantProposal": "Vorschlags-Lebenslauf (Name sichtbar, Kontaktdaten verborgen)",
+    "variantFull": "Vollständiger Lebenslauf (mit Kontaktdaten)",
+    "notSentYet": "Koios versendet den Vorschlag noch nicht selbst — der Recruiter lädt den Lebenslauf herunter und versendet ihn über das eigene E-Mail-Programm. Der automatische, widerrufbare Freigabelink folgt, sobald diese Funktion verfügbar ist.",
+    "saveFailed": "Speichern fehlgeschlagen",
+    "saved": "Gespeichert"
   },
   "cvTemplate": {
     "title": "Lebenslauf-Vorlage",
