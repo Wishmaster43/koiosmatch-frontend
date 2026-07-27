@@ -87,6 +87,7 @@
   },
   "overview": {
     "general": "General",
+    "branch": "Branch",
     "online": "Online",
     "settings": "Settings",
     "textsTitle": "Texts",

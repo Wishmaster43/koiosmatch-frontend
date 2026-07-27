@@ -38,6 +38,8 @@ const FIELD_MAP: Record<string, string> = {
   showInVacancies: 'show_in_my_vacancies', excludeFromSourcing: 'exclude_from_sourcing', tags: 'tags',
   // Kostenplaats + facturatie-email (Danny 2026-07-22) — the customer-level source.
   costCenter: 'cost_center', billingEmail: 'billing_email',
+  // BRANCH-1: the establishment picker writes location_id (validated backend-side).
+  branchId: 'location_id',
   // §3B "Eigen velden" — the Extra tab patches the full merged map at once.
   customFields: 'custom_fields',
 }

@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import { useIndustries } from '@/lib/useIndustries'
+import { useLocations } from '@/lib/useLocations'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import EditableRichTextField from './EditableRichTextField'
 import { buildCustomerAdviceInsights } from './customerAiInsights'
@@ -24,6 +25,9 @@ import type { Customer } from '@/types/customer'
 export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (values: Record<string, unknown>) => void }) {
   const { t } = useTranslation('customers')
   const { industries } = useIndustries()
+  // The tenant's own establishments (GET /locations) — the same source the match
+  // form's Vestiging picker uses, so both screens offer exactly one list.
+  const branchOptions = useLocations().map(l => ({ value: String(l.value), label: l.label }))
 
   const gGeneral  = t('overview.general')
   const gOnline   = t('overview.online')
@@ -34,7 +38,11 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
   // are translated to API keys in the page's updateCustomer. Description/
   // recruitmentProblems live in their own Teksten blocks below, not here.
   const fields: FieldRow[] = [
-    { key: 'debtorNumber',  label: t('overview.debtorNumber'), group: gGeneral },
+    // BRANCH-1 (Danny 27-07): every customer hangs on one of the tenant's own
+    // establishments. The backend already delivered it (branch {id,name} + a
+    // location_id validated against real establishments) — it was simply never
+    // shown, so the drawer could not answer "which office owns this customer".
+    { key: 'branchId', label: t('overview.branch'), type: 'select', options: branchOptions, group: gGeneral },
     { key: 'city',          label: t('overview.city'),         group: gGeneral },
     { key: 'industry',      label: t('overview.industry'),     type: 'select', options: industries, group: gGeneral },
     { key: 'employeeCount', label: t('overview.employeeCount'), inputType: 'number', group: gGeneral },
@@ -42,15 +50,18 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
 
     { key: 'website',          label: t('overview.website'),       group: gOnline },
     { key: 'privacyPolicyUrl', label: t('overview.privacyPolicyUrl'), group: gOnline },
-    { key: 'hasCareerPage',    label: t('overview.hasCareerPage'), type: 'checkbox', group: gOnline },
+    // No "Heeft carrièrepagina" (Danny 27-07): the career site is configured in
+    // Settings, so a per-customer flag here was a second truth nobody maintained.
 
     { key: 'hideCompanyName',     label: t('overview.hideCompanyName'),     type: 'checkbox', group: gSettings },
     { key: 'showInVacancies',     label: t('overview.showInVacancies'),     type: 'checkbox', group: gSettings },
     { key: 'excludeFromSourcing', label: t('overview.excludeFromSourcing'), type: 'checkbox', group: gSettings },
 
-    // Kostenplaats (top of the afdeling>locatie>klant cascade) + facturatie-email
-    // (Danny 2026-07-22: the ONE source billing always reads from, regardless of
-    // which location/department is picked on a match/placement).
+    // Facturatie: the debtor number moved here from Algemeen (Danny 27-07) — it is
+    // an invoicing fact, not a general one. Kostenplaats is the top of the
+    // afdeling>locatie>klant cascade and the billing email is the ONE source
+    // invoicing reads, regardless of the location/department picked on a match.
+    { key: 'debtorNumber', label: t('overview.debtorNumber'), group: gBilling },
     { key: 'costCenter',  label: t('overview.costCenter'),  group: gBilling },
     { key: 'billingEmail', label: t('overview.billingEmail'), group: gBilling },
   ]

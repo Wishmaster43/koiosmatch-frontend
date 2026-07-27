@@ -107,6 +107,11 @@ export interface Customer {
   name: string
   initials: string
   debtorNumber: string
+  // BRANCH-1 (Danny 27-07): the tenant establishment this customer hangs on. The API
+  // sends it as branch {id,name} + a flat branch_id/location_id; the picker writes
+  // location_id back, which the backend validates against real establishments.
+  branchId: Id | null
+  branchName: string
   status: string | number
   statusLabel: string | undefined
   statusColor: string | undefined
@@ -201,6 +206,7 @@ export interface ApiLocation {
 /** Raw API customer (read defensively). */
 export interface ApiCustomer {
   id?: Id; reference_number?: string; name?: string; debtor_number?: string; debtorNumber?: string
+  branch?: { id?: Id; name?: string } | null; branch_id?: Id | null; branch_name?: string
   status?: { value?: string | number; label?: string; color?: string } | string | number
   status_id?: string | number; status_label?: string; status_color?: string
   owner?: { id?: Id; name?: string; avatar_color?: string | null }
