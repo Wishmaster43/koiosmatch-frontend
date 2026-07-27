@@ -1,7 +1,7 @@
 /**
- * useSmLastSync — the ShiftManager mirror's last sync timestamp, so the charts can
+ * useSmLastSync — the Shiftmanager mirror's last sync timestamp, so the charts can
  * show how old the data is. Reads GET /dashboard's sync_sources (already the source
- * of truth on the main dashboard) and picks the ShiftManager/planning entry. Cached.
+ * of truth on the main dashboard) and picks the Shiftmanager/planning entry. Cached.
  */
 import { useQuery } from '@tanstack/react-query'
 import { heavyGet } from '@/lib/heavyGet'
@@ -18,7 +18,7 @@ export function useSmLastSync(enabled = true): string | null {
       return (Array.isArray(sources) ? sources : []) as SyncSource[]
     },
   })
-  // Pick the ShiftManager / planning source (tenant labels vary → match loosely).
+  // Pick the Shiftmanager / planning source (tenant labels vary → match loosely).
   const src = (data ?? []).find(s => /shift|planning|^sm/i.test(`${s.system ?? ''} ${s.label ?? ''}`))
   return src?.last_synced_at ?? null
 }

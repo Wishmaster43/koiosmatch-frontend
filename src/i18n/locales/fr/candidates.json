@@ -974,33 +974,6 @@
       "refreshing": "Actualisation…",
       "refreshStarted": "Mise à jour PDOK lancée — les coordonnées apparaîtront bientôt",
       "refreshFailed": "Échec de l'actualisation"
-    },
-    "helloflex": {
-      "name": "HelloFlex",
-      "alt": "Logo HelloFlex",
-      "notLinked": "Non connecté à HelloFlex"
-    },
-    "shiftmanager": {
-      "name": "Shiftmanager",
-      "alt": "Logo Shiftmanager",
-      "notLinked": "Non connecté à Shiftmanager",
-      "externalId": "Identifiant externe",
-      "syncNow": "Synchroniser maintenant",
-      "syncing": "Synchronisation…",
-      "syncSuccess": "Synchronisation réussie",
-      "syncFailed": "Échec de la synchronisation",
-      "lastSynced": "Dernière synchronisation : {{date}}"
-    },
-    "common": {
-      "linkButton": "Connecter",
-      "retry": "Reconnecter",
-      "linking": "Connexion…",
-      "linkStarted": "Connexion démarrée",
-      "linkFailed": "Échec de la connexion",
-      "linkedByOn": "Connecté par {{name}} le {{date}}",
-      "statusLinked": "Connecté",
-      "statusPending": "En cours",
-      "statusFailed": "Échec"
     }
   },
   "conversations": {

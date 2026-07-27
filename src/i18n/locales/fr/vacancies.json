@@ -319,7 +319,10 @@
       "employmentType": "Type de contrat",
       "industry": "Secteur",
       "category": "Catégorie",
-      "location": "Site"
+      "location": "Site",
+      "cardGeneral": "Général",
+      "cardPlacement": "Affectation",
+      "cardPublication": "Publication"
     },
     "titlePlaceholder": "ex. Infirmier | La Haye",
     "create": "Créer le poste",

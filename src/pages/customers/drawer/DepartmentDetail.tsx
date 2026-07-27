@@ -22,6 +22,7 @@ import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SectionCard from '@/components/ui/SectionCard'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
+import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import EditableRichTextField from './EditableRichTextField'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -29,13 +30,16 @@ import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
 
-export default function DepartmentDetail({ department, locations, statuses, contacts = [], onSave, onDelete, close }: {
+export default function DepartmentDetail({ department, locations, statuses, contacts = [], canLinkBackoffice = false, onSave, onDelete, close }: {
   department: Department
   locations: { id: Id; name: string }[]
   statuses: LookupOption[]
   // The customer's contacts filtered to this department by the caller (the resource
   // itself doesn't embed contacts — CustomerDepartmentResource has no `contacts` field).
   contacts?: Contact[]
+  // EXTRACT-1: the caller's own customers.update permission check for the
+  // Koppelingen sub-tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
+  canLinkBackoffice?: boolean
   onSave: (id: Id, payload: Partial<DepartmentPayload>) => void
   onDelete: (id: Id) => void
   close: () => void
@@ -45,7 +49,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   // The Extra sub-tab only shows when the tenant has defined customer_department custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer_department')
   // Sub-tabs (short labels, Danny 2026-07-14) — default Gegevens.
-  const [subTab, setSubTab] = useState<'data' | 'contacts' | 'extra'>('data')
+  const [subTab, setSubTab] = useState<'data' | 'contacts' | 'extra' | 'koppelingen'>('data')
 
   // Description lives in its own rich-text block below (EditableRichTextField),
   // not in this field-table anymore. Kostenplaats (Danny 2026-07-22) is the
@@ -92,6 +96,8 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           { id: 'data',     label: t('departments.detail.subtabs.data') },
           { id: 'contacts', label: t('drawer.tabs.contacts') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
+          // EXTRACT-1: the shared Koppelingen sub-tab, always last (§3A/§11).
+          { id: 'koppelingen', label: t('common:backofficeLinks.tabLabel') },
         ]}
         active={subTab}
         onChange={id => setSubTab(id as typeof subTab)}
@@ -108,6 +114,10 @@ export default function DepartmentDetail({ department, locations, statuses, cont
       {subTab === 'extra' && (
         <CustomFieldsTab entityType="customer_department" values={department.customFields ?? {}}
           onSave={patch => onSave(department.id as Id, { customFields: { ...department.customFields, ...patch } })} />
+      )}
+
+      {subTab === 'koppelingen' && (
+        <BackofficeLinksTab entity="departments" id={department.id as Id} helloflexLink={department.helloflexLink} shiftmanagerLink={department.shiftmanagerLink} canLink={canLinkBackoffice} />
       )}
 
       {subTab === 'contacts' && (

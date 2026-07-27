@@ -450,6 +450,7 @@
     "postalCode": "Postcode",
     "city": "Plaats",
     "country": "Land",
+    "sectionGeneral": "Algemeen",
     "sectionAddress": "Adres",
     "sectionBusiness": "Bedrijfsgegevens",
     "sectionContact": "Contact",

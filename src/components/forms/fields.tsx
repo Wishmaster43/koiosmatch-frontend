@@ -27,9 +27,9 @@ export function parseDate(value?: string | number | Date | null): Date | null {
   return isNaN(d.getTime()) ? null : d
 }
 
-export function Label({ children, required, htmlFor }: { children: ReactNode; required?: boolean; htmlFor?: string }) {
+export function Label({ children, required, htmlFor, id }: { children: ReactNode; required?: boolean; htmlFor?: string; id?: string }) {
   return (
-    <label htmlFor={htmlFor} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block',
+    <label id={id} htmlFor={htmlFor} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block',
       marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
       {children}{required && <span style={{ color: 'var(--color-danger)', marginLeft: 2 }}>*</span>}
     </label>
@@ -40,10 +40,19 @@ export function Label({ children, required, htmlFor }: { children: ReactNode; re
 // every Field child that forwards `id` (TextField/SelectField/DateField/…).
 export function Field({ label, required, children }: { label: ReactNode; required?: boolean; children: ReactNode }) {
   const id = useId()
-  const child = isValidElement(children) ? cloneElement(children as ReactElement<{ id?: string }>, { id }) : children
+  // `htmlFor` only names LABELABLE elements — an <input> hears it, a <button> does
+  // not. The custom pickers (CreatableSelect/SelectMenu) render a button, so their
+  // visible label was orphaned: a screen reader announced "Beschikbaar, button" with
+  // no field name (measured 27-07, across every picker in every modal). Handing the
+  // label's own id down as aria-labelledby names those too; labelable children simply
+  // resolve to the same text, so nothing regresses.
+  const labelId = `${id}-label`
+  const child = isValidElement(children)
+    ? cloneElement(children as ReactElement<{ id?: string; 'aria-labelledby'?: string }>, { id, 'aria-labelledby': labelId })
+    : children
   return (
     <div>
-      <Label htmlFor={id} required={required}>{label}</Label>
+      <Label id={labelId} htmlFor={id} required={required}>{label}</Label>
       {child}
     </div>
   )

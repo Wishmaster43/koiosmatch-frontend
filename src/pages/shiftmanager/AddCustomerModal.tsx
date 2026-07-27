@@ -1,27 +1,27 @@
 import { useState } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
-import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Building2, ChevronDown } from 'lucide-react'
+import { X, Building2 } from 'lucide-react'
+import { Field, TextField } from '@/components/forms/fields'
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import { BTN_H } from '@/config/buttonMetrics'
+import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 
-// The new-customer form fields.
+// The new-customer form fields (unchanged shape — CustomersPage.tsx imports this
+// type and builds its optimistic row from exactly these keys).
 export interface CustomerForm { name: string; debtorNumber: string; status: string; accountManager: string; city: string }
 
-const iStyle: CSSProperties = {
-  width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8,
-  border: '1px solid var(--border)', background: 'var(--surface)',
-  color: 'var(--text)', boxSizing: 'border-box', outline: 'none',
-}
+// Card chrome — mirrors the native customers/AddCustomerModal.tsx exactly (§3A):
+// 11px uppercase muted heading over a bordered surface, kept local (not a
+// cross-import — CLAUDE.md §2: an entity page must not reach into another
+// entity's internals) so both "Add customer" variants read as one system.
+const cardHead = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
+const cardBox = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, display: 'flex', flexDirection: 'column' as const, gap: 12 }
+const row2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }
 
-function Label({ children, required }: { children: ReactNode; required?: boolean }) {
-  return (
-    <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-      {children}{required && <span style={{ color: 'var(--color-danger)', marginLeft: 2 }}>*</span>}
-    </label>
-  )
-}
-
+// This Shiftmanager mirror has no industry/establishment field (unlike the
+// native customer entity), so "Bedrijf" absorbs debtorNumber+city instead of a
+// separate sparse "Vestiging & plaats" card — see the delivery report.
 const STATUSES = ['actief', 'prospect', 'inactief', 'geblokkeerd']
 
 export default function AddCustomerModal({ onClose, onCreate }: { onClose: () => void; onCreate?: (form: CustomerForm) => void }) {
@@ -39,14 +39,18 @@ export default function AddCustomerModal({ onClose, onCreate }: { onClose: () =>
   }
 
   const canSubmit = !!form.name.trim()
+  // customers.json's status.* group (actief/prospect/inactief/geblokkeerd) already
+  // covers this hardcoded list; the raw value is kept only as a defensive fallback
+  // if a key is ever missing, so the key path never leaks to the UI.
+  const statusOptions = STATUSES.map(s => ({ value: s, label: t(`status.${s}`, s) }))
 
   return (
     <div onClick={e => e.target === e.currentTarget && onClose()}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('modal.title')} tabIndex={-1}
-        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', maxWidth: 520,
-        boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', ...WIDE_MODAL,
+        boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
         {/* Header */}
         <div style={{ padding: '20px 24px 14px', borderBottom: '1px solid var(--border)',
@@ -66,50 +70,52 @@ export default function AddCustomerModal({ onClose, onCreate }: { onClose: () =>
           </button>
         </div>
 
-        {/* Body */}
+        {/* Body — titled bordered cards: Bedrijf (name/debtor/city) then
+            Eigenaar & status (reuses the SAME 'customers' i18n keys the native
+            modal just gained, one translation source for both variants). */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <Label required>{t('modal.fields.name')}</Label>
-            <input value={form.name} onChange={e => set('name', e.target.value)} placeholder={t('modal.fields.namePlaceholder')}
-              aria-label={t('modal.fields.name')}
-              style={{ ...iStyle, borderColor: errors.name ? 'var(--color-danger)' : undefined }} />
-            {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
-              <Label>{t('modal.fields.debtorNumber')}</Label>
-              <input value={form.debtorNumber} onChange={e => set('debtorNumber', e.target.value)} placeholder="10042" aria-label={t('modal.fields.debtorNumber')} style={iStyle} />
-            </div>
-            <div>
-              <Label>{t('modal.fields.status')}</Label>
-              <div style={{ position: 'relative' }}>
-                <select value={form.status} onChange={e => set('status', e.target.value)} aria-label={t('modal.fields.status')}
-                  style={{ ...iStyle, appearance: 'none', paddingRight: 30, cursor: 'pointer' }}>
-                  {/* FINDING (out of this wave's boundary — customers.json has no status.* key yet,
-                      see report): fall back to the raw value so the key path never leaks to the UI. */}
-                  {STATUSES.map(s => <option key={s} value={s}>{t(`status.${s}`, s)}</option>)}
-                </select>
-                <ChevronDown size={13} style={{ position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+            <div style={cardHead}>{t('modal.fields.cardCompany')}</div>
+            <div style={cardBox}>
+              <div>
+                <Field label={t('modal.fields.name')} required>
+                  <TextField value={form.name} onChange={v => set('name', v)} placeholder={t('modal.fields.namePlaceholder')} error={errors.name} />
+                </Field>
+                {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
+              </div>
+              <div style={row2}>
+                <Field label={t('modal.fields.debtorNumber')}>
+                  <TextField value={form.debtorNumber} onChange={v => set('debtorNumber', v)} placeholder="10042" />
+                </Field>
+                <Field label={t('modal.fields.city')}>
+                  <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('modal.fields.cityPlaceholder')} />
+                </Field>
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
-              <Label>{t('modal.fields.accountManager')}</Label>
-              <input value={form.accountManager} onChange={e => set('accountManager', e.target.value)} placeholder="—" aria-label={t('modal.fields.accountManager')} style={iStyle} />
-            </div>
-            <div>
-              <Label>{t('modal.fields.city')}</Label>
-              <input value={form.city} onChange={e => set('city', e.target.value)} placeholder={t('modal.fields.cityPlaceholder')} aria-label={t('modal.fields.city')} style={iStyle} />
+          <div>
+            <div style={cardHead}>{t('modal.fields.cardOwnerStatus')}</div>
+            <div style={cardBox}>
+              <div style={row2}>
+                <Field label={t('modal.fields.accountManager')}>
+                  <TextField value={form.accountManager} onChange={v => set('accountManager', v)} placeholder="—" />
+                </Field>
+                {/* Status — searchable (Danny 27-07), never a bare `<select>`.
+                    Placeholder given even though a default is always selected — it
+                    becomes the search box's accessible label once opened (§6). */}
+                <Field label={t('modal.fields.status')}>
+                  <CreatableSelect value={form.status || null} onChange={v => set('status', v)} allowCreate={false}
+                    placeholder={t('modal.fields.status')} options={statusOptions} />
+                </Field>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Footer — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
-          display: 'flex', justifyContent: 'flex-end', gap: 8, background: 'var(--hover-bg)' }}>
+          display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button onClick={onClose}
             style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
             {t('modal.cancel')}

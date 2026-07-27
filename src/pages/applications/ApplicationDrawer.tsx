@@ -8,7 +8,8 @@ import { useCustomFields } from '@/lib/useCustomFields'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
-import ApplicationChangelogPopover from './drawer/ApplicationChangelogPopover'
+import ChangelogPopover from '@/components/drawer/ChangelogPopover'
+import ChangelogTab from './drawer/ChangelogTab'
 import ApplicationHeaderTitle from './drawer/ApplicationHeaderTitle'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import ApplicationTab from './drawer/ApplicationTab'
@@ -146,7 +147,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
       // Tijdlijn TAB (real lifecycle activity: funnel transitions, appointments,
       // notes, AI-interviews — ApplicationTimeline on the backend) is intentionally
       // distinct from the changelog ICON in the title row (raw field-change audit,
-      // ApplicationChangelogPopover) — §3A(d): tab = activiteit, icon = veldwijzigingen.
+      // the shared ChangelogPopover) — §3A(d): tab = activiteit, icon = veldwijzigingen.
       case 'timeline':     return <Timeline items={a.timeline ?? []} emptyText={t('timeline.empty')} />
       case 'notes':        return <NotesTab application={a} />
       case 'extra':        return <CustomFieldsTab entityType="application" values={a.customFields ?? {}}
@@ -227,7 +228,10 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
               form={candidateEdit.form} setField={candidateEdit.setField}
             />
           )}
-          titleActions={<ApplicationChangelogPopover application={a} />}
+          // Danny 27-07: the shared house ChangelogPopover shell (§3A(d)) — was a
+          // cramped 360px dropdown with no focus trap; now the same 900px centred
+          // panel as the candidate drawer.
+          titleActions={<ChangelogPopover><ChangelogTab application={a} /></ChangelogPopover>}
           actions={canManage && a.candidateId != null ? (
             <>
               {/* "Voorstellen aan klant" — prepares the house-style CV + a drafted

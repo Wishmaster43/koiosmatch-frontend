@@ -13,7 +13,8 @@ import { useUsers } from '@/lib/queries'
 import DetailsTab from './drawer/DetailsTab'
 import RelatedTasks from './drawer/RelatedTasks'
 import LinksTab from './drawer/LinksTab'
-import TaskChangelogPopover from './drawer/TaskChangelogPopover'
+import ChangelogPopover from '@/components/drawer/ChangelogPopover'
+import ActivityTab from './drawer/ActivityTab'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import { initialsOf } from '@/lib/initials'
 import { BTN_H } from '@/config/buttonMetrics'
@@ -135,7 +136,10 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{task.typeLabel || '—'}</div>
             </>
           )}
-          titleActions={<TaskChangelogPopover task={task} />}
+          // Danny 27-07: the shared house ChangelogPopover shell (§3A(d)) — was a
+          // cramped 360px dropdown with no focus trap; now the same 900px centred
+          // panel as the candidate drawer. ActivityTab supplies the task's own content.
+          titleActions={<ChangelogPopover><ActivityTab task={task} /></ChangelogPopover>}
           actions={markDone}
           meta={meta}
           // Tag editing is a PATCH too — hidden while archived (same gating, see meta above).

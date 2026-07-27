@@ -1,5 +1,5 @@
 /**
- * ShiftManager UI row types — the mapped (camelCase) shapes the SM pages build
+ * Shiftmanager UI row types — the mapped (camelCase) shapes the SM pages build
  * from the `sm_*` API and pass to their tables/drawers. Permissive (index sig)
  * since they mirror loosely-typed external data.
  */

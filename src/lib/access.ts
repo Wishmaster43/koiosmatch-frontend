@@ -3,7 +3,7 @@
  *
  * Layer 1 — Tenant/package: `accessible_pages` from the backend (login / /auth/me).
  *   Gated pages only appear when the tenant's package includes them.
- *   'apps' = integration connectors (ShiftManager/Intus etc.) — package 3 only.
+ *   'apps' = integration connectors (Shiftmanager/Intus etc.) — package 3 only.
  *
  * Layer 2 — Role/user: `page.*` permissions on `user.permissions`.
  *   If ANY `page.*` permission exists on the user, they act as a whitelist.

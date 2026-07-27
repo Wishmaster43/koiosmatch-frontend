@@ -1,6 +1,6 @@
 /**
  * Shared types for the reports area (components/reports). These rows mirror
- * loosely-typed external data (ShiftManager customers/candidates, workflow runs,
+ * loosely-typed external data (Shiftmanager customers/candidates, workflow runs,
  * messages), so each interface declares the fields the reports actually render
  * and keeps a `[key: string]: unknown` index signature for the dynamic,
  * key-based sorting the tables do.
@@ -117,7 +117,7 @@ export interface RunRow {
   [key: string]: unknown
 }
 
-// A candidate's per-step global rate (ShiftManager).
+// A candidate's per-step global rate (Shiftmanager).
 export interface GlobalRate {
   global_rate?: { internal_description?: string }
   step_name?: string
@@ -129,7 +129,7 @@ export interface GlobalRate {
 // A candidate feature/characteristic tag.
 export interface CandidateFeature { name?: string; [key: string]: unknown }
 
-// Candidate row used by the candidate report table + drawers (ShiftManager mirror).
+// Candidate row used by the candidate report table + drawers (Shiftmanager mirror).
 export interface ReportCandidate {
   id?: string | number
   firstname?: string

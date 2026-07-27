@@ -2,7 +2,7 @@
  * useMatchesBulkActions — bulk operations for MatchesPage. A match is read-only
  * (§3B: the continuation of an application → placement), so the only bulk
  * operations are row/all selection and authorization-gated *coupling* to an
- * external backoffice (HelloFlex / ShiftManager). The backend queues +
+ * external backoffice (HelloFlex / Shiftmanager). The backend queues +
  * rate-limits the coupling and returns the queued/updated ids; because nothing
  * on the row changes there is no optimistic patch. Toasts come from the shared
  * notifier so a bulk action never fails silently (§10).
@@ -57,6 +57,6 @@ export function useMatchesBulkActions({ selectedIds, setSelectedIds, t }: UseMat
     toggleRow,
     toggleAll,
     bulkCoupleHelloFlex:    () => bulkCouple('helloflex'),
-    bulkCoupleShiftManager: () => bulkCouple('shiftmanager'),
+    bulkCoupleShiftmanager: () => bulkCouple('shiftmanager'),
   }
 }

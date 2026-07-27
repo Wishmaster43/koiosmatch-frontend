@@ -6,19 +6,19 @@
  */
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { Plus, ArrowLeft, Search } from 'lucide-react'
+import { ArrowLeft, Search } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
+// House "+ action" trigger (Danny 27-07 consistency sweep) — replaces the
+// hand-rolled solid-fill addBtn below on every SubEntityTab consumer
+// (Locaties/Afdelingen/Contactpersonen).
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
 const searchWrap: CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 8, flex: 1, padding: '6px 10px',
   background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8,
 }
 const searchInput: CSSProperties = { flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }
-const addBtn: CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 5, padding: '7px 12px', fontSize: 12, fontWeight: 500,
-  background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', flexShrink: 0,
-}
 const backBtn: CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 5, marginBottom: 12, padding: '5px 0', fontSize: 12, fontWeight: 500,
   background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer',
@@ -70,7 +70,7 @@ export default function SubEntityTab<Item extends object>({
           <Search size={13} color="var(--text-muted)" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder={searchPlaceholder} aria-label={searchPlaceholder} style={searchInput} />
         </div>
-        {onAdd && <button onClick={onAdd} style={addBtn}><Plus size={13} /> {addLabel}</button>}
+        {onAdd && <DrawerAddButton onClick={onAdd} label={addLabel} />}
       </div>
       <DataTable columns={columns} rows={rows} onRowClick={it => setSelectedId(getRowId(it))} emptyText={emptyText} />
     </div>

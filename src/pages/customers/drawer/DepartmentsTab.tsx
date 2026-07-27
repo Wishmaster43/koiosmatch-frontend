@@ -26,12 +26,15 @@ interface Props {
   contacts?: Contact[]
   locations?: { id: Id; name: string }[]
   statuses?: LookupOption[]
+  // EXTRACT-1: the caller's own customers.update permission check, threaded down
+  // to the Koppelingen sub-tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
+  canLinkBackoffice?: boolean
   onAdd: (payload: DepartmentPayload, locationName?: string) => void
   onUpdate: (id: Id, payload: Partial<DepartmentPayload>, locationName?: string) => void
   onRemove: (id: Id) => void
 }
 
-export default function DepartmentsTab({ departments = [], contacts = [], locations = [], statuses = [], onAdd, onUpdate, onRemove }: Props) {
+export default function DepartmentsTab({ departments = [], contacts = [], locations = [], statuses = [], canLinkBackoffice = false, onAdd, onUpdate, onRemove }: Props) {
   const { t } = useTranslation('customers')
   const [adding, setAdding] = useState(false)
 
@@ -55,6 +58,7 @@ export default function DepartmentsTab({ departments = [], contacts = [], locati
   const renderDetail = (d: Department, close: () => void) => (
     <DepartmentDetail department={d} locations={locations} statuses={statuses}
       contacts={contacts.filter(c => String(c.departmentId) === String(d.id))}
+      canLinkBackoffice={canLinkBackoffice}
       onSave={onUpdate} onDelete={onRemove} close={close} />
   )
 

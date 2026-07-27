@@ -160,7 +160,7 @@ describe('IntegrationsTab · PDOK manual "Bijwerken" (CAND-PDOK-GEOCODE-FE-1, ca
 describe('IntegrationsTab · HelloFlex card visibility (CONNECTOR APP ONLY — Danny 23-07)', () => {
   it('stays hidden when the app flag is off', () => {
     render(<IntegrationsTab c={baseCandidate()} />)
-    expect(screen.queryByAltText('integrations.helloflex.alt')).toBeNull()
+    expect(screen.queryByAltText('backofficeLinks.helloflex.alt')).toBeNull()
   })
 
   it('stays hidden on the REPORTS module alone — rapporten is anders dan een koppeling', () => {
@@ -168,7 +168,7 @@ describe('IntegrationsTab · HelloFlex card visibility (CONNECTOR APP ONLY — D
     // the koppel-card (Yesway: hf module on, hf app off → no HelloFlex card).
     mockUseAuth.mockReturnValue({ hasModule: (m: string) => m === 'hf' })
     render(<IntegrationsTab c={baseCandidate()} />)
-    expect(screen.queryByAltText('integrations.helloflex.alt')).toBeNull()
+    expect(screen.queryByAltText('backofficeLinks.helloflex.alt')).toBeNull()
   })
 
   it('shows via the app/koppeling flag, with a "Koppelen" button when not linked', () => {
@@ -176,28 +176,28 @@ describe('IntegrationsTab · HelloFlex card visibility (CONNECTOR APP ONLY — D
     // endpoint's { system: 'helloflex' } below is a different, unchanged contract).
     mockUseApps.mockReturnValue({ isAppEnabled: (a: string) => a === 'hf' })
     render(<IntegrationsTab c={baseCandidate()} />)
-    expect(screen.getByAltText('integrations.helloflex.alt')).toBeInTheDocument()
-    expect(screen.getByText('integrations.helloflex.notLinked')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /integrations.common.linkButton/ })).toBeInTheDocument()
+    expect(screen.getByAltText('backofficeLinks.helloflex.alt')).toBeInTheDocument()
+    expect(screen.getByText('backofficeLinks.helloflex.notLinked')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /backofficeLinks.common.linkButton/ })).toBeInTheDocument()
   })
 })
 
 describe('IntegrationsTab · Shiftmanager card visibility (CONNECTOR APP ONLY — Danny 23-07)', () => {
   it('stays hidden when the app flag is off', () => {
     render(<IntegrationsTab c={baseCandidate()} />)
-    expect(screen.queryByAltText('integrations.shiftmanager.alt')).toBeNull()
+    expect(screen.queryByAltText('backofficeLinks.shiftmanager.alt')).toBeNull()
   })
 
   it('stays hidden on the REPORTS module alone', () => {
     mockUseAuth.mockReturnValue({ hasModule: (m: string) => m === 'sm' })
     render(<IntegrationsTab c={baseCandidate()} />)
-    expect(screen.queryByAltText('integrations.shiftmanager.alt')).toBeNull()
+    expect(screen.queryByAltText('backofficeLinks.shiftmanager.alt')).toBeNull()
   })
 
   it('shows via the app/koppeling flag', () => {
     mockUseApps.mockReturnValue({ isAppEnabled: (a: string) => a === 'shiftmanager' })
     render(<IntegrationsTab c={baseCandidate()} />)
-    expect(screen.getByAltText('integrations.shiftmanager.alt')).toBeInTheDocument()
+    expect(screen.getByAltText('backofficeLinks.shiftmanager.alt')).toBeInTheDocument()
   })
 })
 
@@ -205,11 +205,24 @@ describe('IntegrationsTab · not-linked state — real "Koppelen" button, never 
   beforeEach(() => {
     // Both connector apps on — the koppel-cards gate on the APP, never the module.
     mockUseApps.mockReturnValue({ isAppEnabled: () => true })
+    // …and on candidates.update, exactly like the other five entities gate on their own
+    // write permission (28-07). Without it the button is correctly disabled, which the
+    // dedicated test below asserts.
+    mockUseAuth.mockReturnValue({ hasModule: () => false, hasPermission: (p: string) => p === 'candidates.update' })
+  })
+
+  it('disables Koppelen for a user without candidates.update, and never fires', async () => {
+    mockUseAuth.mockReturnValue({ hasModule: () => false, hasPermission: () => false })
+    render(<IntegrationsTab c={baseCandidate()} />)
+    const buttons = screen.getAllByRole('button', { name: /backofficeLinks.common.linkButton/ })
+    expect(buttons.length).toBeGreaterThan(0)
+    buttons.forEach(b => expect(b).toBeDisabled())
+    expect(mockPost).not.toHaveBeenCalled()
   })
 
   it('shows a "Koppelen" button for both systems and never calls the API on mount', () => {
     render(<IntegrationsTab c={baseCandidate()} />)
-    expect(screen.getAllByRole('button', { name: /integrations.common.linkButton/ })).toHaveLength(2)
+    expect(screen.getAllByRole('button', { name: /backofficeLinks.common.linkButton/ })).toHaveLength(2)
     expect(mockPost).not.toHaveBeenCalled()
   })
 
@@ -217,21 +230,21 @@ describe('IntegrationsTab · not-linked state — real "Koppelen" button, never 
     mockPost.mockResolvedValue({ data: { link: { system: 'shiftmanager', status: 'pending' } } })
     const user = userEvent.setup()
     render(<IntegrationsTab c={baseCandidate()} />)
-    const buttons = screen.getAllByRole('button', { name: /integrations.common.linkButton/ })
+    const buttons = screen.getAllByRole('button', { name: /backofficeLinks.common.linkButton/ })
     // Shiftmanager card is the second SectionCard rendered (HelloFlex first).
     await user.click(buttons[1])
     expect(mockPost).toHaveBeenCalledTimes(1)
     expect(mockPost).toHaveBeenCalledWith('/sync/candidates/1', { system: 'shiftmanager' })
-    await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('integrations.common.linkStarted'))
+    await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('backofficeLinks.common.linkStarted'))
     // Optimistic overlay: the card now reads "pending", not "not linked" anymore.
-    expect(screen.getByText('integrations.common.statusPending')).toBeInTheDocument()
+    expect(screen.getByText('backofficeLinks.common.statusPending')).toBeInTheDocument()
   })
 
   it('POSTs { system: "helloflex" } for the HelloFlex card', async () => {
     mockPost.mockResolvedValue({ data: { link: { system: 'helloflex', status: 'pending' } } })
     const user = userEvent.setup()
     render(<IntegrationsTab c={baseCandidate()} />)
-    const buttons = screen.getAllByRole('button', { name: /integrations.common.linkButton/ })
+    const buttons = screen.getAllByRole('button', { name: /backofficeLinks.common.linkButton/ })
     await user.click(buttons[0])
     expect(mockPost).toHaveBeenCalledWith('/sync/candidates/1', { system: 'helloflex' })
   })
@@ -240,7 +253,7 @@ describe('IntegrationsTab · not-linked state — real "Koppelen" button, never 
     mockPost.mockRejectedValue({ response: { data: { message: 'Geen rechten' } } })
     const user = userEvent.setup()
     render(<IntegrationsTab c={baseCandidate()} />)
-    const buttons = screen.getAllByRole('button', { name: /integrations.common.linkButton/ })
+    const buttons = screen.getAllByRole('button', { name: /backofficeLinks.common.linkButton/ })
     await user.click(buttons[1])
     await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Geen rechten'))
   })
@@ -251,9 +264,9 @@ describe('IntegrationsTab · failed state (KOPPELINGEN-META-1 last_error)', () =
     mockUseApps.mockReturnValue({ isAppEnabled: (a: string) => a === 'hf' })
     const c = baseCandidate({ helloflexLink: link({ status: 'failed', lastError: 'HelloFlex-credentials ontbreken (Settings → Integraties)' }) })
     render(<IntegrationsTab c={c} />)
-    expect(screen.getByText('integrations.common.statusFailed')).toBeInTheDocument()
+    expect(screen.getByText('backofficeLinks.common.statusFailed')).toBeInTheDocument()
     expect(screen.getByText('HelloFlex-credentials ontbreken (Settings → Integraties)')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /integrations.common.retry/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /backofficeLinks.common.retry/ })).toBeInTheDocument()
   })
 })
 
@@ -272,29 +285,29 @@ describe('IntegrationsTab · Shiftmanager linked state (who/when + manual sync)'
   it('shows the external id, "Gekoppeld door … op …", the last-synced date and a sync button', () => {
     render(<IntegrationsTab c={linkedCandidate()} />)
     expect(screen.getByText(/428/)).toBeInTheDocument()
-    expect(screen.getByText('integrations.common.linkedByOn')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /integrations.shiftmanager.syncNow/ })).toBeInTheDocument()
-    expect(screen.getByText('integrations.shiftmanager.lastSynced')).toBeInTheDocument()
+    expect(screen.getByText('backofficeLinks.common.linkedByOn')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /backofficeLinks.shiftmanager.syncNow/ })).toBeInTheDocument()
+    expect(screen.getByText('backofficeLinks.shiftmanager.lastSynced')).toBeInTheDocument()
     // The generic "Koppelen" button never shows once truly linked.
-    expect(screen.queryByRole('button', { name: /integrations.common.linkButton/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /backofficeLinks.common.linkButton/ })).toBeNull()
   })
 
   it('calls POST /sm_candidates/sync/{externalId} on click and shows a success toast', async () => {
     mockPost.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
     render(<IntegrationsTab c={linkedCandidate()} />)
-    await user.click(screen.getByRole('button', { name: /integrations.shiftmanager.syncNow/ }))
+    await user.click(screen.getByRole('button', { name: /backofficeLinks.shiftmanager.syncNow/ }))
     // Assert the REQUEST itself (§13) — route + no accidental body — not just that
     // a callback fired.
     expect(mockPost).toHaveBeenCalledWith('/sm_candidates/sync/428')
-    await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('integrations.shiftmanager.syncSuccess'))
+    await waitFor(() => expect(mockNotifySuccess).toHaveBeenCalledWith('backofficeLinks.shiftmanager.syncSuccess'))
   })
 
   it('shows an error toast when the sync call fails', async () => {
     mockPost.mockRejectedValue({ response: { data: { message: 'Niet gevonden' } } })
     const user = userEvent.setup()
     render(<IntegrationsTab c={linkedCandidate()} />)
-    await user.click(screen.getByRole('button', { name: /integrations.shiftmanager.syncNow/ }))
+    await user.click(screen.getByRole('button', { name: /backofficeLinks.shiftmanager.syncNow/ }))
     await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Niet gevonden'))
   })
 })

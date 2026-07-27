@@ -60,6 +60,8 @@
   },
   "create": {
     "title": "Neue Anrufliste",
+    "generalCard": "Allgemein",
+    "sourceCard": "Quelle",
     "name": "Name",
     "namePlaceholder": "z. B. Anrufliste verfügbare Pflegekräfte",
     "channel": "Kanal",

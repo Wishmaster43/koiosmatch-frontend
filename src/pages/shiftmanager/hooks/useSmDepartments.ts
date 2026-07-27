@@ -1,5 +1,5 @@
 /**
- * useSmDepartments — loads the ShiftManager departments mirror (/sm_departments)
+ * useSmDepartments — loads the Shiftmanager departments mirror (/sm_departments)
  * and maps each raw row to the flat SmDepartmentRow the page renders. A failed/
  * empty call is an empty list, never fabricated rows (§3). Via React Query: request
  * dedup + caching + auto-cancel on unmount (A-3 — replaces the raw useEffect fetch).

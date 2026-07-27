@@ -1,5 +1,5 @@
 /**
- * useSmContacts — loads the ShiftManager contacts mirror (/sm_contacts) and maps
+ * useSmContacts — loads the Shiftmanager contacts mirror (/sm_contacts) and maps
  * each raw row to the flat SmContactRow the page renders. A failed/empty call is
  * an empty list, never fabricated rows (§3). Via React Query: request dedup +
  * caching + auto-cancel on unmount (A-3 — replaces the raw useEffect fetch).

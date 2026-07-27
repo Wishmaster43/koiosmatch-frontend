@@ -25,6 +25,7 @@ import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
+import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -37,11 +38,14 @@ const inputStyle: CSSProperties = { width: '100%', padding: '7px 10px', fontSize
 const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
 const cardStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
 
-export default function ContactDetail({ contact, locations, departments, statuses, onSave, onDelete, close }: {
+export default function ContactDetail({ contact, locations, departments, statuses, canLinkBackoffice = false, onSave, onDelete, close }: {
   contact: Contact
   locations: { id: Id; name: string }[]
   departments: Department[]
   statuses: LookupOption[]
+  // EXTRACT-1: the caller's own customers.update permission check for the
+  // Koppelingen sub-tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
+  canLinkBackoffice?: boolean
   onSave: (id: Id, payload: Partial<ContactPayload>) => void
   onDelete: (id: Id) => void
   close: () => void
@@ -51,7 +55,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
   const [editing, setEditing] = useState(false)
   // The Extra sub-tab only shows when the tenant has defined customer_contact custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer_contact')
-  const [subTab, setSubTab] = useState<'data' | 'extra'>('data')
+  const [subTab, setSubTab] = useState<'data' | 'extra' | 'koppelingen'>('data')
   // Contact function (job title) is a lookup combobox, split from the candidate
   // function list (FUNCTIONS-SPLIT-1) — never a plain free-text field.
   const { contactFunctions, allowFreeEntry } = useContactFunctions()
@@ -152,17 +156,17 @@ export default function ContactDetail({ contact, locations, departments, statuse
         </button>
       </div>
 
-      {/* Sub-tab strip only appears once there is a second sub-tab to show (Extra). */}
-      {customFieldDefs.length > 0 && (
-        <SubTabBar
-          tabs={[
-            { id: 'data',  label: t('contacts.detail.subtabs.data') },
-            { id: 'extra', label: t('drawer.tabs.extra') },
-          ]}
-          active={subTab}
-          onChange={id => setSubTab(id as typeof subTab)}
-        />
-      )}
+      {/* Sub-tab strip — EXTRACT-1 made it unconditional (the Koppelingen sub-tab
+          always shows now); Extra still only appears with ≥1 active custom field. */}
+      <SubTabBar
+        tabs={[
+          { id: 'data',  label: t('contacts.detail.subtabs.data') },
+          ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
+          { id: 'koppelingen', label: t('common:backofficeLinks.tabLabel') },
+        ]}
+        active={subTab}
+        onChange={id => setSubTab(id as typeof subTab)}
+      />
 
       {subTab === 'data' && (
         <>
@@ -192,6 +196,9 @@ export default function ContactDetail({ contact, locations, departments, statuse
       {subTab === 'extra' && customFieldDefs.length > 0 && (
         <CustomFieldsTab entityType="customer_contact" values={contact.customFields ?? {}}
           onSave={patch => onSave(contact.id as Id, { customFields: { ...contact.customFields, ...patch } })} />
+      )}
+      {subTab === 'koppelingen' && (
+        <BackofficeLinksTab entity="contacts" id={contact.id as Id} helloflexLink={contact.helloflexLink} shiftmanagerLink={contact.shiftmanagerLink} canLink={canLinkBackoffice} />
       )}
       {dialog}
     </div>

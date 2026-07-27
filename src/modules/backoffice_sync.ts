@@ -1,5 +1,5 @@
 // backoffice_sync module — couple the pipeline's candidates (or another entity from the
-// trigger context) to a backoffice: HelloFlex or ShiftManager. One module, the system is
+// trigger context) to a backoffice: HelloFlex or Shiftmanager. One module, the system is
 // config; the seeded single/bulk koppel-scenarios in the Kandidaten folder use it
 // (BACKOFFICE-SCENARIO-1). only_unlinked guards bulk runs against re-queueing records
 // that already carry a linked external id in the mappings table (no doubles — Danny).

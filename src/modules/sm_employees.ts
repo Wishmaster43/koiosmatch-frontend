@@ -1,4 +1,4 @@
-// sm_employees module — fetch employees (medewerkers) from ShiftManager, one
+// sm_employees module — fetch employees (medewerkers) from Shiftmanager, one
 // pipeline bundle per employee (feeds the employee status-change flow).
 import ShiftManagerMark from '../components/ui/ShiftManagerMark'
 
@@ -6,7 +6,7 @@ export default {
   type:  'sm_employees',
   // GET/lees-kant: gate op de rapporten-MODULE 'sm' (Danny 23-07); de connector-app gate alleen de POST/PATCH-koppelkant.
   module: 'sm',
-  category: 'ShiftManager',
+  category: 'Shiftmanager',
   label: 'SM medewerkers',
   Icon:  ShiftManagerMark,
   color: '#E11D2A',

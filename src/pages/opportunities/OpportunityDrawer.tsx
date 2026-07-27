@@ -13,7 +13,8 @@ import DetailsTab from './drawer/DetailsTab'
 import KlantTab from './drawer/KlantTab'
 import NotesTab from './drawer/NotesTab'
 import TasksTab from './drawer/TasksTab'
-import OpportunityChangelogPopover from './drawer/OpportunityChangelogPopover'
+import ChangelogPopover from '@/components/drawer/ChangelogPopover'
+import ChangelogTab from './drawer/ChangelogTab'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -146,7 +147,10 @@ export default function OpportunityDrawer({
           avatar={{ initials: o.initials, soft: true, color: '#9CA3AF' }}
           renderTitle={renderTitle}
           titleActions={<>
-            <OpportunityChangelogPopover opportunity={o} />
+            {/* Danny 27-07: the shared house ChangelogPopover shell (§3A(d)) — was a
+                cramped 360px dropdown with no focus trap; now the same 900px centred
+                panel as the candidate drawer. */}
+            <ChangelogPopover><ChangelogTab opportunity={o} /></ChangelogPopover>
             {/* ARCHIVE-1: per-id soft-delete (mirrors candidates' trash icon in the
                 title row) — hidden once already archived; the banner below takes over. */}
             {onArchive && !o.archived && (

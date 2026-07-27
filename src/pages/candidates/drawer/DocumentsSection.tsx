@@ -210,13 +210,13 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
           {selected.size > 0 && (
             <>
               <button onClick={downloadSelected}
-                style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer',
+                style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
                   background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)', color: 'var(--color-primary)',
                   border: '1px solid color-mix(in srgb, var(--color-primary) 45%, transparent)' }}>
                 <Download size={11} /> {t('documents.downloadSelected', { count: selected.size })}
               </button>
               <button onClick={() => setConfirmDelete({ kind: 'many' })}
-                style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer',
+                style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
                   background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)', color: 'var(--color-danger)',
                   border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
                 <Trash2 size={11} /> {t('documents.deleteSelected', { count: selected.size })}

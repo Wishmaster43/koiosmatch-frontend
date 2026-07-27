@@ -9,7 +9,8 @@
  */
 import { initialsOf } from '@/lib/initials'
 import { toCoord } from '@/lib/coords'
-import type { ApiCandidate, Candidate, CandidatePool, CandidateBranch, CandidateMatch, CandidateBackofficeLink, Loose } from '@/types/candidate'
+import { backofficeLinkOf } from '@/lib/backofficeLink'
+import type { ApiCandidate, Candidate, CandidatePool, CandidateBranch, CandidateMatch, Loose } from '@/types/candidate'
 
 // Bytes → human size ("44856" → "44 KB"). Backend sends documents.size in bytes.
 const fmtSize = (b: unknown): string => {
@@ -30,24 +31,6 @@ const dateVal = (v: unknown): number => {
 }
 const byNewest = <T>(list: T[], getKey: (x: T) => number): T[] =>
   [...list].sort((a, b) => getKey(b) - getKey(a))
-
-// KOPPELINGEN-META-1: resolve one system's entry out of the flat backoffice_links[]
-// array — null when the tenant never attempted that system (the backend omits a
-// system nobody ever tried, see ExternalIdMapping::toBackofficeLinks). Both
-// HelloFlex and Shiftmanager share this shape since both link via the same
-// generic sync endpoint (POST /sync/candidates/{id} { system }).
-function backofficeLinkOf(links: ApiCandidate['backoffice_links'], system: string): CandidateBackofficeLink | null {
-  const l = (links ?? []).find(x => x?.system === system)
-  if (!l) return null
-  return {
-    status:       l.status ?? null,
-    externalId:   l.external_id ?? null,
-    lastError:    l.last_error ?? null,
-    lastSyncedAt: l.last_synced_at ?? null,
-    linkedAt:     l.linked_at ?? null,
-    linkedBy:     l.linked_by ? { id: l.linked_by.id ?? '', name: l.linked_by.name ?? null } : null,
-  }
-}
 
 export function mapCandidate(c: ApiCandidate): Candidate {
   const name = c.name || c.full_name

@@ -131,6 +131,10 @@
     "save": "Save",
     "saving": "Saving…",
     "cancel": "Cancel",
+    "groups": {
+      "general": "General",
+      "dealStage": "Value & stage"
+    },
     "fields": {
       "title": "Title",
       "client": "Client",

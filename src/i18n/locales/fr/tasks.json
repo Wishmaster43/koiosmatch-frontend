@@ -37,7 +37,7 @@
     "empty": "Glissez les tâches ici"
   },
   "drawer": {
-    "label": "Activité",
+    "label": "Tâche",
     "createdAt": "Créé le {{date}}",
     "archivedBanner": {
       "since": "Archivée le {{date}}",
@@ -57,7 +57,7 @@
     "tags": "Tags"
   },
   "details": {
-    "title": "Détails de l'activité",
+    "title": "Détails de la tâche",
     "type": "Type d'activité",
     "status": "Statut",
     "priority": "Priorité",
@@ -94,7 +94,7 @@
     "empty": "Aucune activité pour le moment."
   },
   "modal": {
-    "title": "Ajouter une activité",
+    "title": "Nouvelle tâche",
     "editTitle": "Modifier la tâche",
     "loadingTask": "Chargement de la tâche…",
     "type": "Type d'activité",
@@ -110,7 +110,7 @@
     "description": "Description",
     "descriptionPlaceholder": "Saisir…",
     "charsLeft": "Caractères disponibles : {{count}}",
-    "detailsTitle": "Détails de l'activité",
+    "detailsTitle": "Détails de la tâche",
     "owner": "Responsable",
     "candidate": "Candidat",
     "candidatePlaceholder": "Sélectionner un candidat",
@@ -122,7 +122,10 @@
     "save": "Enregistrer",
     "saving": "Enregistrement…",
     "cancel": "Annuler",
-    "required": "Requis"
+    "required": "Requis",
+    "cardTask": "Tâche",
+    "cardPlanning": "Planification",
+    "cardLink": "Lien"
   },
   "bulk": {
     "selected": "{{count}} sélectionné(e)s",

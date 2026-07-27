@@ -319,7 +319,10 @@
       "employmentType": "Employment type",
       "industry": "Industry",
       "category": "Category",
-      "location": "Location"
+      "location": "Location",
+      "cardGeneral": "General",
+      "cardPlacement": "Placement",
+      "cardPublication": "Publication"
     },
     "titlePlaceholder": "e.g. Nurse | The Hague",
     "create": "Create vacancy",

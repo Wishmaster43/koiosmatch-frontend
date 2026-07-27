@@ -1,11 +1,20 @@
 /**
  * AddShiftModal — the "plan a shift" dialog: order/location/colour, shift times,
- * candidate search and notes. Self-contained subtree (its Field/SectionHead/
- * Avatar/CandidateRow helpers + style consts live here). Extracted from
+ * candidate search and notes. Self-contained subtree (its Field/Avatar/
+ * CandidateRow helpers + style consts live here). Extracted from
  * PlanningPage. PLAN-LOOKUP-1 (2026-07-16): the customer/department/job-title
  * selects and the candidate list used to be hardcoded Dutch demo data — see
  * ./hooks/useShiftLookups for the real sources and why the old fake
  * favourite/distance suggestion ranking was dropped instead of re-faked.
+ *
+ * Widened to the house WIDE_MODAL constant and every SectionHead regrouped into
+ * a titled bordered card (Danny 27-07: "+ dienst ook nalopen" — every create
+ * modal must share +Match/+Kandidaat's footprint); customer/department/jobtype/
+ * open-dienst are now searchable CreatableSelects, never a bare `<select>`. This
+ * is a genuinely different screen from the single-form modals — a live
+ * 3-column planner (order info / shift details / candidate search), not a form
+ * — so the column widths and the 92vw responsive wrapper stay unchanged; only
+ * the bespoke 1100/90vh frame numbers became the shared constant.
  */
 import { useState, useId, cloneElement, isValidElement } from 'react'
 import type { CSSProperties, ReactNode, ReactElement } from 'react'
@@ -15,16 +24,19 @@ import { formatDate } from './helpers'
 import { interactive } from '@/lib/a11y'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useFunctions } from '@/lib/useFunctions'
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useShiftCustomers, useShiftDepartments, useShiftCandidateSearch } from './hooks/useShiftLookups'
 import type { ShiftCandidateOption } from './hooks/useShiftLookups'
 import { BTN_H } from '@/config/buttonMetrics'
+import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import type { ShiftInput } from '@/types/planning'
 
-// ── Field helpers ─────────────────────────────────────────────────────────────
-const INPUT: CSSProperties = { padding: '7px 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7,
+// ── Field helpers — house footprint (padding '8px 11px', fontSize 13,
+// borderRadius 8, §3A/§4) so this modal's inputs match every other create form,
+// even though its 3-column workspace stays its own (genuinely different) layout. ──
+const INPUT: CSSProperties = { padding: '8px 11px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8,
   outline: 'none', background: 'var(--bg)', color: 'var(--text)', width: '100%', boxSizing: 'border-box' }
 const LABEL: CSSProperties = { fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
-const SELECT: CSSProperties = { ...INPUT, appearance: 'none', cursor: 'pointer' }
 
 function Field({ label, children }: { label?: ReactNode; children: ReactNode }) {
   // Associate the label with its single input via a generated id (§6).
@@ -33,14 +45,15 @@ function Field({ label, children }: { label?: ReactNode; children: ReactNode }) 
   return <div style={{ marginBottom: 10 }}><label htmlFor={id} style={LABEL}>{label}</label>{child}</div>
 }
 
-function SectionHead({ children, style }: { children: ReactNode; style?: CSSProperties }) {
-  return (
-    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.07em',
-      textTransform: 'uppercase', padding: '8px 0 4px', borderBottom: '1px solid var(--border)', marginBottom: 10, ...style }}>
-      {children}
-    </div>
-  )
-}
+// Card chrome (Danny 27-07: "+ dienst ook nalopen" — every create modal must match
+// +Match/+Kandidaat's footprint) — 11px uppercase muted heading above a bordered
+// surface (§3A), kept local (not a cross-import, CLAUDE.md §2). Replaces the old
+// bare "uppercase label + border-bottom" SectionHead with the house card idiom;
+// only the left/middle FORM columns get boxed — the right column is a live
+// search/list widget, not a form section, so it keeps its own chrome (mirrors
+// how RelationsSection's candidate/contact results aren't individually boxed).
+const cardHead: CSSProperties = { fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 6 }
+const cardBox: CSSProperties = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, marginBottom: 14 }
 
 // One fixed palette, picked deterministically from a name's initials — no
 // per-candidate "colour" field exists (or should — see the hook file header
@@ -85,6 +98,11 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
   const [candidate,   setCandidate]   = useState<ShiftCandidateOption | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [color,       setColor]       = useState('var(--color-success)')
+  // "Open dienst" mode — was a fully decorative, unwired `<select>` before (no
+  // value/onChange at all); now a controlled searchable picker for the same
+  // three labels, still LOCAL UI state only (never part of the onAdd payload —
+  // behaviour stays identical to what this modal submitted before).
+  const [openShiftMode, setOpenShiftMode] = useState('all')
   // eslint-disable-next-line no-restricted-syntax -- DATA: shift-colour picker palette, not UI element styling
   const COLORS = ['var(--color-success)','var(--color-primary)','var(--color-warning)','var(--color-danger)','var(--color-secondary)','#8B5CF6']
 
@@ -111,9 +129,13 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
       <div style={{ display: 'flex', width: '100%', height: '100%' }}
         onClick={e => e.target === e.currentTarget && onClose()}>
 
-        {/* ── Modal wrapper gecentreerd ── */}
+        {/* ── Modal wrapper gecentreerd — house WIDE_MODAL footprint (Danny 27-07:
+            every create modal shares one frame). This panel genuinely has more to
+            show than the single-form modals (a live 3-column planner, not a form),
+            so it keeps its own 92vw responsive width; only the 1100/90vh numbers
+            were bespoke and are now the shared constant (1060/94vh). ── */}
         <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('addShift')} tabIndex={-1}
-          style={{ margin: 'auto', width: '92%', maxWidth: 1100, height: '90vh',
+          style={{ margin: 'auto', width: '92%', ...WIDE_MODAL,
           background: 'var(--bg)', borderRadius: 14, overflow: 'hidden',
           boxShadow: '0 24px 80px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column',
           border: '1px solid var(--border)' }}>
@@ -145,144 +167,158 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
           {/* Body: 3 kolommen */}
           <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
-            {/* ── Links: order info ── */}
+            {/* ── Links: order info — each SectionHead became a titled bordered
+                card (Danny 27-07); customer/department are searchable
+                CreatableSelects, never a bare `<select>`. ── */}
             <div style={{ width: 220, flexShrink: 0, borderRight: '1px solid var(--border)',
               background: 'var(--surface)', overflowY: 'auto', padding: '14px 14px' }}>
-              <SectionHead>{t('sectionOrder')}</SectionHead>
-              <Field label={t('fCustomer')}>
-                <select style={SELECT} value={customerId} disabled={customersLoading}
-                  onChange={e => handleCustomerChange(e.target.value)}>
-                  <option value="">
-                    {customersLoading ? t('common:loading')
+              <div style={cardHead}>{t('sectionOrder')}</div>
+              <div style={cardBox}>
+                <Field label={t('fCustomer')}>
+                  <CreatableSelect value={customerId || null} onChange={handleCustomerChange} allowCreate={false}
+                    placeholder={customersLoading ? t('common:loading')
                       : customersError ? t('common:errorGeneric')
                       : customers.length === 0 ? t('common:noResults')
                       : t('common:select')}
-                  </option>
-                  {customers.map(c => <option key={c.id} value={String(c.id)}>{c.name}</option>)}
-                </select>
-              </Field>
-              <Field label={t('fDepartment')}>
-                <select style={SELECT} value={departmentId} disabled={!customerId || departmentsLoading}
-                  onChange={e => setDepartmentId(e.target.value)}>
-                  <option value="">
-                    {!customerId ? t('pickCustomerFirst')
+                    options={customers.map(c => ({ value: String(c.id), label: c.name }))} />
+                </Field>
+                <Field label={t('fDepartment')}>
+                  {/* Options stay empty until a customer is picked (mirrors the old
+                      disabled select) — nothing selectable, not just visually greyed. */}
+                  <CreatableSelect value={departmentId || null} onChange={setDepartmentId} allowCreate={false}
+                    placeholder={!customerId ? t('pickCustomerFirst')
                       : departmentsLoading ? t('common:loading')
                       : departmentsError ? t('common:errorGeneric')
                       : departments.length === 0 ? t('common:noResults')
                       : t('common:select')}
-                  </option>
-                  {departments.map(d => <option key={d.id} value={String(d.id)}>{d.name}</option>)}
-                </select>
-              </Field>
-              <Field label={t('fAssignment')}><input style={INPUT} /></Field>
-              <Field label={t('fContact')}><input style={INPUT} placeholder={t('contactPlaceholder')} /></Field>
+                    options={!customerId ? [] : departments.map(d => ({ value: String(d.id), label: d.name }))} />
+                </Field>
+                <Field label={t('fAssignment')}><input style={INPUT} /></Field>
+                <Field label={t('fContact')}><input style={INPUT} placeholder={t('contactPlaceholder')} /></Field>
+              </div>
 
-              <SectionHead>{t('sectionLocation')}</SectionHead>
-              <Field label={t('fAddress')}>
-                <textarea style={{ ...INPUT, resize: 'none', height: 56 }}
-                  value={address} onChange={e => setAddress(e.target.value)} />
-              </Field>
+              <div style={cardHead}>{t('sectionLocation')}</div>
+              <div style={cardBox}>
+                <Field label={t('fAddress')}>
+                  <textarea style={{ ...INPUT, resize: 'none', height: 56 }}
+                    value={address} onChange={e => setAddress(e.target.value)} />
+                </Field>
+              </div>
 
-              <SectionHead>{t('sectionColor')}</SectionHead>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
-                {COLORS.map(c => (
-                  <button key={c} type="button" onClick={() => setColor(c)}
-                    style={{ width: 20, height: 20, borderRadius: '50%', background: c, border: 'none',
-                      cursor: 'pointer', outline: color === c ? `2px solid ${c}` : 'none', outlineOffset: 2 }} />
-                ))}
+              <div style={cardHead}>{t('sectionColor')}</div>
+              <div style={cardBox}>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {/* Icon-only swatch buttons need a real aria-label (§6) — the CSS
+                      value itself isn't meaningful to a screen reader, so number them. */}
+                  {COLORS.map((c, i) => (
+                    <button key={c} type="button" onClick={() => setColor(c)} aria-label={`${t('sectionColor')} ${i + 1}`}
+                      style={{ width: 20, height: 20, borderRadius: '50%', background: c, border: 'none',
+                        cursor: 'pointer', outline: color === c ? `2px solid ${c}` : 'none', outlineOffset: 2 }} />
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* ── Midden: dienst details ── */}
+            {/* ── Midden: dienst details — same titled-card treatment; jobtype/open
+                dienst are now searchable CreatableSelects. ── */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '14px 20px' }}>
-              <SectionHead>{t('shift1')}</SectionHead>
+              <div style={cardHead}>{t('shift1')}</div>
+              <div style={cardBox}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10 }}>
+                  <Field label={t('fShiftName')}>
+                    <input style={INPUT} value={title} onChange={e => setTitle(e.target.value)} />
+                  </Field>
+                  <Field label={t('fStart')}>
+                    <input type="time" style={INPUT} value={start} onChange={e => setStart(e.target.value)} />
+                  </Field>
+                  <Field label={t('fEnd')}>
+                    <input type="time" style={INPUT} value={end} onChange={e => setEnd(e.target.value)} />
+                  </Field>
+                  <Field label={t('fPersons')}>
+                    <input type="number" style={INPUT} value={personCount} min={1} max={20}
+                      onChange={e => setPersonCount(Number(e.target.value))} />
+                  </Field>
+                </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
-                <Field label={t('fShiftName')}>
-                  <input style={INPUT} value={title} onChange={e => setTitle(e.target.value)} />
-                </Field>
-                <Field label={t('fStart')}>
-                  <input type="time" style={INPUT} value={start} onChange={e => setStart(e.target.value)} />
-                </Field>
-                <Field label={t('fEnd')}>
-                  <input type="time" style={INPUT} value={end} onChange={e => setEnd(e.target.value)} />
-                </Field>
-                <Field label={t('fPersons')}>
-                  <input type="number" style={INPUT} value={personCount} min={1} max={20}
-                    onChange={e => setPersonCount(Number(e.target.value))} />
-                </Field>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
-                <Field label={t('fJobtype')}>
-                  <select style={SELECT} value={jobType} onChange={e => setJobType(e.target.value)}>
-                    <option value="">{t('common:select')}</option>
-                    {functions.map(f => <option key={f} value={f}>{f}</option>)}
-                  </select>
-                </Field>
-                <Field label={t('fOpenShift')}>
-                  <select style={SELECT}>
-                    <option>{t('openAll')}</option>
-                    <option>{t('openFavorites')}</option>
-                    <option>{t('openFixed')}</option>
-                  </select>
-                </Field>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <Field label={t('fJobtype')}>
+                    <CreatableSelect value={jobType || null} onChange={setJobType} allowCreate={false}
+                      placeholder={t('common:select')} options={functions} />
+                  </Field>
+                  <Field label={t('fOpenShift')}>
+                    {/* Placeholder given even though a default is always selected — it
+                        becomes the search box's accessible label once opened (§6). */}
+                    <CreatableSelect value={openShiftMode} onChange={setOpenShiftMode} allowCreate={false}
+                      placeholder={t('fOpenShift')}
+                      options={[
+                        { value: 'all', label: t('openAll') },
+                        { value: 'favorites', label: t('openFavorites') },
+                        { value: 'fixed', label: t('openFixed') },
+                      ]} />
+                  </Field>
+                </div>
               </div>
 
               {/* Scheduled candidate */}
-              <SectionHead>{t('scheduledWorker')}</SectionHead>
-              {candidate ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
-                  border: `1px solid ${colorFor(getInitials(candidate.name))}40`, borderLeft: `4px solid ${colorFor(getInitials(candidate.name))}`,
-                  borderRadius: 8, background: 'var(--surface)', marginBottom: 10 }}>
-                  <Avatar initials={getInitials(candidate.name)} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{candidate.name}</div>
-                    {candidate.functionTitle && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{candidate.functionTitle}</div>}
+              <div style={cardHead}>{t('scheduledWorker')}</div>
+              <div style={cardBox}>
+                {candidate ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
+                    border: `1px solid ${colorFor(getInitials(candidate.name))}40`, borderLeft: `4px solid ${colorFor(getInitials(candidate.name))}`,
+                    borderRadius: 8, background: 'var(--bg)' }}>
+                    <Avatar initials={getInitials(candidate.name)} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{candidate.name}</div>
+                      {candidate.functionTitle && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{candidate.functionTitle}</div>}
+                    </div>
+                    <button onClick={() => setCandidate(null)} aria-label={t('common:cancel')}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                      <X size={14} />
+                    </button>
                   </div>
-                  <button onClick={() => setCandidate(null)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
-                    <X size={14} />
-                  </button>
-                </div>
-              ) : (
-                <div style={{ padding: '20px', textAlign: 'center', border: '1px dashed var(--border)',
-                  borderRadius: 8, fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
-                  {t('clickCandidate')}
-                </div>
-              )}
+                ) : (
+                  <div style={{ padding: '20px', textAlign: 'center', border: '1px dashed var(--border)',
+                    borderRadius: 8, fontSize: 12, color: 'var(--text-muted)' }}>
+                    {t('clickCandidate')}
+                  </div>
+                )}
+              </div>
 
               {/* Notes */}
-              <SectionHead>{t('notes')}</SectionHead>
-              <textarea style={{ ...INPUT, height: 70, resize: 'none' }} placeholder={t('notePlaceholder')} aria-label={t('notePlaceholder')} />
+              <div style={cardHead}>{t('notes')}</div>
+              <div style={cardBox}>
+                <textarea style={{ ...INPUT, height: 70, resize: 'none' }} placeholder={t('notePlaceholder')} aria-label={t('notePlaceholder')} />
+              </div>
 
               {/* Assignment performance */}
-              <SectionHead style={{ marginTop: 16 }}>{t('performance')}</SectionHead>
-              <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
-                    {[t('colName'), t('colClient'), t('colFunction'), t('colColleagues')].map(h => (
-                      <th key={h} style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {candidate ? (
-                    <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                      <td style={{ padding: '8px 10px', color: 'var(--text)' }}>{candidate.name}</td>
-                      <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{customerName}</td>
-                      <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{candidate.functionTitle || '-'}</td>
-                      <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>-</td>
+              <div style={cardHead}>{t('performance')}</div>
+              <div style={cardBox}>
+                <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
+                      {[t('colName'), t('colClient'), t('colFunction'), t('colColleagues')].map(h => (
+                        <th key={h} style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>{h}</th>
+                      ))}
                     </tr>
-                  ) : (
-                    <tr>
-                      <td colSpan={4} style={{ padding: '16px 10px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 12 }}>
-                        {t('noWorkerPlanned')}
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {candidate ? (
+                      <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                        <td style={{ padding: '8px 10px', color: 'var(--text)' }}>{candidate.name}</td>
+                        <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{customerName}</td>
+                        <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{candidate.functionTitle || '-'}</td>
+                        <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>-</td>
+                      </tr>
+                    ) : (
+                      <tr>
+                        <td colSpan={4} style={{ padding: '16px 10px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 12 }}>
+                          {t('noWorkerPlanned')}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* ── Rechts: kandidaat zoeken (PLAN-LOOKUP-1) ── */}

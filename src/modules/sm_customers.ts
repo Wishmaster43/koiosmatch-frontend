@@ -1,11 +1,11 @@
-// sm_customers module — sync customers from ShiftManager into the mirror.
+// sm_customers module — sync customers from Shiftmanager into the mirror.
 import ShiftManagerMark from '../components/ui/ShiftManagerMark'
 
 export default {
   type:  'sm_customers',
   // GET/lees-kant: gate op de rapporten-MODULE 'sm' (Danny 23-07); de connector-app gate alleen de POST/PATCH-koppelkant.
   module: 'sm',
-  category: 'ShiftManager',
+  category: 'Shiftmanager',
   label: 'Klanten',
   Icon:  ShiftManagerMark,
   color: '#E11D2A',

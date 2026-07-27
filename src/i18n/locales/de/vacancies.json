@@ -319,7 +319,10 @@
       "employmentType": "Beschäftigungsart",
       "industry": "Branche",
       "category": "Kategorie",
-      "location": "Standort"
+      "location": "Standort",
+      "cardGeneral": "Allgemein",
+      "cardPlacement": "Einsatz",
+      "cardPublication": "Veröffentlichung"
     },
     "titlePlaceholder": "z. B. Pflegekraft | Den Haag",
     "create": "Stelle erstellen",

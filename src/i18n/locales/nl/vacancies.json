@@ -319,7 +319,10 @@
       "employmentType": "Soort dienstverband",
       "industry": "Branche",
       "category": "Categorie",
-      "location": "Locatie"
+      "location": "Locatie",
+      "cardGeneral": "Algemeen",
+      "cardPlacement": "Plaatsing",
+      "cardPublication": "Publicatie"
     },
     "titlePlaceholder": "bijv. Verpleegkundige | Den Haag",
     "create": "Vacature aanmaken",

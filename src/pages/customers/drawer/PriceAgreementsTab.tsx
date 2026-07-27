@@ -7,7 +7,10 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, RefreshCw, AlertTriangle } from 'lucide-react'
+import { RefreshCw, AlertTriangle } from 'lucide-react'
+// House "+ action" trigger (Danny 27-07: "+ Prijsafspraak toevoegen moet ook
+// knopje zijn!!! zoals in kandidaat drill down") — replaces the bare text button below.
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { usePriceAgreements } from '../hooks/usePriceAgreements'
 import PriceAgreementForm, { emptyDraft, draftToPayload } from './PriceAgreementForm'
 import type { PriceAgreementDraft } from './PriceAgreementForm'
@@ -30,10 +33,7 @@ export default function PriceAgreementsTab({ customerId }: { customerId?: Id }) 
           {t('drawer.tabs.priceAgreements')} <span style={{ fontWeight: 400 }}>{agreements.length}</span>
         </span>
         {!adding && (
-          <button onClick={() => { setDraft(emptyDraft()); setAdding(true) }}
-            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
-            <Plus size={11} /> {t('priceAgreements.add')}
-          </button>
+          <DrawerAddButton onClick={() => { setDraft(emptyDraft()); setAdding(true) }} label={t('priceAgreements.add')} />
         )}
       </div>
 

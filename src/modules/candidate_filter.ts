@@ -5,7 +5,7 @@ import ShiftManagerMark from '../components/ui/ShiftManagerMark'
 export default {
   type:  'candidate_filter',
   app:   'shiftmanager',
-  category: 'ShiftManager',
+  category: 'Shiftmanager',
   label: 'Kandidaten ophalen',
   Icon:  ShiftManagerMark,
   color: '#E11D2A',

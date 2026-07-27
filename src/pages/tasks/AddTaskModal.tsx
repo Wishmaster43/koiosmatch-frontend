@@ -3,20 +3,23 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
-import { Field, TextField, SelectField, DateField } from '@/components/forms/fields'
-import RichTextEditor from '@/components/ui/RichTextEditor'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
 import { notifyError } from '@/lib/notify'
 import { mapTaskDetail } from './data/mapTask'
 import { BTN_H } from '@/config/buttonMetrics'
+import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import TaskCard from './addmodal/TaskCard'
+import PlanningCard from './addmodal/PlanningCard'
+import LinkCard from './addmodal/LinkCard'
 import type { Id } from '@/types/common'
 import type { ApiTask } from '@/types/task'
 
 interface EntityRow { id?: Id; name?: string; first_name?: string; last_name?: string; title?: string; email?: string }
 interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: string; email?: string }
-interface TaskForm {
+// Exported so the addmodal/ card components share this exact shape (type-only import).
+export interface TaskForm {
   type: string; title: string; assigneeId: string; status: string; due: string
   // TASK-DUE-TIME-1: optional "HH:mm" paired with `due`, native <input type="time">.
   dueTime: string; priority: string; description: string
@@ -48,10 +51,20 @@ const idMapOf = (rows: unknown): Record<string, string> =>
     .map(r => [r.value, r.id]))
 
 /**
- * AddTaskModal — the "Toevoegen activiteit" dialog, also reused in EDIT mode
- * (Danny 20-07: pencil on a task row). All option lists come from tenant lookups
- * (type/status/priority) or live endpoints (assignee=/users, candidate/customer/
- * contact pickers) — nothing hardcoded.
+ * AddTaskModal — the "Nieuwe taak" dialog, also reused in EDIT mode (Danny 20-07:
+ * pencil on a task row). All option lists come from tenant lookups (type/status/
+ * priority) or live endpoints (assignee=/users, candidate/customer/contact pickers) —
+ * nothing hardcoded.
+ *
+ * Popup redesign (Danny 27-07 #tasks): the entity is a TAAK — "Activiteit" only
+ * names its TYPE field now (the naming fix lives in tasks.json's values, not here).
+ * The form itself moved onto the shared WIDE_MODAL frame (same footprint as +Match/
+ * +Kandidaat): a thin container composing three titled bordered cards — Taak
+ * (title/type/description), Planning (due/priority/status) and Koppeling (linked
+ * record + assignee), each split into `addmodal/` (§3A: container wires data, one
+ * component per card). Every dropdown is now a searchable CreatableSelect
+ * (allowCreate={false}: type/status/priority/assignee/candidate/customer/contact
+ * are all real tenant/relational values, never a free-text create).
  *
  * Create POSTs the task with its polymorphic `links[]` and hands the created row
  * back via `onCreated` — UNCHANGED from before (verified byte-for-byte: same body
@@ -244,8 +257,10 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={modalTitle} tabIndex={-1}
-        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', maxWidth: 880,
-        boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', ...WIDE_MODAL,
+        // Shared footprint (Danny 27-07): same frame as +Kandidaat/+Match — the
+        // ONE place to resize any of the three is components/ui/modalMetrics.ts.
+        boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
         {/* Header */}
         <div style={{ padding: '18px 24px', borderBottom: '1px solid var(--border)', display: 'flex',
@@ -257,64 +272,19 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
           </button>
         </div>
 
-        {/* Body: main form + details panel, or a loading placeholder while the edit-mode GET is in flight */}
+        {/* Body: titled cards (Taak full-width, Planning + Koppeling paired below —
+            mirrors +Match's Relaties-then-Contract/Financieel layout), or a loading
+            placeholder while the edit-mode GET is in flight. */}
         {loadingTask ? (
           <div style={{ flex: 1, padding: 40, textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>{t('modal.loadingTask')}</div>
         ) : (
-        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', minHeight: 0 }}>
-          {/* Main form */}
-          <div style={{ flex: 1, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
-            <Field label={t('modal.type')} required>
-              {/* Label only — `icon` holds a lucide NAME, never prefix it as text (2026-07-08). */}
-              <SelectField value={form.type} onChange={v => set('type', v)} placeholder={t('modal.typePlaceholder')}
-                options={types.map(x => ({ value: x.value, label: x.label }))} style={errors.type ? { borderColor: 'var(--color-danger)' } : {}} />
-            </Field>
-            <Field label={t('modal.titleLabel')} required>
-              <TextField value={form.title} onChange={v => set('title', v)} placeholder={t('modal.titlePlaceholder')} error={errors.title} />
-            </Field>
-            <Field label={t('modal.assignee')}>
-              <SelectField value={form.assigneeId} onChange={v => set('assigneeId', v)} options={assigneeOpts} />
-            </Field>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <Field label={t('modal.status')}>
-                <SelectField value={form.status} onChange={v => set('status', v)} options={statuses.map(x => ({ value: x.value, label: x.label }))} />
-              </Field>
-              <Field label={t('modal.priority')}>
-                <SelectField value={form.priority} onChange={v => set('priority', v)} options={priorities.map(x => ({ value: x.value, label: x.label }))} />
-              </Field>
-            </div>
-            {/* TASK-DUE-TIME-1: date + optional time-of-day, paired half-row. */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <Field label={t('modal.due')}>
-                <DateField value={form.due} onChange={v => set('due', v)} placeholder="dd-mm-jjjj" />
-              </Field>
-              <Field label={t('modal.dueTime')}>
-                <TextField type="time" value={form.dueTime} onChange={v => set('dueTime', v)} />
-              </Field>
-            </div>
-            {/* Description = note body — same rich editor as the drawer + candidate profile text. */}
-            <Field label={t('modal.description')}>
-              <RichTextEditor value={form.description} onChange={v => set('description', v)} />
-            </Field>
-          </div>
-
-          {/* Details panel: owner (read-only) + link pickers */}
-          <div style={{ width: 300, flexShrink: 0, borderLeft: '1px solid var(--border)', background: 'var(--bg)',
-            padding: '20px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('modal.detailsTitle')}</div>
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 4 }}>{t('modal.owner')}</div>
-              <div style={{ fontSize: 13, color: 'var(--text)' }}>{ownerName || '—'}</div>
-            </div>
-            <Field label={t('modal.candidate')}>
-              <SelectField value={form.candidateId} onChange={v => set('candidateId', v)} placeholder={t('modal.candidatePlaceholder')} options={toOptions(candidates)} />
-            </Field>
-            <Field label={t('modal.customer')}>
-              <SelectField value={form.customerId} onChange={v => set('customerId', v)} placeholder={t('modal.customerPlaceholder')} options={toOptions(customers)} />
-            </Field>
-            <Field label={t('modal.contact')}>
-              <SelectField value={form.contactId} onChange={v => set('contactId', v)} placeholder={t('modal.contactPlaceholder')} options={toOptions(contacts)} />
-            </Field>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <TaskCard t={t} form={form} errors={errors} set={set} types={types} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' }}>
+            <PlanningCard t={t} form={form} set={set} priorities={priorities} statuses={statuses} />
+            <LinkCard t={t} form={form} set={set} ownerName={ownerName}
+              candidates={toOptions(candidates)} customers={toOptions(customers)} contacts={toOptions(contacts)}
+              assigneeOpts={assigneeOpts} />
           </div>
         </div>
         )}

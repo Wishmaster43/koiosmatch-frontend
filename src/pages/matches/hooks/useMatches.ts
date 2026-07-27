@@ -16,6 +16,7 @@
 import { useState, useEffect } from 'react'
 import api from '@/lib/api'
 import { initialsOf } from '@/lib/initials'
+import { backofficeLinkOf } from '@/lib/backofficeLink'
 import type { RawMatch, MatchRow } from '@/types/match'
 
 // Map a raw API match → the flat shape the table renders (snake_case-tolerant).
@@ -57,6 +58,9 @@ export function mapMatch(m: RawMatch): MatchRow {
     approval_rejected_reason: m.approval_rejected_reason ?? '',
     // Tenant custom-field values (§3B "Eigen velden").
     customFieldValues: m.custom_fields ?? {},
+    // EXTRACT-1: the backoffice links (Koppelingen tab).
+    helloflexLink: backofficeLinkOf(m.backoffice_links, 'helloflex'),
+    shiftmanagerLink: backofficeLinkOf(m.backoffice_links, 'shiftmanager'),
     // MATCH-ARCHIVED-LIST-1: real list-level archive state (MatchListResource).
     archived:   Boolean(m.archived ?? m.deleted_at),
     archivedAt: m.deleted_at ?? null,

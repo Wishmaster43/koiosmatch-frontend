@@ -60,6 +60,8 @@
   },
   "create": {
     "title": "Nieuwe bellijst",
+    "generalCard": "Algemeen",
+    "sourceCard": "Bron",
     "name": "Naam",
     "namePlaceholder": "Bijv. Bellijst beschikbare verzorgenden",
     "channel": "Kanaal",

@@ -1,11 +1,11 @@
-// sm_employee_update module — write an employee status back to ShiftManager.
+// sm_employee_update module — write an employee status back to Shiftmanager.
 // dry_run defaults ON so a first run only REPORTS what would change (safe rehearse).
 import ShiftManagerMark from '../components/ui/ShiftManagerMark'
 
 export default {
   type:  'sm_employee_update',
   app:   'shiftmanager',
-  category: 'ShiftManager',
+  category: 'Shiftmanager',
   label: 'SM status bijwerken',
   Icon:  ShiftManagerMark,
   color: '#E11D2A',

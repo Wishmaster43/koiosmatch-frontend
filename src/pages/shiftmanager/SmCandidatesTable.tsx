@@ -1,5 +1,5 @@
 /**
- * SmCandidatesTable — ShiftManager candidate list, mirrors the native
+ * SmCandidatesTable — Shiftmanager candidate list, mirrors the native
  * CandidatesTable idiom (§3A): only declares columns, the generic
  * `components/ui/DataTable` handles rendering/sorting/selection/empty states.
  * Status renders as a soft chip (§4), never a solid fill; numeric/rate values

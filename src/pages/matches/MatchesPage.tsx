@@ -66,7 +66,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const [monthStart] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0, 0, 0, 0); return d.getTime() })
   // Bulk selection (checkboxes); accumulates across pages, clears on filter change.
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
-  const { toggleRow, toggleAll, bulkCoupleHelloFlex, bulkCoupleShiftManager } =
+  const { toggleRow, toggleAll, bulkCoupleHelloFlex, bulkCoupleShiftmanager } =
     useMatchesBulkActions({ selectedIds, setSelectedIds, t })
 
   // Donut click: toggle one value (second click clears).
@@ -295,7 +295,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
               count={selectedIds.size}
               onClear={() => setSelectedIds(new Set())}
               onCoupleHelloFlex={bulkCoupleHelloFlex}
-              onCoupleShiftManager={bulkCoupleShiftManager}
+              onCoupleShiftmanager={bulkCoupleShiftmanager}
               canCouple={hasPermission('matches.couple')}
             />
           ) : (
@@ -374,7 +374,9 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
         // ARCHIVE-1: per-id delete/restore (§7 — UI-only gate; the backend re-checks
         // matches.update on both routes).
         onArchive={canArchive ? archiveMatch : undefined}
-        onRestore={canArchive ? restoreMatch : undefined} />
+        onRestore={canArchive ? restoreMatch : undefined}
+        // EXTRACT-1: same matches.update gate as canApprove/canArchive above.
+        canLinkBackoffice={hasPermission('matches.update')} />
 
       {/* Direct-match creation: the full placement form (rate proposal, contract,
           cost center) with a candidate picker; refetch so server-derived fields land. */}

@@ -4,10 +4,15 @@
  * Status/industry arrive either as a scalar or a { value/label/color|name } object.
  */
 import type { Id } from './common'
+import type { ApiBackofficeLink, BackofficeLink } from '@/lib/backofficeLink'
 
 /** A contact person (flat UI shape). SUB-STATUS-1 status + CONTACT-MULTI-1 multi coupling. */
 export interface Contact {
   id: Id | undefined
+  // EXTRACT-1: the backoffice links (Koppelingen sub-tab), mapped from
+  // backoffice_links[] — same shape/endpoint every entity shares.
+  helloflexLink: BackofficeLink | null
+  shiftmanagerLink: BackofficeLink | null
   firstName: string
   lastName: string
   name: string
@@ -41,6 +46,9 @@ export interface Department {
   id: Id | undefined
   // NUMMER-1: human-readable reference number (A-001).
   referenceNumber?: string
+  // EXTRACT-1: the backoffice links (Koppelingen sub-tab).
+  helloflexLink: BackofficeLink | null
+  shiftmanagerLink: BackofficeLink | null
   name: string
   description: string
   locationId: Id | null
@@ -61,6 +69,9 @@ export interface Location {
   id: Id | undefined
   // NUMMER-1: human-readable reference number (L-001).
   referenceNumber?: string
+  // EXTRACT-1: the backoffice links (Koppelingen sub-tab).
+  helloflexLink: BackofficeLink | null
+  shiftmanagerLink: BackofficeLink | null
   name: string
   street: string
   houseNumber: string
@@ -112,6 +123,9 @@ export interface Customer {
   // location_id back, which the backend validates against real establishments.
   branchId: Id | null
   branchName: string
+  // EXTRACT-1: the backoffice links (Koppelingen tab) — same shape/endpoint every entity shares.
+  helloflexLink: BackofficeLink | null
+  shiftmanagerLink: BackofficeLink | null
   status: string | number
   statusLabel: string | undefined
   statusColor: string | undefined
@@ -176,6 +190,8 @@ export interface ApiContact {
   departments?: { id?: Id; name?: string }[]
   status?: ApiStatusRef | null; status_id?: Id | null
   custom_fields?: Record<string, unknown>
+  // EXTRACT-1: the shared raw shape (src/lib/backofficeLink).
+  backoffice_links?: ApiBackofficeLink[]
   [k: string]: unknown
 }
 
@@ -188,6 +204,8 @@ export interface ApiDepartment {
   cost_center?: string
   status?: ApiStatusRef | null; status_id?: Id | null
   custom_fields?: Record<string, unknown>
+  // EXTRACT-1: the shared raw shape (src/lib/backofficeLink).
+  backoffice_links?: ApiBackofficeLink[]
   [k: string]: unknown
 }
 
@@ -200,6 +218,8 @@ export interface ApiLocation {
   departments?: ApiDepartment[]; contacts?: ApiContact[]
   status?: ApiStatusRef | null; status_id?: Id | null
   custom_fields?: Record<string, unknown>
+  // EXTRACT-1: the shared raw shape (src/lib/backofficeLink).
+  backoffice_links?: ApiBackofficeLink[]
   [k: string]: unknown
 }
 
@@ -234,5 +254,7 @@ export interface ApiCustomer {
   koiosAdvice?: { action?: string; label?: string; reason?: string } | null
   // Tenant custom-field values (§3B "Eigen velden").
   custom_fields?: Record<string, unknown>
+  // EXTRACT-1: the shared raw shape (src/lib/backofficeLink).
+  backoffice_links?: ApiBackofficeLink[]
   [k: string]: unknown
 }

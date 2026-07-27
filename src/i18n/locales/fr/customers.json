@@ -79,6 +79,7 @@
       "priceAgreements": "Accords tarifaires",
       "documents": "Documents",
       "notes": "Notes",
+      "communication": "Communication",
       "extra": "Extra"
     },
     "changelog": "Historique",
@@ -382,7 +383,10 @@
       "industry": "Secteur",
       "selectIndustry": "Choisir un secteur",
       "city": "Ville",
-      "cityPlaceholder": "P. ex. Gorinchem"
+      "cityPlaceholder": "P. ex. Gorinchem",
+      "cardCompany": "Entreprise",
+      "cardBranch": "Agence & ville",
+      "cardOwnerStatus": "Propriétaire & statut"
     }
   },
   "subModal": {
@@ -426,9 +430,13 @@
     "groups": {
       "general": "Général",
       "address": "Adresse",
+      "business": "Professionnel",
       "registration": "Immatriculation",
       "contact": "Contact sur place",
-      "billing": "Facturation"
+      "billing": "Facturation",
+      "person": "Personne",
+      "contactInfo": "Contact",
+      "link": "Association"
     },
     "create": "Ajouter",
     "save": "Enregistrer",

@@ -319,7 +319,10 @@
       "employmentType": "Tipo de contrato",
       "industry": "Sector",
       "category": "Categoría",
-      "location": "Ubicación"
+      "location": "Ubicación",
+      "cardGeneral": "General",
+      "cardPlacement": "Colocación",
+      "cardPublication": "Publicación"
     },
     "titlePlaceholder": "p. ej. Enfermero | La Haya",
     "create": "Crear vacante",

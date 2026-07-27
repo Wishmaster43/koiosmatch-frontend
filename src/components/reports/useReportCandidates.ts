@@ -1,5 +1,5 @@
 /**
- * useReportCandidates — data layer for the ShiftManager candidates report.
+ * useReportCandidates — data layer for the Shiftmanager candidates report.
  * Fetches /sm_candidates (page size from KPI settings) and exposes
  * { candidates, loading, error }. `error` is a boolean; the component maps it to
  * a translated message so i18n stays in the view (§3, §5). Refetches when the

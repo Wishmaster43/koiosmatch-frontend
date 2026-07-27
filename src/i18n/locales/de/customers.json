@@ -79,6 +79,7 @@
       "priceAgreements": "Preisvereinbarungen",
       "documents": "Dokumente",
       "notes": "Notizen",
+      "communication": "Kommunikation",
       "extra": "Extra"
     },
     "changelog": "Änderungen",
@@ -382,7 +383,10 @@
       "industry": "Branche",
       "selectIndustry": "Branche wählen",
       "city": "Ort",
-      "cityPlaceholder": "z. B. Gorinchem"
+      "cityPlaceholder": "z. B. Gorinchem",
+      "cardCompany": "Unternehmen",
+      "cardBranch": "Niederlassung & Ort",
+      "cardOwnerStatus": "Eigentümer & Status"
     }
   },
   "subModal": {
@@ -426,9 +430,13 @@
     "groups": {
       "general": "Allgemein",
       "address": "Adresse",
+      "business": "Geschäftlich",
       "registration": "Registrierung",
       "contact": "Ansprechpartner vor Ort",
-      "billing": "Abrechnung"
+      "billing": "Abrechnung",
+      "person": "Person",
+      "contactInfo": "Kontakt",
+      "link": "Verknüpfung"
     },
     "create": "Hinzufügen",
     "save": "Speichern",

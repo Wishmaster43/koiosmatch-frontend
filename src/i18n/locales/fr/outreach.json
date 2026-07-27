@@ -60,6 +60,8 @@
   },
   "create": {
     "title": "Nouvelle liste d'appels",
+    "generalCard": "Général",
+    "sourceCard": "Source",
     "name": "Nom",
     "namePlaceholder": "p. ex. Liste d'appels soignants disponibles",
     "channel": "Canal",

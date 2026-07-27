@@ -13,7 +13,6 @@ import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import EntityDrawerJs from '@/components/drawer/EntityDrawer'
 import EntityHeaderJs from '@/components/drawer/EntityHeader'
 import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
-import GeocodeButton from '@/components/ui/GeocodeButton'
 import { useGenders } from '@/lib/useGenders'
 import { useAllSettings, getBoolSetting, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { useAuth } from '@/context/AuthContext'
@@ -34,7 +33,8 @@ import CommunicationTab from './drawer/CommunicationTab'
 import DocumentsSection from './drawer/DocumentsSection'
 import IntegrationsTab from './drawer/IntegrationsTab'
 import StatisticsTab from './drawer/StatisticsTab'
-import ChangelogPopover from './drawer/ChangelogPopover'
+import ChangelogPopover from '@/components/drawer/ChangelogPopover'
+import ChangelogTab from './drawer/ChangelogTab'
 import MergeCandidateModal from './drawer/MergeCandidateModal'
 import CandidateStatusModals from './drawer/CandidateStatusModals'
 import { CandidateTitle, CandidateHeaderActions, ArchivedBanner } from './drawer/CandidateHeaderBits'
@@ -283,12 +283,10 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
               phaseInfo={status.phaseInfo} showPhase={!!status.currentPhase} />
           )}
           titleActions={<>
-            <ChangelogPopover c={c} />
-            {/* GEO-REGEOCODE-1: manual "PDOK opnieuw ophalen" — queued + async, never
-                claims "done" (see GeocodeButton). Disabled when there's no address at
-                all yet (nothing meaningful to geocode). */}
-            <GeocodeButton endpoint={`/candidates/${c.id}/geocode`} permission="candidates.update"
-              disabled={!c.city && !c.street && !c.postalCode} />
+            {/* Danny 27-07: the shared house ChangelogPopover shell (§3A(d)) — the
+                candidate's own ChangelogTab supplies the content (field diffs, date
+                filter, CSV export); this drawer stays the reference implementation. */}
+            <ChangelogPopover><ChangelogTab c={c} bare /></ChangelogPopover>
             {/* Merge a duplicate into this record (punt 4) — same permission signal
                 as archive (candidates.delete via the page); not on archived dossiers. */}
             {onMerged && !c.archived && (

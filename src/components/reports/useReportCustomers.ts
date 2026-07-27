@@ -1,5 +1,5 @@
 /**
- * useReportCustomers — data layer for the ShiftManager customers report table.
+ * useReportCustomers — data layer for the Shiftmanager customers report table.
  * Fetches /sm_customers once and exposes { customers, loading, error }. When
  * USE_MOCKS is on (dev only), seed demo customers are merged in so the screen has
  * data without a backend. `error` is a boolean; the view maps it to a translated

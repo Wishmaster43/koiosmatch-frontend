@@ -30,6 +30,9 @@ interface Props {
   statuses?: LookupOption[]
   departmentStatuses?: LookupOption[]
   contactStatuses?: LookupOption[]
+  // EXTRACT-1: the caller's own customers.update permission check, threaded down
+  // to the Koppelingen sub-tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
+  canLinkBackoffice?: boolean
   onAddLocation: (payload: LocationPayload) => void
   onSaveLocation: (id: Id, payload: Partial<LocationPayload>) => void
   onDeleteLocation: (id: Id) => void
@@ -42,6 +45,7 @@ interface Props {
 
 export default function LocationsTab({
   customerId, customerName, locations = [], departments = [], contacts = [], statuses = [], departmentStatuses = [], contactStatuses = [],
+  canLinkBackoffice = false,
   onAddLocation, onSaveLocation, onDeleteLocation, onAddDepartment, onUpdateDepartment, onRemoveDepartment, onAddContact, onUpdateContact,
 }: Props) {
   const { t } = useTranslation('customers')
@@ -72,6 +76,7 @@ export default function LocationsTab({
       locations={locations.map(x => ({ id: x.id as Id, name: x.name }))}
       departments={departments} contacts={contacts}
       statuses={statuses} departmentStatuses={departmentStatuses} contactStatuses={contactStatuses}
+      canLinkBackoffice={canLinkBackoffice}
       onSave={onSaveLocation} onDelete={onDeleteLocation}
       onAddDepartment={onAddDepartment} onUpdateDepartment={onUpdateDepartment} onRemoveDepartment={onRemoveDepartment}
       onAddContact={onAddContact} onUpdateContact={onUpdateContact}

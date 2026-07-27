@@ -237,7 +237,12 @@ describe('MatchPlacementModal · start date defaults to today (job 19)', () => {
   it('proposes today in the start-date field', async () => {
     const { container } = render(<MatchPlacementModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
     await screen.findByRole('dialog') // let the candidate-branch lookup settle first
-    const today = new Date().toISOString().slice(0, 10)
+    // LOCAL date, exactly like helpers.ts todayISO — toISOString() is UTC, so between
+    // midnight and 02:00 Dutch summer time it returned YESTERDAY and this test failed
+    // every night (caught 28-07 at 00:5x). Mirrors the same computation further down.
+    const now = new Date()
+    const pad = (n: number) => String(n).padStart(2, '0')
+    const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
     const dateInputs = container.querySelectorAll('input[type="date"]')
     expect(dateInputs[0]).toHaveValue(today) // start date (first of the pair)
     expect(dateInputs[1]).toHaveValue('') // end date stays empty

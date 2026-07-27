@@ -4,6 +4,7 @@
  * map from and the flat row the table renders.
  */
 import type { Id } from './common'
+import type { ApiBackofficeLink, BackofficeLink } from '@/lib/backofficeLink'
 
 // The raw match as it can arrive from the API (snake_case-tolerant, nested or flat).
 export interface RawMatch {
@@ -42,6 +43,8 @@ export interface RawMatch {
   approval_rejected_reason?: string
   // Tenant custom-field values (§3B "Eigen velden").
   custom_fields?: Record<string, unknown>
+  // EXTRACT-1: the shared raw shape (src/lib/backofficeLink) — the Koppelingen tab.
+  backoffice_links?: ApiBackofficeLink[]
   [k: string]: unknown
 }
 
@@ -76,6 +79,9 @@ export interface MatchRow {
   approval_rejected_reason?: string
   // Tenant custom-field values (§3B "Eigen velden" — the drawer's gated Extra tab).
   customFieldValues?: Record<string, unknown>
+  // EXTRACT-1: the backoffice links (Koppelingen tab), mapped from backoffice_links[].
+  helloflexLink: BackofficeLink | null
+  shiftmanagerLink: BackofficeLink | null
   // MATCH-ARCHIVED-LIST-1 (2026-07-18): server-backed now — MatchListResource carries
   // `archived`/`deleted_at` on every row (mapped by useMatches), reflecting the true
   // list-level state, not just a delete/restore this session performed.

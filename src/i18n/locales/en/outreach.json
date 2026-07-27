@@ -60,6 +60,8 @@
   },
   "create": {
     "title": "New call list",
+    "generalCard": "General",
+    "sourceCard": "Source",
     "name": "Name",
     "namePlaceholder": "e.g. Call list available care workers",
     "channel": "Channel",

@@ -1,4 +1,4 @@
-// sm_schedules module — fetch TODAY'S scheduled shifts from ShiftManager (live,
+// sm_schedules module — fetch TODAY'S scheduled shifts from Shiftmanager (live,
 // dynamic date at run time). One pipeline bundle per schedule with a derived
 // `daypart` (dag/avond/nacht) so a Router splits on it (ShiftReminder flow).
 import ShiftManagerMark from '../components/ui/ShiftManagerMark'
@@ -7,7 +7,7 @@ export default {
   type:  'sm_schedules',
   // GET/lees-kant: gate op de rapporten-MODULE 'sm' (Danny 23-07); de connector-app gate alleen de POST/PATCH-koppelkant.
   module: 'sm',
-  category: 'ShiftManager',
+  category: 'Shiftmanager',
   label: 'Ingeplande diensten',
   Icon:  ShiftManagerMark,
   color: '#E11D2A',

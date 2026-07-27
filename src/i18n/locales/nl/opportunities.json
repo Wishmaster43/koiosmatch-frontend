@@ -131,6 +131,10 @@
     "save": "Opslaan",
     "saving": "Bezig…",
     "cancel": "Annuleren",
+    "groups": {
+      "general": "Algemeen",
+      "dealStage": "Waarde & fase"
+    },
     "fields": {
       "title": "Titel",
       "client": "Klant",

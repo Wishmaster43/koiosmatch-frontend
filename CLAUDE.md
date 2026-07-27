@@ -379,7 +379,7 @@ never label it "Matched"; "matched" is the *application* bucket, a different axi
 - **Table:** soft chips only; add Facebook Lead ID + last-contact-type columns; compact status/owner.
 - **Drawer:** thin container + one component per tab; add a **Changelog** tab (`/candidates/{id}/activity`).
 - **Matches tab = read-only.** A match is the continuation of an application → placement.
-  Coupling to **Backoffice (HelloFlex)** and **ShiftManager** happens three ways — manual,
+  Coupling to **Backoffice (HelloFlex)** and **Shiftmanager** happens three ways — manual,
   bulk, workflow — all **authorization-gated**. Bulk uses a **queue + rate-limit** (HelloFlex),
   writes the GUID to a mapping table, and **surfaces a coupling error + reason on the candidate**
   until resolved. A subtle icon marks a backoffice-linked candidate.
@@ -579,7 +579,7 @@ never label it "Matched"; "matched" is the *application* bucket, a different axi
   **clean, unprefixed** names (`/customers`, `/candidates`, `/locations`, `/departments`,
   `/contacts`, `/kpis`, `/reports`, …). Data that mirrors an **external system** carries that
   system's prefix so its origin is unambiguous at a glance:
-  **ShiftManager → `sm_`** (`/sm_customers`, `/sm_candidates`, `/sm_kpis`, `/sm_reports/…`) and
+  **Shiftmanager → `sm_`** (`/sm_customers`, `/sm_candidates`, `/sm_kpis`, `/sm_reports/…`) and
   **HelloFlex → `hf_`** (`/hf_customers`, `/hf_candidates`, …). Never prefix a native resource,
   and never let an external mirror occupy a clean name (e.g. no `/crm/…` path prefix for native).
 - **Backend/DB is out of scope here.** This is the frontend repo. Never write migrations,
@@ -667,7 +667,7 @@ Be honest. If something is not done, say so — do not pretend.
 - **Small steps, then confirm.** After a change, wait for "zeg next als het werkt"
   before continuing.
 - Prefer small reusable components over large ones.
-- Use the candidate's own UUID `id` for internal references, never ShiftManager's
+- Use the candidate's own UUID `id` for internal references, never Shiftmanager's
   `external_id`.
 - **Subagent model policy (Danny 2026-07-22 — supersedes 2026-07-08/15/17; fallback updated 2026-07-24):**
   The MANAGER runs **Fable 5 at reasoning effort high**; when Fable's budget is

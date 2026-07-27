@@ -431,6 +431,7 @@
     "postalCode": "Código postal",
     "city": "Ciudad",
     "country": "País",
+    "sectionGeneral": "General",
     "sectionAddress": "Dirección",
     "sectionBusiness": "Datos de empresa",
     "sectionContact": "Contacto",

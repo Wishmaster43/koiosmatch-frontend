@@ -108,6 +108,10 @@
     "save": "Guardar",
     "saving": "Guardando…",
     "cancel": "Cancelar",
+    "groups": {
+      "general": "General",
+      "dealStage": "Valor & fase"
+    },
     "fields": {
       "title": "Título",
       "client": "Cliente",

@@ -1,5 +1,5 @@
 /**
- * SmCandidatesInsightsRow — the 9-slot KPI/insights row for the ShiftManager
+ * SmCandidatesInsightsRow — the 9-slot KPI/insights row for the Shiftmanager
  * candidates table (§3A blueprint: config-driven donuts[] + kpis[], equal
  * footprint, click-to-filter). One status donut + 8 KPI cards, computed from
  * the FULL candidate set (server-wide, independent of the table's page) so the

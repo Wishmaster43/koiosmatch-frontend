@@ -61,7 +61,7 @@ describe('useMatchesBulkActions · bulkCouple', () => {
   it('falls back to the `updated` list\'s length when `queued` is absent', async () => {
     post.mockResolvedValue({ data: { updated: [1, 2] } })
     const r = harness()
-    act(() => r.result.current.actions.bulkCoupleShiftManager())
+    act(() => r.result.current.actions.bulkCoupleShiftmanager())
     expect(post).toHaveBeenCalledWith('/matches/bulk/couple', { match_ids: [1, 2], target: 'shiftmanager' })
     await waitFor(() => expect(notify).toHaveBeenCalledWith('success', expect.any(String)))
   })
@@ -69,7 +69,7 @@ describe('useMatchesBulkActions · bulkCouple', () => {
   it('a 404 (endpoint not built yet) is treated as "not available", never a hard error', async () => {
     post.mockRejectedValue({ response: { status: 404 } })
     const r = harness()
-    act(() => r.result.current.actions.bulkCoupleShiftManager())
+    act(() => r.result.current.actions.bulkCoupleShiftmanager())
     await waitFor(() => expect(notify).toHaveBeenCalledWith('info', expect.any(String)))
   })
 

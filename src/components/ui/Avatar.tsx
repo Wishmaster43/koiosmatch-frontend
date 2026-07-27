@@ -5,7 +5,7 @@
  * `color` (candidate gender lookup, owner avatar_color) wins; otherwise the colour
  * is derived from the initials so the same person always gets the same colour.
  */
-// Exported so avatarColor.ts (ShiftManager department/contact/location avatars)
+// Exported so avatarColor.ts (Shiftmanager department/contact/location avatars)
 // consumes this SAME palette — one hash, one colour, app-wide (was two drifting
 // 6- vs 7-colour arrays).
 /* eslint-disable no-restricted-syntax -- DATA: avatar colour-hash palette entries (mixed with token entries), not a themeable UI colour choice */

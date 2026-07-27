@@ -1,5 +1,5 @@
 /**
- * useShiftmanagerDashboard — data layer for the ShiftManager dashboard (§3): SM
+ * useShiftmanagerDashboard — data layer for the Shiftmanager dashboard (§3): SM
  * candidates (feed the "new this month" KPI), shift KPIs, and — only for AI/Workflow
  * packages — recent workflow runs + WhatsApp conversations. Via React Query: each
  * request dedups + caches + auto-cancels; the AI-only calls stay disabled until the
@@ -32,7 +32,7 @@ export function useShiftmanagerDashboard(candidatesPerPage: number, hasAI: boole
     },
   })
 
-  // Shift KPIs from the ShiftManager report endpoint.
+  // Shift KPIs from the Shiftmanager report endpoint.
   const statsQ = useQuery({
     queryKey: ['sm_reports', 'dashboard'],
     queryFn: async ({ signal }) => ((await api.get('/sm_reports/dashboard', { signal })).data ?? null) as SmDashStats | null,

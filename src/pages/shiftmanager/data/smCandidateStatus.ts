@@ -1,5 +1,5 @@
 /**
- * smCandidateStatus — the ShiftManager candidate status palette, shared by
+ * smCandidateStatus — the Shiftmanager candidate status palette, shared by
  * SmCandidatesInsightsRow (status donut) and SmCandidatesTable (status chip) so
  * the same status value always reads the same colour in both places. Mirrors
  * the fixed palette already used by reports/CandidatesTable + DrillDownDrawer's

@@ -1,5 +1,5 @@
 // candidates_fetch module — fetch OUR OWN Koios Match candidates (the native ATS
-// records, never the ShiftManager mirror) onto the pipeline, filtered on tenant-
+// records, never the Shiftmanager mirror) onto the pipeline, filtered on tenant-
 // editable criteria (Danny 23-07: "welke soort kandidaten" — incl. contractvorm).
 // Feeds the bulk scenarios: PDOK-geocode, backoffice-koppeling, bellijst, check-ins.
 import { Users } from 'lucide-react'

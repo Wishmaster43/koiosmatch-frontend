@@ -1,10 +1,13 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, X, Map as MapIcon, Pencil, Trash2, AlertTriangle, RefreshCw } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import GeocodeButton from '@/components/ui/GeocodeButton'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { BTN_H } from '@/config/buttonMetrics'
 
 // STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
 const LocationsMapView = lazy(() => import('./LocationsMapView'))
@@ -69,6 +72,16 @@ export default function LocationsSettings() {
   const [deletingId,setDeletingId]= useState(null)
   const [page,      setPage]      = useState(1)
   const PER_PAGE = 10
+  // a11y (§6): trap focus in the "+ Vestiging" panel + close on Escape while open
+  // (Danny 27-07 — the wide-form frame gets the same dialog behaviour as +Match/
+  // +Kandidaat). Safe to call unconditionally: the hook itself no-ops without a
+  // mounted node, so it can sit above the `showModal &&` render branch below.
+  // useCallback keeps ONE stable function identity across re-renders — every
+  // keystroke into `form` re-renders this component, and a fresh inline closure
+  // here would re-trigger useFocusTrap's effect (its deps include `onClose`) on
+  // every keystroke, stealing focus back to the first focusable element each time.
+  const closeModal = useCallback(() => setShowModal(false), [])
+  const modalPanelRef = useFocusTrap(closeModal)
 
   // Load once — failure is its own state (never a false "no locations yet").
   useEffect(() => {
@@ -234,17 +247,35 @@ export default function LocationsSettings() {
 
       {showModal && (
         <>
-          <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={() => setShowModal(false)} />
-          <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 460, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+          <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={closeModal} />
+          {/* Wide-form frame (Danny 27-07: "+ vestiging... moet net zo breed en hoog
+              worden als + match of + nieuwe kandidaat") — same WIDE_MODAL footprint
+              as AddCandidateModal/MatchPlacementModal, `94vw` cap so it still breathes
+              on narrow viewports (mirrors matchPlacement/styles.ts' `panel`, this
+              component being `position: fixed` with no flex-centering overlay of its
+              own). role="dialog" + useFocusTrap (§6): focus trap, Escape-to-close,
+              focus restore — this panel had none of that before. */}
+          <div ref={modalPanelRef} role="dialog" aria-modal="true" tabIndex={-1}
+            aria-label={editingId ? t('locations.editTitle') : t('locations.create')}
+            className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: '94vw', maxWidth: WIDE_MODAL.maxWidth, maxHeight: WIDE_MODAL.maxHeight, overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <span style={{ fontSize: 15, fontWeight: 700 }}>{editingId ? t('locations.editTitle') : t('locations.create')}</span>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
+              <button onClick={closeModal} aria-label={t('common.cancel')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
             </div>
 
             {(() => {
-              const lbl = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }
-              const inp = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }
-              const sectionLbl = { fontSize: 11, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase', color: 'var(--text-muted)', marginTop: 4 }
+              // House field footprint (Danny 27-07 point D): 11px uppercase muted
+              // label above each input, fontSize 13 / borderRadius 8 — mirrors
+              // matchPlacement/styles.ts' `lbl`/`input` exactly.
+              const lbl = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }
+              const inp = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
+              // Titled-card chrome (Danny 27-07 point B: "kaders om elk blokje") —
+              // mirrors the placement modal's cardHead/cardBox idiom (matchPlacement/
+              // styles.ts + pages/candidates/addmodal/fields), kept LOCAL rather than
+              // a cross-import: this is a settings section, not an entity page, and
+              // this file stays plain JSX (no TS cast boundary to reuse there either).
+              const cardHead = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
+              const cardBox = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, display: 'flex', flexDirection: 'column', gap: 12 }
               const setF = (k) => (e) => setForm(x => ({ ...x, [k]: e.target.value }))
               // Called as a function (not <F/>) so inputs keep focus while typing.
               const field = (k, label, placeholder, type = 'text', flex = 1) => (
@@ -254,45 +285,64 @@ export default function LocationsSettings() {
                 </div>
               )
               return (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  {field('name', t('locations.nameLabel'), t('locations.namePlaceholder'))}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {/* Algemeen — just the name; this form carries no "standaard"/default
+                      flag (unlike the customer-location modal), so nothing invented here. */}
+                  <div>
+                    <div style={cardHead}>{t('locations.sectionGeneral')}</div>
+                    <div style={cardBox}>
+                      {field('name', t('locations.nameLabel'), t('locations.namePlaceholder'))}
+                    </div>
+                  </div>
 
                   {/* Structured address — separate fields so they can be matched/validated. */}
-                  <div style={sectionLbl}>{t('locations.sectionAddress')}</div>
-                  {/* Street + number + suffix on one line (compact, NL convention). */}
-                  <div style={{ display: 'flex', gap: 12 }}>
-                    {field('street', t('locations.street'), t('locations.street'), 'text', 3)}
-                    {field('house_number', t('locations.houseNumber'), '28', 'text', 1)}
-                    {field('house_number_suffix', t('locations.houseNumberSuffix'), 'A', 'text', 1)}
+                  <div>
+                    <div style={cardHead}>{t('locations.sectionAddress')}</div>
+                    <div style={cardBox}>
+                      {/* Street + number + suffix on one line (compact, NL convention). */}
+                      <div style={{ display: 'flex', gap: 12 }}>
+                        {field('street', t('locations.street'), t('locations.street'), 'text', 3)}
+                        {field('house_number', t('locations.houseNumber'), '28', 'text', 1)}
+                        {field('house_number_suffix', t('locations.houseNumberSuffix'), 'A', 'text', 1)}
+                      </div>
+                      <div style={{ display: 'flex', gap: 12 }}>
+                        {field('postal_code', t('locations.postalCode'), '1234 AB')}
+                        {field('city', t('locations.city'), t('locations.city'))}
+                      </div>
+                      {field('country', t('locations.country'), 'Nederland')}
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 12 }}>
-                    {field('postal_code', t('locations.postalCode'), '1234 AB')}
-                    {field('city', t('locations.city'), t('locations.city'))}
-                  </div>
-                  {field('country', t('locations.country'), 'Nederland')}
 
                   {/* Business identifiers for invoicing/registration. */}
-                  <div style={sectionLbl}>{t('locations.sectionBusiness')}</div>
-                  <div style={{ display: 'flex', gap: 12 }}>
-                    {field('coc_number', t('locations.cocNumber'), '12345678')}
-                    {field('vat_number', t('locations.vatNumber'), 'NL000000000B01')}
+                  <div>
+                    <div style={cardHead}>{t('locations.sectionBusiness')}</div>
+                    <div style={cardBox}>
+                      <div style={{ display: 'flex', gap: 12 }}>
+                        {field('coc_number', t('locations.cocNumber'), '12345678')}
+                        {field('vat_number', t('locations.vatNumber'), 'NL000000000B01')}
+                      </div>
+                    </div>
                   </div>
 
                   {/* Contact details for this location. */}
-                  <div style={sectionLbl}>{t('locations.sectionContact')}</div>
-                  {field('contact_name', t('locations.contactName'), t('locations.contactName'))}
-                  <div style={{ display: 'flex', gap: 12 }}>
-                    {field('phone', t('locations.phone'), '+31 6 12345678', 'tel')}
-                    {field('email', t('locations.email'), 'name@company.com', 'email')}
+                  <div>
+                    <div style={cardHead}>{t('locations.sectionContact')}</div>
+                    <div style={cardBox}>
+                      {field('contact_name', t('locations.contactName'), t('locations.contactName'))}
+                      <div style={{ display: 'flex', gap: 12 }}>
+                        {field('phone', t('locations.phone'), '+31 6 12345678', 'tel')}
+                        {field('email', t('locations.email'), 'name@company.com', 'email')}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )
             })()}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-              <button onClick={() => setShowModal(false)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer' }}>{t('common.cancel')}</button>
+              <button onClick={closeModal} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common.cancel')}</button>
               <button onClick={submit} disabled={saving || !form.name.trim()}
-                style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', opacity: form.name.trim() ? 1 : 0.4 }}>
+                style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', opacity: form.name.trim() ? 1 : 0.4 }}>
                 {saving ? t('common.saving') : (editingId ? t('common.save') : t('locations.createBtn'))}
               </button>
             </div>

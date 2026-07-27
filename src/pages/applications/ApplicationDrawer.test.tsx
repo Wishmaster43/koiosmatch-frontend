@@ -51,8 +51,10 @@ describe('ApplicationDrawer — header bucket badge removed (S21, Danny 21-07)',
     expect(screen.getByText('Jan Jansen')).toBeInTheDocument()
     // The Fase meta picker (single source of truth for the phase) is untouched.
     expect(screen.getByText('Fase')).toBeInTheDocument()
-    // The changelog popover icon in the title row is untouched.
-    expect(screen.getByRole('button', { name: 'Wijzigingen' })).toBeInTheDocument()
+    // The changelog popover icon in the title row is untouched. Its name now comes from
+    // the shared common:changelog key — every entity used to word this control
+    // differently ("Wijzigingslog" / "Wijzigingen" / "Activiteit"), unified 28-07.
+    expect(screen.getByRole('button', { name: 'Wijzigingslog' })).toBeInTheDocument()
   })
 
   it('still renders the matched/rejected bucket data path elsewhere unaffected (no badge for any bucket value)', () => {

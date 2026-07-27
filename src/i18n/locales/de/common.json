@@ -231,5 +231,43 @@
     "expand": "Vergrößern",
     "collapse": "Verkleinern",
     "html": "HTML-Quelle"
+  },
+  "changelog": "Änderungsprotokoll",
+  "backofficeLinks": {
+    "tabLabel": "Verknüpfungen",
+    "helloflex": {
+      "name": "HelloFlex",
+      "alt": "HelloFlex-Logo",
+      "notLinked": "Nicht mit HelloFlex verknüpft"
+    },
+    "shiftmanager": {
+      "name": "Shiftmanager",
+      "alt": "Shiftmanager-Logo",
+      "notLinked": "Nicht mit Shiftmanager verknüpft",
+      "externalId": "Externe ID",
+      "syncNow": "Jetzt synchronisieren",
+      "syncing": "Synchronisieren…",
+      "syncSuccess": "Synchronisierung abgeschlossen",
+      "syncFailed": "Synchronisierung fehlgeschlagen",
+      "lastSynced": "Zuletzt synchronisiert: {{date}}"
+    },
+    "common": {
+      "linkButton": "Verknüpfen",
+      "retry": "Erneut verknüpfen",
+      "linking": "Verknüpfen…",
+      "linkStarted": "Verknüpfung gestartet",
+      "linkFailed": "Verknüpfen fehlgeschlagen",
+      "linkedByOn": "Verknüpft von {{name}} am {{date}}",
+      "statusLinked": "Verknüpft",
+      "statusPending": "In Bearbeitung",
+      "statusFailed": "Fehlgeschlagen"
+    },
+    "pdok": {
+      "name": "PDOK",
+      "alt": "PDOK-Logo",
+      "linked": "Verknüpft",
+      "notGeocoded": "Noch nicht geocodiert",
+      "autoInfo": "Koordinaten werden automatisch aktualisiert, sobald sich die Adresse ändert."
+    }
   }
 }

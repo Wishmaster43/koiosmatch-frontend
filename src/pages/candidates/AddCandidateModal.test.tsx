@@ -61,7 +61,8 @@ describe('AddCandidateModal · Optie A card layout', () => {
     // A representative field per card still renders (names / email / function).
     expect(screen.getByPlaceholderText('modal.fields.firstName')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('modal.fields.emailPlaceholder')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'modal.fields.functionPlaceholder' })).toBeInTheDocument()
+    // Trigger's name is the field label now, not its empty-state placeholder text.
+    expect(screen.getByRole('button', { name: 'modal.fields.functionTitle' })).toBeInTheDocument()
     // Branch chips seed from /auth/me (punt 10) — the b1 chip is visible.
     expect(screen.getByText('Vestiging Noord')).toBeInTheDocument()
   })
@@ -77,10 +78,11 @@ describe('AddCandidateModal · Optie A card layout', () => {
     const user = userEvent.setup()
     render(<AddCandidateModal onClose={noop} />)
     // Opening the function combobox reveals its type-to-filter input + lookup option.
-    await user.click(screen.getByRole('button', { name: 'modal.fields.functionPlaceholder' }))
+    // Trigger's name is the field label now, not its empty-state placeholder text.
+    await user.click(screen.getByRole('button', { name: 'modal.fields.functionTitle' }))
     expect(await screen.findByRole('button', { name: /Verzorgende IG/ })).toBeInTheDocument()
     // Province combobox lists the lookup value.
-    await user.click(screen.getAllByRole('button', { name: 'common:select' })[1])
+    await user.click(screen.getByRole('button', { name: 'modal.fields.province' }))
     expect(await screen.findByRole('button', { name: /Utrecht/ })).toBeInTheDocument()
   })
 

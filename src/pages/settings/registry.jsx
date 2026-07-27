@@ -408,7 +408,7 @@ export const NAV_GROUPS = [
     // Modules (Danny 2026-07-20): add-on module settings under the SAME name the
     // super-admin Modules tab uses ("Losse modules"). The group auto-hides when no
     // item passes its gate (SettingsPage drops empty groups) — so it only shows
-    // with ShiftManager-rapportage and/or HelloFlex on. The old app-only gate is
+    // with Shiftmanager-rapportage and/or HelloFlex on. The old app-only gate is
     // gone with the manual Sync tab (SYNC-RETIRE-1): module-only via requiresPage.
     // HelloFlex settings land here once its credentials flow ships (wacht Danny).
     key: 'modules', icon: Boxes,

@@ -1,23 +1,50 @@
 /**
- * OutreachCreate — inline "new campaign" view (replaces the list, like the
- * API-key/webhook create views). No modal: name + channel + optional source pool
- * render full-width. Picking a pool seeds the campaign's targets on create.
+ * OutreachCreate — "new call list" MODAL on the shared wide-form frame (Danny
+ * 27-07: "+ Bellijst is geen popup???" / "elk scherm zoals + locatie moet net
+ * zo breed en hoog worden als + match of + nieuwe kandidaat. Zoekbare
+ * dropdowns en kaders om elk blokje"). Used to be an inline view that swapped
+ * out the whole list (like the API-key/webhook create screens); now an
+ * overlay + centred WIDE_MODAL panel like every other create flow, and the
+ * list stays mounted behind it. Name + channel group into an "Algemeen" card,
+ * the optional source pool into its own "Bron" card — both titled, bordered
+ * cards mirroring the MatchPlacementModal/AddCandidateModal idiom instead of
+ * three lonely full-width inputs. Channel and pool are searchable
+ * CreatableSelect pickers (allowCreate=false — channel is a fixed backend
+ * enum, pool is a real relational id) instead of a plain <select>. Behaviour
+ * is unchanged: same POST payload, same onCreated callback, same pool-seeding.
  */
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, PhoneCall } from 'lucide-react'
+import { X } from 'lucide-react'
 import api from '@/lib/api'
 import { createCampaign } from './data/outreachApi'
 import type { Campaign } from './hooks/useOutreachCampaigns'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import CreatableSelect from '@/components/ui/CreatableSelect'
+import { BTN_H } from '@/config/buttonMetrics'
 
-// Fixed backend enum (not a tenant lookup) — labels via i18n.
+// Fixed backend enum (not a tenant lookup) — labels via i18n, values stay literal.
 const CHANNELS = ['call', 'email', 'whatsapp'] as const
 
 interface Pool { id: string; name: string; color?: string }
+interface Props { onClose: () => void; onCreated: (c: Campaign) => void }
 
-interface Props { onBack: () => void; onCreated: (c: Campaign) => void }
+// Shared "wide form" frame (Danny 27-07): identical overlay/panel footprint to
+// MatchPlacementModal/AddCandidateModal — WIDE_MODAL caps width/height so the
+// call-list modal reads as the same kind of screen as +Match / +Kandidaat.
+const overlayStyle = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 60 } as const
+const panelStyle = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 61, width: '94vw', maxWidth: WIDE_MODAL.maxWidth, maxHeight: WIDE_MODAL.maxHeight, overflowY: 'auto', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: '0 24px 70px rgba(0,0,0,0.22)' } as const
+// Titled-card idiom (mirrors the +Match/+Kandidaat cards): uppercase muted
+// heading over a bordered surface — every field group renders inside one.
+const cardHead = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
+const cardBox = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, display: 'flex', flexDirection: 'column' as const, gap: 12 }
+const twoCol = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' as const }
+const row2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }
+const lbl = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }
+const inputStyle = { width: '100%', height: 36, padding: '0 11px', fontSize: 13, color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 8, outline: 'none', background: 'var(--surface)', boxSizing: 'border-box' as const }
 
-export default function OutreachCreate({ onBack, onCreated }: Props) {
+export default function OutreachCreate({ onClose, onCreated }: Props) {
   const { t } = useTranslation('outreach')
   const [name, setName]     = useState('')
   const [channel, setChannel] = useState<string>('call')
@@ -26,6 +53,8 @@ export default function OutreachCreate({ onBack, onCreated }: Props) {
   const [saving, setSaving] = useState(false)
   const [error, setError]   = useState(false)
   const firstField          = useRef<HTMLInputElement>(null)
+  // Accessible dialog behaviour (§6): traps Tab, Escape closes, focus restores.
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
   // Focus the name field on open.
   useEffect(() => { firstField.current?.focus() }, [])
@@ -45,68 +74,84 @@ export default function OutreachCreate({ onBack, onCreated }: Props) {
     try {
       const created = await createCampaign({ name: name.trim(), channel, ...(poolId ? { from_pool_id: poolId } : {}) })
       onCreated(created)
-      onBack()
+      onClose()
     } catch {
       setError(true)
       setSaving(false)
     }
   }
 
-  const inputStyle = { width: '100%', height: 38, padding: '0 11px', fontSize: 13, color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 8, outline: 'none', background: 'var(--surface)' } as const
-  const labelStyle = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5, display: 'block' } as const
+  const title = t('create.title')
+  // "No pool" is a real, selectable option (mirrors the old <option value="">)
+  // so the picker can be cleared back to it, not just defaulted once.
+  const poolOptions = [{ value: '', label: t('create.poolNone') }, ...pools.map((p) => ({ value: p.id, label: p.name }))]
 
   return (
-    <div>
-      {/* Header: back + icon + title */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
-        <button onClick={onBack} aria-label={t('common:back', { defaultValue: 'Back' })}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--hover-bg)', color: 'var(--text)', cursor: 'pointer' }}>
-          <ArrowLeft size={13} /> {t('common:back', { defaultValue: 'Back' })}
-        </button>
-        <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <PhoneCall size={16} style={{ color: 'var(--color-primary)' }} />
-        </div>
-        <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text)', margin: 0 }}>{t('create.title')}</h2>
-      </div>
-
-      {/* Form, capped to a comfortable reading width */}
-      <div style={{ maxWidth: 640, display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div>
-          <label style={labelStyle} htmlFor="oc-name">{t('create.name')}</label>
-          <input id="oc-name" ref={firstField} value={name} onChange={(e) => setName(e.target.value)}
-            placeholder={t('create.namePlaceholder')} style={inputStyle}
-            onKeyDown={(e) => e.key === 'Enter' && submit()} />
-        </div>
-
-        <div>
-          <label style={labelStyle} htmlFor="oc-channel">{t('create.channel')}</label>
-          <select id="oc-channel" value={channel} onChange={(e) => setChannel(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-            {CHANNELS.map((c) => <option key={c} value={c}>{t(`channel.${c}`)}</option>)}
-          </select>
-        </div>
-
-        <div>
-          <label style={labelStyle} htmlFor="oc-pool">{t('create.pool')}</label>
-          <select id="oc-pool" value={poolId} onChange={(e) => setPoolId(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-            <option value="">{t('create.poolNone')}</option>
-            {pools.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
-          <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '6px 0 0' }}>{t('create.poolHint')}</p>
-        </div>
-
-        {error && <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('create.error')}</div>}
-
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={submit} disabled={saving || !canSubmit}
-            style={{ height: 38, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: canSubmit ? 'pointer' : 'not-allowed', opacity: canSubmit ? 1 : 0.5 }}>
-            {saving ? t('create.saving') : t('create.submit')}
+    <>
+      {/* Overlay dims the list behind the modal (Danny 27-07: this must be a
+          real popup, not a full-page swap) — click-through closes it. */}
+      <div style={overlayStyle} onClick={onClose} />
+      <div ref={panelRef} style={panelStyle} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}>
+        {/* Title row + close X (mirrors every other wide-form modal's header). */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>{title}</span>
+          <button onClick={onClose} aria-label={t('common:close', { defaultValue: 'Close' })}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
+            <X size={16} />
           </button>
-          <button onClick={onBack}
-            style={{ height: 38, padding: '0 16px', fontSize: 13, fontWeight: 500, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+        </div>
+
+        {/* Two titled cards side by side: Algemeen (naam + kanaal) and Bron
+            (optionele pool) — the wide frame's two-column grid, not a stack
+            of lonely inputs. */}
+        <div style={twoCol}>
+          <div>
+            <div style={cardHead}>{t('create.generalCard')}</div>
+            <div style={cardBox}>
+              <div style={row2}>
+                <div>
+                  <label style={lbl} htmlFor="oc-name">{t('create.name')}</label>
+                  <input id="oc-name" ref={firstField} value={name} onChange={(e) => setName(e.target.value)}
+                    placeholder={t('create.namePlaceholder')} style={inputStyle}
+                    onKeyDown={(e) => e.key === 'Enter' && submit()} />
+                </div>
+                <div>
+                  <div style={lbl}>{t('create.channel')}</div>
+                  {/* Searchable picker (Danny 27-07) — same fixed enum values, only
+                      the affordance changes from a bare <select>. */}
+                  <CreatableSelect value={channel} onChange={setChannel} allowCreate={false}
+                    options={CHANNELS.map((c) => ({ value: c, label: t(`channel.${c}`) }))} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div style={cardHead}>{t('create.sourceCard')}</div>
+            <div style={cardBox}>
+              <div>
+                <div style={lbl}>{t('create.pool')}</div>
+                <CreatableSelect value={poolId} onChange={setPoolId} allowCreate={false} options={poolOptions} />
+              </div>
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{t('create.poolHint')}</p>
+            </div>
+          </div>
+        </div>
+
+        {error && <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger)', marginTop: 12 }}>{t('create.error')}</div>}
+
+        {/* Footer — Annuleren + primary create, BTN_H everywhere (§4/§9). */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
+          <button onClick={onClose}
+            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
             {t('common:cancel', { defaultValue: 'Cancel' })}
           </button>
+          <button onClick={submit} disabled={saving || !canSubmit}
+            style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: '#fff', cursor: canSubmit ? 'pointer' : 'not-allowed', opacity: canSubmit ? 1 : 0.5 }}>
+            {saving ? t('create.saving') : t('create.submit')}
+          </button>
         </div>
       </div>
-    </div>
+    </>
   )
 }

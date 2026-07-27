@@ -8,7 +8,7 @@ interface MatchesBulkBarProps {
   count: number
   onClear: () => void
   onCoupleHelloFlex: () => void
-  onCoupleShiftManager: () => void
+  onCoupleShiftmanager: () => void
   // Coupling is authorization-gated in the UI; the backend re-checks (§3B, §7).
   canCouple?: boolean
 }
@@ -16,12 +16,12 @@ interface MatchesBulkBarProps {
 /**
  * MatchesBulkBar — selection action bar shown above the table when ≥1 match is
  * checked. A match is read-only (§3B), so the only bulk operations are coupling
- * the selection to an external backoffice (HelloFlex / ShiftManager), gated on
+ * the selection to an external backoffice (HelloFlex / Shiftmanager), gated on
  * permission. A thin assembler over the shared ActionMenu — extend by adding a
  * node, never fork the bar.
  */
 export default function MatchesBulkBar({
-  count, onClear, onCoupleHelloFlex, onCoupleShiftManager, canCouple = false,
+  count, onClear, onCoupleHelloFlex, onCoupleShiftmanager, canCouple = false,
 }: MatchesBulkBarProps) {
   const { t } = useTranslation('matches')
 
@@ -29,7 +29,7 @@ export default function MatchesBulkBar({
   const items: MenuNode[] = canCouple ? [
     { key: 'couple', label: t('bulk.couple'), icon: Link2, items: [
       { key: 'helloflex',    label: t('bulk.target.helloflex'),    icon: Building2, onSelect: onCoupleHelloFlex },
-      { key: 'shiftmanager', label: t('bulk.target.shiftmanager'), icon: Layers,    onSelect: onCoupleShiftManager },
+      { key: 'shiftmanager', label: t('bulk.target.shiftmanager'), icon: Layers,    onSelect: onCoupleShiftmanager },
     ] },
   ] : []
 

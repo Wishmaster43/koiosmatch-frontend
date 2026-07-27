@@ -1,18 +1,28 @@
 import { useState, useEffect } from 'react'
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
-import { Field, TextField, SelectField, DateField } from '@/components/forms/fields'
+import { Field, TextField, DateField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import SelectMenu from '@/components/ui/SelectMenu'
 import { useAuth } from '@/context/AuthContext'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
 import { useOpportunityServiceTypes, useOpportunityAgreementTypes } from '@/lib/useOpportunityLookups'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useCustomerCascade } from './hooks/useCustomerCascade'
 import { mapOpportunity } from './data/mapOpportunity'
 import { BTN_H } from '@/config/buttonMetrics'
+import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import type { ApiOpportunity, Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
+
+// House "wide form" card idiom (Danny 27-07: bring this popup onto the same
+// frame as +Match/+Kandidaat) — mirrors matchPlacement/styles.ts's cardHead/
+// cardBox/row2 tokens. Kept LOCAL (not cross-imported from pages/candidates):
+// §2 forbids one entity page reaching into another entity page's internals.
+const cardHead: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
+const cardBox: CSSProperties = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, display: 'flex', flexDirection: 'column', gap: 12 }
+const row2: CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
@@ -61,6 +71,9 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
   const { agreementTypes } = useOpportunityAgreementTypes()
   // Owner defaults to the logged-in user (still changeable below).
   const { user: me } = useAuth() as unknown as { user: { id?: Id; name?: string } | null }
+  // Esc closes + Tab-trap + focus-restore (house dialog pattern, §6 — this modal
+  // lacked it before; adding it is part of bringing it onto the house frame).
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [saving, setSaving] = useState(false)
@@ -175,97 +188,119 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
     ...users.map(u => ({ value: String(u.id), label: u.name })),
   ]
   const customerOptions  = customers.map(c => ({ value: String(c.id), label: c.name }))
+  const title = t(isEdit ? 'modal.editTitle' : 'modal.title')
 
   return (
     <div
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', maxWidth: 560,
-        boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+      {/* House wide-form frame (Danny 27-07: same footprint as +Match/+Kandidaat —
+          src/components/ui/modalMetrics.ts is the one place to resize any of them). */}
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}
+        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', ...WIDE_MODAL,
+          boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
         {/* Header */}
         <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border)', flexShrink: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{isEdit ? t('modal.editTitle') : t('modal.title')}</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{title}</span>
           <button onClick={onClose} aria-label={t('common:cancel')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
             <X size={18} />
           </button>
         </div>
 
-        {/* Form */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <Field label={t('modal.fields.title')} required>
-            <TextField value={form.title} onChange={v => set('title', v)} placeholder={t('modal.titlePlaceholder')} error={errors.title} />
-            {errors.title && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
-          </Field>
+        {/* Form — two titled cards side by side (house wide-frame idiom, mirrors
+            the +Match placement modal's Relaties/Contract/Financieel cards).
+            Every dropdown is a searchable CreatableSelect (allowCreate=false) —
+            no bare <select> is left in this modal. */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 22px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' }}>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field label={t('modal.fields.client')}>
-              {/* Searchable, pick-only (allowCreate=false) — same house pattern as
-                  AddMatchModal/AddApplicationModal's PickField for a large option list. */}
-              <CreatableSelect allowCreate={false} value={form.clientId || null} onChange={handleClientChange}
-                placeholder={t('common:select')} options={customerOptions} />
-            </Field>
-            <Field label={t('modal.fields.stage')}>
-              <SelectField value={form.stageId} onChange={v => set('stageId', v)} placeholder={t('common:select')} options={stageOptions} />
-            </Field>
-          </div>
+            {/* Algemeen — title + the customer→location→department→contact
+                relations + owner (mirrors MatchPlacementModal's Relaties card). */}
+            <div>
+              <div style={cardHead}>{t('modal.groups.general')}</div>
+              <div style={cardBox}>
+                <Field label={t('modal.fields.title')} required>
+                  <TextField value={form.title} onChange={v => set('title', v)} placeholder={t('modal.titlePlaceholder')} error={errors.title} />
+                  {errors.title && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
+                </Field>
+                <div style={row2}>
+                  <Field label={t('modal.fields.client')}>
+                    {/* Searchable, pick-only (allowCreate=false) — a customer is a
+                        real relational id, never a free-text create. */}
+                    <CreatableSelect allowCreate={false} value={form.clientId || null} onChange={handleClientChange}
+                      placeholder={t('common:select')} options={customerOptions} />
+                  </Field>
+                  <Field label={t('modal.fields.contact')}>
+                    <CreatableSelect value={contactId || null} onChange={setContactId} allowCreate={false}
+                      placeholder={form.clientId ? t('common:select') : t('pickClientFirst')}
+                      options={contacts.map(c => ({ value: String(c.id), label: c.name ?? '—' }))} />
+                  </Field>
+                </div>
+                <div style={row2}>
+                  <Field label={t('modal.fields.location')}>
+                    <CreatableSelect value={locationId || null} onChange={handleLocationChange} allowCreate={false}
+                      placeholder={form.clientId ? t('common:select') : t('pickClientFirst')}
+                      options={locations.map(l => ({ value: String(l.id), label: l.name ?? '—' }))} />
+                  </Field>
+                  <Field label={t('modal.fields.department')}>
+                    <CreatableSelect value={departmentId || null} onChange={setDepartmentId} allowCreate={false}
+                      placeholder={form.clientId ? t('common:select') : t('pickClientFirst')}
+                      options={departments.map(d => ({ value: String(d.id), label: d.name ?? '—' }))} />
+                  </Field>
+                </div>
+                <Field label={t('modal.fields.owner')}>
+                  <CreatableSelect value={form.ownerId || null} onChange={v => set('ownerId', v)} allowCreate={false}
+                    placeholder={t('common:select')} options={userOptions} />
+                </Field>
+              </div>
+            </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field label={t('modal.fields.location')}>
-              <SelectMenu value={locationId || null} onChange={handleLocationChange}
-                placeholder={form.clientId ? t('common:select') : t('pickClientFirst')}
-                options={locations.map(l => ({ value: String(l.id), label: l.name ?? '—' }))} />
-            </Field>
-            <Field label={t('modal.fields.department')}>
-              <SelectMenu value={departmentId || null} onChange={setDepartmentId}
-                placeholder={form.clientId ? t('common:select') : t('pickClientFirst')}
-                options={departments.map(d => ({ value: String(d.id), label: d.name ?? '—' }))} />
-            </Field>
-          </div>
-
-          <Field label={t('modal.fields.contact')}>
-            <SelectMenu value={contactId || null} onChange={setContactId}
-              placeholder={form.clientId ? t('common:select') : t('pickClientFirst')}
-              options={contacts.map(c => ({ value: String(c.id), label: c.name ?? '—' }))} />
-          </Field>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field label={t('modal.fields.serviceType')}>
-              <SelectField value={form.serviceTypeId} onChange={v => set('serviceTypeId', v)} placeholder={t('common:select')} options={serviceOptions} />
-            </Field>
-            <Field label={t('modal.fields.agreementType')}>
-              <SelectField value={form.agreementTypeId} onChange={v => set('agreementTypeId', v)} placeholder={t('common:select')} options={agreementOptions} />
-            </Field>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field label={t('modal.fields.value')}>
-              <TextField type="number" value={form.value} onChange={v => set('value', v)} placeholder="0" error={errors.value} />
-            </Field>
-            <Field label={t('modal.fields.hours')}>
-              <TextField type="number" value={form.hours} onChange={v => set('hours', v)} placeholder="0" error={errors.hours} />
-            </Field>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field label={t('modal.fields.startDate')}>
-              <DateField value={form.startDate} onChange={v => set('startDate', v)} placeholder={t('common:select')} />
-            </Field>
-            <Field label={t('modal.fields.endDate')}>
-              <DateField value={form.endDate} onChange={v => set('endDate', v)} placeholder={t('common:select')} />
-            </Field>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field label={t('modal.fields.owner')}>
-              <SelectField value={form.ownerId} onChange={v => set('ownerId', v)} placeholder={t('common:select')} options={userOptions} />
-            </Field>
-            <Field label={t('modal.fields.expectedClose')}>
-              <DateField value={form.expectedCloseAt} onChange={v => set('expectedCloseAt', v)} placeholder={t('common:select')} />
-            </Field>
+            {/* Waarde & fase — pipeline stage, service/agreement type, value/hours,
+                contract term + expected close. */}
+            <div>
+              <div style={cardHead}>{t('modal.groups.dealStage')}</div>
+              <div style={cardBox}>
+                <div style={row2}>
+                  <Field label={t('modal.fields.stage')}>
+                    <CreatableSelect value={form.stageId || null} onChange={v => set('stageId', v)} allowCreate={false}
+                      placeholder={t('common:select')} options={stageOptions} />
+                  </Field>
+                  <Field label={t('modal.fields.serviceType')}>
+                    <CreatableSelect value={form.serviceTypeId || null} onChange={v => set('serviceTypeId', v)} allowCreate={false}
+                      placeholder={t('common:select')} options={serviceOptions} />
+                  </Field>
+                </div>
+                <div style={row2}>
+                  <Field label={t('modal.fields.agreementType')}>
+                    <CreatableSelect value={form.agreementTypeId || null} onChange={v => set('agreementTypeId', v)} allowCreate={false}
+                      placeholder={t('common:select')} options={agreementOptions} />
+                  </Field>
+                  <Field label={t('modal.fields.value')}>
+                    <TextField type="number" value={form.value} onChange={v => set('value', v)} placeholder="0" error={errors.value} />
+                  </Field>
+                </div>
+                <div style={row2}>
+                  <Field label={t('modal.fields.hours')}>
+                    <TextField type="number" value={form.hours} onChange={v => set('hours', v)} placeholder="0" error={errors.hours} />
+                  </Field>
+                  <Field label={t('modal.fields.expectedClose')}>
+                    <DateField value={form.expectedCloseAt} onChange={v => set('expectedCloseAt', v)} placeholder={t('common:select')} />
+                  </Field>
+                </div>
+                <div style={row2}>
+                  <Field label={t('modal.fields.startDate')}>
+                    <DateField value={form.startDate} onChange={v => set('startDate', v)} placeholder={t('common:select')} />
+                  </Field>
+                  <Field label={t('modal.fields.endDate')}>
+                    <DateField value={form.endDate} onChange={v => set('endDate', v)} placeholder={t('common:select')} />
+                  </Field>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

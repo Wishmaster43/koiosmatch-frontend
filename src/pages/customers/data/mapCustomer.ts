@@ -1,5 +1,6 @@
 import { initialsOf } from '@/lib/initials'
 import { toCoord } from '@/lib/coords'
+import { backofficeLinkOf } from '@/lib/backofficeLink'
 import type { Id } from '@/types/common'
 import type {
   ApiContact, ApiDepartment, ApiLocation, ApiCustomer,
@@ -30,6 +31,9 @@ export function mapDepartment(d: ApiDepartment = {}): Department {
     id: d.id,
     // NUMMER-1: human-readable reference number (A-001).
     referenceNumber: d.reference_number ?? '',
+    // EXTRACT-1: the backoffice links (Koppelingen sub-tab).
+    helloflexLink: backofficeLinkOf(d.backoffice_links, 'helloflex'),
+    shiftmanagerLink: backofficeLinkOf(d.backoffice_links, 'shiftmanager'),
     name: d.name ?? '—',
     description: d.description ?? '',
     locationId: d.location_id ?? d.locationId ?? null,
@@ -60,6 +64,9 @@ export function mapContact(p: ApiContact = {}): Contact {
     name: p.name ?? [p.first_name, p.last_name].filter(Boolean).join(' ') ?? '—',
     role: p.function ?? p.role ?? '',
     email: p.email ?? '',
+    // EXTRACT-1: the backoffice links (Koppelingen sub-tab).
+    helloflexLink: backofficeLinkOf(p.backoffice_links, 'helloflex'),
+    shiftmanagerLink: backofficeLinkOf(p.backoffice_links, 'shiftmanager'),
     // Split fields (BE 2026-07-20): phone stays the landline/"vast" number; mobile
     // is the new separate mobile number the WhatsApp shortcut uses.
     phone: p.phone ?? '',
@@ -85,6 +92,9 @@ export function mapLocation(l: ApiLocation = {}): Location {
     id: l.id,
     // NUMMER-1: human-readable reference number (L-001).
     referenceNumber: l.reference_number ?? '',
+    // EXTRACT-1: the backoffice links (Koppelingen sub-tab).
+    helloflexLink: backofficeLinkOf(l.backoffice_links, 'helloflex'),
+    shiftmanagerLink: backofficeLinkOf(l.backoffice_links, 'shiftmanager'),
     name: l.name ?? '—',
     street: l.street ?? '',
     houseNumber: l.house_number ?? '',
@@ -142,6 +152,9 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     // the drawer could not show or edit it.
     branchId: (c.branch?.id ?? c.branch_id ?? (c.location_id as Id | undefined) ?? null) as Id | null,
     branchName: c.branch?.name ?? c.branch_name ?? '',
+    // EXTRACT-1: the backoffice links (Koppelingen tab).
+    helloflexLink: backofficeLinkOf(c.backoffice_links, 'helloflex'),
+    shiftmanagerLink: backofficeLinkOf(c.backoffice_links, 'shiftmanager'),
     status: statusValue,
     statusLabel: (status && typeof status === 'object') ? status.label : c.status_label,
     statusColor: (status && typeof status === 'object') ? status.color : c.status_color,

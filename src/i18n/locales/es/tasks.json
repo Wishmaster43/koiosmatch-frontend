@@ -37,7 +37,7 @@
     "empty": "Arrastra las tareas aquí"
   },
   "drawer": {
-    "label": "Actividad",
+    "label": "Tarea",
     "createdAt": "Creado el {{date}}",
     "archivedBanner": {
       "since": "Archivada el {{date}}",
@@ -57,7 +57,7 @@
     "tags": "Etiquetas"
   },
   "details": {
-    "title": "Detalles de la actividad",
+    "title": "Detalles de la tarea",
     "type": "Tipo de actividad",
     "status": "Estado",
     "priority": "Prioridad",
@@ -94,7 +94,7 @@
     "empty": "Aún no hay actividad."
   },
   "modal": {
-    "title": "Añadir actividad",
+    "title": "Nueva tarea",
     "editTitle": "Editar tarea",
     "loadingTask": "Cargando tarea…",
     "type": "Tipo de actividad",
@@ -110,7 +110,7 @@
     "description": "Descripción",
     "descriptionPlaceholder": "Introducir…",
     "charsLeft": "Caracteres disponibles: {{count}}",
-    "detailsTitle": "Detalles de la actividad",
+    "detailsTitle": "Detalles de la tarea",
     "owner": "Responsable",
     "candidate": "Candidato",
     "candidatePlaceholder": "Seleccionar candidato",
@@ -122,7 +122,10 @@
     "save": "Guardar",
     "saving": "Guardando…",
     "cancel": "Cancelar",
-    "required": "Obligatorio"
+    "required": "Obligatorio",
+    "cardTask": "Tarea",
+    "cardPlanning": "Planificación",
+    "cardLink": "Vínculo"
   },
   "bulk": {
     "selected": "{{count}} seleccionado(s)",

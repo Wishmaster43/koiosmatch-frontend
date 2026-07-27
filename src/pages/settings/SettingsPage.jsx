@@ -52,7 +52,7 @@ export default function SettingsPage() {
   const auth = useAuth()
   const { isSuperAdmin, hasModule } = auth
   const { t } = useTranslation('settings')
-  // ShiftManager settings (SM-MODULE-TABS-1) reads the app/koppeling flag from
+  // Shiftmanager settings (SM-MODULE-TABS-1) reads the app/koppeling flag from
   // AppsContext — a nav item may declare requiresModuleOrApp to be visible on
   // EITHER signal (a plain requiresPage ANDs on the module only). isAppEnabled is
   // re-created by AppsProvider whenever its enabled-list changes, so it alone is

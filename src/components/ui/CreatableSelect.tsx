@@ -19,7 +19,7 @@
  * sized to match the clamp, so every item (however long the list) stays
  * scrollable and selectable, never truncated off.
  */
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useId } from 'react'
 import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { ChevronDown, Check, Plus } from 'lucide-react'
@@ -31,6 +31,11 @@ interface CreatableOption {
 }
 
 interface CreatableSelectProps {
+  // Supplied by the shared Field wrapper (§6): `id` names the trigger, and
+  // aria-labelledby points at the visible label — a <button> is not labelable, so
+  // without it the picker announced its value with no field name.
+  id?: string
+  'aria-labelledby'?: string
   value?: string | null
   options?: Array<string | CreatableOption>
   onChange: (value: string) => void
@@ -41,8 +46,15 @@ interface CreatableSelectProps {
 }
 
 export default function CreatableSelect({
+  id, 'aria-labelledby': ariaLabelledBy,
   value, options = [], onChange, placeholder, allowCreate = true, menuWidth = 220, style,
 }: CreatableSelectProps) {
+  const listId = useId()
+  const autoId = useId()
+  const triggerId = id ?? autoId
+  // Name = the field's label PLUS this button's own text (the current value); pointing
+  // aria-labelledby at the label alone would REPLACE the value instead of prefixing it.
+  const labelledBy = ariaLabelledBy ? `${ariaLabelledBy} ${triggerId}` : undefined
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const ref = useRef<HTMLDivElement>(null)
@@ -80,7 +92,14 @@ export default function CreatableSelect({
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
+      {/* Announced as a disclosure, NOT role="combobox": the options are real focusable
+          buttons reached by Tab, so claiming the combobox role would promise the arrow-key
+          + aria-activedescendant model this component does not implement. haspopup/expanded
+          tell a screen reader it opens a list — the part that was missing entirely once a
+          native <select> was replaced by this (measured 27-07). */}
       <button type="button" onClick={() => setOpen(o => !o)}
+        id={triggerId} aria-labelledby={labelledBy}
+        aria-expanded={open} aria-haspopup="listbox" aria-controls={open ? listId : undefined}
         style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', width: '100%',
           boxSizing: 'border-box', border: '1px solid var(--border)', borderRadius: 6,
           background: 'var(--surface)', cursor: 'pointer', ...style }}>
@@ -101,19 +120,21 @@ export default function CreatableSelect({
           ...(rect
             ? (openUp ? { bottom: window.innerHeight - rect.top + 4 } : { top: rect.bottom + 4 })
             : {}),
-          background: 'white', border: '1px solid var(--border)', borderRadius: 8,
+          background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
           boxShadow: '0 4px 16px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
           {/* Search / type-to-create */}
           <div style={{ padding: 6, borderBottom: '1px solid var(--border)' }}>
             <input ref={inputRef} value={query} onChange={e => setQuery(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && canCreate) pick(q); if (e.key === 'Escape') setOpen(false) }}
-              placeholder={placeholder} aria-label={placeholder}
+              placeholder={placeholder} aria-label={placeholder} aria-labelledby={placeholder ? undefined : ariaLabelledBy}
               style={{ width: '100%', boxSizing: 'border-box', padding: '6px 8px', fontSize: 12,
                 border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
           </div>
-          <div style={{ maxHeight: menuMaxHeight - DROPDOWN_SEARCH_ROW_HEIGHT, overflowY: 'auto' }}>
+          <div id={listId}
+            style={{ maxHeight: menuMaxHeight - DROPDOWN_SEARCH_ROW_HEIGHT, overflowY: 'auto' }}>
             {filtered.map(o => (
               <button key={o.value} type="button" onClick={() => pick(o.value)}
+                aria-current={value === o.value}
                 style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px',
                   textAlign: 'left', fontSize: 12, cursor: 'pointer', border: 'none',
                   background: value === o.value ? 'var(--color-primary-bg)' : 'none', color: 'var(--text)' }}>

@@ -13,13 +13,15 @@ import { useTranslation } from 'react-i18next'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
-import GeocodeButton from '@/components/ui/GeocodeButton'
+import PdokCard from '@/components/drawer/PdokCard'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
+import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { initialsOf } from '@/lib/initials'
-import CustomerChangelog from './drawer/CustomerChangelog'
+import ChangelogPopover from '@/components/drawer/ChangelogPopover'
+import ChangelogTab from './drawer/ChangelogTab'
 import OverviewTab from './drawer/OverviewTab'
 import LocationsTab from './drawer/LocationsTab'
 import DepartmentsTab from './drawer/DepartmentsTab'
@@ -45,11 +47,20 @@ const TABS = [
   { id: 'vacancies',     tKey: 'vacancies' },
   { id: 'opportunities', tKey: 'opportunities' },
   { id: 'planning',      tKey: 'planning' },
-  { id: 'statistics',    tKey: 'statistics' },
   { id: 'priceAgreements', tKey: 'priceAgreements' },
   { id: 'documents',     tKey: 'documents' },
+  // Notities and Communicatie are their OWN tabs (Danny 28-07) — they used to share
+  // one "Communicatie" tab with a sub-tab strip. The 'notes' id stays put because
+  // deep-links target it; the timeline moved to its own 'communication' tab.
   { id: 'notes',         tKey: 'notes' },
+  { id: 'communication', tKey: 'communication' },
   { id: 'extra',         tKey: 'extra' },
+  // EXTRACT-1: the shared HelloFlex/Shiftmanager cards. Label comes from the shared
+  // common:backofficeLinks.tabLabel key (not this file's own drawer.tabs.*), so all
+  // six adopting entities read identically.
+  { id: 'koppelingen',   tKey: 'backofficeLinks' },
+  // Statistieken sits LAST (Danny 28-07) — it is a read-only summary, not a working tab.
+  { id: 'statistics',    tKey: 'statistics' },
 ]
 
 interface DrawerUser { id: Id; name: string; avatar_color?: string }
@@ -81,6 +92,10 @@ export default function CustomerDrawer({
   const { t } = useTranslation('customers')
   const auth = useAuth()
   const hasModule = auth?.hasModule ?? (() => false)
+  // EXTRACT-1: the Koppelingen tab's "Koppelen" buttons gate on customers.update
+  // (BackofficeEntityRegistry) — the UI check; the backend re-checks regardless (§7).
+  const hasPermission = auth?.hasPermission ?? (() => false)
+  const canLinkBackoffice = hasPermission('customers.update')
   const { formatDateTime } = useDateFormat()
   // The Extra tab only shows when the tenant has defined customer custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer')
@@ -164,6 +179,7 @@ export default function CustomerDrawer({
         <LocationsTab
           customerId={c.id} customerName={c.name} locations={locationsApi.locations} departments={departmentsApi.departments} contacts={contactsApi.contacts}
           statuses={locationStatuses} departmentStatuses={departmentStatuses} contactStatuses={contactStatuses}
+          canLinkBackoffice={canLinkBackoffice}
           onAddLocation={locationsApi.add}
           onSaveLocation={locationsApi.update} onDeleteLocation={locationsApi.remove}
           onAddDepartment={(payload, locName) => departmentsApi.add(payload, locName)}
@@ -175,12 +191,14 @@ export default function CustomerDrawer({
       case 'departments':   return (
         <DepartmentsTab
           customerId={c.id} departments={departmentsApi.departments} contacts={contactsApi.contacts} locations={locationOptions} statuses={departmentStatuses}
+          canLinkBackoffice={canLinkBackoffice}
           onAdd={departmentsApi.add} onUpdate={departmentsApi.update} onRemove={departmentsApi.remove}
         />
       )
       case 'contacts':      return (
         <ContactsTab
           contacts={contactsApi.contacts} locations={locationOptions} departments={departmentsApi.departments} statuses={contactStatuses}
+          canLinkBackoffice={canLinkBackoffice}
           onAdd={contactsApi.add} onUpdate={contactsApi.update} onRemove={contactsApi.remove}
         />
       )
@@ -196,11 +214,27 @@ export default function CustomerDrawer({
           authorInitials={authorInitials}
           notes={c.notes ?? []}
           onAddNote={payload => onAddNote?.(c.id, payload)}
+          only="notes"
+        />
+      )
+      case 'communication': return (
+        <CustomerNotesTab
+          customerId={c.id} customerName={c.name} customerInitials={c.initials}
+          authorInitials={authorInitials}
+          notes={c.notes ?? []}
+          only="timeline"
         />
       )
       case 'extra':         return (
         <CustomFieldsTab entityType="customer" values={c.customFields ?? {}}
           onSave={patch => onUpdate?.(c.id, { customFields: { ...c.customFields, ...patch } })} />
+      )
+      case 'koppelingen':   return (
+        <BackofficeLinksTab entity="customers" id={c.id as Id} helloflexLink={c.helloflexLink} shiftmanagerLink={c.shiftmanagerLink} canLink={canLinkBackoffice}>
+          {/* PDOK moved out of the title row into this tab (Danny 28-07). Disabled when
+              there is no city yet — the customer's own address is city-only here. */}
+          <PdokCard endpoint={`/customers/${c.id}/geocode`} permission="customers.update" disabled={!c.city} />
+        </BackofficeLinksTab>
       )
       default: return null
     }
@@ -241,7 +275,13 @@ export default function CustomerDrawer({
       expanded={expanded}
       onToggleExpand={onToggleExpand}
       footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: c.created ? formatDateTime(c.created) : '—' })}</span>}
-      tabs={tabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), render: (setActiveTab?: (id: string) => void) => renderTab(tab.id, setActiveTab) }))}
+      tabs={tabs.map(tab => ({
+        // The Koppelingen tab reads the SHARED common:backofficeLinks.tabLabel key
+        // (§3A/§11) — never this file's own drawer.tabs.* — so all six adopting
+        // entities show the exact same label.
+        id: tab.id, label: tab.id === 'koppelingen' ? t('common:backofficeLinks.tabLabel') : t(`drawer.tabs.${tab.tKey}`),
+        render: (setActiveTab?: (id: string) => void) => renderTab(tab.id, setActiveTab),
+      }))}
       header={() => (
         <EntityHeader
           label={t('drawer.entityLabel')}
@@ -251,11 +291,10 @@ export default function CustomerDrawer({
           photoLabels={{ upload: t('drawer.photoUpload'), remove: t('drawer.photoRemove') }}
           renderTitle={renderTitle}
           titleActions={<>
-            <CustomerChangelog customerId={c.id} />
-            {/* GEO-REGEOCODE-1: manual "PDOK opnieuw ophalen" — queued + async, never
-                claims "done" (see GeocodeButton). Disabled when there's no city yet
-                (the customer's own address is city-only on this flat model). */}
-            <GeocodeButton endpoint={`/customers/${c.id}/geocode`} permission="customers.update" disabled={!c.city} />
+            {/* Danny 27-07: the shared house ChangelogPopover shell (§3A(d)) — was a
+                cramped 360px dropdown with no focus trap; now the same 900px centred
+                panel as the candidate drawer. */}
+            <ChangelogPopover><ChangelogTab customerId={c.id} /></ChangelogPopover>
           </>}
           actions={headerActions}
           meta={[

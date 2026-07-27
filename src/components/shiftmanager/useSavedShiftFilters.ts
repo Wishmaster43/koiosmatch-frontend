@@ -1,5 +1,5 @@
 /**
- * useSavedShiftFilters — persist named ShiftManager filter sets. Interim storage
+ * useSavedShiftFilters — persist named Shiftmanager filter sets. Interim storage
  * is the browser (localStorage) so "Filter opslaan/laden" works today; the storage
  * layer is deliberately isolated here so it can swap to the backend endpoint
  * (/sm_reports/saved-filters, worklist SM-FILT-SAVE) without touching the UI.

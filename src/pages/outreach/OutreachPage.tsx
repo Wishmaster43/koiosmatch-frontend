@@ -181,83 +181,79 @@ export default function OutreachPage() {
   // The open drawer's row — may live in the active OR the archived list.
   const openRow = openId ? [...campaigns, ...archived].find(c => String(c.id) === String(openId)) : undefined
 
-  // Create view replaces everything (inline, no modal).
-  if (creating) {
-    return (
-      <div style={{ padding: '20px 24px' }}>
-        <OutreachCreate onBack={() => setCreating(false)} onCreated={add} />
-      </div>
-    )
-  }
-
   return (
-    <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <>
+      {/* + Bellijst is a MODAL over the list (Danny 27-07: "geen popup???") —
+          the list stays mounted behind it instead of being swapped out. */}
+      {creating && <OutreachCreate onClose={() => setCreating(false)} onCreated={add} />}
+      <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-        {/* Insights strip (donuts + KPIs) */}
-        <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
+          {/* Insights strip (donuts + KPIs) */}
+          <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
 
-        {/* Toolbar — create on the LEFT, archived toggle + view toggle on the RIGHT (mirror Opportunities) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
-          {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-          <button onClick={() => setCreating(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>
-            <Plus size={15} /> {t('new')}
-          </button>
-          <HeaderSearch onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />
+          {/* Toolbar — create on the LEFT, archived toggle + view toggle on the RIGHT (mirror Opportunities) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
+            {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
+            <button onClick={() => setCreating(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>
+              <Plus size={15} /> {t('new')}
+            </button>
+            <HeaderSearch onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />
 
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}
-            <QuickViewToggle active={showArchived} onToggle={() => setShowArchived((v) => !v)}
-              label={t('view.archived')} color="var(--color-archive)" icon={Archive} />
-            {/* Table / board view toggle — shared ViewModeToggle (§4, audit r5: this was
-                the last hand-rolled solid-fill switcher after MatchesPage/TasksPage/
-                ApplicationsPage moved to the shared component). */}
-            <ViewModeToggle value={view} onChange={setView} options={[
-              { id: 'table', icon: LayoutList, label: t('view.table') },
-              { id: 'board', icon: Kanban, label: t('view.board') },
-            ]} />
+            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+              {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}
+              <QuickViewToggle active={showArchived} onToggle={() => setShowArchived((v) => !v)}
+                label={t('view.archived')} color="var(--color-archive)" icon={Archive} />
+              {/* Table / board view toggle — shared ViewModeToggle (§4, audit r5: this was
+                  the last hand-rolled solid-fill switcher after MatchesPage/TasksPage/
+                  ApplicationsPage moved to the shared component). */}
+              <ViewModeToggle value={view} onChange={setView} options={[
+                { id: 'table', icon: LayoutList, label: t('view.table') },
+                { id: 'board', icon: Kanban, label: t('view.board') },
+              ]} />
+            </div>
           </div>
+
+          {/* Bulk action bar — active table view only, when ≥1 row is selected */}
+          {view === 'table' && !showArchived && selectedIds.size > 0 && (
+            <div style={{ padding: '8px 24px', flexShrink: 0 }}>
+              <OutreachBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
+                onSetStatus={bulkSetStatus} onArchive={bulkArchive} canArchive={canArchive}
+                statuses={columns.map((c) => ({ value: c.key, label: c.label, color: c.color }))} />
+            </div>
+          )}
+
+          {/* Content */}
+          {view === 'board' ? (
+            <OutreachBoard rows={filtered} columns={columns} onMove={handleMove} />
+          ) : (
+            <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+              <OutreachList
+                campaigns={filtered}
+                loading={showArchived ? archLoading : loading}
+                error={showArchived ? archError : error}
+                onReload={showArchived ? () => setShowArchived(true) : reload}
+                emptyText={showArchived ? t('archivedEmpty') : undefined}
+                selectable={!showArchived}
+                selectedIds={selectedIds}
+                onToggleRow={toggleRow}
+                onToggleAll={toggleAll}
+                onOpen={setOpenId}
+              />
+            </div>
+          )}
         </div>
-
-        {/* Bulk action bar — active table view only, when ≥1 row is selected */}
-        {view === 'table' && !showArchived && selectedIds.size > 0 && (
-          <div style={{ padding: '8px 24px', flexShrink: 0 }}>
-            <OutreachBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
-              onSetStatus={bulkSetStatus} onArchive={bulkArchive} canArchive={canArchive}
-              statuses={columns.map((c) => ({ value: c.key, label: c.label, color: c.color }))} />
-          </div>
-        )}
-
-        {/* Content */}
-        {view === 'board' ? (
-          <OutreachBoard rows={filtered} columns={columns} onMove={handleMove} />
-        ) : (
-          <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-            <OutreachList
-              campaigns={filtered}
-              loading={showArchived ? archLoading : loading}
-              error={showArchived ? archError : error}
-              onReload={showArchived ? () => setShowArchived(true) : reload}
-              emptyText={showArchived ? t('archivedEmpty') : undefined}
-              selectable={!showArchived}
-              selectedIds={selectedIds}
-              onToggleRow={toggleRow}
-              onToggleAll={toggleAll}
-              onOpen={setOpenId}
-            />
-          </div>
-        )}
+        {/* Per-bellijst drill-down (the call list itself) — row click opens it. An
+            archived row feeds the drawer its banner + name/status fallbacks; W2
+            delivered (measured: OutreachCampaignController::show is now withTrashed)
+            so the drawer fetches the real detail instead of skipping the call. */}
+        <OutreachDrawer id={openId} createdAt={openRow?.created_at} onClose={() => setOpenId(null)}
+          archived={Boolean(openRow?.archived)} archivedAt={openRow?.deleted_at ?? null}
+          fallbackName={openRow?.name} fallbackStatus={openRow?.status}
+          onRestore={canRestore ? restoreOne : undefined}
+          expanded={drawerExpanded} onToggleExpand={() => setDrawerExpanded(e => !e)} />
       </div>
-      {/* Per-bellijst drill-down (the call list itself) — row click opens it. An
-          archived row feeds the drawer its banner + name/status fallbacks; W2
-          delivered (measured: OutreachCampaignController::show is now withTrashed)
-          so the drawer fetches the real detail instead of skipping the call. */}
-      <OutreachDrawer id={openId} createdAt={openRow?.created_at} onClose={() => setOpenId(null)}
-        archived={Boolean(openRow?.archived)} archivedAt={openRow?.deleted_at ?? null}
-        fallbackName={openRow?.name} fallbackStatus={openRow?.status}
-        onRestore={canRestore ? restoreOne : undefined}
-        expanded={drawerExpanded} onToggleExpand={() => setDrawerExpanded(e => !e)} />
-    </div>
+    </>
   )
 }

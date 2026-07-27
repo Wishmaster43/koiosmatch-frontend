@@ -37,7 +37,7 @@
     "empty": "Drag tasks here"
   },
   "drawer": {
-    "label": "Activity",
+    "label": "Task",
     "createdAt": "Created on {{date}}",
     "archivedBanner": {
       "since": "Archived on {{date}}",
@@ -71,7 +71,7 @@
     "done": "{{count}} tasks updated"
   },
   "details": {
-    "title": "Activity details",
+    "title": "Task details",
     "type": "Activity type",
     "status": "Status",
     "priority": "Priority",
@@ -108,7 +108,7 @@
     "empty": "No activity yet."
   },
   "modal": {
-    "title": "Add activity",
+    "title": "New task",
     "editTitle": "Edit task",
     "loadingTask": "Loading task…",
     "type": "Activity type",
@@ -124,7 +124,7 @@
     "description": "Description",
     "descriptionPlaceholder": "Enter…",
     "charsLeft": "Characters available: {{count}}",
-    "detailsTitle": "Activity details",
+    "detailsTitle": "Task details",
     "owner": "Created by",
     "candidate": "Candidate",
     "candidatePlaceholder": "Select candidate",
@@ -136,7 +136,10 @@
     "save": "Save",
     "saving": "Saving…",
     "cancel": "Cancel",
-    "required": "Required"
+    "required": "Required",
+    "cardTask": "Task",
+    "cardPlanning": "Planning",
+    "cardLink": "Link"
   },
   "page": {
     "searchPlaceholder": "Search tasks"

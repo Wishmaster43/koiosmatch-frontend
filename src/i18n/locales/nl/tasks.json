@@ -37,7 +37,7 @@
     "empty": "Sleep taken hierheen"
   },
   "drawer": {
-    "label": "Activiteit",
+    "label": "Taak",
     "createdAt": "Aangemaakt op {{date}}",
     "archivedBanner": {
       "since": "Gearchiveerd op {{date}}",
@@ -71,8 +71,8 @@
     "done": "{{count}} taken bijgewerkt"
   },
   "details": {
-    "title": "Activiteitdetails",
-    "type": "Activiteit type",
+    "title": "Taakdetails",
+    "type": "Soort activiteit",
     "status": "Status",
     "priority": "Prioriteit",
     "due": "Vervaldatum",
@@ -108,10 +108,10 @@
     "empty": "Nog geen activiteit."
   },
   "modal": {
-    "title": "Activiteit toevoegen",
+    "title": "Nieuwe taak",
     "editTitle": "Taak bewerken",
     "loadingTask": "Taak laden…",
-    "type": "Activiteit type",
+    "type": "Soort activiteit",
     "typePlaceholder": "Kies type",
     "titleLabel": "Titel",
     "titlePlaceholder": "Invullen",
@@ -124,7 +124,7 @@
     "description": "Omschrijving",
     "descriptionPlaceholder": "Invullen",
     "charsLeft": "Tekens beschikbaar: {{count}}",
-    "detailsTitle": "Activiteit details",
+    "detailsTitle": "Taakdetails",
     "owner": "Aangemaakt door",
     "candidate": "Kandidaat",
     "candidatePlaceholder": "Selecteer kandidaat",
@@ -136,7 +136,10 @@
     "save": "Opslaan",
     "saving": "Opslaan…",
     "cancel": "Annuleren",
-    "required": "Verplicht"
+    "required": "Verplicht",
+    "cardTask": "Taak",
+    "cardPlanning": "Planning",
+    "cardLink": "Koppeling"
   },
   "page": {
     "searchPlaceholder": "Zoek naar taken"

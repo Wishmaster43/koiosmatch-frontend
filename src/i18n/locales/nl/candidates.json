@@ -974,33 +974,6 @@
       "refreshing": "Bijwerken…",
       "refreshStarted": "PDOK-update gestart — coördinaten verschijnen zo",
       "refreshFailed": "Bijwerken mislukt"
-    },
-    "helloflex": {
-      "name": "HelloFlex",
-      "alt": "HelloFlex-logo",
-      "notLinked": "Niet gekoppeld aan HelloFlex"
-    },
-    "shiftmanager": {
-      "name": "Shiftmanager",
-      "alt": "Shiftmanager-logo",
-      "notLinked": "Niet gekoppeld aan Shiftmanager",
-      "externalId": "Extern id",
-      "syncNow": "Nu synchroniseren",
-      "syncing": "Synchroniseren…",
-      "syncSuccess": "Synchronisatie geslaagd",
-      "syncFailed": "Synchroniseren mislukt",
-      "lastSynced": "Laatst gesynchroniseerd: {{date}}"
-    },
-    "common": {
-      "linkButton": "Koppelen",
-      "retry": "Opnieuw koppelen",
-      "linking": "Koppelen…",
-      "linkStarted": "Koppeling gestart",
-      "linkFailed": "Koppelen mislukt",
-      "linkedByOn": "Gekoppeld door {{name}} op {{date}}",
-      "statusLinked": "Gekoppeld",
-      "statusPending": "In behandeling",
-      "statusFailed": "Mislukt"
     }
   },
   "conversations": {

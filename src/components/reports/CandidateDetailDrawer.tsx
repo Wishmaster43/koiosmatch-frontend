@@ -1,5 +1,5 @@
 /**
- * CandidateDetailDrawer — ShiftManager candidate detail overlay, restyled onto
+ * CandidateDetailDrawer — Shiftmanager candidate detail overlay, restyled onto
  * the native candidate-drawer visual language (Danny 24-07 "we moeten uniform
  * zijn — maak 'm hetzelfde"): a calm EntityHeader-style header (soft Avatar,
  * name + colour-coded status badge + mono reference chip, no picker wall),
@@ -59,7 +59,7 @@ function ComingSoon({ icon: Icon, title, desc }: { icon: LucideIcon; title: stri
 
 // The "Algemeen" tab body: contact / timeline / stats / features / global-role
 // cards — SectionCard everywhere (11px uppercase muted title + bordered block),
-// tolerant field readers so this matches the ShiftManager table 1:1 (§11 DRY).
+// tolerant field readers so this matches the Shiftmanager table 1:1 (§11 DRY).
 function TabAlgemeen({ c }: { c: ReportCandidate }) {
   const { t } = useTranslation('reports')
   const { formatDate, formatDateTime } = useDateFormat()

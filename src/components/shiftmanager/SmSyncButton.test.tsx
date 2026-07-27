@@ -1,5 +1,5 @@
 /**
- * SmSyncButton (SYNC-1) — component-level states. ShiftManager is gated off for the
+ * SmSyncButton (SYNC-1) — component-level states. Shiftmanager is gated off for the
  * demo tenant in this environment (module not enabled — see the SYNC-1 report), so the
  * sync flow is verified here at the component level (RTL) rather than via a live
  * Playwright probe: permission gating, single-vs-multi connection, and the
@@ -33,7 +33,7 @@ describe('SmSyncButton', () => {
     expect(screen.getByRole('button')).toBeDisabled()
   })
 
-  it('disables the button when there is no active ShiftManager connection', () => {
+  it('disables the button when there is no active Shiftmanager connection', () => {
     mockUseSmConnections.mockReturnValue({ connections: [], loading: false })
     render(<SmSyncButton />)
     expect(screen.getByRole('button')).toBeDisabled()
@@ -56,7 +56,7 @@ describe('SmSyncButton', () => {
     render(<SmSyncButton />)
     fireEvent.click(screen.getByRole('button'))
     expect(mockSync).not.toHaveBeenCalled()
-    expect(screen.getByText(/Kies ShiftManager-account/i)).toBeInTheDocument()
+    expect(screen.getByText(/Kies Shiftmanager-account/i)).toBeInTheDocument()
   })
 
   it('shows the queued feedback after a successful sync', () => {

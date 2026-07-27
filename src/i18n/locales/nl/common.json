@@ -231,5 +231,43 @@
     "expand": "Vergroten",
     "collapse": "Verkleinen",
     "html": "HTML-bron"
+  },
+  "changelog": "Wijzigingslog",
+  "backofficeLinks": {
+    "tabLabel": "Koppelingen",
+    "helloflex": {
+      "name": "HelloFlex",
+      "alt": "HelloFlex-logo",
+      "notLinked": "Niet gekoppeld aan HelloFlex"
+    },
+    "shiftmanager": {
+      "name": "Shiftmanager",
+      "alt": "Shiftmanager-logo",
+      "notLinked": "Niet gekoppeld aan Shiftmanager",
+      "externalId": "Extern id",
+      "syncNow": "Nu synchroniseren",
+      "syncing": "Synchroniseren…",
+      "syncSuccess": "Synchronisatie geslaagd",
+      "syncFailed": "Synchroniseren mislukt",
+      "lastSynced": "Laatst gesynchroniseerd: {{date}}"
+    },
+    "common": {
+      "linkButton": "Koppelen",
+      "retry": "Opnieuw koppelen",
+      "linking": "Koppelen…",
+      "linkStarted": "Koppeling gestart",
+      "linkFailed": "Koppelen mislukt",
+      "linkedByOn": "Gekoppeld door {{name}} op {{date}}",
+      "statusLinked": "Gekoppeld",
+      "statusPending": "In behandeling",
+      "statusFailed": "Mislukt"
+    },
+    "pdok": {
+      "name": "PDOK",
+      "alt": "PDOK-logo",
+      "linked": "Gekoppeld",
+      "notGeocoded": "Nog niet gegeocodeerd",
+      "autoInfo": "Coördinaten worden automatisch bijgewerkt zodra het adres wijzigt."
+    }
   }
 }

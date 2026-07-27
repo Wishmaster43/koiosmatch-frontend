@@ -1,5 +1,5 @@
 /**
- * smCandidateFields — tolerant field readers for the ShiftManager candidate row
+ * smCandidateFields — tolerant field readers for the Shiftmanager candidate row
  * (§10: the backend is snake_case; guard an unexpected camelCase mirror too so a
  * rename never silently blanks a column/KPI). Shared by SmCandidatesInsightsRow
  * (ending-soon KPI) and SmCandidatesTable (Uitschrijfdatum column) — one source

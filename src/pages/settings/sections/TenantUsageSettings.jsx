@@ -12,7 +12,7 @@ import { useAuth } from '@/context/AuthContext'
 const num = (v) => (v == null ? '—' : Number(v).toLocaleString('nl-NL'))
 
 // Connector key → brand label (proper nouns, not translatable).
-const CONNECTOR_LABELS = { sm: 'ShiftManager', hf: 'HelloFlex', intus: 'Intus', elanza: 'Elanza', aelio: 'Aelio' }
+const CONNECTOR_LABELS = { sm: 'Shiftmanager', hf: 'HelloFlex', intus: 'Intus', elanza: 'Elanza', aelio: 'Aelio' }
 
 // Build the last 12 months as { value: 'YYYY-MM', label } — newest first.
 function buildMonths() {

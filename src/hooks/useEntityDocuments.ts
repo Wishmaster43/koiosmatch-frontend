@@ -27,6 +27,15 @@ export interface EntityDoc {
 // A persisted doc has a real (UUID) id; an optimistic row carries a `tmp-…` id.
 const isTemp = (id: Id | undefined) => typeof id === 'string' && id.startsWith('tmp-')
 
+// Monotonic counter behind every temp id. `Date.now()` alone was NOT unique: picking
+// several files at once fires upload() for each within the same millisecond, so every
+// optimistic row got the SAME id (Danny 28-07). Everything downstream keys on that id,
+// so one collision produced three visible failures at once — the selection Set collapsed
+// to a single entry ("Verwijder (1)" with five rows ticked), the server's reply overwrote
+// EVERY row sharing the id (the same file listed five times), and bulk-delete then fired
+// the same DELETE repeatedly, the second one hitting an already-removed document → 404.
+let tempDocSeq = 0
+
 // Render bytes as a compact KB/MB string; pass strings through (optimistic rows).
 const fmtSize = (s: string | number | undefined): string => {
   if (typeof s === 'string') return s
@@ -51,7 +60,7 @@ export function useEntityDocuments(prefix: string, parentId: Id | undefined) {
   // Upload (multipart) — optimistic row with a temp id, swapped for the server doc.
   const upload = useCallback((file: File, type: string, name: string, objectUrl: string) => {
     if (!parentId) return
-    const tmpId = `tmp-${Date.now()}`
+    const tmpId = `tmp-${Date.now()}-${++tempDocSeq}`
     setDocs(d => [{ id: tmpId, name, type, size: fmtSize(file.size), objectUrl }, ...d])
     const fd = new FormData()
     fd.append('file', file); fd.append('type', type); fd.append('name', name)
@@ -75,11 +84,21 @@ export function useEntityDocuments(prefix: string, parentId: Id | undefined) {
   // Delete — optimistic remove, reverts on failure. A temp row just drops locally.
   const remove = useCallback((id: Id | undefined) => {
     if (!parentId || id == null) return
-    const snapshot = docs
+    // Revert surgically, never by restoring the whole list: bulk-delete calls this once
+    // per row, and a snapshot-restore on the second failure would resurrect the rows the
+    // earlier calls had already deleted successfully.
+    const index = docs.findIndex(x => x.id === id)
+    const row = index >= 0 ? docs[index] : null
     setDocs(d => d.filter(x => x.id !== id))
     if (isTemp(id)) return
     api.delete(`/${prefix}/${parentId}/documents/${id}`)
-      .catch(() => { setDocs(snapshot); notifyError(t('common:actionFailed')) })
+      .catch((err: { response?: { status?: number } }) => {
+        // A 404 means the document is already gone — the caller's goal state. Restoring
+        // the row and shouting "mislukt" would be a lie about what the server holds.
+        if (err?.response?.status === 404) return
+        if (row) setDocs(d => { const next = [...d]; next.splice(Math.min(index, next.length), 0, row); return next })
+        notifyError(t('common:actionFailed'))
+      })
   }, [prefix, parentId, docs, t])
 
   return { docs, upload, rename, remove }

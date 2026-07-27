@@ -11,7 +11,7 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Trash2, Pencil } from 'lucide-react'
+import { Trash2, Pencil } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useNavigation } from '@/context/NavigationContext'
 import { useDateFormat } from '@/lib/datetime'
@@ -23,6 +23,9 @@ import type { Column } from '@/components/ui/DataTable'
 import SoftChip from '@/components/ui/SoftChip'
 import SectionCard from '@/components/ui/SectionCard'
 import { useConfirm } from '@/hooks/useConfirm'
+// House "+ action" trigger (Danny 27-07: "moet een knopje zijn zoals ook bij de
+// kandidaat drill down") — replaces the bare text+Plus button below.
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import AddOpportunityModal from '@/pages/opportunities/AddOpportunityModal'
 import { mapOpportunity } from '@/pages/opportunities/data/mapOpportunity'
 import type { Opportunity } from '@/types/opportunity'
@@ -106,9 +109,7 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <SectionCard title={t('opportunities.title')} action={
-        <button onClick={() => setAdding(true)} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
-          <Plus size={11} /> {t('opportunities.newOpportunity')}
-        </button>
+        <DrawerAddButton onClick={() => setAdding(true)} label={t('opportunities.newOpportunity')} />
       }>
         {error && <Muted text={t('opportunities.loadError')} />}
         {!error && (

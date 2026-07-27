@@ -1,5 +1,5 @@
 /**
- * CandidatesDetailPage — ShiftManager candidates list, restyled onto the native
+ * CandidatesDetailPage — Shiftmanager candidates list, restyled onto the native
  * candidate-page blueprint (§3A/§4): a 9-slot KPI row, one toolbar row with the
  * shared HeaderSearch on the left, then the table + pagination. No reports-panel
  * chrome (title/border) around the table — this page reads like the native

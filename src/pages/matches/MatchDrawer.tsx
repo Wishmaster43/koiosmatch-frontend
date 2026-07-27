@@ -26,6 +26,7 @@ import EntityHeader from '@/components/drawer/EntityHeader'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
+import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import { useDateFormat } from '@/lib/datetime'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useCustomFields } from '@/lib/useCustomFields'
@@ -33,11 +34,13 @@ import ScorePill from './ScorePill'
 import OverviewTab from './drawer/OverviewTab'
 import RelationsTab from './drawer/RelationsTab'
 import MatchContractSection from './drawer/MatchContractSection'
-import MatchChangelogPopover from './drawer/MatchChangelogPopover'
+import ChangelogPopover from '@/components/drawer/ChangelogPopover'
+import ChangelogTab from './drawer/ChangelogTab'
 import MatchApprovalBadge from './drawer/MatchApprovalBadge'
 import MatchApprovalActions from './drawer/MatchApprovalActions'
 import { useMatchApproval } from './hooks/useMatchApproval'
 import type { MatchRow } from '@/types/match'
+import type { Id } from '@/types/common'
 
 interface MatchDrawerProps {
   match: MatchRow | null
@@ -59,11 +62,14 @@ interface MatchDrawerProps {
   // matches.update). Absent = no permission, so the trash icon/restore button don't render.
   onArchive?: (id: MatchRow['id']) => void
   onRestore?: (id: MatchRow['id']) => void
+  // EXTRACT-1: the caller's own matches.update permission check for the
+  // Koppelingen tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
+  canLinkBackoffice?: boolean
 }
 
 export default function MatchDrawer({
   match, onClose, expanded = false, onToggleExpand, onSetStatus, canApprove = false, onApprovalChange, onUpdate, onUpdateCustomFields,
-  onArchive, onRestore,
+  onArchive, onRestore, canLinkBackoffice = false,
 }: MatchDrawerProps) {
   const { t } = useTranslation('matches')
   const { formatDate, formatDateTime } = useDateFormat()
@@ -87,6 +93,11 @@ export default function MatchDrawer({
       <CustomFieldsTab entityType="match" values={match.customFieldValues ?? {}}
         onSave={patch => onUpdateCustomFields?.(match.id, patch)} />
     ) }] : []),
+    // EXTRACT-1: the shared HelloFlex/Shiftmanager cards, positioned last (§3A/§11).
+    // Label comes from the shared common:backofficeLinks.tabLabel key.
+    { id: 'koppelingen', label: t('common:backofficeLinks.tabLabel'), render: () => (
+      <BackofficeLinksTab entity="matches" id={match.id as Id} helloflexLink={match.helloflexLink} shiftmanagerLink={match.shiftmanagerLink} canLink={canLinkBackoffice} />
+    ) },
   ]
 
   return (
@@ -111,7 +122,10 @@ export default function MatchDrawer({
           onToggleExpand={onToggleExpand}
           onClose={onClose}
           titleActions={<>
-            <MatchChangelogPopover match={match} />
+            {/* Danny 27-07: the shared house ChangelogPopover shell (§3A(d)) — was a
+                cramped 360px dropdown with no focus trap; now the same 900px centred
+                panel as the candidate drawer. */}
+            <ChangelogPopover><ChangelogTab match={match} /></ChangelogPopover>
             {/* ARCHIVE-1: per-id soft-delete (mirrors candidates' trash icon in the
                 title row) — hidden once already archived; the banner below takes over. */}
             {onArchive && !match.archived && (

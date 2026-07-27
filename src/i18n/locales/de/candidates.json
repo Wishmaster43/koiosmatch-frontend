@@ -974,33 +974,6 @@
       "refreshing": "Wird aktualisiert…",
       "refreshStarted": "PDOK-Update gestartet — Koordinaten erscheinen in Kürze",
       "refreshFailed": "Aktualisierung fehlgeschlagen"
-    },
-    "helloflex": {
-      "name": "HelloFlex",
-      "alt": "HelloFlex-Logo",
-      "notLinked": "Nicht mit HelloFlex verknüpft"
-    },
-    "shiftmanager": {
-      "name": "Shiftmanager",
-      "alt": "Shiftmanager-Logo",
-      "notLinked": "Nicht mit Shiftmanager verknüpft",
-      "externalId": "Externe ID",
-      "syncNow": "Jetzt synchronisieren",
-      "syncing": "Synchronisieren…",
-      "syncSuccess": "Synchronisierung abgeschlossen",
-      "syncFailed": "Synchronisierung fehlgeschlagen",
-      "lastSynced": "Zuletzt synchronisiert: {{date}}"
-    },
-    "common": {
-      "linkButton": "Verknüpfen",
-      "retry": "Erneut verknüpfen",
-      "linking": "Verknüpfen…",
-      "linkStarted": "Verknüpfung gestartet",
-      "linkFailed": "Verknüpfen fehlgeschlagen",
-      "linkedByOn": "Verknüpft von {{name}} am {{date}}",
-      "statusLinked": "Verknüpft",
-      "statusPending": "In Bearbeitung",
-      "statusFailed": "Fehlgeschlagen"
     }
   },
   "conversations": {

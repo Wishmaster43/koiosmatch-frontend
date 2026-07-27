@@ -79,6 +79,7 @@
       "priceAgreements": "Prijsafspraken",
       "documents": "Documenten",
       "notes": "Notities",
+      "communication": "Communicatie",
       "extra": "Extra"
     },
     "changelog": "Wijzigingen",
@@ -382,7 +383,10 @@
       "industry": "Branche",
       "selectIndustry": "Kies branche",
       "city": "Plaats",
-      "cityPlaceholder": "Bijv. Gorinchem"
+      "cityPlaceholder": "Bijv. Gorinchem",
+      "cardCompany": "Bedrijf",
+      "cardBranch": "Vestiging & plaats",
+      "cardOwnerStatus": "Eigenaar & status"
     }
   },
   "subModal": {
@@ -426,9 +430,13 @@
     "groups": {
       "general": "Algemeen",
       "address": "Adres",
+      "business": "Zakelijk",
       "registration": "Registratie",
       "contact": "Contact ter plaatse",
-      "billing": "Facturatie"
+      "billing": "Facturatie",
+      "person": "Persoon",
+      "contactInfo": "Contact",
+      "link": "Koppeling"
     },
     "create": "Toevoegen",
     "save": "Opslaan",

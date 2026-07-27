@@ -1,5 +1,5 @@
 /**
- * useSmCandidatesList — data layer for the ShiftManager candidates detail list (§3):
+ * useSmCandidatesList — data layer for the Shiftmanager candidates detail list (§3):
  * the paginated /sm_candidates fetch + page/size state, and persisting the chosen page
  * size as the user's default. Via React Query: each page is cached + a superseded fetch
  * cancels, and the previous page stays visible while the next loads (A-3, no flash).

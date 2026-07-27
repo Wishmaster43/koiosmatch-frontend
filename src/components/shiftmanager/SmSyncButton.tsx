@@ -1,6 +1,6 @@
 /**
  * SmSyncButton (SYNC-1) — the manual "Sync" action next to "Laatste sync" on the SM
- * dashboard charts. One active ShiftManager connection syncs immediately; several open
+ * dashboard charts. One active Shiftmanager connection syncs immediately; several open
  * a small SelectMenu picker first (never guesses which account — same rule as the
  * workflow sm_* modules' own connection_id field). Gated on the `sync.refresh`
  * permission, disabled (not hidden) with a tooltip when missing — mirrors the existing

@@ -21,6 +21,7 @@ import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SectionCard from '@/components/ui/SectionCard'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
+import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import { useConfirm } from '@/hooks/useConfirm'
 import LocationDepartments from './LocationDepartments'
 import LocationContacts from './LocationContacts'
@@ -42,6 +43,9 @@ interface Props {
   statuses: LookupOption[]
   departmentStatuses: LookupOption[]
   contactStatuses: LookupOption[]
+  // EXTRACT-1: the caller's own customers.update permission check for the
+  // Koppelingen sub-tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
+  canLinkBackoffice?: boolean
   onSave: (id: Id, payload: Partial<LocationPayload>) => void
   onDelete: (id: Id) => void
   onAddDepartment: (payload: DepartmentPayload, locationName?: string) => void
@@ -53,7 +57,7 @@ interface Props {
 }
 
 export default function LocationDetail({
-  location: l, customerId, locations, departments, contacts, statuses, departmentStatuses, contactStatuses,
+  location: l, customerId, locations, departments, contacts, statuses, departmentStatuses, contactStatuses, canLinkBackoffice = false,
   onSave, onDelete, onAddDepartment, onUpdateDepartment, onRemoveDepartment, onAddContact, onUpdateContact, close,
 }: Props) {
   const { t } = useTranslation('customers')
@@ -65,7 +69,7 @@ export default function LocationDetail({
   // Sub-tabs (short labels, Danny 2026-07-14) — default Adres & gegevens. Each
   // EditableFieldTable below manages its own uncontrolled edit toggle (they no
   // longer share one global pencil now that they live on separate sub-tabs).
-  const [subTab, setSubTab] = useState<'address' | 'billing' | 'departments' | 'contacts' | 'extra'>('address')
+  const [subTab, setSubTab] = useState<'address' | 'billing' | 'departments' | 'contacts' | 'extra' | 'koppelingen'>('address')
 
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
   // Algemeen/Adres/Registratie/Contact ter plaatse — the "Adres & gegevens" sub-tab.
@@ -140,6 +144,9 @@ export default function LocationDetail({
           { id: 'departments', label: t('drawer.tabs.departments') },
           { id: 'contacts',    label: t('drawer.tabs.contacts') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
+          // EXTRACT-1: the shared Koppelingen sub-tab, always last (§3A/§11) — the
+          // shared common:backofficeLinks.tabLabel key, not this file's own labels.
+          { id: 'koppelingen', label: t('common:backofficeLinks.tabLabel') },
         ]}
         active={subTab}
         onChange={id => setSubTab(id as typeof subTab)}
@@ -167,6 +174,10 @@ export default function LocationDetail({
       {subTab === 'extra' && (
         <CustomFieldsTab entityType="customer_location" values={l.customFields ?? {}}
           onSave={patch => onSave(l.id as Id, { customFields: { ...l.customFields, ...patch } })} />
+      )}
+
+      {subTab === 'koppelingen' && (
+        <BackofficeLinksTab entity="locations" id={l.id as Id} helloflexLink={l.helloflexLink} shiftmanagerLink={l.shiftmanagerLink} canLink={canLinkBackoffice} />
       )}
 
       {hasPlanning && (

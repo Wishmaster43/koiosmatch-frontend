@@ -3,12 +3,15 @@ import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import { extractApiError } from '@/lib/extractApiError'
 import api, { unwrap } from '@/lib/api'
-import { Field, TextField, SelectField } from '@/components/forms/fields'
+import { Field, TextField } from '@/components/forms/fields'
+import CreatableSelect from '@/components/ui/CreatableSelect'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useIndustries } from '@/lib/useIndustries'
 import { useFunctions } from '@/lib/useFunctions'
 import { mapVacancy } from './data/mapVacancy'
 import { BTN_H } from '@/config/buttonMetrics'
+import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import type { ApiVacancy, Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -18,13 +21,34 @@ const API_TO_FORM: Record<string, string> = {
   industry: 'industry', category: 'category', location: 'location',
 }
 
+// Card chrome — mirrors AddContactPersonModal/AddLocationModal/AddDepartmentModal
+// (customers folder) exactly (§3A): 11px uppercase muted heading over a bordered
+// surface, kept local (not a cross-import — CLAUDE.md §2: an entity page must not
+// reach into another entity's internals) so every "wide form" modal reads as one
+// system without pages importing each other's internals.
+const cardHead = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
+const cardBox = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, display: 'flex', flexDirection: 'column' as const, gap: 12 }
+const row2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }
+// Even 3-across — client/industry/category share one row so Algemeen isn't a tall
+// single-column stack; also used to constrain a lone field (Plaatsing's location)
+// to roughly a third of the panel instead of stretching it across the full 1060px.
+const row3Even = { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }
+
 interface VacancyForm { title: string; clientId: string; status: string; ownerId: string; industry: string; category: string; location: string }
 interface ModalUser { id: Id; name: string }
 interface ModalCustomer { id: Id; name: string }
 
 /**
- * AddVacancyModal — create a vacancy. Mirrors AddCandidateModal: shared field
- * components, lookups via hooks (never hardcoded option lists), 422 mapping.
+ * AddVacancyModal — create a vacancy. Mirrors AddCandidateModal/AddMatch (Danny
+ * 27-07: "+ vacature is niet zo groot... geen mooie kaders en zoekbare dropdown"):
+ * the house WIDE_MODAL footprint, fields regrouped into titled bordered cards
+ * (Algemeen/Plaatsing/Publicatie), and every dropdown (client/industry/category/
+ * status/owner) is now a searchable CreatableSelect instead of a bare `<select>`.
+ * Lookups via hooks (never hardcoded option lists), 422 mapping unchanged. Only
+ * the fields this form already submitted move around — no new field was added
+ * (Danny's suggested "aantal/startdatum/uren/dienstverband/publiceren-vlag" don't
+ * exist on this create form yet, so Plaatsing stays a single-field card for now;
+ * see the delivery report).
  */
 export default function AddVacancyModal({ onClose, onCreated, users = [], customers = [] }: {
   onClose: () => void; onCreated?: (v: Vacancy) => void; users?: ModalUser[]; customers?: ModalCustomer[]
@@ -33,6 +57,8 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
   const { statuses } = useVacancyLookups()
   const { industries } = useIndustries()
   const { functions } = useFunctions()
+  // Esc closes + tab-trap + focus-restore (house pattern, §6) — was missing here.
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [saving, setSaving] = useState(false)
@@ -77,7 +103,7 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
       } else {
         // Fallback: no field-level 422 — surface the server message (or a generic
         // one) instead of failing silently.
-        setCreateError(extractApiError(e, t('common:errorGeneric')))
+        setCreateError(extractApiError(err, t('common:errorGeneric')))
       }
     } finally {
       setSaving(false)
@@ -94,8 +120,9 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', maxWidth: 640,
-        boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('modal.title')} tabIndex={-1}
+        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', ...WIDE_MODAL,
+        boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
         {/* Header */}
         <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border)', flexShrink: 0,
@@ -107,38 +134,66 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
           </button>
         </div>
 
-        {/* Form */}
+        {/* Form — titled bordered cards, stacked full-width (mirrors the
+            customers sub-modals): Algemeen / Plaatsing / Publicatie. */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <Field label={t('modal.fields.title')} required>
-            <TextField value={form.title} onChange={v => set('title', v)} placeholder={t('modal.titlePlaceholder')} error={errors.title} />
-            {errors.title && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
-          </Field>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field label={t('modal.fields.client')}>
-              <SelectField value={form.clientId} onChange={v => set('clientId', v)} placeholder={t('common:select')} options={customerOptions} />
-            </Field>
-            <Field label={t('modal.fields.status')}>
-              <SelectField value={form.status} onChange={v => set('status', v)} options={statusOptions} />
-            </Field>
+          <div>
+            <div style={cardHead}>{t('modal.fields.cardGeneral')}</div>
+            <div style={cardBox}>
+              <div>
+                <Field label={t('modal.fields.title')} required>
+                  <TextField value={form.title} onChange={v => set('title', v)} placeholder={t('modal.titlePlaceholder')} error={errors.title} />
+                </Field>
+                {errors.title && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
+              </div>
+              <div style={row3Even}>
+                {/* Klant/branche/categorie — searchable (Danny 27-07), never a bare `<select>`. */}
+                <Field label={t('modal.fields.client')}>
+                  <CreatableSelect value={form.clientId || null} onChange={v => set('clientId', v)} allowCreate={false}
+                    placeholder={t('common:select')} options={customerOptions} />
+                </Field>
+                <Field label={t('modal.fields.industry')}>
+                  <CreatableSelect value={form.industry || null} onChange={v => set('industry', v)} allowCreate={false}
+                    placeholder={t('common:select')} options={industries} />
+                </Field>
+                <Field label={t('modal.fields.category')}>
+                  <CreatableSelect value={form.category || null} onChange={v => set('category', v)} allowCreate={false}
+                    placeholder={t('common:select')} options={functions} />
+                </Field>
+              </div>
+            </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field label={t('modal.fields.owner')}>
-              <SelectField value={form.ownerId} onChange={v => set('ownerId', v)} placeholder={t('common:select')} options={userOptions} />
-            </Field>
-            <Field label={t('modal.fields.location')}>
-              <TextField value={form.location} onChange={v => set('location', v)} placeholder={t('modal.fields.location')} />
-            </Field>
+          <div>
+            <div style={cardHead}>{t('modal.fields.cardPlacement')}</div>
+            <div style={cardBox}>
+              {/* Plaatsing stays a single-field card for now: this create form does not
+                  yet submit startdatum/uren/dienstverband (Danny's suggested grouping),
+                  only locatie — see the delivery report re: sparse-by-honesty. */}
+              <div style={row3Even}>
+                <Field label={t('modal.fields.location')}>
+                  <TextField value={form.location} onChange={v => set('location', v)} placeholder={t('modal.fields.location')} />
+                </Field>
+              </div>
+            </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field label={t('modal.fields.industry')}>
-              <SelectField value={form.industry} onChange={v => set('industry', v)} placeholder={t('common:select')} options={industries} />
-            </Field>
-            <Field label={t('modal.fields.category')}>
-              <SelectField value={form.category} onChange={v => set('category', v)} placeholder={t('common:select')} options={functions} />
-            </Field>
+          <div>
+            <div style={cardHead}>{t('modal.fields.cardPublication')}</div>
+            <div style={cardBox}>
+              <div style={row2}>
+                <Field label={t('modal.fields.status')}>
+                  {/* Placeholder given even though a default is always selected — it
+                      becomes the search box's accessible label once opened (§6). */}
+                  <CreatableSelect value={form.status || null} onChange={v => set('status', v)} allowCreate={false}
+                    placeholder={t('modal.fields.status')} options={statusOptions} />
+                </Field>
+                <Field label={t('modal.fields.owner')}>
+                  <CreatableSelect value={form.ownerId || null} onChange={v => set('ownerId', v)} allowCreate={false}
+                    placeholder={t('common:select')} options={userOptions} />
+                </Field>
+              </div>
+            </div>
           </div>
         </div>
 

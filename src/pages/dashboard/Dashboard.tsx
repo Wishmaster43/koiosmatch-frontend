@@ -113,7 +113,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
           now makes explicit.) */}
       {!loading && !error && (
         <>
-          {/* Bron-versheid — ShiftManager heeft z'n eigen "Laatste sync" op het SM-dashboard,
+          {/* Bron-versheid — Shiftmanager heeft z'n eigen "Laatste sync" op het SM-dashboard,
               dus hier alleen de overige koppelingen (intus/sdb). Datum in nl-NL (24u). */}
           {(dash?.sync_sources ?? []).filter(s => s.system !== 'shiftmanager').length > 0 && (
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 16, marginBottom: 8, flexWrap: 'wrap' }}>

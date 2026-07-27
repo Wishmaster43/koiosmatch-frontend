@@ -9,6 +9,7 @@
  */
 
 import type { Id, Loose } from './common'
+import type { ApiBackofficeLink, BackofficeLink } from '@/lib/backofficeLink'
 export type { Loose }
 
 /** A tenant-defined custom field definition (GET /custom-fields?entity_type=candidate). */
@@ -81,15 +82,10 @@ export interface CandidateConsent {
 
 /** A resolved backoffice link for ONE system (KOPPELINGEN-META-1): current sync
  * state plus who/when it was FIRST linked. Shared shape for shiftmanagerLink and
- * helloflexLink — both systems link through the same generic sync endpoint. */
-export interface CandidateBackofficeLink {
-  status: string | null
-  externalId: string | null
-  lastError: string | null
-  lastSyncedAt: string | null
-  linkedAt: string | null
-  linkedBy: { id: string | number; name: string | null } | null
-}
+ * helloflexLink — both systems link through the same generic sync endpoint.
+ * EXTRACT-1: this is now a re-export of the shared type (src/lib/backofficeLink) —
+ * every entity that carries backoffice_links[] uses the same shape. */
+export type CandidateBackofficeLink = BackofficeLink
 
 /** A linked match (read-only on the candidate; the contract lives in HelloFlex). */
 export interface CandidateMatch {
@@ -347,15 +343,9 @@ export interface ApiCandidate {
   country?: string
   // KOPPELINGEN-META-1: `linked_at` + `linked_by` (resolved to {id,name} server-side)
   // record who/when this system was FIRST linked, alongside the existing sync state.
-  backoffice_links?: Array<{
-    system?: string
-    status?: string | null
-    external_id?: string | null
-    last_error?: string | null
-    last_synced_at?: string | null
-    linked_at?: string | null
-    linked_by?: { id?: string | number; name?: string | null } | null
-  }>
+  // EXTRACT-1: the shared raw shape (src/lib/backofficeLink) — every entity that
+  // carries backoffice_links[] reads the same element type.
+  backoffice_links?: ApiBackofficeLink[]
   house_number?: string
   house_number_suffix?: string
   house_number_addition?: string

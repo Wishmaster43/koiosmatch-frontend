@@ -450,6 +450,7 @@
     "postalCode": "Postal code",
     "city": "City",
     "country": "Country",
+    "sectionGeneral": "General",
     "sectionAddress": "Address",
     "sectionBusiness": "Business details",
     "sectionContact": "Contact",

@@ -10,7 +10,7 @@ import type { SVGProps } from 'react'
  * Note: hand-traced approximation of the mark — swap the two <path> definitions
  * for the official vector when available; nothing else needs to change.
  */
-// eslint-disable-next-line no-restricted-syntax -- DATA: ShiftManager brand-mark colour, must match their logo exactly, not a themeable UI colour
+// eslint-disable-next-line no-restricted-syntax -- DATA: Shiftmanager brand-mark colour, must match their logo exactly, not a themeable UI colour
 const SM_RED = '#E11D2A'
 
 // Props mirror the lucide icon contract so the mark is interchangeable with one.

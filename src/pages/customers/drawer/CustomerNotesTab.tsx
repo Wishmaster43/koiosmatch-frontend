@@ -44,26 +44,32 @@ interface Props {
   authorInitials?: string
   notes: CustomerNote[]
   onAddNote?: (payload: { type: string; title: string; body: string }) => void
+  // Render ONE section without the sub-tab strip. Danny 28-07 ("notities los en
+  // communicatie los") split these into two top-level drawer tabs; this component stays
+  // the single owner of the note composer + activity fetch rather than being copied.
+  only?: 'notes' | 'timeline'
 }
 
-export default function CustomerNotesTab({ customerId, customerName, customerInitials, authorInitials, notes, onAddNote }: Props) {
+export default function CustomerNotesTab({ customerId, customerName, customerInitials, authorInitials, notes, onAddNote, only }: Props) {
   const { t } = useTranslation('customers')
   // Note categories from the tenant lookup, scoped to 'customer' (NOTE-TYPES-2/3);
   // writable list for the composer, the full list for chip-label resolution.
   const { writableTypes: noteTypes, types: chipTypes } = useNoteTypes('customer')
   const [subTab, setSubTab] = useState('notes')
   const [timeline, setTimeline] = useState<TimelineEntry[]>([])
+  // The section actually on screen: a fixed `only` wins over the internal sub-tab state.
+  const active = only ?? subTab
 
   // Fetch the activity feed lazily, only once the Tijdlijn sub-tab is opened.
   useEffect(() => {
-    if (subTab !== 'timeline' || !customerId) return
+    if (active !== 'timeline' || !customerId) return
     const ctrl = new AbortController()
     api.get(`/customers/${customerId}/activity`, { signal: ctrl.signal })
       .then(r => setTimeline(((unwrapList(r).rows) as ActivityEntry[])
         .map(ev => ({ time: ev.created_at, text: ev.description ?? ev.action ?? '' }))))
       .catch(e => { if (!isAbortError(e)) setTimeline([]) })
     return () => ctrl.abort()
-  }, [subTab, customerId])
+  }, [active, customerId])
 
   // Shared NotesTab props — each sub-tab renders exactly one of its sections.
   const notesProps = {
@@ -80,17 +86,19 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {/* Sub-tab strip — same shared bar as the candidate Communicatie tab. */}
-      <SubTabBar
-        tabs={[
-          { id: 'notes',    label: t('notes.notes') },
-          { id: 'timeline', label: t('notes.timeline') },
-        ]}
-        active={subTab}
-        onChange={setSubTab}
-      />
-      {subTab === 'notes'    && <NotesTab {...notesProps} showTimeline={false} showConversations={false} />}
-      {subTab === 'timeline' && <NotesTab {...notesProps} showNotes={false} showConversations={false} />}
+      {/* Sub-tab strip only when this tab still owns both sections. */}
+      {!only && (
+        <SubTabBar
+          tabs={[
+            { id: 'notes',    label: t('notes.notes') },
+            { id: 'timeline', label: t('notes.timeline') },
+          ]}
+          active={subTab}
+          onChange={setSubTab}
+        />
+      )}
+      {active === 'notes'    && <NotesTab {...notesProps} showTimeline={false} showConversations={false} />}
+      {active === 'timeline' && <NotesTab {...notesProps} showNotes={false} showConversations={false} />}
     </div>
   )
 }

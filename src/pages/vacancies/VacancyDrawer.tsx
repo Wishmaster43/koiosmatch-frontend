@@ -5,9 +5,10 @@ import { Globe, Edit2, Save, X } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
-import GeocodeButton from '@/components/ui/GeocodeButton'
+import PdokCard from '@/components/drawer/PdokCard'
 import { channelIcon } from './data/channelIcons'
-import VacancyChangelogPopover from './drawer/VacancyChangelogPopover'
+import ChangelogPopover from '@/components/drawer/ChangelogPopover'
+import ChangelogTab from './drawer/ChangelogTab'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
@@ -63,12 +64,21 @@ const TABS: { id: string; tKey: string; autoExpand?: boolean; render: (v: Vacanc
   { id: 'documents',  tKey: 'documents',  render: v => <DocumentsTab vacancy={v} /> },
   // Tijdlijn TAB (intended: real lifecycle activity — created/status changes/
   // applications received) is distinct BY DESIGN from the changelog ICON in the
-  // title row (raw field-change audit, VacancyChangelogPopover) — §3A(d): tab =
+  // title row (raw field-change audit, the shared ChangelogPopover) — §3A(d): tab =
   // activiteit, icon = veldwijzigingen. Currently a calm empty state: the backend
   // hardcodes `timeline: []` (no aggregator like ApplicationTimeline exists yet for
   // vacancies) — BE follow-up, not a reason to remove this tab.
   { id: 'timeline',   tKey: 'timeline',   render: v => <TimelineTab vacancy={v} /> },
   { id: 'notes',      tKey: 'notes',      render: v => <NotesTab vacancy={v} /> },
+  // Koppelingen (Danny 28-07): PDOK left the title row, so the vacancy gets the same
+  // tab as every other entity. Vacancies are NOT in the backoffice sync registry
+  // (no HelloFlex/Shiftmanager token), so this tab holds the geocoding card only —
+  // showing empty link cards would suggest a coupling that does not exist.
+  { id: 'koppelingen', tKey: 'backofficeLinks', render: v => (
+    <PdokCard lat={v.lat} lng={v.lng} endpoint={`/vacancies/${v.id}/geocode`} permission="vacancies.update"
+      disabled={!v.city && !v.street && !v.postalCode && !v.location} />
+  ) },
+  // Statistieken last (Danny 28-07) — a read-only summary, not a working tab.
   { id: 'statistics', tKey: 'statistics', render: v => <StatisticsTab vacancy={v} /> },
 ]
 
@@ -161,7 +171,13 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
           <span />
         </div>
       }
-      tabs={visibleTabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), autoExpand: tab.autoExpand, render: () => tab.render(v, onUpdate) }))}
+      // Koppelingen reads the SHARED common:backofficeLinks.tabLabel key (§3A/§11) so
+      // every entity's tab shows the exact same word.
+      tabs={visibleTabs.map(tab => ({
+        id: tab.id,
+        label: tab.id === 'koppelingen' ? t('common:backofficeLinks.tabLabel') : t(`drawer.tabs.${tab.tKey}`),
+        autoExpand: tab.autoExpand, render: () => tab.render(v, onUpdate),
+      }))}
       header={({ setActiveTab }) => (
         <>
         <EntityHeader
@@ -185,14 +201,10 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
             </>
           )}
           // Changelog icon (§3A(d)) — GET /vacancies/{id}/activity exists (measured:
-          // routes/api/tenant/candidates.php), so this is the missing icon-popover, not a tab.
+          // routes/api/tenant/candidates.php). Danny 27-07: now the shared house
+          // ChangelogPopover shell, same as every other entity.
           titleActions={<>
-            <VacancyChangelogPopover vacancy={v} />
-            {/* GEO-REGEOCODE-1: manual "PDOK opnieuw ophalen" — queued + async, never
-                claims "done" (see GeocodeButton). No bulk variant for vacancies (BE
-                spec). Disabled when there's no address at all yet. */}
-            <GeocodeButton endpoint={`/vacancies/${v.id}/geocode`} permission="vacancies.update"
-              disabled={!v.city && !v.street && !v.postalCode && !v.location} />
+            <ChangelogPopover><ChangelogTab vacancy={v} bare /></ChangelogPopover>
           </>}
           // V7: title pencil → save/cancel, same spot as the changelog icon's row.
           actions={editingTitle ? (

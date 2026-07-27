@@ -20,7 +20,21 @@ import type { Id } from '@/types/common'
 
 interface AppUser { id: Id; name: string; avatar_color?: string }
 type NotePayload = { type: string; title: string; body: string }
-interface CreateForm { name: string; debtorNumber: string; status: string; ownerId: string; industry: string; city: string }
+// The create form's full shape. Everything past `city` is optional (the backend's
+// CustomerRequest::sharedRules marks them sometimes|nullable) and only travels when
+// filled — the modal collects them since Danny 27-07 ("+ Klant mist heel veel
+// informatie"), so they must actually reach the API instead of being dropped here.
+interface CreateForm {
+  name: string; debtorNumber: string; status: string; ownerId: string; industry: string; city: string
+  branchId?: string; website?: string; employeeCount?: string
+  toneOfVoice?: string; costCenter?: string; billingEmail?: string
+}
+
+// Optional create fields → their API keys (same mapping the PATCH path uses).
+const OPTIONAL_CREATE_FIELDS: Array<[keyof CreateForm, string]> = [
+  ['branchId', 'location_id'], ['website', 'website'], ['employeeCount', 'employee_count'],
+  ['toneOfVoice', 'tone_of_voice'], ['costCenter', 'cost_center'], ['billingEmail', 'billing_email'],
+]
 
 interface Args {
   setCustomers: Dispatch<SetStateAction<Customer[]>>
@@ -122,10 +136,17 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
       owner: owner ? { id: owner.id, name: owner.name } : undefined,
     } as ApiCustomer)
     setCustomers(prev => [optimistic, ...prev]); setTotal(tt => tt + 1)
-    return api.post('/customers', {
+    const body: Record<string, unknown> = {
       name: form.name, debtor_number: form.debtorNumber, status: form.status,
       city: form.city, industry: form.industry, owner_id: form.ownerId,
-    }).then(r => { const c = mapCustomer(unwrap(r)); setCustomers(prev => prev.map(x => x.id === optimistic.id ? c : x)); return c })
+    }
+    // Only send an optional field once it carries a value — the rules are
+    // sometimes|nullable, so an empty string would fail the url/email/integer checks.
+    OPTIONAL_CREATE_FIELDS.forEach(([formKey, apiKey]) => {
+      const v = form[formKey]
+      if (typeof v === 'string' && v.trim() !== '') body[apiKey] = v.trim()
+    })
+    return api.post('/customers', body).then(r => { const c = mapCustomer(unwrap(r)); setCustomers(prev => prev.map(x => x.id === optimistic.id ? c : x)); return c })
       .catch(err => { setCustomers(prev => prev.filter(x => x.id !== tmpId)); setTotal(tt => tt - 1); throw err })
   }
 

@@ -8,13 +8,16 @@
 import { useState, useRef } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Plus, X, Pencil, Eye, Download, Trash2 } from 'lucide-react'
+import { Search, X, Pencil, Eye, Download, Trash2 } from 'lucide-react'
 import { useDocumentTypes, resolveDocTypeIcon } from '@/lib/useDocumentTypes'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from '@/components/ui/SectionCard'
 import { useEntityDocuments, type EntityDoc } from '@/hooks/useEntityDocuments'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
+// House "+ action" trigger (Danny 27-07 consistency sweep) — replaces the bare
+// text+Plus button below; same click target (opens the hidden file input).
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import type { Id } from '@/types/common'
 
 // A queued-but-not-yet-uploaded file, each with its own document type (BUGFIX
@@ -139,23 +142,20 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
           {selected.size > 0 && (
             <>
               <button onClick={downloadSelected}
-                style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer',
+                style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
                   background: 'color-mix(in srgb, var(--color-primary) 14%, transparent)', color: 'var(--color-primary)',
                   border: '1px solid color-mix(in srgb, var(--color-primary) 45%, transparent)' }}>
                 <Download size={11} /> {t('documents.downloadSelected', { count: selected.size })}
               </button>
               <button onClick={() => setConfirmDelete({ kind: 'many' })}
-                style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer',
+                style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 99, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
                   background: 'color-mix(in srgb, var(--color-danger) 12%, transparent)', color: 'var(--color-danger)',
                   border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
                 <Trash2 size={11} /> {t('documents.deleteSelected', { count: selected.size })}
               </button>
             </>
           )}
-          <button onClick={() => fileRef.current?.click()}
-            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
-            <Plus size={11} /> {t('documents.add')}
-          </button>
+          <DrawerAddButton onClick={() => fileRef.current?.click()} label={t('documents.add')} />
         </div>
       </div>
       <div style={sectionBlock}>

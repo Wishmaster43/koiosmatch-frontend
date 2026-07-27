@@ -6,7 +6,7 @@ export default {
   type:  'shift_score',
   // GET/lees-kant: gate op de rapporten-MODULE 'sm' (Danny 23-07); de connector-app gate alleen de POST/PATCH-koppelkant.
   module: 'sm',
-  category: 'ShiftManager',
+  category: 'Shiftmanager',
   label: 'Diensten scoren',
   Icon:  ShiftManagerMark,
   color: '#E11D2A',

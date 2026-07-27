@@ -37,7 +37,7 @@
     "empty": "Aufgaben hierher ziehen"
   },
   "drawer": {
-    "label": "Aktivität",
+    "label": "Aufgabe",
     "createdAt": "Erstellt am {{date}}",
     "archivedBanner": {
       "since": "Archiviert am {{date}}",
@@ -57,7 +57,7 @@
     "tags": "Tags"
   },
   "details": {
-    "title": "Aktivitätsdetails",
+    "title": "Aufgabendetails",
     "type": "Aktivitätstyp",
     "status": "Status",
     "priority": "Priorität",
@@ -94,7 +94,7 @@
     "empty": "Noch keine Aktivität."
   },
   "modal": {
-    "title": "Aktivität hinzufügen",
+    "title": "Neue Aufgabe",
     "editTitle": "Aufgabe bearbeiten",
     "loadingTask": "Aufgabe wird geladen…",
     "type": "Aktivitätstyp",
@@ -110,7 +110,7 @@
     "description": "Beschreibung",
     "descriptionPlaceholder": "Eingeben…",
     "charsLeft": "Verfügbare Zeichen: {{count}}",
-    "detailsTitle": "Aktivitätsdetails",
+    "detailsTitle": "Aufgabendetails",
     "owner": "Inhaber",
     "candidate": "Kandidat",
     "candidatePlaceholder": "Kandidat auswählen",
@@ -122,7 +122,10 @@
     "save": "Speichern",
     "saving": "Wird gespeichert…",
     "cancel": "Abbrechen",
-    "required": "Erforderlich"
+    "required": "Erforderlich",
+    "cardTask": "Aufgabe",
+    "cardPlanning": "Planung",
+    "cardLink": "Verknüpfung"
   },
   "bulk": {
     "selected": "{{count}} ausgewählt",
