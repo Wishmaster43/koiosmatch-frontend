@@ -8,7 +8,7 @@
 import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Archive, Map as MapIcon, BotOff } from 'lucide-react'
+import { Archive, Map as MapIcon } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
@@ -275,12 +275,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                   candidate blueprint (the API ships lat/lng + distance_km now). */}
               <QuickViewToggle active={view === 'map'} onToggle={() => setView(x => (x === 'map' ? 'table' : 'map'))}
                 label={t('common:map.view')} color="var(--color-map)" icon={MapIcon} />
-              {/* VAC-AGENT-1: "online without an AI agent" quick view — --color-violet is
-                  the shared system/AI-ish accent token (index.css), not an ad-hoc hex.
-                  Shares toggleWithoutAgent with the agent donut's "Geen agent" segment
-                  and the "Zonder AI-agent" KPI card (VAC-KPI-REDESIGN 22-07). */}
-              <QuickViewToggle active={showWithoutAgent} onToggle={toggleWithoutAgent}
-                label={t('page.withoutAgentView')} color="var(--color-violet)" icon={BotOff} />
+              {/* No "Zonder AI-agent" toggle here (Danny 27-07): the KPI row already
+                  carries that view as a click-to-filter card, and the agent donut's
+                  "Geen agent" segment drives the same toggleWithoutAgent — a third
+                  control for one filter is duplication, not convenience. */}
               {/* Bucket tabs — soft-tinted active (§4: never a solid fill); mirrors
                   ApplicationsPage's identical bucket control verbatim. */}
               {buckets.map(b => (

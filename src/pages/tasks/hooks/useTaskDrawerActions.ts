@@ -10,6 +10,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import { mapTaskDetail } from '../data/mapTask'
 import type { Task, TaskDetail, ApiTask } from '@/types/task'
 import type { Id } from '@/types/common'
@@ -50,7 +51,23 @@ export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks
 
   // Edit one or more fields (drawer or kanban drag). `patch` is LOCAL-shaped.
   const handleUpdate = (id: Id | undefined, patch: Record<string, unknown>) => {
-    setTasks(prev => prev.map(x => x.id === id ? ({ ...x, ...patch } as Task) : x))
+    // Bug class fix: this used to `.catch(() => notifyError(...))` with no revert,
+    // so a rejected PATCH left the new value on screen as if the server had saved
+    // it. Snapshot ONLY the fields this patch overwrites (never the whole row, so a
+    // parallel edit to some other field survives a revert), captured from the live
+    // `prev` inside each setState updater since this hook only receives setTasks
+    // (not the tasks array itself).
+    const keys = Object.keys(patch)
+    let beforeRow: Record<string, unknown> | undefined
+    setTasks(prev => prev.map(x => {
+      if (x.id !== id) return x
+      beforeRow = {}
+      keys.forEach(k => { (beforeRow as Record<string, unknown>)[k] = (x as unknown as Record<string, unknown>)[k] })
+      return { ...x, ...patch } as Task
+    }))
+    const beforeSelected = selected && selected.id === id
+      ? keys.reduce((acc, k) => ({ ...acc, [k]: (selected as unknown as Record<string, unknown>)[k] }), {} as Record<string, unknown>)
+      : undefined
     setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...patch } as TaskDetail) : prev))
     const body: Record<string, unknown> = {
       status: patch.statusKey, priority: patch.priorityKey, type: patch.typeKey,
@@ -60,7 +77,11 @@ export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks
       tags: patch.tags, custom_fields: patch.customFields,
     }
     Object.keys(body).forEach(k => { if (body[k] === undefined) delete body[k] })
-    api.patch(`/tasks/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
+    api.patch(`/tasks/${id}`, body).catch(err => {
+      if (beforeRow) setTasks(prev => prev.map(x => x.id === id ? ({ ...x, ...beforeRow } as Task) : x))
+      if (beforeSelected) setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...beforeSelected } as TaskDetail) : prev))
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    })
   }
 
   // Kanban move = a status-only update.
@@ -73,18 +94,35 @@ export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks
     setTasks(prev => prev.map(x => x.id === id ? { ...x, links: detail.links, linkLabel: detail.linkLabel } : x))
   }
 
-  // Add a polymorphic link from the drawer; show it optimistically, then POST and re-sync.
+  // Add a polymorphic link from the drawer; show it optimistically, then POST and
+  // re-sync. Bug class fix: a rejected POST used to only toast, leaving a link in
+  // the drawer the backend never persisted — the user believed it was added.
+  // Snapshot the pre-add `links` array (only that field) and restore it on failure.
   const handleAddLink = (id: Id | undefined, link: NewLink) => {
+    const beforeLinks = selected && selected.id === id ? selected.links : undefined
     setSelected(prev => (prev && prev.id === id ? ({ ...prev, links: [...(prev.links ?? []), { type: link.type, id: link.id, label: link.label }] } as TaskDetail) : prev))
-    api.post(`/tasks/${id}/links`, { type: link.type, id: link.id }).then(r => applyDetail(id, r)).catch(() => notifyError(t('common:actionFailed')))
+    api.post(`/tasks/${id}/links`, { type: link.type, id: link.id })
+      .then(r => applyDetail(id, r))
+      .catch(err => {
+        if (beforeLinks !== undefined) setSelected(prev => (prev && prev.id === id ? ({ ...prev, links: beforeLinks } as TaskDetail) : prev))
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
   }
 
   // Remove a link from the drawer; drop it optimistically, then DELETE and re-sync.
+  // Same bug class + fix as handleAddLink above — a refused DELETE used to only
+  // toast, leaving the link gone from the drawer while the backend still had it.
   const handleRemoveLink = (id: Id | undefined, link: { type: string; id: Id | null }) => {
+    const beforeLinks = selected && selected.id === id ? selected.links : undefined
     setSelected(prev => (prev && prev.id === id
       ? ({ ...prev, links: (prev.links ?? []).filter(l => !(l.type === link.type && String(l.id) === String(link.id))) } as TaskDetail)
       : prev))
-    api.delete(`/tasks/${id}/links`, { data: { type: link.type, id: link.id } }).then(r => applyDetail(id, r)).catch(() => notifyError(t('common:actionFailed')))
+    api.delete(`/tasks/${id}/links`, { data: { type: link.type, id: link.id } })
+      .then(r => applyDetail(id, r))
+      .catch(err => {
+        if (beforeLinks !== undefined) setSelected(prev => (prev && prev.id === id ? ({ ...prev, links: beforeLinks } as TaskDetail) : prev))
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
   }
 
   // Enkelstuks-sweep: un-archive ONE task via the per-id route (POST /tasks/{id}/restore,

@@ -64,10 +64,14 @@ describe('ProposalsBlock', () => {
     expect(screen.getByText(/propose\.openCount:/)).toBeInTheDocument()
   })
 
-  it('shows notOpenedYet when there is no open timestamp', () => {
+  // DEFECT 1 regression: opened_at can never become non-null while there is no
+  // shareable link (PROPOSE-SHARE-URL-1) — so a "not opened yet" claim must
+  // never render; the open-state slot stays entirely absent from the DOM.
+  it('renders no open-state text when opened_at is null and the proposal is not revoked', () => {
     setProposals([proposal()])
     render(<ProposalsBlock application={app} />)
-    expect(screen.getByText('propose.notOpenedYet')).toBeInTheDocument()
+    expect(screen.queryByText(/propose\.openedOn/)).toBeNull()
+    expect(screen.queryByText('propose.notOpenedYet')).toBeNull()
   })
 
   it('asks for confirmation before calling revoke on a still-valid proposal', async () => {

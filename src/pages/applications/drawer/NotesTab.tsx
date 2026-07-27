@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import SharedNotesTab from '@/components/drawer/tabs/NotesTab'
 import { useNoteTypes } from '@/lib/useNoteTypes'
 import type { ApplicationDetail } from '@/types/application'
@@ -23,12 +25,21 @@ export default function NotesTab({ application: a }: { application: ApplicationD
   // Author avatar initials — the owning recruiter, else a Koios fallback.
   const initials = (a.owner?.name ?? 'Koios').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 
-  // Optimistic add + best-effort persist (endpoint lands with the applications detail API).
+  // Optimistic add, then persist. OPTIMISTIC-REVERT-1 (audit 2026-07-27): this used to
+  // end in `.catch(() => {})`, silently keeping the optimistic note on screen forever —
+  // a recruiter who believes a note was recorded will not write it twice. On failure the
+  // exact optimistic object (reference match, safe even if more notes were added meanwhile)
+  // is removed again and the server's own message is surfaced.
   const addNote = (payload: { type: string; title: string; body: string }) => {
     const local: Note = { ...payload, text: payload.body, author: a.owner?.name ?? 'Koios',
       created_at: new Date().toISOString(), ago: t('common:justNow', { defaultValue: 'zojuist' }) }
     setNotes(prev => [local, ...prev])
-    if (a.id != null) api.post(`/applications/${a.id}/notes`, payload).catch(() => { /* keep optimistic entry */ })
+    if (a.id != null) {
+      api.post(`/applications/${a.id}/notes`, payload).catch(err => {
+        setNotes(prev => prev.filter(n => n !== local))
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
+    }
   }
 
   return (

@@ -89,14 +89,27 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
   }
 
   // Reassign an application's recruiter (owner); optimistic + PATCH owner_id.
+  // OPTIMISTIC-REVERT-1 (audit 2026-07-27, same bug class as handleMove/handleLinkVacancy/
+  // handleReject): a failed PATCH used to only toast, leaving the wrong owner shown as if
+  // it were saved. Snapshot ONLY the owner field before the optimistic write (wideRows
+  // fallback: the drawer may be open while viewing the board) and restore it in both the
+  // list row and the open detail on failure, surfacing the server's own message.
   const handleOwner = (id: Id, ownerId: string) => {
     const u = users.find(x => String(x.id) === String(ownerId))
     if (!u) return
+    const before = applications.find(a => a.id === id) ?? wideRows.find(a => a.id === id)
     const initials = u.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
     const owner = { id: ownerId, name: u.name, initials, color: null }
     setApplications(prev => prev.map(a => a.id === id ? { ...a, owner } : a))
     setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, owner } as ApplicationDetail) : prev))
-    api.patch(`/applications/${id}`, { owner_id: ownerId }).catch(() => notifyError(t('common:actionFailed')))
+    api.patch(`/applications/${id}`, { owner_id: ownerId })
+      .catch(err => {
+        if (before) {
+          setApplications(prev => prev.map(a => a.id === id ? { ...a, owner: before.owner } : a))
+          setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, owner: before.owner } as ApplicationDetail) : prev))
+        }
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
   }
 
   // Re-link (or unlink, null) an application's vacancy — shared by the Sollicitatie
@@ -184,20 +197,42 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
   }
 
   // Manual match-score override on an application (per applicant); optimistic + PATCH.
+  // OPTIMISTIC-REVERT-1: snapshot the fields this patch touches BEFORE the optimistic
+  // write — the list row only renders `score` (matchCriteria/matchSource are drawer-only
+  // fields carried by ApplicationDetail), so the row's own snapshot needs just that field;
+  // the full detail snapshot reverts the open drawer. A failed override used to leave a
+  // fake score/criteria on screen with only a toast.
   const handleAdjustScore = (id: Id | undefined, { score, criteria }: { score: number | null; criteria: Criterion[] }) => {
+    const beforeRow = applications.find(a => a.id === id) ?? wideRows.find(a => a.id === id)
+    const beforeSelected = selected && selected.id === id ? selected : null
     const patch = { score, matchCriteria: criteria, matchSource: 'manual' }
     setApplications(prev => prev.map(a => a.id === id ? ({ ...a, ...patch } as Application) : a))
     setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...patch } as ApplicationDetail) : prev))
-    api.patch(`/applications/${id}`, { match_score: score, match_criteria: criteria }).catch(() => notifyError(t('common:actionFailed')))
+    api.patch(`/applications/${id}`, { match_score: score, match_criteria: criteria })
+      .catch(err => {
+        if (beforeRow) setApplications(prev => prev.map(a => a.id === id ? { ...a, score: beforeRow.score } : a))
+        if (beforeSelected) setSelected(prev => (prev && prev.id === id ? beforeSelected : prev))
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
   }
 
   // Save the Extra tab's tenant custom fields (§3B); the tab only mounts while the
   // drawer is open, so `selected` is always the record being edited. Optimistic +
   // PATCH, merging the partial patch into the full map so the backend persists it whole.
+  // OPTIMISTIC-REVERT-1: snapshot ONLY customFields (the sole field this patch touches;
+  // no list-row slice carries it) before the optimistic write, and restore it on failure —
+  // a failed save used to keep showing tenant custom-field values the server never persisted.
   const handleUpdateCustomFields = (id: Id | undefined, patch: Record<string, unknown>) => {
+    const beforeCustomFields = selected && selected.id === id ? selected.customFields : null
     const merged = { ...(selected?.customFields ?? {}), ...patch }
     setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, customFields: merged } as ApplicationDetail) : prev))
-    api.patch(`/applications/${id}`, { custom_fields: merged }).catch(() => notifyError(t('common:actionFailed')))
+    api.patch(`/applications/${id}`, { custom_fields: merged })
+      .catch(err => {
+        if (beforeCustomFields) {
+          setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, customFields: beforeCustomFields } as ApplicationDetail) : prev))
+        }
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
   }
 
   // Candidate name/function saved from the drawer HEADER pencil (Danny 25-07,

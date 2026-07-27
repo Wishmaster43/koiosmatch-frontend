@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import type { Candidate, CandidatePool } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -35,15 +36,25 @@ export function useCandidatePools(candidate: Candidate) {
   // Is the candidate already in this pool (id or, for bare slugs, name)?
   const has = (id: Id | undefined) => pools.some(p => (p.id ?? p.name) === id)
 
-  // Optimistic add/remove, persisted to the pivot route; notifyError on failure.
+  // Optimistic add/remove, persisted to the pivot route. BUG CLASS FIX: a failed
+  // request used to only toast — the chip stayed in the state the server rejected.
+  // Snapshot only the ONE pool being toggled (never the whole list, so a parallel
+  // toggle of another pool is never clobbered by this revert) and put it back on failure.
   const toggle = (pool: CandidatePool) => {
     const id = pool.id ?? pool.name
     if (has(id)) {
+      const removed = pools.find(p => (p.id ?? p.name) === id)
       setPools(prev => prev.filter(p => (p.id ?? p.name) !== id))
-      api.delete(`/candidates/${candidate.id}/pools/${id}`).catch(() => notifyError(t('common:actionFailed')))
+      api.delete(`/candidates/${candidate.id}/pools/${id}`).catch(err => {
+        if (removed) setPools(prev => (prev.some(p => (p.id ?? p.name) === id) ? prev : [...prev, removed]))
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
     } else {
       setPools(prev => [...prev, pool])
-      api.post(`/candidates/${candidate.id}/pools`, { pool_id: id }).catch(() => notifyError(t('common:actionFailed')))
+      api.post(`/candidates/${candidate.id}/pools`, { pool_id: id }).catch(err => {
+        setPools(prev => prev.filter(p => (p.id ?? p.name) !== id))
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
     }
   }
 

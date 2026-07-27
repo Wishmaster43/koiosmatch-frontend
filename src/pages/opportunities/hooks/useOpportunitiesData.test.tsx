@@ -5,32 +5,46 @@
  * when asked and (b) actually refetch — not silently reuse the cached page —
  * when the flag flips (the query key carries it), so the toggle never looks
  * broken (mirrors the fake-toggle bug this sweep fixed).
+ *
+ * Also covers the optimistic-update bug class (measured audit 2026-07-27, see the
+ * handleMove describe block below): a rejected board move used to only toast, with
+ * no revert, leaving the card sitting in the new column as if the server had
+ * accepted it.
  */
-import { describe, it, expect, vi, afterEach } from 'vitest'
-import { renderHook, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { useOpportunitiesData } from './useOpportunitiesData'
 
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
-vi.mock('@/lib/useOpportunityStages', () => ({
-  // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
-  useOpportunityStages: () => ({ stages: [], stageMeta: () => ({ value: '', label: '', color: '#9CA3AF' }) }),
-}))
+// eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
+const DEFAULT_STAGE_COLOR = '#9CA3AF'
+vi.mock('@/lib/useOpportunityStages', () => ({ useOpportunityStages: vi.fn() }))
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
   return { ...actual, default: { get: vi.fn(), patch: vi.fn() } }
 })
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 import api from '@/lib/api'
+import { useOpportunityStages } from '@/lib/useOpportunityStages'
+import { notifyError } from '@/lib/notify'
 const mockedGet = vi.mocked(api.get)
 const mockedPatch = vi.mocked(api.patch)
+const mockedStages = vi.mocked(useOpportunityStages)
 
 // react-query needs a client in the tree; retry:false keeps failed-fetch tests fast.
 function wrapper({ children }: { children: ReactNode }) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return <QueryClientProvider client={qc}>{children}</QueryClientProvider>
 }
+
+// Default (empty) stage lookup for every test; the handleMove suite below
+// overrides it with real stage/id pairs so the PATCH branch (`if (s?.id)`) fires.
+beforeEach(() => {
+  mockedStages.mockReturnValue({ stages: [], stageMeta: () => ({ value: '', label: '', color: DEFAULT_STAGE_COLOR }) })
+})
 
 // Each test's own react-query cache is fresh, but the mocked api.get call log
 // is module-level — reset it so `.mock.calls.find` never picks up a PRIOR test's call.
@@ -80,5 +94,49 @@ describe('useOpportunitiesData · tags PATCH (audit finding: tags never persiste
 
     await waitFor(() => expect(mockedPatch).toHaveBeenCalled())
     expect(mockedPatch).toHaveBeenCalledWith('/opportunities/o1', { tags: ['foo', 'bar'] })
+  })
+})
+
+// Regression coverage for the optimistic-update bug class (measured audit
+// 2026-07-27): handleMove used to `.catch(() => notifyError(...))` with no revert,
+// so a rejected board move (a backend stage-transition guard) left the card sitting
+// in the new column as if the server had accepted it. Real stage/id pairs are wired
+// in via mockedStages so the PATCH branch (`if (s?.id)`) actually fires.
+describe('useOpportunitiesData · handleMove (board drag revert-on-failure)', () => {
+  const wireStages = () => mockedStages.mockReturnValue({
+    stages: [{ value: 'lead', label: 'Lead', color: DEFAULT_STAGE_COLOR, id: 's1' }, { value: 'won', label: 'Won', color: DEFAULT_STAGE_COLOR, id: 's2' }],
+    stageMeta: (v?: string | null) => (v === 'won'
+      ? { value: 'won', label: 'Won', color: DEFAULT_STAGE_COLOR }
+      : { value: 'lead', label: 'Lead', color: DEFAULT_STAGE_COLOR }),
+  })
+
+  it('PATCHes the target stage id and keeps the new stage when the server accepts', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'o1', title: 'Deal A', stage: { value: 'lead', label: 'Lead', color: DEFAULT_STAGE_COLOR } }] } })
+    mockedPatch.mockResolvedValue({})
+    wireStages()
+    const { result } = renderHook(() => useOpportunitiesData(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    act(() => { result.current.handleMove('o1', 'won') })
+    expect(mockedPatch).toHaveBeenCalledWith('/opportunities/o1', { opportunity_stage_id: 's2' })
+    await waitFor(() => expect(result.current.rows[0].stageValue).toBe('won'))
+    expect(notifyError).not.toHaveBeenCalled()
+  })
+
+  it('reverts ONLY the stage fields and reports the server message when the PATCH fails', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'o1', title: 'Deal A', stage: { value: 'lead', label: 'Lead', color: DEFAULT_STAGE_COLOR } }] } })
+    mockedPatch.mockRejectedValue({ response: { status: 422, data: { message: 'Fase mag niet worden overgeslagen' } } })
+    wireStages()
+    const { result } = renderHook(() => useOpportunitiesData(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    // React Query's notifyManager batches cache notifications onto a microtask, so
+    // the optimistic frame and its immediate revert (the mock rejects right away)
+    // aren't reliably observable as two separate synchronous snapshots here — assert
+    // the settled end-state instead: reverted stage, untouched title, server message.
+    act(() => { result.current.handleMove('o1', 'won') })
+    await waitFor(() => expect(result.current.rows[0].stageValue).toBe('lead')) // reverted
+    expect(result.current.rows[0].title).toBe('Deal A') // untouched field survives the revert
+    expect(notifyError).toHaveBeenCalledWith('Fase mag niet worden overgeslagen')
   })
 })

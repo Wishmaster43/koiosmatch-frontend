@@ -106,14 +106,22 @@ export function useProposeForm(application: ApplicationDetail) {
   const [recipientContactId, setRecipientContactId] = useState<string>(application.contact?.id != null ? String(application.contact.id) : '')
   const [cvVariant, setCvVariant] = useState<CvVariant>(proposalSettings.default_cv_variant === 'full' ? 'full' : 'proposal')
   const [includeMotivation, setIncludeMotivation] = useState(false)
-  const [subject, setSubject] = useState('')
-  const [body, setBody] = useState('')
+  const [subject, setSubjectState] = useState('')
+  const [body, setBodyState] = useState('')
   const [consentConfirmed, setConsentConfirmed] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [copied, setCopied] = useState(false)
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => () => { if (copyTimerRef.current) clearTimeout(copyTimerRef.current) }, [])
+
+  // DEFECT 2 (2026-07): track whether the recruiter has manually touched subject/
+  // body. Wrapping the setters (rather than the raw useState ones) means every
+  // caller outside this hook is a manual edit; the auto-fill effect below reads
+  // this ref and, once true, never overwrites their words again.
+  const dirtyRef = useRef(false)
+  const setSubject = (value: string) => { dirtyRef.current = true; setSubjectState(value) }
+  const setBody = (value: string) => { dirtyRef.current = true; setBodyState(value) }
 
   // The picked contact, falling back to the application's carried contact when
   // the fresh customer fetch hasn't resolved (or failed) yet.
@@ -122,27 +130,32 @@ export function useProposeForm(application: ApplicationDetail) {
       ? { id: String(application.contact.id), name: application.contact.name, email: application.contact.email, phone: application.contact.phone }
       : null)
 
-  // Prefill subject/body from the tenant templates ONCE (token interpolation) —
-  // never overwrite a recruiter's own edits after the first fill. Waits for the
-  // contacts fetch to settle so the {contact} token can resolve to a real name.
-  const prefilledRef = useRef(false)
+  // DEFECT 2 fix: re-run the template fill whenever the RESOLVED RECIPIENT
+  // changes — picking or switching the contact must update the greeting, so the
+  // recorded/copied message never addresses the previous contact while submit()
+  // registers the new one. Guarded by dirtyRef: once the recruiter has edited
+  // subject/body themselves, their words are never overwritten again. With no
+  // recipient yet, the fill is skipped entirely rather than resolving {contact}
+  // to an empty string — a bare "Beste ," reads worse than a still-empty field,
+  // and submit() is disabled without a recipient anyway (see disabledReason).
   useEffect(() => {
-    if (prefilledRef.current || contactsLoading) return
-    prefilledRef.current = true
+    if (dirtyRef.current || !recipient) return
     const tokens = {
       kandidaat: application.candidateName ?? '',
       vacature: application.vacancyTitle ?? '',
       klant: application.client ?? '',
-      contact: recipient?.name ?? '',
+      contact: recipient.name,
       recruiter: application.owner?.name ?? '',
     }
     const subjectTpl = proposalSettings.subject_template || t('propose.defaultSubject')
     const bodyTpl = proposalSettings.body_template || t('propose.defaultBody')
-    setSubject(fillTemplate(subjectTpl, tokens))
-    setBody(fillTemplate(bodyTpl, tokens))
-    // Deliberately narrow deps: this must fire exactly once, when contacts settle.
+    setSubjectState(fillTemplate(subjectTpl, tokens))
+    setBodyState(fillTemplate(bodyTpl, tokens))
+    // Deliberately keyed on the recipient's own identity, not the whole
+    // `application`/`proposalSettings` objects (a new identity every render
+    // would re-fire this on every keystroke elsewhere) or `t`.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contactsLoading])
+  }, [recipient?.id, recipient?.name])
 
   const hasMotivation = Boolean(application.coverLetter)
 
@@ -177,25 +190,20 @@ export function useProposeForm(application: ApplicationDetail) {
     }
   }
 
-  // submit(): download the CV, RECORD the proposal via the real backend
-  // endpoint, and (only when the tenant setting is on) move the funnel phase.
-  // Any failing step surfaces the server message and returns false — never a
-  // false "sent"/"recorded" claim.
+  // submit(): RECORD the proposal via the real backend endpoint FIRST, only
+  // then download the CV, and (only when the tenant setting is on) move the
+  // funnel phase. Any failing step surfaces the server message and returns
+  // false — never a false "sent"/"recorded" claim.
   const submit = async (): Promise<boolean> => {
     if (disabledReason || !candidate || submitting) return false
     setSubmitting(true)
     try {
-      // 1. Generate + download the CV PDF client-side — same blob → object-URL →
-      // <a download> pattern as CandidateHeaderBits' downloadCv, no server round-trip.
-      const blob = await buildProposalCvBlob({ candidate: candidate as unknown as CvCandidate, settings: cvSettings as never, locale, t, variant: cvVariant })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url; link.download = `CV - ${candidate.name ?? 'candidate'}.pdf`
-      document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url)
-
-      // 2. Record the proposal via the real endpoint (gate applications.update) —
-      // recipient, cv variant and the drafted subject/body. This only RECORDS
-      // the proposal; the backend does not send an e-mail itself.
+      // 1. Record the proposal via the real endpoint (gate applications.update)
+      // BEFORE anything leaves the app (DEFECT 3, §8): recipient, cv variant and
+      // the drafted subject/body. This only RECORDS the proposal; the backend
+      // does not send an e-mail itself. If this fails (403/422), no CV full of
+      // special-category data has left the recruiter's browser — the AVG trail
+      // never has a gap.
       await api.post(`/applications/${application.id}/propose`, {
         contact_id: recipientContactId,
         cv_variant: cvVariant,
@@ -207,6 +215,18 @@ export function useProposeForm(application: ApplicationDetail) {
       // Refresh the proposals-history block (ProposalsBlock shares this query
       // key) so the freshly recorded proposal appears without a manual reload.
       queryClient.invalidateQueries({ queryKey: ['applications', application.id, 'proposals'] })
+
+      // 2. Only once the record succeeded, generate + download the CV PDF
+      // client-side — same blob → object-URL → <a download> pattern as
+      // CandidateHeaderBits' downloadCv, no server round-trip.
+      const blob = await buildProposalCvBlob({ candidate: candidate as unknown as CvCandidate, settings: cvSettings as never, locale, t, variant: cvVariant })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url; link.download = `CV - ${candidate.name ?? 'candidate'}.pdf`
+      document.body.appendChild(link); link.click(); document.body.removeChild(link)
+      // Defer the revoke — revoking the object URL synchronously right after
+      // click() can cancel the download in some browsers (DEFECT 3).
+      setTimeout(() => URL.revokeObjectURL(url), 0)
 
       // 3. Move the funnel phase to the is_proposal stage — only when the tenant
       // opted in via Settings (application_proposal.sets_phase).

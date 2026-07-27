@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { ExternalLink, Link2, Save, X } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import { buildEntityDeepLink } from '@/components/ui/EntityLink'
 import { VacancyLookupsProvider } from '@/context/VacancyLookupsContext'
 import DetailsTab from '@/pages/vacancies/drawer/DetailsTab'
@@ -78,14 +79,30 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
   // (and every other DetailsTab field) saves for real instead of no-op'ing.
   const updateVacancy = (id: Id | undefined, patch: Record<string, unknown>) => {
     if (id == null) return
+    // OPTIMISTIC-REVERT-1 (audit 2026-07-27, same bug class as useApplicationDrawerActions):
+    // snapshot ONLY the fields this patch touches, read off the cache BEFORE the optimistic
+    // write — never the whole cached vacancy, so a parallel edit to another field (e.g. from
+    // CompetitionBlock reading the same entry) is not clobbered by the revert.
+    const queryKey = ['vacancies', id, 'detail']
+    const cached = queryClient.getQueryData<VacancyDetail>(queryKey) as Record<string, unknown> | undefined
+    const beforeFields = cached ? Object.fromEntries(Object.keys(patch).map(k => [k, cached[k]])) : null
     // Optimistic merge straight into the shared React Query cache entry (the same
     // key useApplicationVacancy reads), so both this tab and CompetitionBlock see
     // the edit immediately without a duplicate local copy of the vacancy.
-    queryClient.setQueryData(['vacancies', id, 'detail'], (prev: VacancyDetail | undefined) =>
+    queryClient.setQueryData(queryKey, (prev: VacancyDetail | undefined) =>
       prev ? ({ ...prev, ...patch } as VacancyDetail) : prev)
     const body = buildVacancyPatch(patch)
     if (!Object.keys(body).length) return
-    api.patch(`/vacancies/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
+    api.patch(`/vacancies/${id}`, body).catch(err => {
+      // Revert only the touched fields onto the CURRENT cache value — a rejected PATCH
+      // must not leave "Vereiste vaardigheden" (or any other field) showing a value the
+      // server never accepted.
+      if (beforeFields) {
+        queryClient.setQueryData(queryKey, (prev: VacancyDetail | undefined) =>
+          prev ? ({ ...prev, ...beforeFields } as VacancyDetail) : prev)
+      }
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    })
   }
 
   const muted: CSSProperties = { fontSize: 13, color: 'var(--text-muted)', padding: '24px 0', textAlign: 'center' }

@@ -4,7 +4,10 @@
  * mirroring the candidate/customer notes. 404 = endpoint not built yet → empty (calm).
  */
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import type { Id } from '@/types/common'
 
 export interface OpportunityNote {
@@ -17,6 +20,7 @@ export interface OpportunityNote {
 }
 
 export function useOpportunityNotes(id?: Id) {
+  const { t } = useTranslation()
   const [items,   setItems]   = useState<OpportunityNote[]>([])
   const [loading, setLoading] = useState(false)
   // Audit r4 (§3/§10): a real load failure must not render as "no notes yet" —
@@ -45,11 +49,25 @@ export function useOpportunityNotes(id?: Id) {
     return () => ctrl.abort()
   }, [load])
 
-  // Add a note (optimistic-ish: reload after the server confirms).
+  // Add a note. Bug class fix + honesty decision: this used to
+  // `.then(load).catch(() => {})` with NO optimistic write and a swallowed error —
+  // a rejected POST left no trace on screen and no message, so a recruiter had every
+  // reason to believe the note was recorded and would not re-type it. Mirrors the
+  // proven useCandidateNotes.addNote pattern instead: show the note immediately
+  // (optimistic prepend with a temp id), reload for the server-resolved id/author on
+  // success, and on failure remove that exact temp note + surface the server's own
+  // reason — never leave a failed note lingering as if it had saved.
   const addNote = useCallback((payload: { type: string; body: string }) => {
     if (!id || !payload.body.trim()) return
-    api.post(`/opportunities/${id}/notes`, payload).then(() => load()).catch(() => {})
-  }, [id, load])
+    const temp: OpportunityNote = { id: `tmp-${Date.now()}`, type: payload.type, body: payload.body, created_at: new Date().toISOString() }
+    setItems(prev => [temp, ...prev])
+    api.post(`/opportunities/${id}/notes`, payload)
+      .then(() => load())
+      .catch(err => {
+        setItems(prev => prev.filter(n => n.id !== temp.id))
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
+  }, [id, load, t])
 
   return { items, loading, error, addNote }
 }

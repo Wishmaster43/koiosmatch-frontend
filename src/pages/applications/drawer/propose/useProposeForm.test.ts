@@ -96,6 +96,64 @@ describe('useProposeForm', () => {
     expect(result.current.body).toBe('<p>Beste Piet Klaassen, groet Eva Bos</p>')
   })
 
+  // DEFECT 2 regression: switching the recipient must re-fill the {contact}
+  // token with the NEW contact's name — otherwise the recorded/copied message
+  // still addresses the previous contact while submit() registers the new one.
+  it('re-fills the body with the new recipient name when the recipient is switched', async () => {
+    settingsFixture = { application_proposal: JSON.stringify({ body_template: 'Beste {contact}' }) }
+    apiGet.mockImplementation((url: string) => {
+      if (url.startsWith('/customers/')) return Promise.resolve({ data: { contacts: [
+        { id: 'ct1', name: 'Piet Klaassen', email: 'piet@zorggroep.nl' },
+        { id: 'ct2', name: 'Marieke de Boer', email: 'marieke@zorggroep.nl' },
+      ] } })
+      if (url.startsWith('/candidates/')) return Promise.resolve({ data: { id: 'c1', name: 'Jan de Vries' } })
+      return Promise.resolve({ data: {} })
+    })
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.contactsLoading).toBe(false))
+    await waitFor(() => expect(result.current.body).toContain('Piet Klaassen'))
+    act(() => { result.current.setRecipientContactId('ct2') })
+    await waitFor(() => expect(result.current.body).toContain('Marieke de Boer'))
+    expect(result.current.body).not.toContain('Piet Klaassen')
+  })
+
+  // DEFECT 2 regression: once the recruiter has typed their own words, a later
+  // recipient switch must never clobber them.
+  it('does not overwrite a manual edit when the recipient is switched afterward', async () => {
+    settingsFixture = { application_proposal: JSON.stringify({ body_template: 'Beste {contact}' }) }
+    apiGet.mockImplementation((url: string) => {
+      if (url.startsWith('/customers/')) return Promise.resolve({ data: { contacts: [
+        { id: 'ct1', name: 'Piet Klaassen', email: 'piet@zorggroep.nl' },
+        { id: 'ct2', name: 'Marieke de Boer', email: 'marieke@zorggroep.nl' },
+      ] } })
+      if (url.startsWith('/candidates/')) return Promise.resolve({ data: { id: 'c1', name: 'Jan de Vries' } })
+      return Promise.resolve({ data: {} })
+    })
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.contactsLoading).toBe(false))
+    await waitFor(() => expect(result.current.body).toContain('Piet Klaassen'))
+    act(() => { result.current.setBody('My own custom message') })
+    act(() => { result.current.setRecipientContactId('ct2') })
+    expect(result.current.body).toBe('My own custom message')
+  })
+
+  // DEFECT 2 decision: with no recipient at all, the fill is skipped entirely —
+  // a bare "Beste ," greeting is worse than a still-empty field, and submit()
+  // stays disabled ('noContact') so nothing is lost by leaving it blank.
+  it('leaves subject/body empty rather than a half-filled greeting when there is no recipient yet', async () => {
+    apiGet.mockImplementation((url: string) => {
+      if (url.startsWith('/customers/')) return Promise.resolve({ data: { contacts: [] } })
+      if (url.startsWith('/candidates/')) return Promise.resolve({ data: { id: 'c1', name: 'Jan de Vries' } })
+      return Promise.resolve({ data: {} })
+    })
+    const noContact = app({ contact: null } as Partial<ApplicationDetail>)
+    const { result } = renderHook(() => useProposeForm(noContact), { wrapper })
+    await waitFor(() => expect(result.current.contactsLoading).toBe(false))
+    expect(result.current.disabledReason).toBe('noContact')
+    expect(result.current.subject).toBe('')
+    expect(result.current.body).toBe('')
+  })
+
   it('does not PATCH the phase when application_proposal.sets_phase is off', async () => {
     settingsFixture = { application_proposal: JSON.stringify({ sets_phase: false }) }
     const { result } = renderHook(() => useProposeForm(app()), { wrapper })
@@ -155,7 +213,10 @@ describe('useProposeForm', () => {
     expect(lastBody()).toContain('Mijn motivatie')
   })
 
-  it('surfaces an error and does not claim success when the /propose POST fails', async () => {
+  // DEFECT 3 regression: the CV is recorded BEFORE it is generated/downloaded —
+  // on a rejected /propose (403/422), buildProposalCvBlob must never run, so no
+  // special-category PDF leaves the browser while Koios has no record of it.
+  it('surfaces an error, does not claim success, and never builds the CV when the /propose POST fails', async () => {
     apiPost.mockRejectedValueOnce(new Error('network'))
     const { result } = renderHook(() => useProposeForm(app()), { wrapper })
     await waitFor(() => expect(result.current.candidateLoading).toBe(false))
@@ -166,6 +227,7 @@ describe('useProposeForm', () => {
     expect(ok).toBe(false)
     expect(notifyError).toHaveBeenCalled()
     expect(notifySuccess).not.toHaveBeenCalled()
+    expect(buildProposalCvBlob).not.toHaveBeenCalled()
   })
 
   it('disables submit until a contact is present and consent is ticked', async () => {

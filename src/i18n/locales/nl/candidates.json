@@ -931,6 +931,7 @@
     "branchMismatchDesc": "Kandidaat-vestiging ({{candidate}}) wijkt af van de klant-vestiging ({{customer}}).",
     "branchKeep": "Nee — alleen deze match bij deze vestiging",
     "branchMove": "Ja — zet ook de kandidaat over naar deze vestiging",
+    "branchMoveFailed": "Match aangemaakt, maar het overzetten van de kandidaat-vestiging is mislukt. Werk dit handmatig bij.",
     "rateProposal": {
       "agreement": "Voorstel (prijsafspraak): {{purchase}} inkoop / {{sell}} verkoop",
       "conversionFactor": "Voorstel (omrekenfactor): {{purchase}} inkoop / {{sell}} verkoop",

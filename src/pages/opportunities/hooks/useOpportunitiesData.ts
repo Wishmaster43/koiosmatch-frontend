@@ -21,6 +21,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import { useUsers } from '@/lib/queries'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
 import { mapOpportunity } from '../data/mapOpportunity'
@@ -110,12 +111,24 @@ export function useOpportunitiesData(includeArchived: boolean = false) {
   // A freshly created opportunity: prepend + open its drawer (modal close is the page's).
   const handleCreated = (o: Opportunity) => { setRows(prev => [o, ...prev]); selectOpportunity(o) }
 
-  // Board drag-and-drop: move to a new stage optimistically, then PATCH.
+  // Board drag-and-drop: move to a new stage optimistically, then PATCH. Bug class
+  // fix: this used to `.catch(() => notifyError(...))` with no revert, so a rejected
+  // move (e.g. a backend stage-transition guard) left the card sitting in the new
+  // column as if the server had accepted it. Snapshot ONLY the stage fields the
+  // optimistic write is about to overwrite and put them back on failure, mirroring
+  // useApplicationDrawerActions.handleMove.
   const handleMove = (id: Id, stageValue: string | number) => {
     const m = stageMeta(String(stageValue))
+    const before = rows.find(r => r.id === id)
+    const beforeStage = before ? { stage: before.stage, stageValue: before.stageValue, stageColor: before.stageColor } : undefined
     setRows(prev => prev.map(r => r.id === id ? ({ ...r, stage: m.label, stageValue, stageColor: m.color } as Opportunity) : r))
     const s = stages.find(x => x.value === stageValue)
-    if (s?.id) api.patch(`/opportunities/${id}`, { opportunity_stage_id: s.id }).catch(() => notifyError(t('common:actionFailed')))
+    if (s?.id) {
+      api.patch(`/opportunities/${id}`, { opportunity_stage_id: s.id }).catch(err => {
+        if (beforeStage) setRows(prev => prev.map(r => r.id === id ? ({ ...r, ...beforeStage } as Opportunity) : r))
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
+    }
   }
 
   // Header/picker edits: optimistic locally, then PATCH (UI keys → API keys).

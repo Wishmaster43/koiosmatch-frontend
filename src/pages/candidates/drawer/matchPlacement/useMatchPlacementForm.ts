@@ -305,9 +305,16 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, editMatch
       // The frontend must NOT post one anymore (the old interim bridge is removed).
 
       // Mismatch resolution: recruiter chose to move the candidate's branch along.
-      // Best-effort AFTER the placement (its failure must not lose the match).
+      // Best-effort AFTER the placement — its failure must NOT roll back or lose
+      // the match that was just created, so this stays a separate, non-fatal call.
+      // BUG CLASS FIX: it used to end in `.catch(() => {})` — a fully silent
+      // best-effort write, so the recruiter believed the branch moved when it
+      // hadn't. It still doesn't throw (the match creation above already
+      // succeeded and must be reported as such), but it now tells the user with
+      // its own specific message instead of saying nothing.
       if (branchMismatch && mismatchChoice === 'candidate' && detail?.branch_id) {
-        await api.patch(`/candidates/${candidateId}`, { location_id: detail.branch_id }).catch(() => {})
+        await api.patch(`/candidates/${candidateId}`, { location_id: detail.branch_id })
+          .catch(() => notifyError(t('placement.branchMoveFailed')))
       }
       notifySuccess(t(editing ? 'placement.updated' : 'placement.created'))
       onCreated(); onClose()

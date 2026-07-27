@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import VacancyTab from './VacancyTab'
@@ -40,8 +40,11 @@ vi.mock('@/pages/vacancies/drawer/DescriptionTab', () => ({
   default: () => <div>description-tab</div>,
 }))
 vi.mock('@/context/VacancyLookupsContext', () => ({ VacancyLookupsProvider: ({ children }: { children: ReactNode }) => <>{children}</> }))
+// OPTIMISTIC-REVERT-1: mock notify so a failed save's error toast is assertable.
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
 
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 const mockPatch = api.patch as unknown as ReturnType<typeof vi.fn>
 
@@ -54,7 +57,10 @@ describe('VacancyTab', () => {
   // returned from beforeEach as a cleanup hook and CALLED api.get() with no args after
   // every test, producing an unhandled 'boom' rejection that deadlocked the runner.
   // Braces (statement body, no implicit return) are load-bearing here.
-  beforeEach(() => { mockGet.mockReset(); mockPatch.mockReset(); mockPatch.mockResolvedValue({ data: { data: {} } }) })
+  beforeEach(() => {
+    mockGet.mockReset(); mockPatch.mockReset(); mockPatch.mockResolvedValue({ data: { data: {} } })
+    ;(notifyError as ReturnType<typeof vi.fn>).mockClear()
+  })
 
   it('shows the empty state when no vacancy is linked', () => {
     renderTab(<VacancyTab application={app({ vacancyId: null })} />)
@@ -96,6 +102,22 @@ describe('VacancyTab', () => {
     renderTab(<VacancyTab application={app()} />)
     await user.click(await screen.findByText('save-skill'))
     expect(mockPatch).toHaveBeenCalledWith('/vacancies/7', { skills: ['Triage'] })
+  })
+
+  // OPTIMISTIC-REVERT-1 (audit 2026-07-27): a failed PATCH used to only toast, leaving
+  // the optimistically-merged "skills" value in the shared React Query cache as if the
+  // server had accepted it. This asserts the cache entry (the seam CompetitionBlock and
+  // this tab both read) is reverted and the server's own message is surfaced.
+  it('reverts the cached vacancy field and reports the server message when the PATCH FAILS', async () => {
+    mockGet.mockResolvedValue({ data: { data: { id: 7, title: 'Verpleegkundige', skills: [] } } })
+    mockPatch.mockRejectedValue({ response: { status: 422, data: { message: 'Skill niet toegestaan' } } })
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const user = userEvent.setup()
+    render(<QueryClientProvider client={qc}><VacancyTab application={app()} /></QueryClientProvider>)
+    await user.click(await screen.findByText('save-skill'))
+    await waitFor(() => expect(notifyError).toHaveBeenCalled())
+    expect(qc.getQueryData(['vacancies', 7, 'detail'])).toMatchObject({ skills: [] })
+    expect(notifyError).toHaveBeenCalledWith('Skill niet toegestaan')
   })
 
   // S14/S22: clicking through to the full vacancy stashes 'vacancy' as the return

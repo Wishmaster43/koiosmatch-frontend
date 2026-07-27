@@ -931,6 +931,7 @@
     "branchMismatchDesc": "La sede del candidato ({{candidate}}) difiere de la del cliente ({{customer}}).",
     "branchKeep": "No — solo este match en esta sede",
     "branchMove": "Sí — trasladar también al candidato a esta sede",
+    "branchMoveFailed": "Match creado, pero el traslado de la sede del candidato ha fallado. Actualícelo manualmente.",
     "rateProposal": {
       "agreement": "Propuesta (acuerdo de tarifa): {{purchase}} compra / {{sell}} venta",
       "conversionFactor": "Propuesta (factor de conversión): {{purchase}} compra / {{sell}} venta",

@@ -236,10 +236,30 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // Header/profile edits in the drawer flow back here: optimistic locally, then PATCH.
   // `patch` is a dynamic UI edit (UI field names, some outside Candidate) → cast on merge.
   const updateCandidate = (id: Id, patch: Record<string, unknown>) => {
+    // OPTIMISTIC-REVERT-1 (audit 2026-07-27): snapshot ONLY the keys this patch
+    // overwrites, in every slice that shows them, so a refused PATCH puts the old
+    // values back instead of leaving a rejected edit on screen until the drawer is
+    // reopened. Never the whole record — a parallel edit to another field must survive.
+    const keys = Object.keys(patch)
+    const pick = (c: Candidate | null | undefined) => {
+      if (!c) return null
+      const snap: Record<string, unknown> = {}
+      keys.forEach(k => { snap[k] = (c as unknown as Record<string, unknown>)[k] })
+      return snap
+    }
+    const beforeRow = pick(candidates.find(x => x.id === id))
+    const beforeSelected = selected?.id === id ? pick(selected) : null
+    const beforeDetail = detail?.id === id ? pick(detail) : null
+
     setCandidates(prev => prev.map(x => x.id === id ? { ...x, ...patch } as Candidate : x))
     setSelected(prev => (prev && prev.id === id ? { ...prev, ...patch } as Candidate : prev))
     setDetail(prev  => (prev && prev.id === id ? { ...prev, ...patch } as Candidate : prev))
-    patchCandidate(id, patch)
+
+    patchCandidate(id, patch, () => {
+      if (beforeRow) setCandidates(prev => prev.map(x => x.id === id ? { ...x, ...beforeRow } as Candidate : x))
+      if (beforeSelected) setSelected(prev => (prev && prev.id === id ? { ...prev, ...beforeSelected } as Candidate : prev))
+      if (beforeDetail) setDetail(prev => (prev && prev.id === id ? { ...prev, ...beforeDetail } as Candidate : prev))
+    })
   }
 
   // ── Bulk actions ──

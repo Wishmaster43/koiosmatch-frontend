@@ -931,6 +931,7 @@
     "branchMismatchDesc": "L'agence du candidat ({{candidate}}) diffère de celle du client ({{customer}}).",
     "branchKeep": "Non — uniquement ce match dans cette agence",
     "branchMove": "Oui — transférer aussi le candidat vers cette agence",
+    "branchMoveFailed": "Match créé, mais le transfert de l'agence du candidat a échoué. Mettez-le à jour manuellement.",
     "rateProposal": {
       "agreement": "Suggestion (accord tarifaire) : {{purchase}} achat / {{sell}} vente",
       "conversionFactor": "Suggestion (facteur de conversion) : {{purchase}} achat / {{sell}} vente",

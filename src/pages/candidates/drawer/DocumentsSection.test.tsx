@@ -5,10 +5,11 @@
  * its own POST with its own `type`, not just that a callback fired.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, within } from '@testing-library/react'
+import { render, screen, fireEvent, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import DocumentsSection from './DocumentsSection'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import type { Candidate } from '@/types/candidate'
 
 // The multipart POST + its response envelope — id present so the optimistic row reconciles.
@@ -20,6 +21,9 @@ vi.mock('@/lib/api', () => ({
   },
   unwrap: (r: { data?: { data?: unknown } }) => r?.data?.data,
 }))
+// Mocked so the revert-on-failure tests below can assert the exact server
+// message surfaced, instead of the real window-event toast.
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
 // A fixed 2-type tenant lookup — the real hook's fetch/cache plumbing is irrelevant
 // here. Keeps the real resolveDocTypeIcon/DOC_TYPE_ICON_MAP (importOriginal) since
 // DocumentsSection renders the row tile through it — only the hook itself is stubbed.
@@ -224,5 +228,82 @@ describe('DocumentsSection · bulk delete', () => {
     expect(api.delete).toHaveBeenCalledWith('/candidates/c1/documents/uuid-b')
     expect(screen.queryByText('a.pdf')).not.toBeInTheDocument()
     expect(screen.queryByText('b.pdf')).not.toBeInTheDocument()
+  })
+})
+
+/**
+ * BUG CLASS FIX regression coverage (this audit wave): a failed rename PATCH
+ * used to only toast while the new name stayed in the list forever — the user
+ * believes the rename saved until a reload brings the old name back. Asserts
+ * the SEAM (§13): the request still fires, but a REJECTED request puts the
+ * exact old name back, and a resolved one keeps the new one.
+ */
+describe('DocumentsSection · rename reverts the name on a FAILED PATCH', () => {
+  const uuidDoc = { id: 'a1b2c3d4-uuid', name: 'cv.pdf', type: 'CV', size: '44 KB', url: '/api/candidates/c1/documents/a1b2c3d4-uuid/download' }
+  const withDoc = (): Candidate => ({ id: 'c1', documents: [uuidDoc] } as unknown as Candidate)
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal('URL', { createObjectURL: vi.fn(), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('keeps the new name once the PATCH resolves', async () => {
+    const user = userEvent.setup()
+    render(<DocumentsSection c={withDoc()} />)
+    await user.click(screen.getByRole('button', { name: 'common:edit' }))
+    const input = screen.getByDisplayValue('cv')
+    await user.clear(input)
+    await user.type(input, 'cv-nieuw{Enter}')
+    await waitFor(() => expect(api.patch).toHaveBeenCalled())
+    expect(screen.getByText('cv-nieuw.pdf')).toBeInTheDocument()
+    expect(notifyError).not.toHaveBeenCalled()
+  })
+
+  it('puts the OLD name back when the PATCH is REJECTED, and surfaces the server message', async () => {
+    vi.mocked(api.patch).mockRejectedValueOnce({ response: { data: { message: 'Naam bestaat al' } } })
+    const user = userEvent.setup()
+    render(<DocumentsSection c={withDoc()} />)
+    await user.click(screen.getByRole('button', { name: 'common:edit' }))
+    const input = screen.getByDisplayValue('cv')
+    await user.clear(input)
+    await user.type(input, 'cv-nieuw{Enter}')
+    // The rejected PATCH reverts the optimistic name — never leave the unsaved
+    // name showing (the mocked rejection can already settle by the time
+    // user.type resolves, so this only asserts the settled end state).
+    await waitFor(() => expect(screen.getByText('cv.pdf')).toBeInTheDocument())
+    expect(screen.queryByText('cv-nieuw.pdf')).not.toBeInTheDocument()
+    expect(notifyError).toHaveBeenCalledWith('Naam bestaat al')
+  })
+})
+
+/**
+ * BUG CLASS FIX regression coverage (this audit wave): a failed delete used to
+ * only toast while the row stayed gone — the user believes the document was
+ * removed. Asserts the SEAM (§13): the request still fires, but a REJECTED
+ * request puts the row back.
+ */
+describe('DocumentsSection · delete puts the row back on a FAILED request', () => {
+  const uuidDoc = { id: 'a1b2c3d4-uuid', name: 'cv.pdf', type: 'CV', size: '44 KB', url: '/api/candidates/c1/documents/a1b2c3d4-uuid/download' }
+  const withDoc = (): Candidate => ({ id: 'c1', documents: [uuidDoc] } as unknown as Candidate)
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal('URL', { createObjectURL: vi.fn(), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('puts the row back when the DELETE is REJECTED, and surfaces the server message', async () => {
+    vi.mocked(api.delete).mockRejectedValueOnce({ response: { data: { message: 'Verwijderen mislukt' } } })
+    const user = userEvent.setup()
+    render(<DocumentsSection c={withDoc()} />)
+    await user.click(screen.getByRole('button', { name: 'common:remove' }))
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: 'common:remove' }))
+    // The rejected DELETE puts the row back — never leave it looking gone (the
+    // mocked rejection can already settle by the time the click resolves, so
+    // this only asserts the settled end state).
+    await waitFor(() => expect(screen.getByText('cv.pdf')).toBeInTheDocument())
+    expect(notifyError).toHaveBeenCalledWith('Verwijderen mislukt')
   })
 })

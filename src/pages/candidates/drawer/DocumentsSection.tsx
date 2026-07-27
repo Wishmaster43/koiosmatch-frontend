@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Search, X, Pencil, Eye, Download, Trash2 } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import { sectionBlock } from './constants'
 import { useDocumentTypes, resolveDocTypeIcon } from '@/lib/useDocumentTypes'
 import { useDateFormat } from '@/lib/datetime'
@@ -107,7 +108,14 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
       fd.append('file', p.file); fd.append('type', p.type); fd.append('name', p.name)
       api.post(`/candidates/${c.id}/documents`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
         .then(r => { const it = unwrap<DocItem>(r); if (it?.id) setDocs(d => d.map(x => x.id === tmpId ? { ...optimistic, ...it } : x)) })
-        .catch(() => notifyError(t('common:actionFailed')))
+        // OPTIMISTIC-REVERT-1: a refused upload (too large, wrong type, permission)
+        // must not leave a row claiming the file is stored — drop the optimistic row
+        // again and surface the server's own reason, which is what tells the recruiter
+        // what to fix.
+        .catch(err => {
+          setDocs(d => d.filter(x => x.id !== tmpId))
+          notifyError(extractApiError(err, t('common:actionFailed')))
+        })
     })
   }
   // Set one item's doc type (its own select) without touching the others.
@@ -124,28 +132,59 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
   const cancelPending = () => { pending.forEach(p => URL.revokeObjectURL(p.objectUrl)); setPending([]) }
 
   // Rename / delete persist once the row has a real (server, non-temp) id.
+  // BUG CLASS FIX: a failed rename PATCH used to only toast while the new name
+  // stayed in state forever — the user believes it saved until a reload brings
+  // the old name back. Snapshot ONLY the `name` field being overwritten (matched
+  // by id, since the row's index can shift under concurrent edits) and put it
+  // back on failure.
   const rename = (i: number, base: string) => {
-    const id = docs[i]?.id
+    const doc = docs[i]
+    const id = doc?.id
+    const previousName = doc?.name
     // Re-append the original extension — only the name part is editable.
-    const cur = String(docs[i]?.name ?? docs[i]?.file_name ?? '')
+    const cur = String(doc?.name ?? doc?.file_name ?? '')
     const name = base.trim() + splitExt(cur).ext
-    setDocs(docs.map((x, j) => j === i ? { ...x, name } : x)); setRenamingDoc(null)
-    if (isPersisted(id)) api.patch(`/candidates/${c.id}/documents/${id}`, { name }).catch(() => notifyError(t('common:actionFailed')))
+    setDocs(prev => prev.map((x, j) => j === i ? { ...x, name } : x)); setRenamingDoc(null)
+    if (isPersisted(id)) {
+      api.patch(`/candidates/${c.id}/documents/${id}`, { name }).catch(err => {
+        setDocs(prev => prev.map(x => x.id === id ? { ...x, name: previousName } : x))
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
+    }
   }
+  // BUG CLASS FIX: a failed delete used to only toast while the row stayed gone —
+  // the user believes the document was removed. Snapshot the removed row (+ its
+  // index) and re-insert it on failure, matched by id so a concurrent delete of
+  // another row never re-adds the wrong one.
   const removeDoc = (i: number) => {
-    const id = docs[i]?.id
+    const doc = docs[i]
+    const id = doc?.id
     // Prune the removed row's selection key too, so a stale key never lingers.
-    setSelected(prev => { const next = new Set(prev); next.delete(docKey(docs[i], i)); return next })
-    setDocs(docs.filter((_, j) => j !== i))
-    if (isPersisted(id)) api.delete(`/candidates/${c.id}/documents/${id}`).catch(() => notifyError(t('common:actionFailed')))
+    setSelected(prev => { const next = new Set(prev); next.delete(docKey(doc, i)); return next })
+    setDocs(prev => prev.filter((_, j) => j !== i))
+    if (isPersisted(id)) {
+      api.delete(`/candidates/${c.id}/documents/${id}`).catch(err => {
+        setDocs(prev => (prev.some(x => x.id === id) ? prev : [...prev.slice(0, i), doc, ...prev.slice(i)]))
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
+    }
   }
   // Bulk-delete every selected, persisted doc: resolve the rows by key FIRST (before
   // any state mutation), one DELETE per persisted id, then drop them all in one filter.
   const removeSelected = () => {
     const toRemove = docs.map((d, i) => ({ d, key: docKey(d, i) })).filter(({ key }) => selected.has(key))
-    toRemove.forEach(({ d }) => { if (isPersisted(d.id)) api.delete(`/candidates/${c.id}/documents/${d.id}`).catch(() => notifyError(t('common:actionFailed'))) })
     setDocs(prev => prev.filter((d, i) => !selected.has(docKey(d, i))))
     setSelected(new Set())
+    // OPTIMISTIC-REVERT-1: each row that the server refuses to delete comes BACK,
+    // instead of the recruiter watching files disappear that still exist on the
+    // server. Per-row, so one refusal never resurrects the ones that did delete.
+    toRemove.forEach(({ d }) => {
+      if (!isPersisted(d.id)) return
+      api.delete(`/candidates/${c.id}/documents/${d.id}`).catch(err => {
+        setDocs(prev => (prev.some(x => x.id === d.id) ? prev : [d, ...prev]))
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
+    })
   }
   // Runs the staged single/bulk delete once the destructive confirm is accepted.
   const confirmDeleteAction = () => {

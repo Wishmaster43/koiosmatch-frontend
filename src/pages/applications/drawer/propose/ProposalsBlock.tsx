@@ -50,21 +50,27 @@ export default function ProposalsBlock({ application }: ProposalsBlockProps) {
               {p.recipient_email && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{p.recipient_email}</div>}
             </div>
             <SoftChip label={p.cv_variant === 'full' ? t('propose.variantChipFull') : t('propose.variantChipProposal')} color="var(--color-primary)" />
+            {/* DEFECT 1 (PROPOSE-SHARE-URL-1): the date line reports when the
+                proposal was RECORDED, not sent — Koios sends nothing itself yet. */}
             <div style={{ fontSize: 11, color: 'var(--text-muted)', minWidth: 90 }}>
               {p.sent_at ? t('propose.sentOn', { date: formatDate(p.sent_at) }) : '—'}
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', flex: '1 1 160px' }}>
-              {p.revoked_at ? (
-                <span>{t('propose.revoked', { date: formatDate(p.revoked_at) })}</span>
-              ) : p.opened_at ? (
-                <span>
-                  {t('propose.openedOn', { date: formatDate(p.opened_at) })}
-                  {p.open_count > 1 && ` · ${t('propose.openCount', { count: p.open_count })}`}
-                </span>
-              ) : (
-                <span>{t('propose.notOpenedYet')}</span>
-              )}
-            </div>
+            {/* Open-state line only when the backend actually recorded a revoke or
+                an open. There is no shareable link yet, so opened_at can never
+                become non-null in practice — never render a "not opened yet"
+                claim for a channel that structurally measures nothing. */}
+            {(p.revoked_at || p.opened_at) && (
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', flex: '1 1 160px' }}>
+                {p.revoked_at ? (
+                  <span>{t('propose.revoked', { date: formatDate(p.revoked_at) })}</span>
+                ) : p.opened_at ? (
+                  <span>
+                    {t('propose.openedOn', { date: formatDate(p.opened_at) })}
+                    {p.open_count > 1 && ` · ${t('propose.openCount', { count: p.open_count })}`}
+                  </span>
+                ) : null}
+              </div>
+            )}
             {!p.revoked_at && p.is_valid && (
               <button onClick={() => handleRevoke(p.id)} disabled={revoking} aria-label={t('propose.revoke')}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 4, height: 26, padding: '0 8px', fontSize: 11,

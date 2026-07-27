@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import { mapCandidate } from '../data/mapCandidate'
 import { buildCandidatePatch } from '../data/candidatesShared'
 import type { Candidate } from '@/types/candidate'
@@ -47,11 +48,20 @@ export function useCandidateRecord() {
     }
   }
 
-  // Persist a UI patch (mapped to the API body); notifyError on failure (ERR-1).
-  const patchCandidate = (id: Id, patch: Record<string, unknown>) => {
+  // Persist a UI patch (mapped to the API body). BUG CLASS FIX: this used to only
+  // toast on failure, leaving every optimistic caller (list row + open drawer) stuck
+  // showing a value the server rejected until the drawer was reopened. The caller
+  // owns the list/selected/detail state (CandidatesPage/useCandidateDrawerActions),
+  // so it — not this hook — knows what to put back; `revert` is an optional callback
+  // the caller supplies to restore its own snapshot of the overwritten fields. Kept
+  // optional so this stays a drop-in replacement for callers that don't pass one yet.
+  const patchCandidate = (id: Id, patch: Record<string, unknown>, revert?: () => void) => {
     const body = buildCandidatePatch(patch)
     if (Object.keys(body).length) {
-      api.patch(`/candidates/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
+      api.patch(`/candidates/${id}`, body).catch(err => {
+        revert?.()
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
     }
   }
 

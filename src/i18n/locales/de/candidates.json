@@ -931,6 +931,7 @@
     "branchMismatchDesc": "Die Niederlassung des Kandidaten ({{candidate}}) weicht von der des Kunden ({{customer}}) ab.",
     "branchKeep": "Nein — nur dieser Match bei dieser Niederlassung",
     "branchMove": "Ja — Kandidat ebenfalls zu dieser Niederlassung verschieben",
+    "branchMoveFailed": "Match erstellt, aber das Verschieben der Kandidaten-Niederlassung ist fehlgeschlagen. Bitte manuell aktualisieren.",
     "rateProposal": {
       "agreement": "Vorschlag (Preisvereinbarung): {{purchase}} Einkauf / {{sell}} Verkauf",
       "conversionFactor": "Vorschlag (Umrechnungsfaktor): {{purchase}} Einkauf / {{sell}} Verkauf",

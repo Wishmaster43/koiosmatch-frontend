@@ -13,6 +13,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import { mapCustomer } from '../data/mapCustomer'
 import type { Customer, ApiCustomer } from '@/types/customer'
 import type { Id } from '@/types/common'
@@ -61,18 +62,49 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
     setSelected(c); setDetail(null); setDrawerExpanded(false)
     api.get(`/customers/${c.id}`)
       .then(r => { if (selectedIdRef.current === c.id) setDetail(mapCustomer(unwrap(r))) })
-      .catch(() => {})
+      .catch(err => {
+        // Bug class fix: this was a completely empty catch — the worst variant, the
+        // drawer sat stuck on the light row forever with NO signal the detail load
+        // failed (mirrors the identical fix already shipped in useTaskDrawerActions).
+        if (selectedIdRef.current === c.id) notifyError(extractApiError(err, t('common:actionFailed')))
+      })
   }
 
   // Optimistic update of one customer (table + open drawer stay in sync), then PATCH.
   const updateCustomer = (id: Id | undefined, patch: Record<string, unknown>) => {
-    setCustomers(prev => prev.map(c => c.id === id ? ({ ...c, ...patch } as Customer) : c))
+    // Bug class fix: this used to `.catch(() => notifyError(...))` with no revert,
+    // so a rejected PATCH left the new value on screen in all three slices as if
+    // the server had saved it. Snapshot ONLY the fields this patch overwrites (never
+    // the whole record, so a parallel edit to another field survives a revert) from
+    // every slice the optimistic write below touches, then restore exactly those on failure.
+    const keys = Object.keys(patch)
+    const snapshot = (row: Record<string, unknown> | null | undefined): Record<string, unknown> | undefined => {
+      if (!row) return undefined
+      const snap: Record<string, unknown> = {}
+      keys.forEach(k => { snap[k] = row[k] })
+      return snap
+    }
+    let beforeCustomer: Record<string, unknown> | undefined
+    setCustomers(prev => prev.map(c => {
+      if (c.id !== id) return c
+      beforeCustomer = snapshot(c as unknown as Record<string, unknown>)
+      return { ...c, ...patch } as Customer
+    }))
+    const beforeSelected = snapshot(selected && selected.id === id ? (selected as unknown as Record<string, unknown>) : undefined)
+    const beforeDetail   = snapshot(detail   && detail.id === id   ? (detail   as unknown as Record<string, unknown>) : undefined)
     setSelected(prev => (prev && prev.id === id ? ({ ...prev, ...patch } as Customer) : prev))
     setDetail(prev   => (prev && prev.id === id ? ({ ...prev, ...patch } as Customer) : prev))
 
     const body: Record<string, unknown> = {}
     Object.keys(patch).forEach(k => { if (FIELD_MAP[k]) body[FIELD_MAP[k]] = patch[k] })
-    if (Object.keys(body).length) api.patch(`/customers/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
+    if (Object.keys(body).length) {
+      api.patch(`/customers/${id}`, body).catch(err => {
+        if (beforeCustomer) setCustomers(prev => prev.map(c => c.id === id ? ({ ...c, ...beforeCustomer } as Customer) : c))
+        if (beforeSelected) setSelected(prev => (prev && prev.id === id ? ({ ...prev, ...beforeSelected } as Customer) : prev))
+        if (beforeDetail)   setDetail(prev   => (prev && prev.id === id ? ({ ...prev, ...beforeDetail } as Customer) : prev))
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
+    }
   }
 
   // Create a customer: optimistic prepend, then POST + reconcile. Rethrows on
@@ -99,7 +131,17 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
   const addNote = (id: Id | undefined, payload: NotePayload) => {
     const note = { id: `tmp-${Date.now()}`, type: payload.type, title: payload.title, text: payload.body, ago: '' }
     setDetail(prev => (prev && prev.id === id ? ({ ...prev, notes: [note, ...(prev.notes ?? [])] } as Customer) : prev))
-    api.post(`/customers/${id}/notes`, { type: payload.type, title: payload.title, text: payload.body }).catch(() => notifyError(t('common:actionFailed')))
+    // OPTIMISTIC-REVERT-1: a failed note used to stay on screen with only a toast, so an
+    // account manager who believed it was recorded would never write it again. Drop the
+    // optimistic entry again (by reference, so notes added meanwhile survive) and surface
+    // the server's own message.
+    api.post(`/customers/${id}/notes`, { type: payload.type, title: payload.title, text: payload.body })
+      .catch(err => {
+        setDetail(prev => (prev && prev.id === id
+          ? ({ ...prev, notes: (prev.notes ?? []).filter(n => n !== note) } as Customer)
+          : prev))
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
   }
 
   return {
