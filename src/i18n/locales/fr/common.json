@@ -86,7 +86,7 @@
     "reports_flow": "Flux",
     "reports_recruiters": "Recruteurs",
     "reports_vacancies": "Postes",
-    "reports_matches": "Matches",
+    "reports_matches": "Matchs",
     "shiftmanager": "Shiftmanager",
     "shiftmanager_candidates": "Candidats-SM",
     "shiftmanager_customers": "Clients-SM",
@@ -112,7 +112,7 @@
     "modulesGroup": "Modules",
     "switchTenant": "Changer de locataire",
     "workflows": "Workflows",
-    "matches": "Matches",
+    "matches": "Matchs",
     "opportunities": "Opportunités",
     "tasks": "Tâches",
     "outreach": "Listes d'appels"

@@ -1,8 +1,8 @@
 {
-  "title": "Matches",
-  "loading": "Chargement des matches…",
+  "title": "Matchs",
+  "loading": "Chargement des matchs…",
   "empty": "Aucun match pour le moment.",
-  "error": "Impossible de charger les matches.",
+  "error": "Impossible de charger les matchs.",
   "cols": {
     "candidate": "Candidat",
     "vacancy": "Poste",
@@ -127,7 +127,7 @@
     "status": "Statut"
   },
   "view": {
-    "matches": "Matches",
+    "matches": "Matchs",
     "board": "Kanban",
     "archived": "Archivé"
   },

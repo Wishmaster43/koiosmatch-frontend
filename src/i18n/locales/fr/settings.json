@@ -50,7 +50,7 @@
     "shared": "Partagé",
     "whatsapp": "WhatsApp",
     "tasks": "Tâches",
-    "matches": "Correspondances",
+    "matches": "Matchs",
     "outreach": "Listes d'appels",
     "opportunities": "Opportunités",
     "custom_fields": "Champs personnalisés",
@@ -145,7 +145,7 @@
     "vacancy_candidate_tab": "Onglet Recherche de candidats",
     "match_templates": "Profils de matching",
     "task_statuses": "Statuts",
-    "matches": "Correspondances",
+    "matches": "Matchs",
     "outreach": "Listes d'appels",
     "match_statuses": "Statuts",
     "contract_types": "Types de contrat",
@@ -170,7 +170,7 @@
     "kpis_contacts": "Contacts",
     "kpis_tasks": "Tâches",
     "kpis_calllists": "Listes d'appels",
-    "kpis_matches": "Correspondances",
+    "kpis_matches": "Matchs",
     "email_log": "Journal e-mail",
     "whatsapp_log": "Journal des messages",
     "appointment_types": "Types de rendez-vous",
@@ -184,7 +184,7 @@
     "outreach_display": "Affichage du tableau",
     "cf_candidate": "Candidats",
     "cf_application": "Candidatures",
-    "cf_match": "Correspondances",
+    "cf_match": "Matchs",
     "cf_vacancy": "Postes",
     "cf_task": "Tâches",
     "cf_opportunity": "Opportunités",
@@ -195,7 +195,7 @@
     "cf_customer_contact": "Contacts",
     "nt_candidate": "Candidats",
     "nt_application": "Candidatures",
-    "nt_match": "Correspondances",
+    "nt_match": "Matchs",
     "nt_task": "Tâches",
     "nt_customer": "Clients",
     "nt_contact": "Contacts",
@@ -413,7 +413,7 @@
       "tasks_one": "{{count}} tâche",
       "tasks_other": "{{count}} tâches",
       "matches_one": "{{count}} match",
-      "matches_other": "{{count}} matches",
+      "matches_other": "{{count}} matchs",
       "appointments_one": "{{count}} rendez-vous",
       "appointments_other": "{{count}} rendez-vous"
     },
@@ -919,7 +919,7 @@
         "desc": "Aperçu des services du système de planning"
       },
       "shifts": {
-        "label": "Shifts",
+        "label": "Vacations",
         "desc": "Détails des shifts du système de planning"
       },
       "invites": {
@@ -1055,8 +1055,8 @@
       "enterprise": "+ REST API + Insights+ + Connectors + SLA"
     },
     "addon": {
-      "sm": "Reporting Shiftmanager",
-      "hf": "Reporting HelloFlex",
+      "sm": "Rapports Shiftmanager",
+      "hf": "Rapports HelloFlex",
       "sm_ai": "Shiftmanager AI Planner",
       "plan": "Planning"
     }
@@ -1129,7 +1129,7 @@
       "sync": "Synchronisation",
       "vacancies": "Postes",
       "applications": "Candidatures",
-      "matches": "Matches",
+      "matches": "Matchs",
       "opportunities": "Opportunités",
       "tasks": "Tâches",
       "outreach": "Listes d'appels",
@@ -1251,7 +1251,7 @@
       "vacancies": "Postes",
       "tasks": "Tâches",
       "opportunities": "Opportunités",
-      "matches": "Matches",
+      "matches": "Matchs",
       "customers": "Clients",
       "customer_locations": "Sites",
       "customer_departments": "Départements",
@@ -2195,7 +2195,7 @@
     "namePlaceholder": "Ex. Intro standard",
     "kindLabel": "Type",
     "kind": {
-      "intro": "Intro",
+      "intro": "Introduction",
       "cta": "Appel à l'action",
       "legal": "Mentions légales"
     },

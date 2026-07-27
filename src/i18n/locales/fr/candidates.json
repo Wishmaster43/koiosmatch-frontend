@@ -515,7 +515,7 @@
     "planningInfo": "Informations de planification",
     "planningNote": "Note pour les planificateurs…",
     "globalFunction": "Fonction globale",
-    "pools": "Pools",
+    "pools": "Viviers",
     "shiftPref": "Préférence de type de vacation",
     "licenses": "Permis de conduire",
     "addLicense": "Ajouter un permis",
@@ -774,7 +774,7 @@
     "searchPlaceholder": "Champ, valeur ou qui…"
   },
   "matchesView": {
-    "title": "Matches",
+    "title": "Matchs",
     "empty": "Aucun match.",
     "client": "Client",
     "contractType": "Type de contrat",
@@ -806,7 +806,7 @@
   "cellLinks": {
     "notes": "Ouvrir les notes",
     "conversations": "Ouvrir les conversations",
-    "matches": "Ouvrir les matches",
+    "matches": "Ouvrir les matchs",
     "applications": "Ouvrir les candidatures",
     "pools": "Ouvrir les viviers de talents",
     "preferences": "Ouvrir les préférences"
