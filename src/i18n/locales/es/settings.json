@@ -1013,7 +1013,7 @@
     "enable": "Activar",
     "superadminOnly": "Solo un superadministrador de la plataforma puede activar o desactivar conectores (contacte con Koios).",
     "tabPlanning": "Planificación",
-    "tabBackoffice": "Back office",
+    "tabBackoffice": "Backoffice",
     "tabKoiosAi": "Koios AI",
     "comingSoon": "Próximamente",
     "tabTelefonie": "Telefonía"
@@ -1055,8 +1055,8 @@
       "enterprise": "+ REST API + Insights+ + Connectors + SLA"
     },
     "addon": {
-      "sm": "Reporting Shiftmanager",
-      "hf": "Reporting HelloFlex",
+      "sm": "Informes Shiftmanager",
+      "hf": "Informes HelloFlex",
       "sm_ai": "Shiftmanager AI Planner",
       "plan": "Planificación"
     }
@@ -2156,7 +2156,7 @@
     "matcherEmpty": "No hay opciones disponibles.",
     "contentTitle": "Plantilla y voz de marca",
     "templateLabel": "Plantilla",
-    "templateHint": "Usa dobles llaves para las partes de texto que el generador completará después, p. ej. {{function}} o {{location}}.",
+    "templateHint": "Usa dobles llaves para las partes de texto que el generador completará después, p. ej. {{función}} o {{ubicación}}.",
     "toneLabel": "Tono",
     "tone": {
       "neutral": "Neutral",
