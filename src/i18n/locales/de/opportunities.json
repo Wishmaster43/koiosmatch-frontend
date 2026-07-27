@@ -1,17 +1,17 @@
 {
-  "title": "Opportunities",
-  "loading": "Opportunities werden geladen…",
-  "empty": "Noch keine Opportunities.",
-  "error": "Opportunities konnten nicht geladen werden.",
+  "title": "Chancen",
+  "loading": "Chancen werden geladen…",
+  "empty": "Noch keine Chancen.",
+  "error": "Chancen konnten nicht geladen werden.",
   "pickClientFirst": "Zuerst einen Kunden wählen",
   "page": {
-    "add": "Opportunity hinzufügen",
+    "add": "Chance hinzufügen",
     "selected": "{{count}} ausgewählt",
     "clearSelection": "Auswahl aufheben",
     "searchPlaceholder": "Chancen suchen"
   },
   "cols": {
-    "title": "Opportunity",
+    "title": "Chance",
     "client": "Kunde",
     "stage": "Phase",
     "value": "Wert",
@@ -27,7 +27,7 @@
     "client": "Kunde"
   },
   "kpi": {
-    "total": "Opportunities",
+    "total": "Chancen",
     "pipeline": "Pipeline-Wert (€)",
     "avg": "Ø Wert (€)",
     "open": "Offen",
@@ -38,7 +38,7 @@
     "winRate": "Gewinnrate (%)"
   },
   "drawer": {
-    "entityLabel": "Opportunity",
+    "entityLabel": "Chance",
     "stage": "Phase",
     "owner": "Inhaber",
     "client": "Kunde",
@@ -47,15 +47,15 @@
     "selectClient": "Kunde wählen",
     "createdAt": "Erstellt am {{date}}",
     "archive": "Archivieren",
-    "archiveConfirm": "Diese Opportunity archivieren? Du kannst sie danach wiederherstellen.",
-    "archived": "Opportunity archiviert.",
-    "archiveFailed": "Opportunity konnte nicht archiviert werden.",
+    "archiveConfirm": "Diese Chance archivieren? Sie können sie danach wiederherstellen.",
+    "archived": "Chance archiviert.",
+    "archiveFailed": "Chance konnte nicht archiviert werden.",
     "archivedBanner": {
       "since": "Archiviert seit {{date}}",
       "flag": "Archiviert",
       "restore": "Wiederherstellen",
-      "restored": "Opportunity wiederhergestellt.",
-      "restoreFailed": "Opportunity konnte nicht wiederhergestellt werden."
+      "restored": "Chance wiederhergestellt.",
+      "restoreFailed": "Chance konnte nicht wiederhergestellt werden."
     },
     "tabs": {
       "details": "Details",
@@ -99,8 +99,8 @@
     "openCustomer": "Kunde öffnen"
   },
   "modal": {
-    "title": "Neue Opportunity",
-    "editTitle": "Opportunity bearbeiten",
+    "title": "Neue Chance",
+    "editTitle": "Chance bearbeiten",
     "titlePlaceholder": "Z. B. 5 Pflegekräfte — Zorggroep Noord",
     "required": "Titel ist erforderlich",
     "create": "Erstellen",

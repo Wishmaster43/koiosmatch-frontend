@@ -17,7 +17,7 @@ import type { BulkMutateArgs } from './useCandidateBulkActions'
 // AXIS-MATRIX-2 N2 — POST /action-rules/preflight-bulk's response shape (mirrors
 // ActionRuleBulkPreflight::evaluate() verbatim, koiosmatch-api read-only per this
 // task's file boundary). `breakdown` only ever carries warn/block groups (an
-// allow cell never dialogs, docs/AXIS-MATRIX.md's own rule).
+// allow cell never dialogs, docs/contract/AXIS-MATRIX.md's own rule).
 interface BulkPreflightGroup { condition: string; popup_code: string | null; effect: 'warn' | 'block'; count: number; sample_names: string[] }
 interface BulkPreflightResult { total: number; allowed: number; warned: number; blocked: number; not_found: number; breakdown: BulkPreflightGroup[] }
 
@@ -92,7 +92,7 @@ export function useCandidateStageBulk({
     })
   }
 
-  // AXIS-MATRIX-2 N2 (docs/AXIS-MATRIX.md "Niet-interactieve contexten"): one
+  // AXIS-MATRIX-2 N2 (docs/contract/AXIS-MATRIX.md "Niet-interactieve contexten"): one
   // summary preflight BEFORE a guarded bulk mutation runs, so a recruiter sees
   // "{n} of {m} will be skipped" up front instead of only in the after-the-fact
   // partial-result toast. Of every candidate bulk mutation, `candidate.status_set`

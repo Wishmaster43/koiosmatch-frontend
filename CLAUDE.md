@@ -236,7 +236,7 @@ meaning (status/stage), never as decoration; hierarchy via typography and whites
 not borders. Always handle the four UI states (loading/error/empty/success).
 
 **The action/state matrix is binding (Danny 2026-07-14).**
-`koiosmatch-api/docs/AXIS-MATRIX.md` is the system-wide rulebook: allowed state
+`koiosmatch-api/docs/contract/AXIS-MATRIX.md` is the system-wide rulebook: allowed state
 combinations, action × state levels (allow/warn/block + which popup P1–P10),
 non-interactive rules (workflows/bulk/seeder) and the automations catalogue.
 **READ IT before building or changing any create/transition flow** (solliciteren,

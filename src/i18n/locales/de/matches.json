@@ -33,10 +33,10 @@
     "label": "Match",
     "createdAt": "Erstellt am {{date}}",
     "archive": "Archivieren",
-    "archiveConfirm": "Diesen Match archivieren? Du kannst ihn danach wiederherstellen.",
+    "archiveConfirm": "Diesen Match archivieren? Sie können ihn danach wiederherstellen.",
     "archived": "Match archiviert.",
     "archiveFailed": "Match konnte nicht archiviert werden.",
-    "archiveBlockedActiveContract": "Diese Platzierung hat einen aktiven Vertrag — beende ihn zuerst.",
+    "archiveBlockedActiveContract": "Diese Platzierung hat einen aktiven Vertrag — beenden Sie ihn zuerst.",
     "archivedBanner": {
       "since": "Archiviert seit {{date}}",
       "flag": "Archiviert",
@@ -119,7 +119,7 @@
     },
     "coupleQueued": "{{count}} Match(es) zur Kopplung mit {{target}} eingereiht.",
     "coupleUnavailable": "Backoffice-Kopplung ist noch nicht verfügbar.",
-    "noPermission": "Du hast keine Berechtigung für Massenaktionen."
+    "noPermission": "Sie haben keine Berechtigung für Massenaktionen."
   },
   "filters": {
     "stage": "Phase",

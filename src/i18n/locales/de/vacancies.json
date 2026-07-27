@@ -1,7 +1,7 @@
 {
   "page": {
     "title": "Stellen",
-    "subtitle": "Verwalte und veröffentliche all deine offenen Stellen mühelos.",
+    "subtitle": "Verwalten und veröffentlichen Sie all Ihre offenen Stellen mühelos.",
     "add": "Neue Stelle",
     "searchPlaceholder": "Stellen suchen",
     "loading": "Stellen werden geladen…",
@@ -139,7 +139,7 @@
   },
   "matching": {
     "title": "KI-Matching-Gewichtung",
-    "subtitle": "Lege fest, wie wichtig jede Dimension für diese Stelle ist. Die KI gewichtet Kandidaten entsprechend.",
+    "subtitle": "Legen Sie fest, wie wichtig jede Dimension für diese Stelle ist. Die KI gewichtet Kandidaten entsprechend.",
     "less": "Weniger wichtig",
     "balanced": "Ausgewogen",
     "very": "Sehr wichtig",

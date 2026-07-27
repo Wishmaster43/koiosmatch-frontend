@@ -1,6 +1,6 @@
 /**
  * buildDashboardKpis — every KPI block the dashboard can show (live value; 🟡
- * metrics read "—" until the backend feed lands — see docs/DASHBOARD-PLAN.md).
+ * metrics read "—" until the backend feed lands — see docs/plans/DASHBOARD-PLAN.md).
  * Pure builder (§0.3 size split): the page passes its live feeds + helpers in;
  * KPI_ROWS (templates.ts) decides per role which of these render.
  */

@@ -173,7 +173,7 @@
       "alreadyRunning": "Interview läuft bereits — bestehende Sitzung wird angezeigt.",
       "alreadyHasSession": "Dieser Kandidat hat bereits ein offenes Interview bei einer anderen Bewerbung.",
       "unavailable": "Interview starten ist noch nicht verfügbar — wartet auf die Backend-Anbindung.",
-      "noAgentChosen": "Wähle zuerst einen KI-Agenten.",
+      "noAgentChosen": "Wählen Sie zuerst einen KI-Agenten.",
       "loadError": "KI-Agenten konnten nicht geladen werden.",
       "reasons": {
         "no_mobile_or_consent": "Der Kandidat hat keine Mobilnummer oder keine WhatsApp-Zustimmung.",
@@ -192,7 +192,7 @@
         "agent": "Agent ist am Zug",
         "candidate": "Kandidat ist am Zug",
         "pending": "Ausstehend",
-        "recruiter": "Von dir übernommen"
+        "recruiter": "Von Ihnen übernommen"
       },
       "duration": "Gesprächsdauer",
       "durationMinutes": "{{count}} Min.",
@@ -201,19 +201,19 @@
       "visibilityPending": "Agent, Gesprächsseite und Dauer erscheinen, sobald die Backend-Anbindung aktiv ist.",
       "takeover": "Agent stoppen / übernehmen",
       "takeoverBusy": "Wird ausgeführt…",
-      "takeoverSuccess": "Du hast das Gespräch übernommen.",
+      "takeoverSuccess": "Sie haben das Gespräch übernommen.",
       "takeoverUnavailable": "Übernahme ist noch nicht verfügbar — wartet auf die Backend-Anbindung.",
       "takeoverNotActive": "Kein aktives Interview zum Übernehmen.",
       "takeoverFailed": "Übernahme fehlgeschlagen.",
       "resumeBusy": "Wird ausgeführt…",
-      "resumeSuccess": "Du hast das Gespräch fortgesetzt.",
+      "resumeSuccess": "Sie haben das Gespräch fortgesetzt.",
       "resumeUnavailable": "Fortsetzen ist noch nicht verfügbar — wartet auf die Backend-Anbindung.",
       "resumeFailed": "Fortsetzen ist fehlgeschlagen."
     }
   },
   "appointments": {
     "empty": "Keine Termine geplant.",
-    "hint": "Plane ein Interview oder einen Anruf mit diesem Kandidaten.",
+    "hint": "Planen Sie ein Interview oder einen Anruf mit diesem Kandidaten.",
     "new": "Neuer Termin",
     "with": "Mit",
     "statusPlanned": "Geplant",
@@ -231,7 +231,7 @@
     "title": "Notizen",
     "new": "Neue Notiz",
     "empty": "Noch keine Notizen.",
-    "hint": "Füge interne Notizen hinzu, damit dein Team zu diesem Kandidaten abgestimmt bleibt.",
+    "hint": "Fügen Sie interne Notizen hinzu, damit Ihr Team zu diesem Kandidaten abgestimmt bleibt.",
     "placeholder": "Notiz schreiben…",
     "save": "Speichern",
     "cancel": "Abbrechen",

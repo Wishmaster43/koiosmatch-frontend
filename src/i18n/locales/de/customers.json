@@ -293,8 +293,8 @@
     "downloadSelected": "Herunterladen ({{count}})",
     "preview": "Vorschau",
     "deleteTitle": "Dokument löschen",
-    "deleteOneMessage": "Bist du sicher? '{{name}}' wird endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
-    "deleteManyMessage": "Bist du sicher? {{count}} Dokumente werden endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
+    "deleteOneMessage": "Sind Sie sicher? '{{name}}' wird endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
+    "deleteManyMessage": "Sind Sie sicher? {{count}} Dokumente werden endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
     "deleteSelected": "Löschen ({{count}})"
   },
   "priceAgreements": {

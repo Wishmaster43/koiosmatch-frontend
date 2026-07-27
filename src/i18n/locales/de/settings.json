@@ -1,13 +1,13 @@
 {
   "shell": {
     "title": "Einstellungen",
-    "empty": "Keine Einstellungen für deine Rolle verfügbar.",
+    "empty": "Keine Einstellungen für Ihre Rolle verfügbar.",
     "search": "Einstellung suchen…",
     "noResults": "Keine Einstellungen gefunden"
   },
   "common": {
     "save": "Speichern",
-    "unsavedConfirm": "Du hast ungespeicherte Änderungen. Diesen Bereich verlassen?",
+    "unsavedConfirm": "Sie haben ungespeicherte Änderungen. Diesen Bereich verlassen?",
     "saving": "Speichern…",
     "saved": "Gespeichert",
     "loading": "Einstellungen werden geladen…",
@@ -363,7 +363,7 @@
   },
   "company": {
     "title": "Unternehmen",
-    "subtitle": "Verwalte deine Unternehmensdaten und Einstellungen.",
+    "subtitle": "Verwalten Sie Ihre Unternehmensdaten und Einstellungen.",
     "managedUnder": "Firmenname und Logo werden unter Allgemein → Marke verwaltet.",
     "banner": "Unternehmensbanner",
     "industry": "Branche",
@@ -383,7 +383,7 @@
   },
   "locations": {
     "title": "Standorte",
-    "subtitle": "Verwalte alle Büros und Standorte an einem Ort.",
+    "subtitle": "Verwalten Sie alle Büros und Standorte an einem Ort.",
     "create": "Standort erstellen",
     "colName": "Name",
     "colAddress": "Adresse",
@@ -408,8 +408,8 @@
       "customers_other": "{{count}} Kunden",
       "vacancies_one": "{{count}} Stellenangebot",
       "vacancies_other": "{{count}} Stellenangebote",
-      "opportunities_one": "{{count}} Opportunity",
-      "opportunities_other": "{{count}} Opportunities",
+      "opportunities_one": "{{count}} Chance",
+      "opportunities_other": "{{count}} Chancen",
       "tasks_one": "{{count}} Aufgabe",
       "tasks_other": "{{count}} Aufgaben",
       "matches_one": "{{count}} Match",
@@ -443,8 +443,8 @@
   },
   "memory": {
     "title": "Speicher",
-    "subtitle": "Speichere Notizen und Kontext, die im gesamten System verfügbar sind.",
-    "placeholder": "Füge hier Notizen, Kontext oder Anweisungen hinzu…"
+    "subtitle": "Speichern Sie Notizen und Kontext, die im gesamten System verfügbar sind.",
+    "placeholder": "Notizen, Kontext oder Anweisungen hier hinzufügen…"
   },
   "retention": {
     "title": "Aufbewahrungsfrist",
@@ -477,39 +477,39 @@
   },
   "phases": {
     "title": "Phasen",
-    "subtitle": "Verwalte die Phasen deines Workflows und die je Phase verfügbaren Aktionen.",
+    "subtitle": "Verwalten Sie die Phasen Ihres Workflows und die je Phase verfügbaren Aktionen.",
     "add": "Phase hinzufügen"
   },
   "candidateStatus": {
     "title": "Kandidatenstatus",
-    "subtitle": "Verwalte die Status deiner Kandidaten und ihre Verfügbarkeit.",
+    "subtitle": "Verwalten Sie die Status Ihrer Kandidaten und ihre Verfügbarkeit.",
     "add": "Status hinzufügen"
   },
   "vacancy": {
     "title": "Status",
-    "subtitle": "Verwalte die Status deiner Stellen.",
+    "subtitle": "Verwalten Sie die Status Ihrer Stellen.",
     "add": "Status hinzufügen",
     "phasesTitle": "Phasen",
-    "phasesSubtitle": "Verwalte die Phasen deiner Stellen.",
+    "phasesSubtitle": "Verwalten Sie die Phasen Ihrer Stellen.",
     "phasesAdd": "Phase hinzufügen",
     "employmentTitle": "Beschäftigungsart",
-    "employmentSubtitle": "Verwalte die Beschäftigungsarten, die deine Stellen verwenden können.",
+    "employmentSubtitle": "Verwalten Sie die Beschäftigungsarten, die Ihre Stellen verwenden können.",
     "employmentAdd": "Beschäftigungsart hinzufügen",
     "seniorityTitle": "Senioritätslevel",
-    "senioritySubtitle": "Verwalte die Senioritätslevel für deine Stellen.",
+    "senioritySubtitle": "Verwalten Sie die Senioritätslevel für Ihre Stellen.",
     "seniorityAdd": "Level hinzufügen",
     "educationTitle": "Ausbildung",
-    "educationSubtitle": "Verwalte die Ausbildungsniveaus für deine Stellen.",
+    "educationSubtitle": "Verwalten Sie die Ausbildungsniveaus für Ihre Stellen.",
     "educationAdd": "Niveau hinzufügen",
     "channelsTitle": "Jobbörsen",
-    "channelsSubtitle": "Verwalte die Jobbörsen, auf denen du deine Stellen veröffentlichen kannst.",
+    "channelsSubtitle": "Verwalten Sie die Jobbörsen, auf denen Sie Ihre Stellen veröffentlichen können.",
     "channelsAdd": "Jobbörse hinzufügen",
     "appDefaultsTitle": "Bewerbungseinstellungen",
     "appDefaultsSubtitle": "Der Standard, den eine neue Stelle übernimmt. Pro Stelle im Drawer anpassbar."
   },
   "rejection": {
     "title": "Ablehnungsgründe",
-    "subtitle": "Verwalte die Gründe für die Ablehnung von Bewerbungen.",
+    "subtitle": "Verwalten Sie die Gründe für die Ablehnung von Bewerbungen.",
     "add": "Grund hinzufügen",
     "channelTitle": "Kanal & Vorlagen",
     "channelSubtitle": "Der Standardkanal und die Nachricht, die je Grund gesendet wird.",
@@ -523,7 +523,7 @@
     "save": "Vorlagen speichern",
     "saved": "Gespeichert",
     "loading": "Wird geladen…",
-    "noReasons": "Füge zuerst einen Ablehnungsgrund hinzu."
+    "noReasons": "Fügen Sie zuerst einen Ablehnungsgrund hinzu."
   },
   "proposal": {
     "title": "Kandidat vorschlagen",
@@ -543,7 +543,7 @@
   },
   "cvTemplate": {
     "title": "Lebenslauf-Vorlage",
-    "subtitle": "Konfiguriere das aus Kandidatenprofilen generierte Lebenslauf-Design.",
+    "subtitle": "Konfigurieren Sie das aus Kandidatenprofilen generierte Lebenslauf-Design.",
     "pdfPreview": "PDF-Vorschau",
     "generating": "Wird generiert…",
     "reset": "Zurücksetzen",
@@ -552,31 +552,31 @@
     "color1": "Farbe 1",
     "color2": "Farbe 2",
     "sections": "Abschnitte",
-    "sectionsHint": "Lege fest, welche Abschnitte sichtbar sind und in welcher Reihenfolge.",
+    "sectionsHint": "Legen Sie fest, welche Abschnitte sichtbar sind und in welcher Reihenfolge.",
     "preview": "Vorschau",
     "previewHint": "A4 — mit Beispielkandidat"
   },
   "security": {
     "twoFactor": "Zwei-Faktor-Authentifizierung (2FA)",
-    "statusOn": "Aktiviert — dein Konto ist zusätzlich geschützt",
-    "statusOff": "Deaktiviert — füge eine zusätzliche Sicherheitsebene hinzu",
+    "statusOn": "Aktiviert — Ihr Konto ist zusätzlich geschützt",
+    "statusOff": "Deaktiviert — fügen Sie eine zusätzliche Sicherheitsebene hinzu",
     "enable": "Aktivieren",
     "disable": "Deaktivieren",
     "enabledTitle": "Zwei-Faktor-Authentifizierung aktiviert",
-    "enabledDesc": "Speichere deine Wiederherstellungscodes. Sie sind nur einmal nutzbar und werden nicht erneut angezeigt.",
+    "enabledDesc": "Speichern Sie Ihre Wiederherstellungscodes. Sie sind nur einmal nutzbar und werden nicht erneut angezeigt.",
     "recoveryCodes": "Wiederherstellungscodes",
     "copy": "Kopieren",
     "copied": "Kopiert!",
     "done": "Fertig",
     "back": "Zurück",
     "scanTitle": "QR-Code scannen",
-    "scanDesc": "Öffne deine Authenticator-App (Google Authenticator, Microsoft Authenticator, Bitwarden usw.) und scanne den QR-Code unten.",
+    "scanDesc": "Öffnen Sie Ihre Authenticator-App (Google Authenticator, Microsoft Authenticator, Bitwarden usw.) und scannen Sie den QR-Code unten.",
     "manualEntry": "Manuelle Eingabe",
     "codeLabel": "Bestätigungscode aus der App",
     "working": "Wird verarbeitet…",
     "confirmEnable": "Bestätigen und aktivieren",
     "disableTitle": "Zwei-Faktor-Authentifizierung deaktivieren",
-    "disableDesc": "Gib deinen aktuellen Bestätigungscode ein, um 2FA zu deaktivieren.",
+    "disableDesc": "Geben Sie Ihren aktuellen Bestätigungscode ein, um 2FA zu deaktivieren.",
     "disableBtn": "2FA deaktivieren",
     "supportedApps": "Unterstützte Apps",
     "errSetup": "MFA-Einrichtung konnte nicht gestartet werden.",
@@ -600,7 +600,7 @@
     "manualLabel": "Manuelles SMTP",
     "manualDesc": "Eigener Mailserver oder Anbieter",
     "oauthWarningTitle": "Backend erforderlich:",
-    "oauthWarning": "Die OAuth2-Verbindung für {{provider}} muss über das Backend konfiguriert werden. Speichere unten die Absenderadresse; die eigentliche OAuth-Verbindung wird vom Administrator eingerichtet.",
+    "oauthWarning": "Die OAuth2-Verbindung für {{provider}} muss über das Backend konfiguriert werden. Speichern Sie unten die Absenderadresse; die eigentliche OAuth-Verbindung wird vom Administrator eingerichtet.",
     "senderDetails": "Absenderdaten",
     "senderName": "Absendername",
     "senderNamePlaceholder": "z.B. KoiosMatch",
@@ -664,7 +664,7 @@
   "billing": {
     "usage": {
       "title": "Nutzung & Limits",
-      "desc": "Übersicht deiner aktuellen Nutzung in diesem Zeitraum.",
+      "desc": "Übersicht Ihrer aktuellen Nutzung in diesem Zeitraum.",
       "periodToday": "Heute",
       "periodMonth": "Diesen Monat",
       "plan": {
@@ -696,7 +696,7 @@
         "colCost": "Kosten",
         "empty": "Noch keine WhatsApp-Nutzung diesen Monat.",
         "loadError": "WhatsApp-Nutzung konnte nicht geladen werden.",
-        "unavailable": "Du hast keine Berechtigung, dies anzusehen."
+        "unavailable": "Sie haben keine Berechtigung, dies anzusehen."
       },
       "daily": {
         "title": "Tägliche Nutzung",
@@ -821,13 +821,13 @@
         "name": "Name",
         "url": "URL",
         "status": "Status",
-        "events": "Events",
+        "events": "Ereignisse",
         "lastTriggered": "Zuletzt ausgelöst"
       },
       "field": {
         "name": "Name",
         "url": "Endpunkt-URL",
-        "events": "Events"
+        "events": "Ereignisse"
       },
       "detailsTitle": "Details",
       "namePlaceholder": "Name (z. B. ATS-Anbindung)",
@@ -889,10 +889,10 @@
     "noAccess": "Kein Zugriff",
     "syncBtn": "Sync",
     "cooldown": "Cooldown",
-    "noPermission": "Du hast keine Berechtigung zum Synchronisieren",
+    "noPermission": "Sie haben keine Berechtigung zum Synchronisieren",
     "succeeded": "Erfolgreich",
     "failed": "Fehlgeschlagen",
-    "tooManyRequests": "Zu viele Anfragen — warte {{secs}}s",
+    "tooManyRequests": "Zu viele Anfragen — warten Sie {{secs}}s",
     "items": {
       "candidates": {
         "label": "Kandidaten",
@@ -927,7 +927,7 @@
         "desc": "Kandidaten-Einplanungen pro Schicht"
       }
     },
-    "started": "Synchronisierung gestartet — dies kann einige Minuten dauern. Aktualisiere die Listen später für die neuen Daten."
+    "started": "Synchronisierung gestartet — dies kann einige Minuten dauern. Aktualisieren Sie die Listen später für die neuen Daten."
   },
   "import": {
     "types": {
@@ -939,21 +939,21 @@
       "shifts": "Dienste"
     },
     "title": "{{type}} importieren",
-    "subtitle": "Importiere deine bestehenden {{type}}-Daten mit einer CSV-Datei.",
+    "subtitle": "Importieren Sie Ihre bestehenden {{type}}-Daten mit einer CSV-Datei.",
     "fileTitle": "Datei importieren",
     "step": "Aktueller Schritt: {{step}} / {{total}}",
-    "dropHere": "Ziehe deine Dateien hierher",
+    "dropHere": "Ziehen Sie Ihre Dateien hierher",
     "selectCsv": "CSV auswählen",
-    "fileSelected": "Datei ausgewählt. Klicke auf Weiter, um die Spalten zuzuordnen.",
-    "mapColumns": "Ordne die Spalten deiner CSV den Systemfeldern zu.",
+    "fileSelected": "Datei ausgewählt. Klicken Sie auf Weiter, um die Spalten zuzuordnen.",
+    "mapColumns": "Ordnen Sie die Spalten Ihrer CSV den Systemfeldern zu.",
     "mapColumnsHint": "Die Spaltenzuordnung wird nach dem Upload konfiguriert.",
     "doneTitle": "Import abgeschlossen!",
-    "doneDesc": "Deine Daten wurden erfolgreich importiert.",
+    "doneDesc": "Ihre Daten wurden erfolgreich importiert.",
     "newImport": "Neuer Import"
   },
   "facebookLeads": {
     "title": "Facebook Leads",
-    "subtitle": "Verbinde die Facebook-Leads-App dieses Kunden — eingehende Leads landen automatisch als Kandidat.",
+    "subtitle": "Verbinden Sie die Facebook-Leads-App dieses Kunden — eingehende Leads landen automatisch als Kandidat.",
     "verifyToken": "Verify-Token",
     "verifyTokenPlaceholder": "Token aus den Facebook-App-Einstellungen",
     "appSecret": "App-Secret",
@@ -964,7 +964,7 @@
     "showSecret": "Wert anzeigen",
     "hideSecret": "Wert verbergen",
     "secretKeepPlaceholder": "Leer lassen, um den aktuellen Wert zu behalten",
-    "datasetId": "Dataset-ID",
+    "datasetId": "Datensatz-ID",
     "datasetIdPlaceholder": "Conversions-API-Dataset-ID",
     "webhookUrl": "Webhook-URL (in die Facebook-App einfügen)",
     "copyUrl": "URL kopieren",
@@ -972,9 +972,9 @@
   },
   "export": {
     "title": "Exportieren",
-    "subtitle": "Exportiere deine Daten als CSV — dieselben Spalten wie die Tabelle, nur Datensätze, auf die du Zugriff hast.",
+    "subtitle": "Exportieren Sie Ihre Daten als CSV — dieselben Spalten wie die Tabelle, nur Datensätze, auf die Sie Zugriff haben.",
     "button": "CSV exportieren",
-    "noPermission": "Du hast keine Berechtigung für diesen Export.",
+    "noPermission": "Sie haben keine Berechtigung für diesen Export.",
     "rateLimited": "Zu viele Exporte hintereinander. Bitte versuche es in einer Minute erneut.",
     "error": "Export fehlgeschlagen. Bitte später erneut versuchen.",
     "entities": {
@@ -1002,9 +1002,9 @@
   },
   "apps": {
     "notOnPkg3Title": "Tenant ist noch nicht auf Paket 3",
-    "notOnPkg3Desc": "Du kannst Connectors vorab einrichten, aber sie werden erst für Benutzer sichtbar, nachdem du dieses Tenant-Paket über den Tab Module auf Paket 3 hochgestuft hast.",
+    "notOnPkg3Desc": "Sie können Connectors vorab einrichten, aber sie werden erst für Benutzer sichtbar, nachdem Sie dieses Tenant-Paket über den Tab Module auf Paket 3 hochgestuft haben.",
     "costTitle": "Hinweis: hiermit sind monatliche Kosten verbunden",
-    "costDesc": "Das Aktivieren oder Deaktivieren von Apps wirkt sich direkt auf deine Rechnung aus. Wende dich für die Preise an deinen Account Manager.",
+    "costDesc": "Das Aktivieren oder Deaktivieren von Apps wirkt sich direkt auf Ihre Rechnung aus. Wenden Sie sich für die Preise an Ihren Account Manager.",
     "adminOnly": "Nur Admins können Apps aktivieren oder deaktivieren.",
     "active": "Aktiv",
     "monthly": "Monatlich",
@@ -1048,7 +1048,7 @@
     "tierHeading": "Paket",
     "addonsHeading": "Einzelne Module (Add-ons)",
     "comingSoon": "demnächst",
-    "connectorsHint": "Connectors (Shiftmanager, HelloFlex, Elanza…) verwaltest du je Kunde unter Integrationen → Apps. Aktivieren kostet Geld und schaltet die Workflow-Vorlagen frei.",
+    "connectorsHint": "Connectors (Shiftmanager, HelloFlex, Elanza…) verwalten Sie je Kunde unter Integrationen → Apps. Aktivieren kostet Geld und schaltet die Workflow-Vorlagen frei.",
     "tierDesc": {
       "core": "ATS + CRM",
       "pro": "+ Koios AI + AI Agents + Workflows + WhatsApp Business",
@@ -1130,7 +1130,7 @@
       "vacancies": "Stellen",
       "applications": "Bewerbungen",
       "matches": "Matches",
-      "opportunities": "Opportunities",
+      "opportunities": "Chancen",
       "tasks": "Aufgaben",
       "outreach": "Anruflisten",
       "planning": "Planung",
@@ -1464,7 +1464,7 @@
   },
   "poolsSettings": {
     "title": "Talentpools",
-    "subtitle": "Verwalte Pools mit Name und Farbe — für Kandidatenlisten.",
+    "subtitle": "Verwalten Sie Pools mit Name und Farbe — für Kandidatenlisten.",
     "add": "Pool hinzufügen",
     "contextLabel": "Pool-Typ",
     "contextRecruitment": "Recruitment (Talentpool)",
@@ -1472,12 +1472,12 @@
   },
   "matches": {
     "statusTitle": "Status",
-    "statusSubtitle": "Verwalte die Match-Status (Status + Farbe).",
+    "statusSubtitle": "Verwalten Sie die Match-Status (Status + Farbe).",
     "statusAdd": "Status hinzufügen",
     "flagClosed": "Schließt das Match",
     "flagClosedDesc": "Ein Match mit diesem Status ist beendet (Enddatum gesetzt, zählt nicht mehr als offen).",
     "contractTypeTitle": "Vertragsarten",
-    "contractTypeSubtitle": "Verwalte die Vertragsarten und ihre Standardlaufzeit.",
+    "contractTypeSubtitle": "Verwalten Sie die Vertragsarten und ihre Standardlaufzeit.",
     "contractTypeAdd": "Vertragsart hinzufügen",
     "contractTypeDurationLabel": "Laufzeit (Tage)"
   },
@@ -1490,20 +1490,20 @@
   },
   "outreach": {
     "statusTitle": "Status",
-    "statusSubtitle": "Verwalte die Anruflisten-Status (Status + Farbe).",
+    "statusSubtitle": "Verwalten Sie die Anruflisten-Status (Status + Farbe).",
     "statusAdd": "Status hinzufügen",
     "flagReached": "Zählt als erreicht",
     "flagReachedDesc": "Dieser Status stempelt den Kontaktmoment auf den Anruflisten-Eintrag."
   },
   "tasks": {
     "statusTitle": "Status",
-    "statusSubtitle": "Verwalte die Spalten deines Aufgabenboards (Status + Farbe).",
+    "statusSubtitle": "Verwalten Sie die Spalten Ihres Aufgabenboards (Status + Farbe).",
     "statusAdd": "Status hinzufügen",
     "typeTitle": "Aktivitätstypen",
-    "typeSubtitle": "Verwalte die Aktivitätsarten (Aufgabe, Anruf, E-Mail…).",
+    "typeSubtitle": "Verwalten Sie die Aktivitätsarten (Aufgabe, Anruf, E-Mail…).",
     "typeAdd": "Typ hinzufügen",
     "priorityTitle": "Prioritäten",
-    "prioritySubtitle": "Verwalte die Prioritäten deiner Aufgaben (niedrig, normal, hoch).",
+    "prioritySubtitle": "Verwalten Sie die Prioritäten Ihrer Aufgaben (niedrig, normal, hoch).",
     "priorityAdd": "Priorität hinzufügen"
   },
   "taskDisplay": {
@@ -1527,7 +1527,7 @@
   },
   "assessment": {
     "title": "Bewertungskriterien",
-    "subtitle": "Wiederverwendbare Kriteriengruppen, die Koios AI zur Bewertung von Kandidaten nutzt. Verknüpfe eine Gruppe mit einer Stelle und passe sie je Stelle an.",
+    "subtitle": "Wiederverwendbare Kriteriengruppen, die Koios AI zur Bewertung von Kandidaten nutzt. Verknüpfen Sie eine Gruppe mit einer Stelle und passen Sie sie je Stelle an.",
     "addGroup": "Gruppe hinzufügen",
     "empty": "Noch keine Kriteriengruppen.",
     "loading": "Wird geladen…",
@@ -1561,13 +1561,13 @@
   },
   "matching": {
     "title": "Matching-Strenge",
-    "subtitle": "Wie kritisch der KI-Matcher Kandidaten gegen deine Stellen bewertet. Strenger ergibt niedrigere, schwerer verdiente Match-Scores.",
+    "subtitle": "Wie kritisch der KI-Matcher Kandidaten gegen Ihre Stellen bewertet. Strenger ergibt niedrigere, schwerer verdiente Match-Scores.",
     "lenient": "Nachsichtig",
     "balanced": "Ausgewogen",
     "strict": "Streng",
     "save": "Speichern",
     "saved": "Gespeichert",
-    "perVacancyHint": "Was je Stelle wichtig ist (Qualifikationen, Standort, …), stellst du an der Stelle selbst ein.",
+    "perVacancyHint": "Was je Stelle wichtig ist (Qualifikationen, Standort, …), stellen Sie an der Stelle selbst ein.",
     "approval": {
       "title": "Genehmigung",
       "subtitle": "Wann eine Platzierung zuerst genehmigt werden muss.",
@@ -1582,8 +1582,8 @@
   },
   "matchTemplatesSettings": {
     "title": "Match-Profile",
-    "subtitle": "Wiederverwendbare Match-Gewichtungsprofile, die du bei einer Stelle auswählen kannst (Tab Matching). Ein Profil zuweisen kopiert dessen Gewichte auf diese Stelle — spätere Änderungen hier wirken sich nicht automatisch aus.",
-    "empty": "Noch keine Match-Profile — erstelle unten eins.",
+    "subtitle": "Wiederverwendbare Match-Gewichtungsprofile, die Sie bei einer Stelle auswählen können (Tab Matching). Ein Profil zuweisen kopiert dessen Gewichte auf diese Stelle — spätere Änderungen hier wirken sich nicht automatisch aus.",
+    "empty": "Noch keine Match-Profile — erstellen Sie unten eins.",
     "loadError": "Match-Profile konnten nicht geladen werden.",
     "nameLabel": "Name",
     "namePlaceholder": "Z. B. Senior-Technikprofil",
@@ -1605,7 +1605,7 @@
   },
   "languageSettings": {
     "languagesTitle": "Sprachen",
-    "languagesSubtitle": "Die Sprachen, die du bei Kandidaten auswählen kannst.",
+    "languagesSubtitle": "Die Sprachen, die Sie bei Kandidaten auswählen können.",
     "addLanguage": "Sprache hinzufügen",
     "levelsTitle": "Niveaus",
     "levelsSubtitle": "Beherrschungsniveaus (z. B. Schlecht → Sehr gut, Muttersprache).",
@@ -1613,7 +1613,7 @@
   },
   "industrySettings": {
     "title": "Branchen",
-    "subtitle": "Verwalte die Branchen, die du im Unternehmensprofil auswählen kannst.",
+    "subtitle": "Verwalten Sie die Branchen, die Sie im Unternehmensprofil auswählen können.",
     "add": "Branche hinzufügen"
   },
   "provinces": {
@@ -1621,7 +1621,7 @@
     "subtitle": "Provinzen pro Land — verwendet in Adressfeldern und Filtern.",
     "add": "Provinz hinzufügen",
     "country": "Land",
-    "empty": "Noch keine Provinzen für dieses Land — füge die erste hinzu.",
+    "empty": "Noch keine Provinzen für dieses Land — fügen Sie die erste hinzu.",
     "loadError": "Die Provinzen konnten nicht geladen werden.",
     "retry": "Erneut versuchen"
   },
@@ -1711,20 +1711,20 @@
   },
   "functionsSettings": {
     "title": "Funktionen (Kandidat)",
-    "subtitle": "Verwalte die Funktionsliste, die du KANDIDATEN zuweist (z. B. Pflegehelfer), und ob Recruiter freie Werte eingeben dürfen. Dies ist eine andere Liste als die Kontaktpersonen-Funktionen.",
+    "subtitle": "Verwalten Sie die Funktionsliste, die Sie KANDIDATEN zuweisen (z. B. Pflegehelfer), und ob Recruiter freie Werte eingeben dürfen. Dies ist eine andere Liste als die Kontaktpersonen-Funktionen.",
     "add": "Funktion hinzufügen",
     "freeEntry": "Freie Eingabe erlauben",
     "freeEntryHint": "An: Recruiter können eine eigene Funktion eingeben (Combobox). Aus: nur aus der Liste wählen (strikte Auswahl).",
-    "confirmFreeEntry": "Bist du sicher? Freie Eingabe erlaubt Funktionen außerhalb der Liste — das kann die Datenqualität senken."
+    "confirmFreeEntry": "Sind Sie sicher? Freie Eingabe erlaubt Funktionen außerhalb der Liste — das kann die Datenqualität senken."
   },
   "contactFunctionsSettings": {
     "title": "Kontaktfunktionen",
-    "subtitle": "Verwalte die Funktionsliste für Kontaktpersonen bei Kunden (z. B. Standortleiter, Teamleiter).",
+    "subtitle": "Verwalten Sie die Funktionsliste für Kontaktpersonen bei Kunden (z. B. Standortleiter, Teamleiter).",
     "add": "Funktion hinzufügen",
     "notAvailable": "Noch nicht verfügbar — diese Liste wird aktiv, sobald die Backend-Anbindung besteht.",
     "freeEntry": "Freie Eingabe erlauben",
     "freeEntryHint": "An: eine eigene Funktion kann eingetippt werden (Combobox). Aus: nur aus der Liste wählen (strikte Auswahl).",
-    "confirmFreeEntry": "Bist du sicher? Freie Eingabe erlaubt Kontaktfunktionen außerhalb der Liste — das kann die Datenqualität senken."
+    "confirmFreeEntry": "Sind Sie sicher? Freie Eingabe erlaubt Kontaktfunktionen außerhalb der Liste — das kann die Datenqualität senken."
   },
   "customerDisplay": {
     "title": "Tabellenanzeige",
@@ -1824,7 +1824,7 @@
   },
   "waMessageTypes": {
     "title": "Nachrichtentypen",
-    "subtitle": "Deine Klassifizierung ausgehender WhatsApp-Nachrichten (z. B. Bewerbung, Erinnerung). Die Reihenfolge bestimmt die Warteschlangen-Priorität.",
+    "subtitle": "Ihre Klassifizierung ausgehender WhatsApp-Nachrichten (z. B. Bewerbung, Erinnerung). Die Reihenfolge bestimmt die Warteschlangen-Priorität.",
     "add": "Nachrichtentyp hinzufügen"
   },
   "candidateConversion": {
@@ -1924,7 +1924,7 @@
     }
   },
   "usage": {
-    "subtitleTenant": "Verbrauch von {{name}} — nur Mengen für deine Abrechnung.",
+    "subtitleTenant": "Verbrauch von {{name}} — nur Mengen für Ihre Abrechnung.",
     "month": "Monat",
     "loadError": "Verbrauch konnte nicht geladen werden.",
     "col": {
@@ -2006,7 +2006,7 @@
     },
     "truncatedNotice": "Es werden nur die neuesten 5.000 fehlgeschlagenen Jobs angezeigt.",
     "driverWarning": "Die Warteschlange läuft auf \"{{driver}}\" — dieser Bildschirm betrachtet die Datenbank-Warteschlange und zeigt dann möglicherweise nicht den echten Rückstand.",
-    "actionFailed": "Aktion fehlgeschlagen — der Job existiert möglicherweise nicht mehr. Aktualisiere die Liste.",
+    "actionFailed": "Aktion fehlgeschlagen — der Job existiert möglicherweise nicht mehr. Aktualisieren Sie die Liste.",
     "recent": {
       "tenantFilter": "Tenant-Filter",
       "allTenants": "Alle Tenants",
@@ -2077,7 +2077,7 @@
       "title": "Zelldetails",
       "popupCode": "Popup-Code",
       "noPopup": "Kein Popup — diese Aktion wird immer stillschweigend erlaubt.",
-      "noPopupOverrideWarning": "Für diese Zelle existiert kein Popup-Code — der Nutzer sieht nur den generischen Warnung/Blockiert-Titel, ohne erklärenden Text. Prüfe, ob das so gewollt ist.",
+      "noPopupOverrideWarning": "Für diese Zelle existiert kein Popup-Code — der Nutzer sieht nur den generischen Warnung/Blockiert-Titel, ohne erklärenden Text. Prüfen Sie, ob das so gewollt ist.",
       "messageNote": "Der Nachrichtentext ist pro Popup-Code fest und (noch) nicht pro Mandant anpassbar.",
       "resetCell": "Diese Zelle auf Standard zurücksetzen",
       "isOverride": "Von der Standardregel geändert",
@@ -2129,7 +2129,7 @@
       "dirtyCount_one": "{{count}} Änderung noch nicht gespeichert",
       "dirtyCount_other": "{{count}} Änderungen noch nicht gespeichert",
       "resetAll": "Alles auf Standard zurücksetzen",
-      "confirmResetAll": "Alle Aktionsregeln auf ihre Standardwerte zurücksetzen? Dies überschreibt deine Änderungen, sobald du speicherst.",
+      "confirmResetAll": "Alle Aktionsregeln auf ihre Standardwerte zurücksetzen? Dies überschreibt Ihre Änderungen, sobald Sie speichern.",
       "saveFailed": "Speichern der Aktionsregeln ist fehlgeschlagen."
     }
   },
@@ -2213,7 +2213,7 @@
   },
   "caoSettings": {
     "title": "Tarifverträge",
-    "subtitle": "Verwalte die Tarifvertragsliste für Preisvereinbarungen und Matches.",
+    "subtitle": "Verwalten Sie die Tarifvertragsliste für Preisvereinbarungen und Matches.",
     "add": "Tarifvertrag hinzufügen"
   },
   "dashboardsItem": "Element"

@@ -1,7 +1,7 @@
 /**
  * ActionRulesSettings — Settings → Actieregels (AXIS-MATRIX-2 fase 2, FE half). The
  * tenant-editable action×condition matrix behind every guarded write (see
- * koiosmatch-api/docs/AXIS-MATRIX.md): rows = action tokens (kandidaat-/klant-acties,
+ * koiosmatch-api/docs/contract/AXIS-MATRIX.md): rows = action tokens (kandidaat-/klant-acties,
  * per the catalog's own §B/§C split), columns = the condition axis, cell = an
  * allow/warn/block cycle-chip. Edits stage locally; one Save bar PUTs only the
  * changed cells (`PUT /settings/action-rules`). Archived (P4) and the WhatsApp

@@ -200,7 +200,7 @@
       "summary": "Profiltext",
       "branches": "Niederlassungen",
       "branchesNone": "Noch keine Niederlassungen eingerichtet.",
-      "branchesAutoHint": "Leer = automatisch die Niederlassungen, denen du zugeordnet bist.",
+      "branchesAutoHint": "Leer = automatisch die Niederlassungen, denen Sie zugeordnet sind.",
       "branchesAdd": "Niederlassung hinzufügen",
       "cardPersonal": "Persönlich",
       "cardContact": "Kontakt",
@@ -496,7 +496,7 @@
     "knownAtClient": "Kandidat ist bei diesem Kunden bekannt",
     "knownShort": "Bei diesem Kunden bekannt",
     "roster": "Dienstplan",
-    "mail": "Mailen",
+    "mail": "E-Mail",
     "unschedule": "Ausplanen",
     "new": "Neu",
     "date": "Datum",
@@ -667,8 +667,8 @@
     "selectOne": "{{name}} auswählen",
     "downloadSelected": "Herunterladen ({{count}})",
     "deleteTitle": "Dokument löschen",
-    "deleteOneMessage": "Bist du sicher? '{{name}}' wird endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
-    "deleteManyMessage": "Bist du sicher? {{count}} Dokumente werden endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
+    "deleteOneMessage": "Sind Sie sicher? '{{name}}' wird endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
+    "deleteManyMessage": "Sind Sie sicher? {{count}} Dokumente werden endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
     "deleteSelected": "Löschen ({{count}})",
     "types": {
       "cv": "CV",
@@ -764,7 +764,7 @@
       "available_again_date": "Wieder verfügbar am",
       "last_contact_at": "Letzter Kontakt",
       "last_contact_type": "Kontaktkanal",
-      "tags": "Labels",
+      "tags": "Tags",
       "deleted_at": "Archiviert am"
     },
     "dateFrom": "Datum von",
@@ -851,8 +851,8 @@
   },
   "archiveGuard": {
     "title": "Offene Vorgänge gefunden",
-    "body": "Achtung — {{name}} hat noch offene Vorgänge. Was möchtest du damit tun?",
-    "bodyAggregate": "Achtung — {{blocked}} von {{total}} ausgewählten Kandidaten haben noch offene Bewerbungen oder Matches. Was möchtest du damit tun?",
+    "body": "Achtung — {{name}} hat noch offene Vorgänge. Was möchten Sie damit tun?",
+    "bodyAggregate": "Achtung — {{blocked}} von {{total}} ausgewählten Kandidaten haben noch offene Bewerbungen oder Matches. Was möchten Sie damit tun?",
     "applicationsTitle": "Offene Bewerbung(en)",
     "matchesTitle": "Aktive Match(es)",
     "resolutionReject": "Bewerbung(en) ablehnen",
@@ -936,7 +936,7 @@
       "agreement": "Vorschlag (Preisvereinbarung): {{purchase}} Einkauf / {{sell}} Verkauf",
       "conversionFactor": "Vorschlag (Umrechnungsfaktor): {{purchase}} Einkauf / {{sell}} Verkauf",
       "purchaseOnly": "Vorschlag — nur Einkaufstarif bekannt: {{purchase}}",
-      "deviationWarning": "Die Preisvereinbarung schlägt {{proposalPurchase}} Einkauf / {{proposalSell}} Verkauf vor — du hast {{enteredPurchase}} / {{enteredSell}} eingegeben. Bist du sicher?",
+      "deviationWarning": "Die Preisvereinbarung schlägt {{proposalPurchase}} Einkauf / {{proposalSell}} Verkauf vor — Sie haben {{enteredPurchase}} / {{enteredSell}} eingegeben. Sind Sie sicher?",
       "deviationConfirm": "Ja, trotzdem platzieren",
       "deviationCancel": "Tarife anpassen"
     },
@@ -945,8 +945,8 @@
   },
   "merge": {
     "title": "Kandidat zusammenführen",
-    "intro": "Suche den doppelten Kandidaten und wähle dann, welcher Datensatz bestehen bleibt. {{name}} ist der geöffnete Datensatz.",
-    "searchPlaceholder": "Suche nach Name, Nummer oder E-Mail…",
+    "intro": "Suchen Sie den doppelten Kandidaten und wählen Sie dann, welcher Datensatz bestehen bleibt. {{name}} ist der geöffnete Datensatz.",
+    "searchPlaceholder": "Nach Name, Nummer oder E-Mail suchen…",
     "searching": "Suche…",
     "noResults": "Keine Kandidaten gefunden.",
     "stays": "Dieser Datensatz bleibt",
@@ -957,7 +957,7 @@
     "cancel": "Abbrechen",
     "confirm": "Zusammenführen",
     "done": "Kandidaten zusammengeführt.",
-    "errForbidden": "Du darfst keine Kandidaten zusammenführen.",
+    "errForbidden": "Sie dürfen keine Kandidaten zusammenführen.",
     "errFailed": "Zusammenführen fehlgeschlagen. Bitte erneut versuchen."
   },
   "integrations": {

@@ -4,7 +4,7 @@
  * full, role-specific KPI row; `['*']` = show every chart/list (admin/management).
  *
  * The `dashboard_type` enum is OWNED BY THE BACKEND (C-35) and is leading — these
- * are the confirmed values (docs/DASHBOARD-PLAN.md): never diverge. `/auth/me`
+ * are the confirmed values (docs/plans/DASHBOARD-PLAN.md): never diverge. `/auth/me`
  * returns roles[].dashboard_type.
  */
 export const DASHBOARD_TYPES = ['admin', 'management', 'recruitment', 'backoffice', 'sales', 'planning', 'readonly'] as const
@@ -18,7 +18,7 @@ export const SUPER_VIEWS: DashboardType[] = ['admin', 'management']
 
 // ── KPI row per role — bare KPI ids resolved in Dashboard.tsx (kpiById). Every role
 // shows a full, role-specific row (never hidden). 🟡 metrics render "—" until the
-// backend feed lands (see docs/DASHBOARD-PLAN.md).
+// backend feed lands (see docs/plans/DASHBOARD-PLAN.md).
 export const KPI_ROWS: Record<DashboardType, string[]> = {
   // Invulgraad/Escalaties vervangen (Danny 2026-07-06): geen feed/actie — nu Open
   // vacatures · Taken over tijd · Actieve gesprekken (alle drie live) = 9 blokjes.

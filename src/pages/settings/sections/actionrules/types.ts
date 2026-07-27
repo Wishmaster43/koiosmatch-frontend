@@ -1,6 +1,6 @@
 /**
  * ActionRules settings types — the tenant-editable action×condition matrix
- * (AXIS-MATRIX-2, koiosmatch-api/docs/AXIS-MATRIX.md). Mirrors
+ * (AXIS-MATRIX-2, koiosmatch-api/docs/contract/AXIS-MATRIX.md). Mirrors
  * `ActionRuleController::index()`'s row shape (`GET /action-rules`) verbatim.
  */
 

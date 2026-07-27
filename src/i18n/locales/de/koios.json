@@ -17,7 +17,7 @@
     "title": "Modelle",
     "active": "Aktives Modell",
     "selectable": "Auswählbare Modelle",
-    "pickHint": "Wähle die KI-Stufe für dein Büro — die Tarife stehen darunter.",
+    "pickHint": "Wählen Sie die KI-Stufe für Ihr Büro — die Tarife stehen darunter.",
     "tier": {
       "snel": "Schnell",
       "slim": "Smart",

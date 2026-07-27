@@ -1,6 +1,6 @@
 /**
  * ActionRuleDetailPanel — the side detail for the currently selected non-allow cell:
- * its popup code + a generic description (docs/AXIS-MATRIX.md §"Popups"), a note that
+ * its popup code + a generic description (docs/contract/AXIS-MATRIX.md §"Popups"), a note that
  * the message text itself is not (yet) tenant-editable (measured: `action_rules` only
  * stores `effect` — no message column), and a per-cell "reset to default" when the
  * cell isn't locked. Rendered as a persistent card above the grids (§ "popover or side

@@ -12,7 +12,7 @@
  *
  * Candidates: the old SUGGESTIES mock faked a favourite flag + distance (km) +
  * hours-worked ranking. That ranking data doesn't exist yet — Native Planning's
- * "fit-annotation" (koiosmatch-api/docs/FRONTEND-CONTRACT.md §11) is still an
+ * "fit-annotation" (koiosmatch-api/docs/contract/FRONTEND-CONTRACT.md §11) is still an
  * open slice (2-4), and there is no "favourite candidates for this customer"
  * endpoint (only the reverse: a candidate's OWN favourite/blacklist prefs via
  * /candidates/{id}/planning-preferences). Faking that ranking again would just
