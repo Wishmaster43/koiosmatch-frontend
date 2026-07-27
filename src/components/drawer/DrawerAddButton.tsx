@@ -11,6 +11,10 @@ interface DrawerAddButtonProps {
 }
 
 /**
+ * Plus ICON + TEXT label (Danny 28-07: "+ nieuwe taak / + nieuwe afdeling … ETC!!").
+ * An icon-only variant was tried and rejected the same day — the label must be readable
+ * without hovering.
+ *
  * DrawerAddButton — the ONE "+ action" button style for drawer tabs/sub-tabs APP-WIDE
  * (promoted from the candidate drawer — measured from the WorkTab "+ Match" / "+ Solliciteren"
  * buttons — the reference for Danny's consistency sweep, 2026-07). Mirrors §4's
@@ -19,11 +23,13 @@ interface DrawerAddButtonProps {
  */
 export default function DrawerAddButton({ onClick, label, icon: Icon = Plus, disabled, title }: DrawerAddButtonProps) {
   const { t } = useTranslation('common')
+  // The accessible name: the caller's label when it is plain text, else the shared "add".
+  const name = typeof label === 'string' ? label : t('add')
   return (
-    <button onClick={onClick} disabled={disabled} title={title}
+    <button onClick={onClick} disabled={disabled} title={title ?? name} aria-label={name}
       style={{
-        display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px', whiteSpace: 'nowrap',
-        fontSize: 11.5, fontWeight: 500, borderRadius: 6,
+        display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px',
+        whiteSpace: 'nowrap', flexShrink: 0, fontSize: 11.5, fontWeight: 500, borderRadius: 6,
         cursor: disabled ? 'not-allowed' : 'pointer',
         color: disabled ? 'var(--text-muted)' : 'var(--color-primary)',
         background: disabled ? 'var(--bg)' : 'color-mix(in srgb, var(--color-primary) 10%, transparent)',

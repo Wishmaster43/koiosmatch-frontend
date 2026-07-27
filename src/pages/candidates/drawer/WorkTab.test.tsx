@@ -101,7 +101,8 @@ describe('WorkTab · sub-tabs (kandidaten-ronde-2, punt C)', () => {
     const user = userEvent.setup()
     render(<WorkTab c={candidate([])} />)
     await user.click(screen.getByRole('tab', { name: 'sections.pools' }))
-    expect(screen.getByText('sections.poolAdd')).toBeInTheDocument()
+    // Icon-only add trigger (28-07): the label is now its accessible name.
+    expect(screen.getByRole('button', { name: 'sections.poolAdd' })).toBeInTheDocument()
   })
 
   it('sorts the sub-tabs alphabetically by (translated) label', () => {

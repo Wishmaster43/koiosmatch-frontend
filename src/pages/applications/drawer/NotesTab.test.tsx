@@ -28,7 +28,8 @@ describe('applications NotesTab (shared reuse)', () => {
 
   it('offers a new-note composer button', () => {
     render(<NotesTab application={app()} />)
-    expect(screen.getByText('notes.new')).toBeInTheDocument()
+    // Icon-only add trigger (28-07): the label is now its accessible name.
+    expect(screen.getByRole('button', { name: 'notes.new' })).toBeInTheDocument()
   })
 
   it('does not render the drawer-owned timeline/conversations sections here', () => {
@@ -45,7 +46,8 @@ describe('applications NotesTab (shared reuse)', () => {
     mockPost.mockRejectedValue({ response: { status: 422, data: { message: 'Notitie opslaan mislukt' } } })
     const user = userEvent.setup()
     render(<NotesTab application={app()} />)
-    await user.click(screen.getByText('notes.new'))
+    // Icon-only add trigger (28-07): the label is now its accessible name.
+    await user.click(screen.getByRole('button', { name: 'notes.new' }))
     await user.click(screen.getByRole('button', { name: 'notes.save' }))
     // The optimistic note was added, then the rejected POST must remove it again —
     // the empty state returns instead of a fake "saved" note staying on screen.

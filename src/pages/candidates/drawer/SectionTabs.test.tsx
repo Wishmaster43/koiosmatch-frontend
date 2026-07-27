@@ -69,7 +69,8 @@ describe('EducationTab · "Nog in opleiding" checkbox label (C-11 regression gua
   it('keeps its own label text stable through check → uncheck → recheck', async () => {
     const user = userEvent.setup()
     render(<EducationTab items={[]} onAdd={vi.fn()} />)
-    await user.click(screen.getByText(/Toevoegen/))
+    // Icon-only add trigger (28-07): the label is now its accessible name.
+    await user.click(screen.getByRole('button', { name: /Toevoegen/ }))
     const checkbox = screen.getByRole('checkbox')
 
     expect(screen.getByText('Nog in opleiding')).toBeInTheDocument()

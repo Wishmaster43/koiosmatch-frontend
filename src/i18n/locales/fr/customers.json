@@ -94,7 +94,7 @@
     "textsTitle": "Textes",
     "website": "Site web",
     "employeeCount": "Employés",
-    "toneOfVoice": "Tonalité",
+    "toneOfVoice": "Ton de communication",
     "industry": "Secteur",
     "debtorNumber": "Numéro de débiteur",
     "city": "Ville",
@@ -114,7 +114,7 @@
   },
   "locations": {
     "empty": "Aucun site pour le moment",
-    "add": "Ajouter un site",
+    "add": "Nouveau site",
     "searchPlaceholder": "Rechercher un site…",
     "col": {
       "name": "Nom",
@@ -162,7 +162,7 @@
   },
   "departments": {
     "empty": "Aucun service pour le moment",
-    "add": "Ajouter un service",
+    "add": "Nouveau service",
     "searchPlaceholder": "Rechercher un service…",
     "col": {
       "name": "Nom",
@@ -189,7 +189,7 @@
   },
   "contacts": {
     "empty": "Aucun contact pour le moment",
-    "add": "Ajouter un contact",
+    "add": "Nouveau contact",
     "searchPlaceholder": "Rechercher un contact…",
     "col": {
       "name": "Nom",
@@ -279,7 +279,7 @@
   },
   "documents": {
     "empty": "Aucun document pour le moment.",
-    "add": "Ajouter",
+    "add": "Document",
     "search": "Rechercher",
     "docType": "Type de document",
     "pendingCount_one": "{{count}} fichier sélectionné",
@@ -300,7 +300,7 @@
     "deleteSelected": "Supprimer ({{count}})"
   },
   "priceAgreements": {
-    "add": "Ajouter un accord tarifaire",
+    "add": "Nouvel accord tarifaire",
     "any": "Tous",
     "function": "Fonction",
     "cao": "Convention collective",

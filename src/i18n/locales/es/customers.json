@@ -114,7 +114,7 @@
   },
   "locations": {
     "empty": "Aún no hay ubicaciones",
-    "add": "Añadir ubicación",
+    "add": "Nueva ubicación",
     "searchPlaceholder": "Buscar ubicación…",
     "col": {
       "name": "Nombre",
@@ -162,7 +162,7 @@
   },
   "departments": {
     "empty": "Aún no hay departamentos",
-    "add": "Añadir departamento",
+    "add": "Nuevo departamento",
     "searchPlaceholder": "Buscar departamento…",
     "col": {
       "name": "Nombre",
@@ -189,7 +189,7 @@
   },
   "contacts": {
     "empty": "Aún no hay contactos",
-    "add": "Añadir contacto",
+    "add": "Nuevo contacto",
     "searchPlaceholder": "Buscar contacto…",
     "col": {
       "name": "Nombre",
@@ -279,7 +279,7 @@
   },
   "documents": {
     "empty": "Aún no hay documentos.",
-    "add": "Añadir",
+    "add": "Documento",
     "search": "Buscar",
     "docType": "Tipo de documento",
     "pendingCount_one": "{{count}} archivo seleccionado",
@@ -300,7 +300,7 @@
     "deleteSelected": "Eliminar ({{count}})"
   },
   "priceAgreements": {
-    "add": "Añadir acuerdo de tarifas",
+    "add": "Nuevo acuerdo de precios",
     "any": "Todos",
     "function": "Función",
     "cao": "Convenio colectivo",

@@ -13,7 +13,7 @@ import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
-import { SelectField, CheckboxField, DateField } from './fields'
+import { CheckboxField, DateField } from './fields'
 import { useDateFormat } from '@/lib/datetime'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import type { ChipOption } from '@/components/ui/ChipMultiSelect'
@@ -85,6 +85,13 @@ interface EditableFieldTableProps {
   onCancel?: () => void
 }
 
+// Normalise FieldRow options for the searchable picker: it matches on text, so a
+// ReactNode label (used by a few icon rows) falls back to the raw value.
+const selectOptions = (options: FieldRow['options']): Array<{ value: string; label: string }> =>
+  (options ?? []).map(o => (typeof o === 'string'
+    ? { value: o, label: o }
+    : { value: o.value, label: typeof o.label === 'string' ? o.label : o.value }))
+
 export default function EditableFieldTable({
   title, fields, value = {}, onSave, labelWidth = 130, editButton = 'header',
   editing: editingProp, onStartEdit, onCancel,
@@ -122,7 +129,12 @@ export default function EditableFieldTable({
   const renderControl = (f: FieldRow) => {
     const v = form[f.key]
     if (f.type === 'checkbox') return <CheckboxField checked={Boolean(v)} onChange={val => setF(f.key, val)} />
-    if (f.type === 'select')   return <SelectField value={v as string | undefined} onChange={val => setF(f.key, val)} options={f.options} placeholder={t('select')} style={compact} />
+    // Every drawer picker is SEARCHABLE (Danny 28-07: "status/land/provincie is geen
+    // zoekbare dropdown"). This one line covers status, land, provincie, branche and
+    // vestiging on every entity that uses this table — a native <select> forces you to
+    // scroll a 200-item country list. allowCreate stays off: these are tenant lookups,
+    // adding a value belongs in Settings, not in a record's edit row.
+    if (f.type === 'select')   return <CreatableSelect value={(v as string) ?? ''} onChange={val => setF(f.key, val)} options={selectOptions(f.options)} placeholder={t('select')} allowCreate={false} />
     if (f.type === 'creatable') {
       // Lookup combobox that can also add a free-text value (tenant `allowCreate`).
       const opts = (f.options ?? []).map(o => (typeof o === 'string' ? o : { value: o.value, label: String(o.label ?? o.value) }))
