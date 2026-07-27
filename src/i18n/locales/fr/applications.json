@@ -314,7 +314,7 @@
     "defaultSubject": "Candidat {kandidaat} proposé pour {vacature}",
     "defaultBody": "<p>Cher/Chère {contact},</p><p>Je souhaite vous proposer {kandidaat} pour le poste {vacature} chez {klant}.</p><p>Cordialement,<br/>{recruiter}</p>",
     "historyTitle": "Historique des propositions",
-    "sentOn": "Envoyé le {{date}}",
+    "sentOn": "Enregistré le {{date}}",
     "openedOn": "Ouvert le {{date}}",
     "openCount": "ouvert {{count}}x",
     "notOpenedYet": "Pas encore ouvert",

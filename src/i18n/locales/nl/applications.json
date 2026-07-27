@@ -325,7 +325,7 @@
     "defaultSubject": "Kandidaat {kandidaat} voorgesteld voor {vacature}",
     "defaultBody": "<p>Beste {contact},</p><p>Graag stel ik u {kandidaat} voor de functie {vacature} bij {klant} voor.</p><p>Met vriendelijke groet,<br/>{recruiter}</p>",
     "historyTitle": "Voorstelgeschiedenis",
-    "sentOn": "Verstuurd op {{date}}",
+    "sentOn": "Vastgelegd op {{date}}",
     "openedOn": "Geopend op {{date}}",
     "openCount": "{{count}}x geopend",
     "notOpenedYet": "Nog niet geopend",

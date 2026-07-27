@@ -325,7 +325,7 @@
     "defaultSubject": "Candidate {kandidaat} proposed for {vacature}",
     "defaultBody": "<p>Dear {contact},</p><p>I would like to propose {kandidaat} for the {vacature} role at {klant}.</p><p>Kind regards,<br/>{recruiter}</p>",
     "historyTitle": "Proposal history",
-    "sentOn": "Sent on {{date}}",
+    "sentOn": "Recorded on {{date}}",
     "openedOn": "Opened on {{date}}",
     "openCount": "opened {{count}}x",
     "notOpenedYet": "Not opened yet",

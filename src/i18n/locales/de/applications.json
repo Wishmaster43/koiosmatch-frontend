@@ -314,7 +314,7 @@
     "defaultSubject": "Kandidat {kandidaat} für {vacature} vorgeschlagen",
     "defaultBody": "<p>Liebe(r) {contact},</p><p>ich möchte Ihnen {kandidaat} für die Position {vacature} bei {klant} vorschlagen.</p><p>Mit freundlichen Grüßen,<br/>{recruiter}</p>",
     "historyTitle": "Vorschlagsverlauf",
-    "sentOn": "Gesendet am {{date}}",
+    "sentOn": "Festgehalten am {{date}}",
     "openedOn": "Geöffnet am {{date}}",
     "openCount": "{{count}}x geöffnet",
     "notOpenedYet": "Noch nicht geöffnet",
