@@ -639,6 +639,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/exports/candidates.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /exports/candidates.csv — all visible candidates (list columns). */
+        get: operations["getExportsCandidatesCsv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exports/leads.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /exports/leads.csv — candidates in a LEAD phase (flag-driven, never a hardcoded slug). */
+        get: operations["getExportsLeadsCsv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exports/applications.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /exports/applications.csv — all visible applications (list columns). */
+        get: operations["getExportsApplicationsCsv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exports/vacancies.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /exports/vacancies.csv — all visible vacancies (list columns). */
+        get: operations["getExportsVacanciesCsv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exports/customers.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /exports/customers.csv — all visible customers (list columns). */
+        get: operations["getExportsCustomersCsv"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/whatsapp/webhook": {
         parameters: {
             query?: never;
@@ -958,7 +1043,6 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** GET /conversations — paginated list, newest activity first, with filters. */
         get: operations["getConversations"];
         put?: never;
         post?: never;
@@ -1340,6 +1424,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/ai/interview-flows": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /ai/interview-flows — the tenant's flows ({id, name, active}) for the
+         *     agent flow-picker. Runs inside the tenant context; no cross-tenant leak.
+         */
+        get: operations["getAiInterviewFlows"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/contact/auth/login": {
         parameters: {
             query?: never;
@@ -1493,6 +1597,53 @@ export interface paths {
         };
         /** GET /admin/jobs/list — individual pending/reserved jobs, filterable + paginated (max 100/page). */
         get: operations["getAdminJobsList"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/jobs/recent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /admin/jobs/recent — TAAKBEHEER-HORIZON-1 fase 1: the recent jobs out of
+         *     Horizon's own repository (completed + failed + in-flight), tag-filtered per
+         *     tenant/jobnaam. Metadata ONLY — jobnaam, queue, tenant-/workflow-tag, status,
+         *     tijden, duur; the payload itself never leaves this endpoint (§6/§9). Horizon
+         *     trims this window (~1 uur recent) — the runs/audit-trail remain the long
+         *     history; this answers "wat gebeurde er net" (Danny 24-07: 284 geocodes wél
+         *     gedraaid maar onvindbaar op het bord).
+         */
+        get: operations["getAdminJobsRecent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/jobs/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /admin/jobs/metrics — TAAKBEHEER-HORIZON-1 fase 2: Horizon's own snapshotted
+         *     metrics (throughput + average runtime) per measured job and per measured queue.
+         * @description Snapshots are written every 5 minutes by `horizon:snapshot` (see routes/console.php);
+         *     metadata only — job/queue names + numbers, no payload/PII.
+         */
+        get: operations["getAdminJobsMetrics"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1681,6 +1832,76 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/proposals/{tenant}/{proposal}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+                /** @example architecto */
+                proposal: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET (signed, UNAUTHENTICATED) /proposals/{tenant}/{proposal}
+         * @description Revoked or soft-deleted proposals are dead ends (410): once withdrawn, the
+         *     link must never render data again — this is the whole point of a revocable
+         *     link over a PDF attachment (Danny 2026-07-24, health-data proposal).
+         */
+        get: operations["getProposalsTenantProposal"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/facebook/webhook/{tenant}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+            };
+            cookie?: never;
+        };
+        /** GET /facebook/webhook/{tenant} — Meta's hub.challenge handshake. */
+        get: operations["getFacebookWebhookTenant"];
+        put?: never;
+        /** POST /facebook/webhook/{tenant} — ingest leadgen events, one job per lead. */
+        post: operations["postFacebookWebhookTenant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/webhook/{tenant}/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+                /** @example architecto */
+                token: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /ai/webhook/{tenant}/{token} — start the agent's coupled workflows. */
+        post: operations["postAiWebhookTenantToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/public/{any}": {
         parameters: {
             query?: never;
@@ -1696,6 +1917,26 @@ export interface paths {
         post?: never;
         delete?: never;
         options: operations["optionsPublicAny"];
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/public/{tenant}/site": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+            };
+            cookie?: never;
+        };
+        /** GET /public/{tenant}/site — the career page's branding block. */
+        get: operations["getPublicTenantSite"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -2227,6 +2468,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/files/tenant-banner/{tenant}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+            };
+            cookie?: never;
+        };
+        /** GET (signed) /files/tenant-banner/{tenant} — stream the banner (same CSP hardening). */
+        get: operations["getFilesTenantBannerTenant"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/settings": {
         parameters: {
             query?: never;
@@ -2256,6 +2517,28 @@ export interface paths {
         put?: never;
         /** POST /settings/logo — replace the tenant logo with an uploaded image. */
         post: operations["postSettingsLogo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/banner": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /settings/banner (BANNER-UPLOAD-1) — replace the tenant's company banner.
+         * @description Mirrors the logo flow exactly: private-disk path persisted (`company_banner_path`),
+         *     a short-lived signed URL minted on read — never a static/public path, and never
+         *     the FE's old session-local blob: string (the bug this endpoint replaces).
+         */
+        post: operations["postSettingsBanner"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2421,7 +2704,7 @@ export interface paths {
         get?: never;
         put: operations["putProvincesId"];
         post?: never;
-        /** DELETE — 409 while any candidate still carries the province name. */
+        /** DELETE — 409 { in_use: true } while any candidate/vacancy still carries the province name (same helper as index). */
         delete: operations["deleteProvincesId"];
         options?: never;
         head?: never;
@@ -3007,6 +3290,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/candidate-blacklist-reasons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET — name-ordered list; every row carries an `in_use` flag (false when nothing references it). */
+        get: operations["getCandidateBlacklistReasons"];
+        put?: never;
+        post: operations["postCandidateBlacklistReasons"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/candidate-blacklist-reasons/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the candidate blacklist reason.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get: operations["getCandidateBlacklistReasonsId"];
+        put: operations["putCandidateBlacklistReasonsId"];
+        post?: never;
+        /** DELETE — 409 when still referenced (only if a source is declared). */
+        delete: operations["deleteCandidateBlacklistReasonsId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/blacklist-reasons": {
         parameters: {
             query?: never;
@@ -3250,6 +3573,29 @@ export interface paths {
         head?: never;
         /** PATCH /candidates/{candidate} — update profile + the 3 layers. */
         patch: operations["patchCandidatesCandidate"];
+        trace?: never;
+    };
+    "/api/candidates/{candidate}/geocode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                candidate: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /candidates/{id}/geocode — GEO-REGEOCODE-1: re-run PDOK geocoding for this candidate. */
+        post: operations["postCandidatesCandidateGeocode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/candidates/{candidate}/restore": {
@@ -3571,8 +3917,26 @@ export interface paths {
          * POST /candidates/bulk/phase — promote a batch to a phase. A candidate missing a
          *     required field for the target phase (C-29) is skipped, not promoted — so the
          *     { updated, skipped } split drives the FE's honest "X of Y promoted" reconcile.
+         * @description `skipped` carries WHY (not_found / already_on_phase / missing_required_field).
          */
         post: operations["postCandidatesBulkPhase"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/candidates/bulk/geocode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /candidates/bulk/geocode — GEO-REGEOCODE-1: re-run PDOK geocoding for a batch. */
+        post: operations["postCandidatesBulkGeocode"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3606,10 +3970,11 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * POST /candidates/bulk/funnel-stage — move each candidate's LATEST application to
-         *     the given funnel stage (BULK-2). Semantics = the single PATCH /applications/{id}
-         *     with phase_key: MatchMaker sync + the stage_changed event fire per real move; a
-         *     candidate without an application is `skipped`.
+         * POST /candidates/bulk/funnel-stage — move each candidate's SOLE live application
+         *     to the given funnel stage (BULK-2, BULK-FUNNEL-SOLE-1). Semantics = the single
+         *     PATCH /applications/{id} with phase_key: MatchMaker sync + the stage_changed
+         *     event fire per real move. `skipped` carries WHY (not_found / no_application /
+         *     multiple_applications / already_on_stage — see CandidateBulkService).
          */
         post: operations["postCandidatesBulkFunnelStage"];
         delete?: never;
@@ -5186,6 +5551,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/locations/{location}/geocode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The location.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                location: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /locations/{location}/geocode — GEO-REGEOCODE-1: re-run PDOK geocoding for this establishment. */
+        post: operations["postLocationsLocationGeocode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/customers": {
         parameters: {
             query?: never;
@@ -5362,6 +5750,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/customers/{customer}/geocode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                customer: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /customers/{customer}/geocode — GEO-REGEOCODE-1: re-run PDOK geocoding for this customer. */
+        post: operations["postCustomersCustomerGeocode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/customers/bulk/owner": {
         parameters: {
             query?: never;
@@ -5373,6 +5784,23 @@ export interface paths {
         put?: never;
         /** POST /customers/bulk/owner — reassign the account manager for a batch. */
         post: operations["postCustomersBulkOwner"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/bulk/geocode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /customers/bulk/geocode — GEO-REGEOCODE-1: re-run PDOK geocoding for a batch. */
+        post: operations["postCustomersBulkGeocode"];
         delete?: never;
         options?: never;
         head?: never;
@@ -6342,6 +6770,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/ai/koios/model": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /ai/koios/model — the tenant picks its ONE active model (AI-MODEL-CHOICE-1).
+         * @description Validated against the selectable list; stored as tenant setting; audited.
+         */
+        put: operations["putAiKoiosModel"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ai/koios/usage": {
         parameters: {
             query?: never;
@@ -6351,6 +6799,67 @@ export interface paths {
         };
         /** GET /ai/koios/usage?period=today|month — the own organisation's usage. */
         get: operations["getAiKoiosUsage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/koios/usage/daily": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /ai/koios/usage/daily?period=today|month — dag×categorie voor de verbruiksgrafiek. */
+        get: operations["getAiKoiosUsageDaily"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/koios/usage/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /ai/koios/usage/summary?period=today|month — period totals + per-category
+         *     breakdown for the usage dashboard tile. Read-only aggregate only — no plan/
+         *     credit/auto-topup/billing fields (that model is a separate Danny decision).
+         */
+        get: operations["getAiKoiosUsageSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ai/koios/usage/budget": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * USAGE-LIMITS-1: GET /ai/koios/usage/budget — the standing monthly budget/limit
+         *     state for the Gebruik & limieten screen: {status ok|warn|blocked, spent_cents,
+         *     limit_cents, pct_used}. Read-only; the limit is set via the koios_ai.monthly_budget_cents
+         *     setting (may only lower the platform cap). Auto-topup/credits are a separate billing
+         *     decision (needs a payment provider) — deliberately NOT here.
+         */
+        get: operations["getAiKoiosUsageBudget"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6848,6 +7357,80 @@ export interface paths {
         post?: never;
         /** DELETE /{id} — 409 while still referenced. */
         delete: operations["deleteContractTypesId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/vacancies/{id}/candidate-matches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** GET /vacancies/{id}/candidate-matches — eligible candidates, scored best-first. */
+        get: operations["getVacanciesIdCandidateMatches"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/vacancies/{id}/candidate-matches/refresh-advice": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /vacancies/{id}/candidate-matches/refresh-advice — fase 3: queue ONE
+         *     batched Koios verdict run over this vacancy's best matches (ShouldBeUnique
+         *     dedups concurrent refreshes; route throttled). 202: the poll/GET picks the
+         *     cached verdicts up once the job lands.
+         */
+        post: operations["postVacanciesIdCandidateMatchesRefreshAdvice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/candidates/{id}/vacancy-matches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the candidate.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** GET /candidates/{id}/vacancy-matches — open vacancies scored for this candidate. */
+        get: operations["getCandidatesIdVacancyMatches"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -7810,33 +8393,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/public/{tenant}/vacancies/{ref}/apply": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                tenant: string;
-                /** @example architecto */
-                ref: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * `$tenant` is unused directly (InitializeTenancyByParameter already resolved
-         *     it) but MUST stay declared: Laravel splices class-type args in by
-         *     POSITION then calls the method positionally — dropping the leading route
-         *     parameter here would silently bind the tenant's value into `$ref` instead.
-         */
-        post: operations["postPublicTenantVacanciesRefApply"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/public/{tenant}/feeds/indeed.xml": {
         parameters: {
             query?: never;
@@ -8443,6 +8999,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/applications/{application}/proposals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        /** GET /applications/{id}/proposals — newest first, never emits subject/body. */
+        get: operations["getApplicationsApplicationProposals"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/applications/{application}/reject": {
         parameters: {
             query?: never;
@@ -8519,7 +9098,53 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/applications/{application}/start-interview": {
+    "/api/applications/{application}/propose": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /applications/{id}/propose — snapshot the contact + send. */
+        post: operations["postApplicationsApplicationPropose"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/proposals/{proposal}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The proposal.
+                 * @example architecto
+                 */
+                proposal: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /proposals/{id}/revoke — idempotent: already-revoked stays revoked, no error. */
+        post: operations["postProposalsProposalRevoke"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application}/stop-interview": {
         parameters: {
             query?: never;
             header?: never;
@@ -8535,15 +9160,123 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * POST /applications/{id}/start-interview — start a WhatsApp AI-interview run for
-         *     this sollicitatie (WA-INTERVIEW-1). Business logic lives in InterviewStarter; a
-         *     second start while a run already waits on the conversation is a 409, not a race.
+         * INTERVIEW-STOP-1: POST /applications/{id}/stop-interview — recruiter takeover.
+         * @description Pauses the AI so the human answers; the engine never auto-resumes a paused session
+         *     (see InterviewEngine::handleInbound). Idempotent; reversible via resume-interview.
          */
-        post: operations["postApplicationsApplicationStartInterview"];
+        post: operations["postApplicationsApplicationStopInterview"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application}/resume-interview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** INTERVIEW-STOP-1: POST /applications/{id}/resume-interview — hand the flow back to the AI. */
+        post: operations["postApplicationsApplicationResumeInterview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application}/interview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * INTERVIEW-PERAPP-1: POST /applications/{id}/interview {agent_id} — start the AI interview
+         *     for THIS application with a CHOSEN agent (its own flow), independent of the vacancy's
+         *     coupled agent. Returns the live interview block (id + agent). A candidate that already has
+         *     an (open) session gets that session back (200); a guard skip is a 422 with the reason.
+         */
+        post: operations["postApplicationsApplicationInterview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/vacancies/{vacancy}/start-interviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The vacancy.
+                 * @example architecto
+                 */
+                vacancy: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * INTERVIEW-BACKFILL-1: POST /vacancies/{id}/start-interviews — start the AI interview for
+         *     every ELIGIBLE existing applicant of a vacancy (coupling an agent only auto-starts NEW
+         *     applications). Sends real WhatsApp, so the FE confirms first (AVG, no auto-fire).
+         * @description Idempotent + guard-driven; reports per application what happened.
+         */
+        post: operations["postVacanciesVacancyStartInterviews"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{application}/rejection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * PATCH /applications/{id}/rejection — APP-REJECTION-EDIT-1: correct the reason
+         *     and/or internal note of an ALREADY rejected application. Writes ONLY
+         *     rejection_reason_id/rejection_note — never the stage, never re-delivers (the
+         *     candidate must NOT get a second rejection message). 404 when the application
+         *     isn't currently rejected — there is nothing to correct.
+         */
+        patch: operations["patchApplicationsApplicationRejection"];
         trace?: never;
     };
     "/api/applications/{application}/restore": {
@@ -9427,6 +10160,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/vacancies/{vacancy}/leads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The vacancy.
+                 * @example architecto
+                 */
+                vacancy: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET /vacancies/{id}/leads — candidates with an appointment tied to this vacancy
+         *     but no application to it yet (VAC-LEADS-1). Existence check first so a stray id
+         *     from another tenant 404s instead of silently returning an empty page.
+         */
+        get: operations["getVacanciesVacancyLeads"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/vacancies/{vacancy}/geocode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The vacancy.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                vacancy: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /vacancies/{id}/geocode — GEO-REGEOCODE-1: re-run PDOK geocoding for this vacancy. */
+        post: operations["postVacanciesVacancyGeocode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/vacancies/{vacancy}/restore": {
         parameters: {
             query?: never;
@@ -9902,6 +10685,135 @@ export interface paths {
         post?: never;
         /** DELETE /vacancy-channels/{id} — 409 while still published on. */
         delete: operations["deleteVacancyChannelsId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/vacancy-generation-profiles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getVacancyGenerationProfiles"];
+        put?: never;
+        post: operations["postVacancyGenerationProfiles"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/vacancy-generation-profiles/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /vacancy-generation-profiles/reorder — set priority by the given id order. */
+        put: operations["putVacancyGenerationProfilesReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/vacancy-generation-profiles/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy generation profile.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["putVacancyGenerationProfilesId"];
+        post?: never;
+        delete: operations["deleteVacancyGenerationProfilesId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/vacancy-content-blocks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getVacancyContentBlocks"];
+        put?: never;
+        post: operations["postVacancyContentBlocks"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/vacancy-content-blocks/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy content block.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["putVacancyContentBlocksId"];
+        post?: never;
+        delete: operations["deleteVacancyContentBlocksId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/vacancy-generation-profiles/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /vacancy-generation-profiles/resolve?location_id=&contract_type=&function=&industry=
+         *     → the best-matching profile + specificity + which dims matched (transparency chip).
+         */
+        get: operations["getVacancyGenerationProfilesResolve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/vacancies/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["postVacanciesGenerate"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -10541,12 +11453,12 @@ export interface operations {
                     location_id?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     to?: string;
                     /**
@@ -10622,7 +11534,7 @@ export interface operations {
                     type?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     scheduled_at: string;
                     /**
@@ -10631,7 +11543,7 @@ export interface operations {
                      */
                     duration_min?: number | null;
                     /**
-                     * @example office
+                     * @example remote
                      * @enum {string|null}
                      */
                     modality?: "office" | "remote" | "phone" | null;
@@ -10649,15 +11561,20 @@ export interface operations {
                      * @description Must be a valid UUID. Must match an existing stored value.
                      * @example c90237e9-ced5-3af6-88ea-84aeaa148878
                      */
+                    vacancy_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
+                     */
                     location_id?: string | null;
                     /**
-                     * @example cancelled
+                     * @example planned
                      * @enum {string}
                      */
                     status?: "planned" | "completed" | "no_show" | "cancelled";
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example i
+                     * @example v
                      */
                     source?: string | null;
                     /** @example architecto */
@@ -10747,7 +11664,7 @@ export interface operations {
                     type?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     scheduled_at?: string;
                     /**
@@ -10774,15 +11691,20 @@ export interface operations {
                      * @description Must be a valid UUID. Must match an existing stored value.
                      * @example c90237e9-ced5-3af6-88ea-84aeaa148878
                      */
+                    vacancy_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
+                     */
                     location_id?: string | null;
                     /**
-                     * @example completed
+                     * @example planned
                      * @enum {string}
                      */
                     status?: "planned" | "completed" | "no_show" | "cancelled";
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example i
+                     * @example v
                      */
                     source?: string | null;
                     /** @example architecto */
@@ -10831,7 +11753,7 @@ export interface operations {
                      */
                     ids?: string[];
                     /**
-                     * @example helloflex
+                     * @example shiftmanager
                      * @enum {string}
                      */
                     system: "helloflex" | "shiftmanager";
@@ -10871,7 +11793,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example helloflex
+                     * @example shiftmanager
                      * @enum {string}
                      */
                     system: "helloflex" | "shiftmanager";
@@ -10976,7 +11898,7 @@ export interface operations {
                      */
                     name: string;
                     /**
-                     * @example pro
+                     * @example enterprise
                      * @enum {string}
                      */
                     plan: "flex" | "pro" | "enterprise";
@@ -11210,6 +12132,11 @@ export interface operations {
                      * @example architecto
                      */
                     tenant_id?: string;
+                    /**
+                     * @description AGENT-META-SETUP (Danny): the FE asks "agent aanmaken?" — default yes.
+                     * @example true
+                     */
+                    create_agent?: boolean;
                 };
             };
         };
@@ -11701,9 +12628,9 @@ export interface operations {
                          * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
                          */
                         location_id: string;
-                        /** @example false */
+                        /** @example true */
                         can_view?: boolean;
-                        /** @example false */
+                        /** @example true */
                         can_update?: boolean;
                         /** @example false */
                         can_delete?: boolean;
@@ -11855,6 +12782,116 @@ export interface operations {
                 };
             };
         };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getExportsCandidatesCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getExportsLeadsCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getExportsApplicationsCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getExportsVacanciesCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getExportsCustomersCsv: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -12056,7 +13093,7 @@ export interface operations {
                     /** @example architecto */
                     webhook_verify_token?: string | null;
                     /**
-                     * @example meta
+                     * @example 360dialog
                      * @enum {string}
                      */
                     provider?: "meta" | "360dialog";
@@ -12133,7 +13170,7 @@ export interface operations {
                     /** @example architecto */
                     webhook_verify_token?: string;
                     /**
-                     * @example 360dialog
+                     * @example meta
                      * @enum {string}
                      */
                     provider?: "meta" | "360dialog";
@@ -12622,7 +13659,7 @@ export interface operations {
                     state_ai_flexplanner?: string;
                     /** @example 16 */
                     failed_attempts?: number;
-                    /** @example true */
+                    /** @example false */
                     escalated?: boolean;
                 };
             };
@@ -12694,7 +13731,7 @@ export interface operations {
                     /** @example architecto */
                     context_wamid?: string | null;
                     /**
-                     * @example outbound
+                     * @example inbound
                      * @enum {string}
                      */
                     direction: "inbound" | "outbound";
@@ -12706,7 +13743,7 @@ export interface operations {
                     message_content?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:17
                      */
                     sent_at?: string;
                     /**
@@ -12842,7 +13879,7 @@ export interface operations {
                     "application/json": {
                         /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
                         message?: string;
-                        /** @example 21 */
+                        /** @example 53 */
                         retry_after?: number;
                     };
                 };
@@ -12878,7 +13915,7 @@ export interface operations {
                     "application/json": {
                         /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
                         message?: string;
-                        /** @example 21 */
+                        /** @example 53 */
                         retry_after?: number;
                     };
                 };
@@ -12903,16 +13940,16 @@ export interface operations {
             };
         };
         responses: {
-            401: {
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @example Sessie verlopen. Log opnieuw in. */
+                        /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
                         message?: string;
-                        /** @example invalid */
-                        reason?: string;
+                        /** @example 53 */
+                        retry_after?: number;
                     };
                 };
             };
@@ -12936,16 +13973,16 @@ export interface operations {
             };
         };
         responses: {
-            401: {
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @example Sessie verlopen. Log opnieuw in. */
+                        /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
                         message?: string;
-                        /** @example invalid */
-                        reason?: string;
+                        /** @example 53 */
+                        retry_after?: number;
                     };
                 };
             };
@@ -13034,7 +14071,7 @@ export interface operations {
                     message_id?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:48
+                     * @example 2026-07-27T18:29:15
                      */
                     sent_at?: string | null;
                 };
@@ -13199,7 +14236,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example in
+                     * @example out
                      * @enum {string}
                      */
                     direction?: "in" | "out" | "inbound" | "outbound";
@@ -13263,6 +14300,28 @@ export interface operations {
             };
         };
     };
+    getAiInterviewFlows: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     postContactAuthLogin: {
         parameters: {
             query?: never;
@@ -13292,7 +14351,7 @@ export interface operations {
                     "application/json": {
                         /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
                         message?: string;
-                        /** @example 21 */
+                        /** @example 53 */
                         retry_after?: number;
                     };
                 };
@@ -13315,14 +14374,16 @@ export interface operations {
             };
         };
         responses: {
-            404: {
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @example Onbekend portaal. */
+                        /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
                         message?: string;
+                        /** @example 53 */
+                        retry_after?: number;
                     };
                 };
             };
@@ -13570,6 +14631,70 @@ export interface operations {
                 };
             };
         };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getAdminJobsRecent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example b
+                     */
+                    tenant?: string;
+                    /**
+                     * @description Must not be greater than 190 characters.
+                     * @example n
+                     */
+                    job?: string;
+                    /**
+                     * @description Must be at least 1. Must not be greater than 200.
+                     * @example 7
+                     */
+                    limit?: number;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getAdminJobsMetrics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -13854,6 +14979,122 @@ export interface operations {
             };
         };
     };
+    getProposalsTenantProposal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+                /** @example architecto */
+                proposal: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Invalid signature. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getFacebookWebhookTenant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
+                        message?: string;
+                        /** @example 53 */
+                        retry_after?: number;
+                    };
+                };
+            };
+        };
+    };
+    postFacebookWebhookTenant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @example null */
+                    entry?: {
+                        /** @example null */
+                        changes?: Record<string, never>;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Geweigerd */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postAiWebhookTenantToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+                /** @example architecto */
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Geweigerd */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     optionsPublicAny: {
         parameters: {
             query?: never;
@@ -13872,6 +15113,31 @@ export interface operations {
                 };
                 content: {
                     "text/plain": string;
+                };
+            };
+        };
+    };
+    getPublicTenantSite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Onbekend bureau. */
+                        message?: string;
+                    };
                 };
             };
         };
@@ -14882,17 +16148,47 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            302: {
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "text/plain": string;
+                    "application/json": {
+                        /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
+                        message?: string;
+                        /** @example 54 */
+                        retry_after?: number;
+                    };
                 };
             };
         };
     };
     getFilesTenantLogoTenant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Invalid signature. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getFilesTenantBannerTenant: {
         parameters: {
             query?: never;
             header?: never;
@@ -14976,6 +16272,38 @@ export interface operations {
                      * @description Must be a file. Must not be greater than 2048 kilobytes.
                      */
                     logo: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postSettingsBanner: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description Must be a file. Must not be greater than 4096 kilobytes.
+                     */
+                    banner: string;
                 };
             };
         };
@@ -15466,7 +16794,7 @@ export interface operations {
                      */
                     contract_guid: string;
                     /**
-                     * @example sent
+                     * @example active
                      * @enum {string}
                      */
                     status: "sent" | "active" | "ended";
@@ -15618,7 +16946,7 @@ export interface operations {
                      */
                     admin_url?: string | null;
                     /**
-                     * @example company_token
+                     * @example oauth2
                      * @enum {string}
                      */
                     auth_type?: "bearer_token" | "oauth2" | "api_key" | "company_token";
@@ -15743,7 +17071,7 @@ export interface operations {
                     description?: string | null;
                     /**
                      * @description Opt-in: when true, callers MUST send a valid HMAC X-Signature header.
-                     * @example true
+                     * @example false
                      */
                     require_signature?: boolean;
                 };
@@ -15902,11 +17230,11 @@ export interface operations {
                     url: string;
                     /**
                      * @example [
-                     *       "match.created"
+                     *       "candidate.reactivated"
                      *     ]
                      */
-                    events?: ("candidate.created" | "candidate.status_changed" | "candidate.reactivated" | "application.created" | "application.stage_changed" | "match.created" | "match.updated" | "match.deleted" | "vacancy.created" | "vacancy.status_changed" | "task.created" | "appointment.created" | "message.received" | "message.sent")[];
-                    /** @example true */
+                    events?: ("candidate.created" | "candidate.status_changed" | "candidate.reactivated" | "application.created" | "application.stage_changed" | "match.created" | "match.updated" | "match.deleted" | "vacancy.created" | "vacancy.status_changed" | "task.created" | "appointment.created" | "message.received" | "message.sent" | "backoffice.link.updated" | "ai_agent.webhook_received")[];
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -15981,10 +17309,10 @@ export interface operations {
                     url?: string;
                     /**
                      * @example [
-                     *       "application.created"
+                     *       "vacancy.status_changed"
                      *     ]
                      */
-                    events?: ("candidate.created" | "candidate.status_changed" | "candidate.reactivated" | "application.created" | "application.stage_changed" | "match.created" | "match.updated" | "match.deleted" | "vacancy.created" | "vacancy.status_changed" | "task.created" | "appointment.created" | "message.received" | "message.sent")[];
+                    events?: ("candidate.created" | "candidate.status_changed" | "candidate.reactivated" | "application.created" | "application.stage_changed" | "match.created" | "match.updated" | "match.deleted" | "vacancy.created" | "vacancy.status_changed" | "task.created" | "appointment.created" | "message.received" | "message.sent" | "backoffice.link.updated" | "ai_agent.webhook_received")[];
                     /** @example false */
                     active?: boolean;
                 };
@@ -16126,7 +17454,7 @@ export interface operations {
                      */
                     friendly_name: string;
                     /**
-                     * @example primary
+                     * @example additional
                      * @enum {string}
                      */
                     type: "primary" | "additional";
@@ -16158,7 +17486,7 @@ export interface operations {
                     allowed_ips?: string[];
                     /**
                      * @example [
-                     *       "read_write"
+                     *       "read"
                      *     ]
                      */
                     scopes?: ("read" | "read_write")[];
@@ -16234,7 +17562,7 @@ export interface operations {
                      */
                     type?: "primary" | "additional";
                     /**
-                     * @example active
+                     * @example disabled
                      * @enum {string}
                      */
                     status?: "active" | "disabled";
@@ -16356,7 +17684,7 @@ export interface operations {
                     /** @example architecto */
                     entity_type: string;
                     /**
-                     * @example sm_id
+                     * @example hf_id
                      * @enum {string}
                      */
                     field: "sm_id" | "hf_id" | "aelio_id" | "elanza_id" | "intus_id";
@@ -16638,7 +17966,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     order?: number;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -16858,6 +18186,134 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the candidate rejection reason.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCandidateBlacklistReasons: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCandidateBlacklistReasons: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCandidateBlacklistReasonsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the candidate blacklist reason.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putCandidateBlacklistReasonsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the candidate blacklist reason.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteCandidateBlacklistReasonsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the candidate blacklist reason.
                  * @example architecto
                  */
                 id: string;
@@ -17323,7 +18779,7 @@ export interface operations {
                     mobile?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     date_of_birth?: string | null;
                     /**
@@ -17362,20 +18818,35 @@ export interface operations {
                      */
                     province?: string | null;
                     /**
-                     * @description Must not be greater than 255 characters.
+                     * @description Must not be greater than 120 characters.
                      * @example e
+                     */
+                    country?: string | null;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example w
                      */
                     function_title?: string | null;
                     /** @example architecto */
                     summary?: string | null;
                     /**
+                     * @description Must not be greater than 64 characters.
+                     * @example n
+                     */
+                    source?: string | null;
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example g
+                     */
+                    facebook_leads_id?: string | null;
+                    /**
                      * @description Must be a valid UUID.
-                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
                      */
                     owner_id?: string | null;
                     /**
                      * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
+                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
                      */
                     location_id?: string | null;
                     /**
@@ -17395,7 +18866,7 @@ export interface operations {
                     status_reason?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     available_again_date?: string | null;
                     /**
@@ -17412,12 +18883,14 @@ export interface operations {
                     candidate_types?: string[];
                     /** @example null */
                     consent?: {
-                        /** @example false */
+                        /** @example true */
                         whatsapp_opt_in?: boolean;
-                        /** @example false */
+                        /** @example true */
                         email_opt_in?: boolean;
                         /** @example false */
                         newsletter_opt_in?: boolean;
+                        /** @example true */
+                        retention_opt_in?: boolean;
                     };
                     /** @example null */
                     custom_fields?: Record<string, never> | null;
@@ -17627,7 +19100,7 @@ export interface operations {
                     mobile?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     date_of_birth?: string | null;
                     /**
@@ -17666,20 +19139,35 @@ export interface operations {
                      */
                     province?: string | null;
                     /**
-                     * @description Must not be greater than 255 characters.
+                     * @description Must not be greater than 120 characters.
                      * @example e
+                     */
+                    country?: string | null;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example w
                      */
                     function_title?: string | null;
                     /** @example architecto */
                     summary?: string | null;
                     /**
+                     * @description Must not be greater than 64 characters.
+                     * @example n
+                     */
+                    source?: string | null;
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example g
+                     */
+                    facebook_leads_id?: string | null;
+                    /**
                      * @description Must be a valid UUID.
-                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
                      */
                     owner_id?: string | null;
                     /**
                      * @description Must be a valid UUID. Must match an existing stored value.
-                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
+                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
                      */
                     location_id?: string | null;
                     /**
@@ -17699,7 +19187,7 @@ export interface operations {
                     status_reason?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     available_again_date?: string | null;
                     /**
@@ -17718,10 +19206,12 @@ export interface operations {
                     consent?: {
                         /** @example true */
                         whatsapp_opt_in?: boolean;
-                        /** @example false */
+                        /** @example true */
                         email_opt_in?: boolean;
                         /** @example false */
                         newsletter_opt_in?: boolean;
+                        /** @example true */
+                        retention_opt_in?: boolean;
                     };
                     /** @example null */
                     custom_fields?: Record<string, never> | null;
@@ -17739,6 +19229,34 @@ export interface operations {
                 };
             };
         };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCandidatesCandidateGeocode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                candidate: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -18103,6 +19621,28 @@ export interface operations {
         };
     };
     postCandidatesBulkPhase: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCandidatesBulkGeocode: {
         parameters: {
             query?: never;
             header?: never;
@@ -20517,7 +22057,7 @@ export interface operations {
                     type?: "static" | "dynamic" | "ai";
                     /** @example null */
                     criteria?: Record<string, never> | null;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -20708,7 +22248,7 @@ export interface operations {
                     currency?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     expected_close_at?: string | null;
                     /**
@@ -20738,12 +22278,12 @@ export interface operations {
                     hours_period?: "week" | "month" | "total" | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2052-08-12
+                     * @example 2052-08-19
                      */
                     end_date?: string | null;
                     /**
@@ -20890,7 +22430,7 @@ export interface operations {
                     currency?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     expected_close_at?: string | null;
                     /**
@@ -20920,12 +22460,12 @@ export interface operations {
                     hours_period?: "week" | "month" | "total" | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2052-08-12
+                     * @example 2052-08-19
                      */
                     end_date?: string | null;
                     /**
@@ -21447,7 +22987,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     order?: number;
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                 };
             };
@@ -21532,7 +23072,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     order?: number;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -21861,6 +23401,34 @@ export interface operations {
             };
         };
     };
+    postLocationsLocationGeocode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The location.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                location: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getCustomers: {
         parameters: {
             query?: never;
@@ -21964,9 +23532,9 @@ export interface operations {
                     city?: string | null;
                     /** @example true */
                     hide_company_name?: boolean;
-                    /** @example true */
+                    /** @example false */
                     has_career_page?: boolean;
-                    /** @example true */
+                    /** @example false */
                     show_in_my_vacancies?: boolean;
                     /** @example true */
                     exclude_from_sourcing?: boolean;
@@ -22153,7 +23721,7 @@ export interface operations {
                     hide_company_name?: boolean;
                     /** @example false */
                     has_career_page?: boolean;
-                    /** @example false */
+                    /** @example true */
                     show_in_my_vacancies?: boolean;
                     /** @example false */
                     exclude_from_sourcing?: boolean;
@@ -22356,7 +23924,57 @@ export interface operations {
             };
         };
     };
+    postCustomersCustomerGeocode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                customer: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     postCustomersBulkOwner: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersBulkGeocode: {
         parameters: {
             query?: never;
             header?: never;
@@ -23738,11 +25356,19 @@ export interface operations {
                      * @example b
                      */
                     name: string;
-                    /** @example architecto */
-                    model?: string;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     */
+                    interview_flow_id?: string | null;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example z
+                     */
+                    wa_intro_template?: string | null;
                     /**
                      * @description Must be a valid URL.
-                     * @example http://bailey.com/
+                     * @example http://rempel.com/sunt-nihil-accusantium-harum-mollitia
                      */
                     custom_endpoint?: string | null;
                     /** @example architecto */
@@ -23759,7 +25385,7 @@ export interface operations {
                      *     ]
                      */
                     faq_ids?: string[];
-                    /** @example false */
+                    /** @example true */
                     use_knowledge?: boolean;
                     /**
                      * @description Must be at least 1. Must not be greater than 50.
@@ -24153,11 +25779,19 @@ export interface operations {
                      * @example b
                      */
                     name?: string;
-                    /** @example architecto */
-                    model?: string;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     */
+                    interview_flow_id?: string | null;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example z
+                     */
+                    wa_intro_template?: string | null;
                     /**
                      * @description Must be a valid URL.
-                     * @example http://bailey.com/
+                     * @example http://rempel.com/sunt-nihil-accusantium-harum-mollitia
                      */
                     custom_endpoint?: string | null;
                     /** @example architecto */
@@ -24453,7 +26087,7 @@ export interface operations {
                     model?: string;
                     /**
                      * @description Confirmation of the cost estimate (the confirm_costs reply).
-                     * @example true
+                     * @example false
                      */
                     confirm_costs?: boolean;
                     /**
@@ -24508,7 +26142,102 @@ export interface operations {
             };
         };
     };
+    putAiKoiosModel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @example architecto */
+                    model: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getAiKoiosUsage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getAiKoiosUsageDaily: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getAiKoiosUsageSummary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getAiKoiosUsageBudget: {
         parameters: {
             query?: never;
             header?: never;
@@ -24996,12 +26725,12 @@ export interface operations {
                     contract_type?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2052-08-12
+                     * @example 2052-08-19
                      */
                     end_date?: string | null;
                     /**
@@ -25115,7 +26844,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example open
+                     * @example closed
                      * @enum {string}
                      */
                     status?: "open" | "closed";
@@ -25163,12 +26892,12 @@ export interface operations {
                     contract_type?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2052-08-12
+                     * @example 2052-08-19
                      */
                     end_date?: string | null;
                     /**
@@ -25347,12 +27076,12 @@ export interface operations {
                     hours_per_week?: number | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     start_date: string;
                     /**
                      * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2052-08-12
+                     * @example 2052-08-19
                      */
                     end_date?: string | null;
                     /**
@@ -25861,6 +27590,172 @@ export interface operations {
             };
         };
     };
+    getVacanciesIdCandidateMatches: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be at least 1. Must not be greater than 300.
+                     * @example 1
+                     */
+                    radius?: number | null;
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example [
+                     *       "n"
+                     *     ]
+                     */
+                    status?: string[];
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example [
+                     *       "g"
+                     *     ]
+                     */
+                    function_title?: string[];
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example [
+                     *       "z"
+                     *     ]
+                     */
+                    contract_form?: string[];
+                    /**
+                     * @description Must be at least 1.
+                     * @example 27
+                     */
+                    page?: number;
+                    /**
+                     * @description Must be at least 1. Must not be greater than 100.
+                     * @example 15
+                     */
+                    per_page?: number;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postVacanciesIdCandidateMatchesRefreshAdvice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getCandidatesIdVacancyMatches: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the candidate.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be at least 1. Must not be greater than 300.
+                     * @example 1
+                     */
+                    radius?: number | null;
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example [
+                     *       "n"
+                     *     ]
+                     */
+                    status?: string[];
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example [
+                     *       "g"
+                     *     ]
+                     */
+                    function_title?: string[];
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example [
+                     *       "z"
+                     *     ]
+                     */
+                    contract_form?: string[];
+                    /**
+                     * @description Must be at least 1.
+                     * @example 27
+                     */
+                    page?: number;
+                    /**
+                     * @description Must be at least 1. Must not be greater than 100.
+                     * @example 15
+                     */
+                    per_page?: number;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getOutreachCampaigns: {
         parameters: {
             query?: never;
@@ -25904,7 +27799,7 @@ export interface operations {
                      */
                     channel: "call" | "email" | "whatsapp";
                     /**
-                     * @example draft
+                     * @example done
                      * @enum {string}
                      */
                     status?: "draft" | "active" | "done";
@@ -25986,12 +27881,12 @@ export interface operations {
                      */
                     name?: string;
                     /**
-                     * @example email
+                     * @example call
                      * @enum {string}
                      */
                     channel?: "call" | "email" | "whatsapp";
                     /**
-                     * @example draft
+                     * @example done
                      * @enum {string}
                      */
                     status?: "draft" | "active" | "done";
@@ -26123,7 +28018,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example contacted
+                     * @example skipped
                      * @enum {string}
                      */
                     status: "todo" | "contacted" | "skipped" | "answered";
@@ -26480,7 +28375,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example email
+                     * @example whatsapp
                      * @enum {string}
                      */
                     default_channel: "email" | "whatsapp";
@@ -26636,18 +28531,18 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example week
+                     * @example day
                      * @enum {string}
                      */
                     bucket?: "day" | "week" | "month";
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     to?: string;
                     /**
@@ -26832,12 +28727,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     to?: string;
                 };
@@ -27260,12 +29155,12 @@ export interface operations {
                     function?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:17
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:17
                      */
                     to?: string;
                     /** @example true */
@@ -27422,12 +29317,12 @@ export interface operations {
                     status?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:17
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:17
                      */
                     to?: string;
                     /**
@@ -27554,12 +29449,12 @@ export interface operations {
                     status?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:17
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:17
                      */
                     to?: string;
                     /**
@@ -27869,72 +29764,6 @@ export interface operations {
             };
         };
     };
-    postPublicTenantVacanciesRefApply: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                tenant: string;
-                /** @example architecto */
-                ref: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /**
-                     * @description Must not be greater than 100 characters.
-                     * @example b
-                     */
-                    first_name: string;
-                    /**
-                     * @description Must not be greater than 100 characters.
-                     * @example n
-                     */
-                    last_name: string;
-                    /**
-                     * @description Must be a valid email address. Must not be greater than 255 characters.
-                     * @example ashly64@example.com
-                     */
-                    email: string;
-                    /**
-                     * @description Must not be greater than 32 characters.
-                     * @example v
-                     */
-                    phone: string;
-                    /**
-                     * @description Must not be greater than 5000 characters.
-                     * @example d
-                     */
-                    motivation?: string | null;
-                    /**
-                     * Format: binary
-                     * @description Must be a file. Must not be greater than 5120 kilobytes.
-                     */
-                    cv?: string | null;
-                    /** @example architecto */
-                    website?: string | null;
-                };
-            };
-        };
-        responses: {
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
-                        message?: string;
-                        /** @example 21 */
-                        retry_after?: number;
-                    };
-                };
-            };
-        };
-    };
     getPublicTenantFeedsIndeedXml: {
         parameters: {
             query?: never;
@@ -27947,14 +29776,16 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            404: {
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @example Onbekend bureau. */
+                        /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
                         message?: string;
+                        /** @example 53 */
+                        retry_after?: number;
                     };
                 };
             };
@@ -27972,14 +29803,16 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            404: {
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @example Onbekend bureau. */
+                        /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
                         message?: string;
+                        /** @example 53 */
+                        retry_after?: number;
                     };
                 };
             };
@@ -27997,14 +29830,16 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            404: {
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @example Onbekend bureau. */
+                        /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
                         message?: string;
+                        /** @example 53 */
+                        retry_after?: number;
                     };
                 };
             };
@@ -28072,7 +29907,7 @@ export interface operations {
                 "application/json": {
                     /** @example true */
                     ai_enabled?: boolean;
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                 };
             };
@@ -28906,10 +30741,15 @@ export interface operations {
                      * @description Must be a valid UUID. Must match an existing stored value.
                      * @example c90237e9-ced5-3af6-88ea-84aeaa148878
                      */
+                    rejection_reason_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
+                     */
                     vacancy_id?: string | null;
                     /**
                      * @description Must be a valid UUID.
-                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
+                     * @example 21c4122b-d554-3723-966c-6d723ea5293f
                      */
                     owner_id?: string | null;
                     /**
@@ -28992,6 +30832,34 @@ export interface operations {
             };
         };
     };
+    getApplicationsApplicationProposals: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     postApplicationsApplicationReject: {
         parameters: {
             query?: never;
@@ -29016,7 +30884,7 @@ export interface operations {
                     /** @example architecto */
                     note?: string | null;
                     /**
-                     * @example email
+                     * @example whatsapp
                      * @enum {string|null}
                      */
                     channel?: "email" | "whatsapp" | null;
@@ -29117,7 +30985,7 @@ export interface operations {
             };
         };
     };
-    postApplicationsApplicationStartInterview: {
+    postApplicationsApplicationPropose: {
         parameters: {
             query?: never;
             header?: never;
@@ -29134,15 +31002,218 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @description Must not be greater than 100 characters.
-                     * @example b
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
                      */
-                    recruiter: string;
+                    contact_id: string;
                     /**
-                     * @description Must not be greater than 500 characters.
-                     * @example n
+                     * @description Must not be greater than 64 characters.
+                     * @example g
                      */
-                    booking_link?: string | null;
+                    cv_variant?: string | null;
+                    /**
+                     * @description Must not be greater than 5000 characters.
+                     * @example z
+                     */
+                    subject?: string | null;
+                    /**
+                     * @description Must not be greater than 5000 characters.
+                     * @example m
+                     */
+                    body?: string | null;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postProposalsProposalRevoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The proposal.
+                 * @example architecto
+                 */
+                proposal: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postApplicationsApplicationStopInterview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postApplicationsApplicationResumeInterview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postApplicationsApplicationInterview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    agent_id: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postVacanciesVacancyStartInterviews: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The vacancy.
+                 * @example architecto
+                 */
+                vacancy: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    patchApplicationsApplicationRejection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The application.
+                 * @example architecto
+                 */
+                application: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    reason_id?: string;
+                    /**
+                     * @description Must not be greater than 2000 characters.
+                     * @example g
+                     */
+                    note?: string | null;
                 };
             };
         };
@@ -29643,7 +31714,7 @@ export interface operations {
                     "application/json": {
                         /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
                         message?: string;
-                        /** @example 21 */
+                        /** @example 53 */
                         retry_after?: number;
                     };
                 };
@@ -29729,7 +31800,7 @@ export interface operations {
                     sort_order?: number;
                     /** @example true */
                     is_done?: boolean;
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                 };
             };
@@ -29950,9 +32021,9 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     sort_order?: number;
-                    /** @example true */
-                    is_done?: boolean;
                     /** @example false */
+                    is_done?: boolean;
+                    /** @example true */
                     active?: boolean;
                 };
             };
@@ -30060,7 +32131,7 @@ export interface operations {
                     icon?: string | null;
                     /** @example 16 */
                     sort_order?: number;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -30165,7 +32236,7 @@ export interface operations {
                     sort_order?: number;
                     /** @example false */
                     is_default?: boolean;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -30278,12 +32349,12 @@ export interface operations {
                     location_id?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     due_date?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>H:i</code>.
-                     * @example 15:34
+                     * @example 18:29
                      */
                     due_time?: string | null;
                     /**
@@ -30304,7 +32375,7 @@ export interface operations {
                     links?: {
                         /**
                          * @description This field is required when <code>links</code> is present.
-                         * @example contact
+                         * @example department
                          * @enum {string}
                          */
                         type?: "candidate" | "application" | "vacancy" | "match" | "customer" | "opportunity" | "location" | "department" | "contact" | "workflow";
@@ -30434,12 +32505,12 @@ export interface operations {
                     location_id?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     due_date?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>H:i</code>.
-                     * @example 15:34
+                     * @example 18:29
                      */
                     due_time?: string | null;
                     /**
@@ -30460,7 +32531,7 @@ export interface operations {
                     links?: {
                         /**
                          * @description This field is required when <code>links</code> is present.
-                         * @example opportunity
+                         * @example contact
                          * @enum {string}
                          */
                         type?: "candidate" | "application" | "vacancy" | "match" | "customer" | "opportunity" | "location" | "department" | "contact" | "workflow";
@@ -31001,54 +33072,69 @@ export interface operations {
                     contact_id?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2052-08-12
+                     * @example 2052-08-19
                      */
                     end_date?: string | null;
                     /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     */
+                    interview_flow_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
+                     */
+                    ai_agent_id?: string | null;
+                    /**
                      * @description Must not be greater than 255 characters.
-                     * @example n
+                     * @example i
                      */
                     category?: string | null;
                     /**
                      * @description Must not be greater than 255 characters.
-                     * @example g
+                     * @example y
                      */
                     location?: string | null;
                     /**
                      * @description Must not be greater than 255 characters.
-                     * @example z
+                     * @example v
                      */
                     street?: string | null;
                     /**
                      * @description Must not be greater than 20 characters.
-                     * @example miyvdljnikhwaykc
+                     * @example dljnikhwaykcmyuw
                      */
                     house_number?: string | null;
                     /**
                      * @description Must not be greater than 20 characters.
-                     * @example myuwpwlvqwrsitcp
+                     * @example pwlvqwrsitcpscql
                      */
                     house_number_suffix?: string | null;
                     /**
                      * @description Must not be greater than 20 characters.
-                     * @example scqldzsnrwtujwvl
+                     * @example dzsnrwtujwvlxjkl
                      */
                     postcode?: string | null;
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example x
+                     * @example q
                      */
                     city?: string | null;
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example j
+                     * @example p
                      */
                     province?: string | null;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example p
+                     */
+                    country?: string | null;
                     /**
                      * @description Must match an existing stored value.
                      * @example [
@@ -31433,54 +33519,69 @@ export interface operations {
                     contact_id?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-20T15:34:49
+                     * @example 2026-07-27T18:29:16
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2052-08-12
+                     * @example 2052-08-19
                      */
                     end_date?: string | null;
                     /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     */
+                    interview_flow_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID. Must match an existing stored value.
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
+                     */
+                    ai_agent_id?: string | null;
+                    /**
                      * @description Must not be greater than 255 characters.
-                     * @example n
+                     * @example i
                      */
                     category?: string | null;
                     /**
                      * @description Must not be greater than 255 characters.
-                     * @example g
+                     * @example y
                      */
                     location?: string | null;
                     /**
                      * @description Must not be greater than 255 characters.
-                     * @example z
+                     * @example v
                      */
                     street?: string | null;
                     /**
                      * @description Must not be greater than 20 characters.
-                     * @example miyvdljnikhwaykc
+                     * @example dljnikhwaykcmyuw
                      */
                     house_number?: string | null;
                     /**
                      * @description Must not be greater than 20 characters.
-                     * @example myuwpwlvqwrsitcp
+                     * @example pwlvqwrsitcpscql
                      */
                     house_number_suffix?: string | null;
                     /**
                      * @description Must not be greater than 20 characters.
-                     * @example scqldzsnrwtujwvl
+                     * @example dzsnrwtujwvlxjkl
                      */
                     postcode?: string | null;
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example x
+                     * @example q
                      */
                     city?: string | null;
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example j
+                     * @example p
                      */
                     province?: string | null;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example p
+                     */
+                    country?: string | null;
                     /**
                      * @description Must match an existing stored value.
                      * @example [
@@ -31597,6 +33698,62 @@ export interface operations {
                 /**
                  * @description The vacancy.
                  * @example architecto
+                 */
+                vacancy: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getVacanciesVacancyLeads: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The vacancy.
+                 * @example architecto
+                 */
+                vacancy: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postVacanciesVacancyGeocode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The vacancy.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
                  */
                 vacancy: string;
             };
@@ -32604,6 +34761,301 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getVacancyGenerationProfiles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postVacancyGenerationProfiles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putVacancyGenerationProfilesReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putVacancyGenerationProfilesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy generation profile.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteVacancyGenerationProfilesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy generation profile.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getVacancyContentBlocks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postVacancyContentBlocks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putVacancyContentBlocksId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy content block.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteVacancyContentBlocksId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy content block.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getVacancyGenerationProfilesResolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postVacanciesGenerate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    profile_id?: string | null;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
+                     */
+                    base_vacancy_id?: string | null;
+                    /** @example null */
+                    fields?: Record<string, never>;
+                };
+            };
+        };
         responses: {
             401: {
                 headers: {
