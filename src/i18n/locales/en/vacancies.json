@@ -26,7 +26,11 @@
     "client": "Client",
     "createdAt": "Created on",
     "aiAgent": "AI agent",
-    "leadsUnknown": "Not yet computed — open the vacancy to see the matching candidates."
+    "leadsUnknown": "Not yet computed — open the vacancy to see the matching candidates.",
+    "leadsStale": "Being recomputed — number as of {{date}}",
+    "leadsGeoMissing": "Without coordinates the radius could not be applied",
+    "leadsPartial": "Partially counted — a limit was hit",
+    "leadsComputedAt": "Updated on {{date}}"
   },
   "publishedState": {
     "yes": "Published",

@@ -34,10 +34,24 @@ export function useCandidateAdvice(): (c: Candidate) => KoiosAdvice | null {
     if (backendSource) {
       const backendAction = c.koiosAdvice?.action ?? 'none'
       if (backendAction === 'none') return null
+
+      // ADVICE-KEY-1: the deterministic backend engine sends the reason as an i18n
+      // KEY (e.g. "advice.reason.stale_contact"), never a rendered sentence — a raw
+      // pass-through would print the literal key on screen. Detect a key by shape
+      // (dotted, no whitespace) and resolve it through t(), interpolating the
+      // stale-contact threshold; the defaultValue falls back to the raw value
+      // (never an empty string) so an unrecognised/future key still shows something.
+      const rawReason = c.koiosAdvice?.reason ?? null
+      const looksLikeKey = typeof rawReason === 'string' && rawReason.includes('.') && !/\s/.test(rawReason)
+      const reason = looksLikeKey
+        ? t(rawReason as string, { months: staleMonths, defaultValue: rawReason as string })
+        : rawReason
+
       return {
         action: backendAction,
-        label: c.koiosAdvice?.label ?? null,
-        reason: c.koiosAdvice?.reason ?? null,
+        // No label from the backend yet → resolve it the same way as our own engine.
+        label: c.koiosAdvice?.label ?? t(`koios.actions.${backendAction}`),
+        reason,
         source: backendSource,
       }
     }

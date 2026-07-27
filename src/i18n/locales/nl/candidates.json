@@ -1025,5 +1025,13 @@
       "six_month_check": "Halfjaarcheck",
       "interview": "Interview"
     }
+  },
+  "advice": {
+    "reason": {
+      "never_contacted": "Nog nooit contact geweest — neem contact op om dit dossier te activeren.",
+      "stale_contact": "Langer dan {{months}} maanden geen contact geregistreerd — plan een belmoment.",
+      "lead_without_funnel": "Lead zonder sollicitatie — plan een intake om te kwalificeren.",
+      "no_pool": "Zit nog in geen enkele talentenpool — voeg toe zodat de kandidaat vindbaar is."
+    }
   }
 }

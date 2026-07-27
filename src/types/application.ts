@@ -5,6 +5,35 @@
  */
 import type { Id, Loose } from './common'
 
+/**
+ * APP-STAGE-DURATIONS-1 (landed): one entry per phase the application has
+ * passed through — chronological, `leftAt` null on the CURRENT stage. Backs
+ * the status strip's real "days in phase" line instead of guessing from the
+ * application's created date.
+ */
+export interface ApplicationStageDuration {
+  stageKey: string
+  stageLabel: string
+  enteredAt: string | null
+  leftAt: string | null
+  days: number | null
+}
+
+/**
+ * The linked Match summary (GET /applications/{id} → `match`), null when no
+ * Match hangs on this application yet. A Match is the continuation of a
+ * Hired application into a placement — this is a read-only summary, never
+ * the full Match record.
+ */
+export interface ApplicationMatchSummary {
+  id: Id
+  referenceNumber: string
+  statusLabel: string
+  statusColor: string
+  placementStart: string | null
+  placementEnd: string | null
+}
+
 /** Owner/recruiter chip on an application row. */
 export interface ApplicationOwner {
   id: Id | null
@@ -88,6 +117,10 @@ export interface Application {
   // INTERVIEW-PHASE-1: the live interview session's category + step progress,
   // null when the candidate has no session at all.
   interview: ApplicationInterview | null
+  // APP-STAGE-DURATIONS-1: the LIST contract's own timestamp for when the
+  // application entered its current phase — the status strip computes days
+  // from this when the richer `stageDurations` detail array isn't loaded yet.
+  currentStageEnteredAt: string | null
 }
 
 /** The enriched application model rendered by the drawer tabs. */
@@ -141,6 +174,14 @@ export interface ApplicationDetail extends Application {
   // ApplicationDetailResource — every field optional/nullable, null when the
   // backend sends no contact at all (no vacancy linked, or the vacancy has none).
   contact: { id: Id | null; name: string; email: string; phone: string } | null
+  // APP-STAGE-DURATIONS-1: chronological phase history, [] when the backend
+  // sends none — the status strip falls back through currentStageEnteredAt
+  // then the created-date line rather than ever fabricating a duration.
+  stageDurations: ApplicationStageDuration[]
+  // APP-MATCH-SUMMARY-1: the linked Match (Hired → placement), null when this
+  // application has no Match yet — the details card renders nothing for this
+  // row rather than a dash when it is absent.
+  match: ApplicationMatchSummary | null
 }
 
 /** A raw candidate as the API nests it under an application. */
@@ -182,7 +223,22 @@ export interface ApiApplication {
   reference_number?: string | null
   score?: number | null
   match_score?: number | null
-  match?: { overall?: number | null; criteria?: unknown[]; summary?: string }
+  // APP-MATCH-SUMMARY-1: the detail contract's linked Match, null when none
+  // hangs on the application. The older overall/criteria/summary fields feed
+  // the SEPARATE application-fit score (a different concept from the Match
+  // entity) — both live on the same raw key per the verified backend contract.
+  match?: {
+    overall?: number | null; criteria?: unknown[]; summary?: string
+    id?: Id; reference_number?: string; status_label?: string; status_color?: string
+    placement_start?: string | null; placement_end?: string | null
+  } | null
+  // APP-STAGE-DURATIONS-1: chronological phase history (detail only); the list
+  // contract sends `current_stage_entered_at` instead (below).
+  stage_durations?: Array<{
+    stage_key?: string; stage_label?: string; entered_at?: string | null; left_at?: string | null; days?: number | null
+  }>
+  // APP-STAGE-DURATIONS-1: list contract's own "entered current stage at" timestamp.
+  current_stage_entered_at?: string | null
   task?: string
   ai_task?: string
   ai?: { task?: string }

@@ -103,16 +103,34 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       render: r => {
         const known = typeof r.leadsCount === 'number'
         const label = known ? String(r.leadsCount) : '—'
-        const title = known ? undefined : t('columns.leadsUnknown')
+        // VACANCY-LEADS-COUNT-1: once the count IS known, tell the fuller truth
+        // about its freshness/completeness — stale wins over geo-missing wins
+        // over partial, so only the most relevant caveat shows at a time.
+        const state = r.matchCountState
+        let title = known ? undefined : t('columns.leadsUnknown')
+        let caveat: string | null = null
+        if (known && state) {
+          if (state.isStale) caveat = t('columns.leadsStale', { date: formatDate(state.computedAt) })
+          else if (state.geoMissing) caveat = t('columns.leadsGeoMissing')
+          else if (state.partial) caveat = t('columns.leadsPartial')
+          else if (state.computedAt) caveat = t('columns.leadsComputedAt', { date: formatDate(state.computedAt) })
+        }
+        if (caveat) title = caveat
+        // The caveat must ALSO be visible without hovering — a small muted dot
+        // carries the same message via aria-label, never tooltip-only (a11y).
+        const dot = caveat ? (
+          <span role="img" aria-label={caveat} title={caveat}
+            style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--text-muted)', marginLeft: 5 }} />
+        ) : null
         return onOpenCandidateSearch ? (
           <button type="button" style={{ ...leadsBtn, color: known ? 'var(--color-primary)' : 'var(--text-muted)' }}
             aria-label={t('columns.leadsOpenSearch')} title={title}
             onClick={e => { e.stopPropagation(); onOpenCandidateSearch(r.id as Id) }}
             onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
             onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
-            {label}
+            {label}{dot}
           </button>
-        ) : <span title={title} style={!known ? { color: 'var(--text-muted)' } : undefined}>{label}</span>
+        ) : <span title={title} style={!known ? { color: 'var(--text-muted)' } : undefined}>{label}{dot}</span>
       },
     },
     {

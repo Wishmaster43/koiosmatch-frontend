@@ -1,7 +1,19 @@
 import { initialsOf } from '@/lib/initials'
 import { toCoord } from '@/lib/coords'
 import type { Id, Loose } from '@/types/common'
-import type { ApiVacancy, Vacancy, VacancyDetail } from '@/types/vacancy'
+import type { ApiVacancy, MatchCountState, Vacancy, VacancyDetail } from '@/types/vacancy'
+
+// VACANCY-LEADS-COUNT-1: normalise the raw match-count provenance object,
+// defensively — a missing/null state means "never computed", not "fresh".
+const mapMatchCountState = (raw: ApiVacancy['match_count_state']): MatchCountState | null => {
+  if (!raw) return null
+  return {
+    computedAt: raw.computed_at ?? null,
+    isStale: Boolean(raw.is_stale),
+    geoMissing: Boolean(raw.geo_missing),
+    partial: Boolean(raw.partial),
+  }
+}
 
 // Sum the per-phase application counts into a single total.
 const sumPhases = (byPhase: Loose): number =>
@@ -46,6 +58,9 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
     // random number and never a fake zero. The day the backend ships the real
     // field, this column is correct with no further frontend change.
     leadsCount: typeof v.candidate_match_count === 'number' ? v.candidate_match_count : null,
+    // VACANCY-LEADS-COUNT-1: the count's provenance — defensive/camelCase, null
+    // when the backend never sent a state (count itself uncomputed).
+    matchCountState: mapMatchCountState(v.match_count_state),
     applicationsCount: v.applications_count ?? v.applicationsCount ?? sumPhases(byPhase),
     applicationsByPhase: byPhase,
     published: Boolean(v.published ?? false),

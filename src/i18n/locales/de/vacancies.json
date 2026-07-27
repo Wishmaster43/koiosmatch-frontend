@@ -26,7 +26,11 @@
     "client": "Kunde",
     "createdAt": "Erstellt am",
     "aiAgent": "KI-Agent",
-    "leadsUnknown": "Noch nicht berechnet — öffnen Sie die Vakanz, um die passenden Kandidaten zu sehen."
+    "leadsUnknown": "Noch nicht berechnet — öffnen Sie die Vakanz, um die passenden Kandidaten zu sehen.",
+    "leadsStale": "Wird neu berechnet — Zahl vom {{date}}",
+    "leadsGeoMissing": "Ohne Koordinaten konnte der Radius nicht angewendet werden",
+    "leadsPartial": "Teilweise gezählt — ein Limit wurde erreicht",
+    "leadsComputedAt": "Aktualisiert am {{date}}"
   },
   "publishedState": {
     "yes": "Veröffentlicht",

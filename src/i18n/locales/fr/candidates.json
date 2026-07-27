@@ -1025,5 +1025,13 @@
       "six_month_check": "Contrôle semestriel",
       "interview": "Entretien"
     }
+  },
+  "advice": {
+    "reason": {
+      "never_contacted": "Aucun contact n'a jamais été enregistré — contactez pour activer ce dossier.",
+      "stale_contact": "Aucun contact enregistré depuis plus de {{months}} mois — planifiez un appel.",
+      "lead_without_funnel": "Lead sans candidature — planifiez un entretien pour le qualifier.",
+      "no_pool": "Pas encore dans un vivier de talents — ajoutez-le pour qu'il soit trouvable."
+    }
   }
 }

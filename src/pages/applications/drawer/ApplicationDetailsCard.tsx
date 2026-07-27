@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
 import EntityLink from '@/components/ui/EntityLink'
 import SectionCard from '@/components/ui/SectionCard'
+import SoftChip from '@/components/ui/SoftChip'
+import { useDateFormat } from '@/lib/datetime'
 import VacancyLinkField from './VacancyLinkField'
 import { useVacancyLinkOptions } from '../hooks/useVacancyLinkOptions'
 import { rememberReturnTab } from './constants'
@@ -44,6 +46,7 @@ interface ApplicationDetailsCardProps {
  */
 export default function ApplicationDetailsCard({ application: a, onLinkVacancy, onUpdateSource }: ApplicationDetailsCardProps) {
   const { t } = useTranslation(['applications', 'common'])
+  const { formatDate } = useDateFormat()
   // In-place edit of the vacancy link + Bron (S7) — one shared pencil → picker/
   // input → diskette/✕ (§3A house pattern, mirrors KlantTab). Vacancy options
   // only load while editing.
@@ -141,6 +144,31 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
             </Field>
           )}
         </div>
+        {/* APP-MATCH-SUMMARY-1: the linked Match (Hired -> placement) — renders
+            NOTHING when the application has no Match at all, never a dash row
+            for an absent relation (mirrors the honest-gate convention above). */}
+        {a.match && (
+          <div style={{ gridColumn: '1 / -1' }}>
+            {/* The key is matchLabel, not match: 'drawer.match' does not exist and would
+                have rendered the literal key on screen (seam between two parallel changes). */}
+            <Field label={t('drawer.matchLabel')}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <EntityLink page="matches" id={a.match.id} title={t('drawer.openMatch')}>
+                  {a.match.referenceNumber || '—'}
+                </EntityLink>
+                <SoftChip label={a.match.statusLabel} color={a.match.statusColor} />
+              </div>
+              {a.match.placementStart && (
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>
+                  {t('drawer.placementPeriod', {
+                    start: formatDate(a.match.placementStart),
+                    end: a.match.placementEnd ? formatDate(a.match.placementEnd) : t('drawer.placementOngoing'),
+                  })}
+                </div>
+              )}
+            </Field>
+          </div>
+        )}
       </div>
     </SectionCard>
   )

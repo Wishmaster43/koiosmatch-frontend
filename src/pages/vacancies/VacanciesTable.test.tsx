@@ -127,6 +127,44 @@ describe('VacanciesTable · Leads sort puts unknown rows last (VACANCY-LEADS-COU
   })
 })
 
+describe('VacanciesTable · match count state caveats (VACANCY-LEADS-COUNT-1)', () => {
+  it('renders a stale-caveat dot with an aria-label alongside a known count', () => {
+    const staleRows = [
+      { id: 'v1', title: 'Verpleegkundige', leadsCount: 5, created: '2024-02-01', createdSort: '2024-02-01',
+        matchCountState: { computedAt: '2026-07-20', isStale: true, geoMissing: false, partial: false } },
+    ] as unknown as Vacancy[]
+    render(<VacanciesTable rows={staleRows} />)
+    // The caveat must be visible without hovering — an aria-label-carrying dot, not tooltip-only.
+    expect(screen.getByLabelText(nlVacancies.columns.leadsStale.replace('{{date}}', '2026-07-20'))).toBeInTheDocument()
+  })
+
+  it('renders the plain number with no caveat dot when the count carries no state', () => {
+    const plainRows = [
+      { id: 'v1', title: 'Verpleegkundige', leadsCount: 5, created: '2024-02-01', createdSort: '2024-02-01', matchCountState: null },
+    ] as unknown as Vacancy[]
+    const { container } = render(<VacanciesTable rows={plainRows} />)
+    expect(container.querySelector('[role="img"]')).not.toBeInTheDocument()
+  })
+
+  it('shows the geo-missing caveat when coordinates were unavailable', () => {
+    const geoRows = [
+      { id: 'v1', title: 'Verpleegkundige', leadsCount: 2, created: '2024-02-01', createdSort: '2024-02-01',
+        matchCountState: { computedAt: '2026-07-20', isStale: false, geoMissing: true, partial: false } },
+    ] as unknown as Vacancy[]
+    render(<VacanciesTable rows={geoRows} />)
+    expect(screen.getByLabelText(nlVacancies.columns.leadsGeoMissing)).toBeInTheDocument()
+  })
+
+  it('shows the partial caveat when a limit was hit', () => {
+    const partialRows = [
+      { id: 'v1', title: 'Verpleegkundige', leadsCount: 50, created: '2024-02-01', createdSort: '2024-02-01',
+        matchCountState: { computedAt: '2026-07-20', isStale: false, geoMissing: false, partial: true } },
+    ] as unknown as Vacancy[]
+    render(<VacanciesTable rows={partialRows} />)
+    expect(screen.getByLabelText(nlVacancies.columns.leadsPartial)).toBeInTheDocument()
+  })
+})
+
 describe('VacanciesTable · default sort (VAC-KPI-REDESIGN 22-07 meelift-fix)', () => {
   it('sorts newest-first by createdAt on first render — defaultSort must match the real column key', () => {
     // The column's real key is 'createdAt' (not 'created'); a stale defaultSort key

@@ -1025,5 +1025,13 @@
       "six_month_check": "Six-month check",
       "interview": "Interview"
     }
+  },
+  "advice": {
+    "reason": {
+      "never_contacted": "No contact has ever been logged — reach out to activate this dossier.",
+      "stale_contact": "No contact registered for more than {{months}} months — schedule a call.",
+      "lead_without_funnel": "Lead with no application — plan an intake to qualify them.",
+      "no_pool": "Not yet in any talent pool — add them so they can be found."
+    }
   }
 }

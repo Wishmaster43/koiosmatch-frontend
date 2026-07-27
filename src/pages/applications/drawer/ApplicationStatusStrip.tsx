@@ -57,27 +57,40 @@ interface ApplicationStatusStripProps {
  */
 export default function ApplicationStatusStrip({ application: a }: ApplicationStatusStripProps) {
   const { t } = useTranslation(['applications', 'common'])
-  const { formatDateTime } = useDateFormat()
+  const { formatDate, formatDateTime } = useDateFormat()
 
-  // CRITICAL (Danny 25-07 / measured): this is whole days since the application
-  // was CREATED (applied), never "time in this current phase" — the backend only
-  // exposes phase transitions as Dutch prose in the timeline today, so true phase
-  // duration is NOT derivable honestly. See APP-STAGE-DURATIONS-1 — once that ships
-  // a real phase-transition timestamp, this cell can switch to it.
+  // APP-STAGE-DURATIONS-1 (landed): the CURRENT stage's real entry timestamp,
+  // read off the chronological stage_durations array (leftAt === null marks
+  // the stage the application is in right now). Falls back to the list
+  // contract's own current_stage_entered_at when the richer array is empty
+  // (e.g. the drawer hasn't loaded the full detail yet), then to the
+  // created-date "in process" line, then an honest "unknown" — never claims
+  // days-since-created IS days-in-phase (that conflation was the old bug).
+  const currentStage = a.stageDurations?.find(s => s.leftAt === null)
+  const phaseEnteredAt = currentStage?.enteredAt ?? a.currentStageEnteredAt ?? null
+  const daysInPhase = currentStage?.days ?? daysSince(phaseEnteredAt ?? undefined)
   const daysInProcess = daysSince(a.created)
   const nextAppointment = nextFutureAppointment(a.appointments ?? [])
 
   return (
     <SectionCard title={t('status.title')}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 16 }}>
-        {/* Phase — soft chip + "in behandeling" days since applying (never "in fase"). */}
+        {/* Phase — soft chip + the TRUE time in this phase when stage_durations
+            (or its list-contract fallback timestamp) is available; only falls
+            back to the "in process" since-created line when neither exists —
+            the two must never be conflated (APP-STAGE-DURATIONS-1). */}
         <Cell label={t('status.phase')}>
           <SoftChip label={a.phaseLabel ?? a.phaseKey ?? '—'} color={a.phaseColor} />
-          <div style={mutedLine}>
-            {daysInProcess === null
-              ? t('status.inProcess')
-              : `${t('status.inProcess')} · ${t('status.days', { count: daysInProcess })}`}
-          </div>
+          {phaseEnteredAt != null ? (
+            <>
+              <div style={mutedLine}>{t('status.inPhase', { days: daysInPhase ?? 0, phase: a.phaseLabel ?? a.phaseKey ?? '' })}</div>
+              <div style={mutedLine}>{t('status.phaseSince', { date: formatDate(phaseEnteredAt) })}</div>
+            </>
+          ) : daysInProcess !== null ? (
+            <div style={mutedLine}>{`${t('status.inProcess')} · ${t('status.days', { count: daysInProcess })}`}</div>
+          ) : (
+            <div style={mutedLine}>{t('status.phaseUnknown')}</div>
+          )}
         </Cell>
 
         {/* Match score — same thresholds/colours as MatchScoreBlock. */}

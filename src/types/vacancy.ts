@@ -5,6 +5,15 @@
  */
 import type { Id, Loose } from './common'
 
+/** VACANCY-LEADS-COUNT-1: provenance of `leadsCount` — the 15-min/nightly worker's
+ * last run + why the number might not fully reflect reality right now. */
+export interface MatchCountState {
+  computedAt: string | null
+  isStale: boolean
+  geoMissing: boolean
+  partial: boolean
+}
+
 /** Owner/recruiter chip on a vacancy row. */
 export interface VacancyOwner {
   id: Id | null
@@ -40,6 +49,11 @@ export interface Vacancy {
   // mapper never fabricates a 0 or reads the seeded-random legacy field, so the
   // UI must render an honest "unknown" state instead of treating null as zero.
   leadsCount: number | null
+  // VACANCY-LEADS-COUNT-1 (2026-07-27): the count's provenance — null until the
+  // engine has ever run for this vacancy. When present, tells whether the shown
+  // number is stale/geo-incomplete/partial so the UI never presents a derived
+  // number as more certain than it is.
+  matchCountState?: MatchCountState | null
   applicationsCount: number
   applicationsByPhase: Loose
   published: boolean
@@ -157,6 +171,14 @@ export interface ApiVacancy {
   // VACANCY-LEADS-COUNT-1: the real match-count field, emitted once ticket
   // VACANCY-LEADS-COUNT-1 lands backend-side — the only field the mapper reads.
   candidate_match_count?: number
+  // VACANCY-LEADS-COUNT-1: the count's provenance, event-driven (15-min worker +
+  // nightly full run) — null when the count itself has never been computed.
+  match_count_state?: {
+    computed_at?: string | null
+    is_stale?: unknown
+    geo_missing?: unknown
+    partial?: unknown
+  } | null
   applications_count?: number
   applicationsCount?: number
   applications_by_phase?: Loose

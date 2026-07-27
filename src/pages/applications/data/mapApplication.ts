@@ -4,6 +4,7 @@ import type { Id, Loose } from '@/types/common'
 import type { LookupItem } from '@/context/LookupsContext'
 import type {
   ApiApplication, Application, ApplicationDetail, ApiAppCandidate, ApiAppVacancy, ApplicationInterview,
+  ApplicationStageDuration, ApplicationMatchSummary,
 } from '@/types/application'
 
 /**
@@ -105,6 +106,41 @@ export function mapApplication(a: ApiApplication = {}, funnelTypes: LookupItem[]
     // needed). Detached rows arrive only with `?include_archived=1`.
     archived: Boolean(a.archived ?? Boolean(a.deleted_at)),
     deletedAt: a.deleted_at ?? null,
+    // APP-STAGE-DURATIONS-1: the list contract's own "entered current stage" timestamp.
+    currentStageEnteredAt: a.current_stage_entered_at ?? null,
+  }
+}
+
+/**
+ * APP-STAGE-DURATIONS-1: raw stage-durations array → the UI model. Defensive
+ * per-entry reads so a missing field never crashes the strip; `days` stays
+ * null (never fabricated) when the backend omits it.
+ */
+export function mapStageDurations(raw?: ApiApplication['stage_durations']): ApplicationStageDuration[] {
+  return (raw ?? []).map(s => ({
+    stageKey: s.stage_key ?? '',
+    stageLabel: s.stage_label ?? '',
+    enteredAt: s.entered_at ?? null,
+    leftAt: s.left_at ?? null,
+    days: s.days ?? null,
+  }))
+}
+
+/**
+ * APP-MATCH-SUMMARY-1: raw `match` block → the linked-Match summary, null when
+ * the application has no Match (verified live: absent until Hired → Match).
+ * Only maps when the backend actually sends an id — the older overall/summary
+ * shape (no id) is NOT a Match and must not render as one.
+ */
+export function mapMatchSummary(raw?: ApiApplication['match']): ApplicationMatchSummary | null {
+  if (!raw || raw.id == null) return null
+  return {
+    id: raw.id,
+    referenceNumber: raw.reference_number ?? '',
+    statusLabel: raw.status_label ?? '',
+    statusColor: raw.status_color ?? 'var(--text-muted)',
+    placementStart: raw.placement_start ?? null,
+    placementEnd: raw.placement_end ?? null,
   }
 }
 
@@ -197,5 +233,9 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     contact: raw.contact
       ? { id: raw.contact.id ?? null, name: raw.contact.name ?? '', email: raw.contact.email ?? '', phone: raw.contact.phone ?? '' }
       : null,
+    // APP-STAGE-DURATIONS-1: chronological phase history, [] when absent.
+    stageDurations: mapStageDurations(raw.stage_durations),
+    // APP-MATCH-SUMMARY-1: the linked Match, null when none hangs on this application.
+    match: mapMatchSummary(raw.match),
   }
 }

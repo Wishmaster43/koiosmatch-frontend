@@ -1025,5 +1025,13 @@
       "six_month_check": "Revisión semestral",
       "interview": "Entrevista"
     }
+  },
+  "advice": {
+    "reason": {
+      "never_contacted": "Nunca se ha registrado contacto — contacte para activar este expediente.",
+      "stale_contact": "Sin contacto registrado desde hace más de {{months}} meses — programe una llamada.",
+      "lead_without_funnel": "Lead sin solicitud — planifique una entrevista para calificarlo.",
+      "no_pool": "Aún no está en ningún grupo de talento — añádalo para que sea localizable."
+    }
   }
 }

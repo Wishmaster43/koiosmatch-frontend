@@ -1025,5 +1025,13 @@
       "six_month_check": "Halbjahrescheck",
       "interview": "Interview"
     }
+  },
+  "advice": {
+    "reason": {
+      "never_contacted": "Es gab noch nie Kontakt — nehmen Sie Kontakt auf, um dieses Dossier zu aktivieren.",
+      "stale_contact": "Seit mehr als {{months}} Monaten kein Kontakt registriert — planen Sie einen Anruf.",
+      "lead_without_funnel": "Lead ohne Bewerbung — planen Sie ein Intake-Gespräch zur Qualifizierung.",
+      "no_pool": "Noch in keinem Talentpool — hinzufügen, damit der Kandidat auffindbar ist."
+    }
   }
 }

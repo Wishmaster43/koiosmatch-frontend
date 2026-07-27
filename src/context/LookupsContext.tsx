@@ -39,6 +39,10 @@ export interface LookupItem {
   // guard). Carried through so applications never fall back to hardcoded 'hired'/'rejected'
   // slug checks (A1 — the funnel-flags root-cause fix, 2026-07-15).
   is_match?: boolean; is_rejected?: boolean
+  // PROPOSE-STAGE-FLAG-1 (verified live 2026-07-27): the funnel row that represents
+  // "proposed to the customer" now carries is_proposal, so the proposal stage
+  // resolves by flag rather than the literal 'proposal' slug — a tenant may rename it.
+  is_proposal?: boolean
   [k: string]: unknown
 }
 
@@ -89,7 +93,7 @@ export const DEFAULT_PHASES: LookupItem[] = [
 export const DEFAULT_FUNNEL_TYPES: LookupItem[] = [
   { value: 'applied',  label: 'Gesolliciteerd',     color: '#94A3B8' },
   { value: 'invited',  label: 'Uitgenodigd/Intake', color: '#8C86D9', requires_appointment: true },
-  { value: 'proposal', label: 'Voorgesteld',        color: '#6FA8C4' },
+  { value: 'proposal', label: 'Voorgesteld',        color: '#6FA8C4', is_proposal: true },
   { value: 'hired',    label: 'Aangenomen',         color: '#79B58E', is_match: true },
   { value: 'rejected', label: 'Afgewezen',          color: '#D98A8A', is_rejected: true },
 ]
@@ -150,6 +154,8 @@ function normalize(raw: unknown, fallback: LookupItem[]): LookupItem[] {
       is_blacklist: flag(it, 'is_blacklist'),
       is_match: flag(it, 'is_match'),
       is_rejected: flag(it, 'is_rejected'),
+      // PROPOSE-STAGE-FLAG-1: same flag-resolution pattern as is_match/is_rejected.
+      is_proposal: flag(it, 'is_proposal'),
       is_default: flag(it, 'is_default') }))
 }
 

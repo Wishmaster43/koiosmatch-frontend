@@ -26,7 +26,11 @@
     "client": "Client",
     "createdAt": "Créé le",
     "aiAgent": "Agent IA",
-    "leadsUnknown": "Pas encore calculé — ouvrez la vacance pour voir les candidats correspondants."
+    "leadsUnknown": "Pas encore calculé — ouvrez la vacance pour voir les candidats correspondants.",
+    "leadsStale": "Recalcul en cours — chiffre du {{date}}",
+    "leadsGeoMissing": "Sans coordonnées, le rayon n'a pas pu être appliqué",
+    "leadsPartial": "Compté partiellement — une limite a été atteinte",
+    "leadsComputedAt": "Mis à jour le {{date}}"
   },
   "publishedState": {
     "yes": "Publié",

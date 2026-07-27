@@ -26,7 +26,11 @@
     "client": "Cliente",
     "createdAt": "Creada el",
     "aiAgent": "Agente IA",
-    "leadsUnknown": "Aún no calculado — abre la vacante para ver los candidatos que coinciden."
+    "leadsUnknown": "Aún no calculado — abre la vacante para ver los candidatos que coinciden.",
+    "leadsStale": "Recalculando — cifra del {{date}}",
+    "leadsGeoMissing": "Sin coordenadas no se pudo aplicar el radio",
+    "leadsPartial": "Contado parcialmente — se alcanzó un límite",
+    "leadsComputedAt": "Actualizado el {{date}}"
   },
   "publishedState": {
     "yes": "Publicada",

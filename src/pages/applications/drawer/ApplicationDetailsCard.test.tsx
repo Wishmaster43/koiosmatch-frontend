@@ -2,8 +2,11 @@
  * ApplicationDetailsCard — the framed Details block (Danny 25-07 c: Bron/Klant/
  * Locatie/Vacature used to float without a card, unlike Motivatie right below
  * it). Covers: the four existing fields render, the shared pencil opens the
- * edit inputs and saving calls both callbacks, and the new Contactpersoon row
- * (present with a phone/email second line, and a dash when absent — never crash).
+ * edit inputs and saving calls both callbacks, the Contactpersoon row (present
+ * with a phone/email second line, and a dash when absent — never crash), and
+ * the APP-MATCH-SUMMARY-1 Match row (link + status chip + placement period,
+ * rendered ONLY when the application actually carries a match — never a dash
+ * row for an absent relation).
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -15,6 +18,13 @@ import type { ApplicationDetail } from '@/types/application'
 // i18n instance's async-init timing flipping assertions between raw keys and
 // translated NL copy depending on run order.
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+// useDateFormat imports @/i18n, which needs a REAL react-i18next to initialise —
+// stub the whole module (mirrors ApplicationStatusStrip.test.tsx) so nothing
+// here touches the real singleton.
+vi.mock('@/lib/datetime', () => ({
+  useDateFormat: () => ({ formatDate: (d: unknown) => (d ? String(d) : '—'), formatDateTime: (d: unknown) => (d ? String(d) : '—') }),
+  useLocale: () => 'nl-NL',
+}))
 
 // The vacancy-link edit mode (useVacancyLinkOptions) fetches /vacancies — stub
 // the client so this file only tests the card's own wiring.
@@ -32,6 +42,7 @@ const app = (over: Partial<ApplicationDetail> = {}) => ({
     employmentType: '', location: 'Utrecht', salary: '', hours: '', experience: '', seniority: '',
     education: '', branch: '', category: '', skills: [], tags: [] },
   contact: null,
+  match: null,
   ...over,
 } as unknown as ApplicationDetail)
 
@@ -83,5 +94,37 @@ describe('ApplicationDetailsCard', () => {
   it('renders a dash and does not crash when there is no contact', () => {
     render(<ApplicationDetailsCard application={app({ contact: null })} />)
     expect(screen.getByText('drawer.contactPerson')).toBeInTheDocument()
+  })
+
+  it('renders the Match row with its reference/status/placement period when a match exists', () => {
+    render(<ApplicationDetailsCard application={app({
+      match: {
+        id: 'm1', referenceNumber: 'M-00042', statusLabel: 'Active',
+        // eslint-disable-next-line no-restricted-syntax -- DATA fixture (a tenant lookup colour), not a UI colour choice
+        statusColor: '#79B58E',
+        placementStart: '2026-08-01', placementEnd: '2026-09-01',
+      },
+    })} />)
+    expect(screen.getByText('M-00042')).toBeInTheDocument()
+    expect(screen.getByText('Active')).toBeInTheDocument()
+    expect(screen.getByText('drawer.placementPeriod')).toBeInTheDocument()
+  })
+
+  it('shows the ongoing placement label when the match has no end date', () => {
+    render(<ApplicationDetailsCard application={app({
+      match: {
+        id: 'm2', referenceNumber: 'M-00043', statusLabel: 'Active',
+        // eslint-disable-next-line no-restricted-syntax -- DATA fixture (a tenant lookup colour), not a UI colour choice
+        statusColor: '#79B58E',
+        placementStart: '2026-08-01', placementEnd: null,
+      },
+    })} />)
+    expect(screen.getByText('drawer.placementPeriod')).toBeInTheDocument()
+  })
+
+  it('renders NOTHING for the Match row when the application has no match', () => {
+    render(<ApplicationDetailsCard application={app({ match: null })} />)
+    expect(screen.queryByText(/drawer\.match/)).toBeNull()
+    expect(screen.queryByText(/drawer\.placementPeriod/)).toBeNull()
   })
 })

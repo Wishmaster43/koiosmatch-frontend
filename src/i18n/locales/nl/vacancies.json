@@ -26,7 +26,11 @@
     "client": "Klant",
     "createdAt": "Aangemaakt",
     "aiAgent": "AI-agent",
-    "leadsUnknown": "Nog niet berekend — open de vacature om de passende kandidaten te zien."
+    "leadsUnknown": "Nog niet berekend — open de vacature om de passende kandidaten te zien.",
+    "leadsStale": "Wordt opnieuw berekend — getal van {{date}}",
+    "leadsGeoMissing": "Zonder coördinaten kon de straal niet worden toegepast",
+    "leadsPartial": "Gedeeltelijk geteld — er is een limiet geraakt",
+    "leadsComputedAt": "Bijgewerkt op {{date}}"
   },
   "publishedState": {
     "yes": "Gepubliceerd",
