@@ -56,7 +56,10 @@ export default function MatchApprovalActions({
         <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{reason}</div>
       )}
 
-      {/* Reject reason prompt — required textarea, calm inline form. */}
+      {/* Reject reason prompt — required, calm inline form. A plain <textarea> is the
+          documented exception to the rich-text rule (§3A): this is a short structured
+          "why", not user-facing prose, and the backend stores it as a plain string —
+          exactly like DetachReasonModal and the candidate status-reason prompts. */}
       {rejectOpen && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: 8, borderRadius: 8,
           border: '1px solid var(--border)', background: 'var(--bg)' }}>
