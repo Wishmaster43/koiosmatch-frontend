@@ -7,10 +7,14 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import RadiusMapPanel, { type MapPoint } from '@/components/map/RadiusMapPanel'
+import { toCoord } from '@/lib/coords'
 import type { Id } from '@/types/common'
 
 // Minimal row shape — the settings section passes raw API rows (host file is .jsx).
-interface LocationRow { id?: Id; name?: string; city?: string; lat?: number | null; lng?: number | null }
+// lat/lng are deliberately `unknown`: the API sends DECIMALs as STRINGS, so typing
+// them as number would be a lie the compiler then helps enforce (§10). toCoord below
+// is the one place that coerces them.
+interface LocationRow { id?: Id; name?: string; city?: string; lat?: unknown; lng?: unknown }
 
 // Great-circle distance in km (haversine) — plenty precise for an office radius.
 function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
@@ -23,11 +27,17 @@ function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: numb
 export default function LocationsMapView({ locations }: { locations: LocationRow[] }) {
   const { t } = useTranslation('settings')
 
-  // All geocoded offices as map points (the backend fills lat/lng once an address is saved).
-  const allPoints: MapPoint[] = useMemo(() => locations
-    .filter(l => typeof l.lat === 'number' && typeof l.lng === 'number' && l.id != null)
-    .map(l => ({ id: l.id as Id, lat: l.lat as number, lng: l.lng as number, label: l.name || '—', sub: l.city || undefined })),
-  [locations])
+  // All geocoded offices as map points (the backend fills lat/lng once an address is
+  // saved). Coordinates go through toCoord, never `typeof x === 'number'`: this host
+  // passes RAW API rows and Laravel serialises DECIMAL columns as STRINGS, so the
+  // strict check silently dropped every geocoded office and left the map empty
+  // (same class as PDOK-LATLNG-1, §10 — the mappers were fixed, this view was missed).
+  const allPoints: MapPoint[] = useMemo(() => locations.flatMap(l => {
+    const lat = toCoord(l.lat), lng = toCoord(l.lng)
+    return lat !== null && lng !== null && l.id != null
+      ? [{ id: l.id as Id, lat, lng, label: l.name || '—', sub: l.city || undefined }]
+      : []
+  }), [locations])
 
   // Centre starts on the middle of the network (NL centroid fallback) with a wide
   // radius, so the whole office network is visible before the user narrows the search.
