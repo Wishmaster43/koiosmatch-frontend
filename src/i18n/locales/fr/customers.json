@@ -231,7 +231,8 @@
     },
     "filter": {
       "status": "Statut"
-    }
+    },
+    "add": "Nouvelle offre"
   },
   "opportunities": {
     "title": "Opportunités",

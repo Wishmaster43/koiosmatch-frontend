@@ -11,6 +11,10 @@
  */
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import AddVacancyModal from '@/pages/vacancies/AddVacancyModal'
+import { VacancyLookupsProvider } from '@/context/VacancyLookupsContext'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import StatusPill from '@/components/ui/StatusPill'
@@ -30,9 +34,13 @@ const SEED_STATUSES: StatusOpt[] = [
   { value: 'concept', label: 'Concept' }, { value: 'paused', label: 'Gepauzeerd' }, { value: 'closed', label: 'Gesloten' },
 ]
 
-export default function VacanciesTab({ customerId, params }: { customerId?: Id; params?: Record<string, unknown> }) {
+export default function VacanciesTab({ customerId, customerName, params }: { customerId?: Id; customerName?: string; params?: Record<string, unknown> }) {
   const { t } = useTranslation('customers')
   const { rows, loading } = useCustomerVacancies(customerId, params)
+  // Create a vacancy straight from the customer (Danny 28-07) — the client is fixed to
+  // this customer, so the modal shows it read-only instead of asking again.
+  const [adding, setAdding] = useState(false)
+  const queryClient = useQueryClient()
   const [statusOptions, setStatusOptions] = useState<StatusOpt[]>(SEED_STATUSES)
   // Defaults to just 'open' once the real lookup resolves; null = "not decided yet".
   const [selected, setSelected] = useState<string[] | null>(null)
@@ -73,10 +81,29 @@ export default function VacanciesTab({ customerId, params }: { customerId?: Id; 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ maxWidth: 220 }}>
-        <SearchSelectGroup group={{ key: 'status', label: t('vacancies.filter.status'), options: statusOptions, selected: activeSelected, onToggle: toggle }} />
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+        <div style={{ maxWidth: 220, flex: 1 }}>
+          <SearchSelectGroup group={{ key: 'status', label: t('vacancies.filter.status'), options: statusOptions, selected: activeSelected, onToggle: toggle }} />
+        </div>
+        <DrawerAddButton onClick={() => setAdding(true)} label={t('vacancies.add')} />
       </div>
       <DataTable columns={columns} rows={filteredRows} loading={loading} loadingText={t('page.loading')} emptyText={t('vacancies.empty')} />
+
+      {/* Refetch this customer's vacancy list on create, so the new row appears here. */}
+      {/* The modal reads useVacancyLookups, whose provider is only mounted around the
+          Vacancies PAGE — opening it from this drawer threw "must be used within a
+          VacancyLookupsProvider" (caught live 28-07). Mount the provider around the modal
+          itself so the same component works from either entry point. */}
+      {adding && (
+        <VacancyLookupsProvider>
+        <AddVacancyModal
+          onClose={() => setAdding(false)}
+          onCreated={() => { setAdding(false); queryClient.invalidateQueries({ queryKey: ['customers', customerId, 'vacancies'] }) }}
+          lockCustomerId={customerId != null ? String(customerId) : undefined}
+          lockCustomerName={customerName}
+        />
+        </VacancyLookupsProvider>
+      )}
     </div>
   )
 }

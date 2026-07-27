@@ -231,7 +231,8 @@
     },
     "filter": {
       "status": "Status"
-    }
+    },
+    "add": "Nieuwe vacature"
   },
   "opportunities": {
     "title": "Kansen",

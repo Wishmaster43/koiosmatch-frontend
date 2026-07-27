@@ -50,8 +50,13 @@ interface ModalCustomer { id: Id; name: string }
  * exist on this create form yet, so Plaatsing stays a single-field card for now;
  * see the delivery report).
  */
-export default function AddVacancyModal({ onClose, onCreated, users = [], customers = [] }: {
+export default function AddVacancyModal({ onClose, onCreated, users = [], customers = [], lockCustomerId, lockCustomerName }: {
   onClose: () => void; onCreated?: (v: Vacancy) => void; users?: ModalUser[]; customers?: ModalCustomer[]
+  // Opened from a customer drawer (Danny 28-07: "+ nieuwe vacature vanuit de klanten
+  // drill down"): the client is already known, so it is pre-filled and shown read-only
+  // instead of asking the recruiter to pick the customer they are already looking at.
+  // Mirrors AddDepartmentModal's lockLocationId.
+  lockCustomerId?: string; lockCustomerName?: string
 }) {
   const { t } = useTranslation(['vacancies', 'common'])
   const { statuses } = useVacancyLookups()
@@ -67,7 +72,7 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
   // failure shows something inline; modal stays open.
   const [createError, setCreateError] = useState<string | null>(null)
   const [form, setForm] = useState<VacancyForm>({
-    title: '', clientId: '', status: statuses[0]?.value ?? '', ownerId: '',
+    title: '', clientId: lockCustomerId ?? '', status: statuses[0]?.value ?? '', ownerId: '',
     industry: '', category: '', location: '',
   })
 
@@ -149,8 +154,14 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
               <div style={row3Even}>
                 {/* Klant/branche/categorie — searchable (Danny 27-07), never a bare `<select>`. */}
                 <Field label={t('modal.fields.client')}>
-                  <CreatableSelect value={form.clientId || null} onChange={v => set('clientId', v)} allowCreate={false}
-                    placeholder={t('common:select')} options={customerOptions} />
+                  {lockCustomerId
+                    ? (
+                      // Read-only: the drawer already fixes which customer this is.
+                      <div style={{ padding: '8px 11px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
+                        background: 'var(--bg)', color: 'var(--text-muted)' }}>{lockCustomerName ?? ''}</div>
+                    )
+                    : <CreatableSelect value={form.clientId || null} onChange={v => set('clientId', v)} allowCreate={false}
+                        placeholder={t('common:select')} options={customerOptions} />}
                 </Field>
                 <Field label={t('modal.fields.industry')}>
                   <CreatableSelect value={form.industry || null} onChange={v => set('industry', v)} allowCreate={false}

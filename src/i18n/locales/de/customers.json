@@ -231,7 +231,8 @@
     },
     "filter": {
       "status": "Status"
-    }
+    },
+    "add": "Neue Stelle"
   },
   "opportunities": {
     "title": "Chancen",

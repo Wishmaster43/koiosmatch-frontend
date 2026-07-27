@@ -202,7 +202,7 @@ export default function CustomerDrawer({
           onAdd={contactsApi.add} onUpdate={contactsApi.update} onRemove={contactsApi.remove}
         />
       )
-      case 'vacancies':     return <VacanciesTab customerId={c.id} />
+      case 'vacancies':     return <VacanciesTab customerId={c.id} customerName={c.name} />
       case 'opportunities': return <OpportunitiesTab customerId={c.id} customerName={c.name} />
       case 'planning':      return <PlanningTab customerId={c.id ?? ''} />
       case 'statistics':    return <StatisticsTab c={c} onGoToVacancies={() => setActiveTab?.('vacancies')} />
