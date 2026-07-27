@@ -218,7 +218,10 @@
     "wait": "Wachten tot datum",
     "webhook": "Webhook Trigger",
     "whatsapp_send": "WhatsApp Sturen",
-    "facebook_send": "Facebook terugkoppeling"
+    "facebook_send": "Facebook terugkoppeling",
+    "candidates_fetch": "Koios Match kandidaten",
+    "pdok_geocode": "Adres geocoderen (PDOK)",
+    "backoffice_sync": "Backoffice koppelen"
   },
   "categories": {
     "all": "Alle",

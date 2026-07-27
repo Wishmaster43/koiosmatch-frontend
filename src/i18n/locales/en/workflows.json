@@ -183,7 +183,10 @@
     "wait": "Wait until date",
     "webhook": "Webhook Trigger",
     "whatsapp_send": "Send WhatsApp",
-    "facebook_send": "Facebook feedback"
+    "facebook_send": "Facebook feedback",
+    "candidates_fetch": "Koios Match candidates",
+    "pdok_geocode": "Geocode address (PDOK)",
+    "backoffice_sync": "Link to backoffice"
   },
   "status": {
     "active": "Active",
