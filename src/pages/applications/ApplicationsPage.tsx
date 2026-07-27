@@ -109,7 +109,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
 
   // ── Bulk selection + mutations — §0.3 split (F1, audit R1): mirrors useCandidateBulkActions.
   const { toggleRow, toggleAll, bulkSetPhase, bulkDetach } =
-    useApplicationBulkActions({ setApplications, setTotal, selectedIds, setSelectedIds, funnelTypes, t })
+    useApplicationBulkActions({ applications, setApplications, setTotal, selectedIds, setSelectedIds, funnelTypes, t })
 
   // ── Donut data (phase / recruiter / source) + filter option lists — pure
   // aggregate builders (F1, audit R1: data/applicationInsights.ts).

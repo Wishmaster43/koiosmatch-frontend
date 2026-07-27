@@ -44,7 +44,7 @@ function harness(initial: Application[]) {
     const [applications, setApplications] = useState<Application[]>(initial)
     const [total, setTotal] = useState(initial.length)
     const [selectedIds, setSelectedIds] = useState<Set<Id>>(new Set())
-    const actions = useApplicationBulkActions({ setApplications, setTotal, selectedIds, setSelectedIds, funnelTypes: FUNNEL, t })
+    const actions = useApplicationBulkActions({ applications, setApplications, setTotal, selectedIds, setSelectedIds, funnelTypes: FUNNEL, t })
     return { applications, total, setSelectedIds, actions }
   })
 }
@@ -91,5 +91,28 @@ describe('useApplicationBulkActions · bulkSetPhase', () => {
     expect(rowOf(r, 1)?.bucket).toBe('matched')
     expect(patch).toHaveBeenCalledWith('/applications/1', { phase_key: 'hired' })
     expect(patch).toHaveBeenCalledWith('/applications/2', { phase_key: 'hired' })
+  })
+})
+
+// BULK-PHASE-HONEST-1 (audit 2026-07-25): bulkSetPhase used to notify success from a
+// bare .then(), so a refused move (the backend guard blocks the rejected stage without
+// a reason) still read as "Verplaatst" while nothing moved. These assert the seam.
+describe('useApplicationBulkActions · bulkSetPhase honesty', () => {
+  it('confirms only when every PATCH succeeded', async () => {
+    patch.mockResolvedValue({})
+    const r = harness([app({ id: 1 }), app({ id: 2 })])
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    act(() => r.result.current.actions.bulkSetPhase('hired'))
+    await waitFor(() => expect(patch).toHaveBeenCalledTimes(2))
+    expect(rowOf(r, 1)?.phaseKey).toBe('hired')
+  })
+
+  it('reverts every touched row and reports failure when a PATCH is refused', async () => {
+    patch.mockRejectedValue({ response: { status: 422 } })
+    const r = harness([app({ id: 1, phaseKey: 'applied' }), app({ id: 2, phaseKey: 'applied' })])
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    act(() => r.result.current.actions.bulkSetPhase('hired'))
+    await waitFor(() => expect(rowOf(r, 1)?.phaseKey).toBe('applied'))
+    expect(rowOf(r, 2)?.phaseKey).toBe('applied')
   })
 })
