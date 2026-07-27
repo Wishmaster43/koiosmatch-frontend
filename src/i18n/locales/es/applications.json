@@ -76,7 +76,9 @@
       "loading": "Cargando CV…",
       "error": "No se pudo cargar el CV.",
       "view": "Ver",
-      "download": "Descargar"
+      "download": "Descargar",
+      "uploadedOn": "Subido el {{date}}",
+      "none": "No hay CV disponible"
     },
     "tabs": {
       "application": "Candidatura",
@@ -96,6 +98,8 @@
     "vacancy": "Vacante",
     "client": "Cliente",
     "location": "Ubicación",
+    "detailsTitle": "Detalles",
+    "contactPerson": "Persona de contacto",
     "openVacancy": "Abrir vacante",
     "openCandidate": "Abrir candidato",
     "openCustomer": "Abrir cliente",
@@ -308,8 +312,8 @@
     "refresh": "Actualizar",
     "analyzing": "Koios AI está analizando la solicitud…",
     "progressLabel": "Progreso",
-    "progressOk": "{{days}} días en fase «{{phase}}».",
-    "progressStale": "Ya {{days}} días en fase «{{phase}}» — posiblemente estancada, revise el seguimiento.",
+    "progressOk": "{{days}} días en trámite · fase actual «{{phase}}».",
+    "progressStale": "Ya {{days}} días en trámite · fase «{{phase}}» — posiblemente estancada, revise el seguimiento.",
     "progressUnknown": "Fecha desconocida · fase actual «{{phase}}».",
     "completeness": "Integridad",
     "missingVacancy": "No hay vacante vinculada a esta solicitud."
@@ -319,5 +323,29 @@
     "error": "No se pudieron cargar los cambios.",
     "empty": "Aún no hay cambios.",
     "system": "Sistema"
+  },
+  "status": {
+    "title": "Estado",
+    "inProcess": "En trámite",
+    "days": "{{count}} días",
+    "matchScore": "Puntuación de match",
+    "notScored": "Aún sin puntuar",
+    "nextAppointment": "Próxima cita",
+    "noAppointment": "Sin cita programada",
+    "interview": "Entrevista",
+    "noInterview": "Sin entrevista",
+    "phase": "Fase"
+  },
+  "competition": {
+    "title": "Otros solicitantes",
+    "onlyOne": "Este candidato es el único solicitante.",
+    "noVacancy": "Sin vacante vinculada",
+    "aloneInPhase": "Este candidato es el único en la fase {{phase}}.",
+    "loading": "Cargando solicitantes…",
+    "error": "No se pudieron cargar los solicitantes",
+    "total_one": "{{count}} solicitante para esta vacante",
+    "total_other": "{{count}} solicitantes para esta vacante",
+    "inPhase_one": "Este candidato está en {{phase}}, junto con 1 más.",
+    "inPhase_other": "Este candidato está en {{phase}}, junto con {{count}} más."
   }
 }

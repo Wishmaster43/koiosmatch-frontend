@@ -1,10 +1,20 @@
-import type { ReactNode } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import VacancyTab from './VacancyTab'
 import { peekReturnTab } from './constants'
 import type { ApplicationDetail } from '@/types/application'
+
+// APP-VAC-HOOK-1: VacancyTab now reads the vacancy via the shared
+// useApplicationVacancy React Query hook (adopted from useCandidateCvDocument's
+// pattern, mirrors ApplicationTab.test.tsx's own renderTab) — a QueryClientProvider
+// is required in the tree, same as CvBlock's own hook needs one there.
+const renderTab = (ui: ReactElement) => {
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>)
+}
 
 // Stub the api client + the reused vacancy detail (avoids its lookups context).
 // Keep the real unwrap/unwrapList (importActual): VacancyTab itself now unwraps a
@@ -47,25 +57,25 @@ describe('VacancyTab', () => {
   beforeEach(() => { mockGet.mockReset(); mockPatch.mockReset(); mockPatch.mockResolvedValue({ data: { data: {} } }) })
 
   it('shows the empty state when no vacancy is linked', () => {
-    render(<VacancyTab application={app({ vacancyId: null })} />)
+    renderTab(<VacancyTab application={app({ vacancyId: null })} />)
     expect(screen.getByText('vacancyDetail.empty')).toBeInTheDocument()
   })
 
   it('shows the loading state while fetching', () => {
     mockGet.mockReturnValue(new Promise(() => {})) // never resolves
-    render(<VacancyTab application={app()} />)
+    renderTab(<VacancyTab application={app()} />)
     expect(screen.getByText('vacancyDetail.loading')).toBeInTheDocument()
   })
 
   it('shows the error state when the fetch fails', async () => {
     mockGet.mockRejectedValue(new Error('boom'))
-    render(<VacancyTab application={app()} />)
+    renderTab(<VacancyTab application={app()} />)
     expect(await screen.findByText('vacancyDetail.error')).toBeInTheDocument()
   })
 
   it('renders the reused vacancy detail on success', async () => {
     mockGet.mockResolvedValue({ data: { data: { id: 7, title: 'Verpleegkundige' } } })
-    render(<VacancyTab application={app()} />)
+    renderTab(<VacancyTab application={app()} />)
     expect(await screen.findByText('details-tab')).toBeInTheDocument()
   })
 
@@ -73,7 +83,7 @@ describe('VacancyTab', () => {
   // vacancy — this drill-down has no tab bar, so it must stay visible below Details.
   it('renders the description tab alongside the details tab', async () => {
     mockGet.mockResolvedValue({ data: { data: { id: 7, title: 'Verpleegkundige' } } })
-    render(<VacancyTab application={app()} />)
+    renderTab(<VacancyTab application={app()} />)
     expect(await screen.findByText('description-tab')).toBeInTheDocument()
   })
 
@@ -83,7 +93,7 @@ describe('VacancyTab', () => {
   it('persists a DetailsTab edit via PATCH /vacancies/{id}', async () => {
     mockGet.mockResolvedValue({ data: { data: { id: 7, title: 'Verpleegkundige' } } })
     const user = userEvent.setup()
-    render(<VacancyTab application={app()} />)
+    renderTab(<VacancyTab application={app()} />)
     await user.click(await screen.findByText('save-skill'))
     expect(mockPatch).toHaveBeenCalledWith('/vacancies/7', { skills: ['Triage'] })
   })
@@ -93,7 +103,7 @@ describe('VacancyTab', () => {
   it('stashes the return tab before navigating to the full vacancy', async () => {
     mockGet.mockResolvedValue({ data: { data: { id: 7, title: 'Verpleegkundige' } } })
     const user = userEvent.setup()
-    render(<VacancyTab application={app({ id: 9 })} />)
+    renderTab(<VacancyTab application={app({ id: 9 })} />)
     const openLink = await screen.findByTitle('drawer.openVacancy')
     await user.click(openLink)
     expect(peekReturnTab(9)).toBe('vacancy')
@@ -103,7 +113,7 @@ describe('VacancyTab', () => {
   // not the in-app EntityLink button it used to be wrapped in.
   it('renders "Open vacancy" as a real new-tab anchor', async () => {
     mockGet.mockResolvedValue({ data: { data: { id: 7, title: 'Verpleegkundige' } } })
-    render(<VacancyTab application={app()} />)
+    renderTab(<VacancyTab application={app()} />)
     const openLink = await screen.findByTitle('drawer.openVacancy')
     expect(openLink.tagName).toBe('A')
     expect(openLink.getAttribute('href')).toContain('?open=7')

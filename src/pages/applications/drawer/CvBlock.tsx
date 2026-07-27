@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, Eye } from 'lucide-react'
+import { useDateFormat } from '@/lib/datetime'
 import DocPreviewModal from '@/pages/candidates/drawer/DocPreviewModal'
 import { useCandidateCvDocument } from '../hooks/useCandidateCvDocument'
 import type { Id } from '@/types/common'
@@ -13,25 +14,29 @@ const iconBtn = { width: 26, height: 26, display: 'flex', alignItems: 'center', 
   border: 'none', textDecoration: 'none', flexShrink: 0 } as const
 
 /**
- * CvBlock — S31 (refined 21-07, Danny): a compact Ja/Nee indicator of whether
- * the linked candidate has a CV document (type === 'CV'), with a download +
- * preview icon pair once Ja — mirrors the candidate Documents section's own
- * download link + DocPreviewModal (view-only here: no rename/upload/delete,
- * which stay the candidate record's own concern). The newest CV (server order,
- * see the hook) is the one shown/acted on. Four UI states; Nee reads as a calm
- * empty state (italic, mirrors "not registered yet" elsewhere in the app).
+ * CvBlock — S31 (refined 25-07, Danny: "ja/nee" told him nothing — he wants to
+ * see WHICH cv and from WHEN). Shows the file name (truncated with a `title`
+ * attribute carrying the full name) and, on a muted second line, the upload
+ * date, with a download + preview icon pair — mirrors the candidate Documents
+ * section's own download link + DocPreviewModal (view-only here: no rename/
+ * upload/delete, which stay the candidate record's own concern). The newest CV
+ * (server order, see the hook) is the one shown/acted on. Four UI states; the
+ * "none" state reads as a calm empty state (italic, mirrors "not registered
+ * yet" elsewhere in the app).
  */
 export default function CvBlock({ candidateId }: { candidateId: Id | null | undefined }) {
   const { t } = useTranslation(['applications', 'common'])
+  const { formatDateTime } = useDateFormat()
   const { cvDocuments, loading, error } = useCandidateCvDocument(candidateId)
   const [previewOpen, setPreviewOpen] = useState(false)
 
   // No candidate linked yet — nothing to show, and nothing to fetch (§8 data minimisation).
   if (candidateId == null) return null
 
-  // Newest CV first (server order) — the one Ja/download/preview act on.
+  // Newest CV first (server order) — the one shown/acted on.
   const cv = cvDocuments[0] ?? null
   const fileUrl = cv?.download_url ?? cv?.url
+  const uploadedAt = cv?.created_at ?? cv?.uploaded_at
 
   return (
     <div>
@@ -44,7 +49,17 @@ export default function CvBlock({ candidateId }: { candidateId: Id | null | unde
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           {cv ? (
             <>
-              <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('common:yes')}</span>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: 13, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                  title={cv.name}>
+                  {cv.name || t('drawer.cv.title')}
+                </div>
+                {uploadedAt && (
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                    {t('drawer.cv.uploadedOn', { date: formatDateTime(uploadedAt) })}
+                  </div>
+                )}
+              </div>
               {/* Download — the same plain anchor + `download` attribute the candidate
                   Documents preview modal already uses (the one download pattern in
                   the app); disabled look when the record carries no file url. */}
@@ -61,7 +76,7 @@ export default function CvBlock({ candidateId }: { candidateId: Id | null | unde
               </button>
             </>
           ) : (
-            <span style={{ fontSize: 13, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('common:no')}</span>
+            <span style={{ fontSize: 13, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('drawer.cv.none')}</span>
           )}
         </div>
       )}

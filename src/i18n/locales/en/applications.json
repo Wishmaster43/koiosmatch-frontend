@@ -76,7 +76,9 @@
       "loading": "Loading CV…",
       "error": "Failed to load the CV.",
       "view": "View",
-      "download": "Download"
+      "download": "Download",
+      "uploadedOn": "Uploaded on {{date}}",
+      "none": "No CV available"
     },
     "tabs": {
       "application": "Application",
@@ -96,6 +98,8 @@
     "vacancy": "Vacancy",
     "client": "Client",
     "location": "Location",
+    "detailsTitle": "Details",
+    "contactPerson": "Contact person",
     "openVacancy": "Open vacancy",
     "openCandidate": "Open candidate",
     "openCustomer": "Open client",
@@ -308,8 +312,8 @@
     "refresh": "Refresh",
     "analyzing": "Koios AI is analysing the application…",
     "progressLabel": "Progress",
-    "progressOk": "{{days}} days in phase '{{phase}}'.",
-    "progressStale": "Already {{days}} days in phase '{{phase}}' — possibly stalled, check the follow-up.",
+    "progressOk": "{{days}} days in process · current phase '{{phase}}'.",
+    "progressStale": "Already {{days}} days in process · phase '{{phase}}' — possibly stalled, check the follow-up.",
     "progressUnknown": "Date unknown · current phase '{{phase}}'.",
     "completeness": "Completeness",
     "missingVacancy": "No vacancy linked to this application."
@@ -319,5 +323,29 @@
     "error": "Changelog could not be loaded.",
     "empty": "No changes yet.",
     "system": "System"
+  },
+  "status": {
+    "title": "Status",
+    "inProcess": "In process",
+    "days": "{{count}} days",
+    "matchScore": "Match score",
+    "notScored": "Not scored yet",
+    "nextAppointment": "Next appointment",
+    "noAppointment": "No appointment scheduled",
+    "interview": "Interview",
+    "noInterview": "No interview",
+    "phase": "Phase"
+  },
+  "competition": {
+    "title": "Other applicants",
+    "onlyOne": "This candidate is the only applicant.",
+    "noVacancy": "No vacancy linked",
+    "aloneInPhase": "This candidate is the only one in phase {{phase}}.",
+    "loading": "Loading applicants…",
+    "error": "Applicants could not be loaded",
+    "total_one": "{{count}} applicant for this vacancy",
+    "total_other": "{{count}} applicants for this vacancy",
+    "inPhase_one": "This candidate is in {{phase}}, together with 1 other.",
+    "inPhase_other": "This candidate is in {{phase}}, together with {{count}} others."
   }
 }

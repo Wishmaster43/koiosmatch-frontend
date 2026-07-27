@@ -76,7 +76,9 @@
       "loading": "Chargement du CV…",
       "error": "Échec du chargement du CV.",
       "view": "Voir",
-      "download": "Télécharger"
+      "download": "Télécharger",
+      "uploadedOn": "Téléversé le {{date}}",
+      "none": "Aucun CV disponible"
     },
     "tabs": {
       "application": "Candidature",
@@ -96,6 +98,8 @@
     "vacancy": "Poste",
     "client": "Client",
     "location": "Lieu",
+    "detailsTitle": "Détails",
+    "contactPerson": "Personne de contact",
     "openVacancy": "Ouvrir le poste",
     "openCandidate": "Ouvrir le candidat",
     "openCustomer": "Ouvrir le client",
@@ -308,8 +312,8 @@
     "refresh": "Actualiser",
     "analyzing": "Koios AI analyse la candidature…",
     "progressLabel": "Progression",
-    "progressOk": "{{days}} jours en phase « {{phase}} ».",
-    "progressStale": "Déjà {{days}} jours en phase « {{phase}} » — possiblement bloquée, vérifiez le suivi.",
+    "progressOk": "{{days}} jours en traitement · phase actuelle « {{phase}} ».",
+    "progressStale": "Déjà {{days}} jours en traitement · phase « {{phase}} » — possiblement bloquée, vérifiez le suivi.",
     "progressUnknown": "Date inconnue · phase actuelle « {{phase}} ».",
     "completeness": "Exhaustivité",
     "missingVacancy": "Aucun poste associé à cette candidature."
@@ -319,5 +323,29 @@
     "error": "Impossible de charger les modifications.",
     "empty": "Aucune modification pour l’instant.",
     "system": "Système"
+  },
+  "status": {
+    "title": "Statut",
+    "inProcess": "En traitement",
+    "days": "{{count}} jours",
+    "matchScore": "Score de match",
+    "notScored": "Pas encore noté",
+    "nextAppointment": "Prochain rendez-vous",
+    "noAppointment": "Aucun rendez-vous planifié",
+    "interview": "Entretien",
+    "noInterview": "Aucun entretien",
+    "phase": "Phase"
+  },
+  "competition": {
+    "title": "Autres candidats",
+    "onlyOne": "Ce candidat est le seul candidat.",
+    "noVacancy": "Aucun poste associé",
+    "aloneInPhase": "Ce candidat est le seul en phase {{phase}}.",
+    "loading": "Chargement des candidats…",
+    "error": "Impossible de charger les candidats",
+    "total_one": "{{count}} candidat pour ce poste",
+    "total_other": "{{count}} candidats pour ce poste",
+    "inPhase_one": "Ce candidat est en phase {{phase}}, avec 1 autre.",
+    "inPhase_other": "Ce candidat est en phase {{phase}}, avec {{count}} autres."
   }
 }

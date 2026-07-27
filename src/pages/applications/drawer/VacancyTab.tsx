@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
 import { ExternalLink, Link2, Save, X } from 'lucide-react'
-import api, { unwrap } from '@/lib/api'
+import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { buildEntityDeepLink } from '@/components/ui/EntityLink'
 import { VacancyLookupsProvider } from '@/context/VacancyLookupsContext'
 import DetailsTab from '@/pages/vacancies/drawer/DetailsTab'
 import DescriptionTab from '@/pages/vacancies/drawer/DescriptionTab'
-import { mapVacancyDetail } from '@/pages/vacancies/data/mapVacancy'
 import { buildVacancyPatch } from '@/pages/vacancies/data/vacanciesShared'
+import { useApplicationVacancy } from '../hooks/useApplicationVacancy'
 import VacancyLinkField from './VacancyLinkField'
 import { useVacancyLinkOptions } from '../hooks/useVacancyLinkOptions'
 import { rememberReturnTab } from './constants'
@@ -47,25 +48,18 @@ interface VacancyTabProps {
  */
 export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTabProps) {
   const { t } = useTranslation(['applications', 'common'])
-  const [vac, setVac] = useState<VacancyDetail | null>(null)
-  const [state, setState] = useState<LoadState>('loading')
+  const queryClient = useQueryClient()
+  // Shared vacancy-detail fetch (adopted from useApplicationVacancy — §11: land the
+  // new helper WITH adoption at this exact copy site instead of leaving VacancyTab's
+  // own useEffect/useState/api.get running alongside it). CompetitionBlock reads the
+  // same cache entry, so the two tabs never issue duplicate requests.
+  const { vacancy: vac, loading, error } = useApplicationVacancy(a.vacancyId)
+  const state: LoadState = a.vacancyId == null ? 'empty' : loading ? 'loading' : error ? 'error' : vac ? 'ok' : 'empty'
   // Linking flow (empty state) — the CTA opens the shared picker directly (there
   // is nothing read-only to show yet, so no separate pencil step is needed).
   const [linking, setLinking] = useState(false)
   const [vacancyId, setVacancyId] = useState('')
   const vacancyOptions = useVacancyLinkOptions(linking)
-
-  // Fetch the full vacancy detail for the drawer; four UI states handled below.
-  useEffect(() => {
-    const id = a.vacancyId
-    if (id == null) { setState('empty'); return }
-    let alive = true
-    setState('loading')
-    api.get(`/vacancies/${id}`)
-      .then(r => { if (!alive) return; setVac(mapVacancyDetail(unwrap(r))); setState('ok') })
-      .catch(() => { if (alive) setState('error') })
-    return () => { alive = false }
-  }, [a.vacancyId])
 
   // Once a vacancy is actually linked, drop any in-flight linking draft.
   useEffect(() => { if (state === 'ok') setLinking(false) }, [state])
@@ -84,7 +78,11 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
   // (and every other DetailsTab field) saves for real instead of no-op'ing.
   const updateVacancy = (id: Id | undefined, patch: Record<string, unknown>) => {
     if (id == null) return
-    setVac(prev => (prev ? ({ ...prev, ...patch } as VacancyDetail) : prev))
+    // Optimistic merge straight into the shared React Query cache entry (the same
+    // key useApplicationVacancy reads), so both this tab and CompetitionBlock see
+    // the edit immediately without a duplicate local copy of the vacancy.
+    queryClient.setQueryData(['vacancies', id, 'detail'], (prev: VacancyDetail | undefined) =>
+      prev ? ({ ...prev, ...patch } as VacancyDetail) : prev)
     const body = buildVacancyPatch(patch)
     if (!Object.keys(body).length) return
     api.patch(`/vacancies/${id}`, body).catch(() => notifyError(t('common:actionFailed')))

@@ -137,6 +137,10 @@ export interface ApplicationDetail extends Application {
   // consent was given (or the vacancy's setting hides the field) — the drawer
   // honest-gates its AVG-evidence row on this being non-null.
   interviewConsentGivenAt: string | null
+  // CONTACT-PERSON-1 (Danny 25-07): the vacancy/customer contact person carried on
+  // ApplicationDetailResource — every field optional/nullable, null when the
+  // backend sends no contact at all (no vacancy linked, or the vacancy has none).
+  contact: { id: Id | null; name: string; email: string; phone: string } | null
 }
 
 /** A raw candidate as the API nests it under an application. */
@@ -250,6 +254,8 @@ export interface ApiApplication {
   cover_letter?: string | null
   // INTERVIEW-CONSENT-PERSIST-1: the consent-tick timestamp (ApplicationDetailResource).
   interview_consent_given_at?: string | null
+  // CONTACT-PERSON-1: the vacancy/customer contact person (ApplicationDetailResource).
+  contact?: { id?: Id; name?: string; email?: string; phone?: string } | null
   [k: string]: unknown
 }
 

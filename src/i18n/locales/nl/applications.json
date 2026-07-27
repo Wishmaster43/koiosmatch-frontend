@@ -76,7 +76,9 @@
       "loading": "CV laden…",
       "error": "CV laden is mislukt.",
       "view": "Bekijken",
-      "download": "Downloaden"
+      "download": "Downloaden",
+      "uploadedOn": "Geüpload op {{date}}",
+      "none": "Geen cv beschikbaar"
     },
     "tabs": {
       "application": "Sollicitatie",
@@ -96,6 +98,8 @@
     "vacancy": "Vacature",
     "client": "Klant",
     "location": "Locatie",
+    "detailsTitle": "Details",
+    "contactPerson": "Contactpersoon",
     "openVacancy": "Open vacature",
     "openCandidate": "Open kandidaat",
     "openCustomer": "Klant openen",
@@ -308,8 +312,8 @@
     "refresh": "Vernieuwen",
     "analyzing": "Koios AI analyseert de sollicitatie…",
     "progressLabel": "Voortgang",
-    "progressOk": "{{days}} dagen in fase '{{phase}}'.",
-    "progressStale": "Al {{days}} dagen in fase '{{phase}}' — mogelijk vastgelopen, controleer de opvolging.",
+    "progressOk": "{{days}} dagen in behandeling · huidige fase '{{phase}}'.",
+    "progressStale": "Al {{days}} dagen in behandeling · fase '{{phase}}' — mogelijk vastgelopen, controleer de opvolging.",
     "progressUnknown": "Datum onbekend · huidige fase '{{phase}}'.",
     "completeness": "Volledigheid",
     "missingVacancy": "Geen vacature gekoppeld aan deze sollicitatie."
@@ -319,5 +323,29 @@
     "error": "Wijzigingen konden niet geladen worden.",
     "empty": "Nog geen wijzigingen.",
     "system": "Systeem"
+  },
+  "status": {
+    "title": "Status",
+    "inProcess": "In behandeling",
+    "days": "{{count}} dagen",
+    "matchScore": "Matchscore",
+    "notScored": "Nog niet gescoord",
+    "nextAppointment": "Volgende afspraak",
+    "noAppointment": "Geen afspraak gepland",
+    "interview": "Interview",
+    "noInterview": "Geen interview",
+    "phase": "Fase"
+  },
+  "competition": {
+    "title": "Andere sollicitanten",
+    "onlyOne": "Deze kandidaat is de enige sollicitant.",
+    "noVacancy": "Geen vacature gekoppeld",
+    "aloneInPhase": "Deze kandidaat is de enige in fase {{phase}}.",
+    "loading": "Sollicitanten laden…",
+    "error": "Sollicitanten konden niet worden geladen",
+    "total_one": "{{count}} sollicitant op deze vacature",
+    "total_other": "{{count}} sollicitanten op deze vacature",
+    "inPhase_one": "Deze kandidaat staat in {{phase}}, samen met nog 1 andere.",
+    "inPhase_other": "Deze kandidaat staat in {{phase}}, samen met nog {{count}} anderen."
   }
 }

@@ -20,6 +20,13 @@ vi.mock('@/lib/datetime', () => ({
   useLocale: () => 'nl-NL',
 }))
 
+// CompetitionBlock (added 25-07) resolves funnel labels/colours through the tenant
+// lookup — stub the context so this file keeps testing ApplicationTab's own wiring
+// instead of needing the whole provider tree.
+vi.mock('@/context/LookupsContext', () => ({
+  useLookups: () => ({ funnelTypes: [], funnelMeta: (v?: string) => ({ value: v, label: v ?? '', color: 'var(--text-muted)' }) }),
+}))
+
 // The vacancy-link edit mode (useVacancyLinkOptions) fetches /vacancies; S31's CvBlock fetches the linked
 // candidate's documents via React Query — stub the client so this file only
 // tests ApplicationTab's own wiring, not any dependency's internals.
@@ -193,19 +200,22 @@ describe('ApplicationTab', () => {
   // S31 (refined 21-07): compact Ja/Nee CV indicator, reusing the candidate
   // Documents section's download + DocPreviewModal preview affordance.
   describe('CV block (S31)', () => {
-    it('shows Nee when the candidate has no CV', async () => {
+    it('states there is no cv, with no download or preview affordance', async () => {
       renderTab(<ApplicationTab application={app({ candidateId: 'c1' })} />)
-      expect(await screen.findByText('common:no')).toBeInTheDocument()
+      expect(await screen.findByText('drawer.cv.none')).toBeInTheDocument()
       expect(screen.queryByLabelText('drawer.cv.download')).toBeNull()
       expect(screen.queryByLabelText('drawer.cv.view')).toBeNull()
     })
 
-    it('shows Ja with a download + preview icon pair when a CV exists', async () => {
+    // Danny 25-07: "Ja" told the recruiter nothing — WHICH cv and from when is the
+    // actual information (is this cv recent enough to send to a customer?).
+    it('shows the file name + upload date with the download + preview pair when a CV exists', async () => {
       mockGet.mockImplementation((url: string) => String(url).includes('/documents')
         ? Promise.resolve({ data: { data: [{ id: 'd1', name: 'cv-anna.pdf', type: 'CV', url: 'https://files.example/cv-anna.pdf', created_at: '2026-07-01T10:00:00Z' }] } })
         : Promise.resolve({ data: [] }))
       renderTab(<ApplicationTab application={app({ candidateId: 'c1' })} />)
-      expect(await screen.findByText('common:yes')).toBeInTheDocument()
+      expect(await screen.findByText('cv-anna.pdf')).toBeInTheDocument()
+      expect(screen.getByText('drawer.cv.uploadedOn')).toBeInTheDocument()
       const downloadLink = screen.getByLabelText('drawer.cv.download')
       expect(downloadLink).toHaveAttribute('href', 'https://files.example/cv-anna.pdf')
       expect(screen.getByLabelText('drawer.cv.view')).toBeInTheDocument()

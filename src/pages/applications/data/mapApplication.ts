@@ -192,5 +192,10 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     // "Afgewezen" badge with no reason/note, even though ApplicationDetailResource
     // sends `rejection` (reason_id/reason_label/note/channel/sent_at) once rejected.
     rejection: (raw.rejection ?? undefined) as ApplicationDetail['rejection'],
+    // CONTACT-PERSON-1: the vacancy/customer contact person — null when the
+    // backend sends none (defensive per-field reads, never crash on a partial object).
+    contact: raw.contact
+      ? { id: raw.contact.id ?? null, name: raw.contact.name ?? '', email: raw.contact.email ?? '', phone: raw.contact.phone ?? '' }
+      : null,
   }
 }

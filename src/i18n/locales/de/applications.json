@@ -76,7 +76,9 @@
       "loading": "Lebenslauf wird geladen…",
       "error": "Lebenslauf konnte nicht geladen werden.",
       "view": "Ansehen",
-      "download": "Herunterladen"
+      "download": "Herunterladen",
+      "uploadedOn": "Hochgeladen am {{date}}",
+      "none": "Kein Lebenslauf verfügbar"
     },
     "tabs": {
       "application": "Bewerbung",
@@ -96,6 +98,8 @@
     "vacancy": "Stelle",
     "client": "Kunde",
     "location": "Standort",
+    "detailsTitle": "Details",
+    "contactPerson": "Ansprechpartner",
     "openVacancy": "Stelle öffnen",
     "openCandidate": "Kandidat öffnen",
     "openCustomer": "Kunde öffnen",
@@ -308,8 +312,8 @@
     "refresh": "Aktualisieren",
     "analyzing": "Koios AI analysiert die Bewerbung…",
     "progressLabel": "Fortschritt",
-    "progressOk": "{{days}} Tage in Phase '{{phase}}'.",
-    "progressStale": "Bereits {{days}} Tage in Phase '{{phase}}' — möglicherweise ins Stocken geraten, Nachfassen prüfen.",
+    "progressOk": "{{days}} Tage in Bearbeitung · aktuelle Phase '{{phase}}'.",
+    "progressStale": "Bereits {{days}} Tage in Bearbeitung · Phase '{{phase}}' — möglicherweise ins Stocken geraten, Nachfassen prüfen.",
     "progressUnknown": "Datum unbekannt · aktuelle Phase '{{phase}}'.",
     "completeness": "Vollständigkeit",
     "missingVacancy": "Keine Stelle mit dieser Bewerbung verknüpft."
@@ -319,5 +323,29 @@
     "error": "Änderungen konnten nicht geladen werden.",
     "empty": "Noch keine Änderungen.",
     "system": "System"
+  },
+  "status": {
+    "title": "Status",
+    "inProcess": "In Bearbeitung",
+    "days": "{{count}} Tage",
+    "matchScore": "Match-Score",
+    "notScored": "Noch nicht bewertet",
+    "nextAppointment": "Nächster Termin",
+    "noAppointment": "Kein Termin geplant",
+    "interview": "Interview",
+    "noInterview": "Kein Interview",
+    "phase": "Phase"
+  },
+  "competition": {
+    "title": "Andere Bewerber",
+    "onlyOne": "Dieser Kandidat ist der einzige Bewerber.",
+    "noVacancy": "Keine Stelle verknüpft",
+    "aloneInPhase": "Dieser Kandidat ist der einzige in Phase {{phase}}.",
+    "loading": "Bewerber werden geladen…",
+    "error": "Bewerber konnten nicht geladen werden",
+    "total_one": "{{count}} Bewerber für diese Stelle",
+    "total_other": "{{count}} Bewerber für diese Stelle",
+    "inPhase_one": "Dieser Kandidat befindet sich in {{phase}}, zusammen mit 1 weiteren.",
+    "inPhase_other": "Dieser Kandidat befindet sich in {{phase}}, zusammen mit {{count}} weiteren."
   }
 }
