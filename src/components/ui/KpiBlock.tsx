@@ -1,4 +1,5 @@
 import type { ComponentType, ReactNode } from 'react'
+import { interactive } from '@/lib/a11y'
 
 /**
  * KpiBlock — small KPI card (icon tile + value + label + optional sub-text).
@@ -19,6 +20,10 @@ interface KpiBlockProps {
 }
 
 export default function KpiBlock({ label, value, sub, icon: Icon, color, bg, loading, onClick }: KpiBlockProps) {
+  // Stays a <div> (icon tile + text stack are block-level, not valid <button>
+  // content) but gets full button semantics + Enter/Space via the shared
+  // `interactive()` helper — only when `onClick` exists, so a non-clickable
+  // card is never focusable (WCAG 2.1.1 Keyboard, 4.1.2 Name/Role/Value).
   return (
     <div
       style={{
@@ -26,7 +31,7 @@ export default function KpiBlock({ label, value, sub, icon: Icon, color, bg, loa
         padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14,
         cursor: onClick ? 'pointer' : undefined, transition: 'background 0.1s',
       }}
-      onClick={onClick}
+      {...interactive(onClick)}
       onMouseEnter={onClick ? e => (e.currentTarget.style.background = 'var(--hover-bg)') : undefined}
       onMouseLeave={onClick ? e => (e.currentTarget.style.background = 'var(--surface)') : undefined}
     >

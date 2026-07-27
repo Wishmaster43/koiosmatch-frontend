@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 // Real i18n (nl) side-effect init so real Dutch column/status text resolves —
 // mirrors VacanciesTable.test.tsx's convention.
 import '@/i18n'
@@ -58,7 +58,9 @@ describe('SmCandidatesTable · Uitschrijfdatum column (end_date_employment)', ()
     ]
     const { container } = render(<SmCandidatesTable rows={sortRows} />)
     const headerCell = screen.getByText('Uitschrijfdatum').closest('th') as HTMLElement
-    fireEvent.click(headerCell)
+    // Click the header BUTTON, not the th: sorting moved into a real button for
+    // keyboard operability, and jsdom has no hit-testing to forward a parent click.
+    fireEvent.click(within(headerCell).getByRole('button'))
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     const tableRows = container.querySelectorAll('tbody tr')
     // Ascending: the dated row (Bram) sorts before the undated one (DataTable's

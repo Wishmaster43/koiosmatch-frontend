@@ -89,11 +89,11 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       // first-click ascending) order rather than letting them read as 0. The
       // sentinel is a large-but-finite number (never NaN from Infinity-Infinity)
       // so the shared DataTable's numeric compare() stays deterministic; a
-      // subsequent click reverses the WHOLE sorted array (shared DataTable
-      // behaviour, out of this task's file list), so this only guarantees "last"
-      // on the first click / default direction, not both directions strictly.
+      // An unknown count returns null: DataTable sinks null rows to the bottom in
+      // BOTH directions. A sentinel number used to float "not computed yet" rows
+      // above the vacancy with the most real leads on the descending click.
       key: 'leads', header: t('columns.leads'), align: 'left', sortable: true,
-      sortValue: r => r.leadsCount ?? Number.MAX_SAFE_INTEGER,
+      sortValue: r => r.leadsCount,
       cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text)' },
       // A ghost button when the caller wired the deep-link, else the plain number/
       // dash (unchanged behaviour otherwise). stopPropagation so the click opens

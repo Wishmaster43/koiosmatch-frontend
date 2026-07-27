@@ -40,7 +40,9 @@ export interface Column<Row> {
   nowrap?: boolean                            // prevent wrapping in the cell
   align?: 'left' | 'center' | 'right'         // header + cell alignment
   sortable?: boolean                          // enable click-to-sort on this column
-  sortValue?: (row: Row) => string | number   // value to sort by (defaults to row[key])
+  // Value to sort by (defaults to row[key]). Return null/undefined for a value that is
+  // genuinely UNKNOWN — those rows sink to the bottom in both sort directions.
+  sortValue?: (row: Row) => string | number | null | undefined
   sticky?: boolean                            // pin column to left edge during horizontal scroll
   width?: number                              // px width used to compute sticky left offsets
 }
@@ -106,8 +108,16 @@ export default function DataTable<Row>({
     const col = columns.find(c => c.key === sort.key)
     if (!col) return rows
     const valueOf = col.sortValue ?? ((row: Row) => field(row, col.key) as string | number)
-    const sorted = [...rows].sort((a, b) => compare(valueOf(a), valueOf(b)))
-    return sort.dir === 'desc' ? sorted.reverse() : sorted
+    // Rows whose sort value is genuinely UNKNOWN (null/undefined) always sink to the
+    // bottom, in BOTH directions — reversing the whole array would otherwise float them
+    // to the top on the descending click. Measured on the vacancy Leads column, where
+    // "not computed yet" rows outranked the vacancy with the most real leads (audit
+    // 2026-07-27). A column that wants unknowns sorted as a value can still return one.
+    const isUnknown = (v: unknown) => v === null || v === undefined
+    const known = [...rows].filter(r => !isUnknown(valueOf(r)))
+    const unknown = rows.filter(r => isUnknown(valueOf(r)))
+    const sorted = known.sort((a, b) => compare(valueOf(a), valueOf(b)))
+    return [...(sort.dir === 'desc' ? sorted.reverse() : sorted), ...unknown]
   }, [rows, sort, columns])
 
   // Virtualizer: idle (no scroll element) when the caller doesn't opt in.
@@ -218,16 +228,32 @@ export default function DataTable<Row>({
               return <th key={col.key} style={baseStyle}>{col.header}</th>
             }
             const justify = col.align === 'right' ? 'flex-end' : col.align === 'center' ? 'center' : 'flex-start'
+            // aria-sort lives on the th itself (the columnheader role AT relies on);
+            // 'none' for every column that isn't the active sort, never omitted, so
+            // screen readers can tell an unsorted sortable column from a plain one.
+            const ariaSort: 'ascending' | 'descending' | 'none' = active ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'
+            // Padding moves from the th onto the button below so the clickable/focusable
+            // area matches the original full-cell hit region exactly.
+            const { padding: thPadding, ...thStyleRest } = baseStyle
             return (
-              <th key={col.key} style={{ ...baseStyle, cursor: 'pointer', userSelect: 'none' }}
-                onClick={() => toggleSort(col)}
-                title={t('sort')}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, justifyContent: justify }}>
+              <th key={col.key} style={thStyleRest} aria-sort={ariaSort}>
+                {/* A real <button> inside the th (not tabIndex+onKeyDown on the th) — the
+                    conventional accessible-sort pattern: the th keeps its columnheader
+                    semantics, the button gets focus + native Enter/Space activation for
+                    free (WCAG 2.1.1 Keyboard, 4.1.2 Name/Role/Value). `all: unset` strips
+                    the browser's default button chrome; the explicit properties below
+                    restore the exact look the old <span> had (inherited color/font/
+                    white-space come back automatically since those are inherited CSS
+                    properties, unset just means "use the parent's value" for them). */}
+                <button type="button" onClick={() => toggleSort(col)} title={t('sort')}
+                  style={{ all: 'unset', boxSizing: 'border-box', display: 'inline-flex', width: '100%',
+                    padding: thPadding, cursor: 'pointer', userSelect: 'none', alignItems: 'center', gap: 3,
+                    justifyContent: justify, font: 'inherit', color: 'inherit' }}>
                   {col.header}
                   {active
-                    ? (sort.dir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />)
-                    : <ChevronsUpDown size={12} style={{ opacity: 0.35 }} />}
-                </span>
+                    ? (sort.dir === 'asc' ? <ChevronUp size={12} aria-hidden="true" /> : <ChevronDown size={12} aria-hidden="true" />)
+                    : <ChevronsUpDown size={12} aria-hidden="true" style={{ opacity: 0.35 }} />}
+                </button>
               </th>
             )
           })}

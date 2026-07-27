@@ -33,6 +33,49 @@ describe('DataTable', () => {
     expect(within(bodyRows[0]).getByText('Ann')).toBeInTheDocument()
   })
 
+  // Defect fix: a sortable header must be a real <button>, reachable by Tab and
+  // operable with Enter/Space, not just a mouse click on the <th>.
+  it('sorts on a keyboard Enter press on the sortable header button', async () => {
+    const user = userEvent.setup()
+    render(<DataTable columns={columns} rows={rows} />)
+    const sortButton = screen.getByRole('button', { name: 'Name' })
+    sortButton.focus()
+    expect(sortButton).toHaveFocus()
+    await user.keyboard('{Enter}')
+    const bodyRows = screen.getAllByRole('row').slice(1)
+    expect(within(bodyRows[0]).getByText('Ann')).toBeInTheDocument()
+  })
+
+  it('sorts on a keyboard Space press on the sortable header button', async () => {
+    const user = userEvent.setup()
+    render(<DataTable columns={columns} rows={rows} />)
+    const sortButton = screen.getByRole('button', { name: 'Name' })
+    sortButton.focus()
+    await user.keyboard(' ')
+    const bodyRows = screen.getAllByRole('row').slice(1)
+    expect(within(bodyRows[0]).getByText('Ann')).toBeInTheDocument()
+  })
+
+  it('reflects the active sort column/direction via aria-sort and defaults the rest to none', async () => {
+    const user = userEvent.setup()
+    render(<DataTable columns={columns} rows={rows} />)
+    const nameHeader = screen.getByText('Name').closest('th')
+    // Not sorted yet: still exposes aria-sort="none" so a screen-reader user can
+    // tell this IS a sortable column, just not the active one.
+    expect(nameHeader).toHaveAttribute('aria-sort', 'none')
+    await user.click(screen.getByRole('button', { name: 'Name' }))
+    expect(nameHeader).toHaveAttribute('aria-sort', 'ascending')
+    await user.click(screen.getByRole('button', { name: 'Name' }))
+    expect(nameHeader).toHaveAttribute('aria-sort', 'descending')
+  })
+
+  it('exposes no button and no aria-sort on a non-sortable header', () => {
+    render(<DataTable columns={columns} rows={rows} />)
+    const cityHeader = screen.getByText('City').closest('th')
+    expect(cityHeader).not.toHaveAttribute('aria-sort')
+    expect(within(cityHeader).queryByRole('button')).not.toBeInTheDocument()
+  })
+
   it('calls onRowClick with the clicked row', async () => {
     const user = userEvent.setup()
     const onRowClick = vi.fn()
@@ -135,5 +178,30 @@ describe('DataTable · shift-click range selection (job 43)', () => {
     expect(boxes[1]).not.toBeChecked()
     expect(boxes[2]).not.toBeChecked()
     expect(boxes[3]).not.toBeChecked()
+  })
+})
+
+// Unknown sort values (null/undefined) must sink to the bottom in BOTH directions.
+// Reversing the whole sorted array floated "not computed yet" vacancies above the
+// vacancy with the most real leads on the descending click (audit 2026-07-27).
+describe('DataTable · unknown sort values', () => {
+  const cols = [
+    { key: 'title', header: 'Titel' },
+    { key: 'count', header: 'Aantal', sortable: true, sortValue: r => r.count },
+  ]
+  const rows = [
+    { id: 1, title: 'A', count: null },
+    { id: 2, title: 'B', count: 3 },
+    { id: 3, title: 'C', count: 1 },
+  ]
+  const titles = () => Array.from(document.querySelectorAll('tbody tr')).map(tr => tr.children[0].textContent)
+
+  it('sorts unknown rows last ascending AND descending', () => {
+    render(<DataTable columns={cols} rows={rows} />)
+    const header = screen.getByText('Aantal').closest('th')
+    fireEvent.click(within(header).getByRole('button'))   // ascending
+    expect(titles()).toEqual(['C', 'B', 'A'])
+    fireEvent.click(within(header).getByRole('button'))   // descending
+    expect(titles()).toEqual(['B', 'C', 'A'])
   })
 })

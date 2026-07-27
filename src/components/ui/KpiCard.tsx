@@ -5,6 +5,7 @@
 import type { ComponentType, ReactNode } from 'react'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { useNumberFormat } from '@/lib/formatters'
+import { interactive } from '@/lib/a11y'
 
 interface KpiCardProps {
   label?: ReactNode
@@ -36,6 +37,10 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
     )
   }
 
+  // Stays a <div> (its children are block-level tiles, not valid <button> content)
+  // but gets full button semantics + Enter/Space via the shared `interactive()`
+  // helper — only when `onClick` exists, so a non-clickable card is never
+  // focusable (WCAG 2.1.1 Keyboard, 4.1.2 Name/Role/Value).
   return (
     <div
       className="flex flex-col gap-3 p-5 bg-[var(--surface)] rounded-xl"
@@ -44,7 +49,7 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
         cursor: onClick ? 'pointer' : 'default',
         transition: 'box-shadow 0.15s',
       }}
-      onClick={onClick}
+      {...interactive(onClick)}
       onMouseEnter={e => onClick && (e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)')}
       onMouseLeave={e => onClick && (e.currentTarget.style.boxShadow = 'none')}
     >

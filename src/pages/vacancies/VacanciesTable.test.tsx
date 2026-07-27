@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Real i18n (nl) side-effect init so the "AI-agent" column header resolves genuine
 // Dutch text (mirrors VacancyDrawer.test.tsx's convention).
@@ -120,7 +120,9 @@ describe('VacanciesTable · Leads sort puts unknown rows last (VACANCY-LEADS-COU
     const { container } = render(<VacanciesTable rows={mixedRows} />)
 
     const headerCell = screen.getByText('Leads').closest('th') as HTMLElement
-    await user.click(headerCell)
+    // Click the header BUTTON: sorting lives in a real button since the keyboard-
+    // accessibility fix (audit 2026-07-27); clicking the th alone proves nothing.
+    await user.click(within(headerCell).getByRole('button'))
 
     const titles = Array.from(container.querySelectorAll('tbody tr')).map(tr => tr.children[0].textContent)
     expect(titles).toEqual(['C', 'B', 'A'])
