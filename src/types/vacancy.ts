@@ -36,7 +36,10 @@ export interface Vacancy {
   statusValue: string | number | null
   statusLabel: string
   statusColor: string
-  leadsCount: number
+  // VACANCY-LEADS-COUNT-1: `null` means "not yet computed by the backend" — the
+  // mapper never fabricates a 0 or reads the seeded-random legacy field, so the
+  // UI must render an honest "unknown" state instead of treating null as zero.
+  leadsCount: number | null
   applicationsCount: number
   applicationsByPhase: Loose
   published: boolean
@@ -145,10 +148,14 @@ export interface ApiVacancy {
   status_value?: string | number
   status_label?: string
   status_color?: string
+  // VACANCY-LEADS-COUNT-1: these two are the legacy seeded-random column and its
+  // camelCase alias — deliberately UNUSED by the mapper (both seeders that write
+  // leads_count fill it with random_int(0, 25), never a real computation). Kept
+  // typed here only because raw API rows may still carry the field.
   leads_count?: number
   leadsCount?: number
-  // VACANCY-MATCH-COUNT-1: the real match-count field the backend will repoint
-  // `leadsCount` to (read first, tolerant fallback to leads_count/leadsCount above).
+  // VACANCY-LEADS-COUNT-1: the real match-count field, emitted once ticket
+  // VACANCY-LEADS-COUNT-1 lands backend-side — the only field the mapper reads.
   candidate_match_count?: number
   applications_count?: number
   applicationsCount?: number

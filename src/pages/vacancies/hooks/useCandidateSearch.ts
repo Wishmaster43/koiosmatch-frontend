@@ -61,12 +61,26 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
   // same vacancy_candidate_tab key the drawer's visibility gate reads); a stored
   // (even empty) array wins over the exact-match seed default.
   const allSettings = useAllSettings()
-  const candidateTabCfg = getJsonSetting<CandidateTabConfig | null>(allSettings, 'vacancy_candidate_tab', null)
+  // RADIUS-SETTING-1: `default_radius_km` is a new field on the same JSON blob,
+  // not (yet) part of the shared `CandidateTabConfig` type (out of this task's
+  // file list) — a local intersection type reads it without widening that
+  // shared interface for every other caller.
+  const candidateTabCfg = getJsonSetting<(CandidateTabConfig & { default_radius_km?: number }) | null>(
+    allSettings, 'vacancy_candidate_tab', null,
+  )
   const tabDefaults = getCandidateTabDefaults([], statuses, candidateTypes)
   const defaultStatusValues = candidateTabCfg?.candidate_statuses ?? tabDefaults.candidate_statuses
   const defaultContractForms = candidateTabCfg?.contract_forms ?? tabDefaults.contract_forms
+  // RADIUS-SETTING-1 (Danny 25-07): the search radius now comes from the SAME
+  // tenant setting that already drives this tab's status/contract-form defaults
+  // (vacancy_candidate_tab.default_radius_km), not a hardcoded 30 — a tenant with
+  // a sparse region can widen it, one with a dense city can tighten it.
+  // NOTE (known, ticketed): the function/status filter semantics below are left
+  // untouched in this pass — changing those would silently alter which candidates
+  // match, and that is a separate backend-side ticket, not a radius fix.
+  const defaultRadiusKm = candidateTabCfg?.default_radius_km ?? 30
 
-  const [radiusKm, setRadiusKm]           = useState(30)
+  const [radiusKm, setRadiusKm]           = useState(defaultRadiusKm)
   const [functions, setFunctions]         = useState<string[]>(vacancy.category ? [vacancy.category] : [])
   const [statusSel, setStatusSel]         = useState<string[]>(defaultStatusValues)
   const [contractForms, setContractForms] = useState<string[]>(defaultContractForms)
@@ -79,7 +93,7 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
   const [prevId, setPrevId] = useState<Id | undefined>(vacancy.id)
   if (vacancy.id !== prevId) {
     setPrevId(vacancy.id)
-    setRadiusKm(30)
+    setRadiusKm(defaultRadiusKm)
     setFunctions(vacancy.category ? [vacancy.category] : [])
     setStatusSel(defaultStatusValues)
     setContractForms(defaultContractForms)

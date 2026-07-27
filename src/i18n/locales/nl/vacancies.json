@@ -25,7 +25,8 @@
     "owner": "Eigenaar",
     "client": "Klant",
     "createdAt": "Aangemaakt",
-    "aiAgent": "AI-agent"
+    "aiAgent": "AI-agent",
+    "leadsUnknown": "Nog niet berekend — open de vacature om de passende kandidaten te zien."
   },
   "publishedState": {
     "yes": "Gepubliceerd",

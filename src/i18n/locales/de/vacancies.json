@@ -25,7 +25,8 @@
     "owner": "Inhaber",
     "client": "Kunde",
     "createdAt": "Erstellt am",
-    "aiAgent": "KI-Agent"
+    "aiAgent": "KI-Agent",
+    "leadsUnknown": "Noch nicht berechnet — öffnen Sie die Vakanz, um die passenden Kandidaten zu sehen."
   },
   "publishedState": {
     "yes": "Veröffentlicht",

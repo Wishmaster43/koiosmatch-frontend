@@ -35,9 +35,17 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
     statusLabel: status.label ?? v.status_label ?? '',
     // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar.tsx's identical constant)
     statusColor: status.color ?? v.status_color ?? '#9CA3AF',
-    // VACANCY-MATCH-COUNT-1 (CMBE ticket): reads the real match count first, once
-    // the backend ships it — tolerant fallback to the legacy leads count until then.
-    leadsCount: v.candidate_match_count ?? v.leads_count ?? v.leadsCount ?? 0,
+    // VACANCY-LEADS-COUNT-1 (Danny 25-07): leads_count is NEVER computed by any
+    // backend code — its only two writers are seeders that fill it with
+    // random_int(0, 25) (database/seeders/Concerns/SeedsScaleVacancies.php:83 and
+    // app/Console/Commands/SeedDemoVacancies.php:125). A recruiter plans their day
+    // on this column, so we stop presenting that fiction as fact: read ONLY the
+    // real field, candidate_match_count (ticket VACANCY-LEADS-COUNT-1 will start
+    // emitting it), no fallback to leads_count/leadsCount and no `?? 0` — an
+    // uncomputed count stays `null` (renders as "not yet computed"), never a
+    // random number and never a fake zero. The day the backend ships the real
+    // field, this column is correct with no further frontend change.
+    leadsCount: typeof v.candidate_match_count === 'number' ? v.candidate_match_count : null,
     applicationsCount: v.applications_count ?? v.applicationsCount ?? sumPhases(byPhase),
     applicationsByPhase: byPhase,
     published: Boolean(v.published ?? false),

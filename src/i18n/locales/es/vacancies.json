@@ -25,7 +25,8 @@
     "owner": "Responsable",
     "client": "Cliente",
     "createdAt": "Creada el",
-    "aiAgent": "Agente IA"
+    "aiAgent": "Agente IA",
+    "leadsUnknown": "Aún no calculado — abre la vacante para ver los candidatos que coinciden."
   },
   "publishedState": {
     "yes": "Publicada",

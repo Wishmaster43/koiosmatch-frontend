@@ -38,7 +38,9 @@ describe('StatisticsTab · empty state', () => {
 describe('StatisticsTab · V25 real data (derived from the detail applications array)', () => {
   it('derives the per-phase breakdown from raw.applications (the detail endpoint never attaches applications_by_phase)', () => {
     const v = mapVacancyDetail({
-      id: 'v1', title: 'Test', leads_count: 4, created_at: '2026-06-01T00:00:00Z',
+      // VACANCY-LEADS-COUNT-1: candidate_match_count (never the legacy leads_count,
+      // which the mapper now deliberately ignores) is what feeds the leads KPI.
+      id: 'v1', title: 'Test', candidate_match_count: 4, created_at: '2026-06-01T00:00:00Z',
       // Note: NO applications_by_phase on this raw payload — mirrors the real
       // GET /vacancies/{id} response (VacancyController::show() never attaches it).
       /* eslint-disable no-restricted-syntax -- test fixture hex, not UI styling */
@@ -52,7 +54,7 @@ describe('StatisticsTab · V25 real data (derived from the detail applications a
 
     // Not the old bug: the tab is NOT empty even though applications_by_phase was never attached.
     expect(screen.queryByText(nlVacancies.statistics.empty)).toBeNull()
-    // Conversion rate: 1 hired / 2 applied = 50%.
+    // Leads → applications: 2 applications / 4 leads = 50%.
     expect(screen.getByText('50%')).toBeInTheDocument()
     // Per-phase legend rows (only phases with a real count show).
     expect(screen.getByText('Gesolliciteerd')).toBeInTheDocument()
@@ -60,11 +62,25 @@ describe('StatisticsTab · V25 real data (derived from the detail applications a
     expect(screen.queryByText('Afgewezen')).toBeNull()
   })
 
+  // VACANCY-LEADS-COUNT-1: an uncomputed leads count must render as an honest
+  // dash + the "not yet computed" explanation, never a percentage against 0.
+  it('shows a dash (not a fabricated %) for the leads KPI when candidate_match_count is absent', () => {
+    const v = mapVacancyDetail({
+      id: 'v1', title: 'Test', created_at: '2026-06-01T00:00:00Z',
+      applications: [{ id: 'a1', candidate: { id: 'c1', name: 'Rosa Tijssen' }, phase: { value: 'applied' } }],
+    })
+    render(<StatisticsTab vacancy={v} />)
+    expect(screen.queryByText(nlVacancies.statistics.empty)).toBeNull()
+    // The leads KPI reads the honest "not yet computed" explanation, never a
+    // percentage computed against a fabricated 0.
+    expect(screen.getByText(nlVacancies.columns.leadsUnknown)).toBeInTheDocument()
+  })
+
   it('shows days open, published channels and last activity — all read from fields already on the detail', () => {
     const now = new Date('2026-07-15T00:00:00Z')
     vi.setSystemTime(now)
     const v = mapVacancyDetail({
-      id: 'v1', title: 'Test', leads_count: 2, created_at: '2026-07-01T00:00:00Z',
+      id: 'v1', title: 'Test', candidate_match_count: 2, created_at: '2026-07-01T00:00:00Z',
       // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       applications: [{ id: 'a1', candidate: { id: 'c1', name: 'Rosa Tijssen' }, phase: { value: 'applied', label: 'Gesolliciteerd', color: '#94A3B8' } }],
       channels: [
@@ -84,7 +100,7 @@ describe('StatisticsTab · V25 real data (derived from the detail applications a
 
   it('a phase legend row navigates to Sollicitaties pre-filtered on this vacancy + stage', async () => {
     const v = mapVacancyDetail({
-      id: 'v42', title: 'Test', leads_count: 1,
+      id: 'v42', title: 'Test', candidate_match_count: 1,
       // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       applications: [{ id: 'a1', candidate: { id: 'c1', name: 'Rosa' }, phase: { value: 'applied', label: 'Gesolliciteerd', color: '#94A3B8' } }],
     })

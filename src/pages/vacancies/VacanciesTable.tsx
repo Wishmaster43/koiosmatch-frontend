@@ -84,19 +84,36 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       },
     },
     {
-      key: 'leads', header: t('columns.leads'), align: 'left', sortable: true, sortValue: r => r.leadsCount,
+      // VACANCY-LEADS-COUNT-1: `leadsCount` is null until the backend computes a
+      // real candidate_match_count — sort unknown rows to the END of the (default,
+      // first-click ascending) order rather than letting them read as 0. The
+      // sentinel is a large-but-finite number (never NaN from Infinity-Infinity)
+      // so the shared DataTable's numeric compare() stays deterministic; a
+      // subsequent click reverses the WHOLE sorted array (shared DataTable
+      // behaviour, out of this task's file list), so this only guarantees "last"
+      // on the first click / default direction, not both directions strictly.
+      key: 'leads', header: t('columns.leads'), align: 'left', sortable: true,
+      sortValue: r => r.leadsCount ?? Number.MAX_SAFE_INTEGER,
       cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text)' },
-      // VACANCY-MATCH-COUNT-1: a ghost button when the caller wired the deep-link,
-      // else the plain number (unchanged behaviour). stopPropagation so the click
-      // opens the "Kandidaten zoeken" tab instead of double-firing the row's own open.
-      render: r => onOpenCandidateSearch ? (
-        <button type="button" style={leadsBtn} aria-label={t('columns.leadsOpenSearch')}
-          onClick={e => { e.stopPropagation(); onOpenCandidateSearch(r.id as Id) }}
-          onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
-          onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
-          {r.leadsCount ?? 0}
-        </button>
-      ) : (r.leadsCount ?? 0),
+      // A ghost button when the caller wired the deep-link, else the plain number/
+      // dash (unchanged behaviour otherwise). stopPropagation so the click opens
+      // the "Kandidaten zoeken" tab instead of double-firing the row's own open.
+      // Unknown (null) count renders a muted em dash — NEVER a fake 0 — with a
+      // title explaining the match engine has not computed it yet.
+      render: r => {
+        const known = typeof r.leadsCount === 'number'
+        const label = known ? String(r.leadsCount) : '—'
+        const title = known ? undefined : t('columns.leadsUnknown')
+        return onOpenCandidateSearch ? (
+          <button type="button" style={{ ...leadsBtn, color: known ? 'var(--color-primary)' : 'var(--text-muted)' }}
+            aria-label={t('columns.leadsOpenSearch')} title={title}
+            onClick={e => { e.stopPropagation(); onOpenCandidateSearch(r.id as Id) }}
+            onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
+            onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
+            {label}
+          </button>
+        ) : <span title={title} style={!known ? { color: 'var(--text-muted)' } : undefined}>{label}</span>
+      },
     },
     {
       key: 'applications', header: t('columns.applications'), sortable: true, sortValue: r => r.applicationsCount,

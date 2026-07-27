@@ -1637,7 +1637,9 @@
     "subtitle": "Legen Sie fest, wann der Tab „Kandidaten suchen“ im Stellen-Drilldown sichtbar ist und welche Kandidaten standardmäßig angezeigt werden.",
     "vacancyStatusesTitle": "Sichtbar bei Stellenstatus",
     "candidateStatusesTitle": "Einsatzbereitschaft im Tab",
-    "contractFormsTitle": "Vertragsformen im Tab"
+    "contractFormsTitle": "Vertragsformen im Tab",
+    "defaultRadiusLabel": "Standardradius (km)",
+    "defaultRadiusHint": "Radius, den der Tab „Kandidaten suchen“ standardmäßig verwendet, wenn eine Vakanz geöffnet wird (1–500 km)."
   },
   "viewConfig": {
     "title": "{{label}}-Ansicht",

@@ -7,7 +7,7 @@ describe('mapVacancy', () => {
       id: 'v1', code: '00107', title: 'Verpleegkundige | Den Haag',
       // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       status: { value: 'open', label: 'Open', color: '#79B58E' },
-      leads_count: 5, applications_count: 12, published: true,
+      candidate_match_count: 5, applications_count: 12, published: true,
       owner: { id: 'u1', name: 'Kelly van Vliet', avatar_color: '#abc' },
       customer: { id: 'c1', name: 'Yesway zorg' },
       tags: ['zorg'], created_at: '2026-06-16',
@@ -31,9 +31,34 @@ describe('mapVacancy', () => {
     const row = mapVacancy({})
     expect(row.title).toBe('—')
     expect(row.published).toBe(false)
-    expect(row.leadsCount).toBe(0)
+    // VACANCY-LEADS-COUNT-1: an uncomputed leads count is null, never a fake 0.
+    expect(row.leadsCount).toBeNull()
     expect(row.applicationsCount).toBe(0)
     expect(row.owner.initials).toBe('?')
+  })
+
+  // VACANCY-LEADS-COUNT-1 (Danny 25-07): leads_count is a seeded-random column no
+  // backend code computes — the mapper must read ONLY candidate_match_count.
+  describe('leadsCount (VACANCY-LEADS-COUNT-1)', () => {
+    it('maps candidate_match_count through when present', () => {
+      const row = mapVacancy({ id: 'v20', candidate_match_count: 7 })
+      expect(row.leadsCount).toBe(7)
+    })
+
+    it('yields null (never 0) when candidate_match_count is missing', () => {
+      const row = mapVacancy({ id: 'v21' })
+      expect(row.leadsCount).toBeNull()
+    })
+
+    it('ignores the legacy leads_count field even when present', () => {
+      const row = mapVacancy({ id: 'v22', leads_count: 47 })
+      expect(row.leadsCount).toBeNull()
+    })
+
+    it('prefers candidate_match_count over a stray legacy leads_count on the same row', () => {
+      const row = mapVacancy({ id: 'v23', candidate_match_count: 1, leads_count: 47 })
+      expect(row.leadsCount).toBe(1)
+    })
   })
 
   // VAC-DATES-1: start_date/end_date now ship on the list resource too (both

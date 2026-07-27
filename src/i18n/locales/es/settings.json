@@ -1637,7 +1637,9 @@
     "subtitle": "Decide cuándo la pestaña «Buscar candidatos» es visible en el detalle de la vacante y qué candidatos se preseleccionan por defecto.",
     "vacancyStatusesTitle": "Visible según el estado de la vacante",
     "candidateStatusesTitle": "Disponibilidad preseleccionada en la pestaña",
-    "contractFormsTitle": "Formas contractuales preseleccionadas en la pestaña"
+    "contractFormsTitle": "Formas contractuales preseleccionadas en la pestaña",
+    "defaultRadiusLabel": "Radio por defecto (km)",
+    "defaultRadiusHint": "Radio que utiliza por defecto la pestaña de búsqueda de candidatos al abrir una vacante (1–500 km)."
   },
   "viewConfig": {
     "title": "Vista {{label}}",

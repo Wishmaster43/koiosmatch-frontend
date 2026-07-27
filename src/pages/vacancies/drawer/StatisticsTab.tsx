@@ -39,11 +39,16 @@ export default function StatisticsTab({ vacancy: v }: { vacancy: VacancyDetail }
   const applied = byPhase.applied ?? v.applicationsCount ?? 0
   const hired = byPhase.hired ?? 0
   const totalApps = v.applicationsCount ?? 0
-  const leads = v.leadsCount ?? 0
+  // VACANCY-LEADS-COUNT-1: leadsCount is null until the backend computes a real
+  // candidate_match_count — never treat that as 0, or the "leads → applications"
+  // conversion below would show a fake 100%/0% derived from fiction.
+  const leads = v.leadsCount
+  const leadsKnown = typeof leads === 'number'
   const pct = (num: number, den: number) => (den > 0 ? `${Math.round((num / den) * 100)}%` : '—')
 
-  // Not enough data to show anything meaningful.
-  if (totalApps === 0 && leads === 0) {
+  // Not enough data to show anything meaningful (an unknown lead count counts as
+  // "no data" here too — it must never masquerade as a real 0).
+  if (totalApps === 0 && (!leadsKnown || leads === 0)) {
     return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('statistics.empty')}</div>
   }
 
@@ -67,8 +72,10 @@ export default function StatisticsTab({ vacancy: v }: { vacancy: VacancyDetail }
         kpis={[
           { label: t('statistics.conversionRate'), value: pct(hired, applied || totalApps),
             sub: t('statistics.appliedToHired'), color: 'var(--color-success)' },
-          { label: t('statistics.leadsToApplications'), value: pct(totalApps, leads),
-            sub: t('statistics.ofLeads', { count: leads }), color: 'var(--color-primary)' },
+          // Never compute a percentage against an unknown lead count (that would
+          // read as a real conversion rate derived from fiction) — the honest dash.
+          { label: t('statistics.leadsToApplications'), value: leadsKnown ? pct(totalApps, leads ?? 0) : '—',
+            sub: leadsKnown ? t('statistics.ofLeads', { count: leads ?? 0 }) : t('columns.leadsUnknown'), color: 'var(--color-primary)' },
           { label: t('statistics.daysOpen'), value: daysOpen ?? '—',
             sub: v.created ? t('statistics.daysOpenSub', { date: formatDate(v.created) }) : undefined, color: 'var(--color-secondary)' },
           { label: t('statistics.channelsPublished'), value: publishedChannels.length,
@@ -79,7 +86,7 @@ export default function StatisticsTab({ vacancy: v }: { vacancy: VacancyDetail }
           rows: [
             [t('statistics.createdOn'), v.created ? formatDate(v.created) : '—'],
             [t('statistics.lastActivity'), lastActivity ? formatDateTime(lastActivity) : '—'],
-            [t('columns.leads'), String(leads)],
+            [t('columns.leads'), leadsKnown ? String(leads) : '—'],
             [t('columns.applications'), String(totalApps)],
           ],
         }}

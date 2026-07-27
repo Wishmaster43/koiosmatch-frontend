@@ -14,6 +14,14 @@ export default defineConfig({
   // the cookie, D1-DEV-1). Harmless in bearer mode: absolute API URLs bypass the proxy.
   server: {
     port: 5173, strictPort: true,
+    // Poll for changes instead of relying on fs events (measured 25-07-2026): after a
+    // long-running dev session with many file writes from outside the editor, the
+    // native watcher silently stopped firing — the server kept serving the CACHED
+    // transform of changed modules (same URL returned old code, only a cache-busting
+    // query returned the new one), so the browser showed stale UI while the files on
+    // disk were correct. Polling src/ costs little (node_modules is ignored) and makes
+    // "I don't see my change" impossible.
+    watch: { usePolling: true, interval: 400 },
     proxy: {
       '/api':     { target: 'http://koiosmatch-api.test', changeOrigin: true },
       '/sanctum': { target: 'http://koiosmatch-api.test', changeOrigin: true },

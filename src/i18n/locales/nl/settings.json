@@ -1656,7 +1656,9 @@
     "subtitle": "Bepaal wanneer het tabblad 'Kandidaten zoeken' in de vacature-drilldown zichtbaar is en welke kandidaten standaard getoond worden.",
     "vacancyStatusesTitle": "Zichtbaar bij vacaturestatus",
     "candidateStatusesTitle": "Inzetbaarheid in het tabblad",
-    "contractFormsTitle": "Contractvormen in het tabblad"
+    "contractFormsTitle": "Contractvormen in het tabblad",
+    "defaultRadiusLabel": "Standaard straal (km)",
+    "defaultRadiusHint": "Straal die de kandidaten-zoek-tab standaard gebruikt bij het openen van een vacature (1–500 km)."
   },
   "viewConfig": {
     "title": "{{label}} weergave",

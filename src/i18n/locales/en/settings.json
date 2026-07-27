@@ -1656,7 +1656,9 @@
     "subtitle": "Decide when the 'Find candidates' tab is visible in the vacancy drill-down and which candidates are preselected by default.",
     "vacancyStatusesTitle": "Visible for vacancy status",
     "candidateStatusesTitle": "Deployability preselected in the tab",
-    "contractFormsTitle": "Contract forms preselected in the tab"
+    "contractFormsTitle": "Contract forms preselected in the tab",
+    "defaultRadiusLabel": "Default radius (km)",
+    "defaultRadiusHint": "Radius the candidate-search tab uses by default when opening a vacancy (1–500 km)."
   },
   "viewConfig": {
     "title": "{{label}} view",

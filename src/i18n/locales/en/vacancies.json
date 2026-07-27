@@ -25,7 +25,8 @@
     "owner": "Owner",
     "client": "Client",
     "createdAt": "Created on",
-    "aiAgent": "AI agent"
+    "aiAgent": "AI agent",
+    "leadsUnknown": "Not yet computed — open the vacancy to see the matching candidates."
   },
   "publishedState": {
     "yes": "Published",

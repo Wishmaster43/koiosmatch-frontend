@@ -1637,7 +1637,9 @@
     "subtitle": "Décidez quand l'onglet « Recherche de candidats » est visible dans la fiche détaillée du poste et quels candidats sont présélectionnés par défaut.",
     "vacancyStatusesTitle": "Visible selon le statut du poste",
     "candidateStatusesTitle": "Disponibilité présélectionnée dans l'onglet",
-    "contractFormsTitle": "Formes contractuelles présélectionnées dans l'onglet"
+    "contractFormsTitle": "Formes contractuelles présélectionnées dans l'onglet",
+    "defaultRadiusLabel": "Rayon par défaut (km)",
+    "defaultRadiusHint": "Rayon utilisé par défaut par l'onglet de recherche de candidats à l'ouverture d'une vacance (1–500 km)."
   },
   "viewConfig": {
     "title": "Vue {{label}}",

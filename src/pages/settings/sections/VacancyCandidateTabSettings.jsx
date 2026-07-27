@@ -65,18 +65,29 @@ function VacancyCandidateTabSettingsInner() {
   const stored = getJsonSetting(values, KEY, null)
   // Absent setting → show the real seed-based effective behaviour, never a blank form.
   const defaults = getCandidateTabDefaults(vacancyStatuses, candidateStatuses, candidateTypes)
+  // RADIUS-SETTING-1 (Danny 25-07): the default search radius (km) rides the same
+  // JSON blob so useCandidateSearch's radius default and this settings screen
+  // always read/write one source of truth; 30 mirrors the hook's own fallback.
   const cfg = {
     vacancy_statuses: stored?.vacancy_statuses ?? defaults.vacancy_statuses,
     candidate_statuses: stored?.candidate_statuses ?? defaults.candidate_statuses,
     contract_forms: stored?.contract_forms ?? defaults.contract_forms,
+    default_radius_km: stored?.default_radius_km ?? 30,
   }
 
   // Toggle one value in one of the three arrays; always persists the FULL current
-  // config (all three keys explicit), never a partial write — immediate-save, no
+  // config (all four keys explicit), never a partial write — immediate-save, no
   // separate save button (mirrors CandidateVacancyTabSettings).
   const persist = (patch) => saveSettingsKeys({ [KEY]: { ...cfg, ...patch } }).catch(() => {})
   const toggleIn = (key) => (value) =>
     persist({ [key]: cfg[key].includes(value) ? cfg[key].filter(v => v !== value) : [...cfg[key], value] })
+  // Clamp to the 1..500 range before persisting so a stray out-of-bounds value
+  // (typed or pasted past the input's own min/max, which browsers don't hard-enforce)
+  // never gets written.
+  const setRadius = (raw) => {
+    const n = Math.min(500, Math.max(1, Number(raw) || 1))
+    persist({ default_radius_km: n })
+  }
 
   // Three sub-tabs — one per checkbox block, reusing the shared underline SubTabBar.
   const [activeTab, setActiveTab] = useState('vacancy_statuses')
@@ -90,6 +101,18 @@ function VacancyCandidateTabSettingsInner() {
     <div style={{ maxWidth: 720 }}>
       <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('candidateTab.title')}</h3>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t('candidateTab.subtitle')}</p>
+
+      {/* RADIUS-SETTING-1: the default search radius, applied when the tab first
+          opens for any vacancy (mirrors useCandidateSearch's own fallback of 30). */}
+      <div style={{ marginBottom: 14 }}>
+        <label htmlFor="vacancy-candidate-tab-radius" style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', display: 'block', marginBottom: 2 }}>
+          {t('candidateTab.defaultRadiusLabel')}
+        </label>
+        <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('candidateTab.defaultRadiusHint')}</p>
+        <input id="vacancy-candidate-tab-radius" type="number" min={1} max={500} value={cfg.default_radius_km}
+          onChange={e => setRadius(e.target.value)}
+          style={{ width: 100, padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 12 }} />
+      </div>
 
       <SubTabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
       <div style={{ marginTop: 14 }}>

@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event'
 import '@/i18n'
 import VacanciesTable from './VacanciesTable'
 import type { Vacancy } from '@/types/vacancy'
+import nlVacancies from '@/i18n/locales/nl/vacancies.json'
 
 // Lookups arrive via a mocked hook — statusMeta only matters for rows without a
 // resolved statusLabel, which these fixtures don't exercise.
@@ -79,6 +80,50 @@ describe('VacanciesTable · Leads count deep-link (VACANCY-MATCH-COUNT-1, Danny 
     expect(onOpenCandidateSearch).toHaveBeenCalledWith('v1')
     // stopPropagation on the button's click must stop the row's own onClick firing.
     expect(onSelect).not.toHaveBeenCalled()
+  })
+
+  // VACANCY-LEADS-COUNT-1 (Danny 25-07): a null leadsCount must render as an
+  // honest em dash, never a fake 0 — while the click-through button still fires.
+  it('renders a muted em dash for a null leadsCount and still fires the click-through', async () => {
+    const user = userEvent.setup()
+    const onOpenCandidateSearch = vi.fn()
+    const unknownRows = [
+      { id: 'v9', title: 'Onbekend', leadsCount: null, created: '2024-02-01', createdSort: '2024-02-01' },
+    ] as unknown as Vacancy[]
+    render(<VacanciesTable rows={unknownRows} onOpenCandidateSearch={onOpenCandidateSearch} />)
+
+    const btn = screen.getByRole('button', { name: 'Open Kandidaten zoeken' })
+    expect(btn).toHaveTextContent('—')
+    await user.click(btn)
+    expect(onOpenCandidateSearch).toHaveBeenCalledWith('v9')
+  })
+
+  it('renders a muted em dash even without the click-through wired', () => {
+    const unknownRows = [
+      { id: 'v9', title: 'Onbekend', leadsCount: null, created: '2024-02-01', createdSort: '2024-02-01' },
+    ] as unknown as Vacancy[]
+    render(<VacanciesTable rows={unknownRows} />)
+    // Located via the explanatory title (unique text) rather than the dash glyph
+    // itself, which several other empty cells in the row also render.
+    expect(screen.getByTitle(nlVacancies.columns.leadsUnknown)).toBeInTheDocument()
+  })
+})
+
+describe('VacanciesTable · Leads sort puts unknown rows last (VACANCY-LEADS-COUNT-1)', () => {
+  it('sorts a null leadsCount after every known count on first click (ascending)', async () => {
+    const user = userEvent.setup()
+    const mixedRows = [
+      { id: 'v1', title: 'A', leadsCount: null, created: '2024-01-01', createdSort: '2024-01-01' },
+      { id: 'v2', title: 'B', leadsCount: 3, created: '2024-01-01', createdSort: '2024-01-01' },
+      { id: 'v3', title: 'C', leadsCount: 1, created: '2024-01-01', createdSort: '2024-01-01' },
+    ] as unknown as Vacancy[]
+    const { container } = render(<VacanciesTable rows={mixedRows} />)
+
+    const headerCell = screen.getByText('Leads').closest('th') as HTMLElement
+    await user.click(headerCell)
+
+    const titles = Array.from(container.querySelectorAll('tbody tr')).map(tr => tr.children[0].textContent)
+    expect(titles).toEqual(['C', 'B', 'A'])
   })
 })
 
