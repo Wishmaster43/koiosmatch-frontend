@@ -1656,7 +1656,31 @@
     "candidateStatusesTitle": "Disponibilité présélectionnée dans l'onglet",
     "contractFormsTitle": "Formes contractuelles présélectionnées dans l'onglet",
     "defaultRadiusLabel": "Rayon par défaut (km)",
-    "defaultRadiusHint": "Rayon utilisé par défaut par l'onglet de recherche de candidats à l'ouverture d'une vacance (1–500 km)."
+    "defaultRadiusHint": "Rayon utilisé par défaut par l'onglet de recherche de candidats à l'ouverture d'une vacance (1–500 km).",
+    "leadsCriteria": {
+      "title": "Critères de leads",
+      "subtitle": "Déterminez quels candidats comptent comme « lead » pour ce poste — cela alimente à la fois le compteur de leads et l'onglet « Recherche de candidats ».",
+      "countableStatusesTitle": "Statuts de poste qui comptent",
+      "countableStatusesHint": "Aucune sélection = tous les statuts de poste comptent.",
+      "radiusTitle": "Rayon de recherche",
+      "applyRadiusLabel": "Ne compter que les candidats dans le rayon",
+      "applyRadiusHint": "Désactivé = la distance est ignorée ; chaque candidat compte, quel que soit son lieu de résidence.",
+      "functionMatchTitle": "Correspondance de fonction",
+      "functionMatchHint": "Détermine avec quelle rigueur la fonction du candidat doit correspondre à celle du poste.",
+      "functionMatchExact": "Exacte",
+      "functionMatchExactDesc": "Seuls les candidats ayant exactement la même fonction comptent.",
+      "functionMatchCategory": "Catégorie",
+      "functionMatchCategoryDesc": "Les candidats ayant la même catégorie de fonction comptent.",
+      "functionMatchCategoryNote": "Se comporte actuellement comme « Exacte » — les postes n'ont pas encore de catégorie de fonction.",
+      "functionMatchAll": "Toutes",
+      "functionMatchAllDesc": "Chaque fonction compte ; la fonction n'a aucun rôle dans les leads.",
+      "excludeAlreadyAppliedLabel": "Exclure les candidats ayant une candidature en cours",
+      "excludeAlreadyAppliedHint": "Un candidat ayant déjà postulé à ce poste ne compte plus comme lead.",
+      "includeExpiringPlacementsLabel": "Compter les placements bientôt expirés",
+      "includeExpiringPlacementsHint": "Les candidats actuellement placés mais dont le match se termine dans le nombre de jours configuré comptent aussi comme lead.",
+      "expiringWithinDaysLabel": "Nombre de jours",
+      "expiringWithinDaysHint": "Combien de jours à l'avance un placement expirant compte déjà comme lead (1–365)."
+    }
   },
   "viewConfig": {
     "title": "Vue {{label}}",

@@ -1675,7 +1675,31 @@
     "candidateStatusesTitle": "Deployability preselected in the tab",
     "contractFormsTitle": "Contract forms preselected in the tab",
     "defaultRadiusLabel": "Default radius (km)",
-    "defaultRadiusHint": "Radius the candidate-search tab uses by default when opening a vacancy (1–500 km)."
+    "defaultRadiusHint": "Radius the candidate-search tab uses by default when opening a vacancy (1–500 km).",
+    "leadsCriteria": {
+      "title": "Leads criteria",
+      "subtitle": "Decide which candidates count as a 'lead' for this vacancy — this feeds both the leads counter and the 'Find candidates' tab.",
+      "countableStatusesTitle": "Vacancy statuses that count",
+      "countableStatusesHint": "Empty selection = every vacancy status counts.",
+      "radiusTitle": "Search radius",
+      "applyRadiusLabel": "Only count candidates within the radius",
+      "applyRadiusHint": "Off = distance is ignored; every candidate counts, regardless of where they live.",
+      "functionMatchTitle": "Function match",
+      "functionMatchHint": "How strictly the candidate's function must match the vacancy's function.",
+      "functionMatchExact": "Exact",
+      "functionMatchExactDesc": "Only candidates with the exact same function count.",
+      "functionMatchCategory": "Category",
+      "functionMatchCategoryDesc": "Candidates with the same function category count.",
+      "functionMatchCategoryNote": "Currently behaves the same as 'Exact' — vacancies don't have a function category yet.",
+      "functionMatchAll": "All",
+      "functionMatchAllDesc": "Every function counts; function plays no role in leads.",
+      "excludeAlreadyAppliedLabel": "Exclude candidates with a live application",
+      "excludeAlreadyAppliedHint": "A candidate who already applied to this vacancy no longer counts as a lead.",
+      "includeExpiringPlacementsLabel": "Count soon-to-expire placements",
+      "includeExpiringPlacementsHint": "Candidates who are placed right now but whose match ends within the configured number of days also count as a lead.",
+      "expiringWithinDaysLabel": "Number of days",
+      "expiringWithinDaysHint": "How many days ahead an expiring placement already counts as a lead (1–365)."
+    }
   },
   "viewConfig": {
     "title": "{{label}} view",

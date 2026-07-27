@@ -1656,7 +1656,31 @@
     "candidateStatusesTitle": "Einsatzbereitschaft im Tab",
     "contractFormsTitle": "Vertragsformen im Tab",
     "defaultRadiusLabel": "Standardradius (km)",
-    "defaultRadiusHint": "Radius, den der Tab „Kandidaten suchen“ standardmäßig verwendet, wenn eine Vakanz geöffnet wird (1–500 km)."
+    "defaultRadiusHint": "Radius, den der Tab „Kandidaten suchen“ standardmäßig verwendet, wenn eine Vakanz geöffnet wird (1–500 km).",
+    "leadsCriteria": {
+      "title": "Leads-Kriterien",
+      "subtitle": "Legen Sie fest, welche Kandidaten als „Lead“ für diese Stelle zählen — das speist sowohl den Leads-Zähler als auch den Tab „Kandidaten suchen“.",
+      "countableStatusesTitle": "Stellenstatus, die zählen",
+      "countableStatusesHint": "Keine Auswahl = jeder Stellenstatus zählt.",
+      "radiusTitle": "Suchradius",
+      "applyRadiusLabel": "Nur Kandidaten innerhalb des Radius zählen",
+      "applyRadiusHint": "Aus = die Entfernung wird ignoriert; jeder Kandidat zählt, unabhängig vom Wohnort.",
+      "functionMatchTitle": "Funktionsübereinstimmung",
+      "functionMatchHint": "Wie streng die Funktion des Kandidaten mit der Funktion der Stelle übereinstimmen muss.",
+      "functionMatchExact": "Exakt",
+      "functionMatchExactDesc": "Nur Kandidaten mit genau derselben Funktion zählen.",
+      "functionMatchCategory": "Kategorie",
+      "functionMatchCategoryDesc": "Kandidaten mit derselben Funktionskategorie zählen.",
+      "functionMatchCategoryNote": "Verhält sich derzeit genauso wie „Exakt“ — Stellen haben noch keine Funktionskategorie.",
+      "functionMatchAll": "Alle",
+      "functionMatchAllDesc": "Jede Funktion zählt; die Funktion spielt bei Leads keine Rolle.",
+      "excludeAlreadyAppliedLabel": "Kandidaten mit laufender Bewerbung ausschließen",
+      "excludeAlreadyAppliedHint": "Ein Kandidat, der sich bereits auf diese Stelle beworben hat, zählt nicht erneut als Lead.",
+      "includeExpiringPlacementsLabel": "Bald auslaufende Einsätze mitzählen",
+      "includeExpiringPlacementsHint": "Kandidaten, die aktuell platziert sind, deren Match aber innerhalb der eingestellten Tage endet, zählen ebenfalls als Lead.",
+      "expiringWithinDaysLabel": "Anzahl Tage",
+      "expiringWithinDaysHint": "Wie viele Tage im Voraus ein auslaufender Einsatz bereits als Lead zählt (1–365)."
+    }
   },
   "viewConfig": {
     "title": "{{label}}-Ansicht",

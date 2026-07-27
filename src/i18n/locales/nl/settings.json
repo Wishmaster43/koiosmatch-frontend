@@ -1675,7 +1675,31 @@
     "candidateStatusesTitle": "Inzetbaarheid in het tabblad",
     "contractFormsTitle": "Contractvormen in het tabblad",
     "defaultRadiusLabel": "Standaard straal (km)",
-    "defaultRadiusHint": "Straal die de kandidaten-zoek-tab standaard gebruikt bij het openen van een vacature (1–500 km)."
+    "defaultRadiusHint": "Straal die de kandidaten-zoek-tab standaard gebruikt bij het openen van een vacature (1–500 km).",
+    "leadsCriteria": {
+      "title": "Leads-criteria",
+      "subtitle": "Bepaal welke kandidaten meetellen als 'lead' voor deze vacature — dit voedt zowel de leads-teller als het tabblad 'Kandidaten zoeken'.",
+      "countableStatusesTitle": "Vacaturestatussen die meetellen",
+      "countableStatusesHint": "Leeg geselecteerd = alle vacaturestatussen tellen mee.",
+      "radiusTitle": "Zoekstraal",
+      "applyRadiusLabel": "Alleen kandidaten binnen de straal meetellen",
+      "applyRadiusHint": "Uit = de afstand wordt genegeerd; alle kandidaten tellen mee, ongeacht waar ze wonen.",
+      "functionMatchTitle": "Functie-overeenkomst",
+      "functionMatchHint": "Hoe streng de functie van de kandidaat moet overeenkomen met die van de vacature.",
+      "functionMatchExact": "Exact",
+      "functionMatchExactDesc": "Alleen kandidaten met exact dezelfde functie tellen mee.",
+      "functionMatchCategory": "Categorie",
+      "functionMatchCategoryDesc": "Kandidaten met dezelfde functiecategorie tellen mee.",
+      "functionMatchCategoryNote": "Werkt momenteel hetzelfde als 'Exact' — vacatures hebben nog geen functiecategorie.",
+      "functionMatchAll": "Alles",
+      "functionMatchAllDesc": "Elke functie telt mee; functie speelt geen rol bij leads.",
+      "excludeAlreadyAppliedLabel": "Kandidaten met een lopende sollicitatie uitsluiten",
+      "excludeAlreadyAppliedHint": "Een kandidaat die al op deze vacature solliciteert, telt niet nogmaals mee als lead.",
+      "includeExpiringPlacementsLabel": "Bijna aflopende plaatsingen meetellen",
+      "includeExpiringPlacementsHint": "Kandidaten die nu geplaatst zijn maar van wie de match binnen het ingestelde aantal dagen afloopt, tellen ook mee als lead.",
+      "expiringWithinDaysLabel": "Aantal dagen",
+      "expiringWithinDaysHint": "Hoeveel dagen van tevoren een aflopende plaatsing al als lead meetelt (1–365)."
+    }
   },
   "viewConfig": {
     "title": "{{label}} weergave",

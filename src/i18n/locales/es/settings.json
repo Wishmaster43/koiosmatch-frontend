@@ -1656,7 +1656,31 @@
     "candidateStatusesTitle": "Disponibilidad preseleccionada en la pestaña",
     "contractFormsTitle": "Formas contractuales preseleccionadas en la pestaña",
     "defaultRadiusLabel": "Radio por defecto (km)",
-    "defaultRadiusHint": "Radio que utiliza por defecto la pestaña de búsqueda de candidatos al abrir una vacante (1–500 km)."
+    "defaultRadiusHint": "Radio que utiliza por defecto la pestaña de búsqueda de candidatos al abrir una vacante (1–500 km).",
+    "leadsCriteria": {
+      "title": "Criterios de leads",
+      "subtitle": "Decide qué candidatos cuentan como «lead» para esta vacante — esto alimenta tanto el contador de leads como la pestaña «Buscar candidatos».",
+      "countableStatusesTitle": "Estados de vacante que cuentan",
+      "countableStatusesHint": "Sin selección = cuentan todos los estados de vacante.",
+      "radiusTitle": "Radio de búsqueda",
+      "applyRadiusLabel": "Contar solo candidatos dentro del radio",
+      "applyRadiusHint": "Desactivado = se ignora la distancia; todos los candidatos cuentan, sin importar dónde vivan.",
+      "functionMatchTitle": "Coincidencia de función",
+      "functionMatchHint": "Determina con qué rigor debe coincidir la función del candidato con la de la vacante.",
+      "functionMatchExact": "Exacta",
+      "functionMatchExactDesc": "Solo cuentan los candidatos con exactamente la misma función.",
+      "functionMatchCategory": "Categoría",
+      "functionMatchCategoryDesc": "Cuentan los candidatos con la misma categoría de función.",
+      "functionMatchCategoryNote": "Actualmente funciona igual que «Exacta» — las vacantes aún no tienen categoría de función.",
+      "functionMatchAll": "Todas",
+      "functionMatchAllDesc": "Cuenta cualquier función; la función no influye en los leads.",
+      "excludeAlreadyAppliedLabel": "Excluir candidatos con una solicitud activa",
+      "excludeAlreadyAppliedHint": "Un candidato que ya ha solicitado esta vacante deja de contar como lead.",
+      "includeExpiringPlacementsLabel": "Contar colocaciones próximas a vencer",
+      "includeExpiringPlacementsHint": "Los candidatos colocados ahora mismo, pero cuya coincidencia finaliza dentro de los días configurados, también cuentan como lead.",
+      "expiringWithinDaysLabel": "Número de días",
+      "expiringWithinDaysHint": "Cuántos días de antelación ya cuenta una colocación a punto de vencer como lead (1–365)."
+    }
   },
   "viewConfig": {
     "title": "Vista {{label}}",
