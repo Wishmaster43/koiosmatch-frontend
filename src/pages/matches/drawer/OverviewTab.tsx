@@ -9,6 +9,7 @@
  */
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import SectionCard from '@/components/ui/SectionCard'
 import { useDateFormat } from '@/lib/datetime'
 import StatusPill from '@/components/ui/StatusPill'
 import ScorePill from '../ScorePill'
@@ -44,11 +45,12 @@ export default function OverviewTab({ match, onSetStatus }: OverviewTabProps) {
   const statusMeta = metaOf(match.status)
 
   return (
-    <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 14, background: 'var(--bg)' }}>
-      {/* Titled card — grouped match facts */}
-      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>
-        {t('drawer.sectionDetails')}
-      </div>
+    // Danny 27-07 ("achtergrond kleur???"): this card was hand-rolled with
+    // background --bg (the grey page tint) and its own bold title, so the match
+    // drawer was the only one with a tinted panel. It now uses the shared
+    // SectionCard — same border/radius, --surface background, grey uppercase
+    // title outside the block — exactly like every other drawer.
+    <SectionCard title={t('drawer.sectionDetails')}>
       {/* Two-column grid; short fields pair up (§3B) */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 16px' }}>
         <Field label={t('drawer.fields.candidate')}>{textOrDash(match.candidate)}</Field>
@@ -73,6 +75,6 @@ export default function OverviewTab({ match, onSetStatus }: OverviewTabProps) {
         </Field>
         <Field label={t('drawer.fields.created')}>{formatDate(match.date)}</Field>
       </div>
-    </div>
+    </SectionCard>
   )
 }
