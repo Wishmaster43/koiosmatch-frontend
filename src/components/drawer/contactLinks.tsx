@@ -86,3 +86,25 @@ export function websiteValue(v: unknown, openLabel: string): ReactNode {
     </span>
   )
 }
+
+/**
+ * A Chamber-of-Commerce number, linked through to the public KvK register (Danny 28-07:
+ * "KVK moeten we ook gaan doorlinken"). Only digits are looked up — a free-text value
+ * that is not a number is shown as-is rather than sent to a search that cannot resolve it.
+ */
+export function kvkValue(v: unknown, openLabel: string): ReactNode {
+  const value = typeof v === 'string' ? v.trim() : ''
+  if (!value) return dash()
+  const digits = value.replace(/\D/g, '')
+  if (!digits) return <span style={{ fontSize: 12, color: 'var(--text)' }}>{value}</span>
+  const href = `https://www.kvk.nl/zoeken/?handelsnaam=${encodeURIComponent(digits)}`
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      <a href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>{value}</a>
+      <a href={href} target="_blank" rel="noopener noreferrer" title={openLabel} aria-label={openLabel}
+        style={iconStyle} {...hover('var(--color-info)')}>
+        <ExternalLink size={13} />
+      </a>
+    </span>
+  )
+}

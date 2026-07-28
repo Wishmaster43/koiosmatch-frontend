@@ -23,6 +23,8 @@ import SectionCard from '@/components/ui/SectionCard'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
+import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
+import { emailValue, phoneValue, kvkValue } from '@/components/drawer/contactLinks'
 // JOB-STATUS-1 (Danny 28-07: "Status van locatie moet hier!!") — the read-only
 // title-row badge (§3A(c)) + the searchable picker reused for its inline edit.
 import TitleBadge from '@/components/drawer/TitleBadge'
@@ -95,11 +97,14 @@ export default function LocationDetail({
       ] },
     { key: 'state', label: t('locations.detail.state'), type: 'text', group: t('subModal.groups.address') },
     { key: 'country', label: t('locations.detail.country'), type: 'text', group: t('subModal.groups.address') },
-    { key: 'cocNumber', label: t('locations.detail.coc'), type: 'text', group: t('locations.detail.registrationTitle') },
+    { key: 'cocNumber', label: t('locations.detail.coc'), type: 'text', group: t('locations.detail.registrationTitle'),
+      renderValue: v => kvkValue(v, t('locations.detail.openKvk')) },
     { key: 'vatNumber', label: t('locations.detail.vat'), type: 'text', group: t('locations.detail.registrationTitle') },
     { key: 'contactName', label: t('locations.detail.contactName'), type: 'text', group: t('locations.detail.contactTitle') },
-    { key: 'email', label: t('locations.detail.email'), type: 'text', group: t('locations.detail.contactTitle') },
-    { key: 'phone', label: t('locations.detail.phone'), type: 'text', group: t('locations.detail.contactTitle') },
+    { key: 'email', label: t('locations.detail.email'), type: 'text', group: t('locations.detail.contactTitle'),
+      renderValue: v => emailValue(v, t('overview.sendEmail')) },
+    { key: 'phone', label: t('locations.detail.phone'), type: 'text', group: t('locations.detail.contactTitle'),
+      renderValue: v => phoneValue(v, t('overview.callPhone')) },
   ]
   // Facturatie — its own sub-tab, own EditableFieldTable instance/pencil. No
   // billingEmail input here (Danny 2026-07-22): facturatie ALWAYS comes from the
@@ -147,6 +152,7 @@ export default function LocationDetail({
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{l.name}</div>
+          <ReferenceNumberChip value={l.referenceNumber} />
           {editingStatus ? (
             // Inline picker in the title row (Danny 28-07: "Status van locatie moet hier!!")
             // — searchable, pick-only (allowCreate off, same as every tenant-lookup select).

@@ -152,7 +152,7 @@
       "contacts": "Contactos"
     },
     "detail": {
-      "addressTitle": "Dirección y datos",
+      "addressTitle": "Ubicación",
       "name": "Nombre",
       "status": "Estado",
       "changeStatus": "Cambiar estado",
@@ -183,7 +183,8 @@
       "pickContactTitle": "Vincular un contacto",
       "pickContactEmpty": "No hay contactos disponibles para vincular.",
       "deleteLocation": "Eliminar ubicación",
-      "confirmDelete": "¿Eliminar esta ubicación? Los departamentos y contactos vinculados se mantienen pero quedan desvinculados."
+      "confirmDelete": "¿Eliminar esta ubicación? Los departamentos y contactos vinculados se mantienen pero quedan desvinculados.",
+      "openKvk": "Abrir en el registro"
     },
     "saveFailed": "Error al guardar.",
     "deleteFailed": "Error al eliminar.",

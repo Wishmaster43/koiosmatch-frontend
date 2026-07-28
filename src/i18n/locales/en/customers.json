@@ -152,7 +152,7 @@
       "contacts": "Contacts"
     },
     "detail": {
-      "addressTitle": "Address & details",
+      "addressTitle": "Location",
       "name": "Name",
       "status": "Status",
       "changeStatus": "Change status",
@@ -183,7 +183,8 @@
       "pickContactTitle": "Link a contact",
       "pickContactEmpty": "No contacts available to link.",
       "deleteLocation": "Delete location",
-      "confirmDelete": "Delete this location? Linked departments and contacts stay but become unlinked."
+      "confirmDelete": "Delete this location? Linked departments and contacts stay but become unlinked.",
+      "openKvk": "Open in the CoC register"
     },
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",

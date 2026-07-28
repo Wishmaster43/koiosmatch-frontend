@@ -152,7 +152,7 @@
       "contacts": "Kontakte"
     },
     "detail": {
-      "addressTitle": "Adresse & Daten",
+      "addressTitle": "Standort",
       "name": "Name",
       "status": "Status",
       "changeStatus": "Status ändern",
@@ -183,7 +183,8 @@
       "pickContactTitle": "Kontakt verknüpfen",
       "pickContactEmpty": "Keine Kontakte zum Verknüpfen verfügbar.",
       "deleteLocation": "Standort löschen",
-      "confirmDelete": "Diesen Standort löschen? Verknüpfte Abteilungen und Kontakte bleiben bestehen, verlieren aber die Verknüpfung."
+      "confirmDelete": "Diesen Standort löschen? Verknüpfte Abteilungen und Kontakte bleiben bestehen, verlieren aber die Verknüpfung.",
+      "openKvk": "Im Handelsregister öffnen"
     },
     "saveFailed": "Speichern fehlgeschlagen.",
     "deleteFailed": "Löschen fehlgeschlagen.",

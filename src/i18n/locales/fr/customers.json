@@ -152,7 +152,7 @@
       "contacts": "Contacts"
     },
     "detail": {
-      "addressTitle": "Adresse & informations",
+      "addressTitle": "Site",
       "name": "Nom",
       "status": "Statut",
       "changeStatus": "Modifier le statut",
@@ -183,7 +183,8 @@
       "pickContactTitle": "Lier un contact",
       "pickContactEmpty": "Aucun contact disponible à lier.",
       "deleteLocation": "Supprimer le site",
-      "confirmDelete": "Supprimer ce site ? Les services et contacts liés restent mais sont déliés."
+      "confirmDelete": "Supprimer ce site ? Les services et contacts liés restent mais sont déliés.",
+      "openKvk": "Ouvrir dans le registre"
     },
     "saveFailed": "L'enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",

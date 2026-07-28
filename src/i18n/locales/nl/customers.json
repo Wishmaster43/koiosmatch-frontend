@@ -152,7 +152,7 @@
       "contacts": "Contacten"
     },
     "detail": {
-      "addressTitle": "Adres & gegevens",
+      "addressTitle": "Locatie",
       "name": "Naam",
       "status": "Status",
       "changeStatus": "Status wijzigen",
@@ -183,7 +183,8 @@
       "pickContactTitle": "Contactpersoon koppelen",
       "pickContactEmpty": "Geen contactpersonen om te koppelen.",
       "deleteLocation": "Locatie verwijderen",
-      "confirmDelete": "Deze locatie verwijderen? Gekoppelde afdelingen en contactpersonen blijven bestaan maar raken ontkoppeld."
+      "confirmDelete": "Deze locatie verwijderen? Gekoppelde afdelingen en contactpersonen blijven bestaan maar raken ontkoppeld.",
+      "openKvk": "Openen in KvK-register"
     },
     "saveFailed": "Opslaan is mislukt.",
     "deleteFailed": "Verwijderen is mislukt.",
