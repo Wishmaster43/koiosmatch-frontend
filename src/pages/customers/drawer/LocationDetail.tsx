@@ -24,6 +24,8 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
+import { getCountryOptions } from '@/lib/countries'
+import { useProvinces } from '@/hooks/useProvinces'
 import { emailValue, phoneValue, kvkValue, vatValue } from '@/components/drawer/contactLinks'
 // JOB-STATUS-1 (Danny 28-07: "Status van locatie moet hier!!") — the read-only
 // title-row badge (§3A(c)) + the searchable picker reused for its inline edit.
@@ -67,7 +69,18 @@ export default function LocationDetail({
   location: l, customerId, locations, departments, contacts, statuses, departmentStatuses, contactStatuses, canLinkBackoffice = false,
   onSave, onDelete, onAddDepartment, onUpdateDepartment, onRemoveDepartment, onAddContact, onUpdateContact, close,
 }: Props) {
-  const { t } = useTranslation('customers')
+  const { t, i18n } = useTranslation('customers')
+
+  // Country/province option lists. The province list cascades on the country ALREADY
+  // SAVED on this location (the shared field table owns its own draft, so an in-edit
+  // country switch is not observable here) — for a Dutch tenant that is the normal case,
+  // and a wrong-country list would be worse than a stale one.
+  const countryOptions = getCountryOptions(i18n.language).map(o => ({ value: o.label, label: o.label }))
+  const countryCode = getCountryOptions(i18n.language).find(o => o.label === (l.country ?? ''))?.value ?? 'NL'
+  const { provinces } = useProvinces(countryCode)
+  const provinceOptions = provinces.map((p: string) => ({ value: p, label: p }))
+
+
   const { confirm, dialog } = useConfirm()
   const auth = useAuth()
   const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
@@ -95,8 +108,12 @@ export default function LocationDetail({
         { key: 'postalCode', label: t('locations.detail.postalCode'), type: 'text' },
         { key: 'city', label: t('locations.detail.city'), type: 'text' },
       ] },
-    { key: 'state', label: t('locations.detail.state'), type: 'text', group: t('subModal.groups.address') },
-    { key: 'country', label: t('locations.detail.country'), type: 'text', group: t('subModal.groups.address') },
+    // Searchable pickers, not free text (Danny 28-07). NOTE the value format: unlike the
+    // candidate, a location stores the country NAME ("Nederland"), not an ISO-2 code — so
+    // the options carry names as values. Switching to codes here would silently rewrite
+    // every stored country on the next save.
+    { key: 'state', label: t('locations.detail.state'), type: 'select', options: provinceOptions, group: t('subModal.groups.address') },
+    { key: 'country', label: t('locations.detail.country'), type: 'select', options: countryOptions, group: t('subModal.groups.address') },
     { key: 'cocNumber', label: t('locations.detail.coc'), type: 'text', group: t('locations.detail.registrationTitle'),
       renderValue: v => kvkValue(v, t('locations.detail.openKvk')) },
     { key: 'vatNumber', label: t('locations.detail.vat'), type: 'text', group: t('locations.detail.registrationTitle'),
