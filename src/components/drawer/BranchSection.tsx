@@ -40,8 +40,9 @@ export default function BranchSection({ label, addLabel, emptyLabel, options, se
     <div>
       {/* Header row: section label left, the reference-style "+" trigger OUTSIDE the
           card top-right — the popover anchors right so it stays inside the drawer. */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <div style={cardHead}>{label}</div>
+      <div style={{ display: 'flex', alignItems: 'center',
+        justifyContent: label ? 'space-between' : 'flex-end', marginBottom: 6 }}>
+        {label ? <div style={cardHead}>{label}</div> : null}
         <SearchSelect triggerLabel={addLabel} options={options} selected={selectedIds} onToggle={onToggle}
           menuAlign="right" renderTrigger={(toggleOpen: () => void) => <DrawerAddButton onClick={toggleOpen} label={addLabel} />} />
       </div>

@@ -16,12 +16,15 @@ import PriceAgreementForm, { emptyDraft, draftToPayload } from './PriceAgreement
 import type { PriceAgreementDraft } from './PriceAgreementForm'
 import PriceAgreementRow from './PriceAgreementRow'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
+import { useLocations } from '@/lib/useLocations'
 import type { Customer } from '@/types/customer'
 import type { Id } from '@/types/common'
 
 export default function PriceAgreementsTab({ customerId, c, onSave }: { customerId?: Id; c?: Customer; onSave?: (values: Record<string, unknown>) => void }) {
   const { t } = useTranslation('customers')
   const { agreements, loading, error, reload, add, update, remove } = usePriceAgreements(customerId)
+  // Same establishment list the match form uses, so both offer exactly one source.
+  const branchOptions = useLocations().map(l => ({ value: String(l.value), label: l.label }))
   const [adding, setAdding] = useState(false)
   const [draft, setDraft] = useState<PriceAgreementDraft>(emptyDraft)
 
@@ -39,6 +42,10 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
           <EditableFieldTable
             title={t('overview.billing')}
             fields={[
+              // Which establishment this customer's paperwork/invoicing runs through
+              // (BRANCH-1). It sits with the other billing settings rather than on the
+              // company tab (Danny 28-07) — it decides where the invoice comes from.
+              { key: 'branchId', label: t('overview.branchField'), type: 'select', options: branchOptions },
               { key: 'costCenter',   label: t('overview.costCenter') },
               { key: 'billingEmail', label: t('overview.billingEmail') },
             ]}

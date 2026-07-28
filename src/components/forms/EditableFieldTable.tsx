@@ -35,6 +35,10 @@ export interface FieldRow {
   mono?: boolean
   // 'chip-select' empty-state text (e.g. "no locations yet").
   emptyOptionsText?: ReactNode
+  // Custom READ-mode rendering for this field's value (edit mode is unaffected) — e.g.
+  // an e-mail as a real mailto link with a shortcut icon. Added 28-07 so contact data
+  // looks the same on every entity instead of each drawer hand-rolling its own block.
+  renderValue?: (value: unknown) => ReactNode
   // 'address' composite (mirrors the candidate ProfileTab pattern, Danny 2026-07-14):
   // read mode shows ONE composed line (street+no+suffix, postcode+city); editing
   // expands to these loose child fields instead. Child keys are read straight off
@@ -232,6 +236,8 @@ export default function EditableFieldTable({
         ? <SafeHtml html={v as string} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
         : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>
     }
+    // A field may own its read rendering (e.g. e-mail/phone as real links, §3A).
+    if (f.renderValue) return f.renderValue(v)
     return <span style={{ fontSize: 12, color: 'var(--text)', ...(f.mono ? { fontFamily: 'JetBrains Mono, monospace' } : {}) }}>{f.prefix ? `${f.prefix} ` : ''}{(v as ReactNode) || '-'}</span>
   }
 

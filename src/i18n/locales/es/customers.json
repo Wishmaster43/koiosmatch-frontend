@@ -93,7 +93,7 @@
     "branch": "Sucursal",
     "branchesLabel": "Sucursal",
     "branchesLink": "Vincular sucursal",
-    "branchesEmpty": "Aún no hay sede vinculada.",
+    "branchesEmpty": "Aún no hay sucursal vinculada.",
     "contact": "Contacto",
     "email": "Correo electrónico",
     "phone": "Teléfono",
@@ -115,8 +115,12 @@
     "billingEmail": "Correo de facturación",
     "details": "Datos",
     "address": "Dirección",
-    "branchField": "Oficina",
-    "notesTitle": "Notas"
+    "branchField": "Sucursal",
+    "notesTitle": "Notas",
+    "companyText": "Texto de empresa",
+    "sendEmail": "Enviar correo",
+    "callPhone": "Llamar",
+    "openWebsite": "Abrir el sitio web"
   },
   "richText": {
     "empty": "Aún no completado."

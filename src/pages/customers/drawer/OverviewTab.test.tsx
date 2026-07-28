@@ -96,9 +96,10 @@ describe('OverviewTab · Contact card', () => {
     const onSave = vi.fn()
     render(<OverviewTab c={customer()} onSave={onSave} />)
 
-    // The tab also renders two EditableRichTextField pencils (Description/Recruitment
-    // challenges) with the same "edit" title — the field table's is the FIRST one.
-    await user.click(screen.getAllByTitle(cm('edit'))[0])
+    // Each block now has its OWN pencil (Danny 28-07). Open the Contact block by its
+    // position in the block order: Gegevens · Adres · Contact · Vestiging, then the two
+    // rich-text pencils below.
+    await user.click(screen.getAllByTitle(cm('edit'))[2])
     const emailInput = screen.getByDisplayValue('info@rivas.nl')
     await user.clear(emailInput)
     await user.type(emailInput, 'nieuw@rivas.nl')

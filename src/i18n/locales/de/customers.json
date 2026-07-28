@@ -116,7 +116,11 @@
     "details": "Angaben",
     "address": "Adresse",
     "branchField": "Niederlassung",
-    "notesTitle": "Notizen"
+    "notesTitle": "Notizen",
+    "companyText": "Unternehmenstext",
+    "sendEmail": "E-Mail senden",
+    "callPhone": "Anrufen",
+    "openWebsite": "Website öffnen"
   },
   "richText": {
     "empty": "Noch nicht ausgefüllt."

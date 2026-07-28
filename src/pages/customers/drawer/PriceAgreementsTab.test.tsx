@@ -16,6 +16,9 @@ import { usePriceAgreements } from '../hooks/usePriceAgreements'
 // itself imports '@/i18n' as a side effect — that would boot the REAL i18next
 // instance and turn every t() call into translated Dutch instead of the raw key
 // this test asserts on (mirrors DocumentsTab.test.tsx's same stand-in).
+// useLocations is react-query-backed (the Facturatie block's Vestiging picker uses it),
+// so it is mocked here rather than wrapping this test in a QueryClientProvider.
+vi.mock('@/lib/useLocations', () => ({ useLocations: () => [{ value: 'loc-1', label: 'Vestiging Noord' }] }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v }) }))
 vi.mock('../hooks/usePriceAgreements', () => ({ usePriceAgreements: vi.fn() }))
 vi.mock('./PriceAgreementForm', () => ({

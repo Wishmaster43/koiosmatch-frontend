@@ -33,6 +33,7 @@ import { useIndustries } from '@/lib/useIndustries'
 import { useLocations } from '@/lib/useLocations'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import BranchSection from '@/components/drawer/BranchSection'
+import { emailValue, phoneValue, websiteValue } from '@/components/drawer/contactLinks'
 import { useEntityBranches } from '@/components/drawer/useEntityBranches'
 import EditableRichTextField from './EditableRichTextField'
 import { buildCustomerAdviceInsights } from './customerAiInsights'
@@ -62,8 +63,6 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
   const fields: FieldRow[] = [
     { key: 'industry',      label: t('overview.industry'),      type: 'select', options: industries, group: gDetails },
     { key: 'employeeCount', label: t('overview.employeeCount'), inputType: 'number', group: gDetails },
-    { key: 'toneOfVoice',   label: t('overview.toneOfVoice'),   group: gDetails },
-    { key: 'website',       label: t('overview.website'),       group: gDetails },
 
     // ADRES — only `plaats` exists today. The customers table has no street/house
     // number/postcode/province/country (measured 28-07, filed as KLANT-ADRES-1), so this
@@ -73,49 +72,58 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
 
     // CONTACT — the customer's OWN e-mail/phone (they existed on the API all along;
     // only the frontend never showed them).
-    { key: 'email', label: t('overview.email'), inputType: 'email', group: gContact },
-    { key: 'phone', label: t('overview.phone'), group: gContact },
+    // Rendered as real mailto/tel links with a shortcut icon, exactly like the candidate
+    // drawer (Danny 28-07) — one shared renderer, not a second copy.
+    { key: 'email', label: t('overview.email'), inputType: 'email', group: gContact,
+      renderValue: v => emailValue(v, t('overview.sendEmail')) },
+    { key: 'phone', label: t('overview.phone'), group: gContact,
+      renderValue: v => phoneValue(v, t('overview.callPhone')) },
+    // The website is a way to reach the company, so it sits with the other contact
+    // details (Danny 28-07) and opens in a new tab.
+    { key: 'website', label: t('overview.website'), group: gContact,
+      renderValue: v => websiteValue(v, t('overview.openWebsite')) },
 
-    // VESTIGING — the single establishment this customer's paperwork/invoicing routes
-    // through (BRANCH-1). Distinct from the linked-branches block at the bottom, which
-    // is about who may SEE this customer; see the file header.
-    { key: 'branchId', label: t('overview.branchField'), type: 'select', options: branchOptions, group: gBranch },
   ]
+
+  // Per-block rendering: the group title moves to the table's own header row, next to
+  // that block's pencil, so `group` is cleared on the rows (a second in-card heading
+  // would just repeat it).
+  const block = (group: string) => fields.filter(f => f.group === group).map(f => ({ ...f, group: undefined }))
+  const values = c as unknown as Record<string, unknown>
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <EditableFieldTable fields={fields} value={c as unknown as Record<string, unknown>} onSave={onSave} />
+      <EditableFieldTable title={gDetails} fields={block(gDetails)} value={values} onSave={onSave} />
+      <EditableFieldTable title={gAddress} fields={block(gAddress)} value={values} onSave={onSave} />
+      <EditableFieldTable title={gContact} fields={block(gContact)} value={values} onSave={onSave} />
 
-      {/* Notities — free text about the relationship, each with its own pencil (§3A).
-          MEASURED 28-07: nothing in the app or the API reads `description` or
-          `recruitment_problems` — they are stored and never consumed. They stay visible
-          because customers already HAVE text in them and hiding the editor would hide
-          real content; whether the columns survive is a product call, not a UI one. */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
-          {t('overview.notesTitle')}
-        </span>
-        <EditableRichTextField label={t('overview.description')} value={c.description ?? ''}
-          onSave={html => onSave?.({ description: html })} />
-        <EditableRichTextField label={t('overview.recruitmentProblems')} value={c.recruitmentProblems ?? ''}
-          onSave={html => onSave?.({ recruitmentProblems: html })} />
-      </div>
+      {/* BEDRIJFSTEKST — one free-text block for company info AND recruitment issues
+          (Danny 28-07: "1 txt blok"), directly under Contact. It edits `description`.
+          `recruitment_problems` AND `tone_of_voice` (Schrijfstijl) are no longer shown as
+          separate fields — Danny 28-07: both belong in this one text. Their data stays
+          server-side until CMBE merges it into `description` (BEDRIJFSTEKST-1), so
+          nothing is destroyed here, only hidden. */}
+      <EditableRichTextField label={t('overview.companyText')} value={c.description ?? ''}
+        onSave={html => onSave?.({ description: html })} />
 
       {/* Koios AI advisory — company/location completeness + relationship activity (§3A blueprint). */}
       <KoiosAdviceBlock namespace="customers" insights={buildCustomerAdviceInsights(c, t)} />
 
-      {/* Vestiging koppelen — same shared block + position (last) as the candidate
-          drawer's ProfilePanel (fields → AI → branch), see the file header comment
-          for how this relates to the single branchId field above. */}
-      <BranchSection
-        label={t('overview.branchesLabel')}
-        addLabel={t('overview.branchesLink')}
-        emptyLabel={t('overview.branchesEmpty')}
-        options={branchOptions}
-        selectedIds={branchLinks.selectedIds}
-        branches={branchLinks.branches}
-        onToggle={branchLinks.toggle}
-      />
+      {/* VESTIGING — which of the tenant's establishments may see this customer. The
+          single routing/invoicing branch that used to sit above it moved to the
+          Facturatie block on the Prijsafspraken tab (Danny 28-07). */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <BranchSection
+          label={gBranch}
+          addLabel={t('overview.branchesLink')}
+          emptyLabel={t('overview.branchesEmpty')}
+          options={branchOptions}
+          selectedIds={branchLinks.selectedIds}
+          branches={branchLinks.branches}
+          onToggle={branchLinks.toggle}
+        />
+      </div>
+
     </div>
   )
 }

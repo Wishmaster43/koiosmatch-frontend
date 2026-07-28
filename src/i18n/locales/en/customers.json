@@ -92,7 +92,7 @@
     "general": "General",
     "branch": "Branch",
     "branchesLabel": "Branch",
-    "branchesLink": "Link branch",
+    "branchesLink": "Link a branch",
     "branchesEmpty": "No branch linked yet.",
     "contact": "Contact",
     "email": "Email address",
@@ -116,7 +116,11 @@
     "details": "Details",
     "address": "Address",
     "branchField": "Branch",
-    "notesTitle": "Notes"
+    "notesTitle": "Notes",
+    "companyText": "Company text",
+    "sendEmail": "Send e-mail",
+    "callPhone": "Call",
+    "openWebsite": "Open website"
   },
   "richText": {
     "empty": "Not filled in yet."

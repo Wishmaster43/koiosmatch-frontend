@@ -91,9 +91,9 @@
   "overview": {
     "general": "Général",
     "branch": "Établissement",
-    "branchesLabel": "Agence",
-    "branchesLink": "Associer une agence",
-    "branchesEmpty": "Aucune agence rattachée.",
+    "branchesLabel": "Établissement",
+    "branchesLink": "Lier un établissement",
+    "branchesEmpty": "Aucun établissement lié.",
     "contact": "Contact",
     "email": "Adresse e-mail",
     "phone": "Téléphone",
@@ -115,8 +115,12 @@
     "billingEmail": "E-mail de facturation",
     "details": "Informations",
     "address": "Adresse",
-    "branchField": "Agence",
-    "notesTitle": "Notes"
+    "branchField": "Établissement",
+    "notesTitle": "Notes",
+    "companyText": "Texte entreprise",
+    "sendEmail": "Envoyer un e-mail",
+    "callPhone": "Appeler",
+    "openWebsite": "Ouvrir le site"
   },
   "richText": {
     "empty": "Pas encore renseigné."

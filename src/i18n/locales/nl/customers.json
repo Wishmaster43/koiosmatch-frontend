@@ -116,7 +116,11 @@
     "details": "Gegevens",
     "address": "Adres",
     "branchField": "Vestiging",
-    "notesTitle": "Notities"
+    "notesTitle": "Notities",
+    "companyText": "Bedrijfstekst",
+    "sendEmail": "Stuur e-mail",
+    "callPhone": "Bellen",
+    "openWebsite": "Website openen"
   },
   "richText": {
     "empty": "Nog niet ingevuld."
