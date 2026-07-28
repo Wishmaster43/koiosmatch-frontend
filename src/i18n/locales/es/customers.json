@@ -260,7 +260,9 @@
       "subtabs": {
         "data": "Datos",
         "tasks": "Tareas"
-      }
+      },
+      "linkLocation": "Vincular ubicación",
+      "linkDepartment": "Vincular departamento"
     },
     "deleteConfirm": "¿Eliminar este contacto?",
     "saveFailed": "Error al guardar.",

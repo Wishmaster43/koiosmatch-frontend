@@ -260,7 +260,9 @@
       "subtabs": {
         "data": "Détails",
         "tasks": "Tâches"
-      }
+      },
+      "linkLocation": "Lier un site",
+      "linkDepartment": "Lier un service"
     },
     "deleteConfirm": "Supprimer ce contact ?",
     "saveFailed": "L'enregistrement a échoué.",

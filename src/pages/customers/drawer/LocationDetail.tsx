@@ -35,6 +35,7 @@ import { useConfirm } from '@/hooks/useConfirm'
 import DepartmentsPanel from './DepartmentsPanel'
 import ContactsPanel from './ContactsPanel'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+import PdokCard from '@/components/drawer/PdokCard'
 import { buildLocationAdviceInsights } from './locationAiInsights'
 import ContactNameLink from './ContactNameLink'
 import DrillBreadcrumb from '@/components/drawer/DrillBreadcrumb'
@@ -106,7 +107,7 @@ export default function LocationDetail({
   // Sub-tabs (short labels, Danny 2026-07-14) — default Adres & gegevens. Each
   // EditableFieldTable below manages its own uncontrolled edit toggle (they no
   // longer share one global pencil now that they live on separate sub-tabs).
-  const [subTab, setSubTab] = useState<'address' | 'billing' | 'departments' | 'contacts' | 'extra' | 'koppelingen'>('address')
+  const [subTab, setSubTab] = useState<'address' | 'departments' | 'contacts' | 'extra' | 'koppelingen'>('address')
 
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
   // Algemeen/Adres/Registratie/Contact ter plaatse — the "Adres & gegevens" sub-tab.
@@ -135,6 +136,12 @@ export default function LocationDetail({
       renderValue: v => kvkValue(v, t('locations.detail.openKvk')) },
     { key: 'vatNumber', label: t('locations.detail.vat'), type: 'text', group: t('overview.details'),
       renderValue: v => vatValue(v, t('locations.detail.openVies')) },
+    // Kostenplaats sits in Gegevens (Danny 28-07) — it is one field, and a whole
+    // Facturatie sub-tab for one field was more chrome than content. There is still no
+    // billing-email input here: invoicing ALWAYS comes from the customer regardless of
+    // the location picked on a match, so an editable one would be a misleading
+    // affordance (§3) — see OverviewTab for the real billing email.
+    { key: 'costCenter', label: t('locations.detail.costCenter'), type: 'text', group: t('overview.details') },
     // "Contact ter plaatse" is FREE TEXT on the location (customer_locations.contact_name),
     // not a reference to a contact record — so it can only become a link when the typed
     // name resolves to EXACTLY ONE of this customer's contacts. Two people called "Jan
@@ -158,13 +165,6 @@ export default function LocationDetail({
       renderValue: v => emailValue(v, t('overview.sendEmail')) },
     { key: 'phone', label: t('locations.detail.phone'), type: 'text', group: t('locations.detail.contactTitle'),
       renderValue: v => phoneValue(v, t('overview.callPhone')) },
-  ]
-  // Facturatie — its own sub-tab, own EditableFieldTable instance/pencil. No
-  // billingEmail input here (Danny 2026-07-22): facturatie ALWAYS comes from the
-  // customer regardless of the picked location, so an editable field here would
-  // be a misleading affordance (§3) — see OverviewTab for the real billing email.
-  const billingFields: FieldRow[] = [
-    { key: 'costCenter', label: t('locations.detail.costCenter'), type: 'text' },
   ]
 
   const values = {
@@ -270,7 +270,6 @@ export default function LocationDetail({
       <SubTabBar
         tabs={[
           { id: 'address',     label: t('locations.detail.addressTitle') },
-          { id: 'billing',     label: t('locations.detail.billingTitle') },
           { id: 'departments', label: t('drawer.tabs.departments') },
           { id: 'contacts',    label: t('drawer.tabs.contacts') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
@@ -300,10 +299,6 @@ export default function LocationDetail({
         </div>
       )}
 
-      {subTab === 'billing' && (
-        <EditableFieldTable title="" fields={billingFields} value={values} onSave={save} labelWidth={140} />
-      )}
-
       {/* The SAME panel the customer's Afdelingen tab renders — one department surface. */}
       {subTab === 'departments' && (
         <DepartmentsPanel scope="location" scopeId={l.id as Id} scopeName={l.name}
@@ -328,7 +323,14 @@ export default function LocationDetail({
       )}
 
       {subTab === 'koppelingen' && (
-        <BackofficeLinksTab entity="locations" id={l.id as Id} helloflexLink={l.helloflexLink} shiftmanagerLink={l.shiftmanagerLink} canLink={canLinkBackoffice} />
+        <BackofficeLinksTab entity="locations" id={l.id as Id} helloflexLink={l.helloflexLink} shiftmanagerLink={l.shiftmanagerLink} canLink={canLinkBackoffice}>
+          {/* PDOK sits in Koppelingen, like every other integration (Danny 28-07). No
+              `endpoint`: a customer location has lat/lng and the backend fills them, but
+              there is no per-location re-geocode route yet — so the card reads, it does
+              not pretend to act. HelloFlex/Shiftmanager gate themselves on the tenant's
+              connector apps, which is why Yesway sees Shiftmanager and not HelloFlex. */}
+          <PdokCard lat={l.lat} lng={l.lng} permission="customers.update" />
+        </BackofficeLinksTab>
       )}
 
       {hasPlanning && (

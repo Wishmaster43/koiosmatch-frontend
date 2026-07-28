@@ -9,6 +9,8 @@ import type { ApiBackofficeLink, BackofficeLink } from '@/lib/backofficeLink'
 /** A contact person (flat UI shape). SUB-STATUS-1 status + CONTACT-MULTI-1 multi coupling. */
 export interface Contact {
   id: Id | undefined
+  // NUMMER-2: immutable human-readable display number (C-00042).
+  referenceNumber?: string
   // EXTRACT-1: the backoffice links (Koppelingen sub-tab), mapped from
   // backoffice_links[] — same shape/endpoint every entity shares.
   helloflexLink: BackofficeLink | null
@@ -91,6 +93,10 @@ export interface Location {
   contactName: string
   phone: string
   email: string
+  // PDOK coordinates — customer_locations.lat/lng, float-cast by CustomerLocationResource.
+  // There is no per-location re-geocode route yet, so these are read-only in the UI.
+  lat: number | null
+  lng: number | null
   costCenter: string
   billingEmail: string
   address: string
@@ -201,7 +207,7 @@ export interface ApiStatusRef { value?: string; label?: string; color?: string }
 
 /** Raw API contact (read defensively). CustomerContactResource sends first_name/last_name + a composed `name`. */
 export interface ApiContact {
-  id?: Id; first_name?: string; last_name?: string; name?: string; function?: string; role?: string; email?: string; phone?: string
+  id?: Id; reference_number?: string; first_name?: string; last_name?: string; name?: string; function?: string; role?: string; email?: string; phone?: string
   // Split from `phone` (BE 2026-07-20): the mobile number (CustomerContactResource `mobile`).
   mobile?: string
   is_primary?: unknown; isPrimary?: unknown

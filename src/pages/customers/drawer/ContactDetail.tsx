@@ -30,11 +30,14 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash2, Edit2, Save, X, Phone, MessageCircle } from 'lucide-react'
+import { Trash2, Edit2, Save, X } from 'lucide-react'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import SoftChip from '@/components/ui/SoftChip'
+import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
+import TitleBadge from '@/components/drawer/TitleBadge'
+import ContactLinkSection from './ContactLinkSection'
+import { emailValue, phoneValue } from '@/components/drawer/contactLinks'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
@@ -42,14 +45,10 @@ import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useConfirm } from '@/hooks/useConfirm'
-import { waDigits } from '@/lib/waDigits'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 
-const inputStyle: CSSProperties = { width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }
-const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
-const cardStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
 
 export default function ContactDetail({ contact, locations, departments, statuses, existing = [], canLinkBackoffice = false, onSave, onDelete, close }: {
   contact: Contact
@@ -85,12 +84,23 @@ export default function ContactDetail({ contact, locations, departments, statuse
   // Location/department are no longer in this table — see the Koppeling block
   // below (file header BUG FIX 28-07): a chip-select field can't cascade off
   // another field's live draft value, so they need their own cascading picker.
+  // ONE card for the person (Danny 28-07: "telefoonnummers en contactpersoon moeten
+  // samen"). The numbers used to need their own card because they carry per-field icon
+  // affordances — that is what FieldRow.renderValue is for now, so they are plain rows
+  // here and the second card is gone. Status is NOT a row: it is the title-row badge
+  // below, exactly like a location (§3A(c) — the header shows state, the card shows data).
   const fields: FieldRow[] = [
     { key: 'firstName', label: t('subModal.firstName'), type: 'text' },
     { key: 'lastName', label: t('subModal.lastName'), type: 'text' },
     { key: 'role', label: t('contacts.detail.role'), type: 'creatable', options: contactFunctions, allowCreate: allowFreeEntry },
-    { key: 'email', label: t('contacts.detail.email'), type: 'text' },
-    { key: 'statusId', label: t('locations.detail.status'), type: 'select', options: statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label })) },
+    { key: 'email', label: t('contacts.detail.email'), type: 'text',
+      renderValue: v => emailValue(v, t('contacts.detail.email')) },
+    // The WhatsApp shortcut belongs to the MOBILE number only — a landline cannot hold a
+    // conversation, so offering it there would be a control that goes nowhere.
+    { key: 'mobile', label: t('contacts.detail.mobile'), type: 'text',
+      renderValue: v => phoneValue(v, t('contacts.detail.callPhone'), { label: t('contacts.detail.whatsapp') }) },
+    { key: 'phone', label: t('contacts.detail.phone'), type: 'text',
+      renderValue: v => phoneValue(v, t('contacts.detail.callPhone')) },
     { key: 'isPrimary', label: t('contacts.detail.primary'), type: 'checkbox' },
   ]
 
@@ -99,7 +109,8 @@ export default function ContactDetail({ contact, locations, departments, statuse
     lastName: contact.lastName,
     role: contact.role,
     email: contact.email,
-    statusId: contact.statusId != null ? String(contact.statusId) : '',
+    mobile: contact.mobile,
+    phone: contact.phone,
     isPrimary: contact.isPrimary,
   }
 
@@ -112,7 +123,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
       onSave(contact.id as Id, {
         firstName: v.firstName as string, lastName: v.lastName as string,
         role: v.role as string, email: v.email as string,
-        statusId: (v.statusId as string) || null,
+        mobile: v.mobile as string, phone: v.phone as string,
         isPrimary,
       })
       setEditing(false)
@@ -133,6 +144,13 @@ export default function ContactDetail({ contact, locations, departments, statuse
     commit(Boolean(v.isPrimary))
   }
 
+  // Status lives in the title row and saves on its own, independent of the field card.
+  const [editingStatus, setEditingStatus] = useState(false)
+  const [statusDraft, setStatusDraft] = useState('')
+  const startEditStatus = () => { setStatusDraft(contact.statusId != null ? String(contact.statusId) : ''); setEditingStatus(true) }
+  const saveStatus = () => { onSave(contact.id as Id, { statusId: statusDraft || null }); setEditingStatus(false) }
+  const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
+
   const remove = () => confirm(t('contacts.deleteConfirm'), () => { onDelete(contact.id as Id); close() }, { danger: true })
 
   // Location/department coupling — own self-contained edit block (pencil →
@@ -140,90 +158,42 @@ export default function ContactDetail({ contact, locations, departments, statuse
   // BUG FIX 28-07): empty-until-a-location-is-picked, and picking a new
   // location always clears the department (a department belongs to exactly
   // one location, so any location change invalidates the previous pick).
-  const [linkEditing, setLinkEditing] = useState(false)
-  const [linkForm, setLinkForm] = useState<{ locationId: Id | null; departmentId: Id | null }>({
-    locationId: contact.locationId, departmentId: contact.departmentId,
-  })
-  const startLinkEdit = () => { setLinkForm({ locationId: contact.locationId, departmentId: contact.departmentId }); setLinkEditing(true) }
-  const cancelLinkEdit = () => { setLinkForm({ locationId: contact.locationId, departmentId: contact.departmentId }); setLinkEditing(false) }
-  const saveLink = () => { onSave(contact.id as Id, { locationId: linkForm.locationId || null, departmentId: linkForm.departmentId || null }); setLinkEditing(false) }
-
-  // Department options stay EMPTY until a location is picked — never fall back
-  // to "every department of this customer": a department belongs to exactly one
-  // location, so offering the full list would let a mismatched pair get saved.
-  const departmentsForLocation = linkForm.locationId
-    ? departments.filter(d => String(d.locationId) === String(linkForm.locationId))
-    : []
-  // A department set before this fix existed may not belong to the current
-  // draft location — keep it visible in the option list so its label still
-  // resolves instead of the trigger falling back to a raw id string.
-  const selectedDepartment = linkForm.departmentId ? departments.find(d => String(d.id) === String(linkForm.departmentId)) : undefined
-  const departmentOptions = (selectedDepartment && !departmentsForLocation.some(d => String(d.id) === String(selectedDepartment.id))
-    ? [...departmentsForLocation, selectedDepartment]
-    : departmentsForLocation
-  ).map(d => ({ value: String(d.id), label: d.name }))
-  const departmentPlaceholder = !linkForm.locationId ? t('subModal.pickLocationFirst')
-    : departmentOptions.length === 0 ? t('common:noResults')
-    : t('subModal.noneOption')
-
-  // Read-mode labels — resolved against the customer-wide lists, never trusted
-  // straight off contact.locationName/departmentName: the list endpoint leaves
-  // those empty for every seeded contact (only the ids are populated), the same
-  // measured gap ContactsTab's own resolvedLocations/resolvedDepartments works around.
-  const linkedLocation = contact.locationId ? locations.find(l => String(l.id) === String(contact.locationId)) : undefined
-  const linkedDepartment = contact.departmentId ? departments.find(d => String(d.id) === String(contact.departmentId)) : undefined
-
-  // Phone numbers — own small self-contained edit block (pencil → save/cancel),
-  // same pattern as the candidate ProfileTab's contact card (mobile → WhatsApp,
-  // landline → dial; see file header for why this can't live in EditableFieldTable).
-  const [numbersEditing, setNumbersEditing] = useState(false)
-  const [numbersForm, setNumbersForm] = useState({ mobile: contact.mobile ?? '', phone: contact.phone ?? '' })
-  const startNumbersEdit = () => { setNumbersForm({ mobile: contact.mobile ?? '', phone: contact.phone ?? '' }); setNumbersEditing(true) }
-  const saveNumbers = () => { onSave(contact.id as Id, { mobile: numbersForm.mobile, phone: numbersForm.phone }); setNumbersEditing(false) }
-  const cancelNumbers = () => { setNumbersForm({ mobile: contact.mobile ?? '', phone: contact.phone ?? '' }); setNumbersEditing(false) }
-
-  // One number row: label-left, value-right — a tel: link + the field's ONE fixed
-  // shortcut icon (WhatsApp for mobile, dial for landline) while not editing.
-  const numberRow = (key: 'mobile' | 'phone', label: string) => {
-    const v = contact[key]
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26, padding: '0 12px', height: 38 }}>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{label}</span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          {numbersEditing ? (
-            <input value={numbersForm[key]} onChange={e => setNumbersForm(f => ({ ...f, [key]: e.target.value }))} style={inputStyle} />
-          ) : v ? (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <a href={`tel:${String(v).replace(/\s/g, '')}`} style={{ fontSize: 12, color: 'var(--color-info)', textDecoration: 'none' }}>{v}</a>
-              {key === 'mobile' && waDigits(v) && (
-                <a href={`https://wa.me/${waDigits(v)}`} target="_blank" rel="noopener noreferrer"
-                  title={t('contacts.detail.whatsapp')} aria-label={t('contacts.detail.whatsapp')}
-                  style={{ display: 'inline-flex', color: 'var(--text-muted)' }}
-                  onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-success)' }}
-                  onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)' }}>
-                  <MessageCircle size={13} />
-                </a>
-              )}
-              {key === 'phone' && (
-                <a href={`tel:${String(v).replace(/\s/g, '')}`}
-                  title={t('contacts.detail.callPhone')} aria-label={t('contacts.detail.callPhone')}
-                  style={{ display: 'inline-flex', color: 'var(--text-muted)' }}
-                  onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-info)' }}
-                  onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)' }}>
-                  <Phone size={13} />
-                </a>
-              )}
-            </span>
-          ) : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>}
-        </div>
-      </div>
-    )
-  }
+  // Coupling — the shared +Vestiging-shaped section (Danny 28-07). Saving is immediate,
+  // like the branch picker: pick and it is stored, remove the chip and it is cleared.
+  const saveLink = (patch: { locationId?: Id | null; departmentId?: Id | null }) =>
+    onSave(contact.id as Id, patch)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{contact.name}</div>
+      {/* Title row, same anatomy as a customer and a location (§3A(c)): name, the
+          copyable reference number, then the STATUS as a read-only colour badge with its
+          own pencil. Status is not a field-table row here — Danny 28-07: "bij de
+          contactpersoon staat status in de tabel en niet naast de naam zoals bij
+          locaties, we moeten het consistent houden". */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{contact.name}</div>
+          <ReferenceNumberChip value={contact.referenceNumber} />
+          {editingStatus ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ width: 170 }}>
+                <CreatableSelect value={statusDraft} onChange={setStatusDraft} allowCreate={false} menuWidth={180}
+                  placeholder={t('locations.detail.status')}
+                  options={statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))} />
+              </div>
+              <button onClick={saveStatus} title={t('common:save')} aria-label={t('common:save')}
+                style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+              <button onClick={() => setEditingStatus(false)} title={t('common:cancel')} aria-label={t('common:cancel')}
+                style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+            </div>
+          ) : (
+            <>
+              <TitleBadge label={contact.statusLabel} color={contact.statusColor} />
+              <button onClick={startEditStatus} title={t('locations.detail.changeStatus')} aria-label={t('locations.detail.changeStatus')}
+                style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
+            </>
+          )}
+        </div>
         <button onClick={remove} title={t('common:delete')}
           style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--color-danger)' }}>
           <Trash2 size={13} />
@@ -248,61 +218,10 @@ export default function ContactDetail({ contact, locations, departments, statuse
           <EditableFieldTable key={tableEpoch} title={t('contacts.detail.infoTitle')} fields={fields} value={values} onSave={save}
             editing={editing} onStartEdit={() => setEditing(true)} onCancel={() => setEditing(false)} labelWidth={130} />
 
-          {/* Koppeling — location/department, own cascading edit block (see file
-              header BUG FIX 28-07). Mirrors AddContactPersonModal's picker pair. */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('subModal.groups.link')}</span>
-              {linkEditing ? (
-                <div style={{ display: 'flex', gap: 4 }}>
-                  <button onClick={saveLink} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
-                  <button onClick={cancelLinkEdit} title={t('common:cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
-                </div>
-              ) : (
-                <button onClick={startLinkEdit} title={t('common:edit')} style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
-              )}
-            </div>
-            <div style={{ ...cardStyle, padding: '4px 0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26, padding: '0 12px', height: 38 }}>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{t('contacts.detail.location')}</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  {linkEditing ? (
-                    <CreatableSelect value={linkForm.locationId != null ? String(linkForm.locationId) : null} allowCreate={false}
-                      onChange={v => setLinkForm({ locationId: v || null, departmentId: null })}
-                      placeholder={t('subModal.noneOption')} options={locations.map(l => ({ value: String(l.id), label: l.name }))} />
-                  ) : linkedLocation ? <SoftChip label={linkedLocation.name} color="var(--color-secondary)" /> : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>}
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26, padding: '0 12px', height: 38 }}>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{t('contacts.detail.department')}</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  {linkEditing ? (
-                    <CreatableSelect value={linkForm.departmentId != null ? String(linkForm.departmentId) : null} allowCreate={false}
-                      onChange={v => setLinkForm(f => ({ ...f, departmentId: v || null }))}
-                      placeholder={departmentPlaceholder} options={departmentOptions} />
-                  ) : linkedDepartment ? <SoftChip label={linkedDepartment.name} color="var(--color-violet)" /> : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>}
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Koppeling — same shape and behaviour as "+ Vestiging" (Danny 28-07). */}
+          <ContactLinkSection locationId={contact.locationId} departmentId={contact.departmentId}
+            locations={locations} departments={departments} onChange={saveLink} />
 
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('contacts.detail.numbersTitle')}</span>
-              {numbersEditing ? (
-                <div style={{ display: 'flex', gap: 4 }}>
-                  <button onClick={saveNumbers} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
-                  <button onClick={cancelNumbers} title={t('common:cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
-                </div>
-              ) : (
-                <button onClick={startNumbersEdit} title={t('common:edit')} style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
-              )}
-            </div>
-            <div style={{ ...cardStyle, padding: '4px 0' }}>
-              {numberRow('mobile', t('contacts.detail.mobile'))}
-              {numberRow('phone', t('contacts.detail.phone'))}
-            </div>
-          </div>
         </>
       )}
 

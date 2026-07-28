@@ -52,127 +52,99 @@ const baseContact = (overrides: Partial<Contact> = {}): Contact => ({
   ...overrides,
 })
 
-// Scope into the row carrying this field's own label span (mirrors the candidate
-// ProfileTab test's within(field).getByRole('button') convention) — avoids any
-// ambiguity between the location/department triggers or their placeholder text.
-const rowFor = (label: string) => screen.getByText(label).parentElement as HTMLElement
+describe('ContactDetail · location/department coupling (+Vestiging shape, 28-07)', () => {
+  // The coupling is no longer a pencil + two dropdowns; it is the same shape as
+  // "+ Vestiging": a link trigger per row, the current value as a removable chip, and
+  // saving happens on the pick. The RULE it guards is unchanged and is what matters —
+  // a department belongs to exactly one location, so an uncoupled pair must be
+  // unreachable. These tests assert the PATCH, never merely that a callback fired.
+  const openLocationPicker = async (user: ReturnType<typeof userEvent.setup>) =>
+    user.click(screen.getByRole('button', { name: ct('contacts.detail.linkLocation') }))
+  const openDepartmentPicker = async (user: ReturnType<typeof userEvent.setup>) =>
+    user.click(screen.getByRole('button', { name: ct('contacts.detail.linkDepartment') }))
 
-describe('ContactDetail · location/department cascade (BUG FIX 28-07)', () => {
-  it('shows a dash for both fields when neither is linked', () => {
+  it('shows an empty state on both rows when nothing is linked', () => {
     render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
       onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
-    expect(within(rowFor(ct('contacts.detail.location'))).getByText('-')).toBeInTheDocument()
-    expect(within(rowFor(ct('contacts.detail.department'))).getByText('-')).toBeInTheDocument()
+    expect(screen.getByText(ct('subModal.pickLocationFirst'))).toBeInTheDocument()
   })
 
-  it('resolves the linked location/department NAME against the customer-wide lists in read mode', () => {
-    // locationName/departmentName left empty on purpose — the list endpoint leaves
-    // them empty for every seeded contact (measured 2026-07-14); the drawer must
-    // resolve the real label off locationId/departmentId against the props lists.
+  it('shows the linked location/department as chips, resolved against the customer-wide lists', () => {
+    // locationName/departmentName stay empty on purpose — the list endpoint never fills
+    // them (measured 2026-07-14); the labels must resolve off the ids.
     const contact = baseContact({ locationId: 'loc-1', locationName: '', departmentId: 'dep-1', departmentName: '' })
     render(<ContactDetail contact={contact} locations={locations} departments={departments} statuses={statuses}
       onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
-    expect(within(rowFor(ct('contacts.detail.location'))).getByText('Locatie Noord')).toBeInTheDocument()
-    expect(within(rowFor(ct('contacts.detail.department'))).getByText('Verpleging')).toBeInTheDocument()
+    expect(screen.getByText('Locatie Noord')).toBeInTheDocument()
+    expect(screen.getByText('Verpleging')).toBeInTheDocument()
   })
 
-  it('the department picker offers nothing and asks for a location first, before any location is picked', async () => {
+  it('offers no departments at all until a location is linked', async () => {
     const user = userEvent.setup()
     render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
       onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
-
-    // Index 1: the Link block's own pencil (0 = main field table, 2 = phone numbers).
-    await user.click(screen.getAllByTitle(cm('edit'))[1])
-    await user.click(within(rowFor(ct('contacts.detail.department'))).getByRole('button'))
-    expect(screen.getByPlaceholderText(ct('subModal.pickLocationFirst'))).toBeInTheDocument()
+    await openDepartmentPicker(user)
     expect(screen.queryByRole('button', { name: 'Verpleging' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Thuiszorg' })).not.toBeInTheDocument()
   })
 
-  it('picking a location narrows the department list to that location only (C-42/point-9 cascade)', async () => {
+  it('narrows the department list to the linked location only', async () => {
     const user = userEvent.setup()
-    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
-      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
-
-    await user.click(screen.getAllByTitle(cm('edit'))[1])
-    await user.click(within(rowFor(ct('contacts.detail.location'))).getByRole('button'))
-    await user.click(screen.getByRole('button', { name: 'Locatie Noord' }))
-
-    await user.click(within(rowFor(ct('contacts.detail.department'))).getByRole('button'))
+    render(<ContactDetail contact={baseContact({ locationId: 'loc-1' })} locations={locations} departments={departments}
+      statuses={statuses} onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    await openDepartmentPicker(user)
     expect(screen.getByRole('button', { name: 'Verpleging' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Thuiszorg' })).not.toBeInTheDocument()
   })
 
-  it('changing the location resets a department that no longer belongs to it', async () => {
-    const user = userEvent.setup()
-    const contact = baseContact({ locationId: 'loc-1', departmentId: 'dep-1' })
-    render(<ContactDetail contact={contact} locations={locations} departments={departments} statuses={statuses}
-      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
-
-    await user.click(screen.getAllByTitle(cm('edit'))[1])
-    expect(within(rowFor(ct('contacts.detail.department'))).getByRole('button')).toHaveTextContent('Verpleging')
-
-    // Switching to Zuid must clear the now-invalid "Verpleging" pick — never
-    // silently keep a department that belongs to a different location.
-    await user.click(within(rowFor(ct('contacts.detail.location'))).getByRole('button'))
-    await user.click(screen.getByRole('button', { name: 'Locatie Zuid' }))
-
-    expect(within(rowFor(ct('contacts.detail.department'))).getByRole('button')).not.toHaveTextContent('Verpleging')
-    expect(within(rowFor(ct('contacts.detail.department'))).getByRole('button')).toHaveTextContent(ct('subModal.noneOption'))
-  })
-
-  it('saves the exact matching locationId/departmentId pair — asserts the REQUEST, not just that a callback fired', async () => {
+  it('picking a location PATCHes it — and clears a department that no longer fits', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn()
-    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
-      onSave={onSave} onDelete={vi.fn()} close={vi.fn()} />)
+    render(<ContactDetail contact={baseContact({ locationId: 'loc-1', departmentId: 'dep-1' })} locations={locations}
+      departments={departments} statuses={statuses} onSave={onSave} onDelete={vi.fn()} close={vi.fn()} />)
 
-    await user.click(screen.getAllByTitle(cm('edit'))[1])
-    await user.click(within(rowFor(ct('contacts.detail.location'))).getByRole('button'))
-    await user.click(screen.getByRole('button', { name: 'Locatie Noord' }))
-    await user.click(within(rowFor(ct('contacts.detail.department'))).getByRole('button'))
+    await openLocationPicker(user)
+    await user.click(screen.getByRole('button', { name: 'Locatie Zuid' }))
+    // Verpleging belongs to Noord, so it may not survive the move.
+    expect(onSave).toHaveBeenCalledWith('c1', { locationId: 'loc-2', departmentId: null })
+  })
+
+  it('keeps a department that DOES belong to the newly picked location', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    // dep-2 lives at loc-2, so moving the contact to loc-2 must not clear it.
+    render(<ContactDetail contact={baseContact({ locationId: 'loc-1', departmentId: 'dep-2' })} locations={locations}
+      departments={departments} statuses={statuses} onSave={onSave} onDelete={vi.fn()} close={vi.fn()} />)
+
+    await openLocationPicker(user)
+    await user.click(screen.getByRole('button', { name: 'Locatie Zuid' }))
+    expect(onSave).toHaveBeenCalledWith('c1', { locationId: 'loc-2' })
+  })
+
+  it('picking a department PATCHes only that field', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ContactDetail contact={baseContact({ locationId: 'loc-1' })} locations={locations} departments={departments}
+      statuses={statuses} onSave={onSave} onDelete={vi.fn()} close={vi.fn()} />)
+    await openDepartmentPicker(user)
     await user.click(screen.getByRole('button', { name: 'Verpleging' }))
-
-    await user.click(screen.getByTitle(cm('save')))
-
-    expect(onSave).toHaveBeenCalledWith('c1', { locationId: 'loc-1', departmentId: 'dep-1' })
+    expect(onSave).toHaveBeenCalledWith('c1', { departmentId: 'dep-1' })
   })
 
-  it('cancel discards the draft pick without calling onSave, and re-opening re-seeds from the ORIGINAL pair', async () => {
+  it('removing the location chip clears the department too — never an orphan pair', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn()
-    const contact = baseContact({ locationId: 'loc-1', departmentId: 'dep-1' })
-    render(<ContactDetail contact={contact} locations={locations} departments={departments} statuses={statuses}
-      onSave={onSave} onDelete={vi.fn()} close={vi.fn()} />)
-
-    await user.click(screen.getAllByTitle(cm('edit'))[1])
-    await user.click(within(rowFor(ct('contacts.detail.location'))).getByRole('button'))
-    await user.click(screen.getByRole('button', { name: 'Locatie Zuid' }))
-    await user.click(screen.getByTitle(cm('cancel')))
-
-    expect(onSave).not.toHaveBeenCalled()
-    await user.click(screen.getAllByTitle(cm('edit'))[1])
-    expect(within(rowFor(ct('contacts.detail.location'))).getByRole('button')).toHaveTextContent('Locatie Noord')
-  })
-
-  it('still resolves a legacy mismatched department (set before this fix existed) instead of dropping it silently', async () => {
-    const user = userEvent.setup()
-    // dep-1 belongs to loc-1, but this contact's location is loc-2 — a pre-existing
-    // mismatched pair from before the cascade existed (CONTACT-MULTI-1 era data).
-    const contact = baseContact({ locationId: 'loc-2', departmentId: 'dep-1' })
-    render(<ContactDetail contact={contact} locations={locations} departments={departments} statuses={statuses}
-      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
-
-    await user.click(screen.getAllByTitle(cm('edit'))[1])
-    expect(within(rowFor(ct('contacts.detail.department'))).getByRole('button')).toHaveTextContent('Verpleging')
+    render(<ContactDetail contact={baseContact({ locationId: 'loc-1', departmentId: 'dep-1' })} locations={locations}
+      departments={departments} statuses={statuses} onSave={onSave} onDelete={vi.fn()} close={vi.fn()} />)
+    // Scope to the location CHIP itself — matching on the shared "remove" label alone
+    // also catches the reference-number copy button in the title row.
+    const chip = screen.getByText('Locatie Noord').closest('span') as HTMLElement
+    await user.click(within(chip).getByRole('button', { name: cm('remove') }))
+    expect(onSave).toHaveBeenCalledWith('c1', { locationId: null, departmentId: null })
   })
 })
 
-// Regression (found 28-07 by an adversarial verification pass, reproduced with its own
-// probe): promoting a contact to primary asks whether to replace the current one.
-// Declining saves the rest of the edit with isPrimary FALSE — but the toggle kept
-// reading ON, because the field table shows its own draft after a save. A screen that
-// claims it saved something it did not is the worst failure mode there is.
+
 describe('ContactDetail · declining the primary-replace question', () => {
   const other = baseContact({ id: 'c2', firstName: 'Anna', lastName: 'Bakker', name: 'Anna Bakker', isPrimary: true })
 

@@ -267,7 +267,8 @@
       "alt": "PDOK-logo",
       "linked": "Gekoppeld",
       "notGeocoded": "Nog niet gegeocodeerd",
-      "autoInfo": "Coördinaten worden automatisch bijgewerkt zodra het adres wijzigt."
+      "autoInfo": "Coördinaten worden automatisch bijgewerkt zodra het adres wijzigt.",
+      "readOnly": "Coördinaten komen van de klant­locatie zelf; opnieuw geocoderen kan hier nog niet."
     }
   },
   "breadcrumb": "Kruimelpad"

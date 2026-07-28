@@ -267,7 +267,8 @@
       "alt": "PDOK-Logo",
       "linked": "Verknüpft",
       "notGeocoded": "Noch nicht geocodiert",
-      "autoInfo": "Koordinaten werden automatisch aktualisiert, sobald sich die Adresse ändert."
+      "autoInfo": "Koordinaten werden automatisch aktualisiert, sobald sich die Adresse ändert.",
+      "readOnly": "Die Koordinaten stammen vom Kundenstandort selbst; erneutes Geocoding ist hier noch nicht möglich."
     }
   },
   "breadcrumb": "Brotkrümelnavigation"

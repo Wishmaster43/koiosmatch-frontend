@@ -267,7 +267,8 @@
       "alt": "Logo de PDOK",
       "linked": "Vinculado",
       "notGeocoded": "Aún no geocodificado",
-      "autoInfo": "Las coordenadas se actualizan automáticamente en cuanto cambia la dirección."
+      "autoInfo": "Las coordenadas se actualizan automáticamente en cuanto cambia la dirección.",
+      "readOnly": "Las coordenadas provienen de la propia ubicación del cliente; volver a geocodificar aún no es posible aquí."
     }
   },
   "breadcrumb": "Ruta de navegación"

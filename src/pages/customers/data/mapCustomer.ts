@@ -59,6 +59,8 @@ export function mapContact(p: ApiContact = {}): Contact {
     .map(d => ({ id: d.id, name: d.name ?? '—' }))
   return {
     id: p.id,
+    // NUMMER-2: the human-readable number, shown as a copy chip next to the name.
+    referenceNumber: p.reference_number ?? '',
     firstName: p.first_name ?? '',
     lastName: p.last_name ?? '',
     name: p.name ?? [p.first_name, p.last_name].filter(Boolean).join(' ') ?? '—',
@@ -111,6 +113,9 @@ export function mapLocation(l: ApiLocation = {}): Location {
     cocNumber: l.coc_number ?? '',
     vatNumber: l.vat_number ?? '',
     contactName: l.contact_name ?? '',
+    // PDOK coordinates — tolerant coercion (Laravel decimals arrive as strings, §10).
+    lat: toCoord(l.lat),
+    lng: toCoord(l.lng),
     phone: l.phone ?? '',
     email: l.email ?? '',
     costCenter: l.cost_center ?? '',

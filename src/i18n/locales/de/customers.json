@@ -260,7 +260,9 @@
       "subtabs": {
         "data": "Details",
         "tasks": "Aufgaben"
-      }
+      },
+      "linkLocation": "Standort verknüpfen",
+      "linkDepartment": "Abteilung verknüpfen"
     },
     "deleteConfirm": "Diesen Kontakt löschen?",
     "saveFailed": "Speichern fehlgeschlagen.",

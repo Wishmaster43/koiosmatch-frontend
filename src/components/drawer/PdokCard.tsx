@@ -19,8 +19,14 @@ interface PdokCardProps {
   // decimals as JSON strings, §10). Null on both = never geocoded.
   lat?: number | null
   lng?: number | null
-  // Per-id geocode route, e.g. `/customers/{id}/geocode`.
-  endpoint: string
+  /**
+   * Per-id geocode route, e.g. `/customers/{id}/geocode`. OMIT it when the entity has no
+   * re-geocode route yet (a customer LOCATION: it carries lat/lng and the backend fills
+   * them, but there is no POST …/locations/{id}/geocode — measured 28-07, filed as a
+   * ticket). The card then shows the coordinates read-only with a one-line reason, which
+   * is honest; a button that cannot fire would be a fake affordance (§3).
+   */
+  endpoint?: string
   // Write permission for this entity; without it GeocodeButton renders nothing.
   permission: string
   // True when there is no address worth geocoding yet — the caller decides, never this card.
@@ -43,10 +49,10 @@ export default function PdokCard({ lat, lng, endpoint, permission, disabled }: P
         ) : (
           <SoftChip label={t('backofficeLinks.pdok.notGeocoded')} color="var(--text-muted)" />
         )}
-        <GeocodeButton endpoint={endpoint} permission={permission} disabled={disabled} variant="row" />
+        {endpoint && <GeocodeButton endpoint={endpoint} permission={permission} disabled={disabled} variant="row" />}
       </div>
       <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '8px 0 0' }}>
-        {t('backofficeLinks.pdok.autoInfo')}
+        {endpoint ? t('backofficeLinks.pdok.autoInfo') : t('backofficeLinks.pdok.readOnly')}
       </p>
     </SectionCard>
   )

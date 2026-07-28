@@ -260,7 +260,9 @@
       "subtabs": {
         "data": "Details",
         "tasks": "Tasks"
-      }
+      },
+      "linkLocation": "Link location",
+      "linkDepartment": "Link department"
     },
     "deleteConfirm": "Delete this contact?",
     "saveFailed": "Saving failed.",

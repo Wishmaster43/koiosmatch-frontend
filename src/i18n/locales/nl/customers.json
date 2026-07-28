@@ -260,7 +260,9 @@
       "subtabs": {
         "data": "Gegevens",
         "tasks": "Taken"
-      }
+      },
+      "linkLocation": "Locatie koppelen",
+      "linkDepartment": "Afdeling koppelen"
     },
     "deleteConfirm": "Deze contactpersoon verwijderen?",
     "saveFailed": "Opslaan is mislukt.",
