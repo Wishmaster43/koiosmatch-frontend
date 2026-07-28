@@ -1,40 +1,14 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, X, Map as MapIcon, Pencil, Trash2, AlertTriangle, RefreshCw, Building2, Building, Home, Store, Warehouse, Landmark, MapPin, Briefcase } from 'lucide-react'
+import { Plus, Map as MapIcon, AlertTriangle } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
-import GeocodeButton from '@/components/ui/GeocodeButton'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useConfirm } from '@/hooks/useConfirm'
-import { WIDE_MODAL } from '@/components/ui/modalMetrics'
-import { cardHead, cardBox } from '@/components/ui/modalCards'
-import { BTN_H } from '@/config/buttonMetrics'
-import { ColorSwatch } from '../components/SettingsControls'
-import IconPickerControl from './IconPickerControl'
-// Deterministic per-row colour hash — the SAME helper as Avatar/Shiftmanager
-// entities (§11: reuse, never a second hash). See LocationBadge below for why.
-import { avatarColor } from '@/lib/avatarColor'
-
-// Curated lucide set for the location badge/colour picker (VESTIGING-ICOON-1) —
-// mirrors the document-type icon picker (lib/useDocumentTypes.ts): keys are the
-// slugs Store/UpdateLocationRequest persist and LocationResource returns as-is.
-const LOCATION_ICON_MAP = {
-  'building-2': Building2, building: Building, home: Home, store: Store,
-  warehouse: Warehouse, landmark: Landmark, 'map-pin': MapPin, briefcase: Briefcase,
-}
-const LOCATION_ICON_NAMES = Object.keys(LOCATION_ICON_MAP)
-// Resolve a stored icon slug to its lucide component — unknown/null never crashes,
-// it falls back to the same Building2 glyph the read-only hash badge always used.
-function resolveLocationIcon(name) {
-  return LOCATION_ICON_MAP[(name ?? '').trim().toLowerCase()] ?? Building2
-}
-// Defaults for a brand-new row's picker — a real, visible swatch/glyph instead of
-// an empty string, mirroring the neutral fallback other lookup rows use
-// (StatusListEditor's `item.color ?? '#6B7280'`).
-const DEFAULT_LOCATION_ICON = 'building-2'
-// eslint-disable-next-line no-restricted-syntax -- DATA: neutral default swatch colour for a brand-new row, not decorative UI chrome
-const DEFAULT_LOCATION_COLOR = '#6B7280'
+import { DEFAULT_LOCATION_COLOR, DEFAULT_LOCATION_ICON } from '@/lib/locationIcons'
+import LocationsTable from './locations/LocationsTable'
+import LocationFormModal from './locations/LocationFormModal'
 
 // STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
 const LocationsMapView = lazy(() => import('./LocationsMapView'))
@@ -52,16 +26,6 @@ const EMPTY_FORM = {
 // Field keys the API returns/accepts 1:1 (LocationResource ↔ Store/UpdateLocationRequest).
 const FORM_KEYS = Object.keys(EMPTY_FORM)
 
-function formatAddress(loc) {
-  if (loc.address)      return loc.address
-  if (loc.full_address) return loc.full_address
-  const streetLine = [loc.street, loc.house_number].filter(Boolean).join(' ')
-    + (loc.house_number_suffix ? ` ${loc.house_number_suffix}` : '')
-  const cityLine = [loc.postal_code, loc.city].filter(Boolean).join(' ')
-  const parts = [streetLine.trim(), cityLine.trim(), loc.country].filter(Boolean)
-  return parts.length ? parts.join(', ') : '—'
-}
-
 // Prefill the edit form from an existing row — field names already match 1:1.
 // Colour/icon fall back to today's default swatch/glyph only when the row truly
 // has neither (saved before these columns existed) — never an empty picker state.
@@ -71,26 +35,6 @@ function toFormValues(loc) {
   values.color = loc.color || DEFAULT_LOCATION_COLOR
   values.icon = loc.icon || DEFAULT_LOCATION_ICON
   return values
-}
-
-// VESTIGING-ICOON-1 (Danny 28-07): `locations.color`/`locations.icon` now exist
-// end-to-end (LocationResource + Store/UpdateLocationRequest, verified against the
-// running DB) — this badge renders the row's OWN colour/icon when the backend has
-// them. Older rows saved before these columns landed still have neither, so they
-// fall back to the same deterministic avatarColor hash + Building2 glyph this
-// badge always used (§11 reuse — one hash helper, shared with Avatar/Shiftmanager
-// entities), so every row stays identifiable at a glance either way.
-function LocationBadge({ name, color, icon }) {
-  const resolvedColor = color || avatarColor(name)
-  const Icon = icon ? resolveLocationIcon(icon) : Building2
-  return (
-    <span aria-hidden="true" style={{ width: 26, height: 26, flexShrink: 0, display: 'flex',
-      alignItems: 'center', justifyContent: 'center', borderRadius: 7,
-      background: `color-mix(in srgb, ${resolvedColor} 14%, transparent)`,
-      border: `1px solid color-mix(in srgb, ${resolvedColor} 45%, transparent)`, color: resolvedColor }}>
-      <Icon size={13} />
-    </span>
-  )
 }
 
 // LOC-DELETE-GUARD-1: the 409 payload's `counts` object uses backend source keys —
@@ -208,9 +152,6 @@ export default function LocationsSettings() {
   const paginated = locations.slice((page - 1) * PER_PAGE, page * PER_PAGE)
   const totalPages = Math.ceil(locations.length / PER_PAGE)
 
-  const TH = { padding: '8px 14px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'left', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)' }
-  const TD = { padding: '12px 14px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
-
   return (
     <div>
       <div className="flex items-center justify-between mb-5">
@@ -241,190 +182,13 @@ export default function LocationsSettings() {
           <LocationsMapView locations={locations} />
         </Suspense>
       ) : (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={TH}>{t('locations.colName')}</th>
-                <th style={TH}>{t('locations.colAddress')}</th>
-                <th style={TH}>{t('locations.colCreated')}</th>
-                <th style={{ ...TH, textAlign: 'right' }}>{t('locations.colActions')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginated.length === 0 ? (
-                <tr><td colSpan={4} style={{ ...TD, textAlign: 'center', color: 'var(--text-muted)', padding: '32px 0' }}>{t('locations.empty')}</td></tr>
-              ) : paginated.map((loc, i) => (
-                <tr key={loc.id ?? i}>
-                  <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <LocationBadge name={loc.name} color={loc.color} icon={loc.icon} />
-                      {loc.name}
-                    </div>
-                  </td>
-                  <td style={TD}>{formatAddress(loc)}</td>
-                  <td style={{ ...TD, color: 'var(--text-muted)', fontSize: 12 }}>
-                    {loc.created_at ? new Date(loc.created_at).toLocaleString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
-                  </td>
-                  <td style={{ ...TD, textAlign: 'right' }}>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
-                      {/* GEO-REGEOCODE-1: manual "PDOK opnieuw ophalen" — queued + async,
-                          never claims "done" (see GeocodeButton). No bulk for locations (BE spec). */}
-                      <GeocodeButton endpoint={`/locations/${loc.id}/geocode`} permission="settings.update"
-                        disabled={!loc.postal_code && !loc.city && !loc.street} variant="row" />
-                      <button onClick={() => openEdit(loc)} title={t('locations.edit')} aria-label={t('locations.edit')}
-                        style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                 background: 'var(--hover-bg)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--text)' }}>
-                        <Pencil size={12} />
-                      </button>
-                      {/* Delete is live (LOC-DELETE-GUARD-1): disabled only when the backend
-                          already flagged this location as in use; the 409 catch in remove()
-                          is the belt-and-suspenders path for a race with a fresher link. */}
-                      <button onClick={() => remove(loc)} disabled={deletingId === loc.id || inUse(loc)}
-                        title={inUse(loc) ? t('locations.deleteBlockedTooltip') : t('locations.delete')}
-                        aria-label={inUse(loc) ? t('locations.deleteBlockedTooltip') : t('locations.delete')}
-                        style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                 background: inUse(loc) ? 'var(--hover-bg)' : 'var(--color-danger-bg)', border: 'none', borderRadius: 6,
-                                 cursor: (deletingId === loc.id || inUse(loc)) ? 'not-allowed' : 'pointer',
-                                 color: inUse(loc) ? 'var(--text-muted)' : 'var(--color-danger)', opacity: inUse(loc) ? 0.5 : 1 }}>
-                        {deletingId === loc.id ? <RefreshCw size={12} className="animate-spin" /> : <Trash2 size={12} />}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {totalPages > 1 && (
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '10px 14px', borderTop: '1px solid var(--border)' }}>
-              <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1}
-                style={{ height: 30, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: page === 1 ? 'not-allowed' : 'pointer', color: page === 1 ? 'var(--border)' : 'var(--text)' }}>
-                {t('locations.prev')}
-              </button>
-              <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page === totalPages}
-                style={{ height: 30, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: page === totalPages ? 'not-allowed' : 'pointer', color: page === totalPages ? 'var(--border)' : 'var(--text)' }}>
-                {t('locations.next')}
-              </button>
-            </div>
-          )}
-        </div>
+        <LocationsTable isLocked={inUse} rows={paginated} page={page} totalPages={totalPages} onPageChange={setPage}
+          onEdit={openEdit} onDelete={remove} deletingId={deletingId} />
       )}
 
       {showModal && (
-        <>
-          <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={closeModal} />
-          {/* Wide-form frame (Danny 27-07: "+ vestiging... moet net zo breed en hoog
-              worden als + match of + nieuwe kandidaat") — same WIDE_MODAL footprint
-              as AddCandidateModal/MatchPlacementModal, `94vw` cap so it still breathes
-              on narrow viewports (mirrors matchPlacement/styles.ts' `panel`, this
-              component being `position: fixed` with no flex-centering overlay of its
-              own). role="dialog" + useFocusTrap (§6): focus trap, Escape-to-close,
-              focus restore — this panel had none of that before. */}
-          <div ref={modalPanelRef} role="dialog" aria-modal="true" tabIndex={-1}
-            aria-label={editingId ? t('locations.editTitle') : t('locations.create')}
-            className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: '94vw', maxWidth: WIDE_MODAL.maxWidth, maxHeight: WIDE_MODAL.maxHeight, overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-              <span style={{ fontSize: 15, fontWeight: 700 }}>{editingId ? t('locations.editTitle') : t('locations.create')}</span>
-              <button onClick={closeModal} aria-label={t('common.cancel')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
-            </div>
-
-            {(() => {
-              // House field footprint (Danny 27-07 point D): 11px uppercase muted
-              // label above each input, fontSize 13 / borderRadius 8 — mirrors
-              // matchPlacement/styles.ts' `lbl`/`input` exactly.
-              const lbl = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }
-              const inp = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
-              // Titled-card chrome (Danny 27-07 point B: "kaders om elk blokje") — the
-              // shared cardHead/cardBox (CLAUDE.md §11: one source instead of a
-              // per-entity copy), imported at module top since this file stays plain JSX.
-              const setF = (k) => (e) => setForm(x => ({ ...x, [k]: e.target.value }))
-              // Called as a function (not <F/>) so inputs keep focus while typing.
-              const field = (k, label, placeholder, type = 'text', flex = 1) => (
-                <div style={{ flex, minWidth: 0 }}>
-                  <div style={lbl}>{label}</div>
-                  <input type={type} value={form[k]} onChange={setF(k)} placeholder={placeholder} aria-label={label} style={inp} />
-                </div>
-              )
-              return (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {/* Algemeen — just the name; this form carries no "standaard"/default
-                      flag (unlike the customer-location modal), so nothing invented here. */}
-                  <div>
-                    <div style={cardHead}>{t('locations.sectionGeneral')}</div>
-                    <div style={cardBox}>
-                      {field('name', t('locations.nameLabel'), t('locations.namePlaceholder'))}
-                      {/* Branding (VESTIGING-ICOON-1) — the same ColorSwatch/IconPickerControl
-                          every other lookup editor reuses (StatusListEditor), not a bespoke
-                          picker. Both ride along in the create/update payload below. */}
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20 }}>
-                        <div>
-                          <div style={lbl}>{t('locations.color')}</div>
-                          <ColorSwatch color={form.color} onChange={c => setForm(x => ({ ...x, color: c }))} />
-                        </div>
-                        <div>
-                          <div style={lbl}>{t('locations.icon')}</div>
-                          <IconPickerControl icons={LOCATION_ICON_NAMES} resolve={resolveLocationIcon}
-                            value={form.icon} color={form.color || DEFAULT_LOCATION_COLOR}
-                            label={t('locations.icon')} onPick={icon => setForm(x => ({ ...x, icon }))} />
-                        </div>
-                      </div>
-                      <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{t('locations.colorHint')}</p>
-                    </div>
-                  </div>
-
-                  {/* Structured address — separate fields so they can be matched/validated. */}
-                  <div>
-                    <div style={cardHead}>{t('locations.sectionAddress')}</div>
-                    <div style={cardBox}>
-                      {/* Street + number + suffix on one line (compact, NL convention). */}
-                      <div style={{ display: 'flex', gap: 12 }}>
-                        {field('street', t('locations.street'), t('locations.street'), 'text', 3)}
-                        {field('house_number', t('locations.houseNumber'), '28', 'text', 1)}
-                        {field('house_number_suffix', t('locations.houseNumberSuffix'), 'A', 'text', 1)}
-                      </div>
-                      <div style={{ display: 'flex', gap: 12 }}>
-                        {field('postal_code', t('locations.postalCode'), '1234 AB')}
-                        {field('city', t('locations.city'), t('locations.city'))}
-                      </div>
-                      {field('country', t('locations.country'), 'Nederland')}
-                    </div>
-                  </div>
-
-                  {/* Business identifiers for invoicing/registration. */}
-                  <div>
-                    <div style={cardHead}>{t('locations.sectionBusiness')}</div>
-                    <div style={cardBox}>
-                      <div style={{ display: 'flex', gap: 12 }}>
-                        {field('coc_number', t('locations.cocNumber'), '12345678')}
-                        {field('vat_number', t('locations.vatNumber'), 'NL000000000B01')}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Contact details for this location. */}
-                  <div>
-                    <div style={cardHead}>{t('locations.sectionContact')}</div>
-                    <div style={cardBox}>
-                      {field('contact_name', t('locations.contactName'), t('locations.contactName'))}
-                      <div style={{ display: 'flex', gap: 12 }}>
-                        {field('phone', t('locations.phone'), '+31 6 12345678', 'tel')}
-                        {field('email', t('locations.email'), 'name@company.com', 'email')}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )
-            })()}
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-              <button onClick={closeModal} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common.cancel')}</button>
-              <button onClick={submit} disabled={saving || !form.name.trim()}
-                style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', opacity: form.name.trim() ? 1 : 0.4 }}>
-                {saving ? t('common.saving') : (editingId ? t('common.save') : t('locations.createBtn'))}
-              </button>
-            </div>
-          </div>
-        </>
+        <LocationFormModal panelRef={modalPanelRef} editingId={editingId} form={form} setForm={setForm}
+          saving={saving} onClose={closeModal} onSubmit={submit} />
       )}
       {/* House confirm dialog (never native window.confirm) — staged by remove(). */}
       {dialog}

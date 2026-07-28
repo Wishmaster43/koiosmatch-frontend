@@ -3,22 +3,22 @@
  *
  * Renders the node graph (via @xyflow/react / ReactFlow): the canvas, nodes,
  * connecting edges, minimap and controls, plus the header toolbar and the side
- * panels. All editor state + behaviour lives in `useWorkflowEditor`; the panels
- * live in `./workflow/` (ModulePicker · ConfigPanel · LogsPanel · fields · canvas
- * · ScheduleModal). This component stays declarative: hook in, JSX out.
+ * panels. All editor state + behaviour lives in `useWorkflowEditor`; the exit
+ * guards in `useEditorExitGuards`; the panels in `./workflow/` (WorkflowEditorHeader
+ * · ModulePicker · ConfigPanel · LogsPanel · fields · canvas · ScheduleModal).
+ * This component stays declarative: hook in, JSX out.
  */
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import {
   ReactFlow, Background, Controls, MiniMap, ReactFlowProvider,
 } from '@xyflow/react'
 import type { NodeTypes, EdgeTypes } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { X, Save, Play, Loader2, Plus, Zap, List, Clock, Workflow as WorkflowIcon, History } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useConfirm } from '@/hooks/useConfirm'
 import { MODULE_META } from '@/modules/index'
-import { ScheduleModal, scheduleLabel } from './workflow/ScheduleModal'
-import { StopRunButton } from './workflow/runControl'
+import { ScheduleModal } from './workflow/ScheduleModal'
 import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext } from './workflow/contexts'
 import { OutputPanel, NODE_TYPES, EDGE_TYPES } from './workflow/canvas'
 import { EdgeFilterPanel } from './workflow/EdgeFilterPanel'
@@ -26,7 +26,10 @@ import ModulePicker from './workflow/ModulePicker'
 import ConfigPanel, { MANAGE_TABS } from './workflow/ConfigPanel'
 import LogsPanel from './workflow/LogsPanel'
 import WorkflowHistoryView from './workflow/WorkflowHistoryView'
+import WorkflowEditorHeader from './workflow/WorkflowEditorHeader'
+import type { EditorView } from './workflow/WorkflowEditorHeader'
 import { useWorkflowEditor } from './workflow/useWorkflowEditor'
+import { useEditorExitGuards } from './workflow/useEditorExitGuards'
 import { useModuleCatalog } from './workflow/useModuleCatalog'
 import type { Workflow } from '@/types/workflow'
 import type { RunRow } from '@/types/reports'
@@ -49,64 +52,15 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,
     insertModule, updateNodeConfig, deleteNode, handleSave, handleRun, isDirty,
   } = useWorkflowEditor({ workflow, onSave, initialRunId })
-  const { t, i18n } = useTranslation('workflows')
+  const { t } = useTranslation('workflows')
   const { confirm, dialog } = useConfirm()
 
-  // Dirty-check guard (item 19): closing (X) with unsaved changes used to discard
-  // them silently — confirm first (via the shared ConfirmDialog). A native
-  // beforeunload guard covers the tab close/refresh/navigate-away case the
-  // in-app confirm can't catch.
-  const confirmClose = () => {
-    // RUN-VISIBILITY-1 (Danny 24-07): leaving while a run is LIVE gets an explicit
-    // confirm first — honest wording: the run keeps going server-side; stopping is
-    // a deliberate act via the Stoppen button, never a side-effect of closing.
-    const dirtyGuard = () => {
-      if (!isDirty()) { onClose(); return }
-      confirm(t('editor.unsavedConfirm'), onClose)
-    }
-    if (liveRunActive) { confirm(t('editor.liveRunConfirm'), dirtyGuard); return }
-    dirtyGuard()
-  }
+  // Leaving the editor (X, browser-back, tab close) runs one guarded action —
+  // unsaved-changes + live-run confirms live in the hook.
+  const confirmClose = useEditorExitGuards({ isDirty, liveRunActive, onClose, confirm })
 
-  // NAV-BACK-BUILDER-1 (Danny 24-07 "browser-terug doet niets in de builder"):
-  // the editor is an overlay in page state, so browser-back only popped the
-  // router while the overlay stayed. Push our own history entry on open; a pop
-  // re-arms the entry and runs the exact same Close action (incl. the unsaved/
-  // live-run guards). A normal close consumes our entry silently.
-  const confirmCloseRef = useRef(confirmClose)
-  // Keep the ref on the latest closure (guards read live dirty/run state) —
-  // assigned in an effect, never during render (lint: no refs in render).
-  useEffect(() => { confirmCloseRef.current = confirmClose })
-  useEffect(() => {
-    // StrictMode-safe (dev double-mount!): only push our entry when it isn't
-    // already on top, and NEVER history.back() in cleanup — the async pop there
-    // hit the remounted instance and closed the editor the moment it opened
-    // (Danny 24-07 "ik kan geen workflow meer aanklikken"). The one leftover
-    // entry after a normal close makes the next back a harmless same-page pop.
-    if (!(window.history.state as { kmWorkflowEditor?: boolean } | null)?.kmWorkflowEditor) {
-      window.history.pushState({ kmWorkflowEditor: true }, '', window.location.href)
-    }
-    const onPop = () => {
-      // Re-arm first so cancelling the confirm keeps the user in the editor.
-      window.history.pushState({ kmWorkflowEditor: true }, '', window.location.href)
-      confirmCloseRef.current()
-    }
-    window.addEventListener('popstate', onPop)
-    return () => window.removeEventListener('popstate', onPop)
-  }, [])
-
-  useEffect(() => {
-    const handler = (e: BeforeUnloadEvent) => {
-      // Tab close/refresh: warn on unsaved changes OR a live run (same honesty).
-      if (!isDirty() && !liveRunActive) return
-      e.preventDefault()
-      e.returnValue = ''
-    }
-    window.addEventListener('beforeunload', handler)
-    return () => window.removeEventListener('beforeunload', handler)
-  }, [isDirty, liveRunActive])
   // Top-level editor view: the node diagram, or this workflow's run history.
-  const [view, setView] = useState<'diagram' | 'history'>('diagram')
+  const [view, setView] = useState<EditorView>('diagram')
   // LOGS-DRILL-1 (Danny 23-07): jumping from a Logs-panel row lands on the
   // Geschiedenis tab with that run's detail drawer already open. A FRESH wrapper
   // per click, so jumping to the same run twice re-opens the drawer too.
@@ -128,154 +82,20 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
       <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
 
         {/* ── Header ── */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 12,
-          height: 56, padding: '0 20px', flexShrink: 0,
-          background: 'var(--surface)', borderBottom: '1px solid var(--border)',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Zap size={15} color="var(--color-primary)" />
-            </div>
-            <input
-              value={name} onChange={e => setName(e.target.value)}
-              style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', border: 'none', background: 'transparent', outline: 'none', minWidth: 60, maxWidth: 240 }}
-            />
-          </div>
-
-          <div style={{ width: 1, height: 20, background: 'var(--border)', flexShrink: 0 }} />
-
-          {/* View tabs — node diagram vs. run history (Make-style) */}
-          <div style={{ display: 'flex', gap: 2, background: 'var(--hover-bg)', borderRadius: 8, padding: 2, flexShrink: 0 }}>
-            {([
-              { id: 'diagram', label: t('editor.tabDiagram'), Icon: WorkflowIcon },
-              { id: 'history', label: t('editor.tabHistory'), Icon: History },
-            ] as const).map(v => (
-              <button key={v.id} onClick={() => setView(v.id)}
-                aria-pressed={view === v.id}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 6,
-                  fontSize: 12, fontWeight: 500, border: 'none', cursor: 'pointer',
-                  background: view === v.id ? 'var(--surface)' : 'transparent',
-                  color:      view === v.id ? 'var(--text)'    : 'var(--text-muted)',
-                  boxShadow:  view === v.id ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
-                }}>
-                <v.Icon size={13} />
-                {v.label}
-              </button>
-            ))}
-          </div>
-
-          <div style={{ width: 1, height: 20, background: 'var(--border)', flexShrink: 0 }} />
-
-          <button onClick={() => setShowSchedule(true)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 8,
-              border: '1px solid var(--border)', background: 'var(--hover-bg)', cursor: 'pointer',
-              fontSize: 12, color: 'var(--text)', fontWeight: 500,
-            }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'var(--hover-bg)')}>
-            <Clock size={13} color="var(--text-muted)" />
-            {scheduleLabel(t, i18n.language, trigger, scheduleConfig)}
-          </button>
-
-          <div style={{ width: 1, height: 20, background: 'var(--border)', flexShrink: 0 }} />
-
-          <button onClick={() => setStatus(s => s === 'active' ? 'inactive' : 'active')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999,
-              background: status === 'active' ? 'var(--color-success-bg)' : 'var(--hover-bg)',
-              color:      status === 'active' ? 'var(--color-success)' : 'var(--text-muted)',
-              border:     `1px solid ${status === 'active' ? 'color-mix(in srgb, var(--color-success) 40%, transparent)' : 'var(--border)'}`,
-              cursor: 'pointer', fontSize: 11, fontWeight: 500,
-            }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: status === 'active' ? 'var(--color-success)' : 'var(--border)' }} />
-            {status === 'active' ? t('status.active') : t('status.inactive')}
-          </button>
-
-          <div style={{ flex: 1 }} />
-
-          {view === 'diagram' && (
-            <button onClick={() => setShowLogs(s => !s)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-                background: showLogs ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
-                color:      showLogs ? 'var(--color-primary)'    : 'var(--text-muted)',
-                border:     `1px solid ${showLogs ? 'var(--color-primary)' : 'var(--border)'}`,
-                cursor: 'pointer',
-              }}>
-              <List size={13} />
-              {t('editor.logs')}
-            </button>
-          )}
-
-          {/* Run feedback: the backend reason (e.g. a draft can't run) or generic.
-              flexShrink 0: the packed header otherwise crushes the message to "D…". */}
-          {runError !== null && (
-            // eslint-disable-next-line no-restricted-syntax -- DATA: exact-match fallback for var(--color-danger), not an ad-hoc colour
-            <span style={{ fontSize: 11, color: 'var(--color-danger, #DC2626)', maxWidth: 220, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-              title={runError || t('common:actionFailed')}>
-              {runError || t('common:actionFailed')}
-            </span>
-          )}
-
-          {/* RUN-CONTROL-1 single-flight: 409 → "loopt al" + the viewer points at that run. */}
-          {runConflict && (
-            <span style={{ fontSize: 11, color: 'var(--color-warning)', maxWidth: 220, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-              title={t('runControl.alreadyRunning')}>
-              {t('runControl.alreadyRunning')}
-            </span>
-          )}
-
-          {/* Stop the live run (RUN-CONTROL-1) — visible while it can still be cancelled. */}
-          {liveRunActive && activeRunId != null && (
-            <StopRunButton runId={activeRunId} onStopped={handleStopped} onError={setRunError} />
-          )}
-
-          <button onClick={handleRun} disabled={running}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-              background: running ? 'var(--border)' : 'var(--color-primary-bg)',
-              color:      running ? 'var(--text-muted)' : 'var(--color-primary)',
-              border: 'none', cursor: running ? 'not-allowed' : 'pointer',
-            }}>
-            {running ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
-            {running ? t('editor.running') : t('editor.run')}
-          </button>
-
-          {/* Opslaan — blijft in editor */}
-          <button onClick={() => handleSave(false)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-              background: saved ? 'var(--color-success-bg)' : 'var(--hover-bg)',
-              color: saved ? 'var(--color-success)' : 'var(--text)',
-              border: `1px solid ${saved ? 'var(--color-success)' : 'var(--border)'}`,
-              cursor: 'pointer', transition: 'background 0.2s',
-            }}>
-            <Save size={13} />
-            {saved ? t('editor.saved') : t('editor.save')}
-          </button>
-
-          {/* Opslaan & sluiten — terug naar overzicht (live-run guard eerst) */}
-          <button onClick={() => (liveRunActive ? confirm(t('editor.liveRunConfirm'), () => handleSave(true)) : handleSave(true))}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-              background: 'var(--color-primary)', color: 'white',
-              border: 'none', cursor: 'pointer',
-            }}>
-            <Save size={13} />
-            {t('editor.saveClose')}
-          </button>
-
-          <button onClick={confirmClose} aria-label={t('common:close')}
-            style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'none')}
-            title={t('editor.closeTitle')}>
-            <X size={15} />
-          </button>
-        </div>
+        <WorkflowEditorHeader
+          name={name} onNameChange={setName}
+          view={view} onViewChange={setView}
+          trigger={trigger} scheduleConfig={scheduleConfig} onOpenSchedule={() => setShowSchedule(true)}
+          status={status} onToggleStatus={() => setStatus(s => s === 'active' ? 'inactive' : 'active')}
+          showLogs={showLogs} onToggleLogs={() => setShowLogs(s => !s)}
+          runError={runError} onRunError={setRunError} runConflict={runConflict}
+          liveRunActive={liveRunActive} activeRunId={activeRunId} onStopped={handleStopped}
+          running={running} onRun={handleRun}
+          saved={saved} onSave={() => handleSave(false)}
+          // Opslaan & sluiten — terug naar overzicht (live-run guard eerst)
+          onSaveClose={() => (liveRunActive ? confirm(t('editor.liveRunConfirm'), () => handleSave(true)) : handleSave(true))}
+          onClose={confirmClose}
+        />
 
         {/* ── Body ── */}
         {view === 'history' ? (
