@@ -164,7 +164,7 @@
       "city": "Ort",
       "state": "Bundesland",
       "country": "Land",
-      "coc": "Handelsregisternr.",
+      "coc": "Neben-Handelsregisternr.",
       "vat": "USt-IdNr.",
       "registrationTitle": "Registrierung",
       "contactTitle": "Ansprechpartner vor Ort",
@@ -455,7 +455,7 @@
     "city": "Ort",
     "state": "Bundesland",
     "country": "Land",
-    "coc": "Handelsregisternr.",
+    "coc": "Neben-Handelsregisternr.",
     "vat": "USt-IdNr.",
     "costCenter": "Kostenstelle",
     "groups": {

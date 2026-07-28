@@ -164,7 +164,7 @@
       "city": "Plaats",
       "state": "Provincie",
       "country": "Land",
-      "coc": "KvK-nummer",
+      "coc": "Sub-KvK",
       "vat": "BTW-nummer",
       "registrationTitle": "Registratie",
       "contactTitle": "Contact ter plaatse",
@@ -455,7 +455,7 @@
     "city": "Plaats",
     "state": "Provincie",
     "country": "Land",
-    "coc": "KvK-nummer",
+    "coc": "Sub-KvK",
     "vat": "BTW-nummer",
     "costCenter": "Kostenplaats",
     "groups": {

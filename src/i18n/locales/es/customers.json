@@ -164,7 +164,7 @@
       "city": "Ciudad",
       "state": "Provincia",
       "country": "País",
-      "coc": "N.º registro",
+      "coc": "Sub-número CIF",
       "vat": "N.º IVA",
       "registrationTitle": "Registro",
       "contactTitle": "Contacto en el lugar",
@@ -455,7 +455,7 @@
     "city": "Ciudad",
     "state": "Provincia",
     "country": "País",
-    "coc": "N.º registro",
+    "coc": "Sub-número CIF",
     "vat": "N.º IVA",
     "costCenter": "Centro de coste",
     "groups": {

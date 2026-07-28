@@ -164,7 +164,7 @@
       "city": "Ville",
       "state": "Région",
       "country": "Pays",
-      "coc": "N° registre",
+      "coc": "Sous-numéro RCS",
       "vat": "N° TVA",
       "registrationTitle": "Immatriculation",
       "contactTitle": "Contact sur place",
@@ -455,7 +455,7 @@
     "city": "Ville",
     "state": "Région",
     "country": "Pays",
-    "coc": "N° registre",
+    "coc": "Sous-numéro RCS",
     "vat": "N° TVA",
     "costCenter": "Centre de coût",
     "groups": {

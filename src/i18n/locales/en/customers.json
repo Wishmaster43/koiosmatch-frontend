@@ -164,7 +164,7 @@
       "city": "City",
       "state": "State/Province",
       "country": "Country",
-      "coc": "CoC number",
+      "coc": "Sub CoC number",
       "vat": "VAT number",
       "registrationTitle": "Registration",
       "contactTitle": "On-site contact",
@@ -455,7 +455,7 @@
     "city": "City",
     "state": "State/Province",
     "country": "Country",
-    "coc": "CoC number",
+    "coc": "Sub CoC number",
     "vat": "VAT number",
     "costCenter": "Cost center",
     "groups": {
