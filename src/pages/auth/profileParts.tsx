@@ -24,12 +24,18 @@ export interface ProfileFormData {
 // "Nederlands". No `label` here: it's still resolved via `t('languageNames.<code>',
 // { ns: 'auth' })` at render time (see ProfileDisplayTab), so the string has one
 // source of truth per §5 — every locale file simply carries the identical autonym.
+// `label` is the ENDONYM — the language's own name. Deliberately not translated: it is
+// stored as-is by the company-language setting, so a value written while the UI was in
+// English must still match when the UI is Dutch. It is also what a speaker recognises.
+// A refactor once dropped this field while CompanySettings still mapped over it, which
+// rendered five EMPTY options and made the saved value match nothing (found 28-07 by an
+// audit — neither tsc nor the tests saw it: that file is .jsx and had no test).
 export const LANGUAGES = [
-  { value: 'nl', flag: '🇳🇱' },
-  { value: 'en', flag: '🇬🇧' },
-  { value: 'de', flag: '🇩🇪' },
-  { value: 'fr', flag: '🇫🇷' },
-  { value: 'es', flag: '🇪🇸' },
+  { value: 'nl', flag: '🇳🇱', label: 'Nederlands' },
+  { value: 'en', flag: '🇬🇧', label: 'English' },
+  { value: 'de', flag: '🇩🇪', label: 'Deutsch' },
+  { value: 'fr', flag: '🇫🇷', label: 'Français' },
+  { value: 'es', flag: '🇪🇸', label: 'Español' },
 ]
 
 // Role → colour (mirrors UsersPage). Label comes from the `users` i18n namespace.
