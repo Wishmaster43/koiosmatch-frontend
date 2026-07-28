@@ -1,5 +1,7 @@
 /**
- * CareerSiteSettings — the toggle moved to its OWN sub-tab (Danny 23-07).
+ * CareerSiteSettings — the toggle moved to its OWN sub-tab (Danny 23-07); the
+ * control itself is the shared house Toggle (role="switch"), not a raw
+ * checkbox (Danny 28-07: "MOET OOK EEN TOGGLE WORDEN!!").
  * §13: the save assertion checks the REQUEST (settings POST body), not a callback.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
@@ -22,19 +24,19 @@ afterEach(() => { vi.clearAllMocks(); blobRef.current = {} })
 describe('CareerSiteSettings', () => {
   it('renders unchecked when the setting is absent', () => {
     render(<CareerSiteSettings />)
-    expect(screen.getByRole('checkbox')).not.toBeChecked()
+    expect(screen.getByRole('switch')).not.toBeChecked()
   })
 
   it.each([[true], [1], ['1'], ['true']])('coerces stored truthy form %p to checked', (v) => {
     blobRef.current = { career_site_active: v }
     render(<CareerSiteSettings />)
-    expect(screen.getByRole('checkbox')).toBeChecked()
+    expect(screen.getByRole('switch')).toBeChecked()
   })
 
   it('toggling POSTs the settings key immediately (stringified boolean)', async () => {
     const user = userEvent.setup()
     render(<CareerSiteSettings />)
-    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('switch'))
     expect(postMock).toHaveBeenCalledWith('/settings', { career_site_active: 'true' })
   })
 })

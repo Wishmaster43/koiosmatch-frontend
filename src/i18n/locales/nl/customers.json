@@ -7,7 +7,7 @@
     "geblokkeerd": "Geblokkeerd"
   },
   "page": {
-    "add": "Klant toevoegen",
+    "add": "Nieuwe klant",
     "searchPlaceholder": "Zoek klant, debiteurnr, accountmanager…",
     "empty": "Geen klanten gevonden.",
     "loading": "Laden…",
@@ -67,8 +67,10 @@
     "tags": "Tags",
     "addTag": "Tag toevoegen",
     "back": "Terug",
+    "newTask": "Nieuwe taak",
     "tabs": {
       "overview": "Overzicht",
+      "vacancySettings": "Vacature-zichtbaarheid",
       "locations": "Locaties",
       "departments": "Afdelingen",
       "contacts": "Contactpersonen",
@@ -89,6 +91,12 @@
   "overview": {
     "general": "Algemeen",
     "branch": "Vestiging",
+    "branchesLabel": "Vestiging",
+    "branchesLink": "Vestiging koppelen",
+    "branchesEmpty": "Nog geen vestiging gekoppeld.",
+    "contact": "Contact",
+    "email": "E-mailadres",
+    "phone": "Telefoon",
     "online": "Online",
     "settings": "Instellingen",
     "textsTitle": "Teksten",
@@ -98,10 +106,7 @@
     "industry": "Branche",
     "debtorNumber": "Debiteurnummer",
     "city": "Plaats",
-    "hideCompanyName": "Bedrijfsnaam verbergen",
     "hasCareerPage": "Heeft carrièrepagina",
-    "showInVacancies": "Toon in mijn vacatures",
-    "excludeFromSourcing": "Uitsluiten van sourcing",
     "privacyPolicyUrl": "URL privacybeleid",
     "description": "Beschrijving",
     "recruitmentProblems": "Wervingsproblemen",
@@ -111,6 +116,21 @@
   },
   "richText": {
     "empty": "Nog niet ingevuld."
+  },
+  "vacancySettings": {
+    "title": "Vacature-zichtbaarheid",
+    "subtitle": "Hoe deze klant in vacatures en sourcing verschijnt. De standaardwaarde staat in Instellingen → Klanten; per klant kun je hiervan afwijken.",
+    "fields": {
+      "hideCompanyName": "Bedrijfsnaam verbergen",
+      "showInVacancies": "Toon in mijn vacatures",
+      "excludeFromSourcing": "Uitsluiten van sourcing"
+    },
+    "tenantDefault": "Standaard: {{value}}",
+    "on": "aan",
+    "off": "uit",
+    "followsDefault": "volgt de standaard",
+    "deviates": "wijkt af van de standaard",
+    "resetToDefault": "Terug naar standaard"
   },
   "locations": {
     "empty": "Nog geen locaties",
@@ -127,6 +147,7 @@
       "addressTitle": "Adres & gegevens",
       "name": "Naam",
       "status": "Status",
+      "changeStatus": "Status wijzigen",
       "headquarter": "Hoofdvestiging",
       "street": "Straat",
       "houseNumber": "Huisnr.",
@@ -148,7 +169,7 @@
       "contactsHere": "Contactpersonen op deze locatie",
       "none": "Nog niets gekoppeld",
       "addDepartmentHere": "Afdeling toevoegen",
-      "addContactHere": "Nieuw contactpersoon",
+      "addContactHere": "Nieuwe contactpersoon",
       "coupleAction": "Koppelen",
       "uncoupleAction": "Ontkoppelen",
       "pickContactTitle": "Contactpersoon koppelen",
@@ -368,7 +389,7 @@
     "mutateError": "Bewerking is mislukt."
   },
   "modal": {
-    "title": "Klant toevoegen",
+    "title": "Nieuwe klant",
     "subtitle": "Vul de gegevens van de nieuwe klant in",
     "fillRequired": "Vul de verplichte velden in",
     "required": "Verplicht veld",
@@ -391,11 +412,11 @@
     }
   },
   "subModal": {
-    "addLocation": "Locatie toevoegen",
+    "addLocation": "Nieuwe locatie",
     "editLocation": "Locatie bewerken",
-    "addDepartment": "Afdeling toevoegen",
+    "addDepartment": "Nieuwe afdeling",
     "editDepartment": "Afdeling bewerken",
-    "addContact": "Contactpersoon toevoegen",
+    "addContact": "Nieuwe contactpersoon",
     "editContact": "Contactpersoon bewerken",
     "locationName": "Naam locatie",
     "locationPlaceholder": "Bijv. Hoofdlocatie",
@@ -405,6 +426,7 @@
     "selectLocation": "Locatie",
     "selectDepartment": "Afdeling",
     "noLocationsFirst": "Maak eerst een locatie aan",
+    "pickLocationFirst": "Kies eerst een locatie",
     "noneOption": "Geen",
     "firstName": "Voornaam",
     "lastName": "Achternaam",

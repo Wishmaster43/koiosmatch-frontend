@@ -16,7 +16,8 @@ import { useConfirm } from '@/hooks/useConfirm'
 export default function ContactFunctionsSettings() {
   const { t } = useTranslation('settings')
   const settings = useAllSettings()
-  const freeEntry = getBoolSetting(settings, 'contact_functions_allow_free_entry', true)
+  // Default OFF (strict dropdown), mirroring FunctionsSettings — Danny 28-07.
+  const freeEntry = getBoolSetting(settings, 'contact_functions_allow_free_entry', false)
   const [busy, setBusy] = useState(false)
   const { confirm, dialog } = useConfirm()
 

@@ -1,7 +1,7 @@
 {
   "title": "Candidatos",
   "page": {
-    "add": "Añadir candidato",
+    "add": "Nuevo candidato",
     "blacklistView": "Blacklist",
     "archivedView": "Archivados",
     "filterUnsupported": "Este filtro (todavía) no es compatible con el servidor.",
@@ -161,7 +161,7 @@
     "phase": "Fase"
   },
   "modal": {
-    "title": "Añadir candidato",
+    "title": "Nuevo candidato",
     "newPrefix": "Nuevo",
     "candidateData": "Datos del candidato",
     "fillRequired": "Rellena los campos obligatorios",
@@ -697,6 +697,7 @@
   },
   "cv": {
     "contact": "Contacto",
+    "summary": "Resumen",
     "languages": "Idiomas",
     "skills": "Habilidades",
     "certificates": "Certificados",

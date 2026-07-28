@@ -1,14 +1,24 @@
 /**
  * ContactDetail — the Contactpersonen-tab drill-down. Full edit via the shared
  * EditableFieldTable house pattern (pencil → save/cancel): name, function, email,
- * status, primary toggle, and the location/department coupling.
+ * status and primary toggle.
  *
  * CONTACT-MULTI-1: the backend supports only ONE location + ONE department per
  * contact (customer_location_id / customer_department_id). Danny wants multi
- * eventually, so the coupling renders as `chip-select` — a single-value soft-chip
- * picker (not a plain <select>) — so flipping to multi later is a prop change on
- * EditableFieldTable, not a rebuild. Never silently drop a second value; there is
- * nowhere on the backend to put it yet (filed as a BE gap in the delivery report).
+ * eventually.
+ *
+ * BUG FIX (28-07): the location/department coupling used to render as TWO
+ * INDEPENDENT `chip-select` fields inside the table above, so a recruiter could
+ * save a department that belongs to a different location than the one picked —
+ * a department belongs to exactly ONE location, so an uncoupled pair is invalid
+ * data. The main table can't fix this itself: EditableFieldTable's field types
+ * render independently and have no way to narrow one field's options off
+ * another's live draft value. So the coupling now gets its OWN small self-
+ * contained edit block below (pencil → save/cancel, same idea as the phone-
+ * numbers card), using searchable CreatableSelects that CASCADE exactly like
+ * AddContactPersonModal's create form: the department picker stays empty until
+ * a location is picked, and picking a new location always clears the department.
+ * Never a second variant of this behaviour — mirror the modal, don't reinvent it.
  *
  * Phone numbers (BE 2026-07-20 split — mobile is now a separate field from the
  * landline `phone`) get their OWN small card below the main table, NOT a plain
@@ -23,6 +33,8 @@ import { useTranslation } from 'react-i18next'
 import { Trash2, Edit2, Save, X, Phone, MessageCircle } from 'lucide-react'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
+import CreatableSelect from '@/components/ui/CreatableSelect'
+import SoftChip from '@/components/ui/SoftChip'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
@@ -60,17 +72,15 @@ export default function ContactDetail({ contact, locations, departments, statuse
   // function list (FUNCTIONS-SPLIT-1) — never a plain free-text field.
   const { contactFunctions, allowFreeEntry } = useContactFunctions()
 
+  // Location/department are no longer in this table — see the Koppeling block
+  // below (file header BUG FIX 28-07): a chip-select field can't cascade off
+  // another field's live draft value, so they need their own cascading picker.
   const fields: FieldRow[] = [
     { key: 'firstName', label: t('subModal.firstName'), type: 'text' },
     { key: 'lastName', label: t('subModal.lastName'), type: 'text' },
     { key: 'role', label: t('contacts.detail.role'), type: 'creatable', options: contactFunctions, allowCreate: allowFreeEntry },
     { key: 'email', label: t('contacts.detail.email'), type: 'text' },
     { key: 'statusId', label: t('locations.detail.status'), type: 'select', options: statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label })) },
-    // Single-value coupling, chip UI (CONTACT-MULTI-1 — see file header).
-    { key: 'locationId', label: t('contacts.detail.location'), type: 'chip-select',
-      chipOptions: locations.map(l => ({ value: String(l.id), label: l.name })), emptyOptionsText: t('locations.detail.none') },
-    { key: 'departmentId', label: t('contacts.detail.department'), type: 'chip-select',
-      chipOptions: departments.map(d => ({ value: String(d.id), label: d.name })), emptyOptionsText: t('locations.detail.none') },
     { key: 'isPrimary', label: t('contacts.detail.primary'), type: 'checkbox' },
   ]
 
@@ -80,8 +90,6 @@ export default function ContactDetail({ contact, locations, departments, statuse
     role: contact.role,
     email: contact.email,
     statusId: contact.statusId != null ? String(contact.statusId) : '',
-    locationId: contact.locationId != null ? String(contact.locationId) : '',
-    departmentId: contact.departmentId != null ? String(contact.departmentId) : '',
     isPrimary: contact.isPrimary,
   }
 
@@ -90,14 +98,50 @@ export default function ContactDetail({ contact, locations, departments, statuse
       firstName: v.firstName as string, lastName: v.lastName as string,
       role: v.role as string, email: v.email as string,
       statusId: (v.statusId as string) || null,
-      locationId: (v.locationId as string) || null,
-      departmentId: (v.departmentId as string) || null,
       isPrimary: Boolean(v.isPrimary),
     })
     setEditing(false)
   }
 
   const remove = () => confirm(t('contacts.deleteConfirm'), () => { onDelete(contact.id as Id); close() }, { danger: true })
+
+  // Location/department coupling — own self-contained edit block (pencil →
+  // save/cancel), cascading exactly like AddContactPersonModal (file header
+  // BUG FIX 28-07): empty-until-a-location-is-picked, and picking a new
+  // location always clears the department (a department belongs to exactly
+  // one location, so any location change invalidates the previous pick).
+  const [linkEditing, setLinkEditing] = useState(false)
+  const [linkForm, setLinkForm] = useState<{ locationId: Id | null; departmentId: Id | null }>({
+    locationId: contact.locationId, departmentId: contact.departmentId,
+  })
+  const startLinkEdit = () => { setLinkForm({ locationId: contact.locationId, departmentId: contact.departmentId }); setLinkEditing(true) }
+  const cancelLinkEdit = () => { setLinkForm({ locationId: contact.locationId, departmentId: contact.departmentId }); setLinkEditing(false) }
+  const saveLink = () => { onSave(contact.id as Id, { locationId: linkForm.locationId || null, departmentId: linkForm.departmentId || null }); setLinkEditing(false) }
+
+  // Department options stay EMPTY until a location is picked — never fall back
+  // to "every department of this customer": a department belongs to exactly one
+  // location, so offering the full list would let a mismatched pair get saved.
+  const departmentsForLocation = linkForm.locationId
+    ? departments.filter(d => String(d.locationId) === String(linkForm.locationId))
+    : []
+  // A department set before this fix existed may not belong to the current
+  // draft location — keep it visible in the option list so its label still
+  // resolves instead of the trigger falling back to a raw id string.
+  const selectedDepartment = linkForm.departmentId ? departments.find(d => String(d.id) === String(linkForm.departmentId)) : undefined
+  const departmentOptions = (selectedDepartment && !departmentsForLocation.some(d => String(d.id) === String(selectedDepartment.id))
+    ? [...departmentsForLocation, selectedDepartment]
+    : departmentsForLocation
+  ).map(d => ({ value: String(d.id), label: d.name }))
+  const departmentPlaceholder = !linkForm.locationId ? t('subModal.pickLocationFirst')
+    : departmentOptions.length === 0 ? t('common:noResults')
+    : t('subModal.noneOption')
+
+  // Read-mode labels — resolved against the customer-wide lists, never trusted
+  // straight off contact.locationName/departmentName: the list endpoint leaves
+  // those empty for every seeded contact (only the ids are populated), the same
+  // measured gap ContactsTab's own resolvedLocations/resolvedDepartments works around.
+  const linkedLocation = contact.locationId ? locations.find(l => String(l.id) === String(contact.locationId)) : undefined
+  const linkedDepartment = contact.departmentId ? departments.find(d => String(d.id) === String(contact.departmentId)) : undefined
 
   // Phone numbers — own small self-contained edit block (pencil → save/cancel),
   // same pattern as the candidate ProfileTab's contact card (mobile → WhatsApp,
@@ -172,6 +216,44 @@ export default function ContactDetail({ contact, locations, departments, statuse
         <>
           <EditableFieldTable title={t('contacts.detail.infoTitle')} fields={fields} value={values} onSave={save}
             editing={editing} onStartEdit={() => setEditing(true)} onCancel={() => setEditing(false)} labelWidth={130} />
+
+          {/* Koppeling — location/department, own cascading edit block (see file
+              header BUG FIX 28-07). Mirrors AddContactPersonModal's picker pair. */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('subModal.groups.link')}</span>
+              {linkEditing ? (
+                <div style={{ display: 'flex', gap: 4 }}>
+                  <button onClick={saveLink} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+                  <button onClick={cancelLinkEdit} title={t('common:cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+                </div>
+              ) : (
+                <button onClick={startLinkEdit} title={t('common:edit')} style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
+              )}
+            </div>
+            <div style={{ ...cardStyle, padding: '4px 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26, padding: '0 12px', height: 38 }}>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{t('contacts.detail.location')}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  {linkEditing ? (
+                    <CreatableSelect value={linkForm.locationId != null ? String(linkForm.locationId) : null} allowCreate={false}
+                      onChange={v => setLinkForm({ locationId: v || null, departmentId: null })}
+                      placeholder={t('subModal.noneOption')} options={locations.map(l => ({ value: String(l.id), label: l.name }))} />
+                  ) : linkedLocation ? <SoftChip label={linkedLocation.name} color="var(--color-secondary)" /> : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>}
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26, padding: '0 12px', height: 38 }}>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{t('contacts.detail.department')}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  {linkEditing ? (
+                    <CreatableSelect value={linkForm.departmentId != null ? String(linkForm.departmentId) : null} allowCreate={false}
+                      onChange={v => setLinkForm(f => ({ ...f, departmentId: v || null }))}
+                      placeholder={departmentPlaceholder} options={departmentOptions} />
+                  ) : linkedDepartment ? <SoftChip label={linkedDepartment.name} color="var(--color-violet)" /> : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>}
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>

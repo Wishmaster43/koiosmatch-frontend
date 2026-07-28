@@ -98,9 +98,13 @@ export function SettingRow({ label, description, children }) {
   )
 }
 
-export function Toggle({ checked, onChange }) {
+// Optional `ariaLabel`: pass it whenever the visible text sitting next to the
+// switch is NOT already the button's sole accessible name (e.g. a wrapping
+// <label> that also contains a longer description) — see CandidateVacancyTabSettings'
+// leads-criteria rows, which had this same override on the raw checkbox they replace.
+export function Toggle({ checked, onChange, ariaLabel }) {
   return (
-    <button type="button" role="switch" aria-checked={checked} onClick={() => onChange(!checked)}
+    <button type="button" role="switch" aria-checked={checked} aria-label={ariaLabel} onClick={() => onChange(!checked)}
       style={{ width: 32, height: 18, borderRadius: 999, border: 'none', cursor: 'pointer',
                background: checked ? 'var(--color-primary)' : 'var(--border)', position: 'relative',
                transition: 'background 0.15s', flexShrink: 0 }}>

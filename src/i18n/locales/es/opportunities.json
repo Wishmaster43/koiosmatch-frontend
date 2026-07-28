@@ -5,7 +5,7 @@
   "error": "No se pudieron cargar las oportunidades.",
   "pickClientFirst": "Seleccione primero un cliente",
   "page": {
-    "add": "Añadir oportunidad",
+    "add": "Nueva oportunidad",
     "selected": "{{count}} seleccionado(s)",
     "clearSelection": "Borrar selección",
     "searchPlaceholder": "Buscar oportunidades"

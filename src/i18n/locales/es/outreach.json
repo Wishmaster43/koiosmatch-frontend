@@ -1,6 +1,6 @@
 {
   "title": "Listas de llamadas",
-  "new": "Lista de llamadas",
+  "new": "Nueva lista de llamadas",
   "empty": "Aún no hay listas de llamadas.",
   "loadError": "Error al cargar las listas de llamadas.",
   "retry": "Reintentar",

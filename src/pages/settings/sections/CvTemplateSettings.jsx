@@ -5,12 +5,13 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Download, RotateCcw, ToggleLeft, ToggleRight, ChevronUp, ChevronDown } from 'lucide-react'
+import { Download, RotateCcw, ChevronUp, ChevronDown } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
-import { CvDocument } from '@/pages/candidates/CandidateCvTemplate'
-import { useCvSettings } from '@/lib/useCvSettings'
+import { CvDocument, groupCvSections } from '@/pages/candidates/CandidateCvTemplate'
+import { useCvSettings, CV_MOVABLE_SECTION_IDS } from '@/lib/useCvSettings'
 import { useLocale } from '@/lib/datetime'
 import { loadSettings } from '../lib/settingsApi'
+import { Toggle } from '../components/SettingsKit'
 
 const PREVIEW_CANDIDATE = {
   name: 'Anouk de Vries',
@@ -21,6 +22,10 @@ const PREVIEW_CANDIDATE = {
   dob: '1990-03-15',
   nationality: 'Nederlands',
   summary: 'Enthousiaste zorgprofessional met 8 jaar ervaring in de ouderenzorg en thuiszorg. Betrouwbaar, klantgericht en flexibel inzetbaar.',
+  // Sample data for the 'preferences' section — off by default, but a tenant
+  // can enable + relocate it, so the preview needs something to actually show.
+  preferredFunctions: ['Dagdienst', 'Avonddienst'],
+  shiftType: ['Flexibel inzetbaar'],
   experiences: [
     { title: 'Verzorgende IG', company: 'Thuiszorg Noord', start_date: '2020-01-01', description: 'Zelfstandige thuiszorgverlening, medicijnbeheer en rapportage.' },
     { title: 'Helpende Plus',  company: 'Zorggroep West',  start_date: '2017-03-01', end_date: '2019-12-31' },
@@ -45,6 +50,9 @@ function CvHtmlPreview({ settings, t }) {
   const c       = PREVIEW_CANDIDATE
   const secs    = settings.sections ?? []
   const enabled = (id) => secs.length === 0 || (secs.find(s => s.id === id)?.enabled !== false)
+  // The SAME grouping the generated PDF uses (CandidateCvTemplate.groupCvSections) —
+  // so this preview and the real download can never disagree on layout.
+  const groups = groupCvSections(secs)
 
   const A4_W = 794
   const A4_H = 1123
@@ -53,6 +61,56 @@ function CvHtmlPreview({ settings, t }) {
   const sideLabel = {
     fontSize: 7, fontWeight: 700, color: '#fff', textTransform: 'uppercase',
     letterSpacing: '1.4px', marginBottom: 7, opacity: 0.85,
+  }
+  // Light-on-colour (sidebar) vs dark-on-white (main) content palette for a
+  // movable section — mirrors CandidateCvTemplate's paletteFor exactly.
+  const sidebarPalette = { label: 'rgba(255,255,255,0.6)', text: '#fff', chipBg: 'rgba(255,255,255,0.18)', chipText: '#fff', bulletColor: 'rgba(255,255,255,0.5)' }
+  const mainPalette    = { label: '#94A3B8', text: '#334155', chipBg: `${color2}14`, chipText: color2, bulletColor: color2 }
+
+  // Renders one MOVABLE section's content for the given palette — same ids as
+  // the PDF's renderMovableContent, plain HTML instead of react-pdf primitives.
+  const renderContent = (id, palette) => {
+    switch (id) {
+      case 'contact':
+        return [[t('cv.email'), c.email], [t('cv.phone'), c.phone], [t('cv.residence'), c.address], [t('cv.born'), '15 mrt 1990']].map(([k, v]) => (
+          <div key={k} style={{ marginBottom: 5 }}>
+            <div style={{ fontSize: 7, color: palette.label, marginBottom: 1 }}>{k}</div>
+            <div style={{ fontSize: 8.5, color: palette.text, lineHeight: 1.3, wordBreak: 'break-all' }}>{v}</div>
+          </div>
+        ))
+      case 'languages':
+        return c.languages.map((lang, i) => (
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 8.5, color: palette.text, marginBottom: 4 }}>
+            <span>{lang.language}</span>
+            <span style={{ color: palette.label, fontSize: 8 }}>{lang.level}</span>
+          </div>
+        ))
+      case 'skills':
+        return (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            {c.skills.map((v, i) => (
+              <span key={i} style={{ fontSize: 7.5, background: palette.chipBg, color: palette.chipText, padding: '2px 7px', borderRadius: 99 }}>{v.name}</span>
+            ))}
+          </div>
+        )
+      case 'certificates':
+        return c.certs.map((cert, i) => (
+          <div key={i} style={{ fontSize: 8.5, color: palette.text, marginBottom: 4, display: 'flex', gap: 5 }}>
+            <span style={{ color: palette.bulletColor }}>▸</span>{cert.name}
+          </div>
+        ))
+      case 'preferences': {
+        const tags = [...(c.preferredFunctions ?? []), ...(c.shiftType ?? [])]
+        if (tags.length === 0) return null
+        return (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            {tags.map((v, i) => <span key={i} style={{ fontSize: 7.5, background: palette.chipBg, color: palette.chipText, padding: '2px 7px', borderRadius: 99 }}>{v}</span>)}
+          </div>
+        )
+      }
+      default:
+        return null
+    }
   }
 
   return (
@@ -81,93 +139,75 @@ function CvHtmlPreview({ settings, t }) {
         {/* Body */}
         <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
-          {/* Sidebar — colour 1 */}
-          <div style={{ width: 196, background: color1, padding: '22px 16px 22px 22px', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+          {/* Sidebar — colour 1; which movable sections land here (+ order) is tenant-configured */}
+          <div data-testid="cv-preview-sidebar" style={{ width: 196, background: color1, padding: '22px 16px 22px 22px', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
 
             <div style={{ width: 78, height: 78, borderRadius: '50%', background: 'rgba(255,255,255,0.18)', border: '2px solid rgba(255,255,255,0.35)', marginBottom: 18 }} />
 
-            {enabled('contact') && (
-              <div style={{ marginBottom: 16 }}>
-                <div style={sideLabel}>{t('cv.contact')}</div>
-                {[[t('cv.email'), c.email], [t('cv.phone'), c.phone], [t('cv.residence'), c.address], [t('cv.born'), '15 mrt 1990']].map(([k, v]) => (
-                  <div key={k} style={{ marginBottom: 5 }}>
-                    <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.6)', marginBottom: 1 }}>{k}</div>
-                    <div style={{ fontSize: 8.5, color: '#fff', lineHeight: 1.3, wordBreak: 'break-all' }}>{v}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {enabled('languages') && (
-              <div style={{ marginBottom: 16 }}>
-                <div style={sideLabel}>{t('cv.languages')}</div>
-                {c.languages.map((lang, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 8.5, color: '#fff', marginBottom: 4 }}>
-                    <span>{lang.language}</span>
-                    <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 8 }}>{lang.level}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {enabled('skills') && (
-              <div style={{ marginBottom: 16 }}>
-                <div style={sideLabel}>{t('cv.skills')}</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                  {c.skills.map((v, i) => (
-                    <span key={i} style={{ fontSize: 7.5, background: 'rgba(255,255,255,0.18)', color: '#fff', padding: '2px 7px', borderRadius: 99 }}>{v.name}</span>
-                  ))}
+            {groups.sidebar.map(id => {
+              const content = renderContent(id, sidebarPalette)
+              if (!content) return null
+              return (
+                <div key={id} style={{ marginBottom: 16 }}>
+                  <div style={sideLabel}>{t(`cv.${id}`)}</div>
+                  {content}
                 </div>
-              </div>
-            )}
-
-            {enabled('certificates') && (
-              <div>
-                <div style={sideLabel}>{t('cv.certificates')}</div>
-                {c.certs.map((cert, i) => (
-                  <div key={i} style={{ fontSize: 8.5, color: 'rgba(255,255,255,0.85)', marginBottom: 4, display: 'flex', gap: 5 }}>
-                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>▸</span>{cert.name}
-                  </div>
-                ))}
-              </div>
-            )}
+              )
+            })}
           </div>
 
-          {/* Main — colour 2 */}
-          <div style={{ flex: 1, padding: '22px 36px 22px 24px', overflowY: 'hidden', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Main — colour 2; experience/education always render here, movable
+              sections a tenant relocated here use the shared content renderer */}
+          <div data-testid="cv-preview-main" style={{ flex: 1, padding: '22px 36px 22px 24px', overflowY: 'hidden', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-            {enabled('experience') && (
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: color2, textTransform: 'uppercase', letterSpacing: '0.8px' }}>{t('cv.experience')}</div>
-                  <div style={{ flex: 1, height: 1, background: `${color2}25` }} />
-                </div>
-                {c.experiences.map((e, i) => (
-                  <div key={i} style={{ marginBottom: 12, paddingLeft: 10, borderLeft: `2px solid ${color2}30` }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: '#0F172A', marginBottom: 1 }}>{e.title}</div>
-                    <div style={{ fontSize: 9.5, color: color2, fontWeight: 500, marginBottom: 2 }}>{e.company}</div>
-                    <div style={{ fontSize: 8, color: '#94A3B8', marginBottom: e.description ? 4 : 0 }}>jan {i === 0 ? '2020' : '2017'} – {i === 0 ? 'present' : 'dec 2019'}</div>
-                    {e.description && <div style={{ fontSize: 9, color: '#475569', lineHeight: 1.6 }}>{e.description}</div>}
+            {groups.main.map(id => {
+              if (id === 'experience') {
+                return (
+                  <div key="experience">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: color2, textTransform: 'uppercase', letterSpacing: '0.8px' }}>{t('cv.experience')}</div>
+                      <div style={{ flex: 1, height: 1, background: `${color2}25` }} />
+                    </div>
+                    {c.experiences.map((e, i) => (
+                      <div key={i} style={{ marginBottom: 12, paddingLeft: 10, borderLeft: `2px solid ${color2}30` }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: '#0F172A', marginBottom: 1 }}>{e.title}</div>
+                        <div style={{ fontSize: 9.5, color: color2, fontWeight: 500, marginBottom: 2 }}>{e.company}</div>
+                        <div style={{ fontSize: 8, color: '#94A3B8', marginBottom: e.description ? 4 : 0 }}>jan {i === 0 ? '2020' : '2017'} – {i === 0 ? 'present' : 'dec 2019'}</div>
+                        {e.description && <div style={{ fontSize: 9, color: '#475569', lineHeight: 1.6 }}>{e.description}</div>}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
-
-            {enabled('education') && (
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: color2, textTransform: 'uppercase', letterSpacing: '0.8px' }}>{t('cv.education')}</div>
-                  <div style={{ flex: 1, height: 1, background: `${color2}25` }} />
-                </div>
-                {c.educations.map((o, i) => (
-                  <div key={i} style={{ marginBottom: 10, paddingLeft: 10, borderLeft: `2px solid ${color2}30` }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: '#0F172A', marginBottom: 1 }}>{o.title}</div>
-                    <div style={{ fontSize: 9.5, color: color2, fontWeight: 500, marginBottom: 2 }}>{o.school}</div>
-                    <div style={{ fontSize: 8, color: '#94A3B8' }}>{o.start_year} – {o.end_year}</div>
+                )
+              }
+              if (id === 'education') {
+                return (
+                  <div key="education">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: color2, textTransform: 'uppercase', letterSpacing: '0.8px' }}>{t('cv.education')}</div>
+                      <div style={{ flex: 1, height: 1, background: `${color2}25` }} />
+                    </div>
+                    {c.educations.map((o, i) => (
+                      <div key={i} style={{ marginBottom: 10, paddingLeft: 10, borderLeft: `2px solid ${color2}30` }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: '#0F172A', marginBottom: 1 }}>{o.title}</div>
+                        <div style={{ fontSize: 9.5, color: color2, fontWeight: 500, marginBottom: 2 }}>{o.school}</div>
+                        <div style={{ fontSize: 8, color: '#94A3B8' }}>{o.start_year} – {o.end_year}</div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
+                )
+              }
+              const content = renderContent(id, mainPalette)
+              if (!content) return null
+              return (
+                <div key={id}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: color2, textTransform: 'uppercase', letterSpacing: '0.8px' }}>{t(`cv.${id}`)}</div>
+                    <div style={{ flex: 1, height: 1, background: `${color2}25` }} />
+                  </div>
+                  {content}
+                </div>
+              )
+            })}
           </div>
         </div>
 
@@ -180,6 +220,35 @@ function CvHtmlPreview({ settings, t }) {
     </div>
   )
   /* eslint-enable no-restricted-syntax */
+}
+
+// Two-button region switch for a MOVABLE section (Danny 28-07: "ik wil ook de
+// locatie van elke sectie kunnen bepalen") — soft-tint per §4: both options
+// stay tinted, the active one gets the stronger tint + weight 600.
+function RegionToggle({ value, onChange, sectionLabel, t }) {
+  const options = [
+    { key: 'sidebar', label: t('cvTemplate.regionSidebar') },
+    { key: 'main',    label: t('cvTemplate.regionMain') },
+  ]
+  return (
+    <div style={{ display: 'flex', gap: 4 }}>
+      {options.map(o => {
+        const active = value === o.key
+        return (
+          <button key={o.key} type="button" onClick={() => onChange(o.key)} aria-pressed={active}
+            aria-label={t('cvTemplate.moveSectionToRegion', { section: sectionLabel, region: o.label })}
+            style={{
+              padding: '3px 9px', fontSize: 10.5, fontWeight: active ? 600 : 500, borderRadius: 999, cursor: 'pointer',
+              border: `1px solid color-mix(in srgb, var(--color-primary) ${active ? 45 : 20}%, transparent)`,
+              background: `color-mix(in srgb, var(--color-primary) ${active ? 14 : 6}%, transparent)`,
+              color: active ? 'var(--color-primary)' : 'var(--text-muted)',
+            }}>
+            {o.label}
+          </button>
+        )
+      })}
+    </div>
+  )
 }
 
 export default function CvTemplateSettings() {
@@ -207,13 +276,29 @@ export default function CvTemplateSettings() {
     save({ sections: settings.sections.map(s => s.id === id ? { ...s, enabled: !s.enabled } : s) })
   }
 
+  // Sidebar and main column reorder independently (they render as two separate
+  // lists, §CV placement) — so "up"/"down" only swaps within sections sharing
+  // the same resolved placement, never jumping a section into the other region.
   const handleSectionMove = (id, dir) => {
     const arr = [...settings.sections]
-    const idx = arr.findIndex(s => s.id === id)
-    const swapIdx = idx + dir
-    if (swapIdx < 0 || swapIdx >= arr.length) return;
-    [arr[idx], arr[swapIdx]] = [arr[swapIdx], arr[idx]]
+    const target = arr.find(s => s.id === id)
+    if (!target) return
+    const groupIdx = arr.reduce((acc, s, i) => (s.placement === target.placement ? [...acc, i] : acc), [])
+    const posInGroup = groupIdx.indexOf(arr.indexOf(target))
+    const swapPos = posInGroup + dir
+    if (swapPos < 0 || swapPos >= groupIdx.length) return
+    const i1 = groupIdx[posInGroup]
+    const i2 = groupIdx[swapPos]
+    ;[arr[i1], arr[i2]] = [arr[i2], arr[i1]]
     save({ sections: arr })
+  }
+
+  // Move a MOVABLE section to the other CV region (sidebar ⇄ main column,
+  // Danny 28-07: "ik wil ook de locatie van elke sectie kunnen bepalen"); it
+  // lands wherever its stored index puts it in the new region, adjustable
+  // afterwards with the up/down arrows.
+  const handleSectionPlacement = (id, placement) => {
+    save({ sections: settings.sections.map(s => (s.id === id ? { ...s, placement } : s)) })
   }
 
   const handleDownloadPreview = async () => {
@@ -291,32 +376,69 @@ export default function CvTemplateSettings() {
             ))}
           </div>
 
-          {/* Sections */}
+          {/* Sections — grouped by region (header/sidebar/main column) so the
+              list visually mirrors the CV layout itself (§ CV placement). */}
           <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px', background: 'var(--surface)' }}>
             <label style={labelStyle}>{t('cvTemplate.sections')}</label>
             <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12 }}>{t('cvTemplate.sectionsHint')}</p>
-            {settings.sections.map((sec, idx) => (
-              <div key={sec.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 0',
-                borderBottom: idx < settings.sections.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                <button onClick={() => handleSectionToggle(sec.id)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', color: sec.enabled ? 'var(--color-primary)' : 'color-mix(in srgb, var(--text-muted) 55%, transparent)', flexShrink: 0 }}>
-                  {sec.enabled ? <ToggleRight size={22} /> : <ToggleLeft size={22} />}
-                </button>
-                <span style={{ flex: 1, fontSize: 12, color: sec.enabled ? 'var(--text)' : 'var(--text-muted)', fontWeight: sec.enabled ? 500 : 400 }}>
-                  {sec.label}
-                </span>
-                <div style={{ display: 'flex', gap: 2 }}>
-                  <button onClick={() => handleSectionMove(sec.id, -1)} disabled={idx === 0}
-                    style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 4, cursor: idx === 0 ? 'not-allowed' : 'pointer',
-                      padding: '2px 5px', color: idx === 0 ? 'color-mix(in srgb, var(--text-muted) 55%, transparent)' : 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
-                    <ChevronUp size={11} />
-                  </button>
-                  <button onClick={() => handleSectionMove(sec.id, 1)} disabled={idx === settings.sections.length - 1}
-                    style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 4, cursor: idx === settings.sections.length - 1 ? 'not-allowed' : 'pointer',
-                      padding: '2px 5px', color: idx === settings.sections.length - 1 ? 'color-mix(in srgb, var(--text-muted) 55%, transparent)' : 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
-                    <ChevronDown size={11} />
-                  </button>
+            {[
+              { region: 'header',  items: settings.sections.filter(s => s.placement === 'header') },
+              { region: 'sidebar', items: settings.sections.filter(s => s.placement === 'sidebar') },
+              { region: 'main',    items: settings.sections.filter(s => s.placement === 'main') },
+            ].map(({ region, items }) => items.length > 0 && (
+              <div key={region} data-testid={`cv-section-group-${region}`} style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 6 }}>
+                  {t(`cvTemplate.region${region === 'sidebar' ? 'Sidebar' : region === 'main' ? 'Main' : 'Header'}`)}
                 </div>
+                {items.map((sec, idx, arr) => {
+                  // The section's display name is ALWAYS resolved by id through i18n
+                  // (never the raw stored `label`) — a tenant may still have a blob
+                  // saved with the old hardcoded English label; that string is only
+                  // ever used as the i18next defaultValue fallback, never displayed
+                  // directly (§5 i18n fix, "profile text" → "Profieltekst").
+                  const label = tCv(`cv.${sec.id}`, { defaultValue: sec.label })
+                  const movable = CV_MOVABLE_SECTION_IDS.includes(sec.id)
+                  return (
+                    <div key={sec.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 0',
+                      borderBottom: idx < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                      {/* Shared house Toggle (Danny 28-07: "GEEN VINKJES MAAR TOGGLES!!!") — replaces the
+                          hand-rolled ToggleLeft/ToggleRight icon button so every on/off control looks the same. */}
+                      <Toggle checked={sec.enabled} ariaLabel={label} onChange={() => handleSectionToggle(sec.id)} />
+                      <span style={{ flex: 1, fontSize: 12, color: sec.enabled ? 'var(--text)' : 'var(--text-muted)', fontWeight: sec.enabled ? 500 : 400 }}>
+                        {label}
+                      </span>
+                      {movable ? (
+                        <RegionToggle value={sec.placement} onChange={p => handleSectionPlacement(sec.id, p)} sectionLabel={label} t={t} />
+                      ) : (
+                        // Structural placement (§ CV_FIXED_PLACEMENT): no picker offered —
+                        // moving it would either not exist as a region (header) or break
+                        // the layout (a long list squeezed into the narrow sidebar).
+                        <span title={t(sec.placement === 'header' ? 'cvTemplate.regionHeaderHint' : 'cvTemplate.regionFixedMainHint')}
+                          style={{ fontSize: 10, color: 'var(--text-muted)', padding: '3px 8px' }}>
+                          {t(`cvTemplate.region${sec.placement === 'header' ? 'Header' : 'Main'}`)}
+                        </span>
+                      )}
+                      {region === 'header' ? (
+                        <div style={{ width: 44 }} />
+                      ) : (
+                        <div style={{ display: 'flex', gap: 2 }}>
+                          <button onClick={() => handleSectionMove(sec.id, -1)} disabled={idx === 0}
+                            aria-label={t('cvTemplate.moveSectionUp', { section: label })}
+                            style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 4, cursor: idx === 0 ? 'not-allowed' : 'pointer',
+                              padding: '2px 5px', color: idx === 0 ? 'color-mix(in srgb, var(--text-muted) 55%, transparent)' : 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+                            <ChevronUp size={11} />
+                          </button>
+                          <button onClick={() => handleSectionMove(sec.id, 1)} disabled={idx === arr.length - 1}
+                            aria-label={t('cvTemplate.moveSectionDown', { section: label })}
+                            style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 4, cursor: idx === arr.length - 1 ? 'not-allowed' : 'pointer',
+                              padding: '2px 5px', color: idx === arr.length - 1 ? 'color-mix(in srgb, var(--text-muted) 55%, transparent)' : 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+                            <ChevronDown size={11} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             ))}
           </div>

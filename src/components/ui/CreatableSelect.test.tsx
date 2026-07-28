@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import CreatableSelect from './CreatableSelect'
 
 // Build a fake getBoundingClientRect result — only top/bottom matter for the flip math.
@@ -100,5 +101,49 @@ describe('CreatableSelect · flip + clamp + portal', () => {
     fireEvent.mouseDown(screen.getByRole('button', { name: 'A' }))
     fireEvent.click(screen.getByRole('button', { name: 'A' }))
     expect(onChange).toHaveBeenCalledWith('A')
+  })
+})
+
+// Audit finding (§6, WCAG 2.2 AA): opening moves focus into the search input,
+// but on close (pick / Escape / outside click) that input unmounts with the
+// portal, so focus used to land nowhere. Covers focus returning to the trigger
+// on every close path, and never being stolen from an element the user just
+// interacted with (e.g. clicking straight into a different picker's trigger).
+describe('CreatableSelect · focus restoration on close', () => {
+  it('restores focus to the trigger after picking an option', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    render(<CreatableSelect value={null} onChange={onChange} options={['A', 'B']} placeholder="Select" allowCreate={false} />)
+    const trigger = screen.getByRole('button', { name: 'Select' })
+    await user.click(trigger)
+    await user.click(screen.getByRole('button', { name: 'B' }))
+    expect(onChange).toHaveBeenCalledWith('B')
+    expect(trigger).toHaveFocus()
+  })
+
+  it('restores focus to the trigger after Escape', async () => {
+    const user = userEvent.setup()
+    render(<CreatableSelect value={null} onChange={() => {}} options={['A', 'B']} placeholder="Select" allowCreate={false} />)
+    const trigger = screen.getByRole('button', { name: 'Select' })
+    await user.click(trigger)
+    expect(screen.getByPlaceholderText('Select')).toHaveFocus()
+    await user.keyboard('{Escape}')
+    expect(trigger).toHaveFocus()
+  })
+
+  it('does not steal focus from another element when closed by an outside click', async () => {
+    const user = userEvent.setup()
+    render(
+      <div>
+        <CreatableSelect value={null} onChange={() => {}} options={['A', 'B']} placeholder="Select" allowCreate={false} />
+        <button>elsewhere</button>
+      </div>,
+    )
+    const trigger = screen.getByRole('button', { name: 'Select' })
+    await user.click(trigger)
+    const elsewhere = screen.getByRole('button', { name: 'elsewhere' })
+    await user.click(elsewhere)
+    expect(elsewhere).toHaveFocus()
+    expect(trigger).not.toHaveFocus()
   })
 })

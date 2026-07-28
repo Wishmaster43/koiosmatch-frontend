@@ -8,7 +8,6 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
-import { notify } from '@/lib/notify'
 import { isReferenceQuery } from '@/lib/referenceNumber'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
@@ -31,6 +30,7 @@ import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { useMatches, mapMatch } from './hooks/useMatches'
 import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
 import { useMatchArchive } from './hooks/useMatchArchive'
+import { useMatchMutations } from './hooks/useMatchMutations'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
@@ -258,22 +258,15 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
     // eslint-disable-next-line no-restricted-syntax -- fallback swatch hex, consumed as hex+alpha string concat in MatchesBoard
     () => matchStatuses.map(st => ({ key: st.value, label: st.label, color: st.color ?? '#6B7280' })), [matchStatuses])
 
-  // Drag a card to another column → change the match's STATUS (optimistic + persist;
-  // the is_closed flag server-side ends the match when applicable).
-  const handleMove = (id: Id, statusKey: string) => {
-    updateMatch(id, { status: statusKey })
-    setSelected(p => (p && p.id === id ? { ...p, status: statusKey } : p))
-    api.patch(`/matches/${id}`, { status: statusKey }).catch(() => notify('error', t('bulk.mutateError')))
-  }
-
-  // Save the Extra tab's tenant custom fields (§3B); optimistic + PATCH, merging the
-  // partial patch into the full map so the backend persists it whole (patchRow only
-  // syncs local state — the actual PATCH lives here, mirroring handleMove above).
-  const handleUpdateCustomFields = (id: MatchRow['id'], patch: Record<string, unknown>) => {
-    const merged = { ...(selected?.customFieldValues ?? {}), ...patch }
-    patchRow(id, { customFieldValues: merged })
-    api.patch(`/matches/${id}`, { custom_fields: merged }).catch(() => notify('error', t('bulk.mutateError')))
-  }
+  // Bug-class fix (optimistic-revert audit): board drag, the drawer's status
+  // picker and the Extra tab's custom fields used to leave a rejected PATCH's
+  // optimistic value sitting on screen with only a toast — no revert. The
+  // snapshot/revert logic (both the row list and the open drawer, per field)
+  // now lives in useMatchMutations, kept out of the page so it stays under the
+  // ~400-line split trigger (§3) and each mutation is unit-testable on its own.
+  const { setStatus, updateCustomFields } = useMatchMutations({ rows, selected, updateMatch, setSelected })
+  // Drag a card to another column → change the match's STATUS.
+  const handleMove = (id: Id, statusKey: string) => setStatus(id, statusKey)
 
   return (
     <div style={{ display: 'flex', height: '100%', background: 'var(--bg)', overflow: 'hidden' }}>
@@ -361,16 +354,12 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       {/* Read-only drill-down drawer */}
       <MatchDrawer match={selected} onClose={() => setSelected(null)}
         expanded={drawerExpanded} onToggleExpand={() => setDrawerExpanded(v => !v)}
-        onSetStatus={(status) => {
-          if (!selected?.id) return
-          updateMatch(selected.id, { status }); setSelected(p => (p ? { ...p, status } : p))
-          api.patch(`/matches/${selected.id}`, { status }).catch(() => notify('error', t('bulk.mutateError')))
-        }}
+        onSetStatus={(status) => { if (selected?.id != null) setStatus(selected.id, status) }}
         // Approval workflow (§7 — UI-only gate; the backend re-checks matches.update).
         canApprove={hasPermission('matches.update')}
         onApprovalChange={patchRow}
         onUpdate={patchRow}
-        onUpdateCustomFields={handleUpdateCustomFields}
+        onUpdateCustomFields={updateCustomFields}
         // ARCHIVE-1: per-id delete/restore (§7 — UI-only gate; the backend re-checks
         // matches.update on both routes).
         onArchive={canArchive ? archiveMatch : undefined}

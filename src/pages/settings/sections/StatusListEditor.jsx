@@ -11,6 +11,7 @@ import { AlertTriangle, Check, Save, Plus, X, Trash2, RefreshCw, Pencil } from '
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
+import { Toggle } from '../components/SettingsKit'
 
 // extraField (optioneel): { key, label, options: [{value,label}], default } —
 // rendert een extra keuzeveld in de aanmaak-modal + een badge in de rij.
@@ -359,15 +360,14 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
               </div>
             )}
             {flagField && (
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 14, cursor: 'pointer' }}>
-                <input type="checkbox" checked={Boolean(draft[flagField.key])}
-                  onChange={e => setDraft(d => ({ ...d, [flagField.key]: e.target.checked }))}
-                  style={{ accentColor: 'var(--color-primary)', width: 14, height: 14, marginTop: 2, flexShrink: 0 }} />
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 14 }}>
+                <Toggle checked={Boolean(draft[flagField.key])} ariaLabel={flagField.label}
+                  onChange={v => setDraft(d => ({ ...d, [flagField.key]: v }))} />
                 <span style={{ minWidth: 0 }}>
                   <span style={{ display: 'block', fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{flagField.label}</span>
                   {flagField.description && <span style={{ display: 'block', fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>{flagField.description}</span>}
                 </span>
-              </label>
+              </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
               <button onClick={() => setShowModal(false)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer' }}>{t('common.cancel')}</button>

@@ -10,6 +10,7 @@
   "createFailed": "Erstellen fehlgeschlagen.",
   "pwPlaceholder": "Mindestens 8 Zeichen",
   "changeRole": "Rolle ändern",
+  "changeRoleFailed": "Rolle konnte nicht geändert werden. Bitte erneut versuchen.",
   "avatarColor": "Symbolfarbe",
   "avatarColorAuto": "Automatisch",
   "title": "Benutzer",

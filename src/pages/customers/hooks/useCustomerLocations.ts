@@ -61,6 +61,9 @@ const toApi = (p: Partial<LocationPayload>) => ({
   ...(p.customFields !== undefined ? { custom_fields: p.customFields } : {}),
 })
 
+// Monotonic counter behind the optimistic row id (see `add`).
+let tempLocationSeq = 0
+
 export function useCustomerLocations(customerId: Id | undefined) {
   const { t } = useTranslation('customers')
   const [locations, setLocations] = useState<Location[]>([])
@@ -86,7 +89,10 @@ export function useCustomerLocations(customerId: Id | undefined) {
   // fired while the modal closed regardless.
   const add = useCallback((payload: LocationPayload) => {
     if (!customerId) return
-    const tmpId = `tmp-${Date.now()}`
+    // Unique per call, not per millisecond: `Date.now()` alone collides when several
+    // rows are added in the same tick, and everything downstream keys on this id
+    // (the same collision that duplicated document rows and made bulk-delete 404).
+    const tmpId = `tmp-${Date.now()}-${++tempLocationSeq}`
     setLocations(ls => [mapLocation({ id: tmpId } as ApiLocation), ...ls])
     return api.post(`/customers/${customerId}/locations`, toApi(payload))
       .then(res => { const saved = mapLocation(unwrap<ApiLocation>(res)); setLocations(ls => ls.map(x => x.id === tmpId ? saved : x)); return saved })
@@ -97,7 +103,13 @@ export function useCustomerLocations(customerId: Id | undefined) {
   const update = useCallback((id: Id, payload: Partial<LocationPayload>) => {
     if (!customerId) return
     const snapshot = locations
-    setLocations(ls => ls.map(x => x.id === id ? { ...x, ...(payload as Partial<Location>) } : x))
+    // A status change carries only `statusId`; the human label/colour live on the row and
+    // this hook cannot resolve the new ones. Blanking them beats keeping the OLD pair —
+    // the badge briefly shows nothing instead of confidently showing the status you just
+    // replaced. The PATCH response one round-trip later fills in the real values.
+    const optimistic = { ...(payload as Partial<Location>) }
+    if ('statusId' in payload) Object.assign(optimistic, { statusLabel: '', statusColor: '' })
+    setLocations(ls => ls.map(x => x.id === id ? { ...x, ...optimistic } : x))
     return api.patch(`/customers/${customerId}/locations/${id}`, toApi(payload))
       .then(res => { const saved = mapLocation(unwrap<ApiLocation>(res)); setLocations(ls => ls.map(x => x.id === id ? saved : x)); return saved })
       .catch(() => { setLocations(snapshot); notifyError(t('locations.saveFailed')); return null })

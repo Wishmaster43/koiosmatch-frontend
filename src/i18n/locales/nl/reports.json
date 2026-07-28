@@ -37,6 +37,9 @@
     }
   },
   "customers": {
+    "title": "Details — Klanten",
+    "summary": "{{shown}} van {{total}} klanten",
+    "search": "Zoek op naam, debiteurnummer, accountmanager…",
     "loading": "Klanten ophalen…",
     "empty": "Geen klanten gevonden",
     "loadError": "Kon klanten niet laden.",

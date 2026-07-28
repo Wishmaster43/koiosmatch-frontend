@@ -283,6 +283,11 @@ export interface ApiCandidate {
   firstname?: string
   lastname?: string
   first_name?: string
+  // NAAMDELEN-1 (CMBE 2026-07-28): the tussenvoegsel, returned alongside
+  // first_name/last_name on BOTH the list and detail endpoint (measured — see
+  // mapCandidate.ts). Never derive this by splitting `name`: that silently
+  // drops it (the bug this field fixes).
+  middle_name?: string
   last_name?: string
   function_title?: string
   title?: string

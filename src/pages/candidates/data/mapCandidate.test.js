@@ -11,6 +11,33 @@ describe('mapCandidate — name', () => {
   })
 })
 
+// NAAMDELEN-1 (regression, 28-07): the header-edit pencil used to seed itself via
+// name.split(' '), which assigns the last word as surname and drops the
+// tussenvoegsel entirely — "Jan van der Berg" became firstname "Jan" / lastname
+// "Berg", and saving wrote that back, destroying the tussenvoegsel for good.
+// mapCandidate must expose the REAL first_name/middle_name/last_name so the
+// header form never needs to guess.
+describe('mapCandidate — name parts (NAAMDELEN-1 regression)', () => {
+  it('maps first_name/middle_name/last_name, preserving a multi-word tussenvoegsel', () => {
+    const r = mapCandidate({ name: 'Jan van der Berg', first_name: 'Jan', middle_name: 'van der', last_name: 'Berg' })
+    expect(r.firstname).toBe('Jan')
+    expect(r.middleName).toBe('van der')
+    expect(r.lastname).toBe('Berg')
+  })
+  it('never derives the parts from name.split(\' \') when the API omits them', () => {
+    const r = mapCandidate({ name: 'Jan van der Berg' })
+    expect(r.firstname).toBe('')
+    expect(r.middleName).toBe('')
+    expect(r.lastname).toBe('')
+  })
+  it('falls back to the legacy flat firstname/lastname fields (no middle_name legacy source exists)', () => {
+    const r = mapCandidate({ firstname: 'G', lastname: 'H' })
+    expect(r.firstname).toBe('G')
+    expect(r.lastname).toBe('H')
+    expect(r.middleName).toBe('')
+  })
+})
+
 describe('mapCandidate — candidateTypes (multi-value)', () => {
   it('keeps an array', () => {
     expect(mapCandidate({ candidate_types: ['on_call', 'freelance'] }).candidateTypes).toEqual(['on_call', 'freelance'])

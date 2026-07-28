@@ -7,7 +7,7 @@
     "geblokkeerd": "Gesperrt"
   },
   "page": {
-    "add": "Kunde hinzufügen",
+    "add": "Neuer Kunde",
     "searchPlaceholder": "Kunde, Debitorennr., Account-Manager suchen…",
     "empty": "Keine Kunden gefunden.",
     "loading": "Lädt…",
@@ -67,8 +67,10 @@
     "tags": "Tags",
     "addTag": "Tag hinzufügen",
     "back": "Zurück",
+    "newTask": "Neue Aufgabe",
     "tabs": {
       "overview": "Übersicht",
+      "vacancySettings": "Stellensichtbarkeit",
       "locations": "Standorte",
       "departments": "Abteilungen",
       "contacts": "Kontakte",
@@ -89,6 +91,12 @@
   "overview": {
     "general": "Allgemein",
     "branch": "Niederlassung",
+    "branchesLabel": "Niederlassung",
+    "branchesLink": "Niederlassung verknüpfen",
+    "branchesEmpty": "Noch keine Niederlassung verknüpft.",
+    "contact": "Kontakt",
+    "email": "E-Mail-Adresse",
+    "phone": "Telefon",
     "online": "Online",
     "settings": "Einstellungen",
     "textsTitle": "Texte",
@@ -98,10 +106,7 @@
     "industry": "Branche",
     "debtorNumber": "Debitorennummer",
     "city": "Ort",
-    "hideCompanyName": "Firmennamen verbergen",
     "hasCareerPage": "Hat Karriereseite",
-    "showInVacancies": "In meinen Stellen anzeigen",
-    "excludeFromSourcing": "Vom Sourcing ausschließen",
     "privacyPolicyUrl": "URL Datenschutzerklärung",
     "description": "Beschreibung",
     "recruitmentProblems": "Recruiting-Herausforderungen",
@@ -111,6 +116,21 @@
   },
   "richText": {
     "empty": "Noch nicht ausgefüllt."
+  },
+  "vacancySettings": {
+    "title": "Stellensichtbarkeit",
+    "subtitle": "Wie dieser Kunde in Stellenanzeigen und beim Sourcing erscheint. Der Standardwert steht unter Einstellungen → Kunden; pro Kunde abweichbar.",
+    "fields": {
+      "hideCompanyName": "Firmennamen verbergen",
+      "showInVacancies": "In meinen Stellen anzeigen",
+      "excludeFromSourcing": "Vom Sourcing ausschließen"
+    },
+    "tenantDefault": "Standard: {{value}}",
+    "on": "an",
+    "off": "aus",
+    "followsDefault": "folgt dem Standard",
+    "deviates": "weicht vom Standard ab",
+    "resetToDefault": "Auf Standard zurücksetzen"
   },
   "locations": {
     "empty": "Noch keine Standorte",
@@ -127,6 +147,7 @@
       "addressTitle": "Adresse & Daten",
       "name": "Name",
       "status": "Status",
+      "changeStatus": "Status ändern",
       "headquarter": "Hauptsitz",
       "street": "Straße",
       "houseNumber": "Nr.",
@@ -368,7 +389,7 @@
     "mutateError": "Die Aktion ist fehlgeschlagen."
   },
   "modal": {
-    "title": "Kunde hinzufügen",
+    "title": "Neuer Kunde",
     "subtitle": "Geben Sie die Daten des neuen Kunden ein",
     "fillRequired": "Bitte Pflichtfelder ausfüllen",
     "required": "Pflichtfeld",
@@ -391,11 +412,11 @@
     }
   },
   "subModal": {
-    "addLocation": "Standort hinzufügen",
+    "addLocation": "Neuer Standort",
     "editLocation": "Standort bearbeiten",
-    "addDepartment": "Abteilung hinzufügen",
+    "addDepartment": "Neue Abteilung",
     "editDepartment": "Abteilung bearbeiten",
-    "addContact": "Kontakt hinzufügen",
+    "addContact": "Neuer Kontakt",
     "editContact": "Kontakt bearbeiten",
     "locationName": "Standortname",
     "locationPlaceholder": "z. B. Hauptstandort",
@@ -405,6 +426,7 @@
     "selectLocation": "Standort",
     "selectDepartment": "Abteilung",
     "noLocationsFirst": "Zuerst einen Standort anlegen",
+    "pickLocationFirst": "Zuerst einen Standort wählen",
     "noneOption": "Keine",
     "firstName": "Vorname",
     "lastName": "Nachname",

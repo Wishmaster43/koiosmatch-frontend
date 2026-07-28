@@ -16,7 +16,12 @@ function SidebarRow({ label, icon, active, isDragOver, onClick, onDragOver, onDr
   label?: ReactNode; icon?: ReactNode; active?: boolean; isDragOver?: boolean
   onClick?: () => void; onDragOver?: (e: DragEvent) => void; onDragLeave?: () => void; onDrop?: () => void; onDelete?: () => void
 }) {
+  const { t } = useTranslation(['workflows', 'common'])
   const [hover, setHover] = useState(false)
+  // Reveal on keyboard focus too — the delete button used to mount only on mouse
+  // hover, so a keyboard-only user could never Tab to it at all (§6 keyboard trap).
+  const [focused, setFocused] = useState(false)
+  const showDelete = hover || focused
   return (
     <div {...interactive(onClick)} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -31,9 +36,12 @@ function SidebarRow({ label, icon, active, isDragOver, onClick, onDragOver, onDr
     >
       <span style={{ color: isDragOver ? 'var(--color-secondary)' : active ? 'var(--color-primary)' : 'var(--text-muted)', flexShrink: 0 }}>{icon}</span>
       <span style={{ fontSize: 13, flex: 1, fontWeight: active ? 600 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
-      {onDelete && hover && (
+      {onDelete && (
         <button onClick={e => { e.stopPropagation(); onDelete() }}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', padding: 2, display: 'flex', flexShrink: 0 }}>
+          onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+          aria-label={t('common:delete')} title={t('common:delete')}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, display: 'flex', flexShrink: 0,
+            color: showDelete ? 'var(--color-danger)' : 'transparent', opacity: showDelete ? 1 : 0 }}>
           <Trash2 size={11} />
         </button>
       )}
@@ -68,7 +76,7 @@ export default function WorkflowFolderSidebar({
           <button onClick={() => {
             const name = prompt(t('page.folderNamePrompt'))
             if (name?.trim()) createFolder(name.trim())
-          }} title={t('page.newFolder')}
+          }} title={t('page.newFolder')} aria-label={t('page.newFolder')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
             <FolderPlus size={15} />
           </button>

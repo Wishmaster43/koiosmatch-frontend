@@ -8,7 +8,6 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
-import { interactive } from '@/lib/a11y'
 import { notifyError } from '@/lib/notify'
 import Avatar from '@/components/ui/Avatar'
 import { initialsOf } from '@/lib/initials'
@@ -51,7 +50,16 @@ export function AgentsTab() {
 
   const onDelete = async (agent: AiAgent) => {
     if (!confirm(t('ai.agent.confirmDelete', { name: agent.name }))) return
-    await api.delete(`/ai/agents/${agent.id}`).catch(() => notifyError(t('common:actionFailed')))
+    try {
+      // The list/selection must only change once the backend confirms the delete —
+      // a failed request used to fall through to the same state update regardless,
+      // making the agent vanish from the UI while it was still live server-side
+      // (mutation lying about success, audit 2026-07-28).
+      await api.delete(`/ai/agents/${agent.id}`)
+    } catch {
+      notifyError(t('common:actionFailed'))
+      return
+    }
     setAgents(prev => prev.filter(a => a.id !== agent.id))
     setSelected(agents.find(a => a.id !== agent.id) ?? null)
   }
@@ -113,13 +121,23 @@ export function PromptsTab() {
       setPrompts(prev => selected?.id ? prev.map(p => p.id === updated.id ? updated : p) : [updated, ...prev])
       setSelected(updated); setSaved(true); setTimeout(() => setSaved(false), 2500)
       api.get(`/ai/prompts/${updated.id}/versions`).then(r => setVersions(unwrapList<Version>(r).rows)).catch(() => {})
-    } catch {}
+    } catch {
+      // A failed save used to leave no signal at all (silent catch) — say so like every other mutation here.
+      notifyError(t('common:actionFailed'))
+    }
     setSaving(false)
   }
 
   const del = async (p: AiItem) => {
     if (!confirm(t('ai.prompts.confirmDelete', { name: p.name }))) return
-    await api.delete(`/ai/prompts/${p.id}`).catch(() => notifyError(t('common:actionFailed')))
+    try {
+      // Only drop the row once the backend confirms — a failed delete used to remove
+      // it from the list regardless, making it look deleted while still live server-side.
+      await api.delete(`/ai/prompts/${p.id}`)
+    } catch {
+      notifyError(t('common:actionFailed'))
+      return
+    }
     setPrompts(prev => prev.filter(x => x.id !== p.id))
     if (selected?.id === p.id) { setSelected(null); setName(''); setBody(''); setVersions([]) }
   }
@@ -176,13 +194,23 @@ export function FAQTab() {
       const updated = unwrap<AiItem>(res)
       setFaqs(prev => selected?.id ? prev.map(f => f.id === updated.id ? updated : f) : [updated, ...prev])
       setSelected(updated); setSaved(true); setTimeout(() => setSaved(false), 2500)
-    } catch {}
+    } catch {
+      // A failed save used to leave no signal at all (silent catch) — say so like every other mutation here.
+      notifyError(t('common:actionFailed'))
+    }
     setSaving(false)
   }
 
   const del = async (f: AiItem) => {
     if (!confirm(t('ai.faqs.confirmDelete', { name: f.name }))) return
-    await api.delete(`/ai/faqs/${f.id}`).catch(() => notifyError(t('common:actionFailed')))
+    try {
+      // Only drop the row once the backend confirms — a failed delete used to remove
+      // it from the list regardless, making it look deleted while still live server-side.
+      await api.delete(`/ai/faqs/${f.id}`)
+    } catch {
+      notifyError(t('common:actionFailed'))
+      return
+    }
     setFaqs(prev => prev.filter(x => x.id !== f.id))
     if (selected?.id === f.id) { setSelected(null); setName(''); setBody('') }
   }
@@ -233,7 +261,10 @@ export function KnowledgeTab() {
       const u = unwrap<AiItem>(res)
       setItems(prev => selected?.id ? prev.map(x => x.id === u.id ? u : x) : [u, ...prev])
       setSelected(u); setSaved(true); setTimeout(() => setSaved(false), 2500)
-    } catch {}
+    } catch {
+      // A failed save used to leave no signal at all (silent catch) — say so like every other mutation here.
+      notifyError(t('common:actionFailed'))
+    }
     setSaving(false)
   }
 
@@ -263,25 +294,29 @@ export function KnowledgeTab() {
 
 // Built-in tool ids; label/description come from t('ai.tools.items.<id>.*').
 const BUILTIN_TOOLS = ['shift_lookup', 'candidate_status', 'send_whatsapp', 'update_candidate', 'knowledge_search', 'calendar_check']
+// Which tools ship enabled by default — display-only until the backend exists (see below).
+const DEFAULT_ENABLED_TOOLS = new Set(['shift_lookup', 'knowledge_search'])
 
+// AUDIT 2026-07-28 (fake affordance, §3): this used to be a clickable toggle whose
+// state lived only in this component and was never sent anywhere — no `tools` field
+// on AiAgent, no /ai/agents/{id}/tools route (verified against api-generated.ts).
+// Toggling looked like a per-agent save but reset to the same two defaults on every
+// remount. Render it read-only with an honest notice instead of faking a save;
+// wire it up for real once the backend ships the endpoint (report, don't fake it).
 export function ToolsTab() {
   const { t } = useTranslation('workflows')
-  const [enabled, setEnabled] = useState<Set<string>>(() => new Set(['shift_lookup', 'knowledge_search']))
-
-  const toggle = (id: string) => setEnabled(prev => {
-    const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n
-  })
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>{t('ai.tools.hint')}</p>
+      <p style={{ fontSize: 11, color: 'var(--color-warning)', marginBottom: 4 }}>{t('ai.tools.notAvailable')}</p>
       {BUILTIN_TOOLS.map(toolId => {
-        const on = enabled.has(toolId)
+        const on = DEFAULT_ENABLED_TOOLS.has(toolId)
         return (
-          <div key={toolId} {...interactive(() => toggle(toolId))}
-            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 9, cursor: 'pointer',
+          <div key={toolId} aria-disabled="true"
+            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 9, cursor: 'not-allowed', opacity: 0.7,
               background: on ? 'var(--color-primary-bg)' : 'var(--bg)',
-              border: `1px solid ${on ? 'var(--color-primary)' : 'var(--border)'}`, transition: 'all 0.12s' }}>
+              border: `1px solid ${on ? 'var(--color-primary)' : 'var(--border)'}` }}>
             <div style={{ width: 16, height: 16, borderRadius: 4, border: `2px solid ${on ? 'var(--color-primary)' : 'var(--border)'}`, background: on ? 'var(--color-primary)' : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {on && <Check size={9} color="white" />}
             </div>

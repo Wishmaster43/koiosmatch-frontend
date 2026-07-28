@@ -32,12 +32,14 @@ describe('useContactFunctions', () => {
     await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/contact-functions', undefined))
   })
 
-  it('keeps the seed fallback (and creatable default) while the request is pending', async () => {
+  // Danny 28-07: the never-configured default is STRICT (dropdown only), exactly like
+  // the candidate function list — "toggle moet uit zoals kandidaten".
+  it('keeps the seed fallback (and the strict default) while the request is pending', async () => {
     const { mockedGet, useContactFunctions, DEFAULT_CONTACT_FUNCTIONS } = await freshHook()
     mockedGet.mockReturnValue(new Promise(() => {})) // never resolves in this test
     const { result } = renderHook(() => useContactFunctions())
     expect(result.current.contactFunctions).toEqual(DEFAULT_CONTACT_FUNCTIONS)
-    expect(result.current.allowFreeEntry).toBe(true)
+    expect(result.current.allowFreeEntry).toBe(false)
   })
 
   it('maps the API rows and honours a false allow_free_entry once the backend sends one', async () => {

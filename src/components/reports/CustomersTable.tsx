@@ -6,7 +6,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import type { CSSProperties, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw } from 'lucide-react'
+import { ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw, Search } from 'lucide-react'
 import { useRightPanel }      from '@/context/RightPanelContext'
 import CustomerDetailDrawer   from './CustomerDetailDrawer'
 import PaginationBar          from '../ui/PaginationBar'
@@ -31,7 +31,7 @@ export default function CustomersTable() {
   const { t } = useTranslation('reports')
   // Data (fetch + dev-mock merge) lives in the shared hook (§3).
   const { customers, loading, error } = useReportCustomers()
-  const [search]                                  = useState('')
+  const [search,            setSearch]            = useState('')
   const [selectedStatuses,  setSelectedStatuses]  = useState<Array<string | number>>(['active'])
   const [sort,              setSort]              = useState<SortState>({ key: 'name', dir: 'asc' })
   const [page, setPage] = useState(1)
@@ -119,6 +119,25 @@ export default function CustomersTable() {
   return (
     <div className="flex flex-col h-full">
 
+      {/* Header: title + summary + search — mirrors the sibling SM entity tables
+          (DepartmentsTable/LocationsTable), was missing here so `search` state
+          had no control feeding it (§3 "control that goes nowhere" audit fix). */}
+      <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
+        <div>
+          <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{t('customers.title')}</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
+            {loading ? t('common.loadingShort') : t('customers.summary', { shown: filtered.length, total: customers.length })}
+          </p>
+        </div>
+        <div className="relative">
+          <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
+                                     transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder={t('customers.search')}
+            style={{ height: 34, width: 260, paddingLeft: 32, paddingRight: 12, fontSize: 13,
+                     border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)' }} />
+        </div>
+      </div>
 
       {error && (
         <div style={{ padding: '10px 14px', marginBottom: 12, fontSize: 13, color: 'var(--color-danger)',

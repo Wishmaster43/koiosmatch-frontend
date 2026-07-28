@@ -46,6 +46,8 @@ interface Args {
 // UI field name → API field name for the single-record PATCH.
 const FIELD_MAP: Record<string, string> = {
   name: 'name', debtorNumber: 'debtor_number', city: 'city', industry: 'industry',
+  // JOB-CONTACT-1 (Danny 28-07): the customer's own e-mail/phone Contact card.
+  email: 'email', phone: 'phone',
   status: 'status', ownerId: 'owner_id', website: 'website', employeeCount: 'employee_count',
   toneOfVoice: 'tone_of_voice', description: 'description', recruitmentProblems: 'recruitment_problems',
   privacyPolicyUrl: 'privacy_policy_url', hideCompanyName: 'hide_company_name', hasCareerPage: 'has_career_page',

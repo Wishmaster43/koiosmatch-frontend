@@ -163,6 +163,7 @@
     "functions": "Functions",
     "contact_functions": "Functions",
     "customer_display": "Table display",
+    "customer_vacancy_defaults": "Vacancy visibility",
     "opportunity_display": "Table display",
     "dashboards": "Dashboards",
     "kpis_locations": "Locations",
@@ -292,30 +293,36 @@
     "subtitle": "Per column: coloured labels or plain text. The KPI charts always keep their colours.",
     "fields": {
       "candidate_table_color_funnel": {
-        "label": "Funnel type"
+        "label": "Funnel type",
+        "description": "On = funnel type as a coloured label. Off = plain text."
       },
       "candidate_table_color_type": {
-        "label": "Candidate type"
+        "label": "Contract form",
+        "description": "On = contract form as a coloured label. Off = plain text."
       },
       "candidate_table_color_pool": {
-        "label": "Talent pool"
+        "label": "Talent pool",
+        "description": "On = talent pool as a coloured label. Off = plain text."
       },
       "candidate_table_color_koios": {
-        "label": "Koios AI"
+        "label": "Koios AI",
+        "description": "On = Koios AI advice as a coloured label. Off = plain text."
       },
       "candidate_avatar_colored_by_gender": {
         "label": "Name avatar per gender",
         "description": "On = the avatar next to the candidate name is coloured per gender. Off = one calm grey."
       },
       "candidate_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "On = status as a coloured label. Off = plain text."
       },
       "candidate_table_color_owner": {
         "label": "Owner colour",
         "description": "On = the owner avatar uses the recruiter's colour. Off = neutral grey."
       },
       "candidate_table_color_phase": {
-        "label": "Phase"
+        "label": "Phase",
+        "description": "On = phase as a coloured label. Off = plain text."
       }
     }
   },
@@ -324,13 +331,16 @@
     "subtitle": "Per column: coloured labels or plain text. The KPI charts always keep their colours.",
     "fields": {
       "application_table_color_score": {
-        "label": "Match score"
+        "label": "Match score",
+        "description": "On = match score as a coloured chip. Off = plain text."
       },
       "application_table_color_phase": {
-        "label": "Phase"
+        "label": "Phase",
+        "description": "On = phase as a coloured label. Off = plain text."
       },
       "application_table_color_status": {
-        "label": "Candidate status"
+        "label": "Candidate status",
+        "description": "On = candidate status as a coloured label. Off = plain text."
       },
       "application_table_color_owner": {
         "label": "Owner colour",
@@ -624,13 +634,16 @@
     "subtitle": "Per column: coloured labels or plain text. The task board keeps its colours regardless.",
     "fields": {
       "task_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "On = task status as a coloured label. Off = plain text."
       },
       "task_table_color_priority": {
-        "label": "Priority"
+        "label": "Priority",
+        "description": "On = priority as a coloured label. Off = plain text."
       },
       "task_table_color_type": {
-        "label": "Type"
+        "label": "Type",
+        "description": "On = activity type as a coloured label. Off = plain text."
       },
       "task_table_color_assignee": {
         "label": "Assignee colour",
@@ -761,7 +774,15 @@
     "color1": "Colour 1",
     "color2": "Colour 2",
     "sections": "Sections",
-    "sectionsHint": "Set which sections are visible and in what order.",
+    "sectionsHint": "Set which sections are visible, in what order, and whether they sit in the sidebar or the main column.",
+    "regionSidebar": "Sidebar",
+    "regionMain": "Main column",
+    "regionHeader": "Header",
+    "regionFixedMainHint": "This section is too extensive for the narrow sidebar, so it always stays in the main column.",
+    "regionHeaderHint": "This section sits in the header above the name and has no column of its own.",
+    "moveSectionUp": "Move '{{section}}' up",
+    "moveSectionDown": "Move '{{section}}' down",
+    "moveSectionToRegion": "Place '{{section}}' in {{region}}",
     "preview": "Preview",
     "previewHint": "A4 — with sample candidate"
   },
@@ -1736,7 +1757,8 @@
         "description": "On = the Kansen table and KPIs show hours instead of euros."
       },
       "opportunity_table_color_stage": {
-        "label": "Stage"
+        "label": "Stage",
+        "description": "On = stage as a coloured label. Off = plain text."
       },
       "opportunity_table_color_owner": {
         "label": "Owner colour",
@@ -1749,14 +1771,34 @@
     "subtitle": "Per column: coloured labels or plain text. The KPI charts always keep their colours.",
     "fields": {
       "customer_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "On = customer status as a coloured label. Off = plain text."
       },
       "customer_table_color_koios": {
-        "label": "Koios AI"
+        "label": "Koios AI",
+        "description": "On = Koios AI advice as a coloured label. Off = plain text."
       },
       "customer_table_color_owner": {
         "label": "Owner colour",
         "description": "On = the owner avatar uses the account manager's colour. Off = neutral grey."
+      }
+    }
+  },
+  "customerVacancyDefaults": {
+    "title": "Vacancy visibility (default)",
+    "subtitle": "The tenant default for new and existing customers. Each customer can deviate from it via its Vacancy visibility tab.",
+    "fields": {
+      "customer_default_hide_company_name": {
+        "label": "Hide company name",
+        "description": "On = hide this customer's name on vacancies and the career site."
+      },
+      "customer_default_show_in_vacancies": {
+        "label": "Show in my vacancies",
+        "description": "On = show this customer's vacancies in 'my vacancies'."
+      },
+      "customer_default_exclude_from_sourcing": {
+        "label": "Exclude from sourcing",
+        "description": "On = exclude this customer from automatic sourcing."
       }
     }
   },
@@ -1857,10 +1899,12 @@
     "subtitle": "Per column: coloured labels or plain text. The KPI charts always keep their colours.",
     "fields": {
       "vacancy_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "On = vacancy status as a coloured label. Off = plain text."
       },
       "vacancy_table_color_published": {
-        "label": "Published"
+        "label": "Published",
+        "description": "On = publish status as a coloured label. Off = plain text."
       },
       "vacancy_table_color_owner": {
         "label": "Owner colour",
@@ -1873,7 +1917,8 @@
     "subtitle": "Per column: coloured labels or plain text. The match board always keeps its colours.",
     "fields": {
       "match_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "On = match status as a coloured label. Off = plain text."
       },
       "match_table_color_owner": {
         "label": "Owner colour",
@@ -1886,10 +1931,12 @@
     "subtitle": "Per column: coloured labels or plain text.",
     "fields": {
       "outreach_table_color_channel": {
-        "label": "Channel"
+        "label": "Channel",
+        "description": "On = channel as a coloured label. Off = plain text."
       },
       "outreach_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "On = campaign status as a coloured label. Off = plain text."
       },
       "outreach_table_color_owner": {
         "label": "Owner colour",
@@ -2208,8 +2255,7 @@
   "careerSite": {
     "title": "Career site",
     "subtitle": "This tenant's public vacancy site.",
-    "on": "On — public vacancy site visible",
-    "off": "Off — public site unreachable",
+    "activeLabel": "Career site active",
     "hint": "Turn the public career site (…/{tenant}/vacatures) on or off. The backend enforces it immediately: off = the public site shows a calm inactive notice and applying is closed."
   },
   "caoSettings": {

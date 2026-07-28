@@ -4,7 +4,7 @@
  * department list. Pure presentation; the location is passed in from LocationsPage.
  */
 import { useTranslation } from 'react-i18next'
-import { MapPin, Building2, Layers, X, Phone, Mail, ChevronRight, Plus } from 'lucide-react'
+import { MapPin, Building2, Layers, X, Phone, Mail, ChevronRight } from 'lucide-react'
 import { Avatar, StatusBadge, ac } from './locationParts'
 import type { SmLocationRow } from '@/types/shiftmanager'
 
@@ -122,18 +122,13 @@ export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | 
           ))}
         </div>
 
-        {/* Afdelingen */}
+        {/* Afdelingen — read-only list (this is a ShiftManager mirror, §3B: no
+            add/edit control here, /sm_locations has no write route to back one). */}
         <div style={{ marginBottom: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('locationsPage.drawer.departments')}</span>
-              <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--hover-bg)',
-                padding: '1px 7px', borderRadius: 999 }}>{deps.length}</span>
-            </div>
-            <button style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--color-primary)',
-              background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-              <Plus size={12} /> {t('locationsPage.drawer.add')}
-            </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('locationsPage.drawer.departments')}</span>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--hover-bg)',
+              padding: '1px 7px', borderRadius: 999 }}>{deps.length}</span>
           </div>
           {deps.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -157,15 +152,8 @@ export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | 
           )}
         </div>
       </div>
-
-      {/* Footer */}
-      <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-        <button style={{ width: '100%', padding: '9px', fontSize: 13, fontWeight: 500,
-          borderRadius: 8, border: '1px solid var(--color-primary)', background: 'var(--color-primary-bg)',
-          color: 'var(--color-primary)', cursor: 'pointer' }}>
-          {t('locationsPage.drawer.edit')}
-        </button>
-      </div>
+      {/* No footer edit action (§3/§3B): /sm_locations is a read-only ShiftManager
+          mirror with no write route — the old "Edit" button never persisted anything. */}
     </div>
   )
 }

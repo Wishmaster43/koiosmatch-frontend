@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { Brain, ChevronDown, Eye, EyeOff, MessageSquare, Send, Trash2 } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { interactive } from '@/lib/a11y'
+import { notifyError } from '@/lib/notify'
 import Avatar from '@/components/ui/Avatar'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import { initialsOf } from '@/lib/initials'
@@ -178,7 +179,10 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
       onSaved(unwrap<AiAgent>(res))
       set('custom_api_key', '') // clear the typed value; has_custom_api_key now covers it
       setSaved(true); setTimeout(() => setSaved(false), 2500)
-    } catch { /* noop */ }
+    } catch {
+      // A failed save used to leave no signal at all (silent catch) — say so instead.
+      notifyError(t('common:actionFailed'))
+    }
     setSaving(false)
   }
 
@@ -215,6 +219,7 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
           )}
           {!isNew && (
             <button onClick={() => agent && onDelete(agent)}
+              aria-label={t('common:delete')} title={t('common:delete')}
               style={{ padding: '5px 8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--color-danger)', cursor: 'pointer', display: 'flex' }}>
               <Trash2 size={12} />
             </button>

@@ -14,14 +14,19 @@
  * the top-level tabs). Delete asks for confirmation and returns to the list.
  */
 import { useState } from 'react'
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Edit2, Save, X } from 'lucide-react'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SectionCard from '@/components/ui/SectionCard'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
+// JOB-STATUS-1 (Danny 28-07: "Status van locatie moet hier!!") — the read-only
+// title-row badge (§3A(c)) + the searchable picker reused for its inline edit.
+import TitleBadge from '@/components/drawer/TitleBadge'
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useConfirm } from '@/hooks/useConfirm'
 import LocationDepartments from './LocationDepartments'
 import LocationContacts from './LocationContacts'
@@ -78,7 +83,8 @@ export default function LocationDetail({
   // expand to loose fields while editing; state/country stay their own rows.
   const generalFields: FieldRow[] = [
     { key: 'name', label: t('locations.detail.name'), type: 'text', group: t('subModal.groups.general') },
-    { key: 'statusId', label: t('locations.detail.status'), type: 'select', options: statusOptions, group: t('subModal.groups.general') },
+    // JOB-STATUS-1: status moved OUT of this field table into the title-row badge
+    // (see the render below) — no longer a row here, Danny 28-07: "moet HIER".
     { key: 'isHeadquarter', label: t('locations.detail.headquarter'), type: 'checkbox', group: t('subModal.groups.general') },
     { key: 'address', label: t('subModal.groups.address'), type: 'address', group: t('subModal.groups.address'),
       addressFields: [
@@ -105,7 +111,7 @@ export default function LocationDetail({
   ]
 
   const values = {
-    name: l.name, statusId: l.statusId != null ? String(l.statusId) : '', isHeadquarter: l.isHeadquarter,
+    name: l.name, isHeadquarter: l.isHeadquarter,
     street: l.street, houseNumber: l.houseNumber, houseNumberSuffix: l.houseNumberSuffix,
     postalCode: l.postalCode, city: l.city, state: l.state, country: l.country,
     cocNumber: l.cocNumber, vatNumber: l.vatNumber,
@@ -115,7 +121,7 @@ export default function LocationDetail({
 
   const save = (v: Record<string, unknown>) => {
     onSave(l.id as Id, {
-      name: v.name as string, statusId: (v.statusId as string) || null, isHeadquarter: Boolean(v.isHeadquarter),
+      name: v.name as string, isHeadquarter: Boolean(v.isHeadquarter),
       street: v.street as string, houseNumber: v.houseNumber as string, houseNumberSuffix: v.houseNumberSuffix as string,
       postalCode: v.postalCode as string, city: v.city as string, state: v.state as string, country: v.country as string,
       cocNumber: v.cocNumber as string, vatNumber: v.vatNumber as string,
@@ -126,12 +132,47 @@ export default function LocationDetail({
 
   const remove = () => confirm(t('locations.detail.confirmDelete'), () => { onDelete(l.id as Id); close() }, { danger: true })
 
+  // JOB-STATUS-1: the title-row status badge's own inline edit — pencil toggles to
+  // a searchable CreatableSelect + save/cancel (same in-place-edit convention as
+  // EditableFieldTable/EditableRichTextField, §3A), independent of the general
+  // fields' own save cycle since status now lives entirely in the title row.
+  const [editingStatus, setEditingStatus] = useState(false)
+  const [statusDraft, setStatusDraft] = useState('')
+  const startEditStatus = () => { setStatusDraft(l.statusId != null ? String(l.statusId) : ''); setEditingStatus(true) }
+  const saveStatus = () => { onSave(l.id as Id, { statusId: statusDraft || null }); setEditingStatus(false) }
+  const cancelStatus = () => setEditingStatus(false)
+  const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{l.name}</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{l.name}</div>
+          {editingStatus ? (
+            // Inline picker in the title row (Danny 28-07: "Status van locatie moet hier!!")
+            // — searchable, pick-only (allowCreate off, same as every tenant-lookup select).
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ width: 170 }}>
+                <CreatableSelect value={statusDraft} onChange={setStatusDraft} options={statusOptions}
+                  placeholder={t('locations.detail.status')} allowCreate={false} menuWidth={180} />
+              </div>
+              <button onClick={saveStatus} title={t('common:save')} aria-label={t('common:save')}
+                style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+              <button onClick={cancelStatus} title={t('common:cancel')} aria-label={t('common:cancel')}
+                style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+            </div>
+          ) : (
+            <>
+              {/* Status = colour-coded read-only badge next to the title (§3A(c)), not
+                  buried as a row in Algemeen — the pencil reopens the picker above. */}
+              <TitleBadge label={l.statusLabel} color={l.statusColor} />
+              <button onClick={startEditStatus} title={t('locations.detail.changeStatus')} aria-label={t('locations.detail.changeStatus')}
+                style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
+            </>
+          )}
+        </div>
         <button onClick={remove} title={t('locations.detail.deleteLocation')}
-          style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--color-danger)' }}>
+          style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--color-danger)', flexShrink: 0 }}>
           <Trash2 size={13} />
         </button>
       </div>

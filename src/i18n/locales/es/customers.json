@@ -7,7 +7,7 @@
     "geblokkeerd": "Bloqueado"
   },
   "page": {
-    "add": "Añadir cliente",
+    "add": "Nuevo cliente",
     "searchPlaceholder": "Buscar cliente, n.º deudor, gestor…",
     "empty": "No se encontraron clientes.",
     "loading": "Cargando…",
@@ -67,8 +67,10 @@
     "tags": "Etiquetas",
     "addTag": "Añadir etiqueta",
     "back": "Volver",
+    "newTask": "Nueva tarea",
     "tabs": {
       "overview": "Resumen",
+      "vacancySettings": "Visibilidad de vacantes",
       "locations": "Ubicaciones",
       "departments": "Departamentos",
       "contacts": "Contactos",
@@ -89,6 +91,12 @@
   "overview": {
     "general": "General",
     "branch": "Oficina",
+    "branchesLabel": "Sucursal",
+    "branchesLink": "Vincular sucursal",
+    "branchesEmpty": "Aún no hay sede vinculada.",
+    "contact": "Contacto",
+    "email": "Correo electrónico",
+    "phone": "Teléfono",
     "online": "En línea",
     "settings": "Ajustes",
     "textsTitle": "Textos",
@@ -98,10 +106,7 @@
     "industry": "Sector",
     "debtorNumber": "Número de deudor",
     "city": "Ciudad",
-    "hideCompanyName": "Ocultar nombre de empresa",
     "hasCareerPage": "Tiene página de empleo",
-    "showInVacancies": "Mostrar en mis vacantes",
-    "excludeFromSourcing": "Excluir del sourcing",
     "privacyPolicyUrl": "URL política de privacidad",
     "description": "Descripción",
     "recruitmentProblems": "Retos de contratación",
@@ -111,6 +116,21 @@
   },
   "richText": {
     "empty": "Aún no completado."
+  },
+  "vacancySettings": {
+    "title": "Visibilidad de vacantes",
+    "subtitle": "Cómo aparece este cliente en las vacantes y en el sourcing. El valor predeterminado está en Ajustes → Clientes; cada cliente puede desviarse de él.",
+    "fields": {
+      "hideCompanyName": "Ocultar nombre de empresa",
+      "showInVacancies": "Mostrar en mis vacantes",
+      "excludeFromSourcing": "Excluir del sourcing"
+    },
+    "tenantDefault": "Predeterminado: {{value}}",
+    "on": "activado",
+    "off": "desactivado",
+    "followsDefault": "sigue el valor predeterminado",
+    "deviates": "difiere del valor predeterminado",
+    "resetToDefault": "Restablecer valor predeterminado"
   },
   "locations": {
     "empty": "Aún no hay ubicaciones",
@@ -127,6 +147,7 @@
       "addressTitle": "Dirección y datos",
       "name": "Nombre",
       "status": "Estado",
+      "changeStatus": "Cambiar estado",
       "headquarter": "Sede principal",
       "street": "Calle",
       "houseNumber": "N.º",
@@ -368,7 +389,7 @@
     "mutateError": "La acción ha fallado."
   },
   "modal": {
-    "title": "Añadir cliente",
+    "title": "Nuevo cliente",
     "subtitle": "Introduzca los datos del nuevo cliente",
     "fillRequired": "Rellene los campos obligatorios",
     "required": "Campo obligatorio",
@@ -391,11 +412,11 @@
     }
   },
   "subModal": {
-    "addLocation": "Añadir ubicación",
+    "addLocation": "Nueva ubicación",
     "editLocation": "Editar ubicación",
-    "addDepartment": "Añadir departamento",
+    "addDepartment": "Nuevo departamento",
     "editDepartment": "Editar departamento",
-    "addContact": "Añadir contacto",
+    "addContact": "Nuevo contacto",
     "editContact": "Editar contacto",
     "locationName": "Nombre de ubicación",
     "locationPlaceholder": "P. ej. Sede central",
@@ -405,6 +426,7 @@
     "selectLocation": "Ubicación",
     "selectDepartment": "Departamento",
     "noLocationsFirst": "Cree primero una ubicación",
+    "pickLocationFirst": "Seleccione primero una ubicación",
     "noneOption": "Ninguno",
     "firstName": "Nombre",
     "lastName": "Apellidos",

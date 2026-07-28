@@ -64,6 +64,7 @@ export default function CreatableSelect({
   // immediately self-close before the click handler even runs.
   const menuRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
   // Shared flip + clamp + rect placement (see the module doc comment above).
   const { openUp, maxHeight: menuMaxHeight, rect } = useDropdownPlacement(ref, open)
 
@@ -79,6 +80,21 @@ export default function CreatableSelect({
     return () => document.removeEventListener('mousedown', h)
   }, [open])
   useEffect(() => { if (open) inputRef.current?.focus() }, [open])
+
+  // Restore focus to the trigger whenever the popover transitions open → closed
+  // (pick / Escape / outside click — the search input unmounts with the portal
+  // on every one of those paths, so focus would otherwise land nowhere). Never
+  // on unmount, since that never runs this transition. Skipped if some OTHER
+  // element already claimed focus (e.g. the outside click landed on a
+  // different picker's own trigger) so this never yanks focus away from what
+  // the user just interacted with.
+  const wasOpenRef = useRef(false)
+  useEffect(() => {
+    if (wasOpenRef.current && !open && (document.activeElement === document.body || document.activeElement == null)) {
+      triggerRef.current?.focus()
+    }
+    wasOpenRef.current = open
+  }, [open])
 
   const opts: CreatableOption[] = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
   const current = opts.find(o => o.value === value)
@@ -97,7 +113,7 @@ export default function CreatableSelect({
           + aria-activedescendant model this component does not implement. haspopup/expanded
           tell a screen reader it opens a list — the part that was missing entirely once a
           native <select> was replaced by this (measured 27-07). */}
-      <button type="button" onClick={() => setOpen(o => !o)}
+      <button type="button" ref={triggerRef} onClick={() => setOpen(o => !o)}
         id={triggerId} aria-labelledby={labelledBy}
         aria-expanded={open} aria-haspopup="listbox" aria-controls={open ? listId : undefined}
         style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', width: '100%',

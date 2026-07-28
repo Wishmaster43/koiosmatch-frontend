@@ -126,4 +126,32 @@ describe('ReportFilterSidebar — collapsible group blocks (punt 31)', () => {
     fireEvent.click(screen.getByLabelText('close'))
     expect(onClose).toHaveBeenCalledTimes(1)
   })
+
+  it('falls back to a translated heading when no title prop is passed (audit fix: was a hardcoded "Filters" default)', () => {
+    render(<ReportFilterSidebar groups={makeGroups()} onClose={() => {}} pageId="test-candidates" />)
+    // i18n isn't initialised in tests, so t('filters.title') resolves to the raw key.
+    expect(screen.getByText('filters.title')).toBeInTheDocument()
+  })
+
+  it('gives the "clear all" icon button an accessible name (audit fix: title-only, no aria-label)', () => {
+    render(<ReportFilterSidebar groups={makeGroups()} onClose={() => {}} pageId="test-candidates" />)
+    // activeCount > 0 here (status + pool both have a selected value) so the button renders.
+    expect(screen.getByLabelText('filters.clearAll')).toBeInTheDocument()
+  })
+
+  it('gives the global-search inline clear button an accessible name (audit fix: was icon-only, no label)', () => {
+    const onChange = vi.fn()
+    const groups: ReportFilterGroup[] = [
+      { key: 'search', type: 'global-search', label: 'Search', value: 'anna', onChange },
+      ...makeGroups(),
+    ]
+    render(<ReportFilterSidebar groups={groups} onClose={() => {}} pageId="test-candidates" />)
+    // A non-empty global-search value also echoes as a removable chip in the active-
+    // filter bar, which reuses the same 'filters.clear' label — so more than one
+    // button shares this accessible name; clicking any of them clears the search.
+    const clearButtons = screen.getAllByLabelText('filters.clear')
+    expect(clearButtons.length).toBeGreaterThan(0)
+    fireEvent.click(clearButtons[0])
+    expect(onChange).toHaveBeenCalledWith('')
+  })
 })

@@ -130,3 +130,34 @@ describe('AgentForm — masked custom API key (write-only, security audit findin
     expect(input.value).toBe('')
   })
 })
+
+// Audit 2026-07-28: a failed save used to hit an empty `catch {}` — no toast, no
+// visible change at all, so a recruiter editing an agent's config had no signal
+// their edit was lost. Assert the real failure now surfaces the same way every
+// other mutation in this module does.
+describe('AgentForm — save failure must notify (was a silent catch)', () => {
+  it('toasts an error and never shows the saved confirmation when PUT rejects', async () => {
+    vi.mocked(api.put).mockRejectedValue(new Error('network error'))
+    const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
+
+    render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    await screen.findByDisplayValue('Kelly')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Opslaan' }))
+
+    await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
+      detail: { type: 'error', message: 'Actie mislukt — probeer het opnieuw.' },
+    })))
+    expect(screen.queryByText('Opgeslagen')).toBeNull()
+  })
+})
+
+// Audit 2026-07-28 (§6 icon-only buttons need an accessible name): the delete-agent
+// button in the form header used to render a bare Trash2 icon with no aria-label/title.
+describe('AgentForm — delete button accessible name', () => {
+  it('exposes an accessible name on the icon-only delete button', async () => {
+    render(<AgentForm agent={mockAgent} prompts={[]} faqs={[]} onSaved={vi.fn()} onDelete={vi.fn()} />)
+    await screen.findByDisplayValue('Kelly')
+    expect(screen.getByRole('button', { name: 'Verwijderen' })).toBeInTheDocument()
+  })
+})

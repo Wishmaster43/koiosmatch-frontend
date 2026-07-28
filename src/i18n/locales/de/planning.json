@@ -1,5 +1,7 @@
 {
   "addShift": "Einsatz hinzufügen",
+  "previewNotice": "Nur Vorschau — die hier gezeigten Einsätze sind Demodaten, nichts Hinzugefügtes wird bereits in Ihrem Live-Dienstplan gespeichert.",
+  "previewSaveTitle": "Noch nicht verbunden — dieser Einsatz wird nicht gespeichert.",
   "sectionOrder": "Auftrag",
   "sectionLocation": "Standort",
   "sectionColor": "Farbe",

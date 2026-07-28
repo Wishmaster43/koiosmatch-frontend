@@ -11,12 +11,13 @@
  * Widened to the house "wide form" frame (Danny 27-07: "+ afdeling ook nalopen!" —
  * every create modal must match +Match/+Kandidaat's footprint) via the shared
  * WIDE_MODAL constant, and regrouped into titled, bordered cards (Algemeen/
- * Zakelijk/Omschrijving) stacked full-width — mirrors AddContactPersonModal.tsx /
- * AddLocationModal.tsx (same folder, same 27-07 request) so the "customers"
- * sub-modals read as one system. The location + status pickers become searchable
- * CreatableSelects (allowCreate={false} — real relational ids, never a free-text
- * create). This entity genuinely has fewer fields than Location (5 vs 13), so its
- * cards stay lighter — see report re: not padding the layout with empty space.
+ * Zakelijk/Omschrijving) stacked full-width, using the shared
+ * `@/components/ui/modalCards` chrome (CLAUDE.md §11: one source instead of a
+ * per-entity copy) so the "customers" sub-modals read as one system. The
+ * location + status pickers become searchable CreatableSelects (allowCreate=
+ * {false} — real relational ids, never a free-text create). This entity
+ * genuinely has fewer fields than Location (5 vs 13), so its cards stay
+ * lighter — see report re: not padding the layout with empty space.
  */
 import { useState } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
@@ -27,24 +28,13 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
 import type { DepartmentPayload } from './hooks/useCustomerDepartments'
 import type { Department } from '@/types/customer'
 import type { Id } from '@/types/common'
 import type { LookupOption } from '@/types/common'
 
 interface LocationOption { id: Id; name: string }
-
-// Card chrome — mirrors AddContactPersonModal/AddLocationModal exactly (§3A):
-// 11px uppercase muted heading over a bordered surface, kept local (not a
-// cross-import — CLAUDE.md §2: an entity page must not reach into another
-// entity's internals) so it matches the sibling modals verbatim.
-const cardHead = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
-const cardBox = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, display: 'flex', flexDirection: 'column' as const, gap: 12 }
-const row2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }
-// Even 3-across — used to constrain a SINGLE field (status, or cost centre) to
-// roughly a third of the panel width instead of letting it stretch the full
-// 1060px row (this entity has too few fields per card to fill a wide row).
-const row3Even = { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {

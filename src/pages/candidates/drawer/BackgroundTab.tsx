@@ -23,8 +23,15 @@ const SkillsTab         = SkillsTabJs         as ComponentType<RelTabProps>
  * Each list is optimistic local state that also persists to the candidate's
  * sub-entity routes (POST/PATCH/DELETE /candidates/{id}/{relation}). New items
  * get a negative temp id until the POST returns the server id; edit/remove only
- * hit the API once a real (positive numeric) id exists. All calls fail soft.
+ * hit the API once a real (positive numeric) id exists. A rejected request shows
+ * a toast AND reverts the optimistic write (see `ops` below) — it never leaves
+ * an unsaved change sitting on screen as if it had persisted.
  */
+// Monotonic counter appended to every temp id: `-Date.now()` alone is NOT unique
+// when several rows are added within the same millisecond (mirrors the identical
+// fix in useEntityDocuments.ts, Danny 28-07) — each add now gets its own negative id.
+let tempRelSeq = 0
+
 const TO_API: Record<string, (v: RelItem) => Record<string, unknown>> = {
   experiences: v => ({
     function_title: v.title, employer: v.company, location: v.location,
@@ -71,14 +78,21 @@ export default function BackgroundTab({ c, onEditSave }: { c: Candidate; onEditS
 
   // add / edit-at-index / remove-at-index for a relation, with optimistic persistence.
   // Not-yet-persisted rows get a negative temp id (never collides with server ids).
+  // Bug-class fix (optimistic-revert audit): all three used to fail soft — a
+  // rejected request left the optimistic write sitting on screen with only a
+  // toast, so the recruiter believed it had saved. Each op now reverts SURGICALLY
+  // (mirrors useEntityDocuments.remove): onAdd drops the orphaned temp row, onEdit
+  // restores the exact previous row, onRemove re-inserts the removed row at its
+  // ORIGINAL index — never a whole-list snapshot, which would resurrect rows a
+  // different in-flight call already removed successfully.
   const ops = (rel: string, list: RelItem[], set: Dispatch<SetStateAction<RelItem[]>>) => ({
     onAdd: (raw: RelItem) => {
       const v = NORMALIZE[rel](raw)
-      const id = -Date.now()
+      const id = -(Date.now() + (++tempRelSeq))
       set(p => [...p, { ...v, id }])
       api.post(`/candidates/${c.id}/${rel}`, TO_API[rel](v))
         .then(r => { const it = unwrap<RelItem>(r); if (it?.id) set(p => p.map(x => x.id === id ? { ...v, ...it } : x)) })
-        .catch(() => notifyError(t('actionFailed')))
+        .catch(() => { set(p => p.filter(x => x.id !== id)); notifyError(t('actionFailed')) })
     },
     onEdit: (i: number, raw: RelItem) => {
       // Merge over the stored row FIRST: SectionTabs now has two independent editors
@@ -86,15 +100,26 @@ export default function BackgroundTab({ c, onEditSave }: { c: Candidate; onEditS
       // pencil, ProseField) that each submit only their own subset — merging guarantees
       // the PATCH always carries the full, current record so one editor never silently
       // blanks the field the other one owns.
+      const before = list[i]
       const v = NORMALIZE[rel]({ ...list[i], ...raw })
       const id = list[i]?.id
       set(p => p.map((x, idx) => idx === i ? { ...x, ...v } : x))
-      if (isPersisted(id)) api.patch(`/candidates/${c.id}/${rel}/${id}`, TO_API[rel](v)).catch(() => notifyError(t('actionFailed')))
+      if (isPersisted(id)) {
+        api.patch(`/candidates/${c.id}/${rel}/${id}`, TO_API[rel](v)).catch(() => {
+          if (before) set(p => p.map(x => x.id === id ? before : x))
+          notifyError(t('actionFailed'))
+        })
+      }
     },
     onRemove: (i: number) => {
       const id = list[i]?.id
+      const row = list[i]
       set(p => p.filter((_, idx) => idx !== i))
-      if (isPersisted(id)) api.delete(`/candidates/${c.id}/${rel}/${id}`).catch(() => notifyError(t('actionFailed')))
+      if (!isPersisted(id)) return
+      api.delete(`/candidates/${c.id}/${rel}/${id}`).catch(() => {
+        if (row) set(p => { const next = [...p]; next.splice(Math.min(i, next.length), 0, row); return next })
+        notifyError(t('actionFailed'))
+      })
     },
   })
 

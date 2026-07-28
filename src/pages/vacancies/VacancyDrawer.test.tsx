@@ -53,14 +53,14 @@ const vacancy = { id: 'v1', title: 'Verpleegkundige', clientName: 'Acme', tags: 
 describe('VacancyDrawer · Beschrijving main tab (Danny 21-07)', () => {
   it('renders a "Beschrijving" tab right after "Details"', () => {
     render(<VacancyDrawer vacancy={vacancy} onClose={vi.fn()} />)
-    const tabButtons = screen.getAllByRole('button').filter(b => ['Details', 'Beschrijving'].includes(b.textContent ?? ''))
+    const tabButtons = screen.getAllByRole('tab').filter(b => ['Details', 'Beschrijving'].includes(b.textContent ?? ''))
     expect(tabButtons.map(b => b.textContent)).toEqual(['Details', 'Beschrijving'])
   })
 
   it('shows the DescriptionTab content when the Beschrijving tab is clicked', async () => {
     const user = userEvent.setup()
     render(<VacancyDrawer vacancy={vacancy} onClose={vi.fn()} />)
-    await user.click(screen.getByRole('button', { name: 'Beschrijving' }))
+    await user.click(screen.getByRole('tab', { name: 'Beschrijving' }))
     expect(screen.getByText('description-tab-content')).toBeInTheDocument()
   })
 })
@@ -74,14 +74,14 @@ describe('VacancyDrawer · "Kandidaten zoeken" autoExpand (Danny 23-07)', () => 
     )
 
     // Activating the map+list tab requests the wider drawer width.
-    await user.click(screen.getByRole('button', { name: 'Kandidaten zoeken' }))
+    await user.click(screen.getByRole('tab', { name: 'Kandidaten zoeken' }))
     expect(screen.getByText('candidate-search-tab-content')).toBeInTheDocument()
     expect(onToggleExpand).toHaveBeenCalledTimes(1)
 
     // Simulate the parent applying the requested width, then leave the tab —
     // the previous (collapsed) width is restored.
     rerender(<VacancyDrawer vacancy={vacancy} onClose={vi.fn()} expanded onToggleExpand={onToggleExpand} />)
-    await user.click(screen.getByRole('button', { name: 'Details' }))
+    await user.click(screen.getByRole('tab', { name: 'Details' }))
     expect(onToggleExpand).toHaveBeenCalledTimes(2)
   })
 })
@@ -100,7 +100,7 @@ describe('VacancyDrawer · "Kandidaten zoeken" tenant visibility gate (Danny 23-
     settingsState.settings = { vacancy_candidate_tab: { vacancy_statuses: ['open'] } }
     const openVacancy = { ...vacancy, statusValue: 'open' } as unknown as VacancyDetail
     render(<VacancyDrawer vacancy={openVacancy} onClose={vi.fn()} />)
-    expect(screen.getByRole('button', { name: 'Kandidaten zoeken' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Kandidaten zoeken' })).toBeInTheDocument()
   })
 })
 
@@ -111,7 +111,7 @@ describe('VacancyDrawer · initialTab deep-link (VACANCY-MATCH-COUNT-1, Danny 23
     render(<VacancyDrawer vacancy={vacancy} onClose={vi.fn()} initialTab="candidateSearch" />)
     // The tab's content shows immediately — no click needed to switch there.
     expect(screen.getByText('candidate-search-tab-content')).toBeInTheDocument()
-    const activeBtn = screen.getByRole('button', { name: 'Kandidaten zoeken' })
+    const activeBtn = screen.getByRole('tab', { name: 'Kandidaten zoeken' })
     expect(activeBtn).toHaveStyle({ fontWeight: 600 })
   })
 
@@ -123,7 +123,7 @@ describe('VacancyDrawer · initialTab deep-link (VACANCY-MATCH-COUNT-1, Danny 23
     render(<VacancyDrawer vacancy={closedVacancy} onClose={vi.fn()} initialTab="candidateSearch" />)
     expect(screen.queryByRole('button', { name: 'Kandidaten zoeken' })).not.toBeInTheDocument()
     expect(screen.queryByText('candidate-search-tab-content')).not.toBeInTheDocument()
-    const detailsBtn = screen.getByRole('button', { name: 'Details' })
+    const detailsBtn = screen.getByRole('tab', { name: 'Details' })
     expect(detailsBtn).toHaveStyle({ fontWeight: 600 })
   })
 })

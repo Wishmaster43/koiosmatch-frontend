@@ -162,6 +162,7 @@
     "functions": "Funciones",
     "contact_functions": "Funciones",
     "customer_display": "Vista de tabla",
+    "customer_vacancy_defaults": "Visibilidad de vacantes",
     "vacancy_app_defaults": "Ajustes de candidatura",
     "opportunity_display": "Vista de tabla",
     "dashboards": "Paneles",
@@ -292,30 +293,36 @@
     "subtitle": "Por columna: etiquetas de color o texto plano. Los gráficos KPI siempre mantienen sus colores.",
     "fields": {
       "candidate_table_color_funnel": {
-        "label": "Tipo de embudo"
+        "label": "Tipo de embudo",
+        "description": "Activado = tipo de embudo con etiqueta de color. Desactivado = texto plano."
       },
       "candidate_table_color_type": {
-        "label": "Tipo de candidato"
+        "label": "Tipo de contrato",
+        "description": "Activado = tipo de contrato con etiqueta de color. Desactivado = texto plano."
       },
       "candidate_table_color_pool": {
-        "label": "Grupo de talento"
+        "label": "Grupo de talento",
+        "description": "Activado = grupo de talento con etiqueta de color. Desactivado = texto plano."
       },
       "candidate_table_color_koios": {
-        "label": "Koios AI"
+        "label": "Koios AI",
+        "description": "Activado = aviso de Koios AI con etiqueta de color. Desactivado = texto plano."
       },
       "candidate_avatar_colored_by_gender": {
         "label": "Avatar del nombre por género",
         "description": "Activado = el avatar junto al nombre del candidato se colorea por género. Desactivado = un gris sobrio."
       },
       "candidate_table_color_status": {
-        "label": "Estado"
+        "label": "Estado",
+        "description": "Activado = estado con etiqueta de color. Desactivado = texto plano."
       },
       "candidate_table_color_owner": {
         "label": "Color del responsable",
         "description": "Activado = el avatar del responsable usa el color del reclutador. Desactivado = gris neutro."
       },
       "candidate_table_color_phase": {
-        "label": "Fase"
+        "label": "Fase",
+        "description": "Activado = fase con etiqueta de color. Desactivado = texto plano."
       }
     }
   },
@@ -553,7 +560,15 @@
     "color1": "Color 1",
     "color2": "Color 2",
     "sections": "Secciones",
-    "sectionsHint": "Define qué secciones son visibles y en qué orden.",
+    "sectionsHint": "Define qué secciones son visibles, en qué orden y si van en la columna lateral o en la columna principal.",
+    "regionSidebar": "Columna lateral",
+    "regionMain": "Columna principal",
+    "regionHeader": "Encabezado",
+    "regionFixedMainHint": "Esta sección es demasiado extensa para la estrecha columna lateral, por lo que siempre permanece en la columna principal.",
+    "regionHeaderHint": "Esta sección está en el encabezado, encima del nombre, y no tiene columna propia.",
+    "moveSectionUp": "Mover «{{section}}» hacia arriba",
+    "moveSectionDown": "Mover «{{section}}» hacia abajo",
+    "moveSectionToRegion": "Colocar «{{section}}» en {{region}}",
     "preview": "Vista previa",
     "previewHint": "A4 — con candidato de ejemplo"
   },
@@ -1512,13 +1527,16 @@
     "subtitle": "Por columna: etiquetas de color o texto simple. El tablero de tareas mantiene siempre sus colores.",
     "fields": {
       "task_table_color_status": {
-        "label": "Estado"
+        "label": "Estado",
+        "description": "Activado = estado de tarea con etiqueta de color. Desactivado = texto plano."
       },
       "task_table_color_priority": {
-        "label": "Prioridad"
+        "label": "Prioridad",
+        "description": "Activado = prioridad con etiqueta de color. Desactivado = texto plano."
       },
       "task_table_color_type": {
-        "label": "Tipo"
+        "label": "Tipo",
+        "description": "Activado = tipo de actividad con etiqueta de color. Desactivado = texto plano."
       },
       "task_table_color_assignee": {
         "label": "Color del asignado",
@@ -1696,13 +1714,16 @@
     "subtitle": "Por columna: etiquetas de color o texto plano. Los gráficos KPI siempre conservan sus colores.",
     "fields": {
       "application_table_color_score": {
-        "label": "Puntuación de match"
+        "label": "Puntuación de match",
+        "description": "Activado = puntuación de match como chip de color. Desactivado = texto plano."
       },
       "application_table_color_phase": {
-        "label": "Fase"
+        "label": "Fase",
+        "description": "Activado = fase con etiqueta de color. Desactivado = texto plano."
       },
       "application_table_color_status": {
-        "label": "Estado del candidato"
+        "label": "Estado del candidato",
+        "description": "Activado = estado del candidato con etiqueta de color. Desactivado = texto plano."
       },
       "application_table_color_owner": {
         "label": "Color del propietario",
@@ -1732,14 +1753,34 @@
     "subtitle": "Por columna: etiquetas con color o texto simple. Los gráficos KPI siempre mantienen sus colores.",
     "fields": {
       "customer_table_color_status": {
-        "label": "Estado"
+        "label": "Estado",
+        "description": "Activado = estado del cliente con etiqueta de color. Desactivado = texto plano."
       },
       "customer_table_color_koios": {
-        "label": "Koios AI"
+        "label": "Koios AI",
+        "description": "Activado = aviso de Koios AI con etiqueta de color. Desactivado = texto plano."
       },
       "customer_table_color_owner": {
         "label": "Color del gestor",
         "description": "Activado = el avatar del gestor usa su color. Desactivado = gris neutro."
+      }
+    }
+  },
+  "customerVacancyDefaults": {
+    "title": "Visibilidad de vacantes (predeterminado)",
+    "subtitle": "El valor predeterminado del tenant para clientes nuevos y existentes. Cada cliente puede desviarse mediante su pestaña Visibilidad de vacantes.",
+    "fields": {
+      "customer_default_hide_company_name": {
+        "label": "Ocultar nombre de empresa",
+        "description": "Activado = oculta el nombre de este cliente en vacantes y el sitio de empleo."
+      },
+      "customer_default_show_in_vacancies": {
+        "label": "Mostrar en mis vacantes",
+        "description": "Activado = muestra las vacantes de este cliente en 'mis vacantes'."
+      },
+      "customer_default_exclude_from_sourcing": {
+        "label": "Excluir del sourcing",
+        "description": "Activado = excluye a este cliente del sourcing automático."
       }
     }
   },
@@ -1752,7 +1793,8 @@
         "description": "Activado = la tabla de Oportunidades y los KPI muestran horas en lugar de euros."
       },
       "opportunity_table_color_stage": {
-        "label": "Fase"
+        "label": "Fase",
+        "description": "Activado = fase con etiqueta de color. Desactivado = texto plano."
       },
       "opportunity_table_color_owner": {
         "label": "Color del propietario",
@@ -1857,10 +1899,12 @@
     "subtitle": "Por columna: etiquetas con color o texto simple. Los gráficos KPI siempre mantienen sus colores.",
     "fields": {
       "vacancy_table_color_status": {
-        "label": "Estado"
+        "label": "Estado",
+        "description": "Activado = estado de la vacante con etiqueta de color. Desactivado = texto plano."
       },
       "vacancy_table_color_published": {
-        "label": "Publicada"
+        "label": "Publicada",
+        "description": "Activado = estado de publicación con etiqueta de color. Desactivado = texto plano."
       },
       "vacancy_table_color_owner": {
         "label": "Color del propietario",
@@ -1873,7 +1917,8 @@
     "subtitle": "Por columna: etiquetas de color o texto plano. El tablero de matches mantiene siempre sus colores.",
     "fields": {
       "match_table_color_status": {
-        "label": "Estado"
+        "label": "Estado",
+        "description": "Activado = estado del match con etiqueta de color. Desactivado = texto plano."
       },
       "match_table_color_owner": {
         "label": "Color del propietario",
@@ -1886,10 +1931,12 @@
     "subtitle": "Por columna: etiquetas de color o texto plano.",
     "fields": {
       "outreach_table_color_channel": {
-        "label": "Canal"
+        "label": "Canal",
+        "description": "Activado = canal con etiqueta de color. Desactivado = texto plano."
       },
       "outreach_table_color_status": {
-        "label": "Estado"
+        "label": "Estado",
+        "description": "Activado = estado de campaña con etiqueta de color. Desactivado = texto plano."
       },
       "outreach_table_color_owner": {
         "label": "Color del propietario",
@@ -2208,8 +2255,7 @@
   "careerSite": {
     "title": "Sitio de empleo",
     "subtitle": "El sitio público de vacantes de este inquilino.",
-    "on": "Activado — sitio público visible",
-    "off": "Desactivado — sitio público inaccesible",
+    "activeLabel": "Sitio de empleo activo",
     "hint": "Activa o desactiva el sitio público de empleo (…/{tenant}/vacatures). El backend lo aplica de inmediato: desactivado = el sitio muestra un aviso y las solicitudes quedan cerradas."
   },
   "caoSettings": {

@@ -311,6 +311,9 @@
       "byCustomer": "Par client"
     }
   },
+  "customersPage": {
+    "addDisabledReason": "Les nouveaux clients sont créés dans ShiftManager et sont reflétés ici automatiquement."
+  },
   "locationsPage": {
     "drawerTitle": "Site",
     "kpi": {
@@ -343,10 +346,8 @@
       "phone": "Téléphone",
       "email": "E-mail",
       "departments": "Départements",
-      "add": "Ajouter",
       "noDepartments": "Aucun département lié",
-      "activeShifts": "Missions actives",
-      "edit": "Modifier le site"
+      "activeShifts": "Missions actives"
     }
   },
   "contactsPage": {
@@ -387,7 +388,6 @@
     "shifts": "Missions",
     "notes": "Notes",
     "noNotes": "Aucune note",
-    "edit": "Modifier le département",
     "empty": "Aucun département trouvé",
     "count": "{{count}} départements",
     "kpi": {

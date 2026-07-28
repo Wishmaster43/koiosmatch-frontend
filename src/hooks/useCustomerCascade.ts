@@ -37,6 +37,27 @@ export interface CascadeLocation extends CascadeOption {
   cost_center?: string | null
   billing_email?: string | null
 }
+// A contact's function/job title — the key name varies by response shape (see
+// the comment above), read tolerantly. THE shared reader: consumers building a
+// contact-picker option label call this instead of re-deriving it inline (§11 —
+// this exact fallback chain was already duplicated in RelationsSection.tsx
+// before this export existed; new/touched consumers should import it here).
+export const contactFunctionOf = (c: CascadeOption): string =>
+  c.function || c.function_title || c.position || c.job_title || ''
+
+// The shared "Name — Function" contact-option label (Danny 28-07: the opportunity
+// modal's contact picker showed the same name several times over — one row per
+// location/department coupling — with nothing to tell them apart). Mirrors the
+// " — " subtitle convention already used for contacts elsewhere (RelationsSection's
+// match-placement contact picker, ProposeCandidateModal's recipient picker) — pure
+// data concatenation, not a translatable UI string, so no i18n key. Never leaves a
+// dangling separator when the function is absent.
+export const contactOptionLabel = (c: CascadeOption): string => {
+  const fn = contactFunctionOf(c)
+  const name = c.name ?? '—'
+  return fn ? `${name} — ${fn}` : name
+}
+
 export interface CustomerCascadeDetail {
   branch_id?: Id | null
   branch?: { id?: Id; name?: string } | null

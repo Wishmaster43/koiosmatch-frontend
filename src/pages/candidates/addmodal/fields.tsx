@@ -22,9 +22,8 @@ export const CreatableSelect: ComponentType<Record<string, unknown>> = (props) =
 // A plain value/label pair — the shape every lookup-backed dropdown option boils down to.
 export interface FieldOption { value: string; label: string }
 
-// Card chrome — mirrors the drill-down ProfileTab exactly (11px uppercase muted
-// heading above a bordered surface card) so the modal reads as the same system (§3A).
-export const cardHead: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
-export const cardBox: CSSProperties = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, display: 'flex', flexDirection: 'column', gap: 12 }
-// One-line field pairing (§3A: short fields two-up) — a grid row with the given column spec.
-export const row = (cols: string): CSSProperties => ({ display: 'grid', gridTemplateColumns: cols, gap: 12 })
+// Card chrome + row-grid builder — the shared §3A card idiom (11px uppercase
+// muted heading above a bordered surface). Re-exported from the one shared
+// module every wide create-modal uses (CLAUDE.md §11: no per-entity copies)
+// so this modal, +Match, +Klant, +Vacature, … stay pixel-identical.
+export { cardHead, cardBox, row } from '@/components/ui/modalCards'

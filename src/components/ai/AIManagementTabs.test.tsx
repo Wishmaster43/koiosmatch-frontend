@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import api from '@/lib/api'
-import { AgentsTab } from './AIManagementTabs'
-import type { AiAgent } from '@/types/ai'
+import { AgentsTab, PromptsTab, FAQTab, ToolsTab } from './AIManagementTabs'
+import type { AiAgent, AiItem } from '@/types/ai'
 
 // AgentsTab fetches agents/prompts/faqs on mount and posts/puts through the same
 // client on save — stub the whole default client (keep unwrap/unwrapList real).
@@ -97,5 +97,124 @@ describe('AgentsTab — AI-AGENTS-2/3 fields', () => {
     expect(Object.keys(body as object)).toEqual(expect.arrayContaining([
       'name', 'prompt_id', 'faq_ids', 'use_knowledge', 'max_history', 'custom_endpoint',
     ]))
+  })
+})
+
+// Audit 2026-07-28 (mutation lying about success, §3/§13): AgentsTab/PromptsTab/FAQTab's
+// delete handlers used to remove the row from local state UNCONDITIONALLY after the
+// DELETE call, even inside the .catch — so a failed delete still made the record vanish
+// from the UI while it stayed live on the backend. Assert the REQUEST fires and that a
+// failure leaves the row exactly where it was (never only that a callback ran).
+describe('AgentsTab — delete failure must not remove the agent from the list', () => {
+  beforeEach(() => {
+    vi.mocked(api.get).mockReset()
+    vi.mocked(api.delete).mockReset()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/ai/agents') return Promise.resolve({ data: [mockAgent] })
+      return Promise.resolve({ data: [] })
+    })
+  })
+  afterEach(() => vi.restoreAllMocks())
+
+  it('keeps the agent on screen and toasts an error when DELETE rejects', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    vi.mocked(api.delete).mockRejectedValue(new Error('network error'))
+    const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
+
+    render(<AgentsTab />)
+    // The agent's name also appears as the linked-recruiter sublabel, twice on screen.
+    await screen.findAllByText('Kelly Jansen')
+
+    // Two delete affordances exist for the same agent (the side-list row and the
+    // detail panel's own delete button) — both call the same handler; either works.
+    fireEvent.click(screen.getAllByRole('button', { name: 'Verwijderen' })[0])
+
+    // Wait for the actual async signal (the toast fired from the .catch) rather than
+    // the synchronous call args — the delete call is recorded before its promise settles.
+    await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
+      detail: { type: 'error', message: 'Actie mislukt — probeer het opnieuw.' },
+    })))
+    expect(api.delete).toHaveBeenCalledWith('/ai/agents/a1')
+    // The row must still be there — a failed delete is not a silent success.
+    expect(screen.getAllByText('Kelly Jansen').length).toBeGreaterThan(0)
+  })
+})
+
+// Shared fixtures for the Prompts/FAQ delete-failure regressions below.
+const mockPrompt: AiItem = { id: 'p1', name: 'Openingsbericht', body: 'Hoi!' }
+const mockFaq: AiItem = { id: 'f1', name: 'Vergoeding' }
+
+describe('PromptsTab — delete failure must not remove the prompt from the list', () => {
+  beforeEach(() => {
+    vi.mocked(api.get).mockReset()
+    vi.mocked(api.delete).mockReset()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/ai/prompts') return Promise.resolve({ data: [mockPrompt] })
+      if (url === `/ai/prompts/${mockPrompt.id}/versions`) return Promise.resolve({ data: [] })
+      return Promise.resolve({ data: [] })
+    })
+  })
+  afterEach(() => vi.restoreAllMocks())
+
+  it('keeps the prompt on screen and toasts an error when DELETE rejects', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    vi.mocked(api.delete).mockRejectedValue(new Error('network error'))
+    const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
+
+    render(<PromptsTab />)
+    await screen.findByText('Openingsbericht')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Verwijderen' }))
+
+    await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
+      detail: { type: 'error', message: 'Actie mislukt — probeer het opnieuw.' },
+    })))
+    expect(api.delete).toHaveBeenCalledWith('/ai/prompts/p1')
+    expect(screen.getByText('Openingsbericht')).toBeInTheDocument()
+  })
+})
+
+describe('FAQTab — delete failure must not remove the FAQ from the list', () => {
+  beforeEach(() => {
+    vi.mocked(api.get).mockReset()
+    vi.mocked(api.delete).mockReset()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/ai/faqs') return Promise.resolve({ data: [mockFaq] })
+      return Promise.resolve({ data: [] })
+    })
+  })
+  afterEach(() => vi.restoreAllMocks())
+
+  it('keeps the FAQ on screen and toasts an error when DELETE rejects', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    vi.mocked(api.delete).mockRejectedValue(new Error('network error'))
+    const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
+
+    render(<FAQTab />)
+    await screen.findByText('Vergoeding')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Verwijderen' }))
+
+    await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
+      detail: { type: 'error', message: 'Actie mislukt — probeer het opnieuw.' },
+    })))
+    expect(api.delete).toHaveBeenCalledWith('/ai/faqs/f1')
+    expect(screen.getByText('Vergoeding')).toBeInTheDocument()
+  })
+})
+
+// Audit 2026-07-28 (fake affordance, §3): the tool checklist used to be a live toggle
+// whose state never left the component (no `tools` field on AiAgent, no persistence
+// route). It must now render as an honest, disabled, read-only list instead of a
+// control that looks like it saves per-agent tool access.
+describe('ToolsTab — read-only honest notice (no backend endpoint exists yet)', () => {
+  it('shows the "not available" notice and renders every tool row as disabled', () => {
+    render(<ToolsTab />)
+
+    expect(screen.getByText('Nog niet gekoppeld aan een agent — deze keuzes worden niet opgeslagen.')).toBeInTheDocument()
+    expect(screen.getByText('Dienst opzoeken')).toBeInTheDocument()
+    // No button/checkbox role anywhere — there is nothing left to click.
+    expect(screen.queryByRole('button')).toBeNull()
+    expect(screen.queryByRole('checkbox')).toBeNull()
   })
 })

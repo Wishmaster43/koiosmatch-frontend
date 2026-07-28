@@ -33,7 +33,7 @@ beforeEach(() => vi.clearAllMocks())
 const customer = (overrides: Partial<Customer> = {}): Customer => ({
   id: 1, name: 'Test customer', initials: 'TC', debtorNumber: '', status: 'prospect',
   statusLabel: 'Prospect', statusColor: 'slate', owner: '', ownerId: null, ownerInitials: '', ownerColor: null,
-  city: '', lat: null, lng: null, distanceKm: null, industry: '', website: '', employeeCount: '',
+  city: '', email: '', phone: '', lat: null, lng: null, distanceKm: null, industry: '', website: '', employeeCount: '',
   toneOfVoice: '', description: '', recruitmentProblems: '', privacyPolicyUrl: '',
   hideCompanyName: false, hasCareerPage: false, showInVacancies: false, excludeFromSourcing: false,
   costCenter: '', billingEmail: '', tags: [], archived: false, locations: [], departments: [], contacts: [],
@@ -116,5 +116,16 @@ describe('useCustomerRecord · updateCustomer', () => {
     const r = harness([customer({ id: 1 })])
     act(() => { r.result.current.record.updateCustomer(1, { unknownField: 'x' }) })
     expect(mockedPatch).not.toHaveBeenCalled()
+  })
+
+  // JOB-CONTACT-1 (Danny 28-07): the customer's own e-mail/phone Contact card —
+  // FIELD_MAP must send the exact API keys, not silently drop them.
+  it('maps email/phone to their API keys', async () => {
+    mockedPatch.mockResolvedValue({})
+    const r = harness([customer({ id: 1, email: 'old@rivas.nl', phone: '010-000' })])
+    act(() => { r.result.current.record.updateCustomer(1, { email: 'new@rivas.nl', phone: '010-111' }) })
+    expect(mockedPatch).toHaveBeenCalledWith('/customers/1', { email: 'new@rivas.nl', phone: '010-111' })
+    await waitFor(() => expect(r.result.current.customers[0].email).toBe('new@rivas.nl'))
+    expect(r.result.current.customers[0].phone).toBe('010-111')
   })
 })

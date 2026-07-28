@@ -1,6 +1,8 @@
 {
   "filters": { "shift": "Shift", "location": "Location" },
   "addShift": "Add shift",
+  "previewNotice": "Preview only — shifts shown here are demo data and nothing added is saved to your live schedule yet.",
+  "previewSaveTitle": "Not connected yet — this shift will not be saved.",
   "sectionOrder": "Order",
   "sectionLocation": "Location",
   "sectionColor": "Color",

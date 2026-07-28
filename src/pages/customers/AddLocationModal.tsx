@@ -23,23 +23,16 @@ import { Field, TextField, CheckboxField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { cardHead, cardBox, row2, row3Even, row } from '@/components/ui/modalCards'
 import type { LocationPayload } from './hooks/useCustomerLocations'
 import type { Location } from '@/types/customer'
 import type { LookupOption } from '@/types/common'
 
-// Card chrome — mirrors AddContactPersonModal/matchPlacement's cardHead/cardBox
-// exactly (11px uppercase muted heading over a bordered surface) so every
-// "wide form" modal under pages/customers reads as the same system (Danny 27-07).
-const cardHead = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
-const cardBox = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, display: 'flex', flexDirection: 'column' as const, gap: 12 }
-const row2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }
-// Even 3-across (KvK/BTW/kostenplaats) — the panel is wide enough now that all
-// three "Zakelijk" fields fit on one row instead of a cramped two-field card.
-const row3Even = { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }
 // Weighted rows for the address block (mirrors the candidate AddressCard's own
-// street/postcode ratios — the same real-world field, same proportions).
-const rowStreet = { display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 12 }
-const rowPostal = { display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12 }
+// street/postcode ratios — the same real-world field, same proportions) — a
+// one-off column split only this card needs, built from the shared `row()`.
+const rowStreet = row('2fr 1fr 1fr')
+const rowPostal = row('1fr 2fr')
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 // No billing_email entry (Danny 2026-07-22): that field has no input here anymore

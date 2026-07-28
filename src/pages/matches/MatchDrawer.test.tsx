@@ -41,14 +41,14 @@ describe('MatchDrawer · Koppelingen tab (EXTRACT-1)', () => {
   it('renders "Koppelingen" as the LAST tab, after Overzicht/Contract & financieel/Relaties', () => {
     render(<MatchDrawer match={match} onClose={vi.fn()} />)
     const tabLabels = ['Overzicht', 'Contract & financieel', 'Relaties', 'Koppelingen']
-    const tabButtons = screen.getAllByRole('button').filter(b => tabLabels.includes(b.textContent ?? ''))
+    const tabButtons = screen.getAllByRole('tab').filter(b => tabLabels.includes(b.textContent ?? ''))
     expect(tabButtons.map(b => b.textContent)).toEqual(tabLabels)
   })
 
   it('shows the shared BackofficeLinksTab content when the Koppelingen tab is clicked, with the right entity/id/canLink props', async () => {
     const user = userEvent.setup()
     render(<MatchDrawer match={match} onClose={vi.fn()} canLinkBackoffice />)
-    await user.click(screen.getByRole('button', { name: 'Koppelingen' }))
+    await user.click(screen.getByRole('tab', { name: 'Koppelingen' }))
     expect(screen.getByText('backoffice-links-content')).toBeInTheDocument()
     expect(mockBackofficeLinksTab).toHaveBeenCalledWith(expect.objectContaining({
       entity: 'matches', id: 'm1', canLink: true,
@@ -59,7 +59,7 @@ describe('MatchDrawer · Koppelingen tab (EXTRACT-1)', () => {
   it('defaults canLink to false when the caller omits canLinkBackoffice (no matches.update permission)', async () => {
     const user = userEvent.setup()
     render(<MatchDrawer match={match} onClose={vi.fn()} />)
-    await user.click(screen.getByRole('button', { name: 'Koppelingen' }))
+    await user.click(screen.getByRole('tab', { name: 'Koppelingen' }))
     expect(mockBackofficeLinksTab).toHaveBeenCalledWith(expect.objectContaining({ canLink: false }))
   })
 })

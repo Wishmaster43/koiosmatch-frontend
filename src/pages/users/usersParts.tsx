@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { ShieldCheck, Shield, User, Loader2, ChevronDown } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import { COLOR_PRESETS } from '@/lib/colorPresets'
 import RoleChip from '@/components/ui/RoleChip'
 import type { ManagedUser } from '@/types/api'
@@ -94,7 +95,11 @@ export function RoleSelector({ user: u, availableRoles, onChanged }: {
     try {
       const res = await api.put(`/users/${u.id}/roles`, { roles: [roleId] })
       onChanged(unwrap(res))
-    } catch { /* noop */ }
+    } catch {
+      // A 403 (insufficient permission) or validation error left this completely
+      // silent before — the menu just closed with nothing changed, no clue why (§3).
+      notifyError(t('changeRoleFailed'))
+    }
     setSaving(false)
   }
 

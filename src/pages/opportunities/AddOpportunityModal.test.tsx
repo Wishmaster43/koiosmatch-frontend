@@ -31,7 +31,10 @@ vi.mock('@/lib/useOpportunityLookups', () => ({
 vi.mock('./hooks/useCustomerCascade', () => ({
   useCustomerCascade: () => ({
     locations: [{ id: 'loc-1', name: 'Locatie Noord', departments: [{ id: 'dep-1', name: 'Afdeling A' }] }],
-    contacts: [{ id: 'con-1', name: 'Jan Jansen' }],
+    // 'con-2' shares a name with a real duplicate (Danny 28-07 screenshot: same
+    // contact coupled to several locations/departments) but carries a function —
+    // the option label must disambiguate it, the submitted id must stay the id.
+    contacts: [{ id: 'con-1', name: 'Jan Jansen' }, { id: 'con-2', name: 'Eva Bos', function: 'HR Manager' }],
   }),
 }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'me-1', name: 'Piet' } }) }))
@@ -144,6 +147,23 @@ describe('AddOpportunityModal · same POST payload as before, searchable picks i
     expect(api.post).toHaveBeenCalledWith('/opportunities', expect.objectContaining({
       customer_location_id: 'loc-1', department_id: 'dep-1', contact_id: 'con-1',
     }))
+  })
+
+  it('contact picker (28-07): the option label carries the function title, but the id submitted stays plain', async () => {
+    const user = userEvent.setup()
+    render(<AddOpportunityModal onClose={noop} customers={[{ id: 'cust-1', name: 'Acme' }]} />)
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Kans met contact')
+    await user.click(fieldTrigger('modal.fields.client'))
+    await user.click(await screen.findByRole('button', { name: 'Acme' }))
+
+    await user.click(fieldTrigger('modal.fields.contact'))
+    // The disambiguated label is what renders — a bare "Eva Bos" button must not exist.
+    expect(screen.queryByRole('button', { name: 'Eva Bos' })).not.toBeInTheDocument()
+    await user.click(await screen.findByRole('button', { name: 'Eva Bos — HR Manager' }))
+
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+    // The REQUEST carries the plain contact id — the function title is cosmetic only.
+    expect(api.post).toHaveBeenCalledWith('/opportunities', expect.objectContaining({ contact_id: 'con-2' }))
   })
 })
 

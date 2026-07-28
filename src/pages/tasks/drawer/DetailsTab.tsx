@@ -31,10 +31,29 @@ function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
   )
 }
 
+const iconBtnBase: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
+
+// Shared save/cancel icon pair — used by both independently-editable sections below.
+function EditControls({ onSave, onCancel, saveLabel, cancelLabel }: { onSave: () => void; onCancel: () => void; saveLabel: string; cancelLabel: string }) {
+  return (
+    <div style={{ display: 'flex', gap: 4 }}>
+      <button onClick={onSave} title={saveLabel} aria-label={saveLabel}
+        style={{ ...iconBtnBase, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+      <button onClick={onCancel} title={cancelLabel} aria-label={cancelLabel}
+        style={{ ...iconBtnBase, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+    </div>
+  )
+}
+
 /**
  * DetailsTab — the task's core fields, read by default with an in-place edit
- * (pencil → diskette/✕). Lookups (type/status/priority) and the assignee come from
- * the tenant lookup + /users; nothing is hardcoded. Owner is always read-only.
+ * (pencil → diskette/✕). Split into two independently-editable sections (Danny
+ * 2026-07-28 drill-down audit): the short classification/scheduling/assignee fields
+ * share ONE pencil, and the free-text description gets its OWN pencil — mirrors the
+ * candidate profile summary (§3A: every prose field edits separately from the short
+ * fields around it) — so editing one never discards an in-progress edit on the other.
+ * Lookups (type/status/priority) and the assignee come from the tenant lookup +
+ * /users; nothing is hardcoded. Owner is always read-only.
  */
 export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpdate: (patch: Record<string, unknown>) => void }) {
   const { t } = useTranslation('tasks')
@@ -44,100 +63,121 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
 
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<Record<string, unknown>>({})
+  // Description edits independently of the fields above (own pencil/save/cancel).
+  const [descEditing, setDescEditing] = useState(false)
+  const [descDraft, setDescDraft] = useState('')
   const [descExpanded, setDescExpanded] = useState(false)
 
-  // Enter edit mode with a draft seeded from the current values.
+  // Enter edit mode with a draft seeded from the current field values (description
+  // is seeded/saved separately below — it never rides along in this patch).
   const startEdit = () => {
     setDraft({ typeKey: task.typeKey, statusKey: task.statusKey, priorityKey: task.priorityKey,
-      due: task.due || '', dueTime: task.dueTime || '', assigneeId: task.assigneeId ?? '', description: task.description ?? '' })
+      due: task.due || '', dueTime: task.dueTime || '', assigneeId: task.assigneeId ?? '' })
     setEditing(true)
   }
   const setD = (k: string, v: unknown) => setDraft(d => ({ ...d, [k]: v }))
 
-  // Persist: build the patch (incl. a rebuilt assignee object for the optimistic UI).
+  // Persist the fields block: build the patch (incl. a rebuilt assignee object for
+  // the optimistic UI). `handleUpdate` (useTaskDrawerActions) only PATCHes the keys
+  // present here, so leaving description out changes nothing about the request shape.
   const save = () => {
     const sel = users.find(u => String(u.id) === String(draft.assigneeId))
     const assignee = sel ? { name: userName(sel), initials: initialsOf(userName(sel)), color: sel.avatar_color ?? null } : null
     onUpdate({ typeKey: draft.typeKey, statusKey: draft.statusKey, priorityKey: draft.priorityKey,
-      due: draft.due || '', dueTime: draft.dueTime || '', description: draft.description,
+      due: draft.due || '', dueTime: draft.dueTime || '',
       assigneeId: draft.assigneeId || null, assignee })
     setEditing(false)
   }
+
+  // Description block: its own start/save/cancel, isolated from the fields' draft above.
+  const startDescEdit = () => { setDescDraft(task.description ?? ''); setDescEditing(true) }
+  const saveDesc = () => { onUpdate({ description: descDraft }); setDescEditing(false) }
+  const cancelDesc = () => setDescEditing(false)
 
   // Label only — `icon` holds a lucide NAME, never prefix it as text (2026-07-08).
   const opts = (list: TaskLookupItem[]) => list.map(i => ({ value: i.value, label: i.label }))
   const assigneeOpts = [{ value: '', label: t('bureau') }, ...users.map(u => ({ value: String(u.id), label: userName(u) }))]
 
-  const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
-
   return (
-    <div>
-      {/* Header with the edit toggle */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('details.title')}</span>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div>
+        {/* Header with the edit toggle for the classification/scheduling/assignee block */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('details.title')}</span>
+          {editing ? (
+            <EditControls onSave={save} onCancel={() => setEditing(false)} saveLabel={t('comments.send')} cancelLabel={t('modal.cancel')} />
+          ) : !task.archived && (
+            // No edit on an ARCHIVED task. W2 delivered (measured: TaskController::update
+            // is now withTrashed, so the PATCH no longer 404s) — the gating stays anyway:
+            // restore first is a deliberate product choice (mirrors the header gating).
+            <button onClick={startEdit} title={t('details.title')} aria-label={t('details.title')}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
+              <Edit2 size={13} />
+            </button>
+          )}
+        </div>
+
         {editing ? (
-          <div style={{ display: 'flex', gap: 4 }}>
-            <button onClick={save} title={t('comments.send')} aria-label={t('comments.send')}
-              style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
-            <button onClick={() => setEditing(false)} title={t('modal.cancel')} aria-label={t('modal.cancel')}
-              style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <Field label={t('details.type')}><SelectField value={draft.typeKey as string} onChange={v => setD('typeKey', v)} options={opts(types)} /></Field>
+            <Field label={t('details.status')}><SelectField value={draft.statusKey as string} onChange={v => setD('statusKey', v)} options={opts(statuses)} /></Field>
+            <Field label={t('details.priority')}><SelectField value={draft.priorityKey as string} onChange={v => setD('priorityKey', v)} options={opts(priorities)} /></Field>
+            {/* TASK-DUE-TIME-1: date + optional time-of-day, paired half-row. */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <Field label={t('details.due')}><DateField value={draft.due as string} onChange={v => setD('due', v)} /></Field>
+              <Field label={t('details.dueTime')}><TextField type="time" value={draft.dueTime as string} onChange={v => setD('dueTime', v)} /></Field>
+            </div>
+            <Field label={t('details.assignee')}><SelectField value={String(draft.assigneeId)} onChange={v => setD('assigneeId', v)} options={assigneeOpts} /></Field>
           </div>
-        ) : !task.archived && (
-          // No edit on an ARCHIVED task. W2 delivered (measured: TaskController::update
-          // is now withTrashed, so the PATCH no longer 404s) — the gating stays anyway:
-          // restore first is a deliberate product choice (mirrors the header gating).
-          <button onClick={startEdit} title={t('details.title')} aria-label={t('details.title')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
-            <Edit2 size={13} />
-          </button>
+        ) : (
+          <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
+            <Row label={t('details.type')}>{task.typeLabel ? <SoftChip label={task.typeLabel} color={task.typeColor} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
+            <Row label={t('details.status')}>{task.statusLabel ? <SoftChip label={task.statusLabel} color={task.statusColor} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
+            <Row label={t('details.priority')}>{task.priorityLabel ? <SoftChip label={task.priorityLabel} color={task.priorityColor} dot /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
+            <Row label={t('details.due')}>
+              <span style={{ fontSize: 12, color: task.due ? (isTaskOverdue(task) ? 'var(--color-danger)' : 'var(--text)') : 'var(--text-muted)', fontWeight: isTaskOverdue(task) ? 600 : 400 }}>
+                {/* TASK-DUE-TIME-1: DD-MM-YYYY HH:mm when a time is set, date-only otherwise. */}
+                {task.due ? (task.dueTime ? formatDateTime(dueDateTime(task.due, task.dueTime)) : formatDate(task.due)) : '—'}
+              </span>
+            </Row>
+            <Row label={t('details.assignee')}>
+              {task.assignee ? (
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Avatar initials={task.assignee.initials} size={20} color={task.assignee.color} />
+                  <span style={{ fontSize: 12, color: 'var(--text)' }}>{task.assignee.name}</span>
+                </span>
+              ) : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('bureau')}</span>}
+            </Row>
+            <Row label={t('details.owner')}><span style={{ fontSize: 12, color: 'var(--text)' }}>{task.owner?.name || '—'}</span></Row>
+          </div>
         )}
       </div>
 
-      {editing ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <Field label={t('details.type')}><SelectField value={draft.typeKey as string} onChange={v => setD('typeKey', v)} options={opts(types)} /></Field>
-          <Field label={t('details.status')}><SelectField value={draft.statusKey as string} onChange={v => setD('statusKey', v)} options={opts(statuses)} /></Field>
-          <Field label={t('details.priority')}><SelectField value={draft.priorityKey as string} onChange={v => setD('priorityKey', v)} options={opts(priorities)} /></Field>
-          {/* TASK-DUE-TIME-1: date + optional time-of-day, paired half-row. */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field label={t('details.due')}><DateField value={draft.due as string} onChange={v => setD('due', v)} /></Field>
-            <Field label={t('details.dueTime')}><TextField type="time" value={draft.dueTime as string} onChange={v => setD('dueTime', v)} /></Field>
-          </div>
-          <Field label={t('details.assignee')}><SelectField value={String(draft.assigneeId)} onChange={v => setD('assigneeId', v)} options={assigneeOpts} /></Field>
-          {/* Description = the note body — same rich editor as the candidate profile text. */}
-          <Field label={t('details.description')}>
-            <RichTextEditor value={draft.description as string} onChange={v => setD('description', v)}
-              expanded={descExpanded} onToggleExpand={() => setDescExpanded(e => !e)} />
-          </Field>
+      <div>
+        {/* Description — free-text rich block, own pencil (§3A: every prose field gets
+            its own save/cancel, never bundled with the short fields above). */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('details.description')}</span>
+          {descEditing ? (
+            <EditControls onSave={saveDesc} onCancel={cancelDesc} saveLabel={t('comments.send')} cancelLabel={t('modal.cancel')} />
+          ) : !task.archived && (
+            <button onClick={startDescEdit} title={t('details.description')} aria-label={t('details.description')}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
+              <Edit2 size={13} />
+            </button>
+          )}
         </div>
-      ) : (
-        <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
-          <Row label={t('details.type')}>{task.typeLabel ? <SoftChip label={task.typeLabel} color={task.typeColor} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
-          <Row label={t('details.status')}>{task.statusLabel ? <SoftChip label={task.statusLabel} color={task.statusColor} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
-          <Row label={t('details.priority')}>{task.priorityLabel ? <SoftChip label={task.priorityLabel} color={task.priorityColor} dot /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
-          <Row label={t('details.due')}>
-            <span style={{ fontSize: 12, color: task.due ? (isTaskOverdue(task) ? 'var(--color-danger)' : 'var(--text)') : 'var(--text-muted)', fontWeight: isTaskOverdue(task) ? 600 : 400 }}>
-              {/* TASK-DUE-TIME-1: DD-MM-YYYY HH:mm when a time is set, date-only otherwise. */}
-              {task.due ? (task.dueTime ? formatDateTime(dueDateTime(task.due, task.dueTime)) : formatDate(task.due)) : '—'}
-            </span>
-          </Row>
-          <Row label={t('details.assignee')}>
-            {task.assignee ? (
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Avatar initials={task.assignee.initials} size={20} color={task.assignee.color} />
-                <span style={{ fontSize: 12, color: 'var(--text)' }}>{task.assignee.name}</span>
-              </span>
-            ) : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('bureau')}</span>}
-          </Row>
-          <Row label={t('details.owner')}><span style={{ fontSize: 12, color: 'var(--text)' }}>{task.owner?.name || '—'}</span></Row>
-          <div style={{ padding: '9px 12px' }}>
-            <span style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>{t('details.description')}</span>
+        {descEditing ? (
+          <RichTextEditor value={descDraft} onChange={setDescDraft}
+            expanded={descExpanded} onToggleExpand={() => setDescExpanded(e => !e)} />
+        ) : (
+          <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', padding: '9px 12px' }}>
             {task.description
               ? <SafeHtml html={task.description} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
               : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

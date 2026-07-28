@@ -1,7 +1,7 @@
 {
   "title": "Kandidaten",
   "page": {
-    "add": "Kandidat hinzufügen",
+    "add": "Neuer Kandidat",
     "blacklistView": "Blacklist",
     "archivedView": "Archiviert",
     "filterUnsupported": "Dieser Filter wird (noch) nicht vom Server unterstützt.",
@@ -161,7 +161,7 @@
     "phase": "Phase"
   },
   "modal": {
-    "title": "Kandidat hinzufügen",
+    "title": "Neuer Kandidat",
     "newPrefix": "Neu",
     "candidateData": "Kandidatendaten",
     "fillRequired": "Pflichtfelder ausfüllen",
@@ -697,6 +697,7 @@
   },
   "cv": {
     "contact": "Kontakt",
+    "summary": "Zusammenfassung",
     "languages": "Sprachen",
     "skills": "Fähigkeiten",
     "certificates": "Zertifikate",

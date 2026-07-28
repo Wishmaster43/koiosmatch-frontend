@@ -37,6 +37,9 @@
     }
   },
   "customers": {
+    "title": "Detalles — Clientes",
+    "summary": "{{shown}} de {{total}} clientes",
+    "search": "Buscar por nombre, número de deudor, gestor de cuenta…",
     "loading": "Cargando clientes…",
     "empty": "No se encontraron clientes",
     "loadError": "No se pudieron cargar los clientes.",

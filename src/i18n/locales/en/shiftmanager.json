@@ -311,6 +311,9 @@
       "byCustomer": "By customer"
     }
   },
+  "customersPage": {
+    "addDisabledReason": "New customers are created in ShiftManager and mirrored here automatically."
+  },
   "locationsPage": {
     "drawerTitle": "Location",
     "kpi": {
@@ -343,10 +346,8 @@
       "phone": "Phone",
       "email": "Email",
       "departments": "Departments",
-      "add": "Add",
       "noDepartments": "No departments linked",
-      "activeShifts": "Active shifts",
-      "edit": "Edit location"
+      "activeShifts": "Active shifts"
     }
   },
   "contactsPage": {
@@ -387,7 +388,6 @@
     "shifts": "Shifts",
     "notes": "Notes",
     "noNotes": "No notes yet",
-    "edit": "Edit department",
     "empty": "No departments found",
     "count": "{{count}} departments",
     "kpi": {

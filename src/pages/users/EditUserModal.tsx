@@ -54,7 +54,12 @@ export default function EditUserModal({ user, onClose, onSaved }: {
         phone:     form.phone,
       }
       if (changePassword && form.password) payload.password = form.password
-      const res = await api.patch(`/users/${user.id}`, payload)
+      // PUT because that is what the generated contract documents (operations
+      // .putUsersUserId; the spec lists no patch for this path). The live route accepts
+      // BOTH verbs — Route::match(['put','patch'], 'users/{user}') — so the previous
+      // PATCH was not failing; this simply follows the documented contract, which is
+      // what a spec-driven client should send. Verified 28-07.
+      const res = await api.put(`/users/${user.id}`, payload)
       onSaved(unwrap(res))
       onClose()
     } catch (err) {

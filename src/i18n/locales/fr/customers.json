@@ -7,7 +7,7 @@
     "geblokkeerd": "Bloqué"
   },
   "page": {
-    "add": "Ajouter un client",
+    "add": "Nouveau client",
     "searchPlaceholder": "Rechercher client, n° débiteur, gestionnaire…",
     "empty": "Aucun client trouvé.",
     "loading": "Chargement…",
@@ -67,8 +67,10 @@
     "tags": "Étiquettes",
     "addTag": "Ajouter une étiquette",
     "back": "Retour",
+    "newTask": "Nouvelle tâche",
     "tabs": {
       "overview": "Aperçu",
+      "vacancySettings": "Visibilité des postes",
       "locations": "Sites",
       "departments": "Services",
       "contacts": "Contacts",
@@ -89,6 +91,12 @@
   "overview": {
     "general": "Général",
     "branch": "Agence",
+    "branchesLabel": "Agence",
+    "branchesLink": "Associer une agence",
+    "branchesEmpty": "Aucune agence rattachée.",
+    "contact": "Contact",
+    "email": "Adresse e-mail",
+    "phone": "Téléphone",
     "online": "En ligne",
     "settings": "Paramètres",
     "textsTitle": "Textes",
@@ -98,10 +106,7 @@
     "industry": "Secteur",
     "debtorNumber": "Numéro de débiteur",
     "city": "Ville",
-    "hideCompanyName": "Masquer le nom de l'entreprise",
     "hasCareerPage": "Possède une page carrière",
-    "showInVacancies": "Afficher dans mes postes",
-    "excludeFromSourcing": "Exclure du sourcing",
     "privacyPolicyUrl": "URL politique de confidentialité",
     "description": "Description",
     "recruitmentProblems": "Difficultés de recrutement",
@@ -111,6 +116,21 @@
   },
   "richText": {
     "empty": "Pas encore renseigné."
+  },
+  "vacancySettings": {
+    "title": "Visibilité des postes",
+    "subtitle": "Comment ce client apparaît dans les postes et le sourcing. La valeur par défaut se trouve dans Paramètres → Clients ; chaque client peut s'en écarter.",
+    "fields": {
+      "hideCompanyName": "Masquer le nom de l'entreprise",
+      "showInVacancies": "Afficher dans mes postes",
+      "excludeFromSourcing": "Exclure du sourcing"
+    },
+    "tenantDefault": "Par défaut : {{value}}",
+    "on": "activé",
+    "off": "désactivé",
+    "followsDefault": "suit la valeur par défaut",
+    "deviates": "diffère de la valeur par défaut",
+    "resetToDefault": "Rétablir la valeur par défaut"
   },
   "locations": {
     "empty": "Aucun site pour le moment",
@@ -127,6 +147,7 @@
       "addressTitle": "Adresse & informations",
       "name": "Nom",
       "status": "Statut",
+      "changeStatus": "Modifier le statut",
       "headquarter": "Siège principal",
       "street": "Rue",
       "houseNumber": "N°",
@@ -368,7 +389,7 @@
     "mutateError": "L'action a échoué."
   },
   "modal": {
-    "title": "Ajouter un client",
+    "title": "Nouveau client",
     "subtitle": "Saisissez les informations du nouveau client",
     "fillRequired": "Remplissez les champs obligatoires",
     "required": "Champ obligatoire",
@@ -391,11 +412,11 @@
     }
   },
   "subModal": {
-    "addLocation": "Ajouter un site",
+    "addLocation": "Nouveau site",
     "editLocation": "Modifier le site",
-    "addDepartment": "Ajouter un service",
+    "addDepartment": "Nouveau service",
     "editDepartment": "Modifier le service",
-    "addContact": "Ajouter un contact",
+    "addContact": "Nouveau contact",
     "editContact": "Modifier le contact",
     "locationName": "Nom du site",
     "locationPlaceholder": "P. ex. Siège",
@@ -405,6 +426,7 @@
     "selectLocation": "Site",
     "selectDepartment": "Service",
     "noLocationsFirst": "Créez d'abord un site",
+    "pickLocationFirst": "Sélectionnez d'abord un site",
     "noneOption": "Aucun",
     "firstName": "Prénom",
     "lastName": "Nom",

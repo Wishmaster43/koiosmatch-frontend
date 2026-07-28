@@ -9,12 +9,14 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act, waitFor, cleanup } from '@testing-library/react'
 import { useProfileForm } from './useProfileForm'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
 vi.mock('@/context/AuthContext', () => ({
   useAuth: () => ({ user: { id: 'u1', firstname: 'Jane', lastname: 'Doe', email: 'jane@x.nl', phone: '' }, refreshUser: vi.fn() }),
 }))
 vi.mock('@/lib/api', () => ({ default: { put: vi.fn(), post: vi.fn(), delete: vi.fn() } }))
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
 
 // jsdom has no real blob: URL support — stub with predictable, distinguishable values.
 let urlSeq = 0
@@ -64,13 +66,14 @@ describe('useProfileForm avatar blob URL lifecycle', () => {
     await waitFor(() => expect(revokeObjectURL).toHaveBeenCalledWith('blob:mock-1'))
   })
 
-  it('keeps the local preview (no revoke) when the upload fails', async () => {
+  it('reverts the local preview and surfaces an error when the upload fails (§3 — a failed save must never look saved)', async () => {
     vi.mocked(api.post).mockRejectedValue(new Error('500'))
     const { result } = renderHook(() => useProfileForm())
 
     await act(async () => { await result.current.onPickAvatar(pickEvent(file('a.png'))) })
-    expect(result.current.photo).toBe('blob:mock-1')
-    expect(revokeObjectURL).not.toHaveBeenCalled()
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:mock-1')
+    expect(result.current.photo).toBeNull()
+    expect(notifyError).toHaveBeenCalledWith('profile.avatarUploadFailed')
   })
 
   it('revokes the tracked object URL on unmount', () => {

@@ -163,6 +163,10 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     ownerInitials: initialsOf(owner.name ?? c.account_manager ?? c.owner_name ?? ''),
     ownerColor: owner.avatar_color ?? c.owner_color ?? null,
     city: c.city ?? '',
+    // JOB-CONTACT-1 (Danny 28-07): the customer's own e-mail/phone — the backend
+    // already sends both (CustomerDetailResource), the mapper simply never read them.
+    email: c.email ?? '',
+    phone: c.phone ?? '',
     // STRAAL-1: geocoded coordinates + radius distance from the server.
     // PDOK-LATLNG-1: tolerant coercion — Laravel decimals arrive as strings (see lib/coords).
     lat: toCoord(c.lat),

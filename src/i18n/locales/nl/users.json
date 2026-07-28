@@ -10,6 +10,7 @@
   "createFailed": "Aanmaken mislukt.",
   "pwPlaceholder": "Minimaal 8 tekens",
   "changeRole": "Rol wijzigen",
+  "changeRoleFailed": "Rol wijzigen mislukt. Probeer het opnieuw.",
   "avatarColor": "Kleur van het icoon",
   "avatarColorAuto": "Automatisch",
   "title": "Gebruikers",

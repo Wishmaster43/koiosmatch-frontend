@@ -162,6 +162,7 @@
     "functions": "Funktionen",
     "contact_functions": "Funktionen",
     "customer_display": "Tabellenanzeige",
+    "customer_vacancy_defaults": "Stellensichtbarkeit",
     "vacancy_app_defaults": "Bewerbungseinstellungen",
     "opportunity_display": "Tabellenansicht",
     "dashboards": "Dashboards",
@@ -292,30 +293,36 @@
     "subtitle": "Pro Spalte: farbige Labels oder Klartext. Die KPI-Diagramme behalten ihre Farben immer.",
     "fields": {
       "candidate_table_color_funnel": {
-        "label": "Funnel-Typ"
+        "label": "Funnel-Typ",
+        "description": "An = Funnel-Typ als farbiges Label. Aus = einfacher Text."
       },
       "candidate_table_color_type": {
-        "label": "Kandidatentyp"
+        "label": "Vertragsform",
+        "description": "An = Vertragsform als farbiges Label. Aus = einfacher Text."
       },
       "candidate_table_color_pool": {
-        "label": "Talentpool"
+        "label": "Talentpool",
+        "description": "An = Talentpool als farbiges Label. Aus = einfacher Text."
       },
       "candidate_table_color_koios": {
-        "label": "Koios AI"
+        "label": "Koios AI",
+        "description": "An = Koios-KI-Hinweis als farbiges Label. Aus = einfacher Text."
       },
       "candidate_avatar_colored_by_gender": {
         "label": "Namens-Avatar je Geschlecht",
         "description": "Ein = der Avatar neben dem Kandidatennamen wird je Geschlecht gefärbt. Aus = ein ruhiges Grau."
       },
       "candidate_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "An = Status als farbiges Label. Aus = einfacher Text."
       },
       "candidate_table_color_owner": {
         "label": "Inhaber-Farbe",
         "description": "Ein = der Inhaber-Avatar nutzt die Recruiter-Farbe. Aus = neutrales Grau."
       },
       "candidate_table_color_phase": {
-        "label": "Phase"
+        "label": "Phase",
+        "description": "An = Phase als farbiges Label. Aus = einfacher Text."
       }
     }
   },
@@ -553,7 +560,15 @@
     "color1": "Farbe 1",
     "color2": "Farbe 2",
     "sections": "Abschnitte",
-    "sectionsHint": "Legen Sie fest, welche Abschnitte sichtbar sind und in welcher Reihenfolge.",
+    "sectionsHint": "Legen Sie fest, welche Abschnitte sichtbar sind, in welcher Reihenfolge und ob sie in der Seitenleiste oder der Hauptspalte stehen.",
+    "regionSidebar": "Seitenleiste",
+    "regionMain": "Hauptspalte",
+    "regionHeader": "Kopfzeile",
+    "regionFixedMainHint": "Dieser Abschnitt ist zu umfangreich für die schmale Seitenleiste und steht daher immer in der Hauptspalte.",
+    "regionHeaderHint": "Dieser Abschnitt steht in der Kopfzeile über dem Namen und hat keine eigene Spalte.",
+    "moveSectionUp": "'{{section}}' nach oben verschieben",
+    "moveSectionDown": "'{{section}}' nach unten verschieben",
+    "moveSectionToRegion": "'{{section}}' in {{region}} platzieren",
     "preview": "Vorschau",
     "previewHint": "A4 — mit Beispielkandidat"
   },
@@ -1512,13 +1527,16 @@
     "subtitle": "Pro Spalte: farbige Labels oder Klartext. Das Aufgaben-Board behält seine Farben immer.",
     "fields": {
       "task_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "An = Aufgabenstatus als farbiges Label. Aus = einfacher Text."
       },
       "task_table_color_priority": {
-        "label": "Priorität"
+        "label": "Priorität",
+        "description": "An = Priorität als farbiges Label. Aus = einfacher Text."
       },
       "task_table_color_type": {
-        "label": "Typ"
+        "label": "Typ",
+        "description": "An = Aktivitätstyp als farbiges Label. Aus = einfacher Text."
       },
       "task_table_color_assignee": {
         "label": "Farbe des Zuständigen",
@@ -1696,13 +1714,16 @@
     "subtitle": "Pro Spalte: farbige Labels oder Klartext. Die KPI-Diagramme behalten immer ihre Farben.",
     "fields": {
       "application_table_color_score": {
-        "label": "Match-Score"
+        "label": "Match-Score",
+        "description": "An = Match-Score als farbiger Chip. Aus = einfacher Text."
       },
       "application_table_color_phase": {
-        "label": "Phase"
+        "label": "Phase",
+        "description": "An = Phase als farbiges Label. Aus = einfacher Text."
       },
       "application_table_color_status": {
-        "label": "Kandidatenstatus"
+        "label": "Kandidatenstatus",
+        "description": "An = Kandidatenstatus als farbiges Label. Aus = einfacher Text."
       },
       "application_table_color_owner": {
         "label": "Eigentümer-Farbe",
@@ -1732,14 +1753,34 @@
     "subtitle": "Pro Spalte: farbige Labels oder einfacher Text. Die KPI-Diagramme behalten immer ihre Farben.",
     "fields": {
       "customer_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "An = Kundenstatus als farbiges Label. Aus = einfacher Text."
       },
       "customer_table_color_koios": {
-        "label": "Koios AI"
+        "label": "Koios AI",
+        "description": "An = Koios-KI-Hinweis als farbiges Label. Aus = einfacher Text."
       },
       "customer_table_color_owner": {
         "label": "Eigentümerfarbe",
         "description": "An = der Eigentümer-Avatar nutzt die Farbe des Account-Managers. Aus = neutrales Grau."
+      }
+    }
+  },
+  "customerVacancyDefaults": {
+    "title": "Stellensichtbarkeit (Standard)",
+    "subtitle": "Der Mandanten-Standard für neue und bestehende Kunden. Pro Kunde abweichbar über den Tab Stellensichtbarkeit.",
+    "fields": {
+      "customer_default_hide_company_name": {
+        "label": "Firmennamen verbergen",
+        "description": "An = Firmenname dieses Kunden auf Stellen und Karriereseite verbergen."
+      },
+      "customer_default_show_in_vacancies": {
+        "label": "In meinen Stellen anzeigen",
+        "description": "An = Stellen dieses Kunden in 'meine Stellen' anzeigen."
+      },
+      "customer_default_exclude_from_sourcing": {
+        "label": "Vom Sourcing ausschließen",
+        "description": "An = diesen Kunden vom automatischen Sourcing ausschließen."
       }
     }
   },
@@ -1752,7 +1793,8 @@
         "description": "Ein = die Chancen-Tabelle und KPIs zeigen Stunden statt Euro."
       },
       "opportunity_table_color_stage": {
-        "label": "Phase"
+        "label": "Phase",
+        "description": "An = Phase als farbiges Label. Aus = einfacher Text."
       },
       "opportunity_table_color_owner": {
         "label": "Eigentümerfarbe",
@@ -1857,10 +1899,12 @@
     "subtitle": "Pro Spalte: farbige Labels oder einfacher Text. Die KPI-Diagramme behalten immer ihre Farben.",
     "fields": {
       "vacancy_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "An = Stellenstatus als farbiges Label. Aus = einfacher Text."
       },
       "vacancy_table_color_published": {
-        "label": "Veröffentlicht"
+        "label": "Veröffentlicht",
+        "description": "An = Veröffentlichungsstatus als farbiges Label. Aus = einfacher Text."
       },
       "vacancy_table_color_owner": {
         "label": "Eigentümerfarbe",
@@ -1873,7 +1917,8 @@
     "subtitle": "Pro Spalte: farbige Labels oder Klartext. Das Match-Board behält seine Farben immer.",
     "fields": {
       "match_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "An = Match-Status als farbiges Label. Aus = einfacher Text."
       },
       "match_table_color_owner": {
         "label": "Eigentümerfarbe",
@@ -1886,10 +1931,12 @@
     "subtitle": "Pro Spalte: farbige Labels oder Klartext.",
     "fields": {
       "outreach_table_color_channel": {
-        "label": "Kanal"
+        "label": "Kanal",
+        "description": "An = Kanal als farbiges Label. Aus = einfacher Text."
       },
       "outreach_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "An = Kampagnenstatus als farbiges Label. Aus = einfacher Text."
       },
       "outreach_table_color_owner": {
         "label": "Eigentümerfarbe",
@@ -2208,8 +2255,7 @@
   "careerSite": {
     "title": "Karriereseite",
     "subtitle": "Die öffentliche Stellenseite dieses Mandanten.",
-    "on": "An — öffentliche Stellenseite sichtbar",
-    "off": "Aus — öffentliche Seite nicht erreichbar",
+    "activeLabel": "Karriereseite aktiv",
     "hint": "Schaltet die öffentliche Karriereseite (…/{tenant}/vacatures) ein oder aus. Das Backend erzwingt dies sofort: aus = die Seite zeigt einen Hinweis und Bewerbungen sind geschlossen."
   },
   "caoSettings": {

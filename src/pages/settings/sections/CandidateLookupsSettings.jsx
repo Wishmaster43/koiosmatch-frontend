@@ -21,6 +21,7 @@ import { Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
+import { Toggle } from '../components/SettingsKit'
 import { BTN_H } from '@/config/buttonMetrics'
 
 const BASE = '/settings/candidate-lookups'
@@ -224,11 +225,10 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
             {/* Reason-required toggle — statuses only (e.g. Inactive needs a reason). */}
             {isStatusBlock && (
               <div style={{ marginBottom: 14 }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" checked={modal.requires_reason}
-                    onChange={e => setModal(m => ({ ...m, requires_reason: e.target.checked }))} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Toggle checked={modal.requires_reason} onChange={v => setModal(m => ({ ...m, requires_reason: v }))} />
                   <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.requiresReason')}</span>
-                </label>
+                </div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.requiresReasonHint')}</div>
               </div>
             )}
@@ -236,11 +236,10 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
             {/* Match-required toggle — statuses only (e.g. Placed needs a linked Match). */}
             {isStatusBlock && (
               <div style={{ marginBottom: 14 }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" checked={modal.requires_match}
-                    onChange={e => setModal(m => ({ ...m, requires_match: e.target.checked }))} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Toggle checked={modal.requires_match} onChange={v => setModal(m => ({ ...m, requires_match: v }))} />
                   <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.requiresMatch')}</span>
-                </label>
+                </div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.requiresMatchHint')}</div>
               </div>
             )}
@@ -248,11 +247,10 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
             {/* Return-date toggle — statuses only (e.g. Unavailable asks "available again on"). */}
             {isStatusBlock && (
               <div style={{ marginBottom: 14 }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" checked={modal.expects_return_date}
-                    onChange={e => setModal(m => ({ ...m, expects_return_date: e.target.checked }))} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Toggle checked={modal.expects_return_date} onChange={v => setModal(m => ({ ...m, expects_return_date: v }))} />
                   <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.expectsReturnDate')}</span>
-                </label>
+                </div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.expectsReturnDateHint')}</div>
               </div>
             )}
@@ -260,11 +258,10 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
             {/* Appointment toggle — funnel stages only; flags the intake stage. */}
             {isFunnelBlock && (
               <div style={{ marginBottom: 14 }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" checked={modal.requires_appointment}
-                    onChange={e => setModal(m => ({ ...m, requires_appointment: e.target.checked }))} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Toggle checked={modal.requires_appointment} onChange={v => setModal(m => ({ ...m, requires_appointment: v }))} />
                   <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.requiresAppointment')}</span>
-                </label>
+                </div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.requiresAppointmentHint')}</div>
               </div>
             )}
@@ -272,11 +269,10 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
             {/* Match toggle — funnel stages only; this stage turns the application into a Match (matched bucket). */}
             {isFunnelBlock && (
               <div style={{ marginBottom: 14 }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" checked={modal.is_match}
-                    onChange={e => setModal(m => ({ ...m, is_match: e.target.checked }))} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Toggle checked={modal.is_match} onChange={v => setModal(m => ({ ...m, is_match: v }))} />
                   <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.isMatch')}</span>
-                </label>
+                </div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.isMatchHint')}</div>
               </div>
             )}
@@ -284,11 +280,10 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
             {/* Rejected toggle — funnel stages only; this stage is the rejected bucket. */}
             {isFunnelBlock && (
               <div style={{ marginBottom: 14 }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" checked={modal.is_rejected}
-                    onChange={e => setModal(m => ({ ...m, is_rejected: e.target.checked }))} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Toggle checked={modal.is_rejected} onChange={v => setModal(m => ({ ...m, is_rejected: v }))} />
                   <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.isRejected')}</span>
-                </label>
+                </div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.isRejectedHint')}</div>
               </div>
             )}

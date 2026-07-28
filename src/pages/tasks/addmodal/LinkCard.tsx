@@ -12,13 +12,16 @@ import type { TaskForm } from '../AddTaskModal'
 
 interface Opt { value: string; label: string }
 
-export default function LinkCard({ t, form, set, candidates, customers, contacts, assigneeOpts, ownerName }: {
+export default function LinkCard({ t, form, set, candidates, customers, contacts, assigneeOpts, ownerName, lockCustomerId, lockCustomerName }: {
   t: TFunction
   form: TaskForm
   set: (k: keyof TaskForm, v: string) => void
   candidates: Opt[]; customers: Opt[]; contacts: Opt[]; assigneeOpts: Opt[]
   // The logged-in creator's display name — read-only, no picker (mirrors "Aangemaakt door").
   ownerName: string
+  // Set from a customer drawer trigger: the customer field renders read-only
+  // instead of a picker (mirrors AddVacancyModal's lockCustomerId).
+  lockCustomerId?: string; lockCustomerName?: string
 }) {
   return (
     <div>
@@ -32,8 +35,18 @@ export default function LinkCard({ t, form, set, candidates, customers, contacts
               placeholder={t('modal.candidatePlaceholder')} style={pickerStyle} menuWidth={PICKER_MENU_W} options={candidates} />
           </Field>
           <Field label={t('modal.customer')}>
-            <CreatableSelect value={form.customerId || null} onChange={(v: string) => set('customerId', v)} allowCreate={false}
-              placeholder={t('modal.customerPlaceholder')} style={pickerStyle} menuWidth={PICKER_MENU_W} options={customers} />
+            {lockCustomerId
+              ? (
+                // Read-only: the drawer this modal was opened from already fixes
+                // the customer — never a fake picker the recruiter could repoint.
+                <div style={{ ...pickerStyle, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)' }}>
+                  {lockCustomerName ?? ''}
+                </div>
+              )
+              : (
+                <CreatableSelect value={form.customerId || null} onChange={(v: string) => set('customerId', v)} allowCreate={false}
+                  placeholder={t('modal.customerPlaceholder')} style={pickerStyle} menuWidth={PICKER_MENU_W} options={customers} />
+              )}
           </Field>
         </div>
         <div style={row2}>

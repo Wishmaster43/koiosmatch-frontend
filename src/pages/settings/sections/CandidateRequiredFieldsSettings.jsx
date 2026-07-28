@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { useLookups } from '@/context/LookupsContext'
+import { PermissionToggle } from '../components/SettingsControls'
 
 /**
  * Required-fields-per-phase editor. A matrix of built-in candidate fields × phase
@@ -82,9 +83,10 @@ export default function CandidateRequiredFieldsSettings() {
                 <td style={{ ...cell, textAlign: 'left', color: 'var(--text)' }}>{t(`candidates:modal.fields.${f.label}`, { defaultValue: f.label })}</td>
                 {cols.map(c => (
                   <td key={c.value} style={cell}>
-                    <input type="checkbox" checked={isReq(c.value, f.key)} onChange={() => toggle(c.value, f.key)}
-                      aria-label={`${t(`candidates:modal.fields.${f.label}`, { defaultValue: f.label })} — ${c.label}`}
-                      style={{ cursor: 'pointer', width: 16, height: 16 }} />
+                    {/* Dense required/phase matrix — mirrors RolesPermissionMatrix's PermissionToggle
+                        (Danny 28-07: "GEEN VINKJES MAAR TOGGLES!!!"), not a raw checkbox. */}
+                    <PermissionToggle checked={isReq(c.value, f.key)} onChange={() => toggle(c.value, f.key)}
+                      aria-label={`${t(`candidates:modal.fields.${f.label}`, { defaultValue: f.label })} — ${c.label}`} />
                   </td>
                 ))}
               </tr>

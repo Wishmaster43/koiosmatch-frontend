@@ -1,6 +1,8 @@
 /**
- * CustomerNotesTab — sub-tabs (Danny 2026-07-14, mirrors candidates/drawer/
- * CommunicationTab.tsx): Notities · Tijdlijn. The shared NotesTab renders once
+ * CustomerNotesTab — the Communicatie tab's sub-tabs (mirrors candidates/drawer/
+ * CommunicationTab.tsx): Notities · Tijdlijn · Vacature-zichtbaarheid. The last one
+ * joined on Danny's 28-07 correction ("vacature zichtbaarheid zetten we als sub tabje
+ * onder communicatie") — it was briefly a top-level tab. The shared NotesTab renders once
  * per sub-tab via its show* flags, exactly like the candidate tab — same
  * composer, same note-card look (type chip + author + pencil).
  *
@@ -14,6 +16,15 @@
  * already uses (GET /customers/{id}/activity) — Customer carries no separate
  * embedded `timeline` array the way Candidate does (candidates get theirs
  * straight from GET /candidates/{id}).
+ *
+ * "+ Nieuwe taak" (Danny 28-07, JOB A): the Notities view is where an account
+ * manager actively adds follow-up content about a customer — the same "add
+ * something about this record" moment as "+ Notitie" next to it — so the task
+ * trigger lives here rather than inventing a Taken tab. A customer TASK LIST is
+ * deliberately NOT built: GET /tasks?customer={id} ignores the filter and would
+ * show all tenant tasks (measured 28-07, filed as CMBE TAKEN-OP-KLANT-1), so this
+ * stays a create-only trigger, pre-linked via AddTaskModal's lockCustomerId —
+ * mirrors the outreach TargetsTab's per-row "+ task" (also create-only, no list).
  */
 import { useState, useEffect } from 'react'
 import type { ComponentType } from 'react'
@@ -21,10 +32,14 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { isAbortError } from '@/lib/mocks'
 import SubTabBar from '@/components/drawer/SubTabBar'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
+import AddTaskModal from '@/pages/tasks/AddTaskModal'
+import VacancySettingsTab from './VacancySettingsTab'
+import { TaskLookupsProvider } from '@/context/TaskLookupsContext'
 import { useNoteTypes } from '@/lib/useNoteTypes'
 import type { Id } from '@/types/common'
-import type { CustomerNote } from '@/types/customer'
+import type { Customer, CustomerNote } from '@/types/customer'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS UI helper — accept any props at the boundary (mirrors CommunicationTab).
@@ -44,21 +59,22 @@ interface Props {
   authorInitials?: string
   notes: CustomerNote[]
   onAddNote?: (payload: { type: string; title: string; body: string }) => void
-  // Render ONE section without the sub-tab strip. Danny 28-07 ("notities los en
-  // communicatie los") split these into two top-level drawer tabs; this component stays
-  // the single owner of the note composer + activity fetch rather than being copied.
-  only?: 'notes' | 'timeline'
+  // The record itself + its save path, for the Vacature-zichtbaarheid sub-tab (it edits
+  // three customer fields through the drawer's own optimistic PATCH).
+  c: Customer
+  onSave?: (values: Record<string, unknown>) => void
 }
 
-export default function CustomerNotesTab({ customerId, customerName, customerInitials, authorInitials, notes, onAddNote, only }: Props) {
+export default function CustomerNotesTab({ customerId, customerName, customerInitials, authorInitials, notes, onAddNote, c, onSave }: Props) {
   const { t } = useTranslation('customers')
   // Note categories from the tenant lookup, scoped to 'customer' (NOTE-TYPES-2/3);
   // writable list for the composer, the full list for chip-label resolution.
   const { writableTypes: noteTypes, types: chipTypes } = useNoteTypes('customer')
   const [subTab, setSubTab] = useState('notes')
   const [timeline, setTimeline] = useState<TimelineEntry[]>([])
-  // The section actually on screen: a fixed `only` wins over the internal sub-tab state.
-  const active = only ?? subTab
+  const active = subTab
+  // "+ Nieuwe taak" — see the file header for why this lives here and stays create-only.
+  const [addingTask, setAddingTask] = useState(false)
 
   // Fetch the activity feed lazily, only once the Tijdlijn sub-tab is opened.
   useEffect(() => {
@@ -86,19 +102,37 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {/* Sub-tab strip only when this tab still owns both sections. */}
-      {!only && (
-        <SubTabBar
-          tabs={[
-            { id: 'notes',    label: t('notes.notes') },
-            { id: 'timeline', label: t('notes.timeline') },
-          ]}
-          active={subTab}
-          onChange={setSubTab}
-        />
+      <SubTabBar
+        tabs={[
+          { id: 'notes',           label: t('notes.notes') },
+          { id: 'timeline',        label: t('notes.timeline') },
+          { id: 'vacancySettings', label: t('drawer.tabs.vacancySettings') },
+        ]}
+        active={subTab}
+        onChange={setSubTab}
+      />
+      {active === 'notes' && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <DrawerAddButton onClick={() => setAddingTask(true)} label={t('drawer.newTask')} />
+        </div>
       )}
       {active === 'notes'    && <NotesTab {...notesProps} showTimeline={false} showConversations={false} />}
       {active === 'timeline' && <NotesTab {...notesProps} showNotes={false} showConversations={false} />}
+      {active === 'vacancySettings' && <VacancySettingsTab c={c} onSave={onSave} />}
+
+      {/* New task pre-linked to this customer (read-only in LinkCard, see AddTaskModal's
+          lockCustomerId). AddTaskModal reads useTaskLookups — outside TasksPage that
+          provider is absent (live crash, Danny 18-07), so it wraps its own here, mirroring
+          CandidateTasks/TasksTab/TargetsTab. */}
+      {addingTask && customerId != null && (
+        <TaskLookupsProvider>
+          <AddTaskModal
+            lockCustomerId={String(customerId)} lockCustomerName={customerName}
+            onClose={() => setAddingTask(false)}
+            onCreated={() => setAddingTask(false)}
+          />
+        </TaskLookupsProvider>
+      )}
     </div>
   )
 }

@@ -8,6 +8,7 @@ import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import type { ProfileFormData } from './profileParts'
 
 export function useProfileForm() {
@@ -83,14 +84,26 @@ export function useProfileForm() {
         URL.revokeObjectURL(url); createdUrlRef.current = null
         setAvatarPreview(null); await refreshUser?.()
       }
-    } catch { /* backend may not exist yet — keep the local preview */ }
-    finally { setAvatarBusy(false); if (fileRef.current) fileRef.current.value = '' }
+    } catch {
+      // Upload failed — revert the optimistic preview and say so; leaving the picked
+      // image on screen would look "saved" when the server never persisted it (§3).
+      URL.revokeObjectURL(url); createdUrlRef.current = null
+      setAvatarPreview(null)
+      notifyError(t('profile.avatarUploadFailed'))
+    } finally { setAvatarBusy(false); if (fileRef.current) fileRef.current.value = '' }
   }
 
-  // Remove the stored avatar and fall back to initials.
+  // Remove the stored avatar and fall back to initials; a failed delete keeps the
+  // server's avatar_url (never touched here) and surfaces the error instead of
+  // silently pretending the removal worked (§3).
   const removeAvatar = async () => {
     setAvatarBusy(true)
-    try { await api.delete('/auth/me/avatar'); await refreshUser?.() } catch { /* noop */ }
+    try {
+      await api.delete('/auth/me/avatar')
+      await refreshUser?.()
+    } catch {
+      notifyError(t('profile.avatarRemoveFailed'))
+    }
     if (createdUrlRef.current) { URL.revokeObjectURL(createdUrlRef.current); createdUrlRef.current = null }
     setAvatarPreview(null); setAvatarBusy(false)
   }

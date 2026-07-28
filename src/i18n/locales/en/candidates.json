@@ -1,7 +1,7 @@
 {
   "title": "Candidates",
   "page": {
-    "add": "Add candidate",
+    "add": "New candidate",
     "blacklistView": "Blacklist",
     "archivedView": "Archived",
     "filterUnsupported": "This filter isn't supported by the server yet.",
@@ -183,7 +183,7 @@
     "phase": "Phase"
   },
   "modal": {
-    "title": "Add candidate",
+    "title": "New candidate",
     "newPrefix": "New",
     "candidateData": "Candidate details",
     "fillRequired": "Fill in the required fields",
@@ -719,6 +719,7 @@
   },
   "cv": {
     "contact": "Contact",
+    "summary": "Profile text",
     "languages": "Languages",
     "skills": "Skills",
     "certificates": "Certificates",

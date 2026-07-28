@@ -124,6 +124,8 @@ export default function ProfileEmailConnect() {
                       aria-label={t('profile.email.pass')}
                       style={{ ...inputStyle, paddingRight: 36 }} />
                     <button onClick={() => setShowPass(s => !s)}
+                      title={showPass ? t('profile.email.hidePassword') : t('profile.email.showPassword')}
+                      aria-label={showPass ? t('profile.email.hidePassword') : t('profile.email.showPassword')}
                       style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
                                background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
                       {showPass ? <EyeOff size={14} /> : <Eye size={14} />}

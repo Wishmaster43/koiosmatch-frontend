@@ -69,6 +69,17 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     referenceNumber: c.reference_number ?? '',
     name,
     initials:        initialsOf(name),
+    // NAAMDELEN-1 (CMBE 2026-07-28): real first/middle/last name parts, straight
+    // from the API — NEVER re-derive these from `name.split(' ')` (that assigns the
+    // last word as surname and drops the tussenvoegsel entirely: "Jan van der Berg"
+    // became firstname "Jan" / lastname "Berg", and the header edit then saved that
+    // back, permanently destroying the tussenvoegsel). Measured: both GET /candidates
+    // (list) and GET /candidates/{id} (detail) return first_name/middle_name/last_name
+    // identically — CandidateDetailResource extends the list resource's array, so
+    // either record is a safe source for the header edit form.
+    firstname:       c.first_name ?? c.firstname ?? '',
+    middleName:      c.middle_name ?? '',
+    lastname:        c.last_name ?? c.lastname ?? '',
     title:           c.function_title ?? c.title ?? '',
     // Contract form (multi-value slugs); label/colour via the lookups.
     candidateTypes,

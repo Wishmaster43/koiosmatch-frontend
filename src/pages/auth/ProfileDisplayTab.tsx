@@ -24,6 +24,8 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
   const { t } = useTranslation('auth')
   const [langOpen, setLangOpen] = useState(false)
   const currentLang = LANGUAGES.find(l => l.value === language) ?? LANGUAGES[0]
+  // Autonym lookup — each language names itself (see profileParts.LANGUAGES comment).
+  const langLabel = (code: string) => t(`languageNames.${code}`)
 
   return (
     <Section title={t('profile.display')}>
@@ -83,7 +85,7 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
               cursor: 'pointer', textAlign: 'left',
             }}>
             <Globe size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-            <span style={{ flex: 1 }}>{currentLang.flag} {currentLang.label}</span>
+            <span style={{ flex: 1 }}>{currentLang.flag} {langLabel(currentLang.value)}</span>
             <span style={{ color: 'var(--text-muted)', fontSize: 10 }}>▾</span>
           </button>
           {langOpen && (
@@ -105,7 +107,7 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
                   onMouseLeave={e => { if (language !== lang.value) e.currentTarget.style.background = 'transparent' }}
                 >
                   <span>{lang.flag}</span>
-                  <span>{lang.label}</span>
+                  <span>{langLabel(lang.value)}</span>
                   {language === lang.value && <Check size={12} style={{ marginLeft: 'auto' }} />}
                 </button>
               ))}

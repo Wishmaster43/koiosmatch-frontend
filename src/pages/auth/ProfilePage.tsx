@@ -39,7 +39,8 @@ export default function ProfilePage() {
       {/* Avatar (uploadable) + name header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
         <div style={{ position: 'relative', flexShrink: 0 }}>
-          <button onClick={() => fileRef.current?.click()} disabled={avatarBusy} title={t('profile.changePhoto')}
+          <button onClick={() => fileRef.current?.click()} disabled={avatarBusy}
+            title={t('profile.changePhoto')} aria-label={t('profile.changePhoto')}
             style={{ position: 'relative', border: 'none', background: 'none', padding: 0, borderRadius: '50%',
                      cursor: avatarBusy ? 'default' : 'pointer', display: 'block' }}>
             <Avatar initials={initials} size={64} photo={photo} />

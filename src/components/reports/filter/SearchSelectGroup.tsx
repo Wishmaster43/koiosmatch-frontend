@@ -62,7 +62,7 @@ export default function SearchSelectGroup({ group }: { group: ReportFilterGroup 
                        color: 'var(--text)', background: 'transparent', padding: 0 }}
             />
             {query && (
-              <button onClick={() => setQuery('')}
+              <button onClick={() => setQuery('')} aria-label={t('filters.clear')}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0 }}>
                 <X size={9} />
               </button>
@@ -112,7 +112,7 @@ export default function SearchSelectGroup({ group }: { group: ReportFilterGroup 
                     borderRadius: 999, padding: '2px 7px', fontSize: 10, fontWeight: 500,
                   }}>
                     {opt?.label ?? val}
-                    <button onClick={() => group.onToggle?.(val)}
+                    <button onClick={() => group.onToggle?.(val)} aria-label={t('filters.clear')}
                       style={{ background: 'none', border: 'none', cursor: 'pointer',
                                color: 'inherit', padding: 0, lineHeight: 1 }}>
                       <X size={8} />

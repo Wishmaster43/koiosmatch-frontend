@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Info, Save } from 'lucide-react'
 import { useAllSettings, getJsonSetting, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import RichTextEditor from '@/components/ui/RichTextEditor'
+import { Toggle } from '../components/SettingsKit'
 import { notifyError } from '@/lib/notify'
 
 // The tenant-setting key: one JSON blob holding the whole proposal configuration
@@ -123,11 +124,10 @@ export default function ProposalSettings() {
 
       {/* Phase automation */}
       <div style={cardStyle}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text)', cursor: 'pointer' }}>
-          <input type="checkbox" checked={!!persisted.sets_phase} onChange={toggleSetsPhase}
-            style={{ accentColor: 'var(--color-primary)' }} />
-          {t('proposal.setsPhaseLabel')}
-        </label>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Toggle checked={!!persisted.sets_phase} onChange={toggleSetsPhase} ariaLabel={t('proposal.setsPhaseLabel')} />
+          <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('proposal.setsPhaseLabel')}</span>
+        </div>
         <p style={{ ...hintStyle, marginTop: 6, marginBottom: 0 }}>{t('proposal.setsPhaseHint')}</p>
       </div>
 

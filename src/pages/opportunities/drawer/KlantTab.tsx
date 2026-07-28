@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { contactOptionLabel } from '@/hooks/useCustomerCascade'
 import { Building2, Edit2, Save, X } from 'lucide-react'
 import DetailTableJs from '@/components/ui/DetailTable'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import SelectMenu from '@/components/ui/SelectMenu'
 import EntityLink from '@/components/ui/EntityLink'
-import { useCustomerCascade } from '../hooks/useCustomerCascade'
+import { useCustomerCascade} from '../hooks/useCustomerCascade'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
 
@@ -172,7 +173,7 @@ export default function KlantTab({ opportunity: o, customers = [], onUpdate }: {
             <F label={t('details.contact')}>
               <SelectMenu value={contactId || null} onChange={setContactId}
                 placeholder={customerId ? t('common:select') : t('pickClientFirst')}
-                options={contacts.map(c => ({ value: String(c.id), label: c.name ?? '—' }))} />
+                options={contacts.map(c => ({ value: String(c.id), label: contactOptionLabel(c) }))} />
             </F>
           </div>
         ) : (

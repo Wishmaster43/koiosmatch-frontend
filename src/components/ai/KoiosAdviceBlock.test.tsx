@@ -41,4 +41,13 @@ describe('KoiosAdviceBlock', () => {
     await waitFor(() => expect(screen.queryByText('ai.analyzing')).toBeNull())
     expect(screen.getByText('Completeness')).toBeInTheDocument()
   })
+
+  // Audit 2026-07-28 (§6 icon-only buttons): the refresh button only had a `title`
+  // attribute, no `aria-label` — a weaker, less consistently exposed accessible name
+  // than every other icon-only control in this area. A role+name query only succeeds
+  // once a real accessible name (aria-label) is present.
+  it('exposes an accessible name on the icon-only refresh button', () => {
+    render(<KoiosAdviceBlock namespace="candidates" insights={insights} />)
+    expect(screen.getByRole('button', { name: 'ai.refresh' })).toBeInTheDocument()
+  })
 })

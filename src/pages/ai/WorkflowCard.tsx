@@ -125,6 +125,7 @@ export default function WorkflowCard({ workflow, onRun, onEdit }: WorkflowCardPr
 
           <button
             onClick={e => { e.stopPropagation(); onEdit() }}
+            aria-label={t('list.editWorkflow')} title={t('list.editWorkflow')}
             className="flex items-center justify-center transition-colors rounded-lg"
             style={{ width: 28, height: 28, background: 'var(--hover-bg)', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}

@@ -134,11 +134,11 @@ export default function EditableFieldTable({
     // vestiging on every entity that uses this table — a native <select> forces you to
     // scroll a 200-item country list. allowCreate stays off: these are tenant lookups,
     // adding a value belongs in Settings, not in a record's edit row.
-    if (f.type === 'select')   return <CreatableSelect value={(v as string) ?? ''} onChange={val => setF(f.key, val)} options={selectOptions(f.options)} placeholder={t('select')} allowCreate={false} />
+    if (f.type === 'select')   return <CreatableSelect value={(v as string) ?? ''} onChange={val => setF(f.key, val)} options={selectOptions(f.options)} placeholder={t('select')} allowCreate={false} style={compact} />
     if (f.type === 'creatable') {
       // Lookup combobox that can also add a free-text value (tenant `allowCreate`).
       const opts = (f.options ?? []).map(o => (typeof o === 'string' ? o : { value: o.value, label: String(o.label ?? o.value) }))
-      return <CreatableSelect value={(v as string) ?? ''} onChange={val => setF(f.key, val)} options={opts} placeholder={t('select')} allowCreate={f.allowCreate !== false} />
+      return <CreatableSelect value={(v as string) ?? ''} onChange={val => setF(f.key, val)} options={opts} placeholder={t('select')} allowCreate={f.allowCreate !== false} style={compact} />
     }
     if (f.type === 'date')     return <DateField value={v as string | undefined} onChange={val => setF(f.key, val)} style={compact} />
     if (f.type === 'textarea') return <textarea value={(v as string) ?? ''} onChange={e => setF(f.key, e.target.value)} rows={3} style={{ ...compact, resize: 'vertical' }} />

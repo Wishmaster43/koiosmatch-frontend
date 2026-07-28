@@ -29,9 +29,12 @@ function groupActiveCount(g: ReportFilterGroup): number {
 }
 
 export default function ReportFilterSidebar({
-  title = 'Filters', groups = [], onClose, pageId = 'default',
+  title, groups = [], onClose, pageId = 'default',
 }: { title?: ReactNode; groups?: ReportFilterGroup[]; onClose: () => void; pageId?: string }) {
   const { t } = useTranslation('common')
+  // Every caller today passes its own translated title; this default only
+  // guards a future caller that forgets to — must stay translated too (§5).
+  const heading = title ?? t('filters.title')
   const activeCount = groups.reduce((sum, g) => sum + groupActiveCount(g), 0)
 
   const clearAll = () => {
@@ -86,7 +89,7 @@ export default function ReportFilterSidebar({
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontWeight: 600, fontSize: 12, color: 'var(--text)' }}>{title}</span>
+          <span style={{ fontWeight: 600, fontSize: 12, color: 'var(--text)' }}>{heading}</span>
           {activeCount > 0 && (
             <span style={{ background: 'var(--color-primary)', color: 'white',
                            borderRadius: 999, padding: '1px 6px', fontSize: 10, fontWeight: 600 }}>
@@ -110,7 +113,7 @@ export default function ReportFilterSidebar({
             </button>
           )}
           {activeCount > 0 && (
-            <button onClick={clearAll} title={t('filters.clearAll')}
+            <button onClick={clearAll} title={t('filters.clearAll')} aria-label={t('filters.clearAll')}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
                        width: 22, height: 22, background: 'none', border: 'none',
                        cursor: 'pointer', color: 'var(--text-muted)', borderRadius: 4 }}
@@ -155,7 +158,8 @@ export default function ReportFilterSidebar({
               placeholder={g.placeholder ?? t('filters.searchAll')}
               style={{ flex: 1, border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'transparent', padding: 0 }} />
             {g.value && (
-              <button onClick={() => g.onChange?.('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}>
+              <button onClick={() => g.onChange?.('')} aria-label={t('filters.clear')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}>
                 <X size={10} />
               </button>
             )}

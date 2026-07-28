@@ -7,7 +7,7 @@
     "geblokkeerd": "Blocked"
   },
   "page": {
-    "add": "Add customer",
+    "add": "New customer",
     "searchPlaceholder": "Search customer, debtor no., account manager…",
     "empty": "No customers found.",
     "loading": "Loading…",
@@ -67,8 +67,10 @@
     "tags": "Tags",
     "addTag": "Add tag",
     "back": "Back",
+    "newTask": "New task",
     "tabs": {
       "overview": "Overview",
+      "vacancySettings": "Vacancy visibility",
       "locations": "Locations",
       "departments": "Departments",
       "contacts": "Contacts",
@@ -89,6 +91,12 @@
   "overview": {
     "general": "General",
     "branch": "Branch",
+    "branchesLabel": "Branch",
+    "branchesLink": "Link branch",
+    "branchesEmpty": "No branch linked yet.",
+    "contact": "Contact",
+    "email": "Email address",
+    "phone": "Phone",
     "online": "Online",
     "settings": "Settings",
     "textsTitle": "Texts",
@@ -98,10 +106,7 @@
     "industry": "Industry",
     "debtorNumber": "Debtor number",
     "city": "City",
-    "hideCompanyName": "Hide company name",
     "hasCareerPage": "Has career page",
-    "showInVacancies": "Show in my vacancies",
-    "excludeFromSourcing": "Exclude from sourcing",
     "privacyPolicyUrl": "Privacy policy URL",
     "description": "Description",
     "recruitmentProblems": "Recruitment challenges",
@@ -111,6 +116,21 @@
   },
   "richText": {
     "empty": "Not filled in yet."
+  },
+  "vacancySettings": {
+    "title": "Vacancy visibility",
+    "subtitle": "How this customer appears in vacancies and sourcing. The default lives in Settings → Customers; each customer can deviate from it.",
+    "fields": {
+      "hideCompanyName": "Hide company name",
+      "showInVacancies": "Show in my vacancies",
+      "excludeFromSourcing": "Exclude from sourcing"
+    },
+    "tenantDefault": "Default: {{value}}",
+    "on": "on",
+    "off": "off",
+    "followsDefault": "follows the default",
+    "deviates": "differs from the default",
+    "resetToDefault": "Reset to default"
   },
   "locations": {
     "empty": "No locations yet",
@@ -127,6 +147,7 @@
       "addressTitle": "Address & details",
       "name": "Name",
       "status": "Status",
+      "changeStatus": "Change status",
       "headquarter": "Head office",
       "street": "Street",
       "houseNumber": "No.",
@@ -368,7 +389,7 @@
     "mutateError": "The action failed."
   },
   "modal": {
-    "title": "Add customer",
+    "title": "New customer",
     "subtitle": "Enter the new customer's details",
     "fillRequired": "Fill in the required fields",
     "required": "Required field",
@@ -391,11 +412,11 @@
     }
   },
   "subModal": {
-    "addLocation": "Add location",
+    "addLocation": "New location",
     "editLocation": "Edit location",
-    "addDepartment": "Add department",
+    "addDepartment": "New department",
     "editDepartment": "Edit department",
-    "addContact": "Add contact",
+    "addContact": "New contact",
     "editContact": "Edit contact",
     "locationName": "Location name",
     "locationPlaceholder": "E.g. Head office",
@@ -405,6 +426,7 @@
     "selectLocation": "Location",
     "selectDepartment": "Department",
     "noLocationsFirst": "Create a location first",
+    "pickLocationFirst": "Pick a location first",
     "noneOption": "None",
     "firstName": "First name",
     "lastName": "Last name",

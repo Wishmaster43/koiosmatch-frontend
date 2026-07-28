@@ -49,10 +49,11 @@ const TABS = [
   { id: 'planning',      tKey: 'planning' },
   { id: 'priceAgreements', tKey: 'priceAgreements' },
   { id: 'documents',     tKey: 'documents' },
-  // Notities and Communicatie are their OWN tabs (Danny 28-07) — they used to share
-  // one "Communicatie" tab with a sub-tab strip. The 'notes' id stays put because
-  // deep-links target it; the timeline moved to its own 'communication' tab.
-  { id: 'notes',         tKey: 'notes' },
+  // Communicatie is ONE tab with a sub-tab strip (scope correction, Danny 28-07):
+  // Notities · Tijdlijn · Vacaturezichtbaarheid live inside CustomerNotesTab.tsx.
+  // Conversaties/Taken/Toestemmingen are NOT sub-tabs — no usable per-customer data
+  // source exists yet (GET /tasks?customer={id} ignores the filter; consent lives
+  // on the contact person, not the customer) and an empty sub-tab is a fake affordance.
   { id: 'communication', tKey: 'communication' },
   { id: 'extra',         tKey: 'extra' },
   // EXTRACT-1: the shared HelloFlex/Shiftmanager cards. Label comes from the shared
@@ -208,21 +209,13 @@ export default function CustomerDrawer({
       case 'statistics':    return <StatisticsTab c={c} onGoToVacancies={() => setActiveTab?.('vacancies')} />
       case 'priceAgreements': return <PriceAgreementsTab customerId={c.id} />
       case 'documents':     return <DocumentsTab customerId={c.id} />
-      case 'notes':         return (
-        <CustomerNotesTab
-          customerId={c.id} customerName={c.name} customerInitials={c.initials}
-          authorInitials={authorInitials}
-          notes={c.notes ?? []}
-          onAddNote={payload => onAddNote?.(c.id, payload)}
-          only="notes"
-        />
-      )
       case 'communication': return (
         <CustomerNotesTab
           customerId={c.id} customerName={c.name} customerInitials={c.initials}
           authorInitials={authorInitials}
           notes={c.notes ?? []}
-          only="timeline"
+          onAddNote={payload => onAddNote?.(c.id, payload)}
+          c={c} onSave={v => onUpdate?.(c.id, v)}
         />
       )
       case 'extra':         return (

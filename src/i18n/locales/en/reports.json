@@ -37,6 +37,9 @@
     }
   },
   "customers": {
+    "title": "Details — Customers",
+    "summary": "{{shown}} of {{total}} customers",
+    "search": "Search by name, debtor number, account manager…",
     "loading": "Loading customers…",
     "empty": "No customers found",
     "loadError": "Could not load customers.",

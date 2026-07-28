@@ -21,6 +21,7 @@ import { createCampaign } from './data/outreachApi'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { cardHead, cardBox, row2, cardPair } from '@/components/ui/modalCards'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { BTN_H } from '@/config/buttonMetrics'
 
@@ -35,12 +36,6 @@ interface Props { onClose: () => void; onCreated: (c: Campaign) => void }
 // call-list modal reads as the same kind of screen as +Match / +Kandidaat.
 const overlayStyle = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 60 } as const
 const panelStyle = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 61, width: '94vw', maxWidth: WIDE_MODAL.maxWidth, maxHeight: WIDE_MODAL.maxHeight, overflowY: 'auto', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: '0 24px 70px rgba(0,0,0,0.22)' } as const
-// Titled-card idiom (mirrors the +Match/+Kandidaat cards): uppercase muted
-// heading over a bordered surface — every field group renders inside one.
-const cardHead = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
-const cardBox = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, display: 'flex', flexDirection: 'column' as const, gap: 12 }
-const twoCol = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' as const }
-const row2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }
 const lbl = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }
 const inputStyle = { width: '100%', height: 36, padding: '0 11px', fontSize: 13, color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 8, outline: 'none', background: 'var(--surface)', boxSizing: 'border-box' as const }
 
@@ -102,9 +97,9 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
         </div>
 
         {/* Two titled cards side by side: Algemeen (naam + kanaal) and Bron
-            (optionele pool) — the wide frame's two-column grid, not a stack
+            (optionele pool) — the shared cardPair grid (§11), not a stack
             of lonely inputs. */}
-        <div style={twoCol}>
+        <div style={cardPair}>
           <div>
             <div style={cardHead}>{t('create.generalCard')}</div>
             <div style={cardBox}>

@@ -177,6 +177,7 @@ export function SideList<T extends { id?: string | number }>({ title, items, sel
 export function ListRow<T>({ item, active, onSelect, label, sublabel, leading, onDelete }: {
   item: T; active?: boolean; onSelect: (item: T) => void; label?: ReactNode; sublabel?: ReactNode; leading?: ReactNode; onDelete?: (item: T) => void
 }) {
+  const { t } = useTranslation('common')
   return (
     <div {...interactive(() => onSelect(item))}
       style={{ padding: '8px 11px', cursor: 'pointer', fontSize: 12, gap: 8,
@@ -191,10 +192,16 @@ export function ListRow<T>({ item, active, onSelect, label, sublabel, leading, o
         {sublabel && <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>{sublabel}</div>}
       </div>
       {onDelete && (
+        // Icon-only control: needs an accessible name (§6). It also reveals on
+        // keyboard focus, not just mouse hover — a colour-only reveal that never
+        // fires for Tab navigation would leave it invisible-but-focusable.
         <button onClick={e => { e.stopPropagation(); onDelete(item) }}
+          aria-label={t('delete')} title={t('delete')}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'transparent', padding: 2, flexShrink: 0 }}
           onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'transparent')}>
+          onMouseLeave={e => (e.currentTarget.style.color = 'transparent')}
+          onFocus={e => (e.currentTarget.style.color = 'var(--color-danger)')}
+          onBlur={e => (e.currentTarget.style.color = 'transparent')}>
           <Trash2 size={10} />
         </button>
       )}

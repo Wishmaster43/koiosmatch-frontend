@@ -22,11 +22,19 @@ export function useCandidateHeaderEdit(c: Candidate | null, onUpdate?: (id: Id, 
   }
 
   // Enter edit: capture the current fields so they're controlled + saveable.
+  // NAAMDELEN-1: seed from the REAL first/middle/last-name fields mapCandidate
+  // reads off the API (first_name/middle_name/last_name) — NEVER re-derive them by
+  // splitting `name`. That guess assigned the last word as surname and dropped the
+  // tussenvoegsel entirely, so saving silently rewrote e.g. "Jan van der Berg" as
+  // "Jan Berg" (measured live 28-07). `c` here is the open drawer's candidate record;
+  // measured against the live backend contract, GET /candidates (list) and
+  // GET /candidates/{id} (detail) both return first_name/middle_name/last_name
+  // identically, so either source for `c` is safe — no guess needed either way.
   const startHeaderEdit = () => {
     if (!c) return
     setHeaderForm({
-      firstname:  c.firstname  ?? c.name?.split(' ')[0] ?? '',
-      lastname:   c.lastname   ?? c.name?.split(' ').slice(-1)[0] ?? '',
+      firstname:  c.firstname  ?? '',
+      lastname:   c.lastname   ?? '',
       middleName: c.middleName ?? '',
       title:      c.title ?? '',
     })

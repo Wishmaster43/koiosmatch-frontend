@@ -1,7 +1,7 @@
 /**
  * AddShiftModal — the "plan a shift" dialog: order/location/colour, shift times,
- * candidate search and notes. Self-contained subtree (its Field/Avatar/
- * CandidateRow helpers + style consts live here). Extracted from
+ * candidate search and notes. Its Field/Avatar/CandidateRow presentational
+ * helpers live in ./AddShiftModalFields (CLAUDE.md §3 size split, 28-07). Extracted from
  * PlanningPage. PLAN-LOOKUP-1 (2026-07-16): the customer/department/job-title
  * selects and the candidate list used to be hardcoded Dutch demo data — see
  * ./hooks/useShiftLookups for the real sources and why the old fake
@@ -15,20 +15,45 @@
  * 3-column planner (order info / shift details / candidate search), not a form
  * — so the column widths and the 92vw responsive wrapper stay unchanged; only
  * the bespoke 1100/90vh frame numbers became the shared constant.
+ *
+ * Card chrome adopted from the shared `@/components/ui/modalCards` module
+ * (CLAUDE.md §11, 28-07 dedup pass): this file used to hand-roll its own
+ * cardHead/cardBox (fontWeight 700/letterSpacing 0.07em/marginBottom 6, and a
+ * plain-block cardBox with marginBottom:14 for inter-card spacing) — a real
+ * drift from every other wide create-modal's cardHead/cardBox. Adopting the
+ * shared truth means each card is now its own flex item (gap:16 on the two form
+ * columns) instead of relying on cardBox's own marginBottom, and the local
+ * `Field` helper's redundant marginBottom:10 was dropped — cardBox's own
+ * gap:12 now spaces stacked fields, matching how @/components/forms/fields'
+ * shared Field (used by every other modal) already works.
+ *
+ * PLANNING-PERSIST-1 (CMFE audit 2026-07-28): `onAdd` only ever reached
+ * PlanningPage's local, in-memory shift array — there is no PATCH/POST call
+ * anywhere in this component, and PlanningPage itself never fetches shifts from
+ * a server either (see its own file header). A real backend Planning API exists
+ * (`/planning/orders`, `/planning/shifts`, `/planning/schedules`,
+ * `/planning/assignments`) but its create bodies and success responses aren't in
+ * the generated OpenAPI spec, and this modal's flat order/shift/candidate form
+ * doesn't map onto that order→shift→schedule model without new product
+ * decisions (e.g. no order-creation step exists here). Per §3 (no fake
+ * affordances), the Save button below is disabled with an honest, translated
+ * notice instead of inventing that integration — `handleSave` itself is kept
+ * so it reactivates for free the moment a real save path lands.
  */
-import { useState, useId, cloneElement, isValidElement } from 'react'
-import type { CSSProperties, ReactNode, ReactElement } from 'react'
+import { useState } from 'react'
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Save, Search } from 'lucide-react'
+import { X, Save, Search, Info } from 'lucide-react'
 import { formatDate } from './helpers'
-import { interactive } from '@/lib/a11y'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useFunctions } from '@/lib/useFunctions'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useShiftCustomers, useShiftDepartments, useShiftCandidateSearch } from './hooks/useShiftLookups'
 import type { ShiftCandidateOption } from './hooks/useShiftLookups'
+import { Field, Avatar, CandidateRow, colorFor, getInitials } from './AddShiftModalFields'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { cardHead, cardBox } from '@/components/ui/modalCards'
 import type { ShiftInput } from '@/types/planning'
 
 // ── Field helpers — house footprint (padding '8px 11px', fontSize 13,
@@ -36,52 +61,6 @@ import type { ShiftInput } from '@/types/planning'
 // even though its 3-column workspace stays its own (genuinely different) layout. ──
 const INPUT: CSSProperties = { padding: '8px 11px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8,
   outline: 'none', background: 'var(--bg)', color: 'var(--text)', width: '100%', boxSizing: 'border-box' }
-const LABEL: CSSProperties = { fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
-
-function Field({ label, children }: { label?: ReactNode; children: ReactNode }) {
-  // Associate the label with its single input via a generated id (§6).
-  const id = useId()
-  const child = isValidElement(children) ? cloneElement(children as ReactElement<{ id?: string }>, { id }) : children
-  return <div style={{ marginBottom: 10 }}><label htmlFor={id} style={LABEL}>{label}</label>{child}</div>
-}
-
-// Card chrome (Danny 27-07: "+ dienst ook nalopen" — every create modal must match
-// +Match/+Kandidaat's footprint) — 11px uppercase muted heading above a bordered
-// surface (§3A), kept local (not a cross-import, CLAUDE.md §2). Replaces the old
-// bare "uppercase label + border-bottom" SectionHead with the house card idiom;
-// only the left/middle FORM columns get boxed — the right column is a live
-// search/list widget, not a form section, so it keeps its own chrome (mirrors
-// how RelationsSection's candidate/contact results aren't individually boxed).
-const cardHead: CSSProperties = { fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 6 }
-const cardBox: CSSProperties = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, marginBottom: 14 }
-
-// One fixed palette, picked deterministically from a name's initials — no
-// per-candidate "colour" field exists (or should — see the hook file header
-// for why favourite/ranking data isn't faked), this replaces that need for
-// both the avatar and the scheduled-candidate accent border.
-// eslint-disable-next-line no-restricted-syntax -- DATA: avatar colour-cycling palette, not UI element styling
-const AVATAR_COLORS = ['var(--color-primary)', 'var(--color-secondary)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-danger)', '#8B5CF6', '#EC4899']
-function colorFor(initials: string) {
-  return AVATAR_COLORS[initials.charCodeAt(0) % AVATAR_COLORS.length]
-}
-
-// "Jan de Boer" → "JD" (max 2 letters); falls back to "?" for an empty name.
-function getInitials(name: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  const chars = [parts[0]?.[0], parts[1]?.[0]].filter(Boolean).join('')
-  return (chars || '?').toUpperCase()
-}
-
-function Avatar({ initials, size = 26 }: { initials: string; size?: number }) {
-  const color = colorFor(initials)
-  return (
-    <div style={{ width: size, height: size, borderRadius: '50%', background: color, flexShrink: 0,
-      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
-      fontSize: size * 0.36, fontWeight: 700 }}>
-      {initials}
-    </div>
-  )
-}
 
 // ── Add Shift Modal ───────────────────────────────────────────────────────────
 export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; onClose: () => void; onAdd: (shift: ShiftInput) => void }) {
@@ -148,11 +127,14 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
               <span style={{ fontSize: 12, color: 'var(--sidebar-muted)', marginLeft: 10 }}>{formatDate(date)}</span>
             </div>
             <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-              {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-              <button onClick={handleSave}
+              {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
+                  PLANNING-PERSIST-1 (§3) — disabled + an honest title until a real save
+                  path exists (see the file header); onClick stays wired so it reactivates
+                  for free the moment that path lands. */}
+              <button onClick={handleSave} disabled title={t('previewSaveTitle')}
                 style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 16px', fontSize: 12,
-                  fontWeight: 600, background: 'var(--color-primary)', color: '#fff',
-                  border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+                  fontWeight: 600, background: 'var(--color-primary)', color: '#fff', opacity: 0.5,
+                  border: 'none', borderRadius: 8, cursor: 'not-allowed' }}>
                 <Save size={13} /> {t('common:save')}
               </button>
               <button onClick={onClose} aria-label={t('common:close')}
@@ -164,160 +146,189 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
             </div>
           </div>
 
+          {/* Not-yet-persisted gate (PLANNING-PERSIST-1, §3) — mirrors the calm notice
+              pattern from candidates/drawer/PlanningTab.tsx: Info icon + italic muted
+              text, so opening this modal directly (without seeing PlanningPage's own
+              banner) still tells the truth about what Save does right now. */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 20px',
+            background: 'color-mix(in srgb, var(--text-muted) 8%, transparent)', flexShrink: 0 }}>
+            <Info size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} aria-hidden="true" />
+            <span style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)' }}>{t('previewNotice')}</span>
+          </div>
+
           {/* Body: 3 kolommen */}
           <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
 
             {/* ── Links: order info — each SectionHead became a titled bordered
                 card (Danny 27-07); customer/department are searchable
-                CreatableSelects, never a bare `<select>`. ── */}
+                CreatableSelects, never a bare `<select>`. Each cardHead+cardBox
+                pair is its own flex item (gap:16) — the shared cardBox no longer
+                carries its own marginBottom, mirroring every other wide modal. ── */}
             <div style={{ width: 220, flexShrink: 0, borderRight: '1px solid var(--border)',
-              background: 'var(--surface)', overflowY: 'auto', padding: '14px 14px' }}>
-              <div style={cardHead}>{t('sectionOrder')}</div>
-              <div style={cardBox}>
-                <Field label={t('fCustomer')}>
-                  <CreatableSelect value={customerId || null} onChange={handleCustomerChange} allowCreate={false}
-                    placeholder={customersLoading ? t('common:loading')
-                      : customersError ? t('common:errorGeneric')
-                      : customers.length === 0 ? t('common:noResults')
-                      : t('common:select')}
-                    options={customers.map(c => ({ value: String(c.id), label: c.name }))} />
-                </Field>
-                <Field label={t('fDepartment')}>
-                  {/* Options stay empty until a customer is picked (mirrors the old
-                      disabled select) — nothing selectable, not just visually greyed. */}
-                  <CreatableSelect value={departmentId || null} onChange={setDepartmentId} allowCreate={false}
-                    placeholder={!customerId ? t('pickCustomerFirst')
-                      : departmentsLoading ? t('common:loading')
-                      : departmentsError ? t('common:errorGeneric')
-                      : departments.length === 0 ? t('common:noResults')
-                      : t('common:select')}
-                    options={!customerId ? [] : departments.map(d => ({ value: String(d.id), label: d.name }))} />
-                </Field>
-                <Field label={t('fAssignment')}><input style={INPUT} /></Field>
-                <Field label={t('fContact')}><input style={INPUT} placeholder={t('contactPlaceholder')} /></Field>
+              background: 'var(--surface)', overflowY: 'auto', padding: '14px 14px',
+              display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <div style={cardHead}>{t('sectionOrder')}</div>
+                <div style={cardBox}>
+                  <Field label={t('fCustomer')}>
+                    <CreatableSelect value={customerId || null} onChange={handleCustomerChange} allowCreate={false}
+                      placeholder={customersLoading ? t('common:loading')
+                        : customersError ? t('common:errorGeneric')
+                        : customers.length === 0 ? t('common:noResults')
+                        : t('common:select')}
+                      options={customers.map(c => ({ value: String(c.id), label: c.name }))} />
+                  </Field>
+                  <Field label={t('fDepartment')}>
+                    {/* Options stay empty until a customer is picked (mirrors the old
+                        disabled select) — nothing selectable, not just visually greyed. */}
+                    <CreatableSelect value={departmentId || null} onChange={setDepartmentId} allowCreate={false}
+                      placeholder={!customerId ? t('pickCustomerFirst')
+                        : departmentsLoading ? t('common:loading')
+                        : departmentsError ? t('common:errorGeneric')
+                        : departments.length === 0 ? t('common:noResults')
+                        : t('common:select')}
+                      options={!customerId ? [] : departments.map(d => ({ value: String(d.id), label: d.name }))} />
+                  </Field>
+                  <Field label={t('fAssignment')}><input style={INPUT} /></Field>
+                  <Field label={t('fContact')}><input style={INPUT} placeholder={t('contactPlaceholder')} /></Field>
+                </div>
               </div>
 
-              <div style={cardHead}>{t('sectionLocation')}</div>
-              <div style={cardBox}>
-                <Field label={t('fAddress')}>
-                  <textarea style={{ ...INPUT, resize: 'none', height: 56 }}
-                    value={address} onChange={e => setAddress(e.target.value)} />
-                </Field>
+              <div>
+                <div style={cardHead}>{t('sectionLocation')}</div>
+                <div style={cardBox}>
+                  <Field label={t('fAddress')}>
+                    <textarea style={{ ...INPUT, resize: 'none', height: 56 }}
+                      value={address} onChange={e => setAddress(e.target.value)} />
+                  </Field>
+                </div>
               </div>
 
-              <div style={cardHead}>{t('sectionColor')}</div>
-              <div style={cardBox}>
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                  {/* Icon-only swatch buttons need a real aria-label (§6) — the CSS
-                      value itself isn't meaningful to a screen reader, so number them. */}
-                  {COLORS.map((c, i) => (
-                    <button key={c} type="button" onClick={() => setColor(c)} aria-label={`${t('sectionColor')} ${i + 1}`}
-                      style={{ width: 20, height: 20, borderRadius: '50%', background: c, border: 'none',
-                        cursor: 'pointer', outline: color === c ? `2px solid ${c}` : 'none', outlineOffset: 2 }} />
-                  ))}
+              <div>
+                <div style={cardHead}>{t('sectionColor')}</div>
+                <div style={cardBox}>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    {/* Icon-only swatch buttons need a real aria-label (§6) — the CSS
+                        value itself isn't meaningful to a screen reader, so number them. */}
+                    {COLORS.map((c, i) => (
+                      <button key={c} type="button" onClick={() => setColor(c)} aria-label={`${t('sectionColor')} ${i + 1}`}
+                        style={{ width: 20, height: 20, borderRadius: '50%', background: c, border: 'none',
+                          cursor: 'pointer', outline: color === c ? `2px solid ${c}` : 'none', outlineOffset: 2 }} />
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* ── Midden: dienst details — same titled-card treatment; jobtype/open
-                dienst are now searchable CreatableSelects. ── */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '14px 20px' }}>
-              <div style={cardHead}>{t('shift1')}</div>
-              <div style={cardBox}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10 }}>
-                  <Field label={t('fShiftName')}>
-                    <input style={INPUT} value={title} onChange={e => setTitle(e.target.value)} />
-                  </Field>
-                  <Field label={t('fStart')}>
-                    <input type="time" style={INPUT} value={start} onChange={e => setStart(e.target.value)} />
-                  </Field>
-                  <Field label={t('fEnd')}>
-                    <input type="time" style={INPUT} value={end} onChange={e => setEnd(e.target.value)} />
-                  </Field>
-                  <Field label={t('fPersons')}>
-                    <input type="number" style={INPUT} value={personCount} min={1} max={20}
-                      onChange={e => setPersonCount(Number(e.target.value))} />
-                  </Field>
-                </div>
+                dienst are now searchable CreatableSelects. Each cardHead+cardBox
+                pair is its own flex item (gap:16), same reasoning as the left column. ── */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '14px 20px',
+              display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <div style={cardHead}>{t('shift1')}</div>
+                <div style={cardBox}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10 }}>
+                    <Field label={t('fShiftName')}>
+                      <input style={INPUT} value={title} onChange={e => setTitle(e.target.value)} />
+                    </Field>
+                    <Field label={t('fStart')}>
+                      <input type="time" style={INPUT} value={start} onChange={e => setStart(e.target.value)} />
+                    </Field>
+                    <Field label={t('fEnd')}>
+                      <input type="time" style={INPUT} value={end} onChange={e => setEnd(e.target.value)} />
+                    </Field>
+                    <Field label={t('fPersons')}>
+                      <input type="number" style={INPUT} value={personCount} min={1} max={20}
+                        onChange={e => setPersonCount(Number(e.target.value))} />
+                    </Field>
+                  </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                  <Field label={t('fJobtype')}>
-                    <CreatableSelect value={jobType || null} onChange={setJobType} allowCreate={false}
-                      placeholder={t('common:select')} options={functions} />
-                  </Field>
-                  <Field label={t('fOpenShift')}>
-                    {/* Placeholder given even though a default is always selected — it
-                        becomes the search box's accessible label once opened (§6). */}
-                    <CreatableSelect value={openShiftMode} onChange={setOpenShiftMode} allowCreate={false}
-                      placeholder={t('fOpenShift')}
-                      options={[
-                        { value: 'all', label: t('openAll') },
-                        { value: 'favorites', label: t('openFavorites') },
-                        { value: 'fixed', label: t('openFixed') },
-                      ]} />
-                  </Field>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                    <Field label={t('fJobtype')}>
+                      <CreatableSelect value={jobType || null} onChange={setJobType} allowCreate={false}
+                        placeholder={t('common:select')} options={functions} />
+                    </Field>
+                    <Field label={t('fOpenShift')}>
+                      {/* Placeholder given even though a default is always selected — it
+                          becomes the search box's accessible label once opened (§6). */}
+                      <CreatableSelect value={openShiftMode} onChange={setOpenShiftMode} allowCreate={false}
+                        placeholder={t('fOpenShift')}
+                        options={[
+                          { value: 'all', label: t('openAll') },
+                          { value: 'favorites', label: t('openFavorites') },
+                          { value: 'fixed', label: t('openFixed') },
+                        ]} />
+                    </Field>
+                  </div>
                 </div>
               </div>
 
               {/* Scheduled candidate */}
-              <div style={cardHead}>{t('scheduledWorker')}</div>
-              <div style={cardBox}>
-                {candidate ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
-                    border: `1px solid ${colorFor(getInitials(candidate.name))}40`, borderLeft: `4px solid ${colorFor(getInitials(candidate.name))}`,
-                    borderRadius: 8, background: 'var(--bg)' }}>
-                    <Avatar initials={getInitials(candidate.name)} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{candidate.name}</div>
-                      {candidate.functionTitle && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{candidate.functionTitle}</div>}
+              <div>
+                <div style={cardHead}>{t('scheduledWorker')}</div>
+                <div style={cardBox}>
+                  {candidate ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
+                      border: `1px solid ${colorFor(getInitials(candidate.name))}40`, borderLeft: `4px solid ${colorFor(getInitials(candidate.name))}`,
+                      borderRadius: 8, background: 'var(--bg)' }}>
+                      <Avatar initials={getInitials(candidate.name)} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{candidate.name}</div>
+                        {candidate.functionTitle && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{candidate.functionTitle}</div>}
+                      </div>
+                      <button onClick={() => setCandidate(null)} aria-label={t('common:cancel')}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                        <X size={14} />
+                      </button>
                     </div>
-                    <button onClick={() => setCandidate(null)} aria-label={t('common:cancel')}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
-                      <X size={14} />
-                    </button>
-                  </div>
-                ) : (
-                  <div style={{ padding: '20px', textAlign: 'center', border: '1px dashed var(--border)',
-                    borderRadius: 8, fontSize: 12, color: 'var(--text-muted)' }}>
-                    {t('clickCandidate')}
-                  </div>
-                )}
+                  ) : (
+                    <div style={{ padding: '20px', textAlign: 'center', border: '1px dashed var(--border)',
+                      borderRadius: 8, fontSize: 12, color: 'var(--text-muted)' }}>
+                      {t('clickCandidate')}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Notes */}
-              <div style={cardHead}>{t('notes')}</div>
-              <div style={cardBox}>
-                <textarea style={{ ...INPUT, height: 70, resize: 'none' }} placeholder={t('notePlaceholder')} aria-label={t('notePlaceholder')} />
+              <div>
+                <div style={cardHead}>{t('notes')}</div>
+                <div style={cardBox}>
+                  <textarea style={{ ...INPUT, height: 70, resize: 'none' }} placeholder={t('notePlaceholder')} aria-label={t('notePlaceholder')} />
+                </div>
               </div>
 
               {/* Assignment performance */}
-              <div style={cardHead}>{t('performance')}</div>
-              <div style={cardBox}>
-                <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
-                      {[t('colName'), t('colClient'), t('colFunction'), t('colColleagues')].map(h => (
-                        <th key={h} style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {candidate ? (
-                      <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                        <td style={{ padding: '8px 10px', color: 'var(--text)' }}>{candidate.name}</td>
-                        <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{customerName}</td>
-                        <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{candidate.functionTitle || '-'}</td>
-                        <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>-</td>
+              <div>
+                <div style={cardHead}>{t('performance')}</div>
+                <div style={cardBox}>
+                  <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
+                        {[t('colName'), t('colClient'), t('colFunction'), t('colColleagues')].map(h => (
+                          <th key={h} style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>{h}</th>
+                        ))}
                       </tr>
-                    ) : (
-                      <tr>
-                        <td colSpan={4} style={{ padding: '16px 10px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 12 }}>
-                          {t('noWorkerPlanned')}
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {candidate ? (
+                        <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                          <td style={{ padding: '8px 10px', color: 'var(--text)' }}>{candidate.name}</td>
+                          <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{customerName}</td>
+                          <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{candidate.functionTitle || '-'}</td>
+                          <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>-</td>
+                        </tr>
+                      ) : (
+                        <tr>
+                          <td colSpan={4} style={{ padding: '16px 10px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 12 }}>
+                            {t('noWorkerPlanned')}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
 
@@ -360,32 +371,6 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
           </div>
         </div>
       </div>
-    </div>
-  )
-}
-
-function CandidateRow({ candidate, selected, onClick }: { candidate: ShiftCandidateOption; selected?: boolean; onClick?: () => void }) {
-  const initials = getInitials(candidate.name)
-  return (
-    <div {...interactive(onClick)}
-      style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 8px', borderRadius: 8,
-        background: selected ? 'var(--color-primary-bg)' : 'transparent',
-        border: selected ? `1px solid var(--color-primary)` : '1px solid transparent',
-        cursor: 'pointer', marginBottom: 4, transition: 'background 0.1s' }}
-      onMouseEnter={e => { if (!selected) e.currentTarget.style.background = 'var(--hover-bg)' }}
-      onMouseLeave={e => { if (!selected) e.currentTarget.style.background = 'transparent' }}>
-      <Avatar initials={initials} size={28} />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {candidate.name}
-        </div>
-        {candidate.functionTitle && (
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {candidate.functionTitle}
-          </div>
-        )}
-      </div>
-      {selected && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-primary)', flexShrink: 0 }} />}
     </div>
   )
 }

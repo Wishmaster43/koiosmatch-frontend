@@ -162,6 +162,7 @@
     "functions": "Fonctions",
     "contact_functions": "Fonctions",
     "customer_display": "Affichage du tableau",
+    "customer_vacancy_defaults": "Visibilité des postes",
     "vacancy_app_defaults": "Paramètres de candidature",
     "opportunity_display": "Affichage du tableau",
     "dashboards": "Tableaux de bord",
@@ -292,30 +293,36 @@
     "subtitle": "Par colonne : étiquettes colorées ou texte brut. Les graphiques KPI conservent toujours leurs couleurs.",
     "fields": {
       "candidate_table_color_funnel": {
-        "label": "Type de funnel"
+        "label": "Type de funnel",
+        "description": "Activé = type de funnel en libellé coloré. Désactivé = texte simple."
       },
       "candidate_table_color_type": {
-        "label": "Type de candidat"
+        "label": "Forme de contrat",
+        "description": "Activé = forme de contrat en libellé coloré. Désactivé = texte simple."
       },
       "candidate_table_color_pool": {
-        "label": "Vivier"
+        "label": "Vivier",
+        "description": "Activé = vivier de talents en libellé coloré. Désactivé = texte simple."
       },
       "candidate_table_color_koios": {
-        "label": "Koios AI"
+        "label": "Koios AI",
+        "description": "Activé = avis Koios AI en libellé coloré. Désactivé = texte simple."
       },
       "candidate_avatar_colored_by_gender": {
         "label": "Avatar du nom par genre",
         "description": "Activé = l'avatar à côté du nom du candidat est coloré par genre. Désactivé = un gris sobre."
       },
       "candidate_table_color_status": {
-        "label": "Statut"
+        "label": "Statut",
+        "description": "Activé = statut en libellé coloré. Désactivé = texte simple."
       },
       "candidate_table_color_owner": {
         "label": "Couleur du responsable",
         "description": "Activé = l'avatar du responsable utilise la couleur du recruteur. Désactivé = gris neutre."
       },
       "candidate_table_color_phase": {
-        "label": "Phase"
+        "label": "Phase",
+        "description": "Activé = phase en libellé coloré. Désactivé = texte simple."
       }
     }
   },
@@ -553,7 +560,15 @@
     "color1": "Couleur 1",
     "color2": "Couleur 2",
     "sections": "Sections",
-    "sectionsHint": "Définissez quelles sections sont visibles et dans quel ordre.",
+    "sectionsHint": "Définissez quelles sections sont visibles, dans quel ordre, et si elles se trouvent dans la colonne latérale ou la colonne principale.",
+    "regionSidebar": "Colonne latérale",
+    "regionMain": "Colonne principale",
+    "regionHeader": "En-tête",
+    "regionFixedMainHint": "Cette section est trop étendue pour l'étroite colonne latérale et reste donc toujours dans la colonne principale.",
+    "regionHeaderHint": "Cette section se trouve dans l'en-tête au-dessus du nom et n'a pas de colonne propre.",
+    "moveSectionUp": "Déplacer « {{section}} » vers le haut",
+    "moveSectionDown": "Déplacer « {{section}} » vers le bas",
+    "moveSectionToRegion": "Placer « {{section}} » dans {{region}}",
     "preview": "Aperçu",
     "previewHint": "A4 — avec candidat exemple"
   },
@@ -1512,13 +1527,16 @@
     "subtitle": "Par colonne : libellés colorés ou texte simple. Le tableau des tâches garde toujours ses couleurs.",
     "fields": {
       "task_table_color_status": {
-        "label": "Statut"
+        "label": "Statut",
+        "description": "Activé = statut de tâche en libellé coloré. Désactivé = texte simple."
       },
       "task_table_color_priority": {
-        "label": "Priorité"
+        "label": "Priorité",
+        "description": "Activé = priorité en libellé coloré. Désactivé = texte simple."
       },
       "task_table_color_type": {
-        "label": "Type"
+        "label": "Type",
+        "description": "Activé = type d'activité en libellé coloré. Désactivé = texte simple."
       },
       "task_table_color_assignee": {
         "label": "Couleur de l'assigné",
@@ -1696,13 +1714,16 @@
     "subtitle": "Par colonne : étiquettes colorées ou texte brut. Les graphiques KPI conservent toujours leurs couleurs.",
     "fields": {
       "application_table_color_score": {
-        "label": "Score de correspondance"
+        "label": "Score de correspondance",
+        "description": "Activé = score de match en puce colorée. Désactivé = texte simple."
       },
       "application_table_color_phase": {
-        "label": "Phase"
+        "label": "Phase",
+        "description": "Activé = phase en libellé coloré. Désactivé = texte simple."
       },
       "application_table_color_status": {
-        "label": "Statut du candidat"
+        "label": "Statut du candidat",
+        "description": "Activé = statut du candidat en libellé coloré. Désactivé = texte simple."
       },
       "application_table_color_owner": {
         "label": "Couleur du propriétaire",
@@ -1732,14 +1753,34 @@
     "subtitle": "Par colonne : libellés colorés ou texte simple. Les graphiques KPI gardent toujours leurs couleurs.",
     "fields": {
       "customer_table_color_status": {
-        "label": "Statut"
+        "label": "Statut",
+        "description": "Activé = statut client en libellé coloré. Désactivé = texte simple."
       },
       "customer_table_color_koios": {
-        "label": "Koios AI"
+        "label": "Koios AI",
+        "description": "Activé = avis Koios AI en libellé coloré. Désactivé = texte simple."
       },
       "customer_table_color_owner": {
         "label": "Couleur du gestionnaire",
         "description": "Activé = l'avatar du gestionnaire utilise sa couleur. Désactivé = gris neutre."
+      }
+    }
+  },
+  "customerVacancyDefaults": {
+    "title": "Visibilité des postes (par défaut)",
+    "subtitle": "La valeur par défaut du tenant pour les clients nouveaux et existants. Chaque client peut s'en écarter via son onglet Visibilité des postes.",
+    "fields": {
+      "customer_default_hide_company_name": {
+        "label": "Masquer le nom de l'entreprise",
+        "description": "Activé = masque le nom de ce client sur les offres et le site carrière."
+      },
+      "customer_default_show_in_vacancies": {
+        "label": "Afficher dans mes postes",
+        "description": "Activé = affiche les offres de ce client dans « mes offres »."
+      },
+      "customer_default_exclude_from_sourcing": {
+        "label": "Exclure du sourcing",
+        "description": "Activé = exclut ce client du sourcing automatique."
       }
     }
   },
@@ -1752,7 +1793,8 @@
         "description": "Activé = le tableau Opportunités et les KPI affichent des heures au lieu d’euros."
       },
       "opportunity_table_color_stage": {
-        "label": "Phase"
+        "label": "Phase",
+        "description": "Activé = phase en libellé coloré. Désactivé = texte simple."
       },
       "opportunity_table_color_owner": {
         "label": "Couleur du propriétaire",
@@ -1857,10 +1899,12 @@
     "subtitle": "Par colonne : libellés colorés ou texte simple. Les graphiques KPI gardent toujours leurs couleurs.",
     "fields": {
       "vacancy_table_color_status": {
-        "label": "Statut"
+        "label": "Statut",
+        "description": "Activé = statut de l'offre en libellé coloré. Désactivé = texte simple."
       },
       "vacancy_table_color_published": {
-        "label": "Publié"
+        "label": "Publié",
+        "description": "Activé = statut de publication en libellé coloré. Désactivé = texte simple."
       },
       "vacancy_table_color_owner": {
         "label": "Couleur du propriétaire",
@@ -1873,7 +1917,8 @@
     "subtitle": "Par colonne : étiquettes colorées ou texte brut. Le tableau des matchs garde toujours ses couleurs.",
     "fields": {
       "match_table_color_status": {
-        "label": "Statut"
+        "label": "Statut",
+        "description": "Activé = statut du match en libellé coloré. Désactivé = texte simple."
       },
       "match_table_color_owner": {
         "label": "Couleur du propriétaire",
@@ -1886,10 +1931,12 @@
     "subtitle": "Par colonne : étiquettes colorées ou texte brut.",
     "fields": {
       "outreach_table_color_channel": {
-        "label": "Canal"
+        "label": "Canal",
+        "description": "Activé = canal en libellé coloré. Désactivé = texte simple."
       },
       "outreach_table_color_status": {
-        "label": "Statut"
+        "label": "Statut",
+        "description": "Activé = statut de campagne en libellé coloré. Désactivé = texte simple."
       },
       "outreach_table_color_owner": {
         "label": "Couleur du propriétaire",
@@ -2208,8 +2255,7 @@
   "careerSite": {
     "title": "Site carrière",
     "subtitle": "Le site public des offres de ce locataire.",
-    "on": "Activé — site public visible",
-    "off": "Désactivé — site public inaccessible",
+    "activeLabel": "Site carrière actif",
     "hint": "Active ou désactive le site carrière public (…/{tenant}/vacatures). Le backend l'applique immédiatement : désactivé = le site affiche un avis et les candidatures sont fermées."
   },
   "caoSettings": {

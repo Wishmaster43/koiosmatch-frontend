@@ -5,7 +5,7 @@
   "error": "Kansen konden niet geladen worden.",
   "pickClientFirst": "Kies eerst een klant",
   "page": {
-    "add": "Kans toevoegen",
+    "add": "Nieuwe kans",
     "selected": "{{count}} geselecteerd",
     "clearSelection": "Selectie wissen",
     "searchPlaceholder": "Zoek naar kansen"

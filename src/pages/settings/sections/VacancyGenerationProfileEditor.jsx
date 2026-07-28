@@ -17,6 +17,7 @@ import { useState } from 'react'
 import { X, Plus } from 'lucide-react'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+import { Toggle } from '../components/SettingsKit'
 import { useLocations } from '@/lib/useLocations'
 import { useContractTypes } from '@/lib/useContractTypes'
 import { useFunctions } from '@/lib/useFunctions'
@@ -142,16 +143,15 @@ export default function VacancyGenerationProfileEditor({ draft, onChange, conten
           </div>
         </div>
 
-        {/* Emoji toggle — checkbox + label + description, mirrors StatusListEditor's flagField. */}
-        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, cursor: 'pointer' }}>
-          <input type="checkbox" checked={draft.content.allow_emoji}
-            onChange={e => setContent('allow_emoji', e.target.checked)}
-            style={{ accentColor: 'var(--color-primary)', width: 14, height: 14, marginTop: 2, flexShrink: 0 }} />
+        {/* Emoji toggle — Toggle + label + description, mirrors StatusListEditor's flagField. */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+          <Toggle checked={draft.content.allow_emoji} ariaLabel={t('vacancyGenerationSettings.emojiLabel')}
+            onChange={v => setContent('allow_emoji', v)} />
           <span style={{ minWidth: 0 }}>
             <span style={{ display: 'block', fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{t('vacancyGenerationSettings.emojiLabel')}</span>
             <span style={{ display: 'block', fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>{t('vacancyGenerationSettings.emojiHint')}</span>
           </span>
-        </label>
+        </div>
 
         <div>
           <label style={labelStyle}>{t('vacancyGenerationSettings.brandLabel')}</label>

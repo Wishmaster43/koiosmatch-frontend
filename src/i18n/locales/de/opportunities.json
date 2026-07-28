@@ -5,7 +5,7 @@
   "error": "Chancen konnten nicht geladen werden.",
   "pickClientFirst": "Zuerst einen Kunden wählen",
   "page": {
-    "add": "Chance hinzufügen",
+    "add": "Neue Chance",
     "selected": "{{count}} ausgewählt",
     "clearSelection": "Auswahl aufheben",
     "searchPlaceholder": "Chancen suchen"

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
@@ -10,19 +9,16 @@ import { useOpportunityStages } from '@/lib/useOpportunityStages'
 import { useOpportunityServiceTypes, useOpportunityAgreementTypes } from '@/lib/useOpportunityLookups'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useCustomerCascade } from './hooks/useCustomerCascade'
+// The shared "Name — Function" contact-option label (§11 — one shared builder,
+// not a per-screen copy); imported straight from the real implementation since
+// the local re-export above only re-exports the hook itself.
+import { contactOptionLabel } from '@/hooks/useCustomerCascade'
 import { mapOpportunity } from './data/mapOpportunity'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { cardHead, cardBox, row2, cardPair } from '@/components/ui/modalCards'
 import type { ApiOpportunity, Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
-
-// House "wide form" card idiom (Danny 27-07: bring this popup onto the same
-// frame as +Match/+Kandidaat) — mirrors matchPlacement/styles.ts's cardHead/
-// cardBox/row2 tokens. Kept LOCAL (not cross-imported from pages/candidates):
-// §2 forbids one entity page reaching into another entity page's internals.
-const cardHead: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
-const cardBox: CSSProperties = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, display: 'flex', flexDirection: 'column', gap: 12 }
-const row2: CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
@@ -216,7 +212,8 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
             Every dropdown is a searchable CreatableSelect (allowCreate=false) —
             no bare <select> is left in this modal. */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 22px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' }}>
+          {/* Two titled cards side by side — the shared cardPair grid (§11). */}
+          <div style={cardPair}>
 
             {/* Algemeen — title + the customer→location→department→contact
                 relations + owner (mirrors MatchPlacementModal's Relaties card). */}
@@ -235,9 +232,12 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
                       placeholder={t('common:select')} options={customerOptions} />
                   </Field>
                   <Field label={t('modal.fields.contact')}>
+                    {/* Danny 28-07: same-named contacts (one per location/department
+                        coupling) were indistinguishable — the label now carries the
+                        function title, mirroring RelationsSection's contact picker. */}
                     <CreatableSelect value={contactId || null} onChange={setContactId} allowCreate={false}
                       placeholder={form.clientId ? t('common:select') : t('pickClientFirst')}
-                      options={contacts.map(c => ({ value: String(c.id), label: c.name ?? '—' }))} />
+                      options={contacts.map(c => ({ value: String(c.id), label: contactOptionLabel(c) }))} />
                   </Field>
                 </div>
                 <div style={row2}>

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
+import { contactOptionLabel } from '@/hooks/useCustomerCascade'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { useCustomerCascade } from './useCustomerCascade'
+import { useCustomerCascade} from './useCustomerCascade'
 
 interface Picked { id: string; name: string }
 interface Args {
@@ -69,7 +70,7 @@ export function useCascadePickers({
     ),
     contactPicker: (
       <CreatableSelect value={contactId || null} onChange={handleContactChange} allowCreate={false}
-        placeholder={placeholder} options={opt(contacts)} />
+        placeholder={placeholder} options={contacts.map(c => ({ value: String(c.id), label: contactOptionLabel(c) }))} />
     ),
   }
 }

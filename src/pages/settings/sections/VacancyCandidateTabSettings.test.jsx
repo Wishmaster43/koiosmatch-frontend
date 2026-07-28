@@ -61,7 +61,7 @@ describe('VacancyCandidateTabSettings — leads criteria', () => {
     blobRef.current = { vacancy_candidate_tab: JSON.stringify(STORED) }
     const user = userEvent.setup()
     render(<VacancyCandidateTabSettings />)
-    await user.click(screen.getByRole('checkbox', { name: t('candidateTab.leadsCriteria.includeExpiringPlacementsLabel') }))
+    await user.click(screen.getByRole('switch', { name: t('candidateTab.leadsCriteria.includeExpiringPlacementsLabel') }))
     expect(postMock).toHaveBeenCalledWith('/settings', {
       vacancy_candidate_tab: JSON.stringify({ ...STORED, include_expiring_placements: false }),
     })
@@ -85,7 +85,7 @@ describe('VacancyCandidateTabSettings — leads criteria', () => {
     const user = userEvent.setup()
     render(<VacancyCandidateTabSettings />)
     expect(screen.getByLabelText(t('candidateTab.defaultRadiusLabel'))).not.toBeDisabled()
-    await user.click(screen.getByRole('checkbox', { name: t('candidateTab.leadsCriteria.applyRadiusLabel') }))
+    await user.click(screen.getByRole('switch', { name: t('candidateTab.leadsCriteria.applyRadiusLabel') }))
     expect(postMock).toHaveBeenCalledWith('/settings', {
       vacancy_candidate_tab: JSON.stringify({ ...STORED, apply_radius: false }),
     })

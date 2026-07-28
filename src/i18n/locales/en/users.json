@@ -10,6 +10,7 @@
   "createFailed": "Could not create.",
   "pwPlaceholder": "At least 8 characters",
   "changeRole": "Change role",
+  "changeRoleFailed": "Could not change the role. Please try again.",
   "avatarColor": "Icon colour",
   "avatarColorAuto": "Automatic",
   "title": "Users",

@@ -28,12 +28,12 @@
  *
  * Danny 24-07 points 3/6: the panel now shares its exact frame footprint with
  * AddCandidateModal (modalMetrics.ts, via matchPlacement/styles' panel), and each
- * section renders as a titled CARD — the addmodal card idiom (`cardHead` +
- * `cardBox` from `pages/candidates/addmodal/fields`, both live under
- * pages/candidates so a direct cross-import is fine) — instead of a bare
- * uppercase label over an unbordered block. Opmerkingen is its OWN card, left
- * column, stacked under Contract — Financieel (the tallest section) sits alone
- * on the right so the two columns balance visually (Danny 24-07 layout point).
+ * section renders as a titled CARD — the shared `@/components/ui/modalCards`
+ * chrome (`cardHead`/`cardBox`, CLAUDE.md §11: one source instead of a per-entity
+ * copy) — instead of a bare uppercase label over an unbordered block. Opmerkingen
+ * is its OWN card, left column, stacked under Contract — Financieel (the tallest
+ * section) sits alone on the right so the two columns balance visually (Danny
+ * 24-07 layout point).
  */
 import { X } from 'lucide-react'
 import { RateDeviationWarning } from './RateProposalNotice'
@@ -45,7 +45,7 @@ import ContractSection from './matchPlacement/ContractSection'
 import FinancialSection from './matchPlacement/FinancialSection'
 import RemarksSection from './matchPlacement/RemarksSection'
 import { overlay, panel, twoColSections } from './matchPlacement/styles'
-import { cardHead, cardBox } from '@/pages/candidates/addmodal/fields'
+import { cardHead, cardBox } from '@/components/ui/modalCards'
 import type { Id } from '@/types/common'
 
 export default function MatchPlacementModal({ candidateId: fixedCandidateId, editMatchId, onClose, onCreated }: {

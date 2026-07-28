@@ -5,6 +5,9 @@
  * endpoint stays disabled with a tooltip; an enabled row confirms, DELETEs, and
  * either drops out of the list (success) or surfaces the backend's per-type
  * `counts` payload as an i18n'd in-use message while the row stays put (409).
+ * Also covers VESTIGING-ICON-1: the per-row read-only icon badge (§3 — no
+ * icon/colour column exists on `locations`, so this is a deterministic hash,
+ * never an editable picker that would silently drop on reload).
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -184,5 +187,28 @@ describe('LocationsSettings', () => {
     // Regression guard: the row shows the plain name, never "[object Object]" from a
     // stored-but-unwrapped { data: {...} } envelope.
     expect(await screen.findByText('Nieuwe vestiging')).toBeInTheDocument()
+  })
+
+  it('VESTIGING-ICON-1: each row shows a read-only icon badge tinted by a stable per-name colour hash', async () => {
+    api.get.mockResolvedValue({ data: { data: [location(), location({ id: 'loc2', name: 'Vestiging Utrecht' })] } })
+    render(<LocationsSettings />)
+    await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
+
+    // The badge sits next to the name; querying via the name text keeps this test
+    // resilient to markup changes elsewhere in the row.
+    const badgeOf = (name) => screen.getByText(name).querySelector('span[aria-hidden="true"]')
+    const rotterdamBadge = badgeOf('Kantoor Rotterdam')
+    const utrechtBadge = badgeOf('Vestiging Utrecht')
+
+    // A real icon renders (identifiability "at a glance"), not just a coloured dot.
+    expect(rotterdamBadge.querySelector('svg')).toBeInTheDocument()
+    // Same `avatarColor` hash the rest of the app uses (Avatar / Shiftmanager
+    // entities) — 'K'.charCodeAt(0) % 7 = 5 → AVATAR_COLORS[5]; 'V' → index 2.
+    // eslint-disable-next-line no-restricted-syntax -- DATA: asserting the exact AVATAR_COLORS[5] palette entry, not an invented UI colour
+    expect(rotterdamBadge).toHaveStyle({ background: 'color-mix(in srgb, #8B5CF6 14%, transparent)' })
+    expect(utrechtBadge).toHaveStyle({ background: 'color-mix(in srgb, var(--color-success) 14%, transparent)' })
+    // Two different names must hash to two different colours — that is what makes
+    // rows scannable instead of a uniform icon repeated on every row.
+    expect(rotterdamBadge.style.background).not.toEqual(utrechtBadge.style.background)
   })
 })

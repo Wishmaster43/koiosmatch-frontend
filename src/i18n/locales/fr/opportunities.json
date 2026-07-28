@@ -5,7 +5,7 @@
   "error": "Impossible de charger les opportunités.",
   "pickClientFirst": "Sélectionnez d'abord un client",
   "page": {
-    "add": "Ajouter une opportunité",
+    "add": "Nouvelle opportunité",
     "selected": "{{count}} sélectionné(e)s",
     "clearSelection": "Effacer la sélection",
     "searchPlaceholder": "Rechercher des opportunités"

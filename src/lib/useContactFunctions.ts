@@ -44,10 +44,11 @@ export function useContactFunctions() {
   const { data } = useCachedLookup('/contact-functions', mapContactFunctions, FALLBACK)
   const settings = useAllSettings()
 
-  // Same chain as useFunctions: the tenant Settings toggle wins, else the API's
-  // own flag, else creatable (this list's historical default — flipping it here
-  // would silently strict-lock never-configured tenants).
-  const allowFreeEntry = getBoolSetting(settings, 'contact_functions_allow_free_entry', data.apiFreeEntry ?? true)
+  // Same chain as useFunctions: the tenant Settings toggle wins, else the API's own
+  // flag, else STRICT. Danny 28-07: "toggle moet uit zoals kandidaten — uit is dropdown,
+  // aan is vrije invoer". This list defaulted to creatable while the candidate list
+  // defaulted to strict, so the same control behaved differently on two screens.
+  const allowFreeEntry = getBoolSetting(settings, 'contact_functions_allow_free_entry', data.apiFreeEntry ?? false)
 
   return { contactFunctions: data.contactFunctions, allowFreeEntry }
 }

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { ExternalLink } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import { buildEntityDeepLink } from '@/components/ui/EntityLink'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { mapCandidate } from '@/pages/candidates/data/mapCandidate'
@@ -56,11 +57,34 @@ export default function CandidateTab({ application: a }: { application: Applicat
   // straight to the API and get silently dropped by CandidateProfileRequest's
   // all-sometimes rules (dob, placeOfBirth, houseNumber(+suffix), postalCode,
   // linkedin, candidateTypes, zzp, consent.retentionOptIn, …).
+  // OPTIMISTIC-REVERT-1 (audit 2026-07-28, same bug class as
+  // useApplicationDrawerActions/VacancyTab's updateVacancy): this used to
+  // `.catch(() => notifyError(...))` with no revert, so a rejected PATCH left the
+  // edited value in `edits` forever, looking saved. `edits` is a SPARSE delta
+  // merged over the fetched `cand` (see `c` below) — snapshot ONLY the keys this
+  // patch touches (their `edits` value AND whether they were present at all)
+  // before the optimistic write, then restore exactly those on failure. A key
+  // that was never locally edited before must be DELETED on revert, not set to
+  // `undefined` — an explicit `undefined` still wins the `{...cand, ...edits}`
+  // merge and would hide the real, last-fetched candidate value.
   const onUpdate = (id: string | number, patch: Record<string, unknown>) => {
-    setEdits(e => ({ ...e, ...patch }))
+    const touchedKeys = Object.keys(patch)
+    const before: Record<string, unknown> = {}
+    const hadKey: Record<string, boolean> = {}
+    setEdits(e => {
+      touchedKeys.forEach(k => { hadKey[k] = Object.prototype.hasOwnProperty.call(e, k); before[k] = e[k] })
+      return { ...e, ...patch }
+    })
     const body = buildCandidatePatch(patch)
     if (!Object.keys(body).length) return
-    api.patch(`/candidates/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
+    api.patch(`/candidates/${id}`, body).catch(err => {
+      setEdits(e => {
+        const next = { ...e }
+        touchedKeys.forEach(k => { if (hadKey[k]) next[k] = before[k]; else delete next[k] })
+        return next
+      })
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    })
   }
 
   // Merge local edits over the fetched record for the tab components (undefined

@@ -10,6 +10,11 @@
  * trigger `<button>` showing the current label/placeholder + an options list
  * revealed on click), so pickers are queried by role/name, not getByLabelText
  * (that still works for the plain `<input>`/`<textarea>` fields, unchanged).
+ *
+ * PLANNING-PERSIST-1 (CMFE audit 2026-07-28): `onAdd` never reached a real save
+ * route — see the component's own header comment. Save is now disabled with an
+ * honest, translated notice instead; the "fills the save payload" test below was
+ * rewritten to assert that gate (disabled + notice) rather than a fake success.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -163,7 +168,7 @@ describe('AddShiftModal · candidate search (SUGGESTIES mock removed)', () => {
     expect(screen.queryByText('suggestions')).not.toBeInTheDocument()
   })
 
-  it('selecting a candidate fills the scheduled-worker card and the save payload', async () => {
+  it('selecting a candidate fills the scheduled-worker card (Save stays gated — PLANNING-PERSIST-1)', async () => {
     mockCandidates.mockReturnValue({ candidates: [{ id: 'k1', name: 'Ismail Eddahchouri', functionTitle: 'IG-Verzorging' }], loading: false, error: false })
     const onAdd = vi.fn()
     const user = userEvent.setup()
@@ -172,11 +177,19 @@ describe('AddShiftModal · candidate search (SUGGESTIES mock removed)', () => {
     await user.click(customerTrigger())
     await user.click(screen.getByRole('button', { name: 'Rivas Zorggroep' }))
     await user.click(screen.getByText('Ismail Eddahchouri'))
+    // Save is disabled (no real persistence path yet) — clicking it is a no-op.
     await user.click(screen.getByText('common:save'))
 
-    expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({
-      candidate: 'Ismail Eddahchouri',
-      location: 'Rivas Zorggroep',
-    }))
+    expect(onAdd).not.toHaveBeenCalled()
+  })
+})
+
+describe('AddShiftModal · not-yet-persisted gate (PLANNING-PERSIST-1)', () => {
+  it('disables Save with an honest tooltip and shows the preview notice', () => {
+    render(<AddShiftModal date={new Date()} onClose={noop} onAdd={noop} />)
+    const saveButton = screen.getByText('common:save').closest('button')
+    expect(saveButton).toBeDisabled()
+    expect(saveButton).toHaveAttribute('title', 'previewSaveTitle')
+    expect(screen.getByText('previewNotice')).toBeInTheDocument()
   })
 })

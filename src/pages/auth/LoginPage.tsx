@@ -143,6 +143,8 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
               onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
               onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
             <button type="button" onClick={() => setShowPw(v => !v)}
+              title={showPw ? t('login.hidePassword') : t('login.showPassword')}
+              aria-label={showPw ? t('login.hidePassword') : t('login.showPassword')}
               className="absolute text-gray-400 -translate-y-1/2 right-3 top-1/2 hover:text-gray-600"
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
               {showPw ? <EyeOff size={16} /> : <Eye size={16} />}

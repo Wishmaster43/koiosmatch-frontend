@@ -6,6 +6,7 @@ import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLook
 import { getCandidateTabDefaults } from '@/pages/vacancies/lib/candidateTabVisibility'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { ColorBadge } from '../components/SettingsControls'
+import { Toggle } from '../components/SettingsKit'
 
 /**
  * Kandidaten zoeken-tab visibility + filter-default editor (Danny 23-07): the
@@ -65,21 +66,20 @@ function LookupCheckboxBlock({ items, selected, onToggle }) {
   )
 }
 
-// One label+hint checkbox row, reused for every boolean leads-criteria toggle
+// One label+hint toggle row, reused for every boolean leads-criteria toggle
 // (apply_radius / exclude_already_applied / include_expiring_placements) so the
-// layout stays identical across all three. `aria-label` keeps the checkbox's
-// accessible name short (just the label, not label+hint concatenated) while the
-// wrapping <label> still gives it a real, clickable association (§6).
+// layout stays identical across all three. The shared house Toggle (Danny 28-07:
+// "GEEN VINKJES MAAR TOGGLES!!!") replaces the raw checkbox; `ariaLabel` keeps the
+// switch's accessible name short (just the label, not label+hint concatenated).
 function CheckboxRow({ checked, onChange, label, hint }) {
   return (
-    <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
-      <input type="checkbox" checked={checked} onChange={onChange} aria-label={label}
-        style={{ marginTop: 2, cursor: 'pointer', width: 16, height: 16, flexShrink: 0 }} />
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+      <Toggle checked={checked} onChange={onChange} ariaLabel={label} />
       <span style={{ minWidth: 0 }}>
         <span style={{ display: 'block', fontSize: 12.5, fontWeight: 500, color: 'var(--text)' }}>{label}</span>
         <span style={{ display: 'block', fontSize: 11.5, color: 'var(--text-muted)', marginTop: 1 }}>{hint}</span>
       </span>
-    </label>
+    </div>
   )
 }
 

@@ -134,6 +134,11 @@ export interface Customer {
   ownerInitials: string
   ownerColor: string | null
   city: string
+  // JOB-CONTACT-1 (Danny 28-07: "elke hoofdklant moet ... contactgegevens hebben") —
+  // the customer's OWN e-mail/phone, distinct from a contact person's. The API
+  // already sent these (CustomerDetailResource); only the FE mapper never read them.
+  email: string
+  phone: string
   // STRAAL-1: geocoded coordinates + radius-query distance (null until geocoded).
   lat: number | null
   lng: number | null
@@ -232,6 +237,8 @@ export interface ApiCustomer {
   owner?: { id?: Id; name?: string; avatar_color?: string | null }
   account_manager?: string; owner_name?: string; owner_id?: Id; owner_color?: string | null
   city?: string; industry?: { name?: string } | string; website?: string
+  // JOB-CONTACT-1: the customer's own contact fields (CustomerDetailResource).
+  email?: string; phone?: string
   // STRAAL-1: geocoded coordinates + radius distance from the server.
   lat?: number; lng?: number; distance_km?: number
   employee_count?: string | number; employeeCount?: string | number

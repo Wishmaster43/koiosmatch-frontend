@@ -17,7 +17,7 @@
  */
 import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays, Car,
-  ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Hash, Key, LayoutGrid,
+  ClipboardList, Clock, CreditCard, Download, EyeOff, Factory, FileText, Flag, Hash, Key, LayoutGrid,
   ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Megaphone, Package, Palette, Percent, Phone, Scale, Shield, SlidersHorizontal, Sparkles, Star,
   Boxes, Globe, Store, Tags, Target, Upload, UserCheck, Users, Webhook, XCircle,
 } from 'lucide-react'
@@ -96,6 +96,7 @@ import {
 } from './schemas/kpis'
 import candidateDisplay from './schemas/candidateDisplay'
 import customerDisplay from './schemas/customerDisplay'
+import customerVacancyDefaults from './schemas/customerVacancyDefaults'
 import taskDisplay from './schemas/taskDisplay'
 import applicationDisplay from './schemas/applicationDisplay'
 import opportunityDisplay from './schemas/opportunityDisplay'
@@ -214,6 +215,9 @@ export const NAV_GROUPS = [
       { id: 'location_statuses', icon: MapPin, component: LocationStatusesSettings },
       { id: 'department_statuses', icon: Building2, component: DepartmentStatusesSettings },
       { id: 'customer_display', icon: Palette, schema: customerDisplay },
+      // Tenant-wide default for the customer's vacancy-visibility flags (Danny 27-07) —
+      // VacancySettingsTab (customer drawer) reads these same keys for comparison.
+      { id: 'customer_vacancy_defaults', icon: EyeOff, schema: customerVacancyDefaults },
     ],
   },
   {

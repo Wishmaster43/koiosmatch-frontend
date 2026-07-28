@@ -26,6 +26,27 @@ vi.mock('@/lib/api', () => ({
 const testUser: ManagedUser = { id: 'u1', firstname: 'Jan', lastname: 'Jansen', email: 'jan@bedrijf.nl' }
 const noop = () => {}
 
+describe('EditUserModal · profile save', () => {
+  it('PUTs (not PATCHes) the profile fields — /users/{id} is documented PUT-only, a PATCH 405s silently', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
+    vi.mocked(api.put).mockResolvedValueOnce({ data: { data: { ...testUser, firstname: 'Piet' } } })
+    const user = userEvent.setup()
+    const onSaved = vi.fn()
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={onSaved} />)
+
+    const firstNameInput = await screen.findByDisplayValue('Jan')
+    await user.clear(firstNameInput)
+    await user.type(firstNameInput, 'Piet')
+    await user.click(screen.getByText('common:save'))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/users/u1', {
+      firstname: 'Piet', lastname: 'Jansen', email: 'jan@bedrijf.nl', phone: '',
+    }))
+    expect(api.patch).not.toHaveBeenCalled()
+    expect(onSaved).toHaveBeenCalled()
+  })
+})
+
 describe('EditUserModal · branches', () => {
   it('shows the honest empty hint when the user has no branches yet', async () => {
     vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })

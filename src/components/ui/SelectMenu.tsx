@@ -1,6 +1,7 @@
 /**
  * SelectMenu — single-select dropdown: a button showing the current option that
- * opens a checklist. Closes on outside click.
+ * opens a checklist. Closes on outside click or Escape, and restores focus to
+ * the trigger on close so a keyboard user never loses their place (§6).
  *
  * Reusable header-style picker (status, candidate type, owner, …). Options may
  * carry `initials` to render an Avatar (e.g. the owner/recruiter picker), so one
@@ -41,12 +42,34 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
   const labelledBy = ariaLabelledBy ? `${ariaLabelledBy} ${triggerId}` : undefined
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
 
+  // Close on outside click or Escape — both listeners only exist while open, so
+  // a CLOSED menu never swallows an Escape meant for an ancestor (e.g. a
+  // wrapping modal's own close-on-Escape).
   useEffect(() => {
     if (!open) return
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    document.addEventListener('mousedown', h)
-    return () => document.removeEventListener('mousedown', h)
+    const handleClick = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('mousedown', handleClick)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handleClick)
+      document.removeEventListener('keydown', handleKey)
+    }
+  }, [open])
+
+  // Restore focus to the trigger whenever the menu transitions open → closed
+  // (pick / Escape / outside click) — never on unmount, since that transition
+  // never runs this effect. Skipped if some OTHER element already claimed focus
+  // (e.g. the outside click landed on a different picker's own trigger) so this
+  // never yanks focus away from what the user just interacted with.
+  const wasOpenRef = useRef(false)
+  useEffect(() => {
+    if (wasOpenRef.current && !open && (document.activeElement === document.body || document.activeElement == null)) {
+      triggerRef.current?.focus()
+    }
+    wasOpenRef.current = open
   }, [open])
 
   const opts: SelectOption[] = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
@@ -56,7 +79,7 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
     <div ref={ref} style={{ position: 'relative' }}>
       {/* Same disclosure semantics as CreatableSelect — one picker convention, so a
           screen reader describes both identically (§6). */}
-      <button onClick={() => setOpen(o => !o)}
+      <button ref={triggerRef} onClick={() => setOpen(o => !o)}
         id={triggerId} aria-labelledby={labelledBy}
         aria-expanded={open} aria-haspopup="listbox" aria-controls={open ? listId : undefined}
         style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', width: '100%',

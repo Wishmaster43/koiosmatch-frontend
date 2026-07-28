@@ -12,6 +12,7 @@ import { useFunctions } from '@/lib/useFunctions'
 import { mapVacancy } from './data/mapVacancy'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
 import type { ApiVacancy, Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -20,19 +21,6 @@ const API_TO_FORM: Record<string, string> = {
   title: 'title', status: 'status', owner_id: 'ownerId', customer_id: 'clientId',
   industry: 'industry', category: 'category', location: 'location',
 }
-
-// Card chrome — mirrors AddContactPersonModal/AddLocationModal/AddDepartmentModal
-// (customers folder) exactly (§3A): 11px uppercase muted heading over a bordered
-// surface, kept local (not a cross-import — CLAUDE.md §2: an entity page must not
-// reach into another entity's internals) so every "wide form" modal reads as one
-// system without pages importing each other's internals.
-const cardHead = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
-const cardBox = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, display: 'flex', flexDirection: 'column' as const, gap: 12 }
-const row2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }
-// Even 3-across — client/industry/category share one row so Algemeen isn't a tall
-// single-column stack; also used to constrain a lone field (Plaatsing's location)
-// to roughly a third of the panel instead of stretching it across the full 1060px.
-const row3Even = { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }
 
 interface VacancyForm { title: string; clientId: string; status: string; ownerId: string; industry: string; category: string; location: string }
 interface ModalUser { id: Id; name: string }

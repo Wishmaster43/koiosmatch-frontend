@@ -6,18 +6,11 @@ import { Field, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { cardHead, cardBox, row2 } from '@/components/ui/modalCards'
 
 // The new-customer form fields (unchanged shape — CustomersPage.tsx imports this
 // type and builds its optimistic row from exactly these keys).
 export interface CustomerForm { name: string; debtorNumber: string; status: string; accountManager: string; city: string }
-
-// Card chrome — mirrors the native customers/AddCustomerModal.tsx exactly (§3A):
-// 11px uppercase muted heading over a bordered surface, kept local (not a
-// cross-import — CLAUDE.md §2: an entity page must not reach into another
-// entity's internals) so both "Add customer" variants read as one system.
-const cardHead = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
-const cardBox = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, display: 'flex', flexDirection: 'column' as const, gap: 12 }
-const row2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }
 
 // This Shiftmanager mirror has no industry/establishment field (unlike the
 // native customer entity), so "Bedrijf" absorbs debtorNumber+city instead of a

@@ -1,6 +1,6 @@
 {
   "title": "Call lists",
-  "new": "Call list",
+  "new": "New call list",
   "empty": "No call lists yet.",
   "loadError": "Failed to load call lists.",
   "retry": "Retry",

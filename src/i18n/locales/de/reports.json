@@ -37,6 +37,9 @@
     }
   },
   "customers": {
+    "title": "Details — Kunden",
+    "summary": "{{shown}} von {{total}} Kunden",
+    "search": "Nach Name, Debitorennummer, Kundenbetreuer suchen…",
     "loading": "Kunden werden geladen…",
     "empty": "Keine Kunden gefunden",
     "loadError": "Kunden konnten nicht geladen werden.",

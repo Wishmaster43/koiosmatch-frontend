@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CandidateTab from './CandidateTab'
 import { peekReturnTab } from './constants'
@@ -18,8 +18,12 @@ vi.mock('@/lib/api', () => ({
   default: { get: vi.fn(() => new Promise(() => {})), patch: vi.fn(() => Promise.resolve()) },
   unwrap: (r: unknown) => r,
 }))
+// OPTIMISTIC-REVERT-1: the revert test asserts the error toast fired with the
+// server's own message (extractApiError), mirroring useApplicationDrawerActions.test.ts.
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
 
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 const mockPatch = api.patch as unknown as ReturnType<typeof vi.fn>
 
@@ -27,10 +31,13 @@ const mockPatch = api.patch as unknown as ReturnType<typeof vi.fn>
 // UI-patch -> API-body mapping (buildCandidatePatch) runs here as on the real
 // candidate drawer — the whole point of the fix (a raw camelCase patch used
 // to reach the API directly and get silently dropped by CandidateProfileRequest).
+// OPTIMISTIC-REVERT-1: also renders the merged `c.placeOfBirth` so a test can
+// observe the optimistic write AND its revert on a failed PATCH.
 vi.mock('@/pages/candidates/drawer/ProfilePanel', () => ({
-  default: ({ onEditSave }: { onEditSave?: (v: Record<string, unknown>) => void }) => (
+  default: ({ c, onEditSave }: { c?: { placeOfBirth?: string }; onEditSave?: (v: Record<string, unknown>) => void }) => (
     <div>
       profile-panel
+      <span data-testid="place-of-birth">{c?.placeOfBirth || 'none'}</span>
       <button onClick={() => onEditSave?.({ placeOfBirth: 'Rotterdam', zzp: { chamberOfCommerce: '123' } })}>save-edit</button>
     </div>
   ),
@@ -56,6 +63,7 @@ describe('CandidateTab', () => {
   beforeEach(() => {
     mockGet.mockReset(); mockGet.mockReturnValue(new Promise(() => {}))
     mockPatch.mockReset(); mockPatch.mockResolvedValue({ data: { data: {} } })
+    vi.mocked(notifyError).mockReset()
   })
 
   it('shows the candidate name WITHOUT a status chip (Danny 21-07: the drawer header already carries the application status)', () => {
@@ -112,5 +120,31 @@ describe('CandidateTab', () => {
     render(<CandidateTab application={app()} />)
     await screen.findByText('profile-panel')
     expect(mockPatch).not.toHaveBeenCalled()
+  })
+
+  // OPTIMISTIC-REVERT-1 (audit 2026-07-28): onUpdate used to `.catch(() =>
+  // notifyError(...))` with NO revert, so a rejected PATCH left the edited value
+  // in `edits` forever, looking saved — `edits` is a sparse delta merged over the
+  // fetched candidate, so a naive revert (setting the key back to `undefined`)
+  // would ALSO have been wrong (it would still win the merge over the real
+  // fetched value). A manually-controlled PATCH promise proves the full round
+  // trip: the optimistic write shows BEFORE the server responds, then the
+  // rejection restores the pre-edit (absent) value and surfaces its own message.
+  it('reverts the optimistic edit and reports the server message when the PATCH FAILS', async () => {
+    mockGet.mockResolvedValue({ id: 7, name: 'Jan Jansen' }) // no place_of_birth on the fetched record
+    let rejectPatch!: (err: unknown) => void
+    mockPatch.mockReturnValue(new Promise((_resolve, reject) => { rejectPatch = reject }))
+    const user = userEvent.setup()
+    render(<CandidateTab application={app()} />)
+    // Before the edit — the fetched candidate carries no place of birth.
+    expect((await screen.findByTestId('place-of-birth')).textContent).toBe('none')
+    await user.click(screen.getByText('save-edit'))
+    // Optimistic write shows immediately — the PATCH promise is still pending.
+    expect(screen.getByTestId('place-of-birth').textContent).toBe('Rotterdam')
+    // Now the server rejects it — the failure must revert the shown value, never
+    // let it stay on screen as if it had saved.
+    await act(async () => { rejectPatch({ response: { data: { message: 'Ongeldige geboorteplaats' } } }) })
+    await waitFor(() => expect(screen.getByTestId('place-of-birth').textContent).toBe('none'))
+    expect(notifyError).toHaveBeenCalledWith('Ongeldige geboorteplaats')
   })
 })

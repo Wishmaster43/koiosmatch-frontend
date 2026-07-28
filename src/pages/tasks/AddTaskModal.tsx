@@ -76,8 +76,14 @@ const idMapOf = (rows: unknown): Record<string, string> =>
  * resolves slug → FK id. Pre-existing links this form doesn't manage (e.g. an
  * opportunity link) are carried over so the update's full-replace `links` never
  * silently drops them.
+ *
+ * `lockCustomerId`/`lockCustomerName` (Danny 28-07, "+ Nieuwe taak" from the
+ * customer drawer) mirror AddVacancyModal's `lockCustomerId` pattern: the
+ * customer is already known from the drawer it was opened in, so LinkCard
+ * renders it as read-only text instead of a picker the recruiter could
+ * accidentally repoint to a different customer.
  */
-export default function AddTaskModal({ onClose, onCreated, onSaved, initial, extraLinks, editId }: {
+export default function AddTaskModal({ onClose, onCreated, onSaved, initial, extraLinks, editId, lockCustomerId, lockCustomerName }: {
   onClose: () => void
   onCreated?: (raw: unknown) => void
   // Fired after a successful edit-mode save (PATCH), mirrors `onCreated`.
@@ -86,6 +92,8 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   extraLinks?: Array<{ type: string; id: string }>
   // Set → edit mode: GET/prefill/PATCH this task id instead of creating a new one.
   editId?: Id
+  // Opened from a customer drawer: the customer link is fixed and shown read-only.
+  lockCustomerId?: string; lockCustomerName?: string
 }) {
   const { t } = useTranslation('tasks')
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
@@ -95,10 +103,12 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   const ownerName = auth?.user ? userName(auth.user as UserLike) : ''
   const isEdit = editId != null
 
-  // `initial` pre-fills fields/links when opened from an entity drawer (e.g. the candidate).
+  // `initial` pre-fills fields/links when opened from an entity drawer (e.g. the
+  // candidate); `lockCustomerId` (the customer-drawer trigger) seeds customerId the
+  // same way but additionally makes LinkCard render it read-only, see below.
   const [form, setForm] = useState<TaskForm>({
     type: '', title: '', assigneeId: '', status: '', due: '', dueTime: '', priority: '', description: '',
-    candidateId: '', customerId: '', contactId: '', ...initial,
+    candidateId: '', customerId: lockCustomerId ?? '', contactId: '', ...initial,
   })
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [saving, setSaving] = useState(false)
@@ -284,7 +294,7 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
             <PlanningCard t={t} form={form} set={set} priorities={priorities} statuses={statuses} />
             <LinkCard t={t} form={form} set={set} ownerName={ownerName}
               candidates={toOptions(candidates)} customers={toOptions(customers)} contacts={toOptions(contacts)}
-              assigneeOpts={assigneeOpts} />
+              assigneeOpts={assigneeOpts} lockCustomerId={lockCustomerId} lockCustomerName={lockCustomerName} />
           </div>
         </div>
         )}

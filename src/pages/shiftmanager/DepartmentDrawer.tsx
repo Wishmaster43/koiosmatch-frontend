@@ -114,14 +114,8 @@ export default function DepartmentDrawer({ dep, onClose }: { dep: SmDepartmentRo
           </div>
         </div>
       </div>
-
-      <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-        <button style={{ width: '100%', padding: 9, fontSize: 13, fontWeight: 500,
-          borderRadius: 8, border: '1px solid var(--color-primary)', background: 'var(--color-primary-bg)',
-          color: 'var(--color-primary)', cursor: 'pointer' }}>
-          {t('departmentsPage.edit')}
-        </button>
-      </div>
+      {/* No footer edit action (§3/§3B): /sm_departments is a read-only ShiftManager
+          mirror with no write route — the old "Edit" button never persisted anything. */}
     </div>
   )
 }

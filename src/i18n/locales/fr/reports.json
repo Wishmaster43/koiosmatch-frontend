@@ -37,6 +37,9 @@
     }
   },
   "customers": {
+    "title": "Détails — Clients",
+    "summary": "{{shown}} sur {{total}} clients",
+    "search": "Rechercher par nom, numéro de débiteur, responsable de compte…",
     "loading": "Chargement des clients…",
     "empty": "Aucun client trouvé",
     "loadError": "Impossible de charger les clients.",

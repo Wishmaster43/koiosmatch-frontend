@@ -1,13 +1,27 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Info } from 'lucide-react'
 import { monthName, formatDate } from './helpers'
 import AddShiftModal from './AddShiftModal'
 import { MonthView, WeekView, DayView, ListView } from './views'
 import type { Shift, ShiftInput } from '@/types/planning'
 
-// ── Dummy shifts ──────────────────────────────────────────────────────────────
+// ── Dummy shifts (PLANNING-PERSIST-1, CMFE audit 2026-07-28) ──────────────────
+// This calendar's shifts are entirely LOCAL, in-memory demo rows — never fetched
+// from a server, and `handleAdd` below only appends to that local array: reload
+// the page and every "saved" shift is gone. A real backend Planning API already
+// exists (GET/POST/PATCH/DELETE `/planning/orders`, `/planning/shifts`,
+// `/planning/schedules`, `/planning/assignments` — see src/types/api-generated.ts)
+// but this screen calls none of it. Wiring the backend's order→shift→schedule
+// model onto this flat `Shift` shape is a real feature build — the generated spec
+// only documents the GET filter params, not a create body or any 2xx response
+// shape, and an order/customer/department creation flow doesn't exist in this UI
+// yet — so it is NOT attempted here (§0: never invent an endpoint contract).
+// Per §3 (no fake affordances), the actual persistence action — AddShiftModal's
+// Save — is gated with an honest, disabled notice instead (see its own header
+// comment); this page adds a matching banner so the read side is equally honest
+// about being preview data, not a tenant's live schedule.
 const today = new Date()
 const y = today.getFullYear(), m = today.getMonth()
 
@@ -140,6 +154,14 @@ export default function PlanningPage() {
             border: 'none', borderRadius: 8, cursor: 'pointer' }}>
           <Plus size={14} /> {t('addShift')}
         </button>
+      </div>
+
+      {/* Not-yet-persisted gate (PLANNING-PERSIST-1, §3) — the shifts below are
+          preview/demo data, not this tenant's live schedule; see the file header. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 20px',
+        background: 'color-mix(in srgb, var(--text-muted) 8%, transparent)', flexShrink: 0 }}>
+        <Info size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} aria-hidden="true" />
+        <span style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)' }}>{t('previewNotice')}</span>
       </div>
 
       {/* ── Calendar body ── */}

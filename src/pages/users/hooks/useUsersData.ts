@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import type { AvailableRole } from '../usersParts'
 import type { ManagedUser } from '@/types/api'
 
@@ -33,14 +34,18 @@ export function useUsersData() {
       .finally(() => setLoading(false))
   }, [])
 
-  // Optimistically set a user's icon colour (PATCH /users/{id}); revert on failure.
+  // Optimistically set a user's icon colour (PUT /users/{id}); revert on failure.
+  // PUT, not PATCH: the generated contract (operations.putUsersUserId) documents
   const setColor = async (u: ManagedUser, color: string | null) => {
     const prev = u.avatar_color ?? null
     setUsers(list => list.map(x => x.id === u.id ? { ...x, avatar_color: color } : x))
     try {
-      await api.patch(`/users/${u.id}`, { avatar_color: color })
+      await api.put(`/users/${u.id}`, { avatar_color: color })
     } catch {
+      // Revert AND say so — the sibling useUserBranches.toggle already does both;
+      // this one used to revert silently, leaving no clue the pick didn't stick (§3).
       setUsers(list => list.map(x => x.id === u.id ? { ...x, avatar_color: prev } : x))
+      notifyError(t('saveFailed'))
     }
   }
 

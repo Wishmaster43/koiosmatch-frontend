@@ -37,6 +37,10 @@ const STATUS_COLORS: Record<string, string> = {
 }
 const deptCount = (c: SmCustomerRow) => (c.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)
 
+// Monotonic suffix for the (currently unreachable, see onCreate below) optimistic
+// temp-id — `Date.now()` alone collides within the same millisecond (§9).
+let smCustomerTempSeq = 0
+
 // Normalise a raw API customer into the shape the table/insights expect.
 const mapCustomer = (c: RawCustomer): SmCustomerRow => ({
   id:             c.id,
@@ -53,7 +57,9 @@ const mapCustomer = (c: RawCustomer): SmCustomerRow => ({
 })
 
 export default function CustomersPage() {
-  const { t } = useTranslation('customers')
+  // Default namespace stays 'customers' (shared form/table copy with the native
+  // entity); 'shiftmanager' is only for the one gating string below — see onCreate.
+  const { t } = useTranslation(['customers', 'shiftmanager'])
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   const [customers, setCustomers] = useState<SmCustomerRow[]>([])
@@ -160,7 +166,17 @@ export default function CustomersPage() {
     { key: 'noContact',   label: t('insights.noContact'),   value: noContactCount,   sub: t('insights.noContactSub'),   color: 'var(--color-danger)' },
   ]
 
-  const onCreate = (form: CustomerForm) => setCustomers(prev => [mapCustomer({ ...form, debtor_number: form.debtorNumber, account_manager: form.accountManager, id: `new-${Date.now()}` }), ...prev])
+  // GATED (§3, WORKLIST LOOKUP-GAP-1 — "besluit Danny": remove or wire up):
+  // /sm_customers has no create route (GET/{id} + /sync only, api-generated.ts) —
+  // this mirrors ShiftManager, so a customer must exist there first. onCreate/the
+  // modal only ever inserted a LOCAL row that vanished on refetch, a false success
+  // (§3 no fake affordances). Kept inert behind the disabled trigger below rather
+  // than deleted, pending that decision; the counter guards against the temp-id
+  // collision risk (§9) if this is ever re-enabled without revisiting the id scheme.
+  const onCreate = (form: CustomerForm) => setCustomers(prev => [mapCustomer({
+    ...form, debtor_number: form.debtorNumber, account_manager: form.accountManager,
+    id: `new-${Date.now()}-${++smCustomerTempSeq}`,
+  }), ...prev])
 
   return (
     <>
@@ -175,8 +191,11 @@ export default function CustomersPage() {
             {/* On-accent button text: '#fff' (not var(--surface), which is dark in dark mode and
                 would fail contrast here) — matches the "+Add" button on every other entity page. */}
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-            <button onClick={() => setAddOpen(true)} style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto', height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600,
-              background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+            {/* Disabled + honest reason (§3): no /sm_customers create route exists — this is a
+                ShiftManager mirror, see the onCreate comment above / WORKLIST LOOKUP-GAP-1. */}
+            <button onClick={() => setAddOpen(true)} disabled title={t('customersPage.addDisabledReason', { ns: 'shiftmanager' })}
+              style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto', height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600,
+              background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'not-allowed', opacity: 0.5 }}>
               + {t('page.add')}
             </button>
           </div>

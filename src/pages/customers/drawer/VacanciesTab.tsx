@@ -45,20 +45,47 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
   // Defaults to just 'open' once the real lookup resolves; null = "not decided yet".
   const [selected, setSelected] = useState<string[] | null>(null)
 
-  // Load the tenant vacancy-status lookup once; default-select the seeded 'open'
-  // value if present, otherwise show everything (no artificial narrowing).
+  // Has the REAL lookup answered? The seed list must never decide the default
+  // selection — see the id/name bug documented below.
+  const [resolved, setResolved] = useState(false)
+
+  // Load the tenant vacancy-status lookup once.
+  // BUG FIX (Danny 28-07: "Open maar staat niet aangevinkt?????" while the table said
+  // "Geen vacatures voor deze klant"): this mapped the option VALUE off `name`, but
+  // `GET /vacancy-statuses` returns no `value` at all — it returns `id` (a uuid) +
+  // `name`. A vacancy row carries that UUID in `status.value`, so the filter compared
+  // "Open" against a uuid, matched nothing, and silently hid every vacancy. The option
+  // value is now the id, exactly what the rows carry.
   useEffect(() => {
     api.get('/vacancy-statuses').then(r => {
-      const raw = (unwrapList(r).rows) as Array<{ value?: string; label?: string; name?: string; active?: boolean }>
-      const opts = raw.filter(o => o.active !== false).map(o => ({ value: String(o.value ?? o.name ?? ''), label: String(o.label ?? o.name ?? o.value ?? '') })).filter(o => o.value)
+      const raw = (unwrapList(r).rows) as Array<{ id?: string; value?: string; label?: string; name?: string; active?: boolean }>
+      const opts = raw.filter(o => o.active !== false)
+        .map(o => ({ value: String(o.id ?? o.value ?? o.name ?? ''), label: String(o.label ?? o.name ?? '') }))
+        .filter(o => o.value)
       if (opts.length) setStatusOptions(opts)
-    }).catch(() => {})
+      setResolved(true)
+    }).catch(() => setResolved(true))
   }, [])
+
+  // Default-select "open" ONLY once the real list is in. The second half of the same
+  // bug: this used to run against the SEED list, wrote the slug 'open', and then never
+  // reconciled when the real (uuid-keyed) options replaced it — leaving a selection that
+  // matched no option (hence the unchecked box) and no row (hence the empty table).
+  // There is no slug on this lookup, so "open" is matched on the name.
   useEffect(() => {
-    if (selected !== null) return
-    const hasOpen = statusOptions.some(o => o.value === 'open')
-    setSelected(hasOpen ? ['open'] : statusOptions.map(o => o.value))
-  }, [statusOptions, selected])
+    if (!resolved || selected !== null) return
+    const open = statusOptions.find(o => /^open$/i.test(o.label))
+    setSelected(open ? [open.value] : statusOptions.map(o => o.value))
+  }, [resolved, statusOptions, selected])
+
+  // Drop selected values that no longer exist in the lookup (a status deleted in
+  // Settings must not keep filtering rows invisibly).
+  useEffect(() => {
+    if (!resolved || selected === null) return
+    const known = new Set(statusOptions.map(o => o.value))
+    const pruned = selected.filter(v => known.has(v))
+    if (pruned.length !== selected.length) setSelected(pruned)
+  }, [resolved, statusOptions, selected])
 
   const toggle = (v: string | number) => setSelected(p => { const s = p ?? []; const val = String(v); return s.includes(val) ? s.filter(x => x !== val) : [...s, val] })
 

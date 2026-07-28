@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ProfileTab from './ProfileTab'
 import type { Candidate } from '@/types/candidate'
@@ -11,78 +11,74 @@ vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: ['Utr
 vi.mock('@/components/ui/RichTextEditor', () => ({ default: () => null }))
 vi.mock('@/components/ui/SafeHtml', () => ({ default: () => null }))
 
-// waDigits itself moved to src/lib/waDigits.ts + its own test (P1 follow-up,
-// 2026-07-20) — this file only covers ProfileTab's own render behaviour now.
+// Danny 28-07 split: the old single pencil flipped ~15 fields at once ("ruk om
+// te onderhouden"). ProfileTab is now a thin container over three sub-tabs
+// (Personal/Address/Contact), each with its own pencil — mirrors the
+// PreferencesZzpTabs sub-tab pattern already used elsewhere in this drawer.
+describe('ProfileTab · thin container over Personal/Address/Contact sub-tabs', () => {
+  const candidate = {
+    id: 1, gender: 'male', nationality: 'Nederlands', dob: '1990-01-01', placeOfBirth: 'Utrecht',
+    street: 'Kerkstraat', houseNumber: '12', houseNumberSuffix: '', postalCode: '1234 AB', city: 'Utrecht',
+    province: 'Utrecht', country: 'NL', email: 'a@b.nl', phone: '', mobile: '', linkedin: '',
+    summary: '', phase: 'candidate',
+  } as unknown as Candidate
 
-// BE 2026-07-20: phone (landline) and mobile are now independent fields, each
-// with exactly ONE fixed shortcut icon — mobile → WhatsApp (wa.me), landline →
-// dial (tel:). No more tenant-configurable phone_click_action ambiguity.
-describe('ProfileTab · mobile/phone split render (2026-07-20)', () => {
-  const candidate = { id: 1, phone: '0301234567', mobile: '0612345678' } as unknown as Candidate
-
-  it('renders the mobile value with only a WhatsApp shortcut (wa.me)', () => {
+  it('renders the three sub-tabs, defaulting to Persoonlijk', () => {
     render(<ProfileTab c={candidate} />)
-    const wa = screen.getByTitle('Open in WhatsApp')
-    expect(wa.getAttribute('href')).toBe('https://wa.me/31612345678')
-    // The landline never gets a WhatsApp icon (only one "Open in WhatsApp" title on the page).
-    expect(screen.getAllByTitle('Open in WhatsApp')).toHaveLength(1)
+    const tabs = screen.getAllByRole('tab').map(el => el.textContent)
+    expect(tabs).toEqual(['Persoonlijk', 'Adres', 'Contact'])
+    expect(screen.getByRole('tab', { name: 'Persoonlijk' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByText('Geslacht')).toBeInTheDocument()
+    expect(screen.queryByText('Straat')).toBeNull()
+    expect(screen.queryByText('E-mailadres')).toBeNull()
   })
 
-  it('renders the landline value with only a call shortcut (tel:), no WhatsApp icon', () => {
-    render(<ProfileTab c={candidate} />)
-    const call = screen.getByTitle('Bellen')
-    expect(call.getAttribute('href')).toBe('tel:0301234567')
-    expect(screen.getAllByTitle('Bellen')).toHaveLength(1)
-  })
-
-  it('hides the WhatsApp icon for a mobile value too short to be a real MSISDN', () => {
-    const c = { id: 1, phone: '', mobile: '0612' } as unknown as Candidate
-    render(<ProfileTab c={c} />)
-    expect(screen.queryByTitle('Open in WhatsApp')).toBeNull()
-  })
-})
-
-// Kandidaten-ronde-2, punt A: Geslacht/Nationaliteit/Provincie become searchable
-// (type-to-filter) dropdowns instead of a plain native <select>.
-describe('ProfileTab · searchable dropdowns (kandidaten-ronde-2, punt A)', () => {
-  const candidate = { id: 1, gender: '', nationality: '', province: '' } as unknown as Candidate
-
-  it('renders no plain <select> for gender/nationality/province once editing starts', async () => {
-    const user = userEvent.setup()
-    const { container } = render(<ProfileTab c={candidate} />)
-    await user.click(screen.getAllByTitle('Bewerken')[0])
-    expect(container.querySelectorAll('select')).toHaveLength(0)
-  })
-
-  it('typing in the nationality picker filters down to the matching option only', async () => {
+  it('Adres shows only the address fields and hides Persoonlijk/Contact', async () => {
     const user = userEvent.setup()
     render(<ProfileTab c={candidate} />)
-    await user.click(screen.getAllByTitle('Bewerken')[0])
-    const natField = screen.getByText('Nationaliteit').parentElement as HTMLElement
-    await user.click(within(natField).getByRole('button'))
-    await user.type(screen.getByPlaceholderText('Selecteer'), 'Belg')
-    expect(screen.getByRole('button', { name: 'Belgisch' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Nederlands' })).toBeNull()
+    await user.click(screen.getByRole('tab', { name: 'Adres' }))
+    expect(screen.getByText('Kerkstraat 12, 1234 AB Utrecht')).toBeInTheDocument()
+    expect(screen.queryByText('Geslacht')).toBeNull()
+    expect(screen.queryByText('E-mailadres')).toBeNull()
   })
 
-  it('typing in the province picker filters down to the matching option only', async () => {
+  it('Contact shows only the contact fields and hides Persoonlijk/Adres', async () => {
     const user = userEvent.setup()
     render(<ProfileTab c={candidate} />)
-    await user.click(screen.getAllByTitle('Bewerken')[0])
-    const provField = screen.getByText('Provincie').parentElement as HTMLElement
-    await user.click(within(provField).getByRole('button'))
-    await user.type(screen.getByPlaceholderText('Selecteer'), 'Utr')
-    expect(screen.getByRole('button', { name: 'Utrecht' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Zuid-Holland' })).toBeNull()
+    await user.click(screen.getByRole('tab', { name: 'Contact' }))
+    expect(screen.getByText('E-mailadres')).toBeInTheDocument()
+    expect(screen.queryByText('Geslacht')).toBeNull()
+    expect(screen.queryByText('Straat')).toBeNull()
   })
 
-  it('is pick-only (allowCreate=false) — typing an unknown value never offers to create it', async () => {
+  it('editing Persoonlijk does not open a pencil on Adres/Contact — each sub-tab keeps its own edit state', async () => {
     const user = userEvent.setup()
     render(<ProfileTab c={candidate} />)
+    // Two pencils exist at rest: the active sub-tab's (index 0, DOM order) + the
+    // profile-text block's own (index 1) — click only the sub-tab's.
     await user.click(screen.getAllByTitle('Bewerken')[0])
-    const genderField = screen.getByText('Geslacht').parentElement as HTMLElement
-    await user.click(within(genderField).getByRole('button'))
-    await user.type(screen.getByPlaceholderText('Selecteer'), 'NoSuchGenderXYZ')
-    expect(screen.queryByText(/NoSuchGenderXYZ/)).toBeNull()
+    expect(screen.getByTitle('Opslaan')).toBeInTheDocument()
+    // Only the summary's pencil remains while Persoonlijk is mid-edit.
+    expect(screen.getAllByTitle('Bewerken')).toHaveLength(1)
+    await user.click(screen.getByRole('tab', { name: 'Adres' }))
+    // Adres mounts fresh — its OWN pencil, not a leftover Save/Cancel from Persoonlijk.
+    expect(screen.getAllByTitle('Bewerken')).toHaveLength(2)
+    expect(screen.queryByTitle('Opslaan')).toBeNull()
+  })
+
+  it('the profile-text block keeps its own separate pencil, untouched by the field sub-tabs', () => {
+    render(<ProfileTab c={{ ...candidate, summary: '<p>Hello</p>' } as unknown as Candidate} />)
+    expect(screen.getByText('Profieltekst')).toBeInTheDocument()
+    // Two pencils are visible at once: Persoonlijk's (active sub-tab) + the summary's own.
+    expect(screen.getAllByTitle('Bewerken')).toHaveLength(2)
+  })
+
+  it('calls onEditSave with only the edited sub-tab\'s fields when Personal saves', async () => {
+    const user = userEvent.setup()
+    const onEditSave = vi.fn()
+    render(<ProfileTab c={candidate} onEditSave={onEditSave} />)
+    await user.click(screen.getAllByTitle('Bewerken')[0])
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(onEditSave).toHaveBeenCalledWith({ gender: 'male', nationality: 'Nederlands', dob: '1990-01-01', placeOfBirth: 'Utrecht' })
   })
 })

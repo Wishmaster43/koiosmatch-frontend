@@ -76,7 +76,15 @@ export async function archiveAndFindBack({ page, errors }) {
   page.on('dialog', acceptDialog)
   for (let i = 0; i < rowCount && !name; i++) {
     const row = page.locator('table tbody tr').nth(i)
-    const rowName = (await row.locator('td').nth(1).innerText()).split('\n')[0].trim()
+    // Read the name from the span's title (it IS candidate.name), never from the cell's
+    // innerText: the name cell also holds the Avatar, which renders the INITIALS as text
+    // when the candidate has no photo. `.split('\n')[0]` then yielded "BS" instead of
+    // "Bart Smit", and the archived-view lookup failed on a name that never existed
+    // (28-07). Passing runs were the ones that happened to hit a candidate WITH a photo.
+    const nameSpan = row.locator('td').nth(1).locator('span[title]').first()
+    const rowName = (await nameSpan.count())
+      ? (await nameSpan.getAttribute('title') ?? '').trim()
+      : (await row.locator('td').nth(1).innerText()).split('\n').map(s => s.trim()).filter(Boolean).pop() ?? ''
     await row.click(); await sleep(1200)
     const trash = page.locator('button[title*="rchiveren"], button[aria-label*="rchiveren"]').first()
     expect(await trash.count(), 'archiveer-knop niet gevonden in de drawer')

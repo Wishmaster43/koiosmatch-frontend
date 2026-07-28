@@ -163,6 +163,7 @@
     "functions": "Functies",
     "contact_functions": "Functies",
     "customer_display": "Tabelweergave",
+    "customer_vacancy_defaults": "Vacature-zichtbaarheid",
     "opportunity_display": "Tabelweergave",
     "dashboards": "Dashboards",
     "kpis_locations": "Locaties",
@@ -292,30 +293,36 @@
     "subtitle": "Per kolom: gekleurde labels of platte tekst. De KPI-grafieken houden hun kleuren altijd.",
     "fields": {
       "candidate_table_color_funnel": {
-        "label": "Funnel type"
+        "label": "Funnel type",
+        "description": "Aan = funnel-type als gekleurd label. Uit = platte tekst."
       },
       "candidate_table_color_type": {
-        "label": "Kandidaat-type"
+        "label": "Contractvorm",
+        "description": "Aan = contractvorm als gekleurd label. Uit = platte tekst."
       },
       "candidate_table_color_pool": {
-        "label": "Talentenpool"
+        "label": "Talentenpool",
+        "description": "Aan = talentenpool als gekleurd label. Uit = platte tekst."
       },
       "candidate_table_color_koios": {
-        "label": "Koios AI"
+        "label": "Koios AI",
+        "description": "Aan = Koios AI-advies als gekleurd label. Uit = platte tekst."
       },
       "candidate_avatar_colored_by_gender": {
         "label": "Naam-avatar per geslacht",
         "description": "Aan = de avatar bij de kandidaatnaam krijgt een kleur per geslacht. Uit = één rustige grijze kleur."
       },
       "candidate_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "Aan = status als gekleurd label. Uit = platte tekst."
       },
       "candidate_table_color_owner": {
         "label": "Eigenaar-kleur",
         "description": "Aan = de eigenaar-avatar krijgt de recruiterkleur. Uit = neutraal grijs."
       },
       "candidate_table_color_phase": {
-        "label": "Fase"
+        "label": "Fase",
+        "description": "Aan = fase als gekleurd label. Uit = platte tekst."
       }
     }
   },
@@ -324,13 +331,16 @@
     "subtitle": "Per kolom: gekleurde labels of platte tekst. De KPI-grafieken houden altijd hun kleur.",
     "fields": {
       "application_table_color_score": {
-        "label": "Match score"
+        "label": "Match score",
+        "description": "Aan = matchscore als gekleurde chip. Uit = platte tekst."
       },
       "application_table_color_phase": {
-        "label": "Fase"
+        "label": "Fase",
+        "description": "Aan = fase als gekleurd label. Uit = platte tekst."
       },
       "application_table_color_status": {
-        "label": "Kandidaatstatus"
+        "label": "Kandidaatstatus",
+        "description": "Aan = kandidaatstatus als gekleurd label. Uit = platte tekst."
       },
       "application_table_color_owner": {
         "label": "Eigenaar-kleur",
@@ -624,13 +634,16 @@
     "subtitle": "Per kolom: gekleurde labels of platte tekst. Het takenbord houdt zijn kleuren altijd.",
     "fields": {
       "task_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "Aan = taakstatus als gekleurd label. Uit = platte tekst."
       },
       "task_table_color_priority": {
-        "label": "Prioriteit"
+        "label": "Prioriteit",
+        "description": "Aan = prioriteit als gekleurd label. Uit = platte tekst."
       },
       "task_table_color_type": {
-        "label": "Type"
+        "label": "Type",
+        "description": "Aan = activiteit-type als gekleurd label. Uit = platte tekst."
       },
       "task_table_color_assignee": {
         "label": "Toegewezen aan-kleur",
@@ -761,7 +774,15 @@
     "color1": "Kleur 1",
     "color2": "Kleur 2",
     "sections": "Secties",
-    "sectionsHint": "Stel in welke secties zichtbaar zijn en in welke volgorde.",
+    "sectionsHint": "Stel in welke secties zichtbaar zijn, in welke volgorde en of ze in de zijbalk of de hoofdkolom staan.",
+    "regionSidebar": "Zijbalk",
+    "regionMain": "Hoofdkolom",
+    "regionHeader": "Koptekst",
+    "regionFixedMainHint": "Deze sectie is te uitgebreid voor de smalle zijbalk en staat daarom altijd in de hoofdkolom.",
+    "regionHeaderHint": "Deze sectie staat in de koptekst boven de naam en heeft geen eigen kolom.",
+    "moveSectionUp": "Verplaats '{{section}}' omhoog",
+    "moveSectionDown": "Verplaats '{{section}}' omlaag",
+    "moveSectionToRegion": "Zet '{{section}}' in {{region}}",
     "preview": "Voorvertoning",
     "previewHint": "A4 — met voorbeeldkandidaat"
   },
@@ -1736,7 +1757,8 @@
         "description": "Aan = de Kansen-tabel en KPI's tonen uren i.p.v. euro's."
       },
       "opportunity_table_color_stage": {
-        "label": "Fase"
+        "label": "Fase",
+        "description": "Aan = fase als gekleurd label. Uit = platte tekst."
       },
       "opportunity_table_color_owner": {
         "label": "Eigenaar-kleur",
@@ -1749,14 +1771,34 @@
     "subtitle": "Per kolom: gekleurde labels of platte tekst. De KPI-grafieken houden altijd hun kleuren.",
     "fields": {
       "customer_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "Aan = klantstatus als gekleurd label. Uit = platte tekst."
       },
       "customer_table_color_koios": {
-        "label": "Koios AI"
+        "label": "Koios AI",
+        "description": "Aan = Koios AI-advies als gekleurd label. Uit = platte tekst."
       },
       "customer_table_color_owner": {
         "label": "Eigenaarkleur",
         "description": "Aan = de eigenaar-avatar gebruikt de kleur van de accountmanager. Uit = neutraal grijs."
+      }
+    }
+  },
+  "customerVacancyDefaults": {
+    "title": "Vacature-zichtbaarheid (standaard)",
+    "subtitle": "De tenant-standaard voor nieuwe en bestaande klanten. Per klant kan hiervan worden afgeweken via het tabblad Vacature-zichtbaarheid op de klant.",
+    "fields": {
+      "customer_default_hide_company_name": {
+        "label": "Bedrijfsnaam verbergen",
+        "description": "Aan = bedrijfsnaam van de klant verbergen op vacatures en carrièresite."
+      },
+      "customer_default_show_in_vacancies": {
+        "label": "Toon in mijn vacatures",
+        "description": "Aan = vacatures van deze klant tonen in 'mijn vacatures'."
+      },
+      "customer_default_exclude_from_sourcing": {
+        "label": "Uitsluiten van sourcing",
+        "description": "Aan = deze klant uitsluiten van automatische sourcing."
       }
     }
   },
@@ -1857,10 +1899,12 @@
     "subtitle": "Per kolom: gekleurde labels of platte tekst. De KPI-grafieken houden altijd hun kleuren.",
     "fields": {
       "vacancy_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "Aan = vacaturestatus als gekleurd label. Uit = platte tekst."
       },
       "vacancy_table_color_published": {
-        "label": "Gepubliceerd"
+        "label": "Gepubliceerd",
+        "description": "Aan = publicatiestatus als gekleurd label. Uit = platte tekst."
       },
       "vacancy_table_color_owner": {
         "label": "Eigenaar-kleur",
@@ -1873,7 +1917,8 @@
     "subtitle": "Per kolom: gekleurde labels of platte tekst. Het matchbord houdt zijn kleuren altijd.",
     "fields": {
       "match_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "Aan = matchstatus als gekleurd label. Uit = platte tekst."
       },
       "match_table_color_owner": {
         "label": "Eigenaar-kleur",
@@ -1886,10 +1931,12 @@
     "subtitle": "Per kolom: gekleurde labels of platte tekst.",
     "fields": {
       "outreach_table_color_channel": {
-        "label": "Kanaal"
+        "label": "Kanaal",
+        "description": "Aan = kanaal als gekleurd label. Uit = platte tekst."
       },
       "outreach_table_color_status": {
-        "label": "Status"
+        "label": "Status",
+        "description": "Aan = campagnestatus als gekleurd label. Uit = platte tekst."
       },
       "outreach_table_color_owner": {
         "label": "Eigenaar-kleur",
@@ -2208,8 +2255,7 @@
   "careerSite": {
     "title": "Carrière-site",
     "subtitle": "De publieke vacaturesite van deze tenant.",
-    "on": "Aan — publieke vacaturesite zichtbaar",
-    "off": "Uit — publieke site niet bereikbaar",
+    "activeLabel": "Carrière-site actief",
     "hint": "Zet de publieke carrière-site (…/{tenant}/vacatures) aan of uit. De backend dwingt dit direct af: uit = de publieke site toont een nette niet-actief-melding en solliciteren is dicht."
   },
   "caoSettings": {

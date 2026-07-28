@@ -17,13 +17,19 @@ export interface ProfileFormData {
   default_per_page?: number
 }
 
-// UI languages offered in the display tab + header language picker.
+// UI languages offered in the display tab. Deliberate choice (Danny 2026-07-28):
+// a language picker shows each language's own AUTONYM (e.g. "Nederlands" for
+// Dutch), never translated into the current UI language — otherwise a French
+// user staring at an English UI would hunt for "Dutch" instead of recognising
+// "Nederlands". No `label` here: it's still resolved via `t('languageNames.<code>',
+// { ns: 'auth' })` at render time (see ProfileDisplayTab), so the string has one
+// source of truth per §5 — every locale file simply carries the identical autonym.
 export const LANGUAGES = [
-  { value: 'nl', label: 'Nederlands',  flag: '🇳🇱' },
-  { value: 'en', label: 'English',     flag: '🇬🇧' },
-  { value: 'de', label: 'Deutsch',     flag: '🇩🇪' },
-  { value: 'fr', label: 'Français',    flag: '🇫🇷' },
-  { value: 'es', label: 'Español',     flag: '🇪🇸' },
+  { value: 'nl', flag: '🇳🇱' },
+  { value: 'en', flag: '🇬🇧' },
+  { value: 'de', flag: '🇩🇪' },
+  { value: 'fr', flag: '🇫🇷' },
+  { value: 'es', flag: '🇪🇸' },
 ]
 
 // Role → colour (mirrors UsersPage). Label comes from the `users` i18n namespace.

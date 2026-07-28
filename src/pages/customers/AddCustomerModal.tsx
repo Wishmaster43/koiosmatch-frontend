@@ -8,19 +8,8 @@ import { useIndustries } from '@/lib/useIndustries'
 import { useLocations } from '@/lib/useLocations'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { cardHead, cardBox, row2, row3Even, cardPair } from '@/components/ui/modalCards'
 import type { Id, LookupOption } from '@/types/common'
-
-// Card chrome — mirrors AddContactPersonModal/AddLocationModal/AddDepartmentModal
-// (same folder) exactly (§3A): 11px uppercase muted heading over a bordered
-// surface, kept local (not a cross-import — CLAUDE.md §2: an entity page must not
-// reach into another entity's internals) so every customer sub-modal reads as one system.
-const cardHead = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
-const cardBox = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, display: 'flex', flexDirection: 'column' as const, gap: 12 }
-const row2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }
-const row3Even = { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }
-// Two CARDS side by side (distinct from row2/row3Even, which pair FIELDS inside
-// one card) — mirrors MatchPlacementModal's twoColSections idiom.
-const cardPair = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' as const }
 
 interface CustomerForm {
   name: string; debtorNumber: string; status: string; ownerId: string; industry: string; city: string

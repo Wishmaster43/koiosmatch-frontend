@@ -1,13 +1,17 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, X, Map as MapIcon, Pencil, Trash2, AlertTriangle, RefreshCw } from 'lucide-react'
+import { Plus, X, Map as MapIcon, Pencil, Trash2, AlertTriangle, RefreshCw, Building2 } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import GeocodeButton from '@/components/ui/GeocodeButton'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { cardHead, cardBox } from '@/components/ui/modalCards'
 import { BTN_H } from '@/config/buttonMetrics'
+// Deterministic per-row colour hash — the SAME helper as Avatar/Shiftmanager
+// entities (§11: reuse, never a second hash). See LocationBadge below for why.
+import { avatarColor } from '@/lib/avatarColor'
 
 // STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
 const LocationsMapView = lazy(() => import('./LocationsMapView'))
@@ -38,6 +42,28 @@ function toFormValues(loc) {
   const values = { ...EMPTY_FORM }
   FORM_KEYS.forEach(k => { values[k] = loc[k] ?? '' })
   return values
+}
+
+// VESTIGING-ICON-1 (Danny 28-07, "Icons voor de bedrijven met een kleur"): the
+// `locations` table/model/resource/Store+UpdateLocationRequest carry no `color`
+// or `icon` field at all (checked the tenant migration, LocationResource and both
+// FormRequests) — a user-editable icon/colour picker would be a fake affordance
+// (§3): nothing typed there would survive a reload or a PATCH. Until the backend
+// adds those columns, every row instead gets a deterministic, READ-ONLY badge — a
+// fixed building glyph tinted by a stable per-name colour hash, the same
+// convention Avatar/avatarColor already uses for candidates, owners and
+// Shiftmanager entities (§11 reuse) — so branches are identifiable at a glance
+// without pretending to save a choice the API cannot store.
+function LocationBadge({ name }) {
+  const color = avatarColor(name)
+  return (
+    <span aria-hidden="true" style={{ width: 26, height: 26, flexShrink: 0, display: 'flex',
+      alignItems: 'center', justifyContent: 'center', borderRadius: 7,
+      background: `color-mix(in srgb, ${color} 14%, transparent)`,
+      border: `1px solid color-mix(in srgb, ${color} 45%, transparent)`, color }}>
+      <Building2 size={13} />
+    </span>
+  )
 }
 
 // LOC-DELETE-GUARD-1: the 409 payload's `counts` object uses backend source keys —
@@ -196,7 +222,12 @@ export default function LocationsSettings() {
                 <tr><td colSpan={4} style={{ ...TD, textAlign: 'center', color: 'var(--text-muted)', padding: '32px 0' }}>{t('locations.empty')}</td></tr>
               ) : paginated.map((loc, i) => (
                 <tr key={loc.id ?? i}>
-                  <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{loc.name}</td>
+                  <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <LocationBadge name={loc.name} />
+                      {loc.name}
+                    </div>
+                  </td>
                   <td style={TD}>{formatAddress(loc)}</td>
                   <td style={{ ...TD, color: 'var(--text-muted)', fontSize: 12 }}>
                     {loc.created_at ? new Date(loc.created_at).toLocaleString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
@@ -269,13 +300,9 @@ export default function LocationsSettings() {
               // matchPlacement/styles.ts' `lbl`/`input` exactly.
               const lbl = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }
               const inp = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
-              // Titled-card chrome (Danny 27-07 point B: "kaders om elk blokje") —
-              // mirrors the placement modal's cardHead/cardBox idiom (matchPlacement/
-              // styles.ts + pages/candidates/addmodal/fields), kept LOCAL rather than
-              // a cross-import: this is a settings section, not an entity page, and
-              // this file stays plain JSX (no TS cast boundary to reuse there either).
-              const cardHead = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
-              const cardBox = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, display: 'flex', flexDirection: 'column', gap: 12 }
+              // Titled-card chrome (Danny 27-07 point B: "kaders om elk blokje") — the
+              // shared cardHead/cardBox (CLAUDE.md §11: one source instead of a
+              // per-entity copy), imported at module top since this file stays plain JSX.
               const setF = (k) => (e) => setForm(x => ({ ...x, [k]: e.target.value }))
               // Called as a function (not <F/>) so inputs keep focus while typing.
               const field = (k, label, placeholder, type = 'text', flex = 1) => (

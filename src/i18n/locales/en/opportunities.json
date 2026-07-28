@@ -5,7 +5,7 @@
   "error": "Opportunities could not be loaded.",
   "pickClientFirst": "Pick a client first",
   "page": {
-    "add": "Add opportunity",
+    "add": "New opportunity",
     "selected": "{{count}} selected",
     "clearSelection": "Clear selection",
     "searchPlaceholder": "Search opportunities"

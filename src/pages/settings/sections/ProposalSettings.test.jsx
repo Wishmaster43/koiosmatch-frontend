@@ -36,7 +36,7 @@ describe('ProposalSettings', () => {
     blobRef.current = { application_proposal: JSON.stringify(STORED) }
     render(<ProposalSettings />)
     expect(screen.getByDisplayValue(STORED.subject_template)).toBeInTheDocument()
-    expect(screen.getByRole('checkbox')).not.toBeChecked()
+    expect(screen.getByRole('switch')).not.toBeChecked()
     expect(screen.getAllByRole('radio')[0]).toBeChecked() // proposal
   })
 
@@ -44,7 +44,7 @@ describe('ProposalSettings', () => {
     blobRef.current = { application_proposal: JSON.stringify(STORED) }
     const user = userEvent.setup()
     render(<ProposalSettings />)
-    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('switch'))
     expect(postMock).toHaveBeenCalledWith('/settings', {
       application_proposal: JSON.stringify({ ...STORED, sets_phase: true }),
     })

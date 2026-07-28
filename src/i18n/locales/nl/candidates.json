@@ -1,7 +1,7 @@
 {
   "title": "Kandidaten",
   "page": {
-    "add": "Kandidaat toevoegen",
+    "add": "Nieuwe kandidaat",
     "blacklistView": "Blacklist",
     "archivedView": "Gearchiveerd",
     "filterUnsupported": "Dit filter wordt (nog) niet door de server ondersteund.",
@@ -183,7 +183,7 @@
     "phase": "Fase"
   },
   "modal": {
-    "title": "Kandidaat toevoegen",
+    "title": "Nieuwe kandidaat",
     "newPrefix": "Nieuw",
     "candidateData": "Kandidaatgegevens",
     "fillRequired": "Vul de verplichte velden in",
@@ -719,6 +719,7 @@
   },
   "cv": {
     "contact": "Contact",
+    "summary": "Profieltekst",
     "languages": "Talen",
     "skills": "Vaardigheden",
     "certificates": "Certificaten",

@@ -10,6 +10,7 @@
   "createFailed": "Échec de la création.",
   "pwPlaceholder": "Au moins 8 caractères",
   "changeRole": "Changer de rôle",
+  "changeRoleFailed": "Échec du changement de rôle. Veuillez réessayer.",
   "avatarColor": "Couleur de l'icône",
   "avatarColorAuto": "Automatique",
   "title": "Utilisateurs",

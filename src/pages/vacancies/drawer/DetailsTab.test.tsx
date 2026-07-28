@@ -1,26 +1,17 @@
 /**
- * DetailsTab · VAC-AGENT-2 (Danny 21-07) regression guard: the AI-agent picker
- * card moved to its own tab (VacancyAgentTab) — DetailsTab must never render it
- * again. The whole form/cascade/lookup hook is stubbed (DetailsTab is pure card/
- * row JSX around it, see useVacancyDetailsForm's own doc comment), so no context
- * providers are needed to mount it.
- *
- * Also covers the flat-layout redesign (Danny 21-07): the sub-tab strip
- * (Algemeen/Profiel/Koios-advies) is gone — every section now stacks in one flat
- * scroll (no `role="tablist"`), and the field-edit pencil sits in the Algemeen
- * card's own title row instead of a separate row above the tab content.
- * Description moved OUT to its own drawer main-tab (DescriptionTab.test.tsx).
- *
- * VAC-COUNTRY-1 (Danny 22-07, punt 2): the land→provincie cascade logic itself
- * (province options scoping to the picked country, clearing an invalid province)
- * lives in useVacancyDetailsForm — fully stubbed here — so it's covered by
- * useVacancyDetailsForm.test.ts instead. This file only proves the component's
- * OWN wiring: the resolved country display name in read-mode, and the province
- * options the hook hands back reaching the picker.
+ * DetailsTab · VAC-DETAILS-SPLIT-1 (Danny 24-07) regression guard: the tab now
+ * shows a SubTabBar (Algemeen/Locatie/Eisen/Voorwaarden) — the OPPOSITE of the
+ * earlier flat-stack redesign (21-07) — because ONE shared editing/form pair
+ * meant a single pencil turned all 21 fields into inputs at once. Each
+ * sub-tab renders its OWN Details<X>Tab component wired to its OWN hook
+ * section (general/location/requirements/conditions), so a pencil opened in
+ * one sub-tab can only ever flip that sub-tab. The whole hook is stubbed
+ * (DetailsTab wires data + the tab list only), so no context providers are
+ * needed to mount it.
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { vi } from 'vitest'
+import userEvent from '@testing-library/user-event'
 import DetailsTab from './DetailsTab'
 import type { VacancyDetail } from '@/types/vacancy'
 
@@ -30,28 +21,103 @@ vi.mock('@/lib/countries', () => ({
   getCountryOptions: () => [{ value: 'NL', label: 'Netherlands' }, { value: 'BE', label: 'Belgium' }],
   getCountryName: (code: string) => (code === 'NL' ? 'Netherlands' : code),
 }))
+// Not under test here — makes its own API/insight calls, irrelevant to this guard.
+vi.mock('@/components/ai/KoiosAdviceBlock', () => ({ default: () => null }))
 
-vi.mock('../hooks/useVacancyDetailsForm', () => ({
-  useVacancyDetailsForm: () => ({
-    candidateTypes: [], typeMeta: () => ({ label: '', color: '#000' }),
-    seniorityLevels: [], educationLevels: [], industries: [], formatDate: (d: string) => d, fnOptions: [],
-    editing: false, setEditing: vi.fn(), form: {}, setF: vi.fn(), save: vi.fn(), cancel: vi.fn(),
-    provinces: ['Utrecht', 'Zuid-Holland'],
+// One section's mock shape — every Details<X>Tab only ever reads/calls its OWN
+// section, so each test can override just the bits it needs (e.g. `editing: true`).
+const baseSection = (extra: Record<string, unknown> = {}) => ({
+  editing: false, setEditing: vi.fn(), form: {}, setF: vi.fn(), save: vi.fn(), cancel: vi.fn(), ...extra,
+})
+const makeHookReturn = (overrides: { general?: object; location?: object; requirements?: object; conditions?: object } = {}) => ({
+  candidateTypes: [], typeMeta: () => ({ label: '', color: '#000' }),
+  seniorityLevels: [], educationLevels: [], industries: [], formatDate: (d: string) => d, fnOptions: [],
+  general: baseSection({
     clientId: '', handleClientChange: vi.fn(), customerOptions: [],
     cascade: { locationName: '', departmentName: '', contactName: '' },
     locationPicker: null, departmentPicker: null, contactPicker: null,
     types: [], toggleType: vi.fn(),
-    skills: [], newSkill: '', setNewSkill: vi.fn(), addSkill: vi.fn(), removeSkill: vi.fn(),
+    ...overrides.general,
   }),
+  location: baseSection({ provinces: ['Utrecht', 'Zuid-Holland'], ...overrides.location }),
+  requirements: baseSection({ skills: [], newSkill: '', setNewSkill: vi.fn(), addSkill: vi.fn(), removeSkill: vi.fn(), ...overrides.requirements }),
+  conditions: baseSection({ ...overrides.conditions }),
+})
+
+// Mutable so each test can install its own hook stub before rendering.
+let hookReturn = makeHookReturn()
+vi.mock('../hooks/useVacancyDetailsForm', () => ({
+  useVacancyDetailsForm: () => hookReturn,
   composeAddress: () => '',
 }))
-// Not under test here — makes its own API/insight calls, irrelevant to this guard.
-vi.mock('@/components/ai/KoiosAdviceBlock', () => ({ default: () => null }))
 
 const vacancy = { id: 'v1', title: 'Verpleegkundige', aiAgentId: 'a1', aiAgentName: 'Kelly' } as unknown as VacancyDetail
 
+describe('DetailsTab · sub-tab strip (VAC-DETAILS-SPLIT-1)', () => {
+  it('renders a tablist with the four existing group labels, Algemeen active first', () => {
+    hookReturn = makeHookReturn()
+    render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
+    expect(screen.getByRole('tablist')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'details.groups.general' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'details.groups.location' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'details.groups.requirements' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'details.groups.conditions' })).toBeInTheDocument()
+    // Only Algemeen's own fields render initially — the other three sub-tabs are unmounted.
+    expect(screen.getByText('details.contractType')).toBeInTheDocument()
+    expect(screen.queryByText('details.address')).not.toBeInTheDocument()
+    expect(screen.queryByText('details.experience')).not.toBeInTheDocument()
+    expect(screen.queryByText('details.salary')).not.toBeInTheDocument()
+  })
+
+  it('switching sub-tabs swaps the rendered fields', async () => {
+    hookReturn = makeHookReturn()
+    const user = userEvent.setup()
+    render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
+
+    await user.click(screen.getByRole('tab', { name: 'details.groups.location' }))
+    expect(screen.getByText('details.address')).toBeInTheDocument()
+    expect(screen.queryByText('details.contractType')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: 'details.groups.requirements' }))
+    expect(screen.getByText('details.experience')).toBeInTheDocument()
+    expect(screen.getByText('details.skills')).toBeInTheDocument()
+    expect(screen.queryByText('details.address')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: 'details.groups.conditions' }))
+    expect(screen.getByText('details.salary')).toBeInTheDocument()
+    expect(screen.queryByText('details.experience')).not.toBeInTheDocument()
+  })
+
+  it('a pencil open in one sub-tab never flips another (each section has its OWN editing flag)', async () => {
+    // Eisen is mid-edit; Algemeen/Locatie/Voorwaarden are not.
+    hookReturn = makeHookReturn({ requirements: { editing: true } })
+    const user = userEvent.setup()
+    render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
+    // Algemeen (the active tab) still shows its READ-mode pencil, not save/cancel.
+    expect(screen.getByTitle('common:edit')).toBeInTheDocument()
+    expect(screen.queryByTitle('common:save')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: 'details.groups.requirements' }))
+    // Eisen's OWN card is mid-edit — save/cancel show, not a pencil.
+    expect(screen.getByTitle('common:save')).toBeInTheDocument()
+    expect(screen.getByTitle('common:cancel')).toBeInTheDocument()
+  })
+
+  it('clicking a sub-tab\'s own pencil calls ONLY that section\'s setEditing', async () => {
+    hookReturn = makeHookReturn()
+    const user = userEvent.setup()
+    render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
+    await user.click(screen.getByTitle('common:edit'))
+    expect(hookReturn.general.setEditing).toHaveBeenCalledWith(true)
+    expect(hookReturn.location.setEditing).not.toHaveBeenCalled()
+    expect(hookReturn.requirements.setEditing).not.toHaveBeenCalled()
+    expect(hookReturn.conditions.setEditing).not.toHaveBeenCalled()
+  })
+})
+
 describe('DetailsTab · the AI-agent card is gone (moved to VacancyAgentTab)', () => {
   it('renders no AI-agent picker copy or the linked agent name', () => {
+    hookReturn = makeHookReturn()
     render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
     // In unit tests i18n resources aren't loaded, so t() echoes the raw key — if the
     // card were reintroduced these keys would render literally as this text.
@@ -63,40 +129,23 @@ describe('DetailsTab · the AI-agent card is gone (moved to VacancyAgentTab)', (
   })
 })
 
-describe('DetailsTab · flat layout (Danny 21-07: no sub-tab strip)', () => {
-  it('renders Algemeen, Profiel and Koios-advies all stacked, with no tablist', () => {
-    render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
-    expect(screen.getByText('details.groups.general')).toBeInTheDocument()
-    expect(screen.getByText('details.groups.location')).toBeInTheDocument()
-    expect(screen.getByText('details.groups.requirements')).toBeInTheDocument()
-    expect(screen.getByText('details.groups.conditions')).toBeInTheDocument()
-    expect(screen.getByText('details.skills')).toBeInTheDocument()
-    // No sub-tab bar left (SubTabBar renders role="tablist").
-    expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
-    // Description moved to its own drawer tab — never rendered here anymore.
-    expect(screen.queryByText('details.description')).not.toBeInTheDocument()
-  })
-
-  it('puts the edit pencil in the Algemeen card title row', () => {
-    render(<DetailsTab vacancy={vacancy} onUpdate={vi.fn()} />)
-    const generalTitle = screen.getByText('details.groups.general')
-    const editButton = screen.getByTitle('common:edit')
-    // Same row wrapper: the title and the pencil share one parent (title-row div).
-    expect(editButton.parentElement).toBe(generalTitle.parentElement)
-  })
-})
-
 describe('DetailsTab · land→provincie cascade (Danny 22-07, punt 2)', () => {
-  it('read-mode resolves the country to its display name, never the bare ISO code', () => {
+  it('read-mode resolves the country to its display name, never the bare ISO code', async () => {
+    hookReturn = makeHookReturn()
+    const user = userEvent.setup()
     const v = { ...vacancy, country: 'NL', province: 'Utrecht' } as VacancyDetail
     render(<DetailsTab vacancy={v} onUpdate={vi.fn()} />)
+    await user.click(screen.getByRole('tab', { name: 'details.groups.location' }))
     expect(screen.getByText('Netherlands')).toBeInTheDocument()
     expect(screen.getByText('Utrecht')).toBeInTheDocument()
   })
 
-  it('shows a dash for an unset country/province, never a raw empty string', () => {
+  it('shows a dash for an unset country/province, never a raw empty string', async () => {
+    hookReturn = makeHookReturn()
+    const user = userEvent.setup()
     const v = { ...vacancy, country: '', province: '' } as VacancyDetail
     render(<DetailsTab vacancy={v} onUpdate={vi.fn()} />)
+    await user.click(screen.getByRole('tab', { name: 'details.groups.location' }))
     // Both the Location card's province and country rows fall back to the dash.
     expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(2)
   })

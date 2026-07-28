@@ -9,11 +9,9 @@
  * Widened to the house "wide form" frame (Danny 27-07: "+ contactpersoon ook" —
  * every create modal must match +Match/+Kandidaat's footprint) via the shared
  * WIDE_MODAL constant, and regrouped into titled, bordered cards (Persoon/Contact/
- * Koppeling) mirroring the placement modal's card idiom (matchPlacement/styles.ts +
- * pages/candidates/addmodal/fields' cardHead/cardBox) — kept as LOCAL constants here
- * rather than a cross-import, since an entity page must not reach into another
- * entity page's internals (CLAUDE.md §2); the values are copied verbatim so the
- * look matches exactly. The location/department pickers become searchable
+ * Koppeling) using the shared `@/components/ui/modalCards` chrome (CLAUDE.md §11:
+ * one source instead of a per-entity copy) so the look matches every other wide
+ * create-modal exactly. The location/department pickers become searchable
  * CreatableSelects (allowCreate={false} — both are real relational ids, never a
  * free-text create), same as every other relational picker in the app.
  */
@@ -26,17 +24,10 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
-
-// Card chrome — mirrors matchPlacement/styles' cardHead/cardBox exactly (11px
-// uppercase muted heading over a bordered surface) so this "wide form" modal
-// reads as the same system as +Match/+Kandidaat (Danny 27-07).
-const cardHead = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
-const cardBox = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, display: 'flex', flexDirection: 'column' as const, gap: 12 }
-const row2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }
-const row3 = { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }
 
 interface OptionRow { id: Id; name: string }
 
@@ -116,9 +107,23 @@ export default function AddContactPersonModal({
 
   const canSubmit = !!form.firstName.trim() && !!form.lastName.trim()
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
-  // Departments narrow to the picked location once one is chosen (dependent picker, C-42).
-  const departmentOptions = (form.locationId ? departments.filter(d => String(d.locationId) === String(form.locationId)) : departments)
-    .map(d => ({ value: String(d.id), label: d.name }))
+  // Department options stay EMPTY until a location is picked — mirrors AddShiftModal's
+  // customer->department cascade (PLAN-LOOKUP-1). Never fall back to "every department
+  // of this customer": a department belongs to exactly one location, so offering the
+  // full list would let one from a DIFFERENT location get submitted alongside it.
+  const departmentsForLocation = form.locationId ? departments.filter(d => String(d.locationId) === String(form.locationId)) : []
+  // Edit mode may load a contact whose location/department were set independently via
+  // the drawer's chip-select (CONTACT-MULTI-1 has no cascade there) — keep the currently
+  // selected department visible even if it falls outside the location filter, so its
+  // label still resolves instead of the trigger falling back to a raw id string.
+  const selectedDepartment = form.departmentId ? departments.find(d => String(d.id) === String(form.departmentId)) : undefined
+  const departmentOptions = (selectedDepartment && !departmentsForLocation.some(d => String(d.id) === String(selectedDepartment.id))
+    ? [...departmentsForLocation, selectedDepartment]
+    : departmentsForLocation
+  ).map(d => ({ value: String(d.id), label: d.name }))
+  const departmentPlaceholder = !form.locationId ? t('subModal.pickLocationFirst')
+    : departmentOptions.length === 0 ? t('common:noResults')
+    : t('subModal.noneOption')
   const showLocationPicker = !lockLocationId
 
   return (
@@ -171,7 +176,7 @@ export default function AddContactPersonModal({
           <div>
             <div style={cardHead}>{t('subModal.groups.contactInfo')}</div>
             <div style={cardBox}>
-              <div style={row3}>
+              <div style={row3Even}>
                 <Field label={t('subModal.email')}><TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder="naam@klant.nl" /></Field>
                 <Field label={t('subModal.phone')}><TextField value={form.phone} onChange={v => set('phone', v)} /></Field>
                 <Field label={t('subModal.mobile')}><TextField value={form.mobile} onChange={v => set('mobile', v)} /></Field>
@@ -194,7 +199,7 @@ export default function AddContactPersonModal({
                   <Field label={t('subModal.selectDepartment')}>
                     <CreatableSelect value={form.departmentId ? String(form.departmentId) : null} allowCreate={false}
                       onChange={v => set('departmentId', v || null)}
-                      placeholder={t('subModal.noneOption')} options={departmentOptions} />
+                      placeholder={departmentPlaceholder} options={departmentOptions} />
                   </Field>
                 </div>
               )}
