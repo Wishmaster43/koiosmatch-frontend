@@ -231,7 +231,7 @@ function RegionToggle({ value, onChange, sectionLabel, t }) {
     { key: 'main',    label: t('cvTemplate.regionMain') },
   ]
   return (
-    <div style={{ display: 'flex', gap: 4 }}>
+    <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
       {options.map(o => {
         const active = value === o.key
         return (
@@ -322,7 +322,7 @@ export default function CvTemplateSettings() {
   const labelStyle = { fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 5, display: 'block' }
 
   return (
-    <div style={{ padding: '28px 32px', maxWidth: 1100 }}>
+    <div style={{ padding: '28px 32px', maxWidth: 1220 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
           <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)', margin: 0 }}>{t('cvTemplate.title')}</h2>
@@ -342,7 +342,7 @@ export default function CvTemplateSettings() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 40, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '420px 1fr', gap: 32, alignItems: 'start' }}>
 
         {/* Form panel */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -404,7 +404,8 @@ export default function CvTemplateSettings() {
                       {/* Shared house Toggle (Danny 28-07: "GEEN VINKJES MAAR TOGGLES!!!") — replaces the
                           hand-rolled ToggleLeft/ToggleRight icon button so every on/off control looks the same. */}
                       <Toggle checked={sec.enabled} ariaLabel={label} onChange={() => handleSectionToggle(sec.id)} />
-                      <span style={{ flex: 1, fontSize: 12, color: sec.enabled ? 'var(--text)' : 'var(--text-muted)', fontWeight: sec.enabled ? 500 : 400 }}>
+                      <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        fontSize: 12, color: sec.enabled ? 'var(--text)' : 'var(--text-muted)', fontWeight: sec.enabled ? 500 : 400 }}>
                         {label}
                       </span>
                       {movable ? (
@@ -421,7 +422,7 @@ export default function CvTemplateSettings() {
                       {region === 'header' ? (
                         <div style={{ width: 44 }} />
                       ) : (
-                        <div style={{ display: 'flex', gap: 2 }}>
+                        <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
                           <button onClick={() => handleSectionMove(sec.id, -1)} disabled={idx === 0}
                             aria-label={t('cvTemplate.moveSectionUp', { section: label })}
                             style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 4, cursor: idx === 0 ? 'not-allowed' : 'pointer',
