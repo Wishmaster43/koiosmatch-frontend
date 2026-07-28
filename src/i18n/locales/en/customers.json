@@ -185,7 +185,10 @@
       "deleteLocation": "Delete location",
       "confirmDelete": "Delete this location? Linked departments and contacts stay but become unlinked.",
       "openKvk": "Open in the CoC register",
-      "openVies": "Check in VIES (EU)"
+      "openVies": "Check in VIES (EU)",
+      "pickContactSearch": "Search by name, role or email",
+      "pickContactLinks": "Currently linked to",
+      "pickContactNoLinks": "Not linked yet"
     },
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",
@@ -228,7 +231,10 @@
       "department": "Department",
       "role": "Role",
       "email": "Email",
-      "phone": "Phone"
+      "phone": "Phone",
+      "status": "Status",
+      "mobile": "Mobile",
+      "lastContact": "Last contact"
     },
     "detail": {
       "infoTitle": "Contact",
@@ -245,13 +251,24 @@
       "department": "Department",
       "none": "Not provided",
       "subtabs": {
-        "data": "Details"
+        "data": "Details",
+        "tasks": "Tasks"
       }
     },
     "deleteConfirm": "Delete this contact?",
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",
-    "deleteInUse": "Can't delete — this contact is still in use."
+    "deleteInUse": "Can't delete — this contact is still in use.",
+    "primaryChip": "Primary",
+    "tasks": {
+      "newTask": "New task",
+      "open": "Open",
+      "history": "History",
+      "empty": "No tasks for this contact yet",
+      "loading": "Loading tasks…",
+      "error": "Tasks could not be loaded",
+      "openTask": "Open task"
+    }
   },
   "vacancies": {
     "empty": "No vacancies for this customer.",
@@ -474,7 +491,18 @@
     "create": "Add",
     "save": "Save",
     "cancel": "Cancel",
-    "required": "Required field"
+    "required": "Required field",
+    "duplicate": {
+      "email": "Already exists: {{name}} has this email address",
+      "phone": "Already exists: {{name}} has this phone number",
+      "mobile": "Already exists: {{name}} has this mobile number"
+    },
+    "primaryReplace": {
+      "title": "Replace primary contact?",
+      "body": "{{name}} is currently the primary contact for this customer. Replace them?",
+      "confirm": "Yes, replace",
+      "decline": "No, keep {{name}} primary"
+    }
   },
   "changelog": {
     "empty": "No changes yet."

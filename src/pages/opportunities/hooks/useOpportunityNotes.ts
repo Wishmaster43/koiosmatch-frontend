@@ -25,7 +25,7 @@ export function useOpportunityNotes(id?: Id) {
   const [loading, setLoading] = useState(false)
   // Audit r4 (§3/§10): a real load failure must not render as "no notes yet" —
   // 404 stays the calm not-built-yet empty; everything else (5xx, network/no
-  // response) flags error, mirroring useOpportunityTasks/useOpportunityActivity.
+  // response) flags error, mirroring useOpportunityActivity.
   const [error,   setError]   = useState(false)
 
   const load = useCallback((signal?: AbortSignal) => {

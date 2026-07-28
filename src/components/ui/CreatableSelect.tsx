@@ -122,7 +122,13 @@ export default function CreatableSelect({
         {/* The trigger label follows an explicit style.fontSize (modal-sized fields). */}
         <span style={{ fontSize: (style as { fontSize?: number } | undefined)?.fontSize ?? 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden',
           textOverflow: 'ellipsis', color: (current || value) ? 'var(--text)' : 'var(--text-muted)' }}>
-          {current?.label ?? value ?? placeholder ?? '-'}
+          {/* `value || placeholder`, NOT `value ?? placeholder`: an unset field commonly
+              holds an EMPTY STRING (form state seeded with ''), which ?? happily renders —
+              leaving the trigger with no text at all. The placeholder then never showed AND
+              the box collapsed ~8px shorter than the text inputs beside it (measured live
+              28-07 on the contact modal's Functie field: 30px vs 38px, Danny's "het veld is
+              niet even groot als de rest"). Every picker seeded with '' had it. */}
+          {current?.label ?? (value || placeholder) ?? '-'}
         </span>
         <ChevronDown size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
       </button>

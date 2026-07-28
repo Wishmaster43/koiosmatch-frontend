@@ -3,7 +3,7 @@
  * composes ONE line (street+no+suffix, postcode+city — mirrors the candidate
  * ProfileTab addressRow), editing expands it into its declared `addressFields`
  * loose child rows, and saving hands back a flat object (no nested 'address' key).
- * Also checks a plain sibling field (text + checkbox) is unaffected by that logic.
+ * Also checks a plain sibling field (text + boolean toggle) is unaffected by that logic.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -51,10 +51,12 @@ describe('EditableFieldTable · address composite (read mode)', () => {
     expect(screen.getByText('-')).toBeInTheDocument()
   })
 
-  it('does not disturb a sibling plain/checkbox field', () => {
+  // A boolean field renders as the shared Toggle (role="switch"), not a tick box —
+  // Danny 28-07: "GEEN VINKJES MAAR TOGGLES".
+  it('does not disturb a sibling plain/boolean field', () => {
     render(<EditableFieldTable fields={fields} value={value} />)
     expect(screen.getByText('0612345678')).toBeInTheDocument()
-    expect(screen.getByRole('checkbox')).toBeChecked()
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true')
   })
 })
 
@@ -112,6 +114,6 @@ describe('EditableFieldTable · address composite (edit mode)', () => {
     render(<EditableFieldTable fields={fields} value={value} />)
     await user.click(screen.getByTitle('edit'))
     expect(screen.getByDisplayValue('0612345678')).toBeInTheDocument()
-    expect(screen.getByRole('checkbox')).toBeChecked()
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true')
   })
 })

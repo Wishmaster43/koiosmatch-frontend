@@ -185,7 +185,10 @@
       "deleteLocation": "Locatie verwijderen",
       "confirmDelete": "Deze locatie verwijderen? Gekoppelde afdelingen en contactpersonen blijven bestaan maar raken ontkoppeld.",
       "openKvk": "Openen in KvK-register",
-      "openVies": "Controleren in VIES (EU)"
+      "openVies": "Controleren in VIES (EU)",
+      "pickContactSearch": "Zoek op naam, functie of e-mail",
+      "pickContactLinks": "Nu gekoppeld aan",
+      "pickContactNoLinks": "Nog geen koppeling"
     },
     "saveFailed": "Opslaan is mislukt.",
     "deleteFailed": "Verwijderen is mislukt.",
@@ -228,7 +231,10 @@
       "department": "Afdeling",
       "role": "Functie",
       "email": "E-mailadres",
-      "phone": "Telefoon"
+      "phone": "Telefoon",
+      "status": "Status",
+      "mobile": "Mobiel",
+      "lastContact": "Laatste contact"
     },
     "detail": {
       "infoTitle": "Contactpersoon",
@@ -245,13 +251,24 @@
       "department": "Afdeling",
       "none": "Niet opgegeven",
       "subtabs": {
-        "data": "Gegevens"
+        "data": "Gegevens",
+        "tasks": "Taken"
       }
     },
     "deleteConfirm": "Deze contactpersoon verwijderen?",
     "saveFailed": "Opslaan is mislukt.",
     "deleteFailed": "Verwijderen is mislukt.",
-    "deleteInUse": "Verwijderen is niet mogelijk — deze contactpersoon wordt nog gebruikt."
+    "deleteInUse": "Verwijderen is niet mogelijk — deze contactpersoon wordt nog gebruikt.",
+    "primaryChip": "Primair",
+    "tasks": {
+      "newTask": "Nieuwe taak",
+      "open": "Open",
+      "history": "Historie",
+      "empty": "Nog geen taken voor deze contactpersoon",
+      "loading": "Taken laden…",
+      "error": "Taken konden niet worden geladen",
+      "openTask": "Open taak"
+    }
   },
   "vacancies": {
     "empty": "Geen vacatures voor deze klant.",
@@ -474,7 +491,18 @@
     "create": "Toevoegen",
     "save": "Opslaan",
     "cancel": "Annuleren",
-    "required": "Verplicht veld"
+    "required": "Verplicht veld",
+    "duplicate": {
+      "email": "Bestaat al: {{name}} heeft dit e-mailadres",
+      "phone": "Bestaat al: {{name}} heeft dit telefoonnummer",
+      "mobile": "Bestaat al: {{name}} heeft dit mobiele nummer"
+    },
+    "primaryReplace": {
+      "title": "Primair contact vervangen?",
+      "body": "{{name}} is nu het primaire contact bij deze klant. Wil je die vervangen?",
+      "confirm": "Ja, vervangen",
+      "decline": "Nee, laat {{name}} primair"
+    }
   },
   "changelog": {
     "empty": "Nog geen wijzigingen."

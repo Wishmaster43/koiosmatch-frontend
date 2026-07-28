@@ -185,7 +185,10 @@
       "deleteLocation": "Standort löschen",
       "confirmDelete": "Diesen Standort löschen? Verknüpfte Abteilungen und Kontakte bleiben bestehen, verlieren aber die Verknüpfung.",
       "openKvk": "Im Handelsregister öffnen",
-      "openVies": "In VIES prüfen (EU)"
+      "openVies": "In VIES prüfen (EU)",
+      "pickContactSearch": "Nach Name, Funktion oder E-Mail suchen",
+      "pickContactLinks": "Aktuell verknüpft mit",
+      "pickContactNoLinks": "Noch nicht verknüpft"
     },
     "saveFailed": "Speichern fehlgeschlagen.",
     "deleteFailed": "Löschen fehlgeschlagen.",
@@ -228,7 +231,10 @@
       "department": "Abteilung",
       "role": "Funktion",
       "email": "E-Mail",
-      "phone": "Telefon"
+      "phone": "Telefon",
+      "status": "Status",
+      "mobile": "Mobil",
+      "lastContact": "Letzter Kontakt"
     },
     "detail": {
       "infoTitle": "Kontakt",
@@ -245,13 +251,24 @@
       "department": "Abteilung",
       "none": "Nicht angegeben",
       "subtabs": {
-        "data": "Details"
+        "data": "Details",
+        "tasks": "Aufgaben"
       }
     },
     "deleteConfirm": "Diesen Kontakt löschen?",
     "saveFailed": "Speichern fehlgeschlagen.",
     "deleteFailed": "Löschen fehlgeschlagen.",
-    "deleteInUse": "Löschen nicht möglich — dieser Kontakt wird noch verwendet."
+    "deleteInUse": "Löschen nicht möglich — dieser Kontakt wird noch verwendet.",
+    "primaryChip": "Hauptkontakt",
+    "tasks": {
+      "newTask": "Neue Aufgabe",
+      "open": "Offen",
+      "history": "Verlauf",
+      "empty": "Noch keine Aufgaben für diesen Kontakt",
+      "loading": "Aufgaben werden geladen…",
+      "error": "Aufgaben konnten nicht geladen werden",
+      "openTask": "Aufgabe öffnen"
+    }
   },
   "vacancies": {
     "empty": "Keine Stellen für diesen Kunden.",
@@ -474,7 +491,18 @@
     "create": "Hinzufügen",
     "save": "Speichern",
     "cancel": "Abbrechen",
-    "required": "Pflichtfeld"
+    "required": "Pflichtfeld",
+    "duplicate": {
+      "email": "Bereits vorhanden: {{name}} hat diese E-Mail-Adresse",
+      "phone": "Bereits vorhanden: {{name}} hat diese Telefonnummer",
+      "mobile": "Bereits vorhanden: {{name}} hat diese Mobilnummer"
+    },
+    "primaryReplace": {
+      "title": "Hauptkontakt ersetzen?",
+      "body": "{{name}} ist derzeit der Hauptkontakt dieses Kunden. Ersetzen?",
+      "confirm": "Ja, ersetzen",
+      "decline": "Nein, {{name}} bleibt Hauptkontakt"
+    }
   },
   "changelog": {
     "empty": "Noch keine Änderungen."

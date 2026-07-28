@@ -23,15 +23,28 @@
  * Dedupe-by-id for a measured duplicate-row issue lives at the shared source
  * (useCustomerContacts) so both this tab AND the location detail's nested list
  * stay correct — see that hook's docblock for the finding.
+ *
+ * COLUMNS (Danny 28-07: "contactpersonen tabel moet meer informatie bevatten ...
+ * status maar ook mobile met hyperlink en email met hyperlink ... laatste contact
+ * datum en type"): added Status, a dedicated Mobile column and a combined
+ * Last-contact column; Email/Mobile/Phone now render as real mailto:/tel: links
+ * via the shared `contactLinks` renderer (never a second hand-rolled hyperlink).
+ * The primary contact is now a real text CHIP next to the name, not a bare icon —
+ * colour alone must never be the only signal (§6 WCAG); Danny could not tell who
+ * was primary from the icon alone.
  */
 import { useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Users, Check } from 'lucide-react'
+import { Users } from 'lucide-react'
 import SubEntityTab from './SubEntityTab'
 import ContactDetail from './ContactDetail'
 import AddContactPersonModal from '../AddContactPersonModal'
 import type { Column } from '@/components/ui/DataTable'
 import SoftChipJs from '@/components/ui/SoftChip'
+import { emailValue, phoneValue } from '@/components/drawer/contactLinks'
+import { useLastContactTypes } from '@/lib/useLastContactTypes'
+import { useDateFormat } from '@/lib/datetime'
+import LookupIcon from '@/components/ui/LookupIcon'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
@@ -65,6 +78,10 @@ const chipList = (items: { id: Id; name: string }[], color: string) =>
 export default function ContactsTab({ contacts = [], locations = [], departments = [], statuses = [], canLinkBackoffice = false, onAdd, onUpdate, onRemove }: Props) {
   const { t } = useTranslation('customers')
   const [adding, setAdding] = useState(false)
+  // Last-contact channel lookup (label + settings-managed icon) — the same
+  // source CandidatesTable reads for its own combined last-contact column.
+  const { labelOf: lastContactLabel, iconOf: lastContactIcon } = useLastContactTypes()
+  const { formatDate } = useDateFormat()
 
   // Fallback resolver — the multi-array (see file docblock) is empty for every
   // seeded contact today; resolve the PRIMARY singular link against the already-
@@ -80,42 +97,84 @@ export default function ContactsTab({ contacts = [], locations = [], departments
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Users size={14} color="var(--color-primary)" style={{ flexShrink: 0 }} />
           <span style={{ color: 'var(--text)' }}>{p.name}</span>
-          {p.isPrimary && <Check size={12} color="var(--color-success)" />}
+          {p.isPrimary && <SoftChip label={t('contacts.primaryChip')} color="var(--color-success)" round size={10} />}
         </div>
       ) },
+    // Deployability/lifecycle status — same soft-chip fallback as the sibling
+    // Locations tab (LocationsTab.tsx): never a hardcoded look, '—' when unset.
+    { key: 'status', header: t('contacts.col.status'), sortable: true, sortValue: p => p.statusLabel,
+      render: p => p.statusLabel ? <SoftChip label={p.statusLabel} color={p.statusColor} /> : '—' },
     { key: 'location', header: t('contacts.col.location'), sortable: true, sortValue: p => p.locationName,
       render: p => chipList(resolvedLocations(p), 'var(--color-secondary)') },
     { key: 'department', header: t('contacts.col.department'), sortable: true, sortValue: p => p.departmentName,
       render: p => chipList(resolvedDepartments(p), 'var(--color-violet)') },
     { key: 'role',  header: t('contacts.col.role'),  cellStyle: muted, sortable: true, sortValue: p => p.role,  render: p => p.role || '—' },
-    { key: 'email', header: t('contacts.col.email'), cellStyle: muted, sortable: true, sortValue: p => p.email, render: p => p.email || '—' },
-    // Single column, sensible fallback (BE 2026-07-20 split): prefer the mobile
-    // number, fall back to the landline — one column stays one column.
-    { key: 'phone', header: t('contacts.col.phone'), nowrap: true, cellStyle: muted, sortable: true, sortValue: p => p.mobile || p.phone, render: p => p.mobile || p.phone || '—' },
+    // Real mailto link + shortcut icon (Danny 28-07) — the ONE shared renderer
+    // (contactLinks), never a second hand-rolled hyperlink.
+    { key: 'email', header: t('contacts.col.email'), cellStyle: muted, sortable: true, sortValue: p => p.email,
+      render: p => emailValue(p.email, t('contacts.detail.email')) },
+    // Mobile is now its OWN column (split from the old combined phone/mobile
+    // fallback column) WITH the WhatsApp shortcut — correct only here, since this
+    // column IS the mobile number; never pass the whatsapp arg for the landline.
+    { key: 'mobile', header: t('contacts.col.mobile'), nowrap: true, cellStyle: muted, sortable: true, sortValue: p => p.mobile,
+      render: p => phoneValue(p.mobile, t('contacts.detail.callPhone'), { label: t('contacts.detail.whatsapp') }) },
+    // NO separate landline column on purpose: nine columns did not fit the drawer and
+    // Danny asked for the MOBILE number specifically. The landline stays one click away
+    // in the drill-down's Telefoonnummers card, where both numbers live.
+    {
+      // Combined last-contact column (date + channel icon) — mirrors
+      // CandidatesTable's own cell minus the click-through: a contact has no
+      // conversations/notes screen to open, so this is a plain span, not a button.
+      // Always '—' today: lastContactAt is null until CustomerContactResource
+      // sends it (see the Contact type comment) — that is expected, not a bug.
+      key: 'lastContact', header: t('contacts.col.lastContact'), nowrap: true,
+      sortable: true, sortValue: p => p.lastContactAt ?? '',
+      render: p => {
+        if (!p.lastContactAt) return <span style={{ color: 'var(--text-muted)' }}>—</span>
+        const label = lastContactLabel(p.lastContactType)
+        const icon = p.lastContactType ? lastContactIcon(p.lastContactType) : undefined
+        return (
+          <span title={label} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--text)', fontSize: 12 }}>
+            {formatDate(p.lastContactAt)}
+            {icon && <span style={{ display: 'inline-flex', flexShrink: 0, opacity: 0.6 }}><LookupIcon icon={icon} size={12} /></span>}
+          </span>
+        )
+      },
+    },
   ]
 
   const renderDetail = (p: Contact, close: () => void) => (
     <ContactDetail contact={p} locations={locations} departments={departments} statuses={statuses}
-      canLinkBackoffice={canLinkBackoffice}
+      existing={contacts} canLinkBackoffice={canLinkBackoffice}
       onSave={onUpdate} onDelete={onRemove} close={close} />
   )
 
   return (
     <>
-      <SubEntityTab
-        items={contacts}
-        columns={columns}
-        addLabel={t('contacts.add')}
-        emptyText={t('contacts.empty')}
-        searchPlaceholder={t('contacts.searchPlaceholder')}
-        backLabel={t('drawer.back')}
-        searchKeys={['name', 'role', 'email']}
-        onAdd={() => setAdding(true)}
-        renderDetail={renderDetail}
-      />
+      {/* Horizontal scroll owned HERE, not the page body. Neither DataTable nor
+          SubEntityTab wrap the table in a scroll container, and the ancestor
+          EntityDrawer panel clips overflow (`overflow:hidden` on a fixed
+          580/880px width) — without this wrapper the 9 columns would be
+          silently CUT OFF (unreachable), never a page-wide sideways scroll. */}
+      <div style={{ overflowX: 'auto' }}>
+        <SubEntityTab
+          items={contacts}
+          columns={columns}
+          addLabel={t('contacts.add')}
+          emptyText={t('contacts.empty')}
+          searchPlaceholder={t('contacts.searchPlaceholder')}
+          backLabel={t('drawer.back')}
+          searchKeys={['name', 'role', 'email', 'mobile']}
+          onAdd={() => setAdding(true)}
+          renderDetail={renderDetail}
+        />
+      </div>
+      {/* `existing` feeds the modal's duplicate check (email/phone/mobile) and its
+          "replace the current primary contact?" question — both need the customer's
+          OTHER contacts, which this tab already holds. */}
       {adding && (
         <AddContactPersonModal locations={locations} departments={departments} statuses={statuses}
-          onCreate={onAdd} onClose={() => setAdding(false)} />
+          existing={contacts} onCreate={onAdd} onClose={() => setAdding(false)} />
       )}
     </>
   )

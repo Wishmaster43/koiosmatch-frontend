@@ -46,6 +46,9 @@ const baseContact = (overrides: Partial<Contact> = {}): Contact => ({
   role: '', email: '', phone: '', mobile: '', isPrimary: false,
   locationId: null, locationName: '', departmentId: null, departmentName: '',
   locations: [], departments: [], statusId: null, status: '', statusLabel: '', statusColor: '', customFields: {},
+  // Last-contact pair (customer_contacts.last_contact_at / _type) — null here, as the
+  // API sends it today: CustomerContactResource does not expose the columns yet.
+  lastContactAt: null, lastContactType: null,
   ...overrides,
 })
 

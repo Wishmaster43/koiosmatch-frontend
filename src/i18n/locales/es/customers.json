@@ -185,7 +185,10 @@
       "deleteLocation": "Eliminar ubicación",
       "confirmDelete": "¿Eliminar esta ubicación? Los departamentos y contactos vinculados se mantienen pero quedan desvinculados.",
       "openKvk": "Abrir en el registro",
-      "openVies": "Comprobar en VIES (UE)"
+      "openVies": "Comprobar en VIES (UE)",
+      "pickContactSearch": "Buscar por nombre, función o correo",
+      "pickContactLinks": "Vinculado actualmente a",
+      "pickContactNoLinks": "Aún sin vincular"
     },
     "saveFailed": "Error al guardar.",
     "deleteFailed": "Error al eliminar.",
@@ -228,7 +231,10 @@
       "department": "Departamento",
       "role": "Función",
       "email": "Correo electrónico",
-      "phone": "Teléfono"
+      "phone": "Teléfono",
+      "status": "Estado",
+      "mobile": "Móvil",
+      "lastContact": "Último contacto"
     },
     "detail": {
       "infoTitle": "Contacto",
@@ -245,13 +251,24 @@
       "department": "Departamento",
       "none": "No indicado",
       "subtabs": {
-        "data": "Datos"
+        "data": "Datos",
+        "tasks": "Tareas"
       }
     },
     "deleteConfirm": "¿Eliminar este contacto?",
     "saveFailed": "Error al guardar.",
     "deleteFailed": "Error al eliminar.",
-    "deleteInUse": "No se puede eliminar — este contacto todavía está en uso."
+    "deleteInUse": "No se puede eliminar — este contacto todavía está en uso.",
+    "primaryChip": "Principal",
+    "tasks": {
+      "newTask": "Nueva tarea",
+      "open": "Abiertas",
+      "history": "Historial",
+      "empty": "Aún no hay tareas para este contacto",
+      "loading": "Cargando tareas…",
+      "error": "No se pudieron cargar las tareas",
+      "openTask": "Abrir tarea"
+    }
   },
   "vacancies": {
     "empty": "No hay vacantes para este cliente.",
@@ -474,7 +491,18 @@
     "create": "Añadir",
     "save": "Guardar",
     "cancel": "Cancelar",
-    "required": "Campo obligatorio"
+    "required": "Campo obligatorio",
+    "duplicate": {
+      "email": "Ya existe: {{name}} tiene esta dirección de correo",
+      "phone": "Ya existe: {{name}} tiene este número de teléfono",
+      "mobile": "Ya existe: {{name}} tiene este número de móvil"
+    },
+    "primaryReplace": {
+      "title": "¿Reemplazar el contacto principal?",
+      "body": "{{name}} es actualmente el contacto principal de este cliente. ¿Reemplazarlo?",
+      "confirm": "Sí, reemplazar",
+      "decline": "No, mantener a {{name}} como principal"
+    }
   },
   "changelog": {
     "empty": "Aún no hay cambios."

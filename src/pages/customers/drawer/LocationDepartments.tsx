@@ -8,7 +8,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pencil, Trash2 } from 'lucide-react'
-import { AddButton } from '@/components/forms/fields'
+// House "+ action" trigger (Danny 28-07 consistency sweep) — the same swap the
+// sibling LocationContacts got; a drawer add-trigger is never a bare text link.
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import SoftChip from '@/components/ui/SoftChip'
 import { useConfirm } from '@/hooks/useConfirm'
 import AddDepartmentModal from '../AddDepartmentModal'
@@ -43,7 +45,7 @@ export default function LocationDepartments({ locationId, locationName, departme
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
         <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('locations.detail.departmentsHere')}</span>
-        <AddButton onClick={() => setModal('add')} label={t('locations.detail.addDepartmentHere')} />
+        <DrawerAddButton onClick={() => setModal('add')} label={t('locations.detail.addDepartmentHere')} />
       </div>
 
       {rows.length === 0 ? (

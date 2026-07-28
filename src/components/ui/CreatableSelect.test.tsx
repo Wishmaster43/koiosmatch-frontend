@@ -131,6 +131,15 @@ describe('CreatableSelect · focus restoration on close', () => {
     expect(trigger).toHaveFocus()
   })
 
+  // Regression (Danny 28-07): a field seeded with '' (the normal form-state default,
+  // e.g. the contact modal's Functie) rendered the empty string instead of the
+  // placeholder — the trigger had NO text, so the placeholder never showed and the box
+  // collapsed ~8px shorter than the text inputs beside it.
+  it('shows the placeholder when the value is an empty string, not blank text', () => {
+    render(<CreatableSelect value="" onChange={() => {}} options={['A', 'B']} placeholder="Selecteer" allowCreate={false} />)
+    expect(screen.getByRole('button', { name: 'Selecteer' })).toHaveTextContent('Selecteer')
+  })
+
   it('does not steal focus from another element when closed by an outside click', async () => {
     const user = userEvent.setup()
     render(

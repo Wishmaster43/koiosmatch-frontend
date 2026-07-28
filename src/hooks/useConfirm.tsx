@@ -7,6 +7,13 @@ interface ConfirmOptions {
   danger?: boolean
   confirmLabel?: string
   cancelLabel?: string
+  /**
+   * Optional action for the CANCEL button. Only pass it when cancelling is a real
+   * second choice rather than "do nothing" — e.g. "replace the primary contact?"
+   * where declining still saves the record, just without the flag. Omitted, cancel
+   * closes the dialog and nothing happens, as before.
+   */
+  onCancel?: () => void
 }
 
 interface ConfirmState extends ConfirmOptions {
@@ -38,7 +45,7 @@ export function useConfirm() {
       confirmLabel={state?.confirmLabel}
       cancelLabel={state?.cancelLabel}
       onConfirm={() => { state?.onConfirm(); setState(null) }}
-      onCancel={() => setState(null)}
+      onCancel={() => { state?.onCancel?.(); setState(null) }}
     />
   )
 

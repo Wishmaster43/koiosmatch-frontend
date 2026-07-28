@@ -8,8 +8,12 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Pencil, Link2, Unlink } from 'lucide-react'
-import { AddButton } from '@/components/forms/fields'
+import { Pencil, Link2, Unlink } from 'lucide-react'
+// House "+ action" trigger (Danny 28-07 consistency sweep) — replaces the
+// hand-rolled AddButton/borderless-link-button pair below.
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import SoftChip from '@/components/ui/SoftChip'
+import ContactLinkPicker from './ContactLinkPicker'
 import AddContactPersonModal from '../AddContactPersonModal'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 import type { Contact, Department } from '@/types/customer'
@@ -29,32 +33,6 @@ interface Props {
   onUpdate: (id: Id, payload: Partial<ContactPayload>) => void
 }
 
-// Small couple-picker: the customer's contacts not already at this location.
-function CouplePicker({ candidates, onPick, onClose }: { candidates: Contact[]; onClose: () => void; onPick: (id: Id) => void }) {
-  const { t } = useTranslation('customers')
-  return (
-    <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ background: 'var(--surface)', borderRadius: 12, width: '100%', maxWidth: 380, boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden' }}>
-        <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('locations.detail.pickContactTitle')}</span>
-          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
-        </div>
-        <div style={{ maxHeight: 280, overflowY: 'auto' }}>
-          {candidates.length === 0 && <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{t('locations.detail.pickContactEmpty')}</div>}
-          {candidates.map(c => (
-            <button key={String(c.id)} onClick={() => onPick(c.id as Id)}
-              style={{ display: 'flex', width: '100%', alignItems: 'center', gap: 8, padding: '9px 16px', fontSize: 12, textAlign: 'left', border: 'none', borderBottom: '1px solid var(--border)', background: 'none', cursor: 'pointer', color: 'var(--text)' }}>
-              <span style={{ flex: 1 }}>{c.name}</span>
-              <span style={{ color: 'var(--text-muted)' }}>{c.role}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export default function LocationContacts({ locationId, locationName, contacts, locations, departments, statuses, onAdd, onUpdate }: Props) {
   const { t } = useTranslation('customers')
   const [modal, setModal] = useState<'add' | 'couple' | Contact | null>(null)
@@ -65,11 +43,9 @@ export default function LocationContacts({ locationId, locationName, contacts, l
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, gap: 8 }}>
         <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('locations.detail.contactsHere')}</span>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <button onClick={() => setModal('couple')} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
-            <Link2 size={11} /> {t('locations.detail.coupleAction')}
-          </button>
-          <AddButton onClick={() => setModal('add')} label={t('locations.detail.addContactHere')} />
+        <div style={{ display: 'flex', gap: 8 }}>
+          <DrawerAddButton onClick={() => setModal('couple')} label={t('locations.detail.coupleAction')} icon={Link2} />
+          <DrawerAddButton onClick={() => setModal('add')} label={t('locations.detail.addContactHere')} />
         </div>
       </div>
 
@@ -79,7 +55,15 @@ export default function LocationContacts({ locationId, locationName, contacts, l
         <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
           {rows.map((c, i) => (
             <div key={String(c.id)} style={{ ...rowStyle, borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none' }}>
-              <span style={{ flex: 1, color: 'var(--text)' }}>{c.name}</span>
+              {/* Primary contact of the CUSTOMER — shown here too (Danny 28-07: he
+                  could not see who was primary from this list). Note the axis: the
+                  flag is one-per-customer, NOT one-per-location; a per-location
+                  primary needs a flag on the contact↔location pivot (CMBE ticket
+                  LOCATIE-PRIMAIR-1), so never read this chip as "primary here". */}
+              <span style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text)' }}>
+                {c.name}
+                {c.isPrimary && <SoftChip label={t('contacts.primaryChip')} color="var(--color-success)" round size={10} />}
+              </span>
               <span style={{ color: 'var(--text-muted)' }}>{[c.role, c.email].filter(Boolean).join(' · ')}</span>
               <button onClick={() => setModal(c)} title={t('common:edit')} style={iconBtn}><Pencil size={12} /></button>
               <button onClick={() => onUpdate(c.id as Id, { locationId: null })} title={t('locations.detail.uncoupleAction')} style={iconBtn}><Unlink size={12} /></button>
@@ -89,17 +73,23 @@ export default function LocationContacts({ locationId, locationName, contacts, l
       )}
 
       {modal === 'couple' && (
-        <CouplePicker candidates={candidates} onClose={() => setModal(null)} onPick={id => { onUpdate(id, { locationId }); setModal(null) }} />
+        <ContactLinkPicker candidates={candidates} locations={locations} departments={departments}
+          onClose={() => setModal(null)} onPick={id => { onUpdate(id, { locationId }); setModal(null) }} />
       )}
+      {/* `existing` powers the modal's duplicate check (email/phone/mobile) and the
+          "replace the current primary?" question — it needs the customer's WHOLE
+          contact list, not just the ones at this location, because both rules are
+          scoped per customer on the backend. */}
       {modal === 'add' && (
         <AddContactPersonModal
           locations={locations} departments={departments} statuses={statuses} lockLocationId={locationId} customerName={locationName}
-          onCreate={onAdd} onClose={() => setModal(null)}
+          existing={contacts} onCreate={onAdd} onClose={() => setModal(null)}
         />
       )}
       {modal && modal !== 'add' && modal !== 'couple' && (
         <AddContactPersonModal
           initial={modal} locations={locations} departments={departments} statuses={statuses}
+          existing={contacts}
           onCreate={payload => onUpdate(modal.id as Id, payload)}
           onClose={() => setModal(null)}
         />

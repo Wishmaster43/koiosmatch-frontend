@@ -14,13 +14,30 @@
  * create-modal exactly. The location/department pickers become searchable
  * CreatableSelects (allowCreate={false} — both are real relational ids, never a
  * free-text create), same as every other relational picker in the app.
+ *
+ * Danny 28-07 fixes: (1) locking the location (adding "at this location") used to
+ * hide the WHOLE row2 block, taking the department picker down with it — the
+ * department field now always renders, only the location field is conditional.
+ * (2) "Primair contact" is now the shared `Toggle` (never a raw checkbox, house
+ * rule) and asks via `useConfirm` before silently demoting whichever OTHER contact
+ * currently holds the flag — the backend allows exactly one primary per customer
+ * and demotes the previous one without asking, so the UI must ask first. (3) A
+ * client-side duplicate check on email/phone/mobile (scoped to this customer's
+ * OTHER contacts, via the new `existing` prop) blocks submit and explains why,
+ * instead of letting the server's 422 be the first the user hears of it. (4) The
+ * CreatableSelect trigger boxes (role/location/department/status) get an explicit
+ * style override so they render at the exact same height/width as the TextField
+ * siblings sharing their grid row — mirrors the identical fix already applied in
+ * `pages/candidates/addmodal/fields.tsx` for the same trigger-vs-input mismatch.
  */
 import { useState } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useConfirm } from '@/hooks/useConfirm'
 import { useTranslation } from 'react-i18next'
 import { X, Users } from 'lucide-react'
-import { Field, TextField, CheckboxField } from '@/components/forms/fields'
+import { Field, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import Toggle from '@/components/ui/Toggle'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
@@ -31,6 +48,21 @@ import type { Id, LookupOption } from '@/types/common'
 
 interface OptionRow { id: Id; name: string }
 
+// Matches the TextField input footprint exactly (padding/font-size/radius) — the
+// CreatableSelect trigger otherwise renders smaller (6px/12px vs 8px/13px), the
+// same mismatch already fixed once in `pages/candidates/addmodal/fields.tsx`.
+const CREATABLE_STYLE = { padding: '8px 11px', borderRadius: 8, fontSize: 13 }
+
+// Normalize an email for duplicate comparison — trimmed, case-insensitive; empty never matches.
+const normalizeEmail = (v: string) => v.trim().toLowerCase()
+// Normalize a phone/mobile number for duplicate comparison — digits only, so
+// punctuation/spacing differences ("010-522 97 18" vs "0105229718") don't hide a
+// real collision. This is a plain digit-strip, not an international-format
+// normalization — "+31 10 522 97 18" and "0105229718" are NOT folded into the
+// same value (no country-code/leading-zero equivalence), matching the backend's
+// own plain-string check; empty never matches.
+const normalizeDigits = (v: string) => String(v ?? '').replace(/\D/g, '')
+
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
   first_name: 'firstName', last_name: 'lastName', email: 'email', phone: 'phone', mobile: 'mobile',
@@ -38,8 +70,15 @@ const API_TO_FORM: Record<string, string> = {
   status_id: 'statusId', is_primary: 'isPrimary',
 }
 
+// Duplicate/server message line under email·phone·mobile — the client-side
+// duplicate message wins over the server's own message when both exist (same collision).
+function FieldError({ text }: { text?: string }) {
+  if (!text) return null
+  return <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger)' }}>{text}</div>
+}
+
 export default function AddContactPersonModal({
-  onClose, onCreate, customerName, locations = [], departments = [], statuses = [], initial, lockLocationId,
+  onClose, onCreate, customerName, locations = [], departments = [], statuses = [], initial, lockLocationId, existing = [],
 }: {
   onClose: () => void
   onCreate?: (v: ContactPayload) => void
@@ -49,9 +88,13 @@ export default function AddContactPersonModal({
   statuses?: LookupOption[]
   initial?: Contact | null
   lockLocationId?: Id
+  // The customer's OTHER already-loaded contacts — drives the primary-replace
+  // confirmation and the email/phone/mobile duplicate check below.
+  existing?: Contact[]
 }) {
   const { t } = useTranslation(['customers', 'common'])
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
+  const { confirm, dialog } = useConfirm()
   const isEdit = Boolean(initial)
   // Contact function (job title) is a lookup combobox, split from the candidate
   // function list (FUNCTIONS-SPLIT-1) — never a plain free-text field.
@@ -70,17 +113,58 @@ export default function AddContactPersonModal({
     customFields: initial?.customFields ?? {},
   })
   const [errors, setErrors] = useState<Record<string, boolean>>({})
+  // The server's own per-field message (first one, when it sends one) — shown
+  // under the field alongside the red border instead of being thrown away.
+  const [fieldMessages, setFieldMessages] = useState<Record<string, string>>({})
   // Non-field 422/generic failure — only reachable on the CREATE path (see submit()).
   const [createError, setCreateError] = useState<string | null>(null)
   const set = <K extends keyof ContactPayload>(k: K, v: ContactPayload[K]) => {
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
+    if (fieldMessages[k]) setFieldMessages(m => ({ ...m, [k]: '' }))
     setCreateError(null)
   }
+
+  // The contact who currently holds the primary flag (excluding the one being
+  // edited, so re-saving the already-primary contact never prompts).
+  const currentPrimary = existing.find(c => c.isPrimary && String(c.id) !== String(initial?.id))
+  // Turning the toggle ON while someone else is primary asks first — the backend
+  // silently demotes the previous primary, so the UI must not do that silently too.
+  // Turning it OFF never asks.
+  const handlePrimaryToggle = (v: boolean) => {
+    if (v && currentPrimary) {
+      confirm(t('subModal.primaryReplace.body', { name: currentPrimary.name }), () => set('isPrimary', true), {
+        title: t('subModal.primaryReplace.title'),
+        confirmLabel: t('subModal.primaryReplace.confirm'),
+        cancelLabel: t('subModal.primaryReplace.decline', { name: currentPrimary.name }),
+      })
+      return
+    }
+    set('isPrimary', v)
+  }
+
+  // Find another contact of this customer that already has the same email/phone/
+  // mobile value — scoped per field (phone only collides with phone, mobile only
+  // with mobile), never cross-field, mirroring the backend's own check.
+  const findDuplicate = (value: string, field: 'email' | 'phone' | 'mobile') => {
+    const normalize = field === 'email' ? normalizeEmail : normalizeDigits
+    const target = normalize(value)
+    if (!target) return undefined
+    return existing.find(c => String(c.id) !== String(initial?.id) && normalize(c[field]) === target)
+  }
+  const emailDup = findDuplicate(form.email, 'email')
+  const phoneDup = findDuplicate(form.phone, 'phone')
+  const mobileDup = findDuplicate(form.mobile, 'mobile')
 
   const submit = async () => {
     if (!form.firstName.trim() || !form.lastName.trim()) {
       setErrors({ firstName: !form.firstName.trim(), lastName: !form.lastName.trim() })
+      return
+    }
+    // Client-side duplicate guard — block submit before the server rejects the
+    // same collision with a 422; the messages already render live under the fields.
+    if (emailDup || phoneDup || mobileDup) {
+      setErrors(e => ({ ...e, email: !!emailDup, phone: !!phoneDup, mobile: !!mobileDup }))
       return
     }
     const payload = { ...form, firstName: form.firstName.trim(), lastName: form.lastName.trim() }
@@ -97,15 +181,23 @@ export default function AddContactPersonModal({
       const apiErrors = e?.response?.data?.errors
       if (apiErrors) {
         const e2: Record<string, boolean> = {}
-        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
+        const m2: Record<string, string> = {}
+        Object.entries(apiErrors).forEach(([k, v]) => {
+          const field = API_TO_FORM[k] ?? k
+          e2[field] = true
+          // Laravel 422 payloads carry an array of messages per field — keep the first.
+          const msg = Array.isArray(v) ? v[0] : v
+          if (typeof msg === 'string') m2[field] = msg
+        })
         setErrors(e2)
+        setFieldMessages(m2)
       } else {
         setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
       }
     }
   }
 
-  const canSubmit = !!form.firstName.trim() && !!form.lastName.trim()
+  const canSubmit = !!form.firstName.trim() && !!form.lastName.trim() && !emailDup && !phoneDup && !mobileDup
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
   // Department options stay EMPTY until a location is picked — mirrors AddShiftModal's
   // customer->department cascade (PLAN-LOOKUP-1). Never fall back to "every department
@@ -165,7 +257,7 @@ export default function AddContactPersonModal({
               <div style={row2}>
                 <Field label={t('subModal.role')}>
                   <CreatableSelect value={form.role} onChange={v => set('role', v)} options={contactFunctions}
-                    allowCreate={allowFreeEntry} placeholder={t('common:select')} />
+                    allowCreate={allowFreeEntry} placeholder={t('common:select')} style={CREATABLE_STYLE} />
                 </Field>
                 <div />
               </div>
@@ -177,9 +269,24 @@ export default function AddContactPersonModal({
             <div style={cardHead}>{t('subModal.groups.contactInfo')}</div>
             <div style={cardBox}>
               <div style={row3Even}>
-                <Field label={t('subModal.email')}><TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder="naam@klant.nl" /></Field>
-                <Field label={t('subModal.phone')}><TextField value={form.phone} onChange={v => set('phone', v)} /></Field>
-                <Field label={t('subModal.mobile')}><TextField value={form.mobile} onChange={v => set('mobile', v)} /></Field>
+                <div>
+                  <Field label={t('subModal.email')}>
+                    <TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder="naam@klant.nl" error={!!emailDup || errors.email} />
+                  </Field>
+                  <FieldError text={emailDup ? t('subModal.duplicate.email', { name: emailDup.name }) : fieldMessages.email} />
+                </div>
+                <div>
+                  <Field label={t('subModal.phone')}>
+                    <TextField value={form.phone} onChange={v => set('phone', v)} error={!!phoneDup || errors.phone} />
+                  </Field>
+                  <FieldError text={phoneDup ? t('subModal.duplicate.phone', { name: phoneDup.name }) : fieldMessages.phone} />
+                </div>
+                <div>
+                  <Field label={t('subModal.mobile')}>
+                    <TextField value={form.mobile} onChange={v => set('mobile', v)} error={!!mobileDup || errors.mobile} />
+                  </Field>
+                  <FieldError text={mobileDup ? t('subModal.duplicate.mobile', { name: mobileDup.name }) : fieldMessages.mobile} />
+                </div>
               </div>
             </div>
           </div>
@@ -189,29 +296,37 @@ export default function AddContactPersonModal({
           <div>
             <div style={cardHead}>{t('subModal.groups.link')}</div>
             <div style={cardBox}>
-              {showLocationPicker && (
-                <div style={row2}>
+              {/* Location is only picked here at the top-level Contactpersonen tab —
+                  `lockLocationId` (adding "at this location") hides ONLY this field.
+                  The department field always renders in the same row2 grid so widths
+                  stay identical either way: locked -> [department, empty cell],
+                  unlocked -> [location, department] — mirrors the Function row above. */}
+              <div style={row2}>
+                {showLocationPicker && (
                   <Field label={t('subModal.selectLocation')}>
                     <CreatableSelect value={form.locationId ? String(form.locationId) : null} allowCreate={false}
                       onChange={v => { set('locationId', v || null); set('departmentId', null) }}
-                      placeholder={t('subModal.noneOption')} options={locations.map(l => ({ value: String(l.id), label: l.name }))} />
+                      placeholder={t('subModal.noneOption')} options={locations.map(l => ({ value: String(l.id), label: l.name }))}
+                      style={CREATABLE_STYLE} />
                   </Field>
-                  <Field label={t('subModal.selectDepartment')}>
-                    <CreatableSelect value={form.departmentId ? String(form.departmentId) : null} allowCreate={false}
-                      onChange={v => set('departmentId', v || null)}
-                      placeholder={departmentPlaceholder} options={departmentOptions} />
-                  </Field>
-                </div>
-              )}
+                )}
+                <Field label={t('subModal.selectDepartment')}>
+                  <CreatableSelect value={form.departmentId ? String(form.departmentId) : null} allowCreate={false}
+                    onChange={v => set('departmentId', v || null)}
+                    placeholder={departmentPlaceholder} options={departmentOptions} style={CREATABLE_STYLE} />
+                </Field>
+                {!showLocationPicker && <div />}
+              </div>
               <div style={{ ...row2, alignItems: 'end' }}>
                 <Field label={t('subModal.status')}>
                   <CreatableSelect value={form.statusId ? String(form.statusId) : null} allowCreate={false}
-                    onChange={v => set('statusId', v || null)} placeholder={t('subModal.selectStatus')} options={statusOptions} />
+                    onChange={v => set('statusId', v || null)} placeholder={t('subModal.selectStatus')} options={statusOptions}
+                    style={CREATABLE_STYLE} />
                 </Field>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 7, paddingBottom: 8 }}>
-                  <CheckboxField checked={form.isPrimary} onChange={v => set('isPrimary', v)} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7, paddingBottom: 8 }}>
+                  <Toggle checked={form.isPrimary} onChange={handlePrimaryToggle} ariaLabel={t('subModal.isPrimary')} />
                   <span style={{ fontSize: 12, color: 'var(--text)' }}>{t('subModal.isPrimary')}</span>
-                </label>
+                </div>
               </div>
             </div>
           </div>
@@ -234,6 +349,7 @@ export default function AddContactPersonModal({
           </button>
         </div>
       </div>
+      {dialog}
     </div>
   )
 }

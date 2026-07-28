@@ -38,6 +38,12 @@ export interface Contact {
   status: string
   statusLabel: string
   statusColor: string
+  // `customer_contacts.last_contact_at` — always null today: CustomerContactResource
+  // does not expose it yet (backend ticket filed); wired here so it lights up the
+  // moment the resource sends it.
+  lastContactAt: string | null
+  // `customer_contacts.last_contact_type` — same gap as lastContactAt above.
+  lastContactType: string | null
   customFields: Record<string, unknown>
 }
 
@@ -193,6 +199,8 @@ export interface ApiContact {
   locations?: { id?: Id; name?: string }[]
   departments?: { id?: Id; name?: string }[]
   status?: ApiStatusRef | null; status_id?: Id | null
+  // Not yet sent by CustomerContactResource (see the Contact interface comment above).
+  last_contact_at?: string | null; last_contact_type?: string | null
   custom_fields?: Record<string, unknown>
   // EXTRACT-1: the shared raw shape (src/lib/backofficeLink).
   backoffice_links?: ApiBackofficeLink[]

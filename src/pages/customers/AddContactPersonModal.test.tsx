@@ -9,6 +9,14 @@
  * the department picker must CASCADE off the picked location, mirroring
  * AddShiftModal's customer->department dependent picker — see the block below
  * covering that narrowing/reset/submit behaviour.
+ *
+ * Danny 28-07: three more cases. (1) locking the location (adding "at this
+ * location") must hide ONLY the location picker, never the department picker
+ * alongside it. (2) the "primair contact" toggle asks via the shared confirm
+ * dialog before replacing whichever OTHER contact currently holds the flag.
+ * (3) a client-side duplicate check on email/phone/mobile (scoped to the
+ * customer's OTHER contacts via the new `existing` prop) blocks submit before
+ * the server's 422 would.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -38,6 +46,18 @@ const dept = (id: string, name: string, locationId: string): Department => ({
   contacts: [], costCenter: '', statusId: null, status: '', statusLabel: '', statusColor: '', customFields: {},
 })
 const departments = [dept('dep-1', 'Verpleging', 'loc-1'), dept('dep-2', 'Thuiszorg', 'loc-2')]
+
+// Minimal-but-type-complete Contact fixture for the `existing` prop (the customer's
+// OTHER already-loaded contacts) — drives the primary-replace confirm and the
+// email/phone/mobile duplicate check.
+const contact = (overrides: Partial<Contact>): Contact => ({
+  id: 'c-other', helloflexLink: null, shiftmanagerLink: null, firstName: 'Anna', lastName: 'Bakker', name: 'Anna Bakker',
+  role: '', email: '', phone: '', mobile: '', isPrimary: false,
+  locationId: null, locationName: '', departmentId: null, departmentName: '',
+  locations: [], departments: [], statusId: null, status: '', statusLabel: '', statusColor: '', customFields: {},
+  lastContactAt: null, lastContactType: null,
+  ...overrides,
+})
 
 describe('AddContactPersonModal', () => {
   it('blocks submit while first/last name are empty and shows the required message', async () => {
@@ -170,10 +190,121 @@ describe('AddContactPersonModal', () => {
       role: '', email: '', phone: '', mobile: '', isPrimary: false,
       locationId: null, locationName: '', departmentId: 'dep-1', departmentName: 'Verpleging',
       locations: [], departments: [], statusId: null, status: '', statusLabel: '', statusColor: '', customFields: {},
+      lastContactAt: null, lastContactType: null,
     } as Contact
 
     render(<AddContactPersonModal onClose={() => {}} onCreate={vi.fn()} locations={locations} departments={departments} statuses={statuses} initial={initial} />)
 
     expect(screen.getByRole('button', { name: ct('subModal.selectDepartment') })).toHaveTextContent('Verpleging')
+  })
+
+  it('locking the location (adding "at this location") hides only the location picker — department still renders and cascades', async () => {
+    const onCreate = vi.fn()
+    const user = userEvent.setup()
+    render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} departments={departments} statuses={statuses} lockLocationId="loc-1" />)
+
+    // Location is pre-filled/hidden; department must still be pickable and already
+    // scoped to loc-1 (the location departmentsForLocation cascade off form.locationId).
+    expect(screen.queryByRole('button', { name: ct('subModal.selectLocation') })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: ct('subModal.selectDepartment') }))
+    expect(screen.getByRole('button', { name: 'Verpleging' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Thuiszorg' })).not.toBeInTheDocument()
+  })
+
+  it('toggling "primair" ON while another contact is already primary asks first — confirming turns it on', async () => {
+    const onCreate = vi.fn()
+    const user = userEvent.setup()
+    const existing = [contact({ id: 'c-primary', name: 'Anna Bakker', isPrimary: true })]
+    render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} existing={existing} />)
+
+    const toggle = screen.getByRole('switch', { name: ct('subModal.isPrimary') })
+    expect(toggle).toHaveAttribute('aria-checked', 'false')
+
+    await user.click(toggle)
+    // Staged, not yet applied — the toggle must not flip before the user confirms.
+    expect(toggle).toHaveAttribute('aria-checked', 'false')
+    expect(screen.getByText(ct('subModal.primaryReplace.title'))).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: ct('subModal.primaryReplace.confirm') }))
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
+  })
+
+  it('cancelling the primary-replace confirmation leaves the toggle off and changes nothing else', async () => {
+    const onCreate = vi.fn()
+    const user = userEvent.setup()
+    const existing = [contact({ id: 'c-primary', name: 'Anna Bakker', isPrimary: true })]
+    render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} existing={existing} />)
+
+    const toggle = screen.getByRole('switch', { name: ct('subModal.isPrimary') })
+    await user.click(toggle)
+    await user.click(screen.getByRole('button', { name: ct('subModal.primaryReplace.decline', { name: 'Anna Bakker' }) }))
+
+    expect(toggle).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('editing the contact that is ALREADY primary never prompts on save', async () => {
+    const onCreate = vi.fn()
+    const user = userEvent.setup()
+    // Same id as `initial` — must be excluded from the "someone else is primary" check.
+    const initial = contact({ id: 'c-self', name: 'Jan Jansen', firstName: 'Jan', lastName: 'Jansen', isPrimary: true })
+    const existing = [initial]
+    render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} initial={initial} existing={existing} />)
+
+    const toggle = screen.getByRole('switch', { name: ct('subModal.isPrimary') })
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
+    // Toggling off and back on for the already-primary contact must never prompt.
+    await user.click(toggle)
+    await user.click(toggle)
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
+    expect(screen.queryByText(ct('subModal.primaryReplace.title'))).not.toBeInTheDocument()
+  })
+
+  it('typing an email that another contact already has shows the duplicate message and blocks submit', async () => {
+    const onCreate = vi.fn()
+    const user = userEvent.setup()
+    const existing = [contact({ id: 'c-other', name: 'Anna Bakker', email: 'anna@klant.nl' })]
+    render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} existing={existing} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText(ct('subModal.lastName'), { exact: false }), 'Jansen')
+    await user.type(screen.getByLabelText(ct('subModal.email'), { exact: false }), 'anna@klant.nl')
+
+    expect(screen.getByText(ct('subModal.duplicate.email', { name: 'Anna Bakker' }))).toBeInTheDocument()
+    const createBtn = screen.getByRole('button', { name: ct('subModal.create') })
+    expect(createBtn).toBeDisabled()
+
+    await user.click(createBtn)
+    expect(onCreate).not.toHaveBeenCalled()
+  })
+
+  it('a phone duplicate is detected on digits only, ignoring punctuation/spacing differences', async () => {
+    const onCreate = vi.fn()
+    const user = userEvent.setup()
+    // Same digits as the typed value below, just formatted with a dash/spaces —
+    // the digit-only compare must still catch it (a plain string compare would not).
+    const existing = [contact({ id: 'c-other', name: 'Anna Bakker', phone: '010-522 97 18' })]
+    render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} existing={existing} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText(ct('subModal.lastName'), { exact: false }), 'Jansen')
+    await user.type(screen.getByLabelText(ct('subModal.phone'), { exact: false }), '0105229718')
+
+    expect(screen.getByText(ct('subModal.duplicate.phone', { name: 'Anna Bakker' }))).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: ct('subModal.create') })).toBeDisabled()
+  })
+
+  it('an international-format phone is NOT folded to the same value as a domestic one (plain digit-strip, no country-code normalization)', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    const existing = [contact({ id: 'c-other', name: 'Anna Bakker', phone: '+31 10 522 97 18' })]
+    render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} existing={existing} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText(ct('subModal.lastName'), { exact: false }), 'Jansen')
+    await user.type(screen.getByLabelText(ct('subModal.phone'), { exact: false }), '0105229718')
+
+    // "31105229718" (stripped) !== "0105229718" (stripped) — no duplicate, submit stays enabled.
+    expect(screen.queryByText(ct('subModal.duplicate.phone', { name: 'Anna Bakker' }))).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: ct('subModal.create') })).not.toBeDisabled()
   })
 })

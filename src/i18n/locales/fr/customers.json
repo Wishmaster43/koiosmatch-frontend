@@ -185,7 +185,10 @@
       "deleteLocation": "Supprimer le site",
       "confirmDelete": "Supprimer ce site ? Les services et contacts liés restent mais sont déliés.",
       "openKvk": "Ouvrir dans le registre",
-      "openVies": "Vérifier dans VIES (UE)"
+      "openVies": "Vérifier dans VIES (UE)",
+      "pickContactSearch": "Rechercher par nom, fonction ou e-mail",
+      "pickContactLinks": "Actuellement lié à",
+      "pickContactNoLinks": "Pas encore lié"
     },
     "saveFailed": "L'enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
@@ -228,7 +231,10 @@
       "department": "Service",
       "role": "Fonction",
       "email": "E-mail",
-      "phone": "Téléphone"
+      "phone": "Téléphone",
+      "status": "Statut",
+      "mobile": "Mobile",
+      "lastContact": "Dernier contact"
     },
     "detail": {
       "infoTitle": "Contact",
@@ -245,13 +251,24 @@
       "department": "Service",
       "none": "Non renseigné",
       "subtabs": {
-        "data": "Détails"
+        "data": "Détails",
+        "tasks": "Tâches"
       }
     },
     "deleteConfirm": "Supprimer ce contact ?",
     "saveFailed": "L'enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
-    "deleteInUse": "Suppression impossible — ce contact est encore utilisé."
+    "deleteInUse": "Suppression impossible — ce contact est encore utilisé.",
+    "primaryChip": "Principal",
+    "tasks": {
+      "newTask": "Nouvelle tâche",
+      "open": "Ouvertes",
+      "history": "Historique",
+      "empty": "Aucune tâche pour ce contact",
+      "loading": "Chargement des tâches…",
+      "error": "Impossible de charger les tâches",
+      "openTask": "Ouvrir la tâche"
+    }
   },
   "vacancies": {
     "empty": "Aucun poste pour ce client.",
@@ -474,7 +491,18 @@
     "create": "Ajouter",
     "save": "Enregistrer",
     "cancel": "Annuler",
-    "required": "Champ obligatoire"
+    "required": "Champ obligatoire",
+    "duplicate": {
+      "email": "Existe déjà : {{name}} a cette adresse e-mail",
+      "phone": "Existe déjà : {{name}} a ce numéro de téléphone",
+      "mobile": "Existe déjà : {{name}} a ce numéro de mobile"
+    },
+    "primaryReplace": {
+      "title": "Remplacer le contact principal ?",
+      "body": "{{name}} est actuellement le contact principal de ce client. Le remplacer ?",
+      "confirm": "Oui, remplacer",
+      "decline": "Non, garder {{name}} comme principal"
+    }
   },
   "changelog": {
     "empty": "Aucun changement pour le moment."

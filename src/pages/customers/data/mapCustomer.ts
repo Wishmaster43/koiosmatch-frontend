@@ -80,6 +80,10 @@ export function mapContact(p: ApiContact = {}): Contact {
     departments,
     statusId: p.status_id ?? null,
     ...mapStatusRef(p.status),
+    // Mirrors mapCandidate's identical pair — CustomerContactResource doesn't send
+    // these yet, so this always resolves to null today (see the Contact type comment).
+    lastContactAt: p.last_contact_at ?? null,
+    lastContactType: p.last_contact_type ?? null,
     customFields: p.custom_fields ?? {},
   }
 }

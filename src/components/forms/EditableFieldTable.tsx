@@ -13,7 +13,8 @@ import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
-import { CheckboxField, DateField } from './fields'
+import { DateField } from './fields'
+import Toggle from '@/components/ui/Toggle'
 import { useDateFormat } from '@/lib/datetime'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import type { ChipOption } from '@/components/ui/ChipMultiSelect'
@@ -132,7 +133,10 @@ export default function EditableFieldTable({
 
   const renderControl = (f: FieldRow) => {
     const v = form[f.key]
-    if (f.type === 'checkbox') return <CheckboxField checked={Boolean(v)} onChange={val => setF(f.key, val)} />
+    // A boolean field is a TOGGLE, never a tick box (Danny: "GEEN VINKJES MAAR
+    // TOGGLES!!", repeated 28-07 for the primary-contact flag). One shared switch, so
+    // every boolean in every drawer reads the same.
+    if (f.type === 'checkbox') return <Toggle checked={Boolean(v)} onChange={val => setF(f.key, val)} ariaLabel={typeof f.label === 'string' ? f.label : undefined} />
     // Every drawer picker is SEARCHABLE (Danny 28-07: "status/land/provincie is geen
     // zoekbare dropdown"). This one line covers status, land, provincie, branche and
     // vestiging on every entity that uses this table — a native <select> forces you to
@@ -186,7 +190,7 @@ export default function EditableFieldTable({
 
   const renderValue = (f: FieldRow) => {
     const v = saved[f.key]
-    if (f.type === 'checkbox') return <CheckboxField checked={Boolean(v)} disabled onChange={() => {}} />
+    if (f.type === 'checkbox') return <Toggle checked={Boolean(v)} disabled onChange={() => {}} ariaLabel={typeof f.label === 'string' ? f.label : undefined} />
     // Dates render as DD-MM-YYYY in read mode (the edit control already is).
     if (f.type === 'date') return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{v ? formatDate(v as string) : '-'}</span>
     // Chips read as soft accent chips (consistent with the Candidate-type chips),

@@ -38,6 +38,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
+import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -50,11 +51,13 @@ const inputStyle: CSSProperties = { width: '100%', padding: '7px 10px', fontSize
 const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
 const cardStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
 
-export default function ContactDetail({ contact, locations, departments, statuses, canLinkBackoffice = false, onSave, onDelete, close }: {
+export default function ContactDetail({ contact, locations, departments, statuses, existing = [], canLinkBackoffice = false, onSave, onDelete, close }: {
   contact: Contact
   locations: { id: Id; name: string }[]
   departments: Department[]
   statuses: LookupOption[]
+  /** The customer's OTHER contacts — needed to spot the current primary before replacing it. */
+  existing?: Contact[]
   // EXTRACT-1: the caller's own customers.update permission check for the
   // Koppelingen sub-tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
   canLinkBackoffice?: boolean
@@ -67,7 +70,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
   const [editing, setEditing] = useState(false)
   // The Extra sub-tab only shows when the tenant has defined customer_contact custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer_contact')
-  const [subTab, setSubTab] = useState<'data' | 'extra' | 'koppelingen'>('data')
+  const [subTab, setSubTab] = useState<'data' | 'tasks' | 'extra' | 'koppelingen'>('data')
   // Contact function (job title) is a lookup combobox, split from the candidate
   // function list (FUNCTIONS-SPLIT-1) — never a plain free-text field.
   const { contactFunctions, allowFreeEntry } = useContactFunctions()
@@ -93,14 +96,32 @@ export default function ContactDetail({ contact, locations, departments, statuse
     isPrimary: contact.isPrimary,
   }
 
+  // The customer's current primary, if it is someone else — the backend silently
+  // demotes them when this contact is saved as primary, so we ask first.
+  const currentPrimary = existing.find(c => c.isPrimary && String(c.id) !== String(contact.id))
+
   const save = (v: Record<string, unknown>) => {
-    onSave(contact.id as Id, {
-      firstName: v.firstName as string, lastName: v.lastName as string,
-      role: v.role as string, email: v.email as string,
-      statusId: (v.statusId as string) || null,
-      isPrimary: Boolean(v.isPrimary),
-    })
-    setEditing(false)
+    const commit = (isPrimary: boolean) => {
+      onSave(contact.id as Id, {
+        firstName: v.firstName as string, lastName: v.lastName as string,
+        role: v.role as string, email: v.email as string,
+        statusId: (v.statusId as string) || null,
+        isPrimary,
+      })
+      setEditing(false)
+    }
+    // Promoting this contact to primary takes the flag away from someone else — never
+    // silently. Declining saves the rest of the edit and leaves the other one primary.
+    if (Boolean(v.isPrimary) && !contact.isPrimary && currentPrimary) {
+      confirm(t('subModal.primaryReplace.body', { name: currentPrimary.name }), () => commit(true), {
+        title: t('subModal.primaryReplace.title'),
+        confirmLabel: t('subModal.primaryReplace.confirm'),
+        cancelLabel: t('subModal.primaryReplace.decline', { name: currentPrimary.name }),
+        onCancel: () => commit(false),
+      })
+      return
+    }
+    commit(Boolean(v.isPrimary))
   }
 
   const remove = () => confirm(t('contacts.deleteConfirm'), () => { onDelete(contact.id as Id); close() }, { danger: true })
@@ -205,6 +226,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
       <SubTabBar
         tabs={[
           { id: 'data',  label: t('contacts.detail.subtabs.data') },
+          { id: 'tasks', label: t('contacts.detail.subtabs.tasks') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
           { id: 'koppelingen', label: t('common:backofficeLinks.tabLabel') },
         ]}
@@ -273,6 +295,24 @@ export default function ContactDetail({ contact, locations, departments, statuse
             </div>
           </div>
         </>
+      )}
+
+      {/* Taken — the tasks linked to THIS contact (Danny 28-07: "we willen hierop ook
+          … taken hebben op de klant en gelinkt aan contactpersoon"). Reads the generic
+          GET /tasks?contact={id} filter, which only started working on 28-07
+          (TASKS-LINK-FILTER-1); before that the filter was silently ignored and the
+          list would have shown every task in the tenant. Shared component — the
+          opportunity drawer renders the exact same body. */}
+      {subTab === 'tasks' && (
+        <EntityTasksTab
+          linkType="contact"
+          id={contact.id}
+          labels={{
+            newTask: t('contacts.tasks.newTask'), open: t('contacts.tasks.open'), history: t('contacts.tasks.history'),
+            empty: t('contacts.tasks.empty'), loading: t('contacts.tasks.loading'), error: t('contacts.tasks.error'),
+            openTask: t('contacts.tasks.openTask'),
+          }}
+        />
       )}
 
       {subTab === 'extra' && customFieldDefs.length > 0 && (

@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Check, RefreshCw, Save } from 'lucide-react'
 import { ColorSwatch } from './SettingsControls'
 import { SettingsDirtyContext } from '../lib/settingsDirty'
+import ToggleUi from '@/components/ui/Toggle'
 
 const CARD = {
   background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
@@ -102,18 +103,9 @@ export function SettingRow({ label, description, children }) {
 // switch is NOT already the button's sole accessible name (e.g. a wrapping
 // <label> that also contains a longer description) — see CandidateVacancyTabSettings'
 // leads-criteria rows, which had this same override on the raw checkbox they replace.
-export function Toggle({ checked, onChange, ariaLabel }) {
-  return (
-    <button type="button" role="switch" aria-checked={checked} aria-label={ariaLabel} onClick={() => onChange(!checked)}
-      style={{ width: 32, height: 18, borderRadius: 999, border: 'none', cursor: 'pointer',
-               background: checked ? 'var(--color-primary)' : 'var(--border)', position: 'relative',
-               transition: 'background 0.15s', flexShrink: 0 }}>
-      <div style={{ position: 'absolute', top: 2, left: checked ? 16 : 2, width: 14, height: 14,
-                    borderRadius: '50%', background: 'var(--surface)', transition: 'left 0.15s',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
-    </button>
-  )
-}
+// Re-exported from `components/ui/Toggle` (the promoted shared component) so every
+// existing `import { Toggle } from '.../SettingsKit'` call site keeps working unchanged.
+export const Toggle = ToggleUi
 
 const inputStyle = {
   height: 34, padding: '0 10px', fontSize: 14, color: 'var(--text)',
