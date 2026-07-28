@@ -57,6 +57,10 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const isEdit = Boolean(initial)
   const [form, setForm] = useState<LocationPayload>({
+    // LOCATIE-VESTIGING-1: a site starts with NO deviation, so it inherits the customer's
+    // branches. Editing keeps whatever deviation it already had — the Vestiging block in
+    // the drill-down is where that is changed, never here.
+    branchIds: initial?.branchIds ?? [],
     name: initial?.name ?? '',
     street: initial?.street ?? '',
     houseNumber: initial?.houseNumber ?? '',

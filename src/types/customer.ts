@@ -16,6 +16,10 @@ export interface Contact {
   helloflexLink: BackofficeLink | null
   shiftmanagerLink: BackofficeLink | null
   firstName: string
+  // CONTACT-TUSSENVOEGSEL-1: the Dutch tussenvoegsel, same field the candidate has. The
+  // backend composes `name` from first + middle + last; without this the FE PATCHed a
+  // name with the tussenvoegsel missing and the stored value was quietly destroyed.
+  middleName: string
   lastName: string
   name: string
   role: string
@@ -93,6 +97,14 @@ export interface Location {
   contactName: string
   phone: string
   email: string
+  // LOCATIE-VESTIGING-1: this site's OWN branch couplings. EMPTY is meaningful — it means
+  // "no deviation", so the site inherits the customer's set and the customer stays the one
+  // source of truth. `branchInherited` says which of the two you are looking at, and
+  // `effectiveBranches` is what the site actually works under (derived, never stored).
+  branchIds: Id[]
+  branches: { id: Id; name: string }[]
+  branchInherited: boolean
+  effectiveBranches: { id: Id; name: string }[]
   // PDOK coordinates — customer_locations.lat/lng, float-cast by CustomerLocationResource.
   // There is no per-location re-geocode route yet, so these are read-only in the UI.
   lat: number | null
@@ -207,7 +219,7 @@ export interface ApiStatusRef { value?: string; label?: string; color?: string }
 
 /** Raw API contact (read defensively). CustomerContactResource sends first_name/last_name + a composed `name`. */
 export interface ApiContact {
-  id?: Id; reference_number?: string; first_name?: string; last_name?: string; name?: string; function?: string; role?: string; email?: string; phone?: string
+  id?: Id; reference_number?: string; first_name?: string; middle_name?: string; last_name?: string; name?: string; function?: string; role?: string; email?: string; phone?: string
   // Split from `phone` (BE 2026-07-20): the mobile number (CustomerContactResource `mobile`).
   mobile?: string
   is_primary?: unknown; isPrimary?: unknown
@@ -247,6 +259,8 @@ export interface ApiLocation {
   postcode?: string; postal_code?: string; city?: string; state?: string; country?: string; coc_number?: string; vat_number?: string
   contact_name?: string; phone?: string; email?: string
   cost_center?: string; billing_email?: string
+  branch_ids?: Id[]; branches?: { id?: Id; name?: string }[]
+  branch_inherited?: boolean; effective_branches?: { id?: Id; name?: string }[]
   departments?: ApiDepartment[]; contacts?: ApiContact[]
   status?: ApiStatusRef | null; status_id?: Id | null
   custom_fields?: Record<string, unknown>

@@ -447,7 +447,10 @@
     "contactName": "Ansprechpartner",
     "phone": "Telefon",
     "email": "E-Mail",
-    "mapNoCoords": "Noch keine Standorte mit Koordinaten — geben Sie die Adresse eines Standorts ein, dann erscheint er automatisch auf der Karte."
+    "mapNoCoords": "Noch keine Standorte mit Koordinaten — geben Sie die Adresse eines Standorts ein, dann erscheint er automatisch auf der Karte.",
+    "color": "Farbe",
+    "icon": "Symbol",
+    "colorHint": "Farbe und Symbol machen einen Standort in Listen und auf der Karte erkennbar."
   },
   "memory": {
     "title": "Speicher",
@@ -1013,6 +1016,34 @@
       "customers": {
         "title": "Kunden",
         "desc": "Kundendaten mit Standorten und Ansprechpartnern."
+      },
+      "contacts": {
+        "title": "Kontakte",
+        "desc": "Kontaktpersonen mit Kunde, Standort, Abteilung und Kontaktdaten."
+      },
+      "locations": {
+        "title": "Standorte",
+        "desc": "Kundenstandorte mit Adresse, Registriernummern und Kostenstelle."
+      },
+      "departments": {
+        "title": "Abteilungen",
+        "desc": "Abteilungen mit Standort und Kostenstelle."
+      },
+      "matches": {
+        "title": "Matches",
+        "desc": "Matches mit Kandidat, Stelle, Status und Einsatzdaten."
+      },
+      "tasks": {
+        "title": "Aufgaben",
+        "desc": "Aufgaben mit Status, Priorität, Verantwortlichem und verknüpftem Datensatz."
+      },
+      "opportunities": {
+        "title": "Chancen",
+        "desc": "Chancen mit Phase, Kunde, Wert und Verantwortlichem."
+      },
+      "outreach": {
+        "title": "Anruflisten",
+        "desc": "Anruflisten mit Zielgruppe, Ergebnis und letztem Kontakt."
       }
     }
   },

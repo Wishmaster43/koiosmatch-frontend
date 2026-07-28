@@ -47,7 +47,9 @@ const TABS = [
   { id: 'vacancies',     tKey: 'vacancies' },
   { id: 'opportunities', tKey: 'opportunities' },
   { id: 'planning',      tKey: 'planning' },
-  { id: 'priceAgreements', tKey: 'priceAgreements' },
+  // Danny 28-07: "Prijsafspraken hernoemen naar Financieel, met 2 subtabjes". The tab id
+  // stays `priceAgreements` — it is the deep-link token the count-cells and the URL use.
+  { id: 'priceAgreements', tKey: 'financial' },
   { id: 'documents',     tKey: 'documents' },
   // Communicatie is ONE tab with a sub-tab strip (scope correction, Danny 28-07):
   // Notities · Tijdlijn · Vacaturezichtbaarheid live inside CustomerNotesTab.tsx.

@@ -37,7 +37,9 @@
     "categories": {
       "general": "General",
       "organisation": "Organisation"
-    }
+    },
+    "allStatuses": "All statuses",
+    "statusFilter": "Filter by status"
   },
   "insights": {
     "statusTitle": "Status",
@@ -82,7 +84,9 @@
       "documents": "Documents",
       "notes": "Notes",
       "communication": "Communication",
-      "extra": "Extra"
+      "extra": "Extra",
+      "financial": "Financial",
+      "billing": "Billing"
     },
     "changelog": "Changelog",
     "photoUpload": "Upload logo",
@@ -191,7 +195,13 @@
       "pickContactSearch": "Search by name, role or email",
       "pickContactLinks": "Currently linked to",
       "pickContactNoLinks": "Not linked yet",
-      "coupleNote": "Linking MOVES the contact to this location — it is unlinked from its current one."
+      "coupleNote": "Linking MOVES the contact to this location — it is unlinked from its current one.",
+      "branchTitle": "Branch",
+      "branchInherited": "Follows the customer",
+      "branchOwn": "Set separately",
+      "branchLink": "Link branch",
+      "branchEmpty": "No branch of its own — this location follows the customer.",
+      "branchHint": "Leaving this empty means the location works under the same branches as the customer. Linking one here makes it deviate on purpose."
     },
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",
@@ -262,7 +272,8 @@
         "tasks": "Tasks"
       },
       "linkLocation": "Link location",
-      "linkDepartment": "Link department"
+      "linkDepartment": "Link department",
+      "middleName": "Middle name"
     },
     "deleteConfirm": "Delete this contact?",
     "saveFailed": "Saving failed.",
@@ -292,7 +303,8 @@
     "filter": {
       "status": "Status"
     },
-    "add": "New vacancy"
+    "add": "New vacancy",
+    "searchPlaceholder": "Search vacancy…"
   },
   "opportunities": {
     "title": "Opportunities",
@@ -514,7 +526,8 @@
       "body": "{{name}} is currently the primary contact for this customer. Replace them?",
       "confirm": "Yes, replace",
       "decline": "No, don't replace"
-    }
+    },
+    "middleName": "Middle name"
   },
   "changelog": {
     "empty": "No changes yet."

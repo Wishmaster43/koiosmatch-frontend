@@ -37,7 +37,9 @@
     "categories": {
       "general": "Algemeen",
       "organisation": "Organisatie"
-    }
+    },
+    "allStatuses": "Alle statussen",
+    "statusFilter": "Filter op status"
   },
   "insights": {
     "statusTitle": "Status",
@@ -82,7 +84,9 @@
       "documents": "Documenten",
       "notes": "Notities",
       "communication": "Communicatie",
-      "extra": "Extra"
+      "extra": "Extra",
+      "financial": "Financieel",
+      "billing": "Facturatie"
     },
     "changelog": "Wijzigingen",
     "photoUpload": "Logo uploaden",
@@ -191,7 +195,13 @@
       "pickContactSearch": "Zoek op naam, functie of e-mail",
       "pickContactLinks": "Nu gekoppeld aan",
       "pickContactNoLinks": "Nog geen koppeling",
-      "coupleNote": "Koppelen VERPLAATST de contactpersoon naar deze locatie — hij raakt los van zijn huidige locatie."
+      "coupleNote": "Koppelen VERPLAATST de contactpersoon naar deze locatie — hij raakt los van zijn huidige locatie.",
+      "branchTitle": "Vestiging",
+      "branchInherited": "Volgt de klant",
+      "branchOwn": "Afwijkend ingesteld",
+      "branchLink": "Vestiging koppelen",
+      "branchEmpty": "Nog geen eigen vestiging — deze locatie volgt de klant.",
+      "branchHint": "Leeg laten betekent: deze locatie werkt onder dezelfde vestigingen als de klant. Koppel je er zelf een, dan wijkt deze locatie bewust af."
     },
     "saveFailed": "Opslaan is mislukt.",
     "deleteFailed": "Verwijderen is mislukt.",
@@ -262,7 +272,8 @@
         "tasks": "Taken"
       },
       "linkLocation": "Locatie koppelen",
-      "linkDepartment": "Afdeling koppelen"
+      "linkDepartment": "Afdeling koppelen",
+      "middleName": "Tussenvoegsel"
     },
     "deleteConfirm": "Deze contactpersoon verwijderen?",
     "saveFailed": "Opslaan is mislukt.",
@@ -292,7 +303,8 @@
     "filter": {
       "status": "Status"
     },
-    "add": "Nieuwe vacature"
+    "add": "Nieuwe vacature",
+    "searchPlaceholder": "Zoek vacature…"
   },
   "opportunities": {
     "title": "Kansen",
@@ -514,7 +526,8 @@
       "body": "{{name}} is nu het primaire contact bij deze klant. Wil je die vervangen?",
       "confirm": "Ja, vervangen",
       "decline": "Nee, niet vervangen"
-    }
+    },
+    "middleName": "Tussenvoegsel"
   },
   "changelog": {
     "empty": "Nog geen wijzigingen."

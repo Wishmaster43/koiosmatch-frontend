@@ -2,15 +2,18 @@
  * LocationsSettings — covers the four UI states (loading/error/empty/success), the
  * edit round-trip (house pencil pattern → PATCH /locations/{id}), and the live
  * delete flow (LOC-DELETE-GUARD-FE): a row already flagged `in_use` by the list
- * endpoint stays disabled with a tooltip; an enabled row confirms, DELETEs, and
+ * endpoint stays disabled with a tooltip; an enabled row confirms via the shared
+ * house ConfirmDialog (useConfirm — never native window.confirm), DELETEs, and
  * either drops out of the list (success) or surfaces the backend's per-type
  * `counts` payload as an i18n'd in-use message while the row stays put (409).
- * Also covers VESTIGING-ICON-1: the per-row read-only icon badge (§3 — no
- * icon/colour column exists on `locations`, so this is a deterministic hash,
- * never an editable picker that would silently drop on reload).
+ * Also covers VESTIGING-ICOON-1: `locations.color`/`locations.icon` are real,
+ * persisted columns now — the per-row badge renders them when set and falls back
+ * to the deterministic hash + Building2 glyph only for older rows that have
+ * neither; the add/edit form's ColorSwatch/IconPickerControl ride both fields
+ * along in the create/update payload.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
@@ -25,6 +28,18 @@ vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() })
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
+// The house ConfirmDialog (useConfirm) renders its Confirm/Cancel labels from the
+// 'common' namespace's TOP-LEVEL keys (not settings.json's nested "common" block
+// that `st('common.*')` resolves) — its own helper keeps that distinction honest.
+const ct = (key, opts) => i18n.t(key, { ns: 'common', ...opts })
+
+// Click Delete for a row, then resolve the house confirm dialog it stages
+// (never native window.confirm) by clicking Confirm or Cancel inside it.
+const confirmDelete = async (user, name, { accept = true } = {}) => {
+  await user.click(screen.getByRole('button', { name: st('locations.delete') }))
+  const dialog = await screen.findByRole('dialog', { name: st('locations.confirmDelete', { name }) })
+  await user.click(within(dialog).getByRole('button', { name: accept ? ct('confirm') : ct('cancel') }))
+}
 
 const location = (over = {}) => ({
   id: 'loc1', name: 'Kantoor Rotterdam', street: 'Coolsingel', house_number: '1', house_number_suffix: '',
@@ -67,31 +82,28 @@ describe('LocationsSettings', () => {
     expect(deleteBtn).toBeDisabled()
   })
 
-  it('delete click confirms, DELETEs /locations/{id}, and removes the row on success', async () => {
+  it('delete click confirms via the house dialog, DELETEs /locations/{id}, and removes the row on success', async () => {
     api.get.mockResolvedValue({ data: { data: [location()] } })
     api.delete.mockResolvedValue({})
     const { notifySuccess } = await import('@/lib/notify')
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     const user = userEvent.setup()
     render(<LocationsSettings />)
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
 
-    await user.click(screen.getByRole('button', { name: st('locations.delete') }))
+    await confirmDelete(user, 'Kantoor Rotterdam')
 
-    expect(window.confirm).toHaveBeenCalledWith(st('locations.confirmDelete', { name: 'Kantoor Rotterdam' }))
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/locations/loc1'))
     await waitFor(() => expect(screen.queryByText('Kantoor Rotterdam')).not.toBeInTheDocument())
     expect(notifySuccess).toHaveBeenCalledWith(st('locations.deleteSuccess'))
   })
 
-  it('declining the confirm dialog never calls DELETE', async () => {
+  it('declining the house confirm dialog never calls DELETE', async () => {
     api.get.mockResolvedValue({ data: { data: [location()] } })
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
     const user = userEvent.setup()
     render(<LocationsSettings />)
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
 
-    await user.click(screen.getByRole('button', { name: st('locations.delete') }))
+    await confirmDelete(user, 'Kantoor Rotterdam', { accept: false })
 
     expect(api.delete).not.toHaveBeenCalled()
     expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument()
@@ -101,12 +113,11 @@ describe('LocationsSettings', () => {
     api.get.mockResolvedValue({ data: { data: [location()] } })
     api.delete.mockRejectedValue({ response: { status: 409, data: { in_use: true, counts: { candidates: 3, tasks: 1 } } } })
     const { notifyError } = await import('@/lib/notify')
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     const user = userEvent.setup()
     render(<LocationsSettings />)
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
 
-    await user.click(screen.getByRole('button', { name: st('locations.delete') }))
+    await confirmDelete(user, 'Kantoor Rotterdam')
 
     // The message spells out WHAT is still linked, built from the payload's counts.
     const expectedList = `${st('locations.usage.candidates', { count: 3 })}, ${st('locations.usage.tasks', { count: 1 })}`
@@ -121,12 +132,11 @@ describe('LocationsSettings', () => {
     api.get.mockResolvedValue({ data: { data: [location()] } })
     api.delete.mockRejectedValue(new Error('network down'))
     const { notifyError } = await import('@/lib/notify')
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     const user = userEvent.setup()
     render(<LocationsSettings />)
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
 
-    await user.click(screen.getByRole('button', { name: st('locations.delete') }))
+    await confirmDelete(user, 'Kantoor Rotterdam')
 
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('locations.deleteFailed')))
     expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument()
@@ -189,7 +199,9 @@ describe('LocationsSettings', () => {
     expect(await screen.findByText('Nieuwe vestiging')).toBeInTheDocument()
   })
 
-  it('VESTIGING-ICON-1: each row shows a read-only icon badge tinted by a stable per-name colour hash', async () => {
+  it('VESTIGING-ICOON-1 fallback: a row with no stored colour/icon falls back to the read-only hash badge', async () => {
+    // Neither `location()` factory row sets color/icon — mirrors an older row saved
+    // before these columns existed on `locations`.
     api.get.mockResolvedValue({ data: { data: [location(), location({ id: 'loc2', name: 'Vestiging Utrecht' })] } })
     render(<LocationsSettings />)
     await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
@@ -200,8 +212,8 @@ describe('LocationsSettings', () => {
     const rotterdamBadge = badgeOf('Kantoor Rotterdam')
     const utrechtBadge = badgeOf('Vestiging Utrecht')
 
-    // A real icon renders (identifiability "at a glance"), not just a coloured dot.
-    expect(rotterdamBadge.querySelector('svg')).toBeInTheDocument()
+    // The generic Building2 glyph renders (identifiability "at a glance"), not just a coloured dot.
+    expect(rotterdamBadge.querySelector('svg.lucide-building2')).toBeInTheDocument()
     // Same `avatarColor` hash the rest of the app uses (Avatar / Shiftmanager
     // entities) — 'K'.charCodeAt(0) % 7 = 5 → AVATAR_COLORS[5]; 'V' → index 2.
     // eslint-disable-next-line no-restricted-syntax -- DATA: asserting the exact AVATAR_COLORS[5] palette entry, not an invented UI colour
@@ -210,5 +222,68 @@ describe('LocationsSettings', () => {
     // Two different names must hash to two different colours — that is what makes
     // rows scannable instead of a uniform icon repeated on every row.
     expect(rotterdamBadge.style.background).not.toEqual(utrechtBadge.style.background)
+  })
+
+  it('VESTIGING-ICOON-1: a row WITH a stored colour/icon renders those instead of the hash fallback', async () => {
+    // eslint-disable-next-line no-restricted-syntax -- DATA: mock API row colour, not UI styling
+    api.get.mockResolvedValue({ data: { data: [location({ color: '#059669', icon: 'store' })] } })
+    render(<LocationsSettings />)
+    await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
+
+    const badge = screen.getByText('Kantoor Rotterdam').querySelector('span[aria-hidden="true"]')
+    // The row's OWN colour drives the tint — not the deterministic name hash.
+    // eslint-disable-next-line no-restricted-syntax -- DATA: asserting the exact stored row colour, not an invented UI colour
+    expect(badge).toHaveStyle({ background: 'color-mix(in srgb, #059669 14%, transparent)' })
+    // The row's OWN icon renders — the 'store' slug, not the Building2 fallback.
+    expect(badge.querySelector('svg.lucide-store')).toBeInTheDocument()
+    expect(badge.querySelector('svg.lucide-building2')).not.toBeInTheDocument()
+  })
+
+  it('creating a location rides the chosen icon (and a real colour) along in the POST payload', async () => {
+    api.get.mockResolvedValue({ data: { data: [] } })
+    // eslint-disable-next-line no-restricted-syntax -- DATA: mock API row colour, not UI styling
+    api.post.mockResolvedValue({ data: { data: location({ id: 'loc2', name: 'Nieuwe vestiging', color: '#059669', icon: 'store' }) } })
+    const user = userEvent.setup()
+    render(<LocationsSettings />)
+    await waitFor(() => expect(screen.getByText(st('locations.empty'))).toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: st('locations.create') }))
+    await user.type(screen.getByLabelText(st('locations.nameLabel')), 'Nieuwe vestiging')
+
+    // Open the reused IconPickerControl and pick 'store' instead of the default glyph.
+    const iconLabel = `${st('documentTypes.icon')}: ${st('locations.icon')}`
+    await user.click(screen.getByRole('button', { name: iconLabel }))
+    await user.click(screen.getByRole('menuitem', { name: `${st('documentTypes.icon')}: store` }))
+
+    await user.click(screen.getByRole('button', { name: st('locations.createBtn') }))
+
+    // Assert the REQUEST body — both fields ride along, icon carries the exact pick.
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/locations', expect.objectContaining({
+      name: 'Nieuwe vestiging', icon: 'store', color: expect.any(String),
+    })))
+  })
+
+  it('editing a location rides the chosen colour/icon along in the PATCH payload', async () => {
+    // eslint-disable-next-line no-restricted-syntax -- DATA: mock API row colour, not UI styling
+    api.get.mockResolvedValue({ data: { data: [location({ color: '#059669', icon: 'landmark' })] } })
+    // eslint-disable-next-line no-restricted-syntax -- DATA: mock API row colour, not UI styling
+    api.patch.mockResolvedValue({ data: { data: location({ color: '#059669', icon: 'building' }) } })
+    const user = userEvent.setup()
+    render(<LocationsSettings />)
+    await waitFor(() => expect(screen.getByText('Kantoor Rotterdam')).toBeInTheDocument())
+
+    await user.click(screen.getByRole('button', { name: st('locations.edit') }))
+
+    // Prefilled from the row's own stored icon, not the default glyph.
+    const iconLabel = `${st('documentTypes.icon')}: ${st('locations.icon')}`
+    await user.click(screen.getByRole('button', { name: iconLabel }))
+    await user.click(screen.getByRole('menuitem', { name: `${st('documentTypes.icon')}: building` }))
+    await user.click(screen.getByRole('button', { name: st('common.save') }))
+
+    // The stored colour rides along untouched; the icon carries the new pick.
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/locations/loc1', expect.objectContaining({
+      // eslint-disable-next-line no-restricted-syntax -- DATA: asserting the exact stored row colour, not an invented UI colour
+      color: '#059669', icon: 'building',
+    })))
   })
 })

@@ -10,6 +10,7 @@ import LookupIcon from '@/components/ui/LookupIcon'
 import { AlertTriangle, Check, Save, Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { useConfirm } from '@/hooks/useConfirm'
 import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
 import { Toggle } from '../components/SettingsKit'
 
@@ -48,6 +49,8 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
   const [saved,     setSaved]     = useState(false)
   const [deleting,  setDeleting]  = useState(null)
   const [settingDefaultId, setSettingDefaultId] = useState(null)
+  // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
+  const { confirm, dialog } = useConfirm()
 
   useEffect(() => {
     // Reset every previous-load flag when the endpoint/entity identity changes —
@@ -107,18 +110,19 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
     } catch { notifyError(t('statusList.saveFailed')) } finally { setSaving(false) }
   }
 
-  const remove = async (item) => {
+  const remove = (item) => {
     if (inUse(item)) return
-    if (!confirm(t('statusList.confirmDelete', { name: labelOf(item) }))) return
-    setDeleting(item.id)
-    // 409 = backend rejects deletion of an in-use item; keep the row and flag it.
-    // Any OTHER failure (500/network) still needs a visible signal — otherwise the
-    // row silently stays in the list with no explanation (§3: no silent catch).
-    try { await api.delete(`${endpoint}/${item.id}`); setItems(p => p.filter(x => x.id !== item.id)) }
-    catch (e) {
-      if (e?.response?.status === 409) setItems(p => p.map(x => x.id === item.id ? { ...x, in_use: true } : x))
-      else notifyError(t('statusList.deleteFailed'))
-    } finally { setDeleting(null) }
+    confirm(t('statusList.confirmDelete', { name: labelOf(item) }), async () => {
+      setDeleting(item.id)
+      // 409 = backend rejects deletion of an in-use item; keep the row and flag it.
+      // Any OTHER failure (500/network) still needs a visible signal — otherwise the
+      // row silently stays in the list with no explanation (§3: no silent catch).
+      try { await api.delete(`${endpoint}/${item.id}`); setItems(p => p.filter(x => x.id !== item.id)) }
+      catch (e) {
+        if (e?.response?.status === 409) setItems(p => p.map(x => x.id === item.id ? { ...x, in_use: true } : x))
+        else notifyError(t('statusList.deleteFailed'))
+      } finally { setDeleting(null) }
+    }, { danger: true })
   }
 
   // Optimistic per-row icon update (iconPicker mode) — same revert rule as colour.
@@ -379,6 +383,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
           </div>
         </>
       )}
+      {dialog}
     </div>
   )
 }

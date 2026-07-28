@@ -10,6 +10,7 @@ import { notify, notifyError } from '@/lib/notify'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
+import { useConfirm } from '@/hooks/useConfirm'
 import { extractApiError } from '@/lib/extractApiError'
 import { normalizeWorkflow, denormalizeWorkflow } from '../data/workflowMap'
 import type { Workflow, RawWorkflow } from '@/types/workflow'
@@ -41,6 +42,8 @@ export function useWorkflowsData(showArchived: boolean) {
   const [selectedFolder, setSelectedFolder] = useState<FolderId>(null)   // null = alle, 'unassigned' = geen folder, uuid = folder
   const [dragOverFolder, setDragOverFolder] = useState<FolderId>(null)
   const dragWf = useRef<string | number | null>(null)
+  // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
+  const { confirm, dialog } = useConfirm()
 
   useEffect(() => {
     // Archived view asks the backend for soft-deleted rows too (C-27-workflow).
@@ -165,19 +168,20 @@ export function useWorkflowsData(showArchived: boolean) {
     }
   }
 
-  const deleteFolder = async (folder: WorkflowFolder) => {
+  const deleteFolder = (folder: WorkflowFolder) => {
     if (!canManageFolders) return
-    if (!confirm(t('page.deleteFolderConfirm', { name: folder.name }))) return
-    try {
-      await api.delete(`/workflow-folders/${folder.id}`)
-      setFolders(prev => prev.filter(f => f.id !== folder.id))
-      setWorkflows(prev => prev.map(w => w.folder_id === folder.id ? { ...w, folder_id: null } : w))
-      if (selectedFolder === folder.id) setSelectedFolder(null)
-    } catch (e) {
-      // 409 = the folder still holds active workflows → backend blocks the delete (R-3).
-      const status = (e as { response?: { status?: number } })?.response?.status
-      notifyError(t(status === 409 ? 'page.deleteFolderInUse' : 'common:actionFailed'))
-    }
+    confirm(t('page.deleteFolderConfirm', { name: folder.name }), async () => {
+      try {
+        await api.delete(`/workflow-folders/${folder.id}`)
+        setFolders(prev => prev.filter(f => f.id !== folder.id))
+        setWorkflows(prev => prev.map(w => w.folder_id === folder.id ? { ...w, folder_id: null } : w))
+        if (selectedFolder === folder.id) setSelectedFolder(null)
+      } catch (e) {
+        // 409 = the folder still holds active workflows → backend blocks the delete (R-3).
+        const status = (e as { response?: { status?: number } })?.response?.status
+        notifyError(t(status === 409 ? 'page.deleteFolderInUse' : 'common:actionFailed'))
+      }
+    }, { danger: true })
   }
 
   const moveToFolder = async (workflowId: string | number | null, folderId: FolderId) => {
@@ -199,5 +203,6 @@ export function useWorkflowsData(showArchived: boolean) {
     retryLoad, openEditor, closeEditor,
     handleRun, handleToggleStatus, handleSave,
     createFolder, deleteFolder, moveToFolder,
+    dialog,
   }
 }

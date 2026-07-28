@@ -80,14 +80,22 @@ describe('downloadCsv (the real per-entity export request)', () => {
   })
 })
 
+// All twelve entity ids the screen must list (five original + the seven
+// EXPORT-UITBREIDEN-1 routes the backend shipped 2026-07-28).
+const ALL_ENTITY_IDS = [
+  'candidates', 'applications', 'vacancies', 'leads', 'customers',
+  'contacts', 'locations', 'departments', 'matches', 'tasks', 'opportunities', 'outreach',
+]
+
 // Master-detail layout (Danny 21-07: same format as Importeren) — every entity is
 // a left sub-nav item; the right detail panel shows the SELECTED entity's export action.
 describe('ExportSettings screen', () => {
   it('lists every entity in the sub-nav and shows one enabled export button for the selection', () => {
     render(<ExportSettings />)
 
-    // All five entities are reachable from the left sub-nav.
-    for (const id of ['candidates', 'applications', 'vacancies', 'leads', 'customers']) {
+    // All twelve entities are reachable from the left sub-nav, resolved through the
+    // active locale's translated title — never a hardcoded Dutch label.
+    for (const id of ALL_ENTITY_IDS) {
       expect(screen.getByRole('button', { name: t(`export.entities.${id}.title`) })).toBeInTheDocument()
     }
     // The detail panel shows exactly one export button (the selected entity's), enabled.
@@ -108,5 +116,36 @@ describe('ExportSettings screen', () => {
     const btn = screen.getByRole('button', { name: t('export.button') })
     expect(btn).toBeDisabled()
     expect(btn).toHaveAttribute('title', t('export.noPermission'))
+  })
+
+  it('disables (never hides) the export button for a NEW entity the user lacks its own view-permission for', async () => {
+    // Matches is gated on matches.view (a different permission than the others), so
+    // this proves the new rows are wired to their OWN entity permission, not a shared one.
+    mockUseAuth.mockReturnValue({ hasPermission: (perm) => perm !== 'matches.view' })
+    const user = userEvent.setup()
+    render(<ExportSettings />)
+
+    await user.click(screen.getByRole('button', { name: t('export.entities.matches.title') }))
+    const btn = screen.getByRole('button', { name: t('export.button') })
+    expect(btn).toBeDisabled()
+    expect(btn).toHaveAttribute('title', t('export.noPermission'))
+  })
+
+  it('GETs the exact new route when a new entity row triggers its export', async () => {
+    api.get.mockResolvedValue({ data: new Blob(['a,b\n1,2'], { type: 'text/csv' }), headers: {} })
+    vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL })
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    const user = userEvent.setup()
+    render(<ExportSettings />)
+
+    // Select the new "outreach" row from the sub-nav, then trigger its export button —
+    // this asserts the REQUEST (exact route), never just that a handler fired (§13).
+    await user.click(screen.getByRole('button', { name: t('export.entities.outreach.title') }))
+    await user.click(screen.getByRole('button', { name: t('export.button') }))
+
+    expect(api.get).toHaveBeenCalledWith('/exports/outreach.csv', { responseType: 'blob' })
+
+    clickSpy.mockRestore()
+    vi.unstubAllGlobals()
   })
 })

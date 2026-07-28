@@ -15,7 +15,7 @@ import type { Column } from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
 const searchWrap: CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 8, flex: 1, padding: '6px 10px',
+  display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 120, padding: '6px 10px',
   background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8,
 }
 const searchInput: CSSProperties = { flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }
@@ -28,6 +28,8 @@ interface SubEntityTabProps<Item> {
   searchPlaceholder?: string
   searchKeys?: string[]
   onAdd?: () => void
+  /** Rendered between the search box and the add trigger (the status filter). */
+  filter?: ReactNode
   // `close` lets the detail view return to the list itself (e.g. after a delete).
   renderDetail: (item: Item, close: () => void) => ReactNode
   getRowId?: (item: Item) => string | number | undefined
@@ -35,7 +37,7 @@ interface SubEntityTabProps<Item> {
 
 export default function SubEntityTab<Item extends object>({
   items = [], columns, addLabel, emptyText, searchPlaceholder,
-  searchKeys = ['name'], onAdd, renderDetail,
+  searchKeys = ['name'], onAdd, filter, renderDetail,
   getRowId = (it: Item) => (it as { id?: string | number }).id,
 }: SubEntityTabProps<Item>) {
   const [search, setSearch]         = useState('')
@@ -61,6 +63,7 @@ export default function SubEntityTab<Item extends object>({
           <Search size={13} color="var(--text-muted)" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder={searchPlaceholder} aria-label={searchPlaceholder} style={searchInput} />
         </div>
+        {filter}
         {onAdd && <DrawerAddButton onClick={onAdd} label={addLabel} />}
       </div>
       <DataTable columns={columns} rows={rows} onRowClick={it => setSelectedId(getRowId(it))} emptyText={emptyText} />

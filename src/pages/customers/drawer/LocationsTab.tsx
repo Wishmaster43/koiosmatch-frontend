@@ -8,6 +8,7 @@ import { useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MapPin } from 'lucide-react'
 import SubEntityTab from './SubEntityTab'
+import StatusFilterSelect, { useStatusFilter } from './StatusFilterSelect'
 import LocationDetail from './LocationDetail'
 import AddLocationModal from '../AddLocationModal'
 import type { Column } from '@/components/ui/DataTable'
@@ -52,6 +53,9 @@ export default function LocationsTab({
 }: Props) {
   const { t } = useTranslation('customers')
   const [adding, setAdding] = useState(false)
+  // Status filter (Danny 28-07). It defaults to "active only" — but only once that is
+  // provably a non-empty view; see the hook for why that guard exists.
+  const { value: statusFilter, setValue: setStatusFilter, filtered: visibleLocations } = useStatusFilter(locations, statuses)
 
   const columns: Column<Location>[] = [
     { key: 'name', header: t('locations.col.name'), sortable: true, sortValue: l => l.name,
@@ -90,12 +94,13 @@ export default function LocationsTab({
   return (
     <>
       <SubEntityTab
-        items={locations}
+        items={visibleLocations}
         columns={columns}
         addLabel={t('locations.add')}
         emptyText={t('locations.empty')}
         searchPlaceholder={t('locations.searchPlaceholder')}
         searchKeys={['name', 'city']}
+        filter={<StatusFilterSelect value={statusFilter} onChange={setStatusFilter} statuses={statuses} />}
         onAdd={() => setAdding(true)}
         renderDetail={renderDetail}
       />

@@ -44,7 +44,7 @@ const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'c
 
 const contact = (over: Partial<Contact> = {}): Contact => ({
   id: 'c1', helloflexLink: null, shiftmanagerLink: null,
-  firstName: 'Eva', lastName: 'Bos', name: 'Eva Bos', role: 'HR Manager',
+  firstName: 'Eva', middleName: '', lastName: 'Bos', name: 'Eva Bos', role: 'HR Manager',
   email: 'eva@klant.test', phone: '', mobile: '0612345678', isPrimary: false,
   locationId: 'loc-1', locationName: '', departmentId: 'dep-1', departmentName: '',
   locations: [], departments: [], statusId: null, status: '', statusLabel: '', statusColor: '',

@@ -67,7 +67,7 @@ const normalizeDigits = (v: string) => String(v ?? '').replace(/\D/g, '')
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
-  first_name: 'firstName', last_name: 'lastName', email: 'email', phone: 'phone', mobile: 'mobile',
+  first_name: 'firstName', middle_name: 'middleName', last_name: 'lastName', email: 'email', phone: 'phone', mobile: 'mobile',
   function: 'role', customer_location_id: 'locationId', customer_department_id: 'departmentId',
   status_id: 'statusId', is_primary: 'isPrimary',
 }
@@ -106,6 +106,7 @@ export default function AddContactPersonModal({
   const { contactFunctions, allowFreeEntry } = useContactFunctions()
   const [form, setForm] = useState<ContactPayload>({
     firstName: initial?.firstName ?? '',
+    middleName: initial?.middleName ?? '',
     lastName: initial?.lastName ?? '',
     email: initial?.email ?? '',
     phone: initial?.phone ?? '',
@@ -172,7 +173,7 @@ export default function AddContactPersonModal({
       setErrors(e => ({ ...e, email: !!emailDup, phone: !!phoneDup, mobile: !!mobileDup }))
       return
     }
-    const payload = { ...form, firstName: form.firstName.trim(), lastName: form.lastName.trim() }
+    const payload = { ...form, firstName: form.firstName.trim(), middleName: form.middleName.trim(), lastName: form.lastName.trim() }
     // Edit path: update() keeps its existing toast-based error handling (it also
     // backs the couple/uncouple buttons elsewhere) — unchanged, closes immediately.
     if (isEdit) { onCreate?.(payload); onClose(); return }
@@ -248,9 +249,14 @@ export default function AddContactPersonModal({
           <div>
             <div style={cardHead}>{t('subModal.groups.person')}</div>
             <div style={cardBox}>
-              <div style={row2}>
+              <div style={row3Even}>
                 <Field label={t('subModal.firstName')} required>
                   <TextField value={form.firstName} onChange={v => set('firstName', v)} error={errors.firstName} />
+                </Field>
+                {/* CONTACT-TUSSENVOEGSEL-1: without this the backend stores "Jan Vries"
+                    for "Jan de Vries" — and an edit of an existing contact wiped it. */}
+                <Field label={t('subModal.middleName')}>
+                  <TextField value={form.middleName} onChange={v => set('middleName', v)} placeholder="van" />
                 </Field>
                 <Field label={t('subModal.lastName')} required>
                   <TextField value={form.lastName} onChange={v => set('lastName', v)} error={errors.lastName} />

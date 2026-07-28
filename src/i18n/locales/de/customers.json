@@ -37,7 +37,9 @@
     "categories": {
       "general": "Allgemein",
       "organisation": "Organisation"
-    }
+    },
+    "allStatuses": "Alle Status",
+    "statusFilter": "Nach Status filtern"
   },
   "insights": {
     "statusTitle": "Status",
@@ -82,7 +84,9 @@
       "documents": "Dokumente",
       "notes": "Notizen",
       "communication": "Kommunikation",
-      "extra": "Extra"
+      "extra": "Extra",
+      "financial": "Finanzen",
+      "billing": "Abrechnung"
     },
     "changelog": "Änderungen",
     "photoUpload": "Logo hochladen",
@@ -191,7 +195,13 @@
       "pickContactSearch": "Nach Name, Funktion oder E-Mail suchen",
       "pickContactLinks": "Aktuell verknüpft mit",
       "pickContactNoLinks": "Noch nicht verknüpft",
-      "coupleNote": "Das Verknüpfen VERSCHIEBT den Kontakt an diesen Standort — die bisherige Verknüpfung entfällt."
+      "coupleNote": "Das Verknüpfen VERSCHIEBT den Kontakt an diesen Standort — die bisherige Verknüpfung entfällt.",
+      "branchTitle": "Standort",
+      "branchInherited": "Folgt dem Kunden",
+      "branchOwn": "Abweichend gesetzt",
+      "branchLink": "Standort verknüpfen",
+      "branchEmpty": "Kein eigener Standort — dieser Standort folgt dem Kunden.",
+      "branchHint": "Leer lassen bedeutet: gleiche Standorte wie beim Kunden. Eine eigene Verknüpfung weicht bewusst ab."
     },
     "saveFailed": "Speichern fehlgeschlagen.",
     "deleteFailed": "Löschen fehlgeschlagen.",
@@ -262,7 +272,8 @@
         "tasks": "Aufgaben"
       },
       "linkLocation": "Standort verknüpfen",
-      "linkDepartment": "Abteilung verknüpfen"
+      "linkDepartment": "Abteilung verknüpfen",
+      "middleName": "Namenszusatz"
     },
     "deleteConfirm": "Diesen Kontakt löschen?",
     "saveFailed": "Speichern fehlgeschlagen.",
@@ -292,7 +303,8 @@
     "filter": {
       "status": "Status"
     },
-    "add": "Neue Stelle"
+    "add": "Neue Stelle",
+    "searchPlaceholder": "Stelle suchen…"
   },
   "opportunities": {
     "title": "Chancen",
@@ -514,7 +526,8 @@
       "body": "{{name}} ist derzeit der Hauptkontakt dieses Kunden. Ersetzen?",
       "confirm": "Ja, ersetzen",
       "decline": "Nein, nicht ersetzen"
-    }
+    },
+    "middleName": "Namenszusatz"
   },
   "changelog": {
     "empty": "Noch keine Änderungen."

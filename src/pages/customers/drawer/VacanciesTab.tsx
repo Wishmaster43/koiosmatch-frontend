@@ -13,6 +13,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import { Search } from 'lucide-react'
 import AddVacancyModal from '@/pages/vacancies/AddVacancyModal'
 import { VacancyLookupsProvider } from '@/context/VacancyLookupsContext'
 import DataTable from '@/components/ui/DataTable'
@@ -40,6 +41,8 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
   // Create a vacancy straight from the customer (Danny 28-07) — the client is fixed to
   // this customer, so the modal shows it read-only instead of asking again.
   const [adding, setAdding] = useState(false)
+  // Free-text search over the title (Danny 28-07) — the list can run to dozens of rows.
+  const [search, setSearch] = useState('')
   const queryClient = useQueryClient()
   const [statusOptions, setStatusOptions] = useState<StatusOpt[]>(SEED_STATUSES)
   // Defaults to just 'open' once the real lookup resolves; null = "not decided yet".
@@ -94,9 +97,10 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
   // Depend on `selected` itself (stable state reference), not a derived `?? []`
   // array, which would be a fresh reference every render and defeat the memo.
   const filteredRows = useMemo(() => {
-    if (!selected || selected.length === 0) return rows
-    return rows.filter(v => selected.includes(v.status.value ?? ''))
-  }, [rows, selected])
+    const byStatus = !selected || selected.length === 0 ? rows : rows.filter(v => selected.includes(v.status.value ?? ''))
+    const q = search.trim().toLowerCase()
+    return q ? byStatus.filter(v => String(v.title ?? '').toLowerCase().includes(q)) : byStatus
+  }, [rows, selected, search])
   const activeSelected = selected ?? []
 
   const columns: Column<VacancyRow>[] = [
@@ -108,9 +112,19 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
-        <div style={{ maxWidth: 220, flex: 1 }}>
-          <SearchSelectGroup group={{ key: 'status', label: t('vacancies.filter.status'), options: statusOptions, selected: activeSelected, onToggle: toggle }} />
+      {/* Toolbar in the house order (Danny 28-07): search left, status filter right,
+          add trigger last — the same left-to-right reading as every other sub-entity
+          list. The filter renders `plain` so it is white like the pickers beside it. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 120, padding: '6px 10px',
+          background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
+          <Search size={13} color="var(--text-muted)" />
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder={t('vacancies.searchPlaceholder')} aria-label={t('vacancies.searchPlaceholder')}
+            style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
+        </div>
+        <div style={{ width: 170, flexShrink: 0 }}>
+          <SearchSelectGroup plain group={{ key: 'status', label: t('vacancies.filter.status'), options: statusOptions, selected: activeSelected, onToggle: toggle }} />
         </div>
         <DrawerAddButton onClick={() => setAdding(true)} label={t('vacancies.add')} />
       </div>

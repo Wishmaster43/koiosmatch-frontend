@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Copy, Plus, Trash2, Edit2, Save, X } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { useConfirm } from '@/hooks/useConfirm'
 
 // Inbound webhook URLs hang off the API root's /webhook path, not under /api.
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
@@ -24,6 +25,8 @@ export default function IncomingWebhooks() {
   const [editId,   setEditId]   = useState(null)
   const [editName, setEditName] = useState('')
   const [editDesc, setEditDesc] = useState('')
+  // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
+  const { confirm, dialog } = useConfirm()
 
   // Start / save an in-place edit of an existing webhook (name + description).
   const startEdit = (wh) => { setEditId(wh.id); setEditName(wh.name ?? ''); setEditDesc(wh.description ?? '') }
@@ -56,10 +59,11 @@ export default function IncomingWebhooks() {
     setCreating(false)
   }
 
-  const remove = async (id) => {
-    if (!confirm(t('webhooks.incoming.removeConfirm'))) return
-    await api.delete(`/webhooks/${id}`).catch(() => {})
-    setWebhooks((prev) => prev.filter((w) => w.id !== id))
+  const remove = (id) => {
+    confirm(t('webhooks.incoming.removeConfirm'), async () => {
+      await api.delete(`/webhooks/${id}`).catch(() => {})
+      setWebhooks((prev) => prev.filter((w) => w.id !== id))
+    }, { danger: true })
   }
 
   const copyUrl = (token) => {
@@ -155,6 +159,7 @@ export default function IncomingWebhooks() {
           ))}
         </div>
       )}
+      {dialog}
     </div>
   )
 }

@@ -12,20 +12,35 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Upload, Users, ClipboardList, Briefcase, Target, Building2, Loader2 } from 'lucide-react'
+import {
+  Upload, Users, ClipboardList, Briefcase, Target, Building2, Loader2,
+  MapPin, Building, Handshake, ListChecks, PhoneCall,
+} from 'lucide-react'
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { notifyError } from '@/lib/notify'
 
 // Entity → icon + its export route + the view-permission that gates it (mirrors
 // routes/api/tenant/exports.php exactly). "Leads" = candidates in a Lead phase,
-// not a separate resource, so it reuses candidates.view.
+// not a separate resource, so it reuses candidates.view. Icons mirror how each
+// entity is iconified elsewhere in the app: matches/tasks/opportunities/outreach
+// from Sidebar.jsx NAV_ITEMS; contacts/locations/departments from their customer-drawer
+// row icon + Add<Entity>Modal header (ContactsPanel.tsx/AddContactPersonModal.tsx,
+// LocationsTab.tsx/AddLocationModal.tsx, DepartmentsPanel.tsx/AddDepartmentModal.tsx).
 const ENTITIES = [
   { id: 'candidates', icon: Users, route: '/exports/candidates.csv', permission: 'candidates.view' },
   { id: 'applications', icon: ClipboardList, route: '/exports/applications.csv', permission: 'applications.view' },
   { id: 'vacancies', icon: Briefcase, route: '/exports/vacancies.csv', permission: 'vacancies.view' },
   { id: 'leads', icon: Target, route: '/exports/leads.csv', permission: 'candidates.view' },
   { id: 'customers', icon: Building2, route: '/exports/customers.csv', permission: 'customers.view' },
+  // EXPORT-UITBREIDEN-1 (CMFE 2026-07-28): the seven routes the backend added today.
+  { id: 'contacts', icon: Users, route: '/exports/contacts.csv', permission: 'customers.view' },
+  { id: 'locations', icon: MapPin, route: '/exports/locations.csv', permission: 'customers.view' },
+  { id: 'departments', icon: Building, route: '/exports/departments.csv', permission: 'customers.view' },
+  { id: 'matches', icon: Handshake, route: '/exports/matches.csv', permission: 'matches.view' },
+  { id: 'tasks', icon: ListChecks, route: '/exports/tasks.csv', permission: 'tasks.view' },
+  { id: 'opportunities', icon: Target, route: '/exports/opportunities.csv', permission: 'opportunities.view' },
+  { id: 'outreach', icon: PhoneCall, route: '/exports/outreach.csv', permission: 'outreach.view' },
 ]
 
 // Parse the filename the backend sets via Content-Disposition (Laravel's

@@ -37,7 +37,9 @@
     "categories": {
       "general": "Général",
       "organisation": "Organisation"
-    }
+    },
+    "allStatuses": "Tous les statuts",
+    "statusFilter": "Filtrer par statut"
   },
   "insights": {
     "statusTitle": "Statut",
@@ -82,7 +84,9 @@
       "documents": "Documents",
       "notes": "Notes",
       "communication": "Communication",
-      "extra": "Extra"
+      "extra": "Extra",
+      "financial": "Financier",
+      "billing": "Facturation"
     },
     "changelog": "Historique",
     "photoUpload": "Téléverser le logo",
@@ -191,7 +195,13 @@
       "pickContactSearch": "Rechercher par nom, fonction ou e-mail",
       "pickContactLinks": "Actuellement lié à",
       "pickContactNoLinks": "Pas encore lié",
-      "coupleNote": "Lier DÉPLACE le contact vers ce site — il est détaché de son site actuel."
+      "coupleNote": "Lier DÉPLACE le contact vers ce site — il est détaché de son site actuel.",
+      "branchTitle": "Établissement",
+      "branchInherited": "Suit le client",
+      "branchOwn": "Défini séparément",
+      "branchLink": "Lier un établissement",
+      "branchEmpty": "Aucun établissement propre — ce site suit le client.",
+      "branchHint": "Laisser vide signifie : mêmes établissements que le client. En lier un ici crée une dérogation volontaire."
     },
     "saveFailed": "L'enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
@@ -262,7 +272,8 @@
         "tasks": "Tâches"
       },
       "linkLocation": "Lier un site",
-      "linkDepartment": "Lier un service"
+      "linkDepartment": "Lier un service",
+      "middleName": "Particule"
     },
     "deleteConfirm": "Supprimer ce contact ?",
     "saveFailed": "L'enregistrement a échoué.",
@@ -292,7 +303,8 @@
     "filter": {
       "status": "Statut"
     },
-    "add": "Nouvelle offre"
+    "add": "Nouvelle offre",
+    "searchPlaceholder": "Rechercher une offre…"
   },
   "opportunities": {
     "title": "Opportunités",
@@ -514,7 +526,8 @@
       "body": "{{name}} est actuellement le contact principal de ce client. Le remplacer ?",
       "confirm": "Oui, remplacer",
       "decline": "Non, ne pas remplacer"
-    }
+    },
+    "middleName": "Particule"
   },
   "changelog": {
     "empty": "Aucun changement pour le moment."

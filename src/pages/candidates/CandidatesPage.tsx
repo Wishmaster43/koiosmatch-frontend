@@ -215,6 +215,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     archiveOne, restoreOne, markDeletionOne,
     archiveGuard, setArchiveGuard, resolveArchiveGuard,
     eraseTarget, setEraseTarget, hardDeleteOne, confirmHardDelete,
+    dialog: lifecycleConfirmDialog,
   } = useCandidateDrawerActions({ candidates, setCandidates, setTotal,
     notifyMsg: m => setActionMsg(m as ActionMessage), t })
   // Open a candidate drawer when arriving via a dashboard/cross-entity link ({ open: id }).
@@ -361,6 +362,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
           bulkMergeTarget={bulkMergeTarget} onCloseBulkMerge={resolveBulkMerge} onMergedBulk={handleBulkMerged}
         />
         {bulkConfirmDialog}
+        {lifecycleConfirmDialog}
       </div>
     </>
   )

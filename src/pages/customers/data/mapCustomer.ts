@@ -62,6 +62,7 @@ export function mapContact(p: ApiContact = {}): Contact {
     // NUMMER-2: the human-readable number, shown as a copy chip next to the name.
     referenceNumber: p.reference_number ?? '',
     firstName: p.first_name ?? '',
+    middleName: p.middle_name ?? '',
     lastName: p.last_name ?? '',
     name: p.name ?? [p.first_name, p.last_name].filter(Boolean).join(' ') ?? '—',
     role: p.function ?? p.role ?? '',
@@ -113,6 +114,13 @@ export function mapLocation(l: ApiLocation = {}): Location {
     cocNumber: l.coc_number ?? '',
     vatNumber: l.vat_number ?? '',
     contactName: l.contact_name ?? '',
+    // LOCATIE-VESTIGING-1: only sent when the caller eager-loaded branchLinks, so every
+    // field defaults defensively. `branchInherited` defaults TRUE — no data means "no
+    // deviation recorded", which is exactly what inheriting means.
+    branchIds: (l.branch_ids ?? []).filter((x): x is Id => x != null),
+    branches: (l.branches ?? []).filter((b): b is { id: Id; name?: string } => b?.id != null).map(b => ({ id: b.id, name: b.name ?? '—' })),
+    branchInherited: l.branch_inherited ?? true,
+    effectiveBranches: (l.effective_branches ?? []).filter((b): b is { id: Id; name?: string } => b?.id != null).map(b => ({ id: b.id, name: b.name ?? '—' })),
     // PDOK coordinates — tolerant coercion (Laravel decimals arrive as strings, §10).
     lat: toCoord(l.lat),
     lng: toCoord(l.lng),

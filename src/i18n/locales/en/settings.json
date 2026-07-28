@@ -469,7 +469,10 @@
     "contactName": "Contact person",
     "phone": "Phone",
     "email": "Email",
-    "mapNoCoords": "No locations with coordinates yet — fill in a location's address and it will appear on the map automatically."
+    "mapNoCoords": "No locations with coordinates yet — fill in a location's address and it will appear on the map automatically.",
+    "color": "Colour",
+    "icon": "Icon",
+    "colorHint": "Colour and icon make a branch recognisable in lists and on the map."
   },
   "memory": {
     "title": "Memory",
@@ -1227,6 +1230,34 @@
       "customers": {
         "title": "Customers",
         "desc": "Customer data with locations and contacts."
+      },
+      "contacts": {
+        "title": "Contacts",
+        "desc": "Contact persons with customer, location, department and contact details."
+      },
+      "locations": {
+        "title": "Locations",
+        "desc": "Customer locations with address, registration numbers and cost centre."
+      },
+      "departments": {
+        "title": "Departments",
+        "desc": "Departments with their location and cost centre."
+      },
+      "matches": {
+        "title": "Matches",
+        "desc": "Matches with candidate, vacancy, status and placement details."
+      },
+      "tasks": {
+        "title": "Tasks",
+        "desc": "Tasks with status, priority, owner and linked record."
+      },
+      "opportunities": {
+        "title": "Opportunities",
+        "desc": "Opportunities with stage, customer, value and owner."
+      },
+      "outreach": {
+        "title": "Call lists",
+        "desc": "Call lists with audience, outcome and last contact."
       }
     }
   },

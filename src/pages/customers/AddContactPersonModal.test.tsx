@@ -51,7 +51,7 @@ const departments = [dept('dep-1', 'Verpleging', 'loc-1'), dept('dep-2', 'Thuisz
 // OTHER already-loaded contacts) — drives the primary-replace confirm and the
 // email/phone/mobile duplicate check.
 const contact = (overrides: Partial<Contact>): Contact => ({
-  id: 'c-other', helloflexLink: null, shiftmanagerLink: null, firstName: 'Anna', lastName: 'Bakker', name: 'Anna Bakker',
+  id: 'c-other', helloflexLink: null, shiftmanagerLink: null, firstName: 'Anna', middleName: '', lastName: 'Bakker', name: 'Anna Bakker',
   role: '', email: '', phone: '', mobile: '', isPrimary: false,
   locationId: null, locationName: '', departmentId: null, departmentName: '',
   locations: [], departments: [], statusId: null, status: '', statusLabel: '', statusColor: '', customFields: {},
@@ -111,7 +111,7 @@ describe('AddContactPersonModal', () => {
     await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
 
     expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({
-      firstName: 'Jan', lastName: 'Jansen', locationId: 'loc-1',
+      firstName: 'Jan', middleName: '', lastName: 'Jansen', locationId: 'loc-1',
     }))
   })
 
@@ -186,7 +186,7 @@ describe('AddContactPersonModal', () => {
     // department without a matching location — the picker must still show its
     // real label, never fall back to rendering the raw id.
     const initial = {
-      id: 'c1', helloflexLink: null, shiftmanagerLink: null, firstName: 'Jan', lastName: 'Jansen', name: 'Jan Jansen',
+      id: 'c1', helloflexLink: null, shiftmanagerLink: null, firstName: 'Jan', middleName: '', lastName: 'Jansen', name: 'Jan Jansen',
       role: '', email: '', phone: '', mobile: '', isPrimary: false,
       locationId: null, locationName: '', departmentId: 'dep-1', departmentName: 'Verpleging',
       locations: [], departments: [], statusId: null, status: '', statusLabel: '', statusColor: '', customFields: {},
@@ -246,7 +246,7 @@ describe('AddContactPersonModal', () => {
     const onCreate = vi.fn()
     const user = userEvent.setup()
     // Same id as `initial` — must be excluded from the "someone else is primary" check.
-    const initial = contact({ id: 'c-self', name: 'Jan Jansen', firstName: 'Jan', lastName: 'Jansen', isPrimary: true })
+    const initial = contact({ id: 'c-self', name: 'Jan Jansen', firstName: 'Jan', middleName: '', lastName: 'Jansen', isPrimary: true })
     const existing = [initial]
     render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} initial={initial} existing={existing} />)
 
@@ -306,5 +306,41 @@ describe('AddContactPersonModal', () => {
     // "31105229718" (stripped) !== "0105229718" (stripped) — no duplicate, submit stays enabled.
     expect(screen.queryByText(ct('subModal.duplicate.phone', { name: 'Anna Bakker' }))).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: ct('subModal.create') })).not.toBeDisabled()
+  })
+})
+
+// CONTACT-TUSSENVOEGSEL-1 (28-07): the backend has stored and returned `middle_name` for
+// a while, but the frontend never sent it — so "Jan de Vries" was created as "Jan Vries",
+// and editing an existing contact wiped the tussenvoegsel it already had. The seam is the
+// PAYLOAD, so that is what this asserts.
+describe('AddContactPersonModal · tussenvoegsel', () => {
+  it('sends the tussenvoegsel with the create payload', async () => {
+    const user = userEvent.setup()
+    const onCreate = vi.fn()
+    render(<AddContactPersonModal onCreate={onCreate} onClose={vi.fn()} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText(ct('subModal.middleName'), { exact: false }), 'de')
+    await user.type(screen.getByLabelText(ct('subModal.lastName'), { exact: false }), 'Vries')
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+
+    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({
+      firstName: 'Jan', middleName: 'de', lastName: 'Vries',
+    }))
+  })
+
+  it('keeps an existing tussenvoegsel when a contact is edited', async () => {
+    const user = userEvent.setup()
+    const onCreate = vi.fn()
+    const existing = { id: 'c9', firstName: 'Jan', middleName: 'van der', lastName: 'Berg', name: 'Jan van der Berg' } as never
+    render(<AddContactPersonModal initial={existing} onCreate={onCreate} onClose={vi.fn()} />)
+
+    // Change only the first name; the tussenvoegsel must ride along untouched.
+    const first = screen.getByLabelText(ct('subModal.firstName'), { exact: false })
+    await user.clear(first)
+    await user.type(first, 'Johan')
+    await user.click(screen.getByRole('button', { name: ct('subModal.save') }))
+
+    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ firstName: 'Johan', middleName: 'van der' }))
   })
 })

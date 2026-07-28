@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next'
 import { Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { useConfirm } from '@/hooks/useConfirm'
 import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
 import { Toggle } from '../components/SettingsKit'
 import { BTN_H } from '@/config/buttonMetrics'
@@ -36,6 +37,8 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
   const [busy,     setBusy]     = useState(false)
   const [deleting, setDeleting] = useState(null)
   const [settingDefaultId, setSettingDefaultId] = useState(null)
+  // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
+  const { confirm, dialog } = useConfirm()
 
   // Per-item flag location: is_applicant on statuses, requires_appointment on the funnel.
   const isStatusBlock = slug === 'statuses'
@@ -101,15 +104,16 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
   // An item is protected when the backend marks it as referenced by existing data.
   const inUse = (i) => Boolean(i.in_use ?? i.is_used ?? i.locked ?? ((i.usage_count ?? i.candidates_count ?? 0) > 0))
 
-  const remove = async (it) => {
+  const remove = (it) => {
     if (inUse(it)) return
-    if (!confirm(t('lookups.confirmDelete', { name: it.label }))) return
-    setDeleting(it.id)
-    // 409 = backend rejects deletion of an in-use item; keep the row and flag it.
-    try { await api.delete(`${BASE}/${slug}/${it.id}`); setItems(p => p.filter(x => x.id !== it.id)) }
-    catch (e) {
-      if (e?.response?.status === 409) setItems(p => p.map(x => x.id === it.id ? { ...x, in_use: true } : x))
-    } finally { setDeleting(null) }
+    confirm(t('lookups.confirmDelete', { name: it.label }), async () => {
+      setDeleting(it.id)
+      // 409 = backend rejects deletion of an in-use item; keep the row and flag it.
+      try { await api.delete(`${BASE}/${slug}/${it.id}`); setItems(p => p.filter(x => x.id !== it.id)) }
+      catch (e) {
+        if (e?.response?.status === 409) setItems(p => p.map(x => x.id === it.id ? { ...x, in_use: true } : x))
+      } finally { setDeleting(null) }
+    }, { danger: true })
   }
 
   const reorder = async (next) => {
@@ -298,6 +302,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
           </div>
         </>
       )}
+      {dialog}
     </div>
   )
 }

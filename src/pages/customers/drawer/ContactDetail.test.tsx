@@ -42,7 +42,7 @@ const departments = [dept('dep-1', 'Verpleging', 'loc-1'), dept('dep-2', 'Thuisz
 
 const baseContact = (overrides: Partial<Contact> = {}): Contact => ({
   id: 'c1', helloflexLink: null, shiftmanagerLink: null,
-  firstName: 'Jan', lastName: 'Jansen', name: 'Jan Jansen',
+  firstName: 'Jan', middleName: '', lastName: 'Jansen', name: 'Jan Jansen',
   role: '', email: '', phone: '', mobile: '', isPrimary: false,
   locationId: null, locationName: '', departmentId: null, departmentName: '',
   locations: [], departments: [], statusId: null, status: '', statusLabel: '', statusColor: '', customFields: {},
@@ -146,7 +146,7 @@ describe('ContactDetail · location/department coupling (+Vestiging shape, 28-07
 
 
 describe('ContactDetail · declining the primary-replace question', () => {
-  const other = baseContact({ id: 'c2', firstName: 'Anna', lastName: 'Bakker', name: 'Anna Bakker', isPrimary: true })
+  const other = baseContact({ id: 'c2', firstName: 'Anna', middleName: '', lastName: 'Bakker', name: 'Anna Bakker', isPrimary: true })
 
   it('saves isPrimary false AND leaves the toggle off on screen', async () => {
     const user = userEvent.setup()

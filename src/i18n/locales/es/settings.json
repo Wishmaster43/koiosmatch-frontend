@@ -447,7 +447,10 @@
     "contactName": "Persona de contacto",
     "phone": "Teléfono",
     "email": "Correo electrónico",
-    "mapNoCoords": "Aún no hay ubicaciones con coordenadas: introduce la dirección de una ubicación y aparecerá automáticamente en el mapa."
+    "mapNoCoords": "Aún no hay ubicaciones con coordenadas: introduce la dirección de una ubicación y aparecerá automáticamente en el mapa.",
+    "color": "Color",
+    "icon": "Icono",
+    "colorHint": "El color y el icono hacen reconocible una sede en listas y en el mapa."
   },
   "memory": {
     "title": "Memoria",
@@ -1013,6 +1016,34 @@
       "customers": {
         "title": "Clientes",
         "desc": "Datos de clientes con ubicaciones y contactos."
+      },
+      "contacts": {
+        "title": "Contactos",
+        "desc": "Personas de contacto con cliente, ubicación, departamento y datos de contacto."
+      },
+      "locations": {
+        "title": "Ubicaciones",
+        "desc": "Ubicaciones de cliente con dirección, números de registro y centro de coste."
+      },
+      "departments": {
+        "title": "Departamentos",
+        "desc": "Departamentos con su ubicación y centro de coste."
+      },
+      "matches": {
+        "title": "Matches",
+        "desc": "Matches con candidato, vacante, estado y datos de colocación."
+      },
+      "tasks": {
+        "title": "Tareas",
+        "desc": "Tareas con estado, prioridad, responsable y registro vinculado."
+      },
+      "opportunities": {
+        "title": "Oportunidades",
+        "desc": "Oportunidades con etapa, cliente, valor y responsable."
+      },
+      "outreach": {
+        "title": "Listas de llamadas",
+        "desc": "Listas de llamadas con público, resultado y último contacto."
       }
     }
   },

@@ -1,17 +1,40 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, X, Map as MapIcon, Pencil, Trash2, AlertTriangle, RefreshCw, Building2 } from 'lucide-react'
+import { Plus, X, Map as MapIcon, Pencil, Trash2, AlertTriangle, RefreshCw, Building2, Building, Home, Store, Warehouse, Landmark, MapPin, Briefcase } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import GeocodeButton from '@/components/ui/GeocodeButton'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useConfirm } from '@/hooks/useConfirm'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import { BTN_H } from '@/config/buttonMetrics'
+import { ColorSwatch } from '../components/SettingsControls'
+import IconPickerControl from './IconPickerControl'
 // Deterministic per-row colour hash — the SAME helper as Avatar/Shiftmanager
 // entities (§11: reuse, never a second hash). See LocationBadge below for why.
 import { avatarColor } from '@/lib/avatarColor'
+
+// Curated lucide set for the location badge/colour picker (VESTIGING-ICOON-1) —
+// mirrors the document-type icon picker (lib/useDocumentTypes.ts): keys are the
+// slugs Store/UpdateLocationRequest persist and LocationResource returns as-is.
+const LOCATION_ICON_MAP = {
+  'building-2': Building2, building: Building, home: Home, store: Store,
+  warehouse: Warehouse, landmark: Landmark, 'map-pin': MapPin, briefcase: Briefcase,
+}
+const LOCATION_ICON_NAMES = Object.keys(LOCATION_ICON_MAP)
+// Resolve a stored icon slug to its lucide component — unknown/null never crashes,
+// it falls back to the same Building2 glyph the read-only hash badge always used.
+function resolveLocationIcon(name) {
+  return LOCATION_ICON_MAP[(name ?? '').trim().toLowerCase()] ?? Building2
+}
+// Defaults for a brand-new row's picker — a real, visible swatch/glyph instead of
+// an empty string, mirroring the neutral fallback other lookup rows use
+// (StatusListEditor's `item.color ?? '#6B7280'`).
+const DEFAULT_LOCATION_ICON = 'building-2'
+// eslint-disable-next-line no-restricted-syntax -- DATA: neutral default swatch colour for a brand-new row, not decorative UI chrome
+const DEFAULT_LOCATION_COLOR = '#6B7280'
 
 // STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
 const LocationsMapView = lazy(() => import('./LocationsMapView'))
@@ -23,6 +46,8 @@ const EMPTY_FORM = {
   postal_code: '', city: '', country: '',
   // Business identifiers + contact details, so a location is a full entity.
   coc_number: '', vat_number: '', contact_name: '', phone: '', email: '',
+  // VESTIGING-ICOON-1: branding — rides along in the same create/update payload.
+  color: DEFAULT_LOCATION_COLOR, icon: DEFAULT_LOCATION_ICON,
 }
 // Field keys the API returns/accepts 1:1 (LocationResource ↔ Store/UpdateLocationRequest).
 const FORM_KEYS = Object.keys(EMPTY_FORM)
@@ -38,30 +63,32 @@ function formatAddress(loc) {
 }
 
 // Prefill the edit form from an existing row — field names already match 1:1.
+// Colour/icon fall back to today's default swatch/glyph only when the row truly
+// has neither (saved before these columns existed) — never an empty picker state.
 function toFormValues(loc) {
   const values = { ...EMPTY_FORM }
   FORM_KEYS.forEach(k => { values[k] = loc[k] ?? '' })
+  values.color = loc.color || DEFAULT_LOCATION_COLOR
+  values.icon = loc.icon || DEFAULT_LOCATION_ICON
   return values
 }
 
-// VESTIGING-ICON-1 (Danny 28-07, "Icons voor de bedrijven met een kleur"): the
-// `locations` table/model/resource/Store+UpdateLocationRequest carry no `color`
-// or `icon` field at all (checked the tenant migration, LocationResource and both
-// FormRequests) — a user-editable icon/colour picker would be a fake affordance
-// (§3): nothing typed there would survive a reload or a PATCH. Until the backend
-// adds those columns, every row instead gets a deterministic, READ-ONLY badge — a
-// fixed building glyph tinted by a stable per-name colour hash, the same
-// convention Avatar/avatarColor already uses for candidates, owners and
-// Shiftmanager entities (§11 reuse) — so branches are identifiable at a glance
-// without pretending to save a choice the API cannot store.
-function LocationBadge({ name }) {
-  const color = avatarColor(name)
+// VESTIGING-ICOON-1 (Danny 28-07): `locations.color`/`locations.icon` now exist
+// end-to-end (LocationResource + Store/UpdateLocationRequest, verified against the
+// running DB) — this badge renders the row's OWN colour/icon when the backend has
+// them. Older rows saved before these columns landed still have neither, so they
+// fall back to the same deterministic avatarColor hash + Building2 glyph this
+// badge always used (§11 reuse — one hash helper, shared with Avatar/Shiftmanager
+// entities), so every row stays identifiable at a glance either way.
+function LocationBadge({ name, color, icon }) {
+  const resolvedColor = color || avatarColor(name)
+  const Icon = icon ? resolveLocationIcon(icon) : Building2
   return (
     <span aria-hidden="true" style={{ width: 26, height: 26, flexShrink: 0, display: 'flex',
       alignItems: 'center', justifyContent: 'center', borderRadius: 7,
-      background: `color-mix(in srgb, ${color} 14%, transparent)`,
-      border: `1px solid color-mix(in srgb, ${color} 45%, transparent)`, color }}>
-      <Building2 size={13} />
+      background: `color-mix(in srgb, ${resolvedColor} 14%, transparent)`,
+      border: `1px solid color-mix(in srgb, ${resolvedColor} 45%, transparent)`, color: resolvedColor }}>
+      <Icon size={13} />
     </span>
   )
 }
@@ -108,6 +135,8 @@ export default function LocationsSettings() {
   // every keystroke, stealing focus back to the first focusable element each time.
   const closeModal = useCallback(() => setShowModal(false), [])
   const modalPanelRef = useFocusTrap(closeModal)
+  // House confirm dialog (never native window.confirm, §3A) — staged by remove().
+  const { confirm, dialog } = useConfirm()
 
   // Load once — failure is its own state (never a false "no locations yet").
   useEffect(() => {
@@ -147,11 +176,10 @@ export default function LocationsSettings() {
   // (LOC-DELETE-GUARD-1) — mirrors the shared lookup `inUse(item)` convention.
   const inUse = (loc) => Boolean(loc.in_use)
 
-  // DELETE /locations/{id} — confirm, then remove on success or surface the
-  // in-use counts on a 409 (never drop the row silently in either case).
-  const remove = async (loc) => {
-    if (inUse(loc)) return
-    if (!confirm(t('locations.confirmDelete', { name: loc.name }))) return
+  // The actual DELETE /locations/{id} — remove on success or surface the in-use
+  // counts on a 409 (never drop the row silently in either case). Only runs after
+  // the confirm dialog below approves.
+  const doRemove = async (loc) => {
     setDeletingId(loc.id)
     try {
       await api.delete(`/locations/${loc.id}`)
@@ -169,6 +197,12 @@ export default function LocationsSettings() {
     } finally {
       setDeletingId(null)
     }
+  }
+
+  // Stage the house confirm dialog (never native window.confirm) before deleting.
+  const remove = (loc) => {
+    if (inUse(loc)) return
+    confirm(t('locations.confirmDelete', { name: loc.name }), () => doRemove(loc), { danger: true })
   }
 
   const paginated = locations.slice((page - 1) * PER_PAGE, page * PER_PAGE)
@@ -224,7 +258,7 @@ export default function LocationsSettings() {
                 <tr key={loc.id ?? i}>
                   <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <LocationBadge name={loc.name} />
+                      <LocationBadge name={loc.name} color={loc.color} icon={loc.icon} />
                       {loc.name}
                     </div>
                   </td>
@@ -319,6 +353,22 @@ export default function LocationsSettings() {
                     <div style={cardHead}>{t('locations.sectionGeneral')}</div>
                     <div style={cardBox}>
                       {field('name', t('locations.nameLabel'), t('locations.namePlaceholder'))}
+                      {/* Branding (VESTIGING-ICOON-1) — the same ColorSwatch/IconPickerControl
+                          every other lookup editor reuses (StatusListEditor), not a bespoke
+                          picker. Both ride along in the create/update payload below. */}
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20 }}>
+                        <div>
+                          <div style={lbl}>{t('locations.color')}</div>
+                          <ColorSwatch color={form.color} onChange={c => setForm(x => ({ ...x, color: c }))} />
+                        </div>
+                        <div>
+                          <div style={lbl}>{t('locations.icon')}</div>
+                          <IconPickerControl icons={LOCATION_ICON_NAMES} resolve={resolveLocationIcon}
+                            value={form.icon} color={form.color || DEFAULT_LOCATION_COLOR}
+                            label={t('locations.icon')} onPick={icon => setForm(x => ({ ...x, icon }))} />
+                        </div>
+                      </div>
+                      <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{t('locations.colorHint')}</p>
                     </div>
                   </div>
 
@@ -376,6 +426,8 @@ export default function LocationsSettings() {
           </div>
         </>
       )}
+      {/* House confirm dialog (never native window.confirm) — staged by remove(). */}
+      {dialog}
     </div>
   )
 }

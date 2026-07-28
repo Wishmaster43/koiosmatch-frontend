@@ -117,7 +117,6 @@ describe('AgentsTab — delete failure must not remove the agent from the list',
   afterEach(() => vi.restoreAllMocks())
 
   it('keeps the agent on screen and toasts an error when DELETE rejects', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     vi.mocked(api.delete).mockRejectedValue(new Error('network error'))
     const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
 
@@ -128,6 +127,10 @@ describe('AgentsTab — delete failure must not remove the agent from the list',
     // Two delete affordances exist for the same agent (the side-list row and the
     // detail panel's own delete button) — both call the same handler; either works.
     fireEvent.click(screen.getAllByRole('button', { name: 'Verwijderen' })[0])
+
+    // The delete only fires after the house ConfirmDialog's own button is pressed —
+    // never a bare window.confirm() (§0 restschuld cleanup).
+    fireEvent.click(await screen.findByRole('button', { name: 'Bevestigen' }))
 
     // Wait for the actual async signal (the toast fired from the .catch) rather than
     // the synchronous call args — the delete call is recorded before its promise settles.
@@ -157,7 +160,6 @@ describe('PromptsTab — delete failure must not remove the prompt from the list
   afterEach(() => vi.restoreAllMocks())
 
   it('keeps the prompt on screen and toasts an error when DELETE rejects', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     vi.mocked(api.delete).mockRejectedValue(new Error('network error'))
     const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
 
@@ -165,6 +167,8 @@ describe('PromptsTab — delete failure must not remove the prompt from the list
     await screen.findByText('Openingsbericht')
 
     fireEvent.click(screen.getByRole('button', { name: 'Verwijderen' }))
+    // The delete only fires after the house ConfirmDialog's own button is pressed.
+    fireEvent.click(await screen.findByRole('button', { name: 'Bevestigen' }))
 
     await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
       detail: { type: 'error', message: 'Actie mislukt — probeer het opnieuw.' },
@@ -186,7 +190,6 @@ describe('FAQTab — delete failure must not remove the FAQ from the list', () =
   afterEach(() => vi.restoreAllMocks())
 
   it('keeps the FAQ on screen and toasts an error when DELETE rejects', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     vi.mocked(api.delete).mockRejectedValue(new Error('network error'))
     const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
 
@@ -194,6 +197,8 @@ describe('FAQTab — delete failure must not remove the FAQ from the list', () =
     await screen.findByText('Vergoeding')
 
     fireEvent.click(screen.getByRole('button', { name: 'Verwijderen' }))
+    // The delete only fires after the house ConfirmDialog's own button is pressed.
+    fireEvent.click(await screen.findByRole('button', { name: 'Bevestigen' }))
 
     await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
       detail: { type: 'error', message: 'Actie mislukt — probeer het opnieuw.' },

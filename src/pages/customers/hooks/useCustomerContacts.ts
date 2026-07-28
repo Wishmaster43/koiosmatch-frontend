@@ -22,6 +22,8 @@ import type { Id } from '@/types/common'
 // The editable payload — the fields CustomerContactController::validateContact accepts.
 export interface ContactPayload {
   firstName: string
+  // CONTACT-TUSSENVOEGSEL-1 — validated by CustomerContactController (nullable string).
+  middleName: string
   lastName: string
   email: string
   phone: string
@@ -53,6 +55,7 @@ const dedupeById = (rows: Contact[]): Contact[] => {
 
 const toApi = (p: Partial<ContactPayload>) => ({
   ...(p.firstName !== undefined ? { first_name: p.firstName } : {}),
+  ...(p.middleName !== undefined ? { middle_name: p.middleName } : {}),
   ...(p.lastName !== undefined ? { last_name: p.lastName } : {}),
   ...(p.email !== undefined ? { email: p.email } : {}),
   ...(p.phone !== undefined ? { phone: p.phone } : {}),
@@ -91,7 +94,10 @@ export function useCustomerContacts(customerId: Id | undefined) {
   const add = useCallback((payload: ContactPayload) => {
     if (!customerId) return
     const tmpId = `tmp-${Date.now()}`
-    setContacts(cs => [{ ...mapContact({ id: tmpId } as ApiContact), name: `${payload.firstName} ${payload.lastName}`.trim() }, ...cs])
+    // The optimistic row composes the name the SAME way the backend does (full_name):
+    // first + tussenvoegsel + last, so it does not flicker into a different name.
+    const optimisticName = [payload.firstName, payload.middleName, payload.lastName].filter(Boolean).join(' ').trim()
+    setContacts(cs => [{ ...mapContact({ id: tmpId } as ApiContact), name: optimisticName }, ...cs])
     return api.post(`/customers/${customerId}/contacts`, toApi(payload))
       .then(res => {
         const saved = mapContact(unwrap<ApiContact>(res))

@@ -81,7 +81,6 @@ describe('StatusListEditor — defaultField singleton', () => {
 // error silently — the row just stayed in the list with no explanation.
 describe('StatusListEditor — delete failures notify the user', () => {
   it('notifies on a non-409 delete failure, keeping the row in the list', async () => {
-    vi.stubGlobal('confirm', vi.fn(() => true))
     api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Intake' })] })
     api.delete.mockRejectedValue(new Error('network down'))
     const { notifyError } = await import('@/lib/notify')
@@ -94,6 +93,9 @@ describe('StatusListEditor — delete failures notify the user', () => {
     const editBtn = screen.getByRole('button', { name: st('statusList.edit') })
     const deleteBtn = editBtn.nextElementSibling
     await user.click(deleteBtn)
+    // The delete only fires after the house ConfirmDialog's own button is pressed
+    // (never a bare window.confirm() — §0 restschuld cleanup).
+    await user.click(await screen.findByRole('button', { name: i18n.t('confirm', { ns: 'common' }) }))
 
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/phases/t1'))
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.deleteFailed')))
@@ -102,7 +104,6 @@ describe('StatusListEditor — delete failures notify the user', () => {
   })
 
   it('does not notify on a 409 (in-use) delete rejection — the row is flagged instead', async () => {
-    vi.stubGlobal('confirm', vi.fn(() => true))
     api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Intake' })] })
     api.delete.mockRejectedValue({ response: { status: 409 } })
     const { notifyError } = await import('@/lib/notify')
@@ -112,6 +113,7 @@ describe('StatusListEditor — delete failures notify the user', () => {
     await screen.findByText('Intake')
     const editBtn = screen.getByRole('button', { name: st('statusList.edit') })
     await user.click(editBtn.nextElementSibling)
+    await user.click(await screen.findByRole('button', { name: i18n.t('confirm', { ns: 'common' }) }))
 
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/phases/t1'))
     expect(notifyError).not.toHaveBeenCalled()

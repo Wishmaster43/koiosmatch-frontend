@@ -33,6 +33,7 @@ import { Search, Building } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import StatusFilterSelect, { useStatusFilter } from './StatusFilterSelect'
 import type { Crumb } from '@/components/drawer/DrillBreadcrumb'
 import SoftChipJs from '@/components/ui/SoftChip'
 import DepartmentDetail from './DepartmentDetail'
@@ -94,7 +95,9 @@ export default function DepartmentsPanel({
 
   // THE membership rule, in one place. A department always carries a single locationId.
   const inScope = (d: Department) => scope === 'location' ? String(d.locationId) === String(scopeId) : true
-  const rows = departments.filter(inScope)
+  const scoped = departments.filter(inScope)
+  // Status filter (Danny 28-07) — same component and same defaulting rule on all three lists.
+  const { value: statusFilter, setValue: setStatusFilter, filtered: rows } = useStatusFilter(scoped, statuses)
   // Resolved against the CUSTOMER-WIDE list, never the scoped rows: moving a department to
   // another location must not make its open detail vanish mid-edit.
   const selected = openId != null ? departments.find(d => String(d.id) === String(openId)) ?? null : null
@@ -148,6 +151,7 @@ export default function DepartmentsPanel({
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder={t('departments.searchPlaceholder')} aria-label={t('departments.searchPlaceholder')} style={searchInput} />
         </div>
+        <StatusFilterSelect value={statusFilter} onChange={setStatusFilter} statuses={statuses} />
         <DrawerAddButton onClick={() => setAdding(true)} label={t('departments.add')} />
       </div>
 

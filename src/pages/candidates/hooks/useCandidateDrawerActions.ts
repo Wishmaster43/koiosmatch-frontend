@@ -14,6 +14,7 @@
  */
 import { useState, useRef, useCallback } from 'react'
 import api from '@/lib/api'
+import { useConfirm } from '@/hooks/useConfirm'
 import { useCandidateRecord } from './useCandidateMutations'
 import { needsLiveCheck, fetchLiveBlockers, liveFromError } from '../data/archiveGuard'
 import type { BlockingApplication, BlockingMatch } from '../data/archiveGuard'
@@ -46,6 +47,8 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
   // Deep-link target tab (contact-cell → communication, funnel-chip → work); row click = default.
   const [drawerTab,      setDrawerTab]      = useState<string | undefined>(undefined)
   const selectedIdRef = useRef<Id | null>(null)
+  // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
+  const { confirm, dialog } = useConfirm()
 
   // Full-record load + edit persistence (fetch/PATCH live in the hook, §3).
   const { fetchDetail, patchCandidate } = useCandidateRecord()
@@ -130,10 +133,10 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
 
   // Guarded entry point shared by archive + mark-deletion. The blockers check
   // runs FIRST: when it finds a live application/match the guard modal opens
-  // and NOTHING else happens (no native confirm — the modal itself is the
-  // confirmation). Only the clear case falls through to the plain confirm()
-  // the UI used to show before calling onArchive/onMarkDeletion directly
-  // ("proceed directly as today" — §3B ARCHIVE-GUARD spec point 2).
+  // and NOTHING else happens (no plain confirm — the modal itself is the
+  // confirmation). Only the clear case falls through to the house ConfirmDialog
+  // ("proceed directly as today" — §3B ARCHIVE-GUARD spec point 2), replacing
+  // the native window.confirm() this used to call (§0 restschuld cleanup).
   const guardedLifecycle = async (id: Id, mode: 'archive' | 'trash', confirmKey: string, proceed: () => void) => {
     const cand = candidates.find(x => x.id === id)
     if (needsLiveCheck(cand)) {
@@ -143,8 +146,7 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
         return
       }
     }
-    if (!window.confirm(t(confirmKey, { name: cand?.name ?? '' }))) return
-    proceed()
+    confirm(t(confirmKey, { name: cand?.name ?? '' }), proceed, { danger: true })
   }
 
   // Archive ONE candidate (soft-delete → Gearchiveerd) via the bulk route with a single id.
@@ -200,5 +202,6 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
     archiveOne, restoreOne, markDeletionOne,
     archiveGuard, setArchiveGuard, resolveArchiveGuard,
     eraseTarget, setEraseTarget, hardDeleteOne, confirmHardDelete,
+    dialog,
   }
 }

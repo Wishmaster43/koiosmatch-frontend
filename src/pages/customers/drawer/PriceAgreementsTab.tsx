@@ -17,6 +17,7 @@ import type { PriceAgreementDraft } from './PriceAgreementForm'
 import PriceAgreementRow from './PriceAgreementRow'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import { useLocations } from '@/lib/useLocations'
+import SubTabBar from '@/components/drawer/SubTabBar'
 import type { Customer } from '@/types/customer'
 import type { Id } from '@/types/common'
 
@@ -26,6 +27,10 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
   // Same establishment list the match form uses, so both offer exactly one source.
   const branchOptions = useLocations().map(l => ({ value: String(l.value), label: l.label }))
   const [adding, setAdding] = useState(false)
+  // Danny 28-07: the tab is "Financieel" with two sub-tabs. Price agreements are what an
+  // account manager works in daily; the billing settings are set once and then left, so
+  // they get their own place instead of sitting on top of the list.
+  const [subTab, setSubTab] = useState<'prices' | 'billing'>('prices')
   const [draft, setDraft] = useState<PriceAgreementDraft>(emptyDraft)
 
   // Submit the add-form, then close it and reset for the next entry.
@@ -33,12 +38,20 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
 
   return (
     <div>
-      {/* Facturatie moved here off the company tab (Danny 28-07) — kostenplaats is the
-          top of the afdeling>locatie>klant cascade the placement form reads, and the
-          billing e-mail is the ONE address invoicing uses regardless of which location
-          or department a match picks. Both are money, so they live on the money tab. */}
-      {c && (
-        <div style={{ marginBottom: 14 }}>
+      <SubTabBar
+        tabs={[
+          { id: 'prices',  label: t('drawer.tabs.priceAgreements') },
+          { id: 'billing', label: t('drawer.tabs.billing') },
+        ]}
+        active={subTab}
+        onChange={id => setSubTab(id as typeof subTab)}
+      />
+
+      {/* Facturatie — kostenplaats is the top of the afdeling>locatie>klant cascade the
+          placement form reads, and the billing e-mail is the ONE address invoicing uses
+          regardless of which location or department a match picks. */}
+      {subTab === 'billing' && c && (
+        <div style={{ marginTop: 14 }}>
           <EditableFieldTable
             title={t('overview.billing')}
             fields={[
@@ -54,7 +67,9 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
           />
         </div>
       )}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+      {subTab === 'prices' && (
+      <>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '14px 0 6px' }}>
         <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
           {t('drawer.tabs.priceAgreements')} <span style={{ fontWeight: 400 }}>{agreements.length}</span>
         </span>
@@ -97,6 +112,8 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
       {!loading && !error && agreements.map(a => (
         <PriceAgreementRow key={String(a.id)} agreement={a} onSave={update} onDelete={remove} />
       ))}
+      </>
+      )}
     </div>
   )
 }

@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { Check } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { useConfirm } from '@/hooks/useConfirm'
 import Avatar from '@/components/ui/Avatar'
 import { initialsOf } from '@/lib/initials'
 import { inputStyle, Field, TextEditor, SideList, ListRow } from './management/shared'
@@ -25,6 +26,8 @@ export function AgentsTab() {
   const [prompts,  setPrompts]  = useState<AiItem[]>([])
   const [faqs,     setFaqs]     = useState<AiItem[]>([])
   const [loading,  setLoading]  = useState(true)
+  // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
+  const { confirm, dialog } = useConfirm()
 
   useEffect(() => {
     Promise.all([
@@ -48,40 +51,44 @@ export function AgentsTab() {
     setSelected(agent)
   }
 
-  const onDelete = async (agent: AiAgent) => {
-    if (!confirm(t('ai.agent.confirmDelete', { name: agent.name }))) return
-    try {
-      // The list/selection must only change once the backend confirms the delete —
-      // a failed request used to fall through to the same state update regardless,
-      // making the agent vanish from the UI while it was still live server-side
-      // (mutation lying about success, audit 2026-07-28).
-      await api.delete(`/ai/agents/${agent.id}`)
-    } catch {
-      notifyError(t('common:actionFailed'))
-      return
-    }
-    setAgents(prev => prev.filter(a => a.id !== agent.id))
-    setSelected(agents.find(a => a.id !== agent.id) ?? null)
+  const onDelete = (agent: AiAgent) => {
+    confirm(t('ai.agent.confirmDelete', { name: agent.name }), async () => {
+      try {
+        // The list/selection must only change once the backend confirms the delete —
+        // a failed request used to fall through to the same state update regardless,
+        // making the agent vanish from the UI while it was still live server-side
+        // (mutation lying about success, audit 2026-07-28).
+        await api.delete(`/ai/agents/${agent.id}`)
+      } catch {
+        notifyError(t('common:actionFailed'))
+        return
+      }
+      setAgents(prev => prev.filter(a => a.id !== agent.id))
+      setSelected(agents.find(a => a.id !== agent.id) ?? null)
+    }, { danger: true })
   }
 
   return (
-    <SideList
-      title={t('ai.tabs.agents')} items={agents} selected={selected}
-      onSelect={setSelected} onNew={() => setSelected({ _new: true })} loading={loading}
-      renderItem={(a, active) => (
-        // AI-AGENTS-2: show the linked recruiter/manager user, not a model (removed — MODEL-1).
-        <ListRow key={a.id} item={a} active={active} onSelect={setSelected}
-          label={a.name} sublabel={a.user?.name}
-          leading={a.user ? <Avatar initials={initialsOf(a.user.name)} size={22} soft /> : undefined}
-          onDelete={onDelete} />
-      )}>
-      {selected
-        ? <AgentForm agent={selected._new ? null : selected} prompts={prompts} faqs={faqs} onSaved={onSaved} onDelete={onDelete} />
-        : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 180, fontSize: 12, color: 'var(--text-muted)' }}>
-            {t('ai.agent.selectOrNew')}
-          </div>
-      }
-    </SideList>
+    <>
+      <SideList
+        title={t('ai.tabs.agents')} items={agents} selected={selected}
+        onSelect={setSelected} onNew={() => setSelected({ _new: true })} loading={loading}
+        renderItem={(a, active) => (
+          // AI-AGENTS-2: show the linked recruiter/manager user, not a model (removed — MODEL-1).
+          <ListRow key={a.id} item={a} active={active} onSelect={setSelected}
+            label={a.name} sublabel={a.user?.name}
+            leading={a.user ? <Avatar initials={initialsOf(a.user.name)} size={22} soft /> : undefined}
+            onDelete={onDelete} />
+        )}>
+        {selected
+          ? <AgentForm agent={selected._new ? null : selected} prompts={prompts} faqs={faqs} onSaved={onSaved} onDelete={onDelete} />
+          : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 180, fontSize: 12, color: 'var(--text-muted)' }}>
+              {t('ai.agent.selectOrNew')}
+            </div>
+        }
+      </SideList>
+      {dialog}
+    </>
   )
 }
 
@@ -97,6 +104,8 @@ export function PromptsTab() {
   const [saved,    setSaved]    = useState(false)
   const [versions, setVersions] = useState<Version[]>([])
   const [loading,  setLoading]  = useState(true)
+  // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
+  const { confirm, dialog } = useConfirm()
 
   useEffect(() => {
     api.get('/ai/prompts').then(r => {
@@ -128,34 +137,38 @@ export function PromptsTab() {
     setSaving(false)
   }
 
-  const del = async (p: AiItem) => {
-    if (!confirm(t('ai.prompts.confirmDelete', { name: p.name }))) return
-    try {
-      // Only drop the row once the backend confirms — a failed delete used to remove
-      // it from the list regardless, making it look deleted while still live server-side.
-      await api.delete(`/ai/prompts/${p.id}`)
-    } catch {
-      notifyError(t('common:actionFailed'))
-      return
-    }
-    setPrompts(prev => prev.filter(x => x.id !== p.id))
-    if (selected?.id === p.id) { setSelected(null); setName(''); setBody(''); setVersions([]) }
+  const del = (p: AiItem) => {
+    confirm(t('ai.prompts.confirmDelete', { name: p.name }), async () => {
+      try {
+        // Only drop the row once the backend confirms — a failed delete used to remove
+        // it from the list regardless, making it look deleted while still live server-side.
+        await api.delete(`/ai/prompts/${p.id}`)
+      } catch {
+        notifyError(t('common:actionFailed'))
+        return
+      }
+      setPrompts(prev => prev.filter(x => x.id !== p.id))
+      if (selected?.id === p.id) { setSelected(null); setName(''); setBody(''); setVersions([]) }
+    }, { danger: true })
   }
 
   return (
-    <SideList
-      title={t('ai.tabs.prompts')} items={prompts} selected={selected}
-      onSelect={select} onNew={() => { setSelected(null); setName(''); setBody(''); setVersions([]) }} loading={loading}
-      renderItem={(p, active) => <ListRow key={p.id} item={p} active={active} onSelect={select} label={p.name} onDelete={del} />}>
-      <Field label={t('ai.field.name')}>
-        <input value={name} onChange={e => setName(e.target.value)} style={inputStyle} placeholder={t('ai.prompts.namePlaceholder')} />
-      </Field>
-      <Field label={t('ai.field.content')}>
-        <TextEditor value={body} onChange={setBody} onSave={save} saving={saving} saved={saved}
-          versions={versions} onRestore={v => setBody(v.body ?? v.content ?? '')}
-          placeholder={t('ai.prompts.bodyPlaceholder')} />
-      </Field>
-    </SideList>
+    <>
+      <SideList
+        title={t('ai.tabs.prompts')} items={prompts} selected={selected}
+        onSelect={select} onNew={() => { setSelected(null); setName(''); setBody(''); setVersions([]) }} loading={loading}
+        renderItem={(p, active) => <ListRow key={p.id} item={p} active={active} onSelect={select} label={p.name} onDelete={del} />}>
+        <Field label={t('ai.field.name')}>
+          <input value={name} onChange={e => setName(e.target.value)} style={inputStyle} placeholder={t('ai.prompts.namePlaceholder')} />
+        </Field>
+        <Field label={t('ai.field.content')}>
+          <TextEditor value={body} onChange={setBody} onSave={save} saving={saving} saved={saved}
+            versions={versions} onRestore={v => setBody(v.body ?? v.content ?? '')}
+            placeholder={t('ai.prompts.bodyPlaceholder')} />
+        </Field>
+      </SideList>
+      {dialog}
+    </>
   )
 }
 
@@ -171,6 +184,8 @@ export function FAQTab() {
   const [saved,    setSaved]    = useState(false)
   const [versions, setVersions] = useState<Version[]>([])
   const [loading,  setLoading]  = useState(true)
+  // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
+  const { confirm, dialog } = useConfirm()
 
   useEffect(() => {
     api.get('/ai/faqs').then(r => {
@@ -201,34 +216,38 @@ export function FAQTab() {
     setSaving(false)
   }
 
-  const del = async (f: AiItem) => {
-    if (!confirm(t('ai.faqs.confirmDelete', { name: f.name }))) return
-    try {
-      // Only drop the row once the backend confirms — a failed delete used to remove
-      // it from the list regardless, making it look deleted while still live server-side.
-      await api.delete(`/ai/faqs/${f.id}`)
-    } catch {
-      notifyError(t('common:actionFailed'))
-      return
-    }
-    setFaqs(prev => prev.filter(x => x.id !== f.id))
-    if (selected?.id === f.id) { setSelected(null); setName(''); setBody('') }
+  const del = (f: AiItem) => {
+    confirm(t('ai.faqs.confirmDelete', { name: f.name }), async () => {
+      try {
+        // Only drop the row once the backend confirms — a failed delete used to remove
+        // it from the list regardless, making it look deleted while still live server-side.
+        await api.delete(`/ai/faqs/${f.id}`)
+      } catch {
+        notifyError(t('common:actionFailed'))
+        return
+      }
+      setFaqs(prev => prev.filter(x => x.id !== f.id))
+      if (selected?.id === f.id) { setSelected(null); setName(''); setBody('') }
+    }, { danger: true })
   }
 
   return (
-    <SideList
-      title={t('ai.tabs.faqs')} items={faqs} selected={selected}
-      onSelect={select} onNew={() => { setSelected(null); setName(''); setBody(''); setVersions([]) }} loading={loading}
-      renderItem={(f, active) => <ListRow key={f.id} item={f} active={active} onSelect={select} label={f.name} onDelete={del} />}>
-      <Field label={t('ai.field.name')}>
-        <input value={name} onChange={e => setName(e.target.value)} style={inputStyle} placeholder={t('ai.faqs.namePlaceholder')} />
-      </Field>
-      <Field label={t('ai.faqs.contentLabel')}>
-        <TextEditor value={body} onChange={setBody} onSave={save} saving={saving} saved={saved}
-          versions={versions} onRestore={v => setBody(v.body ?? v.content ?? '')}
-          placeholder={t('ai.faqs.bodyPlaceholder')} />
-      </Field>
-    </SideList>
+    <>
+      <SideList
+        title={t('ai.tabs.faqs')} items={faqs} selected={selected}
+        onSelect={select} onNew={() => { setSelected(null); setName(''); setBody(''); setVersions([]) }} loading={loading}
+        renderItem={(f, active) => <ListRow key={f.id} item={f} active={active} onSelect={select} label={f.name} onDelete={del} />}>
+        <Field label={t('ai.field.name')}>
+          <input value={name} onChange={e => setName(e.target.value)} style={inputStyle} placeholder={t('ai.faqs.namePlaceholder')} />
+        </Field>
+        <Field label={t('ai.faqs.contentLabel')}>
+          <TextEditor value={body} onChange={setBody} onSave={save} saving={saving} saved={saved}
+            versions={versions} onRestore={v => setBody(v.body ?? v.content ?? '')}
+            placeholder={t('ai.faqs.bodyPlaceholder')} />
+        </Field>
+      </SideList>
+      {dialog}
+    </>
   )
 }
 

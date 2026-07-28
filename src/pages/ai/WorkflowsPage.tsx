@@ -68,6 +68,7 @@ export default function WorkflowsPage() {
           onSave={data.handleSave}
         />
       )}
+      {data.dialog}
     </div>
   )
 }

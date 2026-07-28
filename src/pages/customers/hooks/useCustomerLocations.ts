@@ -32,7 +32,8 @@ export interface LocationPayload {
   billingEmail: string
   statusId: Id | null
   // Tenant custom-field values (§3B "Eigen velden" — the Extra sub-tab).
-  customFields: Record<string, unknown>
+  customFields: Record<string, unknown>  /** LOCATIE-VESTIGING-1 — empty array = no deviation (inherit the customer's set). */
+  branchIds: Id[]
 }
 
 const isTemp = (id: Id | undefined) => typeof id === 'string' && id.startsWith('tmp-')
@@ -57,6 +58,10 @@ const toApi = (p: Partial<LocationPayload>) => ({
   ...(p.billingEmail !== undefined ? { billing_email: p.billingEmail } : {}),
   ...(p.statusId !== undefined ? { status_id: p.statusId || null } : {}),
   ...(p.customFields !== undefined ? { custom_fields: p.customFields } : {}),
+  // LOCATIE-VESTIGING-1: this site's OWN branch couplings. An ABSENT key leaves the
+  // deviation untouched; an EMPTY ARRAY clears it, which is how a site goes back to
+  // inheriting the customer's branches. So it must be sent as [], never omitted.
+  ...(p.branchIds !== undefined ? { branch_ids: p.branchIds } : {}),
 })
 
 // Monotonic counter behind the optimistic row id (see `add`).

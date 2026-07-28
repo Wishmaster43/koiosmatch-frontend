@@ -33,7 +33,7 @@ const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'c
 // baseContact) — only the fields each test cares about vary.
 const baseContact = (overrides: Partial<Contact> = {}): Contact => ({
   id: 'c1', helloflexLink: null, shiftmanagerLink: null,
-  firstName: 'Jan', lastName: 'Jansen', name: 'Jan Jansen',
+  firstName: 'Jan', middleName: '', lastName: 'Jansen', name: 'Jan Jansen',
   role: '', email: '', phone: '', mobile: '', isPrimary: false,
   locationId: null, locationName: '', departmentId: null, departmentName: '',
   locations: [], departments: [], statusId: null, status: '', statusLabel: '', statusColor: '',

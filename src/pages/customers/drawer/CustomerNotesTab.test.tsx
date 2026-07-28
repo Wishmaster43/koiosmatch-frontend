@@ -1,14 +1,11 @@
 /**
- * CustomerNotesTab · "+ Nieuwe taak" trigger (Danny 28-07, JOB A: create a task
- * from the customer drawer). Mounts the REAL AddTaskModal (not a stub) so the
- * assertion proves the actual REQUEST body — §13: a mutation test must assert
- * the request, never only that a callback fired. Covers: the trigger only shows
- * in the Notities view (not Communicatie/timeline), the customer field renders
- * LOCKED read-only text (never a picker the recruiter could repoint), and the
- * POST carries the customer link.
+ * CustomerNotesTab — this tab is notes and timeline, nothing else. It briefly carried a
+ * "+ Nieuwe taak" trigger because GET /tasks?customer= ignored its filter, so a real
+ * Taken tab could not be built; that filter works now and Danny had it removed
+ * ("hoort hier niet"). This test holds that line: no task trigger, no task modal.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import CustomerNotesTab from './CustomerNotesTab'
 
@@ -31,10 +28,10 @@ vi.mock('@/context/TaskLookupsContext', () => ({
   }),
 }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
-// Stubbed: this file tests the TRIGGER's contract, not the modal's internals.
-let lastTaskModalProps: Record<string, unknown> = {}
+// Stubbed so a stray render would be VISIBLE as a testid rather than mounting the real
+// modal (which once hung the whole suite).
 vi.mock('@/pages/tasks/AddTaskModal', () => ({
-  default: (props: Record<string, unknown>) => { lastTaskModalProps = props; return <div data-testid="add-task-modal" /> },
+  default: () => <div data-testid="add-task-modal" />,
 }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 // The candidate/customer/contact link pickers each GET their own list; empty
@@ -49,34 +46,15 @@ vi.mock('@/lib/api', async (importOriginal) => {
 // Minimal customer record — only the Vacature-zichtbaarheid sub-tab reads it.
 const customer = { id: 'cust-1', name: 'Acme Zorg' } as never
 
-describe('CustomerNotesTab · "+ Nieuwe taak" trigger', () => {
-  it('shows the trigger in the Notities view but not in the Communicatie (timeline) view', async () => {
-    // Notities is the default sub-tab; switching to Tijdlijn must hide the trigger.
-    render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]} c={customer} />)
-    expect(screen.getByRole('button', { name: 'drawer.newTask' })).toBeInTheDocument()
-
-    // SubTabBar exposes role="tab" since it became a real tablist (28-07).
-    fireEvent.click(screen.getByRole('tab', { name: 'notes.timeline' }))
-    // Await the activity fetch the Tijdlijn view kicks off — leaving it in flight makes
-    // React warn about an un-acted update and keeps the worker alive after the run.
-    await waitFor(() => expect(screen.queryByRole('button', { name: 'drawer.newTask' })).not.toBeInTheDocument())
-  })
-
-  it('does not render the modal until the trigger is clicked', () => {
-    render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]} c={customer} />)
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-  })
-
-  // The trigger's contract with the modal: it must hand over THIS customer, locked.
-  // Asserted on the props rather than by mounting the real AddTaskModal — that mount
-  // left in-flight lookup promises that kept the vitest worker alive after the run, so
-  // the whole file never reported (measured 28-07). The POST body itself is covered
-  // where it belongs, in AddTaskModal.test.tsx, which asserts the real request.
-  it('opens the task modal with THIS customer pre-linked and locked', () => {
-    render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]} c={customer} />)
-    fireEvent.click(screen.getByRole('button', { name: 'drawer.newTask' }))
-
-    expect(screen.getByTestId('add-task-modal')).toBeInTheDocument()
-    expect(lastTaskModalProps).toMatchObject({ lockCustomerId: 'cust-1', lockCustomerName: 'Acme Zorg' })
+describe('CustomerNotesTab · geen taak-trigger', () => {
+  // Danny 28-07: "+ nieuwe taak moet weg, hoort hier niet". It only ever sat on this tab
+  // because GET /tasks?customer= ignored its filter, so a real Taken tab could not be
+  // built and a create-only button was the most that was honest. That filter works now,
+  // so tasks belong in their own tab — this one is notes and timeline, nothing else.
+  it('renders no task trigger on the Notities view', () => {
+    render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]} onAddNote={vi.fn()} c={customer} onSave={vi.fn()} />)
+    // t() echoes raw keys here (see the datetime mock), so the key IS the label.
+    expect(screen.queryByRole('button', { name: 'drawer.newTask' })).toBeNull()
+    expect(screen.queryByTestId('add-task-modal')).toBeNull()
   })
 })

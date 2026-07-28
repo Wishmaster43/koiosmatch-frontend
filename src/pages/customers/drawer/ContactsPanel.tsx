@@ -23,6 +23,7 @@ import { Search, Users, Link2, Unlink } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import StatusFilterSelect, { useStatusFilter } from './StatusFilterSelect'
 import DrillBreadcrumb from '@/components/drawer/DrillBreadcrumb'
 import type { Crumb } from '@/components/drawer/DrillBreadcrumb'
 import SoftChipJs from '@/components/ui/SoftChip'
@@ -96,7 +97,9 @@ export default function ContactsPanel({
     scope === 'location' ? String(c.locationId) === String(scopeId)
       : scope === 'department' ? String(c.departmentId) === String(scopeId)
         : true
-  const rows = contacts.filter(inScope)
+  const scoped = contacts.filter(inScope)
+  // Status filter (Danny 28-07) — same component and same defaulting rule on all three lists.
+  const { value: statusFilter, setValue: setStatusFilter, filtered: rows } = useStatusFilter(scoped, statuses)
   // Resolved against the CUSTOMER-WIDE list, never the scoped rows: editing a contact's
   // location moves it out of this scope, and the open detail must not vanish mid-edit.
   const selected = openId != null ? contacts.find(c => String(c.id) === String(openId)) ?? null : null
@@ -206,6 +209,7 @@ export default function ContactsPanel({
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder={t('contacts.searchHere')} aria-label={t('contacts.searchHere')} style={searchInput} />
         </div>
+        <StatusFilterSelect value={statusFilter} onChange={setStatusFilter} statuses={statuses} />
         {/* Coupling only exists inside a scope; at customer level a contact is already "here". */}
         {scope !== 'customer' && (
           <DrawerAddButton onClick={() => setModal('couple')} icon={Link2}

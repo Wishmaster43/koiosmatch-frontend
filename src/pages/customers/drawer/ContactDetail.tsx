@@ -91,6 +91,8 @@ export default function ContactDetail({ contact, locations, departments, statuse
   // below, exactly like a location (§3A(c) — the header shows state, the card shows data).
   const fields: FieldRow[] = [
     { key: 'firstName', label: t('subModal.firstName'), type: 'text' },
+    // CONTACT-TUSSENVOEGSEL-1: editing a contact used to drop this silently.
+    { key: 'middleName', label: t('contacts.detail.middleName'), type: 'text' },
     { key: 'lastName', label: t('subModal.lastName'), type: 'text' },
     { key: 'role', label: t('contacts.detail.role'), type: 'creatable', options: contactFunctions, allowCreate: allowFreeEntry },
     { key: 'email', label: t('contacts.detail.email'), type: 'text',
@@ -106,6 +108,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
 
   const values = {
     firstName: contact.firstName,
+    middleName: contact.middleName,
     lastName: contact.lastName,
     role: contact.role,
     email: contact.email,
@@ -121,7 +124,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
   const save = (v: Record<string, unknown>) => {
     const commit = (isPrimary: boolean) => {
       onSave(contact.id as Id, {
-        firstName: v.firstName as string, lastName: v.lastName as string,
+        firstName: v.firstName as string, middleName: v.middleName as string, lastName: v.lastName as string,
         role: v.role as string, email: v.email as string,
         mobile: v.mobile as string, phone: v.phone as string,
         isPrimary,

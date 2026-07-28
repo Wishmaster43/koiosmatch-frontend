@@ -17,14 +17,11 @@
  * embedded `timeline` array the way Candidate does (candidates get theirs
  * straight from GET /candidates/{id}).
  *
- * "+ Nieuwe taak" (Danny 28-07, JOB A): the Notities view is where an account
- * manager actively adds follow-up content about a customer — the same "add
- * something about this record" moment as "+ Notitie" next to it — so the task
- * trigger lives here rather than inventing a Taken tab. A customer TASK LIST is
- * deliberately NOT built: GET /tasks?customer={id} ignores the filter and would
- * show all tenant tasks (measured 28-07, filed as CMBE TAKEN-OP-KLANT-1), so this
- * stays a create-only trigger, pre-linked via AddTaskModal's lockCustomerId —
- * mirrors the outreach TargetsTab's per-row "+ task" (also create-only, no list).
+ * NO task trigger here (Danny 28-07: "+ nieuwe taak moet weg, hoort hier niet"). It sat
+ * on this tab only because GET /tasks?customer={id} used to ignore its filter, so a real
+ * Taken tab could not be built and a create-only button was the most that was honest.
+ * That filter works now (TASKS-LINK-FILTER-1), so tasks belong in their own tab on the
+ * customer — not bolted onto Notities.
  */
 import { useState, useEffect } from 'react'
 import type { ComponentType } from 'react'
@@ -32,11 +29,8 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { isAbortError } from '@/lib/mocks'
 import SubTabBar from '@/components/drawer/SubTabBar'
-import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
-import AddTaskModal from '@/pages/tasks/AddTaskModal'
 import VacancySettingsTab from './VacancySettingsTab'
-import { TaskLookupsProvider } from '@/context/TaskLookupsContext'
 import { useNoteTypes } from '@/lib/useNoteTypes'
 import type { Id } from '@/types/common'
 import type { Customer, CustomerNote } from '@/types/customer'
@@ -73,8 +67,6 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
   const [subTab, setSubTab] = useState('notes')
   const [timeline, setTimeline] = useState<TimelineEntry[]>([])
   const active = subTab
-  // "+ Nieuwe taak" — see the file header for why this lives here and stays create-only.
-  const [addingTask, setAddingTask] = useState(false)
 
   // Fetch the activity feed lazily, only once the Tijdlijn sub-tab is opened.
   useEffect(() => {
@@ -111,28 +103,10 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
         active={subTab}
         onChange={setSubTab}
       />
-      {active === 'notes' && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <DrawerAddButton onClick={() => setAddingTask(true)} label={t('drawer.newTask')} />
-        </div>
-      )}
       {active === 'notes'    && <NotesTab {...notesProps} showTimeline={false} showConversations={false} />}
       {active === 'timeline' && <NotesTab {...notesProps} showNotes={false} showConversations={false} />}
       {active === 'vacancySettings' && <VacancySettingsTab c={c} onSave={onSave} />}
 
-      {/* New task pre-linked to this customer (read-only in LinkCard, see AddTaskModal's
-          lockCustomerId). AddTaskModal reads useTaskLookups — outside TasksPage that
-          provider is absent (live crash, Danny 18-07), so it wraps its own here, mirroring
-          CandidateTasks/TasksTab/TargetsTab. */}
-      {addingTask && customerId != null && (
-        <TaskLookupsProvider>
-          <AddTaskModal
-            lockCustomerId={String(customerId)} lockCustomerName={customerName}
-            onClose={() => setAddingTask(false)}
-            onCreated={() => setAddingTask(false)}
-          />
-        </TaskLookupsProvider>
-      )}
     </div>
   )
 }

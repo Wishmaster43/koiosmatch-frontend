@@ -37,7 +37,6 @@ describe('AppointmentLocationSettings', () => {
   it('a 409 on delete keeps the row and flags it in-use instead of removing it', async () => {
     api.get.mockResolvedValue({ data: [location({ is_default: false }), location({ id: 'l2', name: 'Online', is_default: true })] })
     api.delete.mockRejectedValue({ response: { status: 409 } })
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     const user = userEvent.setup()
     render(<AppointmentLocationSettings />)
 
@@ -48,6 +47,9 @@ describe('AppointmentLocationSettings', () => {
     const kantoorRow = screen.getByText('Kantoor').closest('div')
     const rowButtons = kantoorRow.querySelectorAll('button')
     await user.click(rowButtons[rowButtons.length - 1])
+    // The delete only fires after the house ConfirmDialog's own button is pressed
+    // (StatusListEditor no longer calls the native window.confirm() — §0 restschuld).
+    await user.click(await screen.findByRole('button', { name: i18n.t('confirm', { ns: 'common' }) }))
 
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/appointment-locations/l1'))
     // Row survives the 409 (never silently removed) — its name is still on screen.

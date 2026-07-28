@@ -469,7 +469,10 @@
     "contactName": "Contactpersoon",
     "phone": "Telefoon",
     "email": "E-mailadres",
-    "mapNoCoords": "Nog geen vestigingen met coördinaten — vul het adres van een locatie in, dan verschijnt die automatisch op de kaart."
+    "mapNoCoords": "Nog geen vestigingen met coördinaten — vul het adres van een locatie in, dan verschijnt die automatisch op de kaart.",
+    "color": "Kleur",
+    "icon": "Icoon",
+    "colorHint": "Kleur en icoon maken een vestiging herkenbaar in lijsten en op de kaart."
   },
   "memory": {
     "title": "Geheugen",
@@ -1227,6 +1230,34 @@
       "customers": {
         "title": "Klanten",
         "desc": "Klantgegevens met locaties en contactpersonen."
+      },
+      "contacts": {
+        "title": "Contactpersonen",
+        "desc": "Contactpersonen met klant, locatie, afdeling en contactgegevens."
+      },
+      "locations": {
+        "title": "Locaties",
+        "desc": "Klantlocaties met adres, registratienummers en kostenplaats."
+      },
+      "departments": {
+        "title": "Afdelingen",
+        "desc": "Afdelingen met hun locatie en kostenplaats."
+      },
+      "matches": {
+        "title": "Matches",
+        "desc": "Matches met kandidaat, vacature, status en plaatsingsgegevens."
+      },
+      "tasks": {
+        "title": "Taken",
+        "desc": "Taken met status, prioriteit, eigenaar en gekoppeld record."
+      },
+      "opportunities": {
+        "title": "Kansen",
+        "desc": "Kansen met fase, klant, waarde en eigenaar."
+      },
+      "outreach": {
+        "title": "Bellijsten",
+        "desc": "Bellijsten met doelgroep, uitkomst en laatste contact."
       }
     }
   },

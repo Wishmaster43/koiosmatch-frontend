@@ -37,7 +37,9 @@
     "categories": {
       "general": "General",
       "organisation": "Organización"
-    }
+    },
+    "allStatuses": "Todos los estados",
+    "statusFilter": "Filtrar por estado"
   },
   "insights": {
     "statusTitle": "Estado",
@@ -78,11 +80,13 @@
       "opportunities": "Oportunidades",
       "planning": "Planificación",
       "statistics": "Estadísticas",
-      "priceAgreements": "Acuerdos de tarifas",
+      "priceAgreements": "Acuerdos de precios",
       "documents": "Documentos",
       "notes": "Notas",
       "communication": "Comunicación",
-      "extra": "Extra"
+      "extra": "Extra",
+      "financial": "Financiero",
+      "billing": "Facturación"
     },
     "changelog": "Cambios",
     "photoUpload": "Subir logo",
@@ -191,7 +195,13 @@
       "pickContactSearch": "Buscar por nombre, función o correo",
       "pickContactLinks": "Vinculado actualmente a",
       "pickContactNoLinks": "Aún sin vincular",
-      "coupleNote": "Vincular MUEVE el contacto a esta ubicación — se desvincula de la actual."
+      "coupleNote": "Vincular MUEVE el contacto a esta ubicación — se desvincula de la actual.",
+      "branchTitle": "Sede",
+      "branchInherited": "Sigue al cliente",
+      "branchOwn": "Definido aparte",
+      "branchLink": "Vincular sede",
+      "branchEmpty": "Sin sede propia — esta ubicación sigue al cliente.",
+      "branchHint": "Dejarlo vacío significa: mismas sedes que el cliente. Vincular una aquí crea una excepción deliberada."
     },
     "saveFailed": "Error al guardar.",
     "deleteFailed": "Error al eliminar.",
@@ -262,7 +272,8 @@
         "tasks": "Tareas"
       },
       "linkLocation": "Vincular ubicación",
-      "linkDepartment": "Vincular departamento"
+      "linkDepartment": "Vincular departamento",
+      "middleName": "Partícula"
     },
     "deleteConfirm": "¿Eliminar este contacto?",
     "saveFailed": "Error al guardar.",
@@ -292,7 +303,8 @@
     "filter": {
       "status": "Estado"
     },
-    "add": "Nueva vacante"
+    "add": "Nueva vacante",
+    "searchPlaceholder": "Buscar vacante…"
   },
   "opportunities": {
     "title": "Oportunidades",
@@ -514,7 +526,8 @@
       "body": "{{name}} es actualmente el contacto principal de este cliente. ¿Reemplazarlo?",
       "confirm": "Sí, reemplazar",
       "decline": "No, no reemplazar"
-    }
+    },
+    "middleName": "Partícula"
   },
   "changelog": {
     "empty": "Aún no hay cambios."
