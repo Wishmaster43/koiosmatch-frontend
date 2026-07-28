@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X, Trash2 } from 'lucide-react'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
-import SubTabBar from '@/components/drawer/SubTabBar'
 import ProfilePersonalTab from './ProfilePersonalTab'
 import ProfileAddressTab from './ProfileAddressTab'
 import ProfileContactTab from './ProfileContactTab'
@@ -15,28 +14,20 @@ type AnyProps = Record<string, unknown>
 const RichTextEditor = RichTextEditorJs as unknown as ComponentType<AnyProps>
 const SafeHtml = SafeHtmlJs as unknown as ComponentType<AnyProps>
 
-/** Profile tab — thin container composing three field sub-tabs (Personal /
- *  Address / Contact, Danny 28-07: the old single pencil flipped ~15 fields at
- *  once, "ruk om te onderhouden") plus the profile TEXT block, which keeps its
- *  own separate pencil outside the sub-tabs exactly as before — it was already
- *  the good part (own edit state, rich text, expand/collapse). The Koios AI
- *  advice block lives one level up in ProfilePanel.tsx, also unaffected. */
+/** Profile tab — ONE tab (as it has always been), stacking three independently
+ *  editable cards: Persoonlijk / Adres / Contact, each with its own pencil.
+ *
+ *  Danny 28-07: the old single pencil flipped ~15 fields at once ("ruk om te
+ *  onderhouden"), so the edit state was split per card. A sub-tab strip was tried
+ *  first and rejected the same day — this drawer is the house BLUEPRINT (§3A) and
+ *  its layout should not change; only the "whole form opens at once" behaviour had
+ *  to go. Keeping all three mounted also means switching cards mid-edit can no
+ *  longer discard a draft, which the sub-tab version did.
+ *
+ *  The profile TEXT block keeps its own separate pencil below, exactly as before;
+ *  the Koios AI advice block lives one level up in ProfilePanel.tsx, unaffected. */
 export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candidate; onEditSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number }) {
   const { t } = useTranslation('candidates')
-
-  // Sub-tab strip — Persoonlijk · Adres · Contact, one pencil each (≤7 fields).
-  const SUB_TABS = [
-    { id: 'personal', label: t('profile.groupPersonal') },
-    { id: 'address',  label: t('profile.groupAddress') },
-    { id: 'contact',  label: t('profile.groupContact') },
-  ]
-  const [subTab, setSubTab] = useState('personal')
-  // Jump back to Personal whenever the parent bumps autoEditSignal (Lead→Kandidaat
-  // convert with missing required fields) — each sub-tab independently opens its
-  // OWN editing state on the same signal, so tabbing through still finds every
-  // section already in edit mode, same as the old single-toggle behaviour.
-  const [prevAutoEdit, setPrevAutoEdit] = useState(autoEditSignal ?? 0)
-  if ((autoEditSignal ?? 0) !== prevAutoEdit) { setPrevAutoEdit(autoEditSignal ?? 0); setSubTab('personal') }
 
   const [summaryEditing, setSummaryEditing] = useState(false)
   const [summaryExpanded, setSummaryExpanded] = useState(false)
@@ -64,13 +55,12 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
 
-      {/* ── Profile fields, split into sub-tabs — one pencil per group ── */}
-      <div>
-        <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
-        {subTab === 'personal' && <ProfilePersonalTab c={c} onSave={onEditSave} autoEditSignal={autoEditSignal} />}
-        {subTab === 'address'  && <ProfileAddressTab  c={c} onSave={onEditSave} autoEditSignal={autoEditSignal} />}
-        {subTab === 'contact'  && <ProfileContactTab  c={c} onSave={onEditSave} autoEditSignal={autoEditSignal} />}
-      </div>
+      {/* ── Profile fields — three stacked cards, one pencil each. All mounted, so
+             editing one never discards another's draft. Order matches the old
+             single-card layout: Persoonlijk, Adres, Contact. ── */}
+      <ProfilePersonalTab c={c} onSave={onEditSave} autoEditSignal={autoEditSignal} />
+      <ProfileAddressTab  c={c} onSave={onEditSave} autoEditSignal={autoEditSignal} />
+      <ProfileContactTab  c={c} onSave={onEditSave} autoEditSignal={autoEditSignal} />
 
       {/* ── Profile text — same rich editor as Notes (formatting + HTML toggle + expand) ── */}
       <div>

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useProvinces } from '@/hooks/useProvinces'
 import { getCountryOptions, getCountryName } from '@/lib/countries'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
-import { FieldRow, EditControls, GroupCard, inputStyle } from './profileFieldShared'
+import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import type { Candidate } from '@/types/candidate'
 
@@ -127,9 +127,9 @@ export default function ProfileAddressTab({ c, onSave, autoEditSignal }: {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 8 }}>
+      <GroupHeader title={t('profile.groupAddress')}>
         <EditControls editing={editing} onSave={save} onCancel={cancel} onStart={() => setEditing(true)} />
-      </div>
+      </GroupHeader>
       <GroupCard>
         {addressRow()}
         {field('province', t('profile.province'))}

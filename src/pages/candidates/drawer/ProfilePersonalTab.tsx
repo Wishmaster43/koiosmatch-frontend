@@ -7,7 +7,7 @@ import { useDateFormat, calcAge, daysUntilBirthday } from '@/lib/datetime'
 import { useGenders } from '@/lib/useGenders'
 import { useNationalities } from '@/lib/useNationalities'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
-import { FieldRow, EditControls, GroupCard, inputStyle } from './profileFieldShared'
+import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import type { Candidate } from '@/types/candidate'
 
@@ -130,9 +130,9 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 8 }}>
+      <GroupHeader title={t('profile.groupPersonal')}>
         <EditControls editing={editing} onSave={save} onCancel={cancel} onStart={() => setEditing(true)} />
-      </div>
+      </GroupHeader>
       <GroupCard>
         {field('gender', t('profile.gender'))}
         {field('nationality', t('profile.nationality'))}

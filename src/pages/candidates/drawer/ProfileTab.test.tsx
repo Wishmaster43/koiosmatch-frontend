@@ -11,11 +11,13 @@ vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: ['Utr
 vi.mock('@/components/ui/RichTextEditor', () => ({ default: () => null }))
 vi.mock('@/components/ui/SafeHtml', () => ({ default: () => null }))
 
-// Danny 28-07 split: the old single pencil flipped ~15 fields at once ("ruk om
-// te onderhouden"). ProfileTab is now a thin container over three sub-tabs
-// (Personal/Address/Contact), each with its own pencil — mirrors the
-// PreferencesZzpTabs sub-tab pattern already used elsewhere in this drawer.
-describe('ProfileTab · thin container over Personal/Address/Contact sub-tabs', () => {
+// Danny 28-07: the old single pencil flipped ~15 fields at once ("ruk om te
+// onderhouden"), so the edit state was split PER CARD. A sub-tab strip was tried
+// first and rejected the same day — this drawer is the house blueprint (§3A), its
+// layout stays one tab; only the "whole form opens at once" behaviour is gone.
+// These tests pin exactly that: three cards visible together, three independent
+// pencils, and a fourth for the profile text.
+describe('ProfileTab · one tab, one pencil per card', () => {
   const candidate = {
     id: 1, gender: 'male', nationality: 'Nederlands', dob: '1990-01-01', placeOfBirth: 'Utrecht',
     street: 'Kerkstraat', houseNumber: '12', houseNumberSuffix: '', postalCode: '1234 AB', city: 'Utrecht',
@@ -23,57 +25,41 @@ describe('ProfileTab · thin container over Personal/Address/Contact sub-tabs', 
     summary: '', phase: 'candidate',
   } as unknown as Candidate
 
-  it('renders the three sub-tabs, defaulting to Persoonlijk', () => {
+  it('shows all three field cards at once — no sub-tab strip', () => {
     render(<ProfileTab c={candidate} />)
-    const tabs = screen.getAllByRole('tab').map(el => el.textContent)
-    expect(tabs).toEqual(['Persoonlijk', 'Adres', 'Contact'])
-    expect(screen.getByRole('tab', { name: 'Persoonlijk' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.queryAllByRole('tab')).toHaveLength(0)
     expect(screen.getByText('Geslacht')).toBeInTheDocument()
-    expect(screen.queryByText('Straat')).toBeNull()
-    expect(screen.queryByText('E-mailadres')).toBeNull()
-  })
-
-  it('Adres shows only the address fields and hides Persoonlijk/Contact', async () => {
-    const user = userEvent.setup()
-    render(<ProfileTab c={candidate} />)
-    await user.click(screen.getByRole('tab', { name: 'Adres' }))
     expect(screen.getByText('Kerkstraat 12, 1234 AB Utrecht')).toBeInTheDocument()
-    expect(screen.queryByText('Geslacht')).toBeNull()
-    expect(screen.queryByText('E-mailadres')).toBeNull()
-  })
-
-  it('Contact shows only the contact fields and hides Persoonlijk/Adres', async () => {
-    const user = userEvent.setup()
-    render(<ProfileTab c={candidate} />)
-    await user.click(screen.getByRole('tab', { name: 'Contact' }))
     expect(screen.getByText('E-mailadres')).toBeInTheDocument()
-    expect(screen.queryByText('Geslacht')).toBeNull()
-    expect(screen.queryByText('Straat')).toBeNull()
   })
 
-  it('editing Persoonlijk does not open a pencil on Adres/Contact — each sub-tab keeps its own edit state', async () => {
-    const user = userEvent.setup()
-    render(<ProfileTab c={candidate} />)
-    // Two pencils exist at rest: the active sub-tab's (index 0, DOM order) + the
-    // profile-text block's own (index 1) — click only the sub-tab's.
-    await user.click(screen.getAllByTitle('Bewerken')[0])
-    expect(screen.getByTitle('Opslaan')).toBeInTheDocument()
-    // Only the summary's pencil remains while Persoonlijk is mid-edit.
-    expect(screen.getAllByTitle('Bewerken')).toHaveLength(1)
-    await user.click(screen.getByRole('tab', { name: 'Adres' }))
-    // Adres mounts fresh — its OWN pencil, not a leftover Save/Cancel from Persoonlijk.
-    expect(screen.getAllByTitle('Bewerken')).toHaveLength(2)
-    expect(screen.queryByTitle('Opslaan')).toBeNull()
-  })
-
-  it('the profile-text block keeps its own separate pencil, untouched by the field sub-tabs', () => {
+  it('gives each card its own pencil, plus one for the profile text', () => {
     render(<ProfileTab c={{ ...candidate, summary: '<p>Hello</p>' } as unknown as Candidate} />)
     expect(screen.getByText('Profieltekst')).toBeInTheDocument()
-    // Two pencils are visible at once: Persoonlijk's (active sub-tab) + the summary's own.
-    expect(screen.getAllByTitle('Bewerken')).toHaveLength(2)
+    // Persoonlijk + Adres + Contact + de profieltekst.
+    expect(screen.getAllByTitle('Bewerken')).toHaveLength(4)
   })
 
-  it('calls onEditSave with only the edited sub-tab\'s fields when Personal saves', async () => {
+  it('editing one card leaves the others read-only — the whole form no longer opens', async () => {
+    const user = userEvent.setup()
+    render(<ProfileTab c={candidate} />)
+    await user.click(screen.getAllByTitle('Bewerken')[0])
+    // One card is in edit mode; the other two cards + the profile text still show a pencil.
+    expect(screen.getByTitle('Opslaan')).toBeInTheDocument()
+    expect(screen.getAllByTitle('Bewerken')).toHaveLength(3)
+  })
+
+  it('keeps another card\'s draft intact while a second card is edited', async () => {
+    const user = userEvent.setup()
+    render(<ProfileTab c={candidate} />)
+    // Open Persoonlijk, then open Adres too: both stay mounted, so neither loses its
+    // in-progress state (the rejected sub-tab version discarded it on switch).
+    await user.click(screen.getAllByTitle('Bewerken')[0])
+    await user.click(screen.getAllByTitle('Bewerken')[0])
+    expect(screen.getAllByTitle('Opslaan')).toHaveLength(2)
+  })
+
+  it('saves only the edited card\'s own fields', async () => {
     const user = userEvent.setup()
     const onEditSave = vi.fn()
     render(<ProfileTab c={candidate} onEditSave={onEditSave} />)

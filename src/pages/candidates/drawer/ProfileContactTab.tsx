@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, Mail, Phone } from 'lucide-react'
 import { waDigits } from '@/lib/waDigits'
-import { FieldRow, EditControls, GroupCard, inputStyle } from './profileFieldShared'
+import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import type { Candidate } from '@/types/candidate'
 
@@ -132,9 +132,9 @@ export default function ProfileContactTab({ c, onSave, autoEditSignal }: {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 8 }}>
+      <GroupHeader title={t('profile.groupContact')}>
         <EditControls editing={editing} onSave={save} onCancel={cancel} onStart={() => setEditing(true)} />
-      </div>
+      </GroupHeader>
       <GroupCard>
         {field('email', t('profile.email'))}
         {field('mobile', t('profile.mobile'))}

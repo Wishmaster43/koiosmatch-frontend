@@ -25,12 +25,23 @@ export const iconBtn: CSSProperties = {
 
 const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
 
-// Un-titled bordered card holding one sub-tab's field rows — no group title
-// inside it (the SubTabBar's own active label already names the group, so a
-// second in-content heading would just repeat it, mirroring the addendum-4
-// convention already used by PreferencesZzpTabs).
+// Bordered card holding one group's field rows. The group NAME is not in here — it sits
+// on the header row above the card, next to the pencil, exactly like the profile-text
+// block does (Danny 28-07: "kopjes horen er buiten te staan, kijk maar naar profiel
+// txt"). See GroupHeader below; one heading convention for the whole tab.
 export function GroupCard({ children }: { children: ReactNode }) {
   return <div style={{ ...blockStyle, padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>{children}</div>
+}
+
+// The row above a card: group title on the left, its own pencil/save/cancel on the
+// right — the same shape the profile-text block already uses.
+export function GroupHeader({ title, children }: { title: ReactNode; children: ReactNode }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+      <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{title}</span>
+      {children}
+    </div>
+  )
 }
 
 // One labelled field row: label-left (with optional required marker/icon),
