@@ -108,35 +108,46 @@ describe('PreferencesTab · status edit pencil (Danny 2026-07-20)', () => {
   })
 })
 
-describe('ZzpTab · sub-tabs (kandidaten-ronde-2, punt E)', () => {
-  it('renders Bedrijf · Facturatie, defaulting to Bedrijf', () => {
+// Danny 28-07: ZZP is ONE tab again — no sub-tab strip. Three blocks (Bedrijf ·
+// Adres · Facturatie), each with its own pencil and its own title ABOVE its card,
+// mirroring what the Profiel tab now does. Only the "one pencil flips everything"
+// behaviour was the complaint; the layout itself stays put.
+describe('ZzpTab · one tab, a pencil per block', () => {
+  it('shows all three blocks at once, with no sub-tab strip', () => {
     render(<ZzpTab c={candidate()} />)
-    const tabs = screen.getAllByRole('tab').map(el => el.textContent)
-    expect(tabs).toEqual(['zzp.groupCompany', 'zzp.groupInvoicing'])
-    expect(screen.getByRole('tab', { name: 'zzp.groupCompany' })).toHaveAttribute('aria-selected', 'true')
-  })
-
-  // Addendum 4: Bedrijf's own "Bedrijf" group-card would repeat the sub-tab bar,
-  // so only that heading is stripped — Adres is a genuine distinct sub-section
-  // ("Adres hoort bij bedrijf") and keeps its own heading.
-  it('Bedrijf includes the company address cluster, with Adres kept as its own heading but no repeated Bedrijf heading', () => {
-    render(<ZzpTab c={candidate()} />)
+    expect(screen.queryAllByRole('tab')).toHaveLength(0)
+    // Bedrijf, Adres and Facturatie fields are all on screen together.
     expect(screen.getByText('zzp.companyName')).toBeInTheDocument()
     expect(screen.getByText('zzp.street')).toBeInTheDocument()
-    expect(screen.getByText('zzp.groupAddress')).toBeInTheDocument()
-    expect(screen.getAllByText('zzp.groupCompany')).toHaveLength(1) // the sub-tab button only
-    // Invoicing fields aren't part of the default Bedrijf sub-tab.
-    expect(screen.queryByText('zzp.creditor')).toBeNull()
+    expect(screen.getByText('zzp.creditor')).toBeInTheDocument()
   })
 
-  it('Facturatie shows crediteur/e-mail/IBAN and hides the company fields, with no repeated Facturatie heading', async () => {
+  it('titles each block once, outside its card, with its own pencil', () => {
+    render(<ZzpTab c={candidate()} />)
+    for (const title of ['zzp.groupCompany', 'zzp.groupAddress', 'zzp.groupInvoicing']) {
+      // Exactly one heading per block — no in-card repeat of the same word.
+      expect(screen.getAllByText(title)).toHaveLength(1)
+    }
+    expect(screen.getAllByTitle('edit')).toHaveLength(3)
+  })
+
+  it('editing one block leaves the other two read-only', async () => {
     const user = userEvent.setup()
     render(<ZzpTab c={candidate()} />)
-    await user.click(screen.getByRole('tab', { name: 'zzp.groupInvoicing' }))
-    expect(screen.getByText('zzp.creditor')).toBeInTheDocument()
-    expect(screen.getByText('zzp.businessEmail')).toBeInTheDocument()
-    expect(screen.getByText('zzp.iban')).toBeInTheDocument()
-    expect(screen.queryByText('zzp.companyName')).toBeNull()
-    expect(screen.getAllByText('zzp.groupInvoicing')).toHaveLength(1) // the sub-tab button only
+    await user.click(screen.getAllByTitle('edit')[0])
+    expect(screen.getByTitle('save')).toBeInTheDocument()
+    expect(screen.getAllByTitle('edit')).toHaveLength(2)
+  })
+
+  it('saving a block still sends the full ZZP payload, unchanged', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ZzpTab c={candidate()} onSave={onSave} />)
+    await user.click(screen.getAllByTitle('edit')[2])   // Facturatie
+    await user.click(screen.getByTitle('save'))
+    // The request shape is the same one the single table produced before the split.
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
+      company_name: expect.anything(), street: expect.anything(), iban: expect.anything(),
+    }))
   })
 })

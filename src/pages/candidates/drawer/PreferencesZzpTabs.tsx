@@ -239,31 +239,24 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
   })
   const handleSave = (v: Record<string, unknown>) => onSave?.(toApi(v))
 
-  // Sub-tabs (Danny kandidaten-ronde-2, punt E): Bedrijf · Facturatie — order as
-  // named, not alphabetical. Bedrijf absorbs the company address cluster too
-  // ("Adres hoort bij bedrijf", Danny's clarification) — Facturatie is Crediteur/
-  // e-mail/IBAN, the only group left.
+  // ONE tab, three blocks — Bedrijf · Adres · Facturatie — each with its own pencil
+  // and its own title ABOVE the card (Danny 28-07: "ZZP zonder sub tabjes, 3 potlootjes
+  // per blokje en de txt erbuiten"). Same shape the Profiel tab now uses, and the same
+  // reason: the sub-tab strip changed the layout when only the "one pencil flips
+  // everything" behaviour had to go — and it discarded a draft on every switch.
   //
-  // Redundant group-card titles stripped (addendum 4): Bedrijf's OWN "Bedrijf"
-  // group-card would repeat the sub-tab bar right above it, so only ITS rows lose
-  // their `group` — Adres stays a genuine, distinct sub-section within Bedrijf.
-  // Facturatie has just the one group (same text as its own sub-tab label), so it
-  // loses its heading entirely — one calm, un-headed card, like Beschikbaarheid/Reizen.
-  const SUB_TABS = [
-    { id: 'company',   label: t('zzp.groupCompany') },
-    { id: 'invoicing', label: t('zzp.groupInvoicing') },
-  ]
-  const [subTab, setSubTab] = useState('company')
-  const companyFields   = fields
-    .filter(f => f.group === t('zzp.groupCompany') || f.group === t('zzp.groupAddress'))
-    .map(f => f.group === t('zzp.groupCompany') ? { ...f, group: undefined } : f)
-  const invoicingFields = fields.filter(f => f.group === t('zzp.groupInvoicing')).map(f => ({ ...f, group: undefined }))
+  // Each block gets the FULL `value` and the same `handleSave`, exactly as before: the
+  // table hands back its whole form, so `toApi` still produces the identical request.
+  // Editing Adres therefore never blanks Facturatie. The per-field `group` is cleared
+  // because the block's own title above the card already names it — a second in-card
+  // heading would just repeat it.
+  const blockFields = (group: string) => fields.filter(f => f.group === group).map(f => ({ ...f, group: undefined }))
 
   return (
-    <>
-      <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
-      {subTab === 'company'   && <EditableFieldTable fields={companyFields}   value={value} labelWidth={180} onSave={handleSave} />}
-      {subTab === 'invoicing' && <EditableFieldTable fields={invoicingFields} value={value} labelWidth={180} onSave={handleSave} />}
-    </>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <EditableFieldTable title={t('zzp.groupCompany')}   fields={blockFields(t('zzp.groupCompany'))}   value={value} labelWidth={180} onSave={handleSave} />
+      <EditableFieldTable title={t('zzp.groupAddress')}   fields={blockFields(t('zzp.groupAddress'))}   value={value} labelWidth={180} onSave={handleSave} />
+      <EditableFieldTable title={t('zzp.groupInvoicing')} fields={blockFields(t('zzp.groupInvoicing'))} value={value} labelWidth={180} onSave={handleSave} />
+    </div>
   )
 }
