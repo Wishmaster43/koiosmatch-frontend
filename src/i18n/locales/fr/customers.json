@@ -270,7 +270,8 @@
       "loading": "Chargement des tâches…",
       "error": "Impossible de charger les tâches",
       "openTask": "Ouvrir la tâche"
-    }
+    },
+    "openContact": "Ouvrir le contact"
   },
   "vacancies": {
     "empty": "Aucun poste pour ce client.",

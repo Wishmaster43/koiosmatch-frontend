@@ -61,6 +61,8 @@ interface Props {
   // EXTRACT-1: the caller's own customers.update permission check, threaded down
   // to the Koppelingen sub-tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
   canLinkBackoffice?: boolean
+  /** Open one contact's drill-down straight away (a click from the locations/departments tab). */
+  openId?: Id | null
   onAdd: (payload: ContactPayload) => void
   onUpdate: (id: Id, payload: Partial<ContactPayload>) => void
   onRemove: (id: Id) => void
@@ -75,7 +77,7 @@ const chipList = (items: { id: Id; name: string }[], color: string) =>
     </div>
   )
 
-export default function ContactsTab({ contacts = [], locations = [], departments = [], statuses = [], canLinkBackoffice = false, onAdd, onUpdate, onRemove }: Props) {
+export default function ContactsTab({ contacts = [], locations = [], departments = [], statuses = [], canLinkBackoffice = false, openId, onAdd, onUpdate, onRemove }: Props) {
   const { t } = useTranslation('customers')
   const [adding, setAdding] = useState(false)
   // Last-contact channel lookup (label + settings-managed icon) — the same
@@ -165,6 +167,7 @@ export default function ContactsTab({ contacts = [], locations = [], departments
           searchPlaceholder={t('contacts.searchPlaceholder')}
           backLabel={t('drawer.back')}
           searchKeys={['name', 'role', 'email', 'mobile']}
+          openId={openId ?? null}
           onAdd={() => setAdding(true)}
           renderDetail={renderDetail}
         />

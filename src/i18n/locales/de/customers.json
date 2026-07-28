@@ -270,7 +270,8 @@
       "loading": "Aufgaben werden geladen…",
       "error": "Aufgaben konnten nicht geladen werden",
       "openTask": "Aufgabe öffnen"
-    }
+    },
+    "openContact": "Kontakt öffnen"
   },
   "vacancies": {
     "empty": "Keine Stellen für diesen Kunden.",

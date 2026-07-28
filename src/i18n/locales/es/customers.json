@@ -270,7 +270,8 @@
       "loading": "Cargando tareas…",
       "error": "No se pudieron cargar las tareas",
       "openTask": "Abrir tarea"
-    }
+    },
+    "openContact": "Abrir contacto"
   },
   "vacancies": {
     "empty": "No hay vacantes para este cliente.",

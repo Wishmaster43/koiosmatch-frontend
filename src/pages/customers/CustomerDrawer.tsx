@@ -121,6 +121,11 @@ export default function CustomerDrawer({
   const [headerName,    setHeaderName]    = useState('')
   const [logoUrl,       setLogoUrl]       = useState<string | null>(null)
   const [prevId, setPrevId] = useState<Id | undefined>(c?.id)
+  // Cross-tab jump target: clicking a contact anywhere in this drawer (a location's or a
+  // department's contact list) must land on THAT contact's own drill-down on the
+  // Contactpersonen tab — the same screen the tab itself shows, never a second variant
+  // (Danny 28-07). The id is handed to ContactsTab, which seeds its detail view with it.
+  const [openContactId, setOpenContactId] = useState<Id | null>(null)
   if (c?.id !== prevId) { setPrevId(c?.id); setStatus(null); setOwner(null); setTags(null); setHeaderEditing(false); setLogoUrl(null) }
 
   // Keep the list/KPI counts in sync with the live sub-entity counts (a pure local
@@ -174,6 +179,8 @@ export default function CustomerDrawer({
   const locationOptions = locationsApi.locations.map(l => ({ id: l.id as Id, name: l.name }))
 
   const renderTab = (id: string, setActiveTab?: (id: string) => void): ReactNode => {
+    // Switch to Contactpersonen AND open this contact there.
+    const goToContact = (contactId: Id) => { setOpenContactId(contactId); setActiveTab?.('contacts') }
     switch (id) {
       case 'overview':      return <OverviewTab c={c} onSave={v => onUpdate?.(c.id, v)} />
       case 'locations':     return (
@@ -187,6 +194,7 @@ export default function CustomerDrawer({
           onUpdateDepartment={(id, payload, locName) => departmentsApi.update(id, payload, locName)}
           onRemoveDepartment={departmentsApi.remove}
           onAddContact={contactsApi.add} onUpdateContact={contactsApi.update}
+          onOpenContact={goToContact}
         />
       )
       case 'departments':   return (
@@ -194,12 +202,13 @@ export default function CustomerDrawer({
           customerId={c.id} departments={departmentsApi.departments} contacts={contactsApi.contacts} locations={locationOptions} statuses={departmentStatuses}
           canLinkBackoffice={canLinkBackoffice}
           onAdd={departmentsApi.add} onUpdate={departmentsApi.update} onRemove={departmentsApi.remove}
+          onOpenContact={goToContact}
         />
       )
       case 'contacts':      return (
         <ContactsTab
           contacts={contactsApi.contacts} locations={locationOptions} departments={departmentsApi.departments} statuses={contactStatuses}
-          canLinkBackoffice={canLinkBackoffice}
+          canLinkBackoffice={canLinkBackoffice} openId={openContactId}
           onAdd={contactsApi.add} onUpdate={contactsApi.update} onRemove={contactsApi.remove}
         />
       )

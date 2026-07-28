@@ -32,9 +32,11 @@ interface Props {
   onAdd: (payload: DepartmentPayload, locationName?: string) => void
   onUpdate: (id: Id, payload: Partial<DepartmentPayload>, locationName?: string) => void
   onRemove: (id: Id) => void
+  /** Open a contact's own drill-down on the Contactpersonen tab (Danny 28-07). */
+  onOpenContact?: (id: Id) => void
 }
 
-export default function DepartmentsTab({ departments = [], contacts = [], locations = [], statuses = [], canLinkBackoffice = false, onAdd, onUpdate, onRemove }: Props) {
+export default function DepartmentsTab({ departments = [], contacts = [], locations = [], statuses = [], canLinkBackoffice = false, onAdd, onUpdate, onRemove, onOpenContact }: Props) {
   const { t } = useTranslation('customers')
   const [adding, setAdding] = useState(false)
 
@@ -58,7 +60,7 @@ export default function DepartmentsTab({ departments = [], contacts = [], locati
   const renderDetail = (d: Department, close: () => void) => (
     <DepartmentDetail department={d} locations={locations} statuses={statuses}
       contacts={contacts.filter(c => String(c.departmentId) === String(d.id))}
-      canLinkBackoffice={canLinkBackoffice}
+      canLinkBackoffice={canLinkBackoffice} onOpenContact={onOpenContact}
       onSave={onUpdate} onDelete={onRemove} close={close} />
   )
 

@@ -34,6 +34,7 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useConfirm } from '@/hooks/useConfirm'
 import LocationDepartments from './LocationDepartments'
 import LocationContacts from './LocationContacts'
+import ContactNameLink from './ContactNameLink'
 import PlanningSummary from './PlanningSummary'
 import { useAuth } from '@/context/AuthContext'
 import { useCustomFields } from '@/lib/useCustomFields'
@@ -62,12 +63,14 @@ interface Props {
   onRemoveDepartment: (id: Id) => void
   onAddContact: (payload: ContactPayload) => void
   onUpdateContact: (id: Id, payload: Partial<ContactPayload>) => void
+  /** Open a contact's own drill-down on the Contactpersonen tab (Danny 28-07). */
+  onOpenContact?: (id: Id) => void
   close: () => void
 }
 
 export default function LocationDetail({
   location: l, customerId, locations, departments, contacts, statuses, departmentStatuses, contactStatuses, canLinkBackoffice = false,
-  onSave, onDelete, onAddDepartment, onUpdateDepartment, onRemoveDepartment, onAddContact, onUpdateContact, close,
+  onSave, onDelete, onAddDepartment, onUpdateDepartment, onRemoveDepartment, onAddContact, onUpdateContact, onOpenContact, close,
 }: Props) {
   const { t, i18n } = useTranslation('customers')
 
@@ -118,7 +121,25 @@ export default function LocationDetail({
       renderValue: v => kvkValue(v, t('locations.detail.openKvk')) },
     { key: 'vatNumber', label: t('locations.detail.vat'), type: 'text', group: t('locations.detail.registrationTitle'),
       renderValue: v => vatValue(v, t('locations.detail.openVies')) },
-    { key: 'contactName', label: t('locations.detail.contactName'), type: 'text', group: t('locations.detail.contactTitle') },
+    // "Contact ter plaatse" is FREE TEXT on the location (customer_locations.contact_name),
+    // not a reference to a contact record — so it can only become a link when the typed
+    // name resolves to EXACTLY ONE of this customer's contacts. Two people called "Jan
+    // de Vries" (or none) leave it as plain text: a link that opens the wrong person is
+    // worse than no link. Making this a real relation is CMBE ticket LOCATIE-PRIMAIR-1.
+    { key: 'contactName', label: t('locations.detail.contactName'), type: 'text', group: t('locations.detail.contactTitle'),
+      renderValue: v => {
+        const typed = typeof v === 'string' ? v.trim() : ''
+        if (!typed) return <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>
+        const byName = (c: Contact) => c.name.trim().toLowerCase() === typed.toLowerCase()
+        // Look at THIS location's own contacts first. Measured on the demo data: the same
+        // person exists as a separate record per location ("Eva Bos" four times, one per
+        // site), so a customer-wide name match finds several and would refuse to link at
+        // all — while "contact ter plaatse" obviously means the one AT this location.
+        const here = contacts.filter(c => String(c.locationId) === String(l.id)).filter(byName)
+        const hits = here.length > 0 ? here : contacts.filter(byName)
+        return <ContactNameLink name={typed} id={hits.length === 1 ? hits[0].id : null}
+          onOpen={onOpenContact} title={t('contacts.openContact')} />
+      } },
     { key: 'email', label: t('locations.detail.email'), type: 'text', group: t('locations.detail.contactTitle'),
       renderValue: v => emailValue(v, t('overview.sendEmail')) },
     { key: 'phone', label: t('locations.detail.phone'), type: 'text', group: t('locations.detail.contactTitle'),
@@ -237,7 +258,7 @@ export default function LocationDetail({
       )}
 
       {subTab === 'contacts' && (
-        <LocationContacts locationId={l.id as Id} locationName={l.name} contacts={contacts} locations={locations}
+        <LocationContacts locationId={l.id as Id} locationName={l.name} contacts={contacts} locations={locations} onOpenContact={onOpenContact}
           departments={departments} statuses={contactStatuses} onAdd={onAddContact} onUpdate={onUpdateContact} />
       )}
 

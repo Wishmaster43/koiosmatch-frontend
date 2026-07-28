@@ -270,7 +270,8 @@
       "loading": "Loading tasks…",
       "error": "Tasks could not be loaded",
       "openTask": "Open task"
-    }
+    },
+    "openContact": "Open contact"
   },
   "vacancies": {
     "empty": "No vacancies for this customer.",

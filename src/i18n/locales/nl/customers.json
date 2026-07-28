@@ -270,7 +270,8 @@
       "loading": "Taken laden…",
       "error": "Taken konden niet worden geladen",
       "openTask": "Open taak"
-    }
+    },
+    "openContact": "Open contactpersoon"
   },
   "vacancies": {
     "empty": "Geen vacatures voor deze klant.",

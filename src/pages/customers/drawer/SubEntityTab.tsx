@@ -33,6 +33,13 @@ interface SubEntityTabProps<Item> {
   backLabel?: ReactNode
   searchKeys?: string[]
   onAdd?: () => void
+  /**
+   * Open this row's detail from OUTSIDE the tab (Danny 28-07: clicking a contact in a
+   * location's list must land on that contact's own drill-down, the same screen the
+   * Contactpersonen tab shows). Each new value opens it once; the user can still
+   * navigate away afterwards, so this seeds the selection rather than pinning it.
+   */
+  openId?: string | number | null
   // `close` lets the detail view return to the list itself (e.g. after a delete).
   renderDetail: (item: Item, close: () => void) => ReactNode
   getRowId?: (item: Item) => string | number | undefined
@@ -40,11 +47,16 @@ interface SubEntityTabProps<Item> {
 
 export default function SubEntityTab<Item extends object>({
   items = [], columns, addLabel, emptyText, searchPlaceholder, backLabel,
-  searchKeys = ['name'], onAdd, renderDetail,
+  searchKeys = ['name'], onAdd, openId, renderDetail,
   getRowId = (it: Item) => (it as { id?: string | number }).id,
 }: SubEntityTabProps<Item>) {
   const [search, setSearch]         = useState('')
-  const [selectedId, setSelectedId] = useState<string | number | undefined>(undefined)
+  const [selectedId, setSelectedId] = useState<string | number | undefined>(openId ?? undefined)
+  // Adopt each NEW openId during render (no effect, so the detail is on screen in the
+  // same paint as the tab switch). Tracking the last value it acted on is what lets the
+  // user press Terug afterwards without the same id immediately reopening.
+  const [lastOpenId, setLastOpenId] = useState<string | number | null | undefined>(openId)
+  if (openId !== lastOpenId) { setLastOpenId(openId); if (openId != null) setSelectedId(openId) }
   // Track by id, not object reference, so the detail pane stays live when the
   // parent's list updates (in-place edit) instead of freezing the clicked snapshot.
   const selected = selectedId !== undefined ? items.find(it => getRowId(it) === selectedId) ?? null : null

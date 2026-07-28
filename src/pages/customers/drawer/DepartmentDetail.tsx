@@ -23,6 +23,7 @@ import SectionCard from '@/components/ui/SectionCard'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
+import ContactNameLink from './ContactNameLink'
 import EditableRichTextField from './EditableRichTextField'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -30,7 +31,7 @@ import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
 
-export default function DepartmentDetail({ department, locations, statuses, contacts = [], canLinkBackoffice = false, onSave, onDelete, close }: {
+export default function DepartmentDetail({ department, locations, statuses, contacts = [], canLinkBackoffice = false, onOpenContact, onSave, onDelete, close }: {
   department: Department
   locations: { id: Id; name: string }[]
   statuses: LookupOption[]
@@ -40,6 +41,8 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   // EXTRACT-1: the caller's own customers.update permission check for the
   // Koppelingen sub-tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
   canLinkBackoffice?: boolean
+  /** Open a contact's own drill-down on the Contactpersonen tab (Danny 28-07). */
+  onOpenContact?: (id: Id) => void
   onSave: (id: Id, payload: Partial<DepartmentPayload>) => void
   onDelete: (id: Id) => void
   close: () => void
@@ -129,7 +132,9 @@ export default function DepartmentDetail({ department, locations, statuses, cont
                 {contacts.map((p, i, arr) => (
                   <div key={p.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', fontSize: 12,
                     borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                    <span style={{ flex: 1, color: 'var(--text)' }}>{p.name}</span>
+                    <span style={{ flex: 1, minWidth: 0, color: 'var(--text)' }}>
+                      <ContactNameLink name={p.name} id={p.id} onOpen={onOpenContact} title={t('contacts.openContact')} />
+                    </span>
                     <span style={{ color: 'var(--text-muted)' }}>{[p.role, p.email].filter(Boolean).join(' · ')}</span>
                   </div>
                 ))}

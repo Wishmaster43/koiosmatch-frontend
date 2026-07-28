@@ -14,6 +14,7 @@ import { Pencil, Link2, Unlink } from 'lucide-react'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import SoftChip from '@/components/ui/SoftChip'
 import ContactLinkPicker from './ContactLinkPicker'
+import ContactNameLink from './ContactNameLink'
 import AddContactPersonModal from '../AddContactPersonModal'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 import type { Contact, Department } from '@/types/customer'
@@ -31,9 +32,11 @@ interface Props {
   statuses: LookupOption[]
   onAdd: (payload: ContactPayload) => void
   onUpdate: (id: Id, payload: Partial<ContactPayload>) => void
+  /** Open this contact's own drill-down on the Contactpersonen tab (Danny 28-07). */
+  onOpenContact?: (id: Id) => void
 }
 
-export default function LocationContacts({ locationId, locationName, contacts, locations, departments, statuses, onAdd, onUpdate }: Props) {
+export default function LocationContacts({ locationId, locationName, contacts, locations, departments, statuses, onAdd, onUpdate, onOpenContact }: Props) {
   const { t } = useTranslation('customers')
   const [modal, setModal] = useState<'add' | 'couple' | Contact | null>(null)
   const rows = contacts.filter(c => String(c.locationId) === String(locationId))
@@ -60,8 +63,8 @@ export default function LocationContacts({ locationId, locationName, contacts, l
                   flag is one-per-customer, NOT one-per-location; a per-location
                   primary needs a flag on the contact↔location pivot (CMBE ticket
                   LOCATIE-PRIMAIR-1), so never read this chip as "primary here". */}
-              <span style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text)' }}>
-                {c.name}
+              <span style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, color: 'var(--text)' }}>
+                <ContactNameLink name={c.name} id={c.id} onOpen={onOpenContact} title={t('contacts.openContact')} />
                 {c.isPrimary && <SoftChip label={t('contacts.primaryChip')} color="var(--color-success)" round size={10} />}
               </span>
               <span style={{ color: 'var(--text-muted)' }}>{[c.role, c.email].filter(Boolean).join(' · ')}</span>
