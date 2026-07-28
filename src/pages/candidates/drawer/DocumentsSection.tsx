@@ -54,7 +54,8 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   // Document types + colours + icons from the tenant lookup (seed fallback until /document-types lands).
-  const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes()
+  // Candidate documents: this entity's types plus the global ones (see DocumentsTab).
+  const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes('candidate')
   const [docs,        setDocs]        = useState<DocItem[]>(c.documents ?? [])
   const [pending,      setPending]     = useState<PendingItem[]>([])
   const [renamingDoc, setRenamingDoc] = useState<number | null>(null)

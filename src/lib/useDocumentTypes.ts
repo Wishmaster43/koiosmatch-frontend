@@ -13,6 +13,18 @@
  *
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
+ *
+ * V20b entity scope: an optional `entity` ('candidate' | 'vacancy' | 'customer')
+ * narrows the request to `?entity=<x>` (backend: that entity's own types PLUS the
+ * global/NULL-entity ones). Omitted, behaviour is unchanged (the plain unscoped
+ * endpoint, same as before this axis existed). useCachedLookup's module-scope
+ * cache is keyed by its `url` argument alone (it lives outside this file and isn't
+ * touched here) — the entity is baked straight into that url string
+ * (`/document-types?entity=vacancy`) rather than passed as a separate axios
+ * `params` object, so each entity variant naturally gets its OWN cache entry.
+ * Without this, a bare-URL-keyed cache would serve one entity's list to every
+ * other entity's consumer (e.g. the candidate screen's fetch would leak into the
+ * customer screen) — this is the one lever available here to prevent that.
  */
 import type { AxiosResponse } from 'axios'
 import type { LucideIcon } from 'lucide-react'
@@ -78,8 +90,11 @@ const mapDocumentTypes = (res: AxiosResponse): LookupOption[] | null => {
   return d.length ? d : null
 }
 
-export function useDocumentTypes() {
-  const { data: types } = useCachedLookup('/document-types', mapDocumentTypes, DEFAULT_DOCUMENT_TYPES)
+export function useDocumentTypes(entity?: string) {
+  // Bake the optional entity filter into the cache key itself (see file header) —
+  // no entity = the exact same request/url as before this axis existed.
+  const url = entity ? `/document-types?entity=${encodeURIComponent(entity)}` : '/document-types'
+  const { data: types } = useCachedLookup(url, mapDocumentTypes, DEFAULT_DOCUMENT_TYPES)
 
   // Resolve a stored value/slug to its label/colour/icon; fall back to raw value / neutral grey.
   const find = (value?: string | null) => {

@@ -1684,7 +1684,8 @@
     "title": "Dokumenttypen",
     "subtitle": "Kategorien und Farben für Kandidatendokumente (Lebenslauf, Ausweis, Diplom, …).",
     "add": "Typ hinzufügen",
-    "icon": "Symbol"
+    "icon": "Symbol",
+    "globalBadge": "Global"
   },
   "requiredFields": {
     "title": "Pflichtfelder",

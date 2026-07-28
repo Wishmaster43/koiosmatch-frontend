@@ -2,15 +2,25 @@
  * CandidatesTable — searchable, sortable table of candidates.
  * Shows a status badge per candidate; clicking a row opens CandidateDetailDrawer.
  * Filters come from RightPanelContext. StatusBadge below = the colored status pill.
+ *
+ * Uses the shared DataTable (§3A) so its sortable headers get real keyboard
+ * reachability + aria-sort for free — this table has no pagination and no
+ * grouped/totals rows, so it fits DataTable's contract without losing anything
+ * real (accessibility audit 2026-07-28). One deliberate trade-off: the old
+ * two-line empty state (title + hint) collapses to DataTable's single-line
+ * `emptyText` — this component currently has zero importers in the app, so the
+ * cosmetic loss has no live user impact; flagged in the audit report.
  */
 import { useState, useEffect, useMemo } from 'react'
 import type { ReactNode, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
-import { Search, ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw } from 'lucide-react'
+import { Search } from 'lucide-react'
 import CandidateDetailDrawer from './CandidateDetailDrawer'
 import { useRightPanel }     from '@/context/RightPanelContext'
-import type { ReportCandidate, ReportColumn, SortState } from '@/types/reports'
+import DataTable from '../ui/DataTable'
+import type { Column } from '../ui/DataTable'
+import type { ReportCandidate } from '@/types/reports'
 
 // Colored status pill (actief / nietactief / extern / ...) for a candidate row.
 function StatusBadge({ status }: { status?: string }) {
@@ -90,11 +100,16 @@ function parseKenmerken(v?: unknown): string[] {
   return v.map(item => item?.name ?? String(item)).filter(Boolean)
 }
 
-// Column definitions; labels are resolved from i18n via the `t` passed in.
-function buildColumns(t: TFunction): ReportColumn[] {
+// Column definitions handed to the shared DataTable — sorting/aria-sort/keyboard
+// reach live there (§3A); this component only declares columns + cell rendering.
+// `global_rate` intentionally has no `sortValue` (there is no single scalar to
+// sort multiple per-step rates by) — DataTable falls back to `row.global_rate`
+// (always undefined), so every row ties and the click is a harmless no-op,
+// exactly as the original `value: () => ''` behaved.
+function buildColumns(t: TFunction): Column<ReportCandidate>[] {
   return [
-  { key: 'name', label: t('candidates.cols.name'), type: 'string',
-    value: c => `${c.firstname ?? ''} ${c.lastname ?? ''}`.trim(),
+  { key: 'name', header: t('candidates.cols.name'), sortable: true,
+    sortValue: c => `${c.firstname ?? ''} ${c.lastname ?? ''}`.trim() || null,
     render: c => (
       <div>
         <div style={{ fontWeight: 500, color: 'var(--text)', fontSize: 13 }}>
@@ -103,59 +118,36 @@ function buildColumns(t: TFunction): ReportColumn[] {
         {c.email && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{c.email}</div>}
       </div>
     )},
-  { key: 'status', label: t('candidates.cols.status'), type: 'string',
-    value: c => c.status || '',
+  { key: 'status', header: t('candidates.cols.status'), sortable: true,
+    sortValue: c => c.status ?? null,
     render: c => <StatusBadge status={c.status} /> },
-  { key: 'position', label: t('candidates.cols.position'), type: 'string',
-    value: c => c.position || '',
+  { key: 'position', header: t('candidates.cols.position'), sortable: true,
+    sortValue: c => c.position ?? null,
     render: c => <span style={{ fontSize: 13 }}>{c.position || '—'}</span> },
-  { key: 'mobile', label: t('candidates.cols.mobile'), type: 'string',
-    value: c => c.mobile ?? c.phone ?? '',
+  { key: 'mobile', header: t('candidates.cols.mobile'), sortable: true,
+    sortValue: c => c.mobile ?? c.phone ?? null,
     render: c => <span style={{ fontSize: 13, whiteSpace: 'nowrap' }}>{c.mobile ?? c.phone ?? '—'}</span> },
-  { key: 'registration_date', label: t('candidates.cols.registration'), type: 'date',
-    value: c => c.registration_date || null,
+  { key: 'registration_date', header: t('candidates.cols.registration'), sortable: true,
+    sortValue: c => c.registration_date ? new Date(c.registration_date).getTime() : null,
     render: c => <span style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{fmtDate(c.registration_date)}</span> },
-  { key: 'last_login_at', label: t('candidates.cols.lastLogin'), type: 'date',
-    value: c => c.last_login_at || null,
+  { key: 'last_login_at', header: t('candidates.cols.lastLogin'), sortable: true,
+    sortValue: c => c.last_login_at ? new Date(c.last_login_at).getTime() : null,
     render: c => <span style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{fmtDate(c.last_login_at)}</span> },
-  { key: 'last_planned_shift', label: t('candidates.cols.plannedShift'), type: 'date',
-    value: c => c.last_planned_shift || null,
+  { key: 'last_planned_shift', header: t('candidates.cols.plannedShift'), sortable: true,
+    sortValue: c => c.last_planned_shift ? new Date(c.last_planned_shift).getTime() : null,
     render: c => <span style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{fmtDate(c.last_planned_shift)}</span> },
-  { key: 'last_worked_shift', label: t('candidates.cols.lastShift'), type: 'date',
-    value: c => c.last_worked_shift || null,
+  { key: 'last_worked_shift', header: t('candidates.cols.lastShift'), sortable: true,
+    sortValue: c => c.last_worked_shift ? new Date(c.last_worked_shift).getTime() : null,
     render: c => <span style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{fmtDate(c.last_worked_shift)}</span> },
-  { key: 'number_of_times_worked', label: t('candidates.cols.shifts'), type: 'number', align: 'right',
-    value: c => Number(c.number_of_times_worked) || 0,
+  { key: 'number_of_times_worked', header: t('candidates.cols.shifts'), align: 'right', sortable: true,
+    sortValue: c => Number(c.number_of_times_worked) || 0,
     render: c => <span style={{ fontSize: 13 }}>{c.number_of_times_worked ?? 0}</span> },
-  { key: 'features', label: t('candidates.cols.features'), type: 'string',
-    value: c => parseKenmerken(c.features).join(', '),
+  { key: 'features', header: t('candidates.cols.features'), sortable: true,
+    sortValue: c => parseKenmerken(c.features).join(', ') || null,
     render: c => <TagCell items={parseKenmerken(c.features)} color="var(--color-primary)" bg="var(--color-primary-bg)" /> },
-  { key: 'global_rate', label: t('candidates.cols.globalRates'), type: 'string',
-    value: () => '',
+  { key: 'global_rate', header: t('candidates.cols.globalRates'), sortable: true,
     render: c => <RateCell candidate={c} /> },
   ]
-}
-
-function compareValues(a: ReportCandidate, b: ReportCandidate, col: ReportColumn, dir: 'asc' | 'desc') {
-  const av = col.value(a)
-  const bv = col.value(b)
-  const aE = av === null || av === undefined || av === ''
-  const bE = bv === null || bv === undefined || bv === ''
-  if (aE && bE) return 0
-  if (aE) return 1
-  if (bE) return -1
-  let cmp: number
-  if (col.type === 'number')    cmp = Number(av) - Number(bv)
-  else if (col.type === 'date') cmp = new Date(av as string).getTime() - new Date(bv as string).getTime()
-  else                          cmp = String(av).localeCompare(String(bv), undefined, { sensitivity: 'base' })
-  return dir === 'asc' ? cmp : -cmp
-}
-
-function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
-  if (!active) return <ChevronsUpDown size={11} style={{ color: 'var(--border)' }} />
-  return dir === 'asc'
-    ? <ChevronUp size={11} style={{ color: 'var(--color-primary)' }} />
-    : <ChevronDown size={11} style={{ color: 'var(--color-primary)' }} />
 }
 
 export default function CandidatesTable({ candidates = [], loading = false, statusFilter, setStatusFilter }: {
@@ -175,7 +167,6 @@ export default function CandidatesTable({ candidates = [], loading = false, stat
   const setSelectedStatuses = setStatusFilter ?? setInternalStatuses
   const [selectedPositions, setSelectedPositions] = useState<Array<string | number>>([])
   const [selectedKenmerken, setSelectedKenmerken] = useState<Array<string | number>>([])
-  const [sort, setSort]                           = useState<SortState>({ key: 'name', dir: 'asc' })
   const [detail, setDetail]                       = useState<ReportCandidate | null>(null)
 
   // Build a toggle handler that adds/removes a value from a selected-set state.
@@ -224,16 +215,10 @@ export default function CandidatesTable({ candidates = [], loading = false, stat
     })
   }, [candidates, selectedStatuses, selectedPositions, selectedYears, selectedKenmerken, search])
 
-  const sorted = useMemo(() => {
-    const col = columns.find(c => c.key === sort.key)
-    if (!col) return filtered
-    return [...filtered].sort((a, b) => compareValues(a, b, col, sort.dir))
-  }, [filtered, sort, columns])
-
-  const onSort = (key: string) =>
-    setSort(prev => prev.key === key
-      ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
-      : { key, dir: 'asc' })
+  // Fallback row id: an object-identity map onto the ORIGINAL candidates list so a
+  // row without an `id` still gets a stable key, mirroring the old `c.id ?? i`.
+  const idIndex = useMemo(() => new Map(candidates.map((c, i) => [c, i])), [candidates])
+  const getRowId = (c: ReportCandidate) => c.id ?? idIndex.get(c) ?? 0
 
   const filterGroups = useMemo(() => [
     { key: 'jaar', label: t('candidates.filters.year'),
@@ -282,60 +267,17 @@ export default function CandidatesTable({ candidates = [], loading = false, stat
       <div className="flex flex-1 min-h-0 overflow-hidden bg-[var(--surface)] rounded-xl"
         style={{ border: '1px solid var(--border)' }}>
         <div className="flex-1 min-w-0 overflow-auto">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center gap-3"
-              style={{ height: '100%', minHeight: 300 }}>
-              <RefreshCw size={20} className="animate-spin" style={{ color: 'var(--border)' }} />
-              <p className="text-sm text-[var(--text-muted)]">{t('candidates.loading')}</p>
-            </div>
-          ) : sorted.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-2 text-center"
-              style={{ height: '100%', minHeight: 300 }}>
-              <p className="text-sm font-medium text-[var(--text-muted)]">{t('candidates.empty')}</p>
-              <p className="text-xs text-[var(--text-muted)]">{t('candidates.emptyHint')}</p>
-            </div>
-          ) : (
-            <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 1100 }}>
-              <thead>
-                <tr style={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--surface)' }}>
-                  {columns.map(col => {
-                    const active = sort.key === col.key
-                    return (
-                      <th key={col.key} onClick={() => onSort(col.key)}
-                        style={{ textAlign: col.align || 'left', padding: '11px 14px',
-                                 borderBottom: '1px solid var(--border)', cursor: 'pointer',
-                                 userSelect: 'none', whiteSpace: 'nowrap', background: 'var(--surface)' }}
-                        className="transition-colors hover:bg-[var(--hover-bg)]">
-                        <span className="inline-flex items-center gap-1"
-                          style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase',
-                                   letterSpacing: '0.04em',
-                                   color: active ? 'var(--text)' : 'var(--text-muted)' }}>
-                          {col.label}
-                          <SortIcon active={active} dir={sort.dir} />
-                        </span>
-                      </th>
-                    )
-                  })}
-                </tr>
-              </thead>
-              <tbody>
-                {sorted.map((c, i) => (
-                  <tr key={c.id ?? i}
-                    onClick={() => setDetail(c)}
-                    className="transition-colors hover:bg-[var(--hover-bg)]"
-                    style={{ borderBottom: '1px solid var(--hover-bg)', cursor: 'pointer' }}>
-                    {columns.map(col => (
-                      <td key={col.key}
-                        style={{ padding: '10px 14px', textAlign: col.align || 'left',
-                                 color: 'var(--text)', fontSize: 13 }}>
-                        {col.render(c)}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+          <DataTable
+            columns={columns}
+            rows={filtered}
+            getRowId={getRowId}
+            onRowClick={setDetail}
+            loading={loading}
+            loadingText={t('candidates.loading')}
+            emptyText={t('candidates.empty')}
+            defaultSort={{ key: 'name', dir: 'asc' }}
+            stickyHeader
+          />
         </div>
 
       </div>

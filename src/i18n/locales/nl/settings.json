@@ -1706,7 +1706,8 @@
     "title": "Documenttypes",
     "subtitle": "Categorieën en kleuren voor kandidaatdocumenten (cv, id-bewijs, diploma, …).",
     "add": "Type toevoegen",
-    "icon": "Icoon"
+    "icon": "Icoon",
+    "globalBadge": "Overal"
   },
   "requiredFields": {
     "title": "Verplichte velden",

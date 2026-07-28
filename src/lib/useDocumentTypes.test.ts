@@ -72,3 +72,34 @@ describe('useDocumentTypes — iconOf', () => {
     expect(result.current.iconOf(undefined)).toBeNull()
   })
 })
+
+// V20b entity scope: the request must carry `?entity=` when a caller passes one,
+// and stay exactly as before when it doesn't. Every other test in this file also
+// mounts the hook on the bare '/document-types' url (never resolving, so
+// useCachedLookup's module-scope inFlight map claims that url for the rest of
+// this file's run) — asserting the real GET call here needs a FRESH module
+// instance per test (vi.resetModules + dynamic re-import) so these two cache
+// entries never collide with the ones above, or with each other.
+describe('useDocumentTypes — entity scope (V20b)', () => {
+  it('omits the entity param on the base endpoint when no entity is given', async () => {
+    vi.resetModules()
+    const freshApi = (await import('@/lib/api')).default
+    vi.mocked(freshApi.get).mockReturnValue(new Promise(() => {}))
+    const { useDocumentTypes: freshUseDocumentTypes } = await import('./useDocumentTypes')
+
+    renderHook(() => freshUseDocumentTypes())
+
+    expect(freshApi.get).toHaveBeenCalledWith('/document-types', undefined)
+  })
+
+  it('bakes ?entity=<x> into the request url when an entity is given', async () => {
+    vi.resetModules()
+    const freshApi = (await import('@/lib/api')).default
+    vi.mocked(freshApi.get).mockReturnValue(new Promise(() => {}))
+    const { useDocumentTypes: freshUseDocumentTypes } = await import('./useDocumentTypes')
+
+    renderHook(() => freshUseDocumentTypes('vacancy'))
+
+    expect(freshApi.get).toHaveBeenCalledWith('/document-types?entity=vacancy', undefined)
+  })
+})

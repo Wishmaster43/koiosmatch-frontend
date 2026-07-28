@@ -1684,7 +1684,8 @@
     "title": "Types de document",
     "subtitle": "Catégories et couleurs pour les documents candidats (CV, pièce d'identité, diplôme, …).",
     "add": "Ajouter un type",
-    "icon": "Icône"
+    "icon": "Icône",
+    "globalBadge": "Global"
   },
   "requiredFields": {
     "title": "Champs requis",

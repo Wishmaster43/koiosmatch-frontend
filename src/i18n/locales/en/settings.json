@@ -1706,7 +1706,8 @@
     "title": "Document types",
     "subtitle": "Categories and colours for candidate documents (CV, ID, diploma, …).",
     "add": "Add type",
-    "icon": "Icon"
+    "icon": "Icon",
+    "globalBadge": "Global"
   },
   "requiredFields": {
     "title": "Required fields",

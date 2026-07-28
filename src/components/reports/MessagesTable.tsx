@@ -32,6 +32,9 @@ const COL_KEYS = [
 
 export default function MessagesTable() {
   const { t } = useTranslation('reports')
+  // Reuses the existing common.sort key for the sortable header's button tooltip
+  // (mirrors DataTable's own sortable header — no new i18n keys needed).
+  const { t: tCommon } = useTranslation('common')
   const COLS = COL_KEYS.map(c => ({ ...c, label: t(`messages.cols.${c.tKey}`) }))
   // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
   const { rows, loading } = useReportList<MessageRow>('/messages')
@@ -158,15 +161,31 @@ export default function MessagesTable() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                {COLS.map(col => (
-                  <th key={col.key} style={TH} onClick={() => col.sortable && setSort_(col.key)}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4,
-                                  cursor: col.sortable ? 'pointer' : 'default' }}>
-                      {col.label}
-                      {col.sortable && <SortIcon active={sort.key === col.key} dir={sort.dir} />}
-                    </div>
-                  </th>
-                ))}
+                {COLS.map(col => {
+                  // Plain header — no sort affordance, no aria-sort (mirrors DataTable's
+                  // own non-sortable column, which never gets aria-sort either).
+                  if (!col.sortable) return <th key={col.key} style={TH}>{col.label}</th>
+                  const active = sort.key === col.key
+                  // Present ('none' for inactive) on EVERY sortable column so a screen
+                  // reader can tell it is sortable at all, not just the active one.
+                  const ariaSort: 'ascending' | 'descending' | 'none' =
+                    active ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'
+                  const { padding: thPadding, ...thStyleRest } = TH
+                  return (
+                    <th key={col.key} style={thStyleRest} aria-sort={ariaSort}>
+                      {/* Real <button> inside the <th> (not tabIndex+onKeyDown on the th) —
+                          gives Tab reachability + native Enter/Space activation; mirrors the
+                          shared DataTable's sortable header exactly. */}
+                      <button type="button" onClick={() => setSort_(col.key)} title={tCommon('sort')}
+                        style={{ all: 'unset', boxSizing: 'border-box', display: 'inline-flex', width: '100%',
+                          padding: thPadding, cursor: 'pointer', userSelect: 'none', alignItems: 'center', gap: 4,
+                          font: 'inherit', color: 'inherit' }}>
+                        {col.label}
+                        <SortIcon active={active} dir={sort.dir} />
+                      </button>
+                    </th>
+                  )
+                })}
               </tr>
             </thead>
             <tbody>

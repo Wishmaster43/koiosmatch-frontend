@@ -5,7 +5,8 @@
  * the search box is now rendered and actually narrows the visible rows.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import '@/i18n'
 import CustomersTable from './CustomersTable'
 import type { ReportCustomer } from '@/types/reports'
@@ -41,5 +42,32 @@ describe('CustomersTable — search box wiring', () => {
     fireEvent.change(input, { target: { value: 'Amsterdam' } })
     expect(screen.getByText('Amsterdam UMC')).toBeInTheDocument()
     expect(screen.queryByText('Zorgpartners Midden-Holland')).not.toBeInTheDocument()
+  })
+})
+
+// Accessibility regression (2026-07-28): this table's headers were a mouse-only
+// `<th onClick>` with no keyboard path and no aria-sort. It keeps its own
+// hand-rolled markup (client-side pagination sorts the FULL filtered list before
+// slicing a page — adopting the shared DataTable, which owns sort state
+// internally, would only reorder rows within the current page), so the fix adds
+// a real <button> + aria-sort around the existing header, mirroring DataTable.
+describe('CustomersTable — keyboard-accessible sort headers', () => {
+  it('sorts the Naam column via a keyboard Enter press and reflects it via aria-sort', async () => {
+    const user = userEvent.setup()
+    render(<CustomersTable />)
+
+    const header = screen.getByText('Naam').closest('th')
+    // Default sort is already Naam/asc, so this exposes the active state up front.
+    expect(header).toHaveAttribute('aria-sort', 'ascending')
+
+    const sortButton = screen.getByRole('button', { name: /Naam/ })
+    sortButton.focus()
+    expect(sortButton).toHaveFocus()
+    await user.keyboard('{Enter}')
+    expect(header).toHaveAttribute('aria-sort', 'descending')
+
+    // Descending by name: "Zorgpartners…" now sorts before "Amsterdam UMC".
+    const bodyRows = screen.getAllByRole('row').slice(1)
+    expect(within(bodyRows[0]).getByText('Zorgpartners Midden-Holland')).toBeInTheDocument()
   })
 })

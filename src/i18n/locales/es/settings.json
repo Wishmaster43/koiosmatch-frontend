@@ -1684,7 +1684,8 @@
     "title": "Tipos de documento",
     "subtitle": "Categorías y colores para documentos de candidatos (CV, identificación, diploma, …).",
     "add": "Añadir tipo",
-    "icon": "Icono"
+    "icon": "Icono",
+    "globalBadge": "Global"
   },
   "requiredFields": {
     "title": "Campos obligatorios",

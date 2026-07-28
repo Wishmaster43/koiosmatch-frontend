@@ -38,7 +38,9 @@ const DOC_GRID_COLUMNS = '18px 1fr 80px 100px'
 export default function DocumentsTab({ customerId }: { customerId: Id | undefined }) {
   const { t } = useTranslation('customers')
   const { formatDate } = useDateFormat()
-  const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes()
+  // Customer documents offer the customer's own types PLUS the global ones — the backend
+  // adds the globals to `?entity=customer` itself (null = applies everywhere).
+  const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes('customer')
   // List + optimistic upload/rename/delete against /customers/{id}/documents.
   const { docs, upload, rename, remove } = useEntityDocuments('customers', customerId)
   const [pending,     setPending]     = useState<PendingItem[]>([])

@@ -82,6 +82,9 @@ function SortIcon({ col, sortCol, sortDir }) {
 
 export default function AuditLog() {
   const { t } = useTranslation('settings')
+  // Reuses the existing common.sort key for the sortable header's button tooltip
+  // (mirrors DataTable's own sortable header — no new i18n keys needed).
+  const { t: tCommon } = useTranslation('common')
   const [logs,          setLogs]          = useState([])
   const [loading,       setLoading]       = useState(true)
   const [error,         setError]         = useState(null)
@@ -270,6 +273,25 @@ export default function AuditLog() {
   const TD = { padding: '10px 10px', fontSize: 12, color: 'var(--text)',
                borderBottom: '1px solid var(--hover-bg)', verticalAlign: 'top' }
 
+  // Accessible sortable header: a real <button> inside the <th> (not tabIndex+
+  // onKeyDown on the th) for Tab reachability + native Enter/Space activation,
+  // plus aria-sort on the th itself — mirrors the shared DataTable's sortable
+  // header exactly, while keeping the existing TH(col)/SortIcon visual intact.
+  const renderSortableTh = (col, label, width) => {
+    const active = sortCol === col
+    const ariaSort = active ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'
+    const { padding: thPadding, ...thStyleRest } = TH(col)
+    return (
+      <th key={col} style={{ ...thStyleRest, width }} aria-sort={ariaSort}>
+        <button type="button" onClick={() => handleSort(col)} title={tCommon('sort')}
+          style={{ all: 'unset', boxSizing: 'border-box', display: 'inline-flex', width: '100%',
+            padding: thPadding, cursor: 'pointer', userSelect: 'none', alignItems: 'center', font: 'inherit', color: 'inherit' }}>
+          {label}<SortIcon col={col} sortCol={sortCol} sortDir={sortDir} />
+        </button>
+      </th>
+    )
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
 
@@ -303,30 +325,14 @@ export default function AuditLog() {
           <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--surface)' }}>
             <thead>
               <tr>
-                <th style={{ ...TH('created_at'), width: 90 }} onClick={() => handleSort('created_at')}>
-                  <span style={{ display: 'flex', alignItems: 'center' }}>
-                    {t('audit.colDate')}<SortIcon col="created_at" sortCol={sortCol} sortDir={sortDir} />
-                  </span>
-                </th>
+                {renderSortableTh('created_at', t('audit.colDate'), 90)}
                 <th style={{ ...TH(null), width: 60 }}>
                   {t('audit.colTime')}
                 </th>
-                <th style={{ ...TH('causer_name'), width: 120 }} onClick={() => handleSort('causer_name')}>
-                  <span style={{ display: 'flex', alignItems: 'center' }}>
-                    {t('audit.colWho')}<SortIcon col="causer_name" sortCol={sortCol} sortDir={sortDir} />
-                  </span>
-                </th>
-                <th style={{ ...TH('log_name'), width: 120 }} onClick={() => handleSort('log_name')}>
-                  <span style={{ display: 'flex', alignItems: 'center' }}>
-                    {t('audit.colType')}<SortIcon col="log_name" sortCol={sortCol} sortDir={sortDir} />
-                  </span>
-                </th>
+                {renderSortableTh('causer_name', t('audit.colWho'), 120)}
+                {renderSortableTh('log_name', t('audit.colType'), 120)}
                 <th style={{ ...TH(null), width: 150 }}>{t('audit.colEntity')}</th>
-                <th style={{ ...TH('description'), width: 280 }} onClick={() => handleSort('description')}>
-                  <span style={{ display: 'flex', alignItems: 'center' }}>
-                    {t('audit.colAction')}<SortIcon col="description" sortCol={sortCol} sortDir={sortDir} />
-                  </span>
-                </th>
+                {renderSortableTh('description', t('audit.colAction'), 280)}
                 <th style={TH(null)}>{t('audit.colOldValue')}</th>
                 <th style={TH(null)}>{t('audit.colNewValue')}</th>
               </tr>

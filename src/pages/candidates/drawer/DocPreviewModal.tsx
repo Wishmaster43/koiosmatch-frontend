@@ -19,7 +19,8 @@ interface CandidateDoc {
 export default function DocPreviewModal({ doc, onClose }: { doc?: CandidateDoc | null; onClose: () => void }) {
   const { t } = useTranslation('candidates')
   // Document type label + colour + icon from the tenant lookup (seed fallback).
-  const { labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes()
+  // Read-only labels for a CANDIDATE document — same scope as the list it opens from.
+  const { labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes('candidate')
   // Hooks run unconditionally (before the `!doc` early return) — Rules of Hooks.
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   // A pdf.js render failure falls back to the same download link used for
