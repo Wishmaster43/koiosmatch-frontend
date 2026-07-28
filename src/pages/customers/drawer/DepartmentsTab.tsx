@@ -16,6 +16,7 @@ import SoftChipJs from '@/components/ui/SoftChip'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
+import type { ContactPayload } from '../hooks/useCustomerContacts'
 
 type AnyProps = Record<string, unknown>
 const SoftChip = SoftChipJs as unknown as ComponentType<AnyProps>
@@ -32,11 +33,14 @@ interface Props {
   onAdd: (payload: DepartmentPayload, locationName?: string) => void
   onUpdate: (id: Id, payload: Partial<DepartmentPayload>, locationName?: string) => void
   onRemove: (id: Id) => void
-  /** Open a contact's own drill-down on the Contactpersonen tab (Danny 28-07). */
-  onOpenContact?: (id: Id) => void
+  /** Lookups + writers the nested ContactsPanel needs. */
+  contactStatuses?: LookupOption[]
+  onAddContact: (payload: ContactPayload) => void
+  onUpdateContact: (id: Id, payload: Partial<ContactPayload>) => void
+  onRemoveContact: (id: Id) => void
 }
 
-export default function DepartmentsTab({ departments = [], contacts = [], locations = [], statuses = [], canLinkBackoffice = false, onAdd, onUpdate, onRemove, onOpenContact }: Props) {
+export default function DepartmentsTab({ departments = [], contacts = [], locations = [], statuses = [], canLinkBackoffice = false, contactStatuses = [], onAdd, onUpdate, onRemove, onAddContact, onUpdateContact, onRemoveContact }: Props) {
   const { t } = useTranslation('customers')
   const [adding, setAdding] = useState(false)
 
@@ -60,7 +64,9 @@ export default function DepartmentsTab({ departments = [], contacts = [], locati
   const renderDetail = (d: Department, close: () => void) => (
     <DepartmentDetail department={d} locations={locations} statuses={statuses}
       contacts={contacts.filter(c => String(c.departmentId) === String(d.id))}
-      canLinkBackoffice={canLinkBackoffice} onOpenContact={onOpenContact}
+      canLinkBackoffice={canLinkBackoffice} departments={departments} contactStatuses={contactStatuses}
+      backLabel={t('drawer.tabs.departments')}
+      onAddContact={onAddContact} onUpdateContact={onUpdateContact} onRemoveContact={onRemoveContact}
       onSave={onUpdate} onDelete={onRemove} close={close} />
   )
 
@@ -72,7 +78,6 @@ export default function DepartmentsTab({ departments = [], contacts = [], locati
         addLabel={t('departments.add')}
         emptyText={t('departments.empty')}
         searchPlaceholder={t('departments.searchPlaceholder')}
-        backLabel={t('drawer.back')}
         searchKeys={['name', 'locationName']}
         onAdd={() => setAdding(true)}
         renderDetail={renderDetail}

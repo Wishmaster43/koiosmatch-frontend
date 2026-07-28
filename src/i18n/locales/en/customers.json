@@ -190,7 +190,8 @@
       "openVies": "Check in VIES (EU)",
       "pickContactSearch": "Search by name, role or email",
       "pickContactLinks": "Currently linked to",
-      "pickContactNoLinks": "Not linked yet"
+      "pickContactNoLinks": "Not linked yet",
+      "coupleNote": "Linking MOVES the contact to this location — it is unlinked from its current one."
     },
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",
@@ -216,7 +217,11 @@
       "none": "Nothing linked yet",
       "subtabs": {
         "data": "Details"
-      }
+      },
+      "coupleNote": "Linking moves the contact to this department.",
+      "coupleAction": "Link",
+      "addContactHere": "New contact",
+      "uncoupleAction": "Unlink"
     },
     "deleteConfirm": "Delete this department?",
     "saveFailed": "Saving failed.",
@@ -271,7 +276,9 @@
       "error": "Tasks could not be loaded",
       "openTask": "Open task"
     },
-    "openContact": "Open contact"
+    "openContact": "Open contact",
+    "backTo": "Back to {{name}}",
+    "searchHere": "Search contact…"
   },
   "vacancies": {
     "empty": "No vacancies for this customer.",

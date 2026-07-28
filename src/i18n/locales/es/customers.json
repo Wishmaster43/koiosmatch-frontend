@@ -190,7 +190,8 @@
       "openVies": "Comprobar en VIES (UE)",
       "pickContactSearch": "Buscar por nombre, función o correo",
       "pickContactLinks": "Vinculado actualmente a",
-      "pickContactNoLinks": "Aún sin vincular"
+      "pickContactNoLinks": "Aún sin vincular",
+      "coupleNote": "Vincular MUEVE el contacto a esta ubicación — se desvincula de la actual."
     },
     "saveFailed": "Error al guardar.",
     "deleteFailed": "Error al eliminar.",
@@ -216,7 +217,11 @@
       "none": "Nada vinculado aún",
       "subtabs": {
         "data": "Datos"
-      }
+      },
+      "coupleNote": "Vincular mueve el contacto a este departamento.",
+      "coupleAction": "Vincular",
+      "addContactHere": "Nuevo contacto",
+      "uncoupleAction": "Desvincular"
     },
     "deleteConfirm": "¿Eliminar este departamento?",
     "saveFailed": "Error al guardar.",
@@ -271,7 +276,9 @@
       "error": "No se pudieron cargar las tareas",
       "openTask": "Abrir tarea"
     },
-    "openContact": "Abrir contacto"
+    "openContact": "Abrir contacto",
+    "backTo": "Volver a {{name}}",
+    "searchHere": "Buscar contacto…"
   },
   "vacancies": {
     "empty": "No hay vacantes para este cliente.",

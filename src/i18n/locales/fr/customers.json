@@ -190,7 +190,8 @@
       "openVies": "Vérifier dans VIES (UE)",
       "pickContactSearch": "Rechercher par nom, fonction ou e-mail",
       "pickContactLinks": "Actuellement lié à",
-      "pickContactNoLinks": "Pas encore lié"
+      "pickContactNoLinks": "Pas encore lié",
+      "coupleNote": "Lier DÉPLACE le contact vers ce site — il est détaché de son site actuel."
     },
     "saveFailed": "L'enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
@@ -216,7 +217,11 @@
       "none": "Rien de lié pour le moment",
       "subtabs": {
         "data": "Détails"
-      }
+      },
+      "coupleNote": "Lier déplace le contact vers ce service.",
+      "coupleAction": "Lier",
+      "addContactHere": "Nouveau contact",
+      "uncoupleAction": "Détacher"
     },
     "deleteConfirm": "Supprimer ce service ?",
     "saveFailed": "L'enregistrement a échoué.",
@@ -271,7 +276,9 @@
       "error": "Impossible de charger les tâches",
       "openTask": "Ouvrir la tâche"
     },
-    "openContact": "Ouvrir le contact"
+    "openContact": "Ouvrir le contact",
+    "backTo": "Retour à {{name}}",
+    "searchHere": "Rechercher un contact…"
   },
   "vacancies": {
     "empty": "Aucun poste pour ce client.",

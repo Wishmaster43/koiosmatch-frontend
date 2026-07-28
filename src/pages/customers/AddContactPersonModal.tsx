@@ -5,6 +5,8 @@
  * the backend has no multi-value yet), status, primary toggle. One component serves
  * the top-level Contactpersonen tab AND the location detail's nested list —
  * `lockLocationId` pre-fills + hides the location field when adding "at this location".
+ * `lockDepartmentId` is the symmetric counterpart for a department's own nested list —
+ * pre-fills + hides the department field when adding "in this department".
  *
  * Widened to the house "wide form" frame (Danny 27-07: "+ contactpersoon ook" —
  * every create modal must match +Match/+Kandidaat's footprint) via the shared
@@ -78,7 +80,7 @@ function FieldError({ text }: { text?: string }) {
 }
 
 export default function AddContactPersonModal({
-  onClose, onCreate, customerName, locations = [], departments = [], statuses = [], initial, lockLocationId, existing = [],
+  onClose, onCreate, customerName, locations = [], departments = [], statuses = [], initial, lockLocationId, lockDepartmentId, existing = [],
 }: {
   onClose: () => void
   onCreate?: (v: ContactPayload) => void
@@ -88,6 +90,9 @@ export default function AddContactPersonModal({
   statuses?: LookupOption[]
   initial?: Contact | null
   lockLocationId?: Id
+  // Symmetric counterpart of lockLocationId — used when adding "in this
+  // department" from a department's own nested contact list.
+  lockDepartmentId?: Id
   // The customer's OTHER already-loaded contacts — drives the primary-replace
   // confirmation and the email/phone/mobile duplicate check below.
   existing?: Contact[]
@@ -107,7 +112,7 @@ export default function AddContactPersonModal({
     mobile: initial?.mobile ?? '',
     role: initial?.role ?? '',
     locationId: initial?.locationId ?? lockLocationId ?? null,
-    departmentId: initial?.departmentId ?? null,
+    departmentId: initial?.departmentId ?? lockDepartmentId ?? null,
     statusId: initial?.statusId ?? (statuses[0]?.id as string | undefined) ?? null,
     isPrimary: initial?.isPrimary ?? false,
     customFields: initial?.customFields ?? {},
@@ -217,6 +222,9 @@ export default function AddContactPersonModal({
     : departmentOptions.length === 0 ? t('common:noResults')
     : t('subModal.noneOption')
   const showLocationPicker = !lockLocationId
+  // Symmetric to showLocationPicker — hides the department field when adding
+  // "in this department" from a department's own nested contact list.
+  const showDepartmentPicker = !lockDepartmentId
 
   return (
     <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
@@ -296,27 +304,34 @@ export default function AddContactPersonModal({
           <div>
             <div style={cardHead}>{t('subModal.groups.link')}</div>
             <div style={cardBox}>
-              {/* Location is only picked here at the top-level Contactpersonen tab —
+              {/* Location is picked at the top-level Contactpersonen tab —
                   `lockLocationId` (adding "at this location") hides ONLY this field.
-                  The department field always renders in the same row2 grid so widths
-                  stay identical either way: locked -> [department, empty cell],
-                  unlocked -> [location, department] — mirrors the Function row above. */}
-              <div style={row2}>
-                {showLocationPicker && (
-                  <Field label={t('subModal.selectLocation')}>
-                    <CreatableSelect value={form.locationId ? String(form.locationId) : null} allowCreate={false}
-                      onChange={v => { set('locationId', v || null); set('departmentId', null) }}
-                      placeholder={t('subModal.noneOption')} options={locations.map(l => ({ value: String(l.id), label: l.name }))}
-                      style={CREATABLE_STYLE} />
-                  </Field>
-                )}
-                <Field label={t('subModal.selectDepartment')}>
-                  <CreatableSelect value={form.departmentId ? String(form.departmentId) : null} allowCreate={false}
-                    onChange={v => set('departmentId', v || null)}
-                    placeholder={departmentPlaceholder} options={departmentOptions} style={CREATABLE_STYLE} />
-                </Field>
-                {!showLocationPicker && <div />}
-              </div>
+                  Department is picked from the top-level tab or a location's nested
+                  list — `lockDepartmentId` (adding "in this department") hides ONLY
+                  that field. Whichever field stays visible keeps its half-width
+                  column via an empty filler cell, never a lone full-width control
+                  (mirrors the Function row above); when BOTH are locked the row
+                  folds away since there is nothing left to pick. */}
+              {(showLocationPicker || showDepartmentPicker) && (
+                <div style={row2}>
+                  {showLocationPicker && (
+                    <Field label={t('subModal.selectLocation')}>
+                      <CreatableSelect value={form.locationId ? String(form.locationId) : null} allowCreate={false}
+                        onChange={v => { set('locationId', v || null); set('departmentId', null) }}
+                        placeholder={t('subModal.noneOption')} options={locations.map(l => ({ value: String(l.id), label: l.name }))}
+                        style={CREATABLE_STYLE} />
+                    </Field>
+                  )}
+                  {showDepartmentPicker && (
+                    <Field label={t('subModal.selectDepartment')}>
+                      <CreatableSelect value={form.departmentId ? String(form.departmentId) : null} allowCreate={false}
+                        onChange={v => set('departmentId', v || null)}
+                        placeholder={departmentPlaceholder} options={departmentOptions} style={CREATABLE_STYLE} />
+                    </Field>
+                  )}
+                  {showLocationPicker !== showDepartmentPicker && <div />}
+                </div>
+              )}
               <div style={{ ...row2, alignItems: 'end' }}>
                 <Field label={t('subModal.status')}>
                   <CreatableSelect value={form.statusId ? String(form.statusId) : null} allowCreate={false}

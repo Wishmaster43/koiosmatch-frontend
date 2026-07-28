@@ -53,7 +53,7 @@ const baseProps = {
   customerId: 'cust-1', locations: [], departments: [], contacts: [],
   statuses, departmentStatuses: [] as LookupOption[], contactStatuses: [] as LookupOption[],
   onDelete: vi.fn(), onAddDepartment: vi.fn(), onUpdateDepartment: vi.fn(), onRemoveDepartment: vi.fn(),
-  onAddContact: vi.fn(), onUpdateContact: vi.fn(), close: vi.fn(),
+  onAddContact: vi.fn(), onUpdateContact: vi.fn(), onRemoveContact: vi.fn(), close: vi.fn(),
 }
 
 describe('LocationDetail · title-row status badge', () => {

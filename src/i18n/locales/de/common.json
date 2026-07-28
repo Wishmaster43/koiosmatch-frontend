@@ -269,5 +269,6 @@
       "notGeocoded": "Noch nicht geocodiert",
       "autoInfo": "Koordinaten werden automatisch aktualisiert, sobald sich die Adresse ändert."
     }
-  }
+  },
+  "breadcrumb": "Brotkrümelnavigation"
 }

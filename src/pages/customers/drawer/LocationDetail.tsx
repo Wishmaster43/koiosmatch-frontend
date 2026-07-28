@@ -33,8 +33,9 @@ import TitleBadge from '@/components/drawer/TitleBadge'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useConfirm } from '@/hooks/useConfirm'
 import LocationDepartments from './LocationDepartments'
-import LocationContacts from './LocationContacts'
+import ContactsPanel from './ContactsPanel'
 import ContactNameLink from './ContactNameLink'
+import DrillBreadcrumb from '@/components/drawer/DrillBreadcrumb'
 import PlanningSummary from './PlanningSummary'
 import { useAuth } from '@/context/AuthContext'
 import { useCustomFields } from '@/lib/useCustomFields'
@@ -63,14 +64,16 @@ interface Props {
   onRemoveDepartment: (id: Id) => void
   onAddContact: (payload: ContactPayload) => void
   onUpdateContact: (id: Id, payload: Partial<ContactPayload>) => void
-  /** Open a contact's own drill-down on the Contactpersonen tab (Danny 28-07). */
-  onOpenContact?: (id: Id) => void
+  /** Label of the list this location was opened from — the first breadcrumb. */
+  backLabel?: string
+  onRemoveContact: (id: Id) => void
   close: () => void
 }
 
 export default function LocationDetail({
   location: l, customerId, locations, departments, contacts, statuses, departmentStatuses, contactStatuses, canLinkBackoffice = false,
-  onSave, onDelete, onAddDepartment, onUpdateDepartment, onRemoveDepartment, onAddContact, onUpdateContact, onOpenContact, close,
+  onSave, onDelete, onAddDepartment, onUpdateDepartment, onRemoveDepartment, onAddContact, onUpdateContact, onRemoveContact,
+  backLabel, close,
 }: Props) {
   const { t, i18n } = useTranslation('customers')
 
@@ -83,6 +86,11 @@ export default function LocationDetail({
   const { provinces } = useProvinces(countryCode)
   const provinceOptions = provinces.map((p: string) => ({ value: p, label: p }))
 
+
+  // A contact opened from this location's own list. The panel owns the id; this flag only
+  // tells the location to stand back (no second title, sub-tab bar or delete button).
+  const [openContactId, setOpenContactId] = useState<Id | null>(null)
+  const contactOpen = openContactId != null
 
   const { confirm, dialog } = useConfirm()
   const auth = useAuth()
@@ -138,7 +146,7 @@ export default function LocationDetail({
         const here = contacts.filter(c => String(c.locationId) === String(l.id)).filter(byName)
         const hits = here.length > 0 ? here : contacts.filter(byName)
         return <ContactNameLink name={typed} id={hits.length === 1 ? hits[0].id : null}
-          onOpen={onOpenContact} title={t('contacts.openContact')} />
+          onOpen={id => { setSubTab('contacts'); setOpenContactId(id) }} title={t('contacts.openContact')} />
       } },
     { key: 'email', label: t('locations.detail.email'), type: 'text', group: t('locations.detail.contactTitle'),
       renderValue: v => emailValue(v, t('overview.sendEmail')) },
@@ -186,8 +194,25 @@ export default function LocationDetail({
   const cancelStatus = () => setEditingStatus(false)
   const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
 
+  // A contact opened from this location's own list takes over the whole body: it brings
+  // its own breadcrumb (Locaties › deze vestiging › de persoon), so showing the location's
+  // title, sub-tab bar and delete button underneath would mean two titles and two delete
+  // buttons with different blast radii on one narrow panel.
+  if (contactOpen) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <ContactsPanel scope="location" scopeId={l.id as Id} scopeName={l.name} contacts={contacts} locations={locations}
+          openId={openContactId} onOpenChange={setOpenContactId} trail={[{ label: backLabel ?? '', onClick: close }]}
+          onRemove={onRemoveContact}
+          departments={departments} statuses={contactStatuses} onAdd={onAddContact} onUpdate={onUpdateContact} />
+      </div>
+    )
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* One way back per level: the shared trail replaces SubEntityTab's own button. */}
+      <DrillBreadcrumb trail={[{ label: backLabel ?? '', onClick: close }]} current={l.name} />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{l.name}</div>
@@ -258,7 +283,9 @@ export default function LocationDetail({
       )}
 
       {subTab === 'contacts' && (
-        <LocationContacts locationId={l.id as Id} locationName={l.name} contacts={contacts} locations={locations} onOpenContact={onOpenContact}
+        <ContactsPanel scope="location" scopeId={l.id as Id} scopeName={l.name} contacts={contacts} locations={locations}
+          openId={openContactId} onOpenChange={setOpenContactId} trail={[{ label: backLabel ?? '', onClick: close }]}
+          onRemove={onRemoveContact}
           departments={departments} statuses={contactStatuses} onAdd={onAddContact} onUpdate={onUpdateContact} />
       )}
 

@@ -269,5 +269,6 @@
       "notGeocoded": "Nog niet gegeocodeerd",
       "autoInfo": "Coördinaten worden automatisch bijgewerkt zodra het adres wijzigt."
     }
-  }
+  },
+  "breadcrumb": "Kruimelpad"
 }

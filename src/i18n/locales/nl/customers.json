@@ -190,7 +190,8 @@
       "openVies": "Controleren in VIES (EU)",
       "pickContactSearch": "Zoek op naam, functie of e-mail",
       "pickContactLinks": "Nu gekoppeld aan",
-      "pickContactNoLinks": "Nog geen koppeling"
+      "pickContactNoLinks": "Nog geen koppeling",
+      "coupleNote": "Koppelen VERPLAATST de contactpersoon naar deze locatie — hij raakt los van zijn huidige locatie."
     },
     "saveFailed": "Opslaan is mislukt.",
     "deleteFailed": "Verwijderen is mislukt.",
@@ -216,7 +217,11 @@
       "none": "Nog niets gekoppeld",
       "subtabs": {
         "data": "Gegevens"
-      }
+      },
+      "coupleNote": "Koppelen verplaatst de contactpersoon naar deze afdeling.",
+      "coupleAction": "Koppelen",
+      "addContactHere": "Nieuwe contactpersoon",
+      "uncoupleAction": "Ontkoppelen"
     },
     "deleteConfirm": "Deze afdeling verwijderen?",
     "saveFailed": "Opslaan is mislukt.",
@@ -271,7 +276,9 @@
       "error": "Taken konden niet worden geladen",
       "openTask": "Open taak"
     },
-    "openContact": "Open contactpersoon"
+    "openContact": "Open contactpersoon",
+    "backTo": "Terug naar {{name}}",
+    "searchHere": "Zoek contactpersoon…"
   },
   "vacancies": {
     "empty": "Geen vacatures voor deze klant.",

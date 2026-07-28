@@ -6,7 +6,7 @@
  */
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { ArrowLeft, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 // House "+ action" trigger (Danny 27-07 consistency sweep) — replaces the
@@ -19,10 +19,6 @@ const searchWrap: CSSProperties = {
   background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8,
 }
 const searchInput: CSSProperties = { flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }
-const backBtn: CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 5, marginBottom: 12, padding: '5px 0', fontSize: 12, fontWeight: 500,
-  background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer',
-}
 
 interface SubEntityTabProps<Item> {
   items?: Item[]
@@ -30,46 +26,29 @@ interface SubEntityTabProps<Item> {
   addLabel?: ReactNode
   emptyText?: string
   searchPlaceholder?: string
-  backLabel?: ReactNode
   searchKeys?: string[]
   onAdd?: () => void
-  /**
-   * Open this row's detail from OUTSIDE the tab (Danny 28-07: clicking a contact in a
-   * location's list must land on that contact's own drill-down, the same screen the
-   * Contactpersonen tab shows). Each new value opens it once; the user can still
-   * navigate away afterwards, so this seeds the selection rather than pinning it.
-   */
-  openId?: string | number | null
   // `close` lets the detail view return to the list itself (e.g. after a delete).
   renderDetail: (item: Item, close: () => void) => ReactNode
   getRowId?: (item: Item) => string | number | undefined
 }
 
 export default function SubEntityTab<Item extends object>({
-  items = [], columns, addLabel, emptyText, searchPlaceholder, backLabel,
-  searchKeys = ['name'], onAdd, openId, renderDetail,
+  items = [], columns, addLabel, emptyText, searchPlaceholder,
+  searchKeys = ['name'], onAdd, renderDetail,
   getRowId = (it: Item) => (it as { id?: string | number }).id,
 }: SubEntityTabProps<Item>) {
   const [search, setSearch]         = useState('')
-  const [selectedId, setSelectedId] = useState<string | number | undefined>(openId ?? undefined)
-  // Adopt each NEW openId during render (no effect, so the detail is on screen in the
-  // same paint as the tab switch). Tracking the last value it acted on is what lets the
-  // user press Terug afterwards without the same id immediately reopening.
-  const [lastOpenId, setLastOpenId] = useState<string | number | null | undefined>(openId)
-  if (openId !== lastOpenId) { setLastOpenId(openId); if (openId != null) setSelectedId(openId) }
+  const [selectedId, setSelectedId] = useState<string | number | undefined>(undefined)
   // Track by id, not object reference, so the detail pane stays live when the
   // parent's list updates (in-place edit) instead of freezing the clicked snapshot.
   const selected = selectedId !== undefined ? items.find(it => getRowId(it) === selectedId) ?? null : null
 
-  // Detail view — show the picked sub-entity with a back button.
-  if (selected) {
-    return (
-      <div>
-        <button onClick={() => setSelectedId(undefined)} style={backBtn}><ArrowLeft size={13} /> {backLabel}</button>
-        {renderDetail(selected, () => setSelectedId(undefined))}
-      </div>
-    )
-  }
+  // Detail view — the detail owns its own way back: it renders the shared
+  // DrillBreadcrumb with the `close` handle below as its first crumb. This shell no
+  // longer draws a back button of its own, because a nested drill-down (a contact
+  // inside a location) then produced two stacked buttons both labelled "Terug".
+  if (selected) return <>{renderDetail(selected, () => setSelectedId(undefined))}</>
 
   // List view — client-side search over the chosen keys.
   const q = search.trim().toLowerCase()

@@ -190,7 +190,8 @@
       "openVies": "In VIES prüfen (EU)",
       "pickContactSearch": "Nach Name, Funktion oder E-Mail suchen",
       "pickContactLinks": "Aktuell verknüpft mit",
-      "pickContactNoLinks": "Noch nicht verknüpft"
+      "pickContactNoLinks": "Noch nicht verknüpft",
+      "coupleNote": "Das Verknüpfen VERSCHIEBT den Kontakt an diesen Standort — die bisherige Verknüpfung entfällt."
     },
     "saveFailed": "Speichern fehlgeschlagen.",
     "deleteFailed": "Löschen fehlgeschlagen.",
@@ -216,7 +217,11 @@
       "none": "Noch nichts verknüpft",
       "subtabs": {
         "data": "Details"
-      }
+      },
+      "coupleNote": "Das Verknüpfen verschiebt den Kontakt in diese Abteilung.",
+      "coupleAction": "Verknüpfen",
+      "addContactHere": "Neuer Kontakt",
+      "uncoupleAction": "Verknüpfung lösen"
     },
     "deleteConfirm": "Diese Abteilung löschen?",
     "saveFailed": "Speichern fehlgeschlagen.",
@@ -271,7 +276,9 @@
       "error": "Aufgaben konnten nicht geladen werden",
       "openTask": "Aufgabe öffnen"
     },
-    "openContact": "Kontakt öffnen"
+    "openContact": "Kontakt öffnen",
+    "backTo": "Zurück zu {{name}}",
+    "searchHere": "Kontakt suchen…"
   },
   "vacancies": {
     "empty": "Keine Stellen für diesen Kunden.",

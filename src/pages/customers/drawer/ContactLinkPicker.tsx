@@ -1,9 +1,13 @@
 /**
- * ContactLinkPicker — the "Koppelen" picker for LocationContacts: pick an existing
- * customer contact to link to THIS location. Widened (Danny 28-07: "de popup moet
- * groter en breeder") from a narrow 380px name list to the app's shared wide-modal
- * footprint, with a search box and, per contact, the locations/departments they are
- * ALREADY linked to — so the user can see what they are re-pointing before picking.
+ * ContactLinkPicker — the "Koppelen" picker for pointing an existing customer
+ * contact at a location OR a department: used by LocationContacts (patches
+ * customer_location_id) and a department's own nested contact list (patches
+ * customer_department_id). The picker itself stays agnostic about WHICH field
+ * the caller will patch — it only reports the picked contact via `onPick(id)`.
+ * Widened (Danny 28-07: "de popup moet groter en breeder") from a narrow 380px
+ * name list to the app's shared wide-modal footprint, with a search box and,
+ * per contact, the locations/departments they are ALREADY linked to — so the
+ * user can see what they are re-pointing before picking.
  */
 import { useState } from 'react'
 import type { ComponentType, CSSProperties } from 'react'
@@ -33,11 +37,21 @@ interface Props {
   departments: Department[]
   onPick: (id: Id) => void
   onClose: () => void
+  // Short muted warning line under the title — e.g. explaining that picking here
+  // REPOINTS the contact's coupling rather than adding a second one. The caller
+  // passes the already-translated text; this component never hardcodes it.
+  note?: string
+  // Override for the "no candidates" empty state; defaults to the location
+  // wording so the existing LocationContacts call site is unchanged.
+  emptyLabel?: string
 }
 
-export default function ContactLinkPicker({ candidates, locations, departments, onPick, onClose }: Props) {
+export default function ContactLinkPicker({ candidates, locations, departments, onPick, onClose, note, emptyLabel }: Props) {
   const { t } = useTranslation('customers')
   const [search, setSearch] = useState('')
+  // Default empty-state text stays the location wording so the existing call
+  // site (no emptyLabel passed) keeps rendering exactly what it did before.
+  const emptyText = emptyLabel ?? t('locations.detail.pickContactEmpty')
   // Focus trap + Escape-to-close + focus restore (§6) — the previous inline
   // version had none of this, a real accessibility gap.
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
@@ -61,7 +75,11 @@ export default function ContactLinkPicker({ candidates, locations, departments, 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('locations.detail.pickContactTitle')} tabIndex={-1}
         style={{ background: 'var(--surface)', borderRadius: 12, width: '100%', ...WIDE_MODAL, boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('locations.detail.pickContactTitle')}</span>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('locations.detail.pickContactTitle')}</div>
+            {/* Optional caller-supplied warning (e.g. "this repoints, it does not add a second site"). */}
+            {note && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{note}</div>}
+          </div>
           <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
         </div>
 
@@ -75,7 +93,7 @@ export default function ContactLinkPicker({ candidates, locations, departments, 
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', borderTop: '1px solid var(--border)' }}>
-          {candidates.length === 0 && <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{t('locations.detail.pickContactEmpty')}</div>}
+          {candidates.length === 0 && <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{emptyText}</div>}
           {candidates.length > 0 && rows.length === 0 && <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:noResults')}</div>}
           {rows.map(c => {
             // Per-contact CURRENT links — so the user sees what they're re-pointing.

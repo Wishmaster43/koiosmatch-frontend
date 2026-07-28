@@ -41,15 +41,14 @@ interface Props {
   onRemoveDepartment: (id: Id) => void
   onAddContact: (payload: ContactPayload) => void
   onUpdateContact: (id: Id, payload: Partial<ContactPayload>) => void
-  /** Jump to a contact's own drill-down on the Contactpersonen tab (Danny 28-07). */
-  onOpenContact?: (id: Id) => void
+  onRemoveContact: (id: Id) => void
 }
 
 export default function LocationsTab({
   customerId, customerName, locations = [], departments = [], contacts = [], statuses = [], departmentStatuses = [], contactStatuses = [],
   canLinkBackoffice = false,
   onAddLocation, onSaveLocation, onDeleteLocation, onAddDepartment, onUpdateDepartment, onRemoveDepartment, onAddContact, onUpdateContact,
-  onOpenContact,
+  onRemoveContact,
 }: Props) {
   const { t } = useTranslation('customers')
   const [adding, setAdding] = useState(false)
@@ -82,8 +81,8 @@ export default function LocationsTab({
       canLinkBackoffice={canLinkBackoffice}
       onSave={onSaveLocation} onDelete={onDeleteLocation}
       onAddDepartment={onAddDepartment} onUpdateDepartment={onUpdateDepartment} onRemoveDepartment={onRemoveDepartment}
-      onAddContact={onAddContact} onUpdateContact={onUpdateContact}
-      onOpenContact={onOpenContact}
+      onAddContact={onAddContact} onUpdateContact={onUpdateContact} onRemoveContact={onRemoveContact}
+      backLabel={t('drawer.tabs.locations')}
       close={close}
     />
   )
@@ -96,7 +95,6 @@ export default function LocationsTab({
         addLabel={t('locations.add')}
         emptyText={t('locations.empty')}
         searchPlaceholder={t('locations.searchPlaceholder')}
-        backLabel={t('drawer.back')}
         searchKeys={['name', 'city']}
         onAdd={() => setAdding(true)}
         renderDetail={renderDetail}

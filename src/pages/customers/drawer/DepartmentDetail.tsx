@@ -19,19 +19,20 @@ import { useTranslation } from 'react-i18next'
 import { Trash2 } from 'lucide-react'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
-import SectionCard from '@/components/ui/SectionCard'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
-import ContactNameLink from './ContactNameLink'
+import ContactsPanel from './ContactsPanel'
+import DrillBreadcrumb from '@/components/drawer/DrillBreadcrumb'
 import EditableRichTextField from './EditableRichTextField'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useConfirm } from '@/hooks/useConfirm'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
+import type { ContactPayload } from '../hooks/useCustomerContacts'
 
-export default function DepartmentDetail({ department, locations, statuses, contacts = [], canLinkBackoffice = false, onOpenContact, onSave, onDelete, close }: {
+export default function DepartmentDetail({ department, locations, statuses, contactStatuses = [], departments = [], contacts = [], canLinkBackoffice = false, backLabel, onAddContact, onUpdateContact, onRemoveContact, onSave, onDelete, close }: {
   department: Department
   locations: { id: Id; name: string }[]
   statuses: LookupOption[]
@@ -41,13 +42,23 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   // EXTRACT-1: the caller's own customers.update permission check for the
   // Koppelingen sub-tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
   canLinkBackoffice?: boolean
-  /** Open a contact's own drill-down on the Contactpersonen tab (Danny 28-07). */
-  onOpenContact?: (id: Id) => void
+  /** Lookups + writers the shared ContactsPanel needs (same set the location gets). */
+  contactStatuses?: LookupOption[]
+  departments?: Department[]
+  /** Label of the list this department was opened from — the first breadcrumb. */
+  backLabel?: string
+  onAddContact: (payload: ContactPayload) => void
+  onUpdateContact: (id: Id, payload: Partial<ContactPayload>) => void
+  onRemoveContact: (id: Id) => void
   onSave: (id: Id, payload: Partial<DepartmentPayload>) => void
   onDelete: (id: Id) => void
   close: () => void
 }) {
   const { t } = useTranslation('customers')
+  // A contact opened from this department's own list takes over the body (see LocationDetail).
+  const [openContactId, setOpenContactId] = useState<Id | null>(null)
+  const contactOpen = openContactId != null
+
   const { confirm, dialog } = useConfirm()
   // The Extra sub-tab only shows when the tenant has defined customer_department custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer_department')
@@ -83,8 +94,24 @@ export default function DepartmentDetail({ department, locations, statuses, cont
 
   const remove = () => confirm(t('departments.deleteConfirm'), () => { onDelete(department.id as Id); close() }, { danger: true })
 
+  // A contact opened from this department's list brings its own full trail, so the
+  // department steps aside — one title, one delete button, one way back.
+  if (contactOpen) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <ContactsPanel scope="department" scopeId={department.id as Id} scopeName={department.name}
+          contacts={contacts} locations={locations} departments={departments} statuses={contactStatuses}
+          trail={[{ label: backLabel ?? '', onClick: close }]}
+          openId={openContactId} onOpenChange={setOpenContactId}
+          onAdd={onAddContact} onUpdate={onUpdateContact} onRemove={onRemoveContact} />
+      </div>
+    )
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* One way back per level (see LocationDetail for why this replaced the old button). */}
+      <DrillBreadcrumb trail={[{ label: backLabel ?? '', onClick: close }]} current={department.name} />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{department.name}</div>
         <button onClick={remove} title={t('common:delete')}
@@ -123,24 +150,13 @@ export default function DepartmentDetail({ department, locations, statuses, cont
         <BackofficeLinksTab entity="departments" id={department.id as Id} helloflexLink={department.helloflexLink} shiftmanagerLink={department.shiftmanagerLink} canLink={canLinkBackoffice} />
       )}
 
+      {/* The SAME panel the customer tab and a location render — one contact surface. */}
       {subTab === 'contacts' && (
-        <SectionCard title={t('departments.detail.contactsHere')}>
-          {contacts.length === 0
-            ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('departments.detail.none')}</div>
-            : (
-              <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-                {contacts.map((p, i, arr) => (
-                  <div key={p.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', fontSize: 12,
-                    borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                    <span style={{ flex: 1, minWidth: 0, color: 'var(--text)' }}>
-                      <ContactNameLink name={p.name} id={p.id} onOpen={onOpenContact} title={t('contacts.openContact')} />
-                    </span>
-                    <span style={{ color: 'var(--text-muted)' }}>{[p.role, p.email].filter(Boolean).join(' · ')}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-        </SectionCard>
+        <ContactsPanel scope="department" scopeId={department.id as Id} scopeName={department.name}
+          contacts={contacts} locations={locations} departments={departments} statuses={contactStatuses}
+          trail={[{ label: backLabel ?? '', onClick: close }]}
+          openId={openContactId} onOpenChange={setOpenContactId}
+          onAdd={onAddContact} onUpdate={onUpdateContact} onRemove={onRemoveContact} />
       )}
       {dialog}
     </div>
