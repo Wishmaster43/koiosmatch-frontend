@@ -18,6 +18,11 @@ import type { Contact } from '@/types/customer'
 // stub the lookup hook the same way CandidatesTable.test.tsx does for its own
 // combined last-contact column, and mock the api client defensively in case a
 // child (ContactDetail/AddContactPersonModal) ever mounts during a test.
+// The chip colours come from a settings fetch; this file asserts synchronously and does
+// not care about them, so the hook is stubbed rather than left to resolve mid-assertion.
+vi.mock('@/lib/settings/useChipColors', () => ({
+  useChipColors: () => ({ location: 'var(--color-secondary)', department: 'var(--color-violet)' }),
+}))
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
   return { ...actual, default: { get: vi.fn().mockResolvedValue({ data: { data: [] } }), post: vi.fn(), patch: vi.fn(), delete: vi.fn() } }

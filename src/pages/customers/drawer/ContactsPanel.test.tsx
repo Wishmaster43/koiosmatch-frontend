@@ -10,9 +10,11 @@
  */
 import { useState } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
+import api from '@/lib/api'
+import { invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import ContactsPanel from './ContactsPanel'
 import type { ComponentProps } from 'react'
 import type { Contact, Department } from '@/types/customer'
@@ -152,5 +154,42 @@ describe('ContactsPanel · scoped actions are the real backend paths', () => {
   it('offers no coupling at customer level — a contact is already "here"', () => {
     render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={[contact()]} />)
     expect(screen.queryByRole('button', { name: ct('locations.detail.coupleAction') })).toBeNull()
+  })
+})
+
+describe('ContactsPanel · chip colours read the tenant setting (CHIPKLEUR-INSTELBAAR-1)', () => {
+  // useAllSettings caches its response at MODULE scope (one fetch per session), so an
+  // earlier test in this file leaves a stale cache behind. Reset it before each case
+  // here so every test's /settings mock is the one actually read — mirrors the reset
+  // useContactFunctions.test.ts does for its own module-scope cache.
+  beforeEach(() => invalidateAllSettingsCache())
+
+  it('keeps today\'s colours when no chip-color setting is saved', async () => {
+    render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={[contact()]} />)
+
+    // Documented backend fallbacks (SettingController.php, CHIPKLEUR-INSTELBAAR-1) —
+    // absent must render exactly like before this setting existed.
+    await waitFor(() => {
+      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: 'var(--color-secondary)' })
+      expect(screen.getByText('Zorg')).toHaveStyle({ color: 'var(--color-violet)' })
+    })
+  })
+
+  it('uses the tenant-saved colours once /settings returns them', async () => {
+    // eslint-disable-next-line no-restricted-syntax -- DATA: arbitrary tenant-picked hex values simulating a saved API setting, not a UI colour choice
+    const savedLocationColor = '#ff0000'
+    // eslint-disable-next-line no-restricted-syntax -- DATA: arbitrary tenant-picked hex values simulating a saved API setting, not a UI colour choice
+    const savedDepartmentColor = '#00cc66'
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/settings'
+        ? Promise.resolve({ data: { customer_location_chip_color: savedLocationColor, customer_department_chip_color: savedDepartmentColor } })
+        : Promise.resolve({ data: { data: [] } }))
+
+    render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={[contact()]} />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: savedLocationColor })
+      expect(screen.getByText('Zorg')).toHaveStyle({ color: savedDepartmentColor })
+    })
   })
 })

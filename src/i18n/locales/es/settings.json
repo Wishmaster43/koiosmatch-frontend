@@ -1794,6 +1794,14 @@
       "customer_table_color_owner": {
         "label": "Color del gestor",
         "description": "Activado = el avatar del gestor usa su color. Desactivado = gris neutro."
+      },
+      "customer_location_chip_color": {
+        "label": "Color chip ubicación",
+        "description": "El color de cada chip Ubicación en un contacto. Vacío = el color predeterminado."
+      },
+      "customer_department_chip_color": {
+        "label": "Color chip departamento",
+        "description": "El color de cada chip Departamento en un contacto. Vacío = el color predeterminado."
       }
     }
   },

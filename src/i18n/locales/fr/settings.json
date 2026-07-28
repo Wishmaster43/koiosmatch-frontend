@@ -1794,6 +1794,14 @@
       "customer_table_color_owner": {
         "label": "Couleur du gestionnaire",
         "description": "Activé = l'avatar du gestionnaire utilise sa couleur. Désactivé = gris neutre."
+      },
+      "customer_location_chip_color": {
+        "label": "Couleur puce site",
+        "description": "La couleur de chaque puce Site sur un contact. Vide = la couleur par défaut."
+      },
+      "customer_department_chip_color": {
+        "label": "Couleur puce service",
+        "description": "La couleur de chaque puce Service sur un contact. Vide = la couleur par défaut."
       }
     }
   },

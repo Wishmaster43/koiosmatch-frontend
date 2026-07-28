@@ -1812,6 +1812,14 @@
       "customer_table_color_owner": {
         "label": "Owner colour",
         "description": "On = the owner avatar uses the account manager's colour. Off = neutral grey."
+      },
+      "customer_location_chip_color": {
+        "label": "Location chip colour",
+        "description": "The colour of every Locatie chip on a contact person. Empty = the default colour."
+      },
+      "customer_department_chip_color": {
+        "label": "Department chip colour",
+        "description": "The colour of every Afdeling chip on a contact person. Empty = the default colour."
       }
     }
   },

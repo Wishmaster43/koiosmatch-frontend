@@ -31,6 +31,7 @@ import LookupIcon from '@/components/ui/LookupIcon'
 import { emailValue, phoneValue } from '@/components/drawer/contactLinks'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import { useDateFormat } from '@/lib/datetime'
+import { useChipColors } from '@/lib/settings/useChipColors'
 import ContactDetail from './ContactDetail'
 import ContactLinkPicker from './ContactLinkPicker'
 import AddContactPersonModal from '../AddContactPersonModal'
@@ -87,6 +88,9 @@ export default function ContactsPanel({
   const { t } = useTranslation('customers')
   const { labelOf: lastContactLabel, iconOf: lastContactIcon } = useLastContactTypes()
   const { formatDate } = useDateFormat()
+  // Tenant-configurable chip colours (CHIPKLEUR-INSTELBAAR-1) — falls back to today's
+  // hardcoded colours until a tenant saves an override in Settings.
+  const { location: locationChipColor, department: departmentChipColor } = useChipColors()
   const [search, setSearch] = useState('')
   const [modal, setModal] = useState<'add' | 'couple' | Contact | null>(null)
 
@@ -143,11 +147,11 @@ export default function ContactsPanel({
       render: p => p.statusLabel ? <SoftChip label={p.statusLabel} color={p.statusColor} /> : '—' },
     ...(scope === 'customer' ? [{
       key: 'location', header: t('contacts.col.location'), sortable: true, sortValue: (p: Contact) => p.locationName,
-      render: (p: Contact) => chipList(resolvedLocations(p), 'var(--color-secondary)'),
+      render: (p: Contact) => chipList(resolvedLocations(p), locationChipColor),
     }] : []),
     ...(scope !== 'department' ? [{
       key: 'department', header: t('contacts.col.department'), sortable: true, sortValue: (p: Contact) => p.departmentName,
-      render: (p: Contact) => chipList(resolvedDepartments(p), 'var(--color-violet)'),
+      render: (p: Contact) => chipList(resolvedDepartments(p), departmentChipColor),
     }] : []),
     { key: 'role', header: t('contacts.col.role'), cellStyle: muted, sortable: true, sortValue: p => p.role, render: p => p.role || '—' },
     { key: 'email', header: t('contacts.col.email'), cellStyle: muted, sortable: true, sortValue: p => p.email,

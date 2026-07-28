@@ -1812,6 +1812,14 @@
       "customer_table_color_owner": {
         "label": "Eigenaarkleur",
         "description": "Aan = de eigenaar-avatar gebruikt de kleur van de accountmanager. Uit = neutraal grijs."
+      },
+      "customer_location_chip_color": {
+        "label": "Kleur locatiechip",
+        "description": "De kleur van elke Locatie-chip bij een contactpersoon. Leeg = de standaardkleur."
+      },
+      "customer_department_chip_color": {
+        "label": "Kleur afdelingschip",
+        "description": "De kleur van elke Afdeling-chip bij een contactpersoon. Leeg = de standaardkleur."
       }
     }
   },

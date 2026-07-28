@@ -1794,6 +1794,14 @@
       "customer_table_color_owner": {
         "label": "Eigentümerfarbe",
         "description": "An = der Eigentümer-Avatar nutzt die Farbe des Account-Managers. Aus = neutrales Grau."
+      },
+      "customer_location_chip_color": {
+        "label": "Farbe Standort-Chip",
+        "description": "Die Farbe jedes Standort-Chips bei einem Kontakt. Leer = die Standardfarbe."
+      },
+      "customer_department_chip_color": {
+        "label": "Farbe Abteilungs-Chip",
+        "description": "Die Farbe jedes Abteilungs-Chips bei einem Kontakt. Leer = die Standardfarbe."
       }
     }
   },

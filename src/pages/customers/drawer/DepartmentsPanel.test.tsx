@@ -31,6 +31,11 @@ function Host({ onOpen, ...props }: PanelProps & { onOpen?: (id: Id | null) => v
 
 // Defensive mocks (same set ContactsPanel.test.tsx uses): DepartmentDetail's nested
 // ContactsPanel/CustomFieldsTab could reach these if a test ever drills a level deeper.
+// The chip colours come from a settings fetch; this file asserts synchronously and does
+// not care about them, so the hook is stubbed rather than left to resolve mid-assertion.
+vi.mock('@/lib/settings/useChipColors', () => ({
+  useChipColors: () => ({ location: 'var(--color-secondary)', department: 'var(--color-violet)' }),
+}))
 vi.mock('@/lib/api', () => ({
   default: { get: vi.fn(() => Promise.resolve({ data: { data: [] } })), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
   unwrap: (r: { data?: unknown }) => r?.data, unwrapList: () => ({ rows: [], total: 0 }),

@@ -34,6 +34,7 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import StatusFilterSelect, { useStatusFilter } from './StatusFilterSelect'
+import { useChipColors } from '@/lib/settings/useChipColors'
 import type { Crumb } from '@/components/drawer/DrillBreadcrumb'
 import SoftChipJs from '@/components/ui/SoftChip'
 import DepartmentDetail from './DepartmentDetail'
@@ -98,6 +99,7 @@ export default function DepartmentsPanel({
   const scoped = departments.filter(inScope)
   // Status filter (Danny 28-07) — same component and same defaulting rule on all three lists.
   const { value: statusFilter, setValue: setStatusFilter, filtered: rows } = useStatusFilter(scoped, statuses)
+  const chipColors = useChipColors()
   // Resolved against the CUSTOMER-WIDE list, never the scoped rows: moving a department to
   // another location must not make its open detail vanish mid-edit.
   const selected = openId != null ? departments.find(d => String(d.id) === String(openId)) ?? null : null
@@ -114,7 +116,8 @@ export default function DepartmentsPanel({
       ) },
     ...(scope === 'customer' ? [{
       key: 'location', header: t('departments.col.location'), sortable: true, sortValue: (d: Department) => d.locationName,
-      render: (d: Department) => d.locationName ? <SoftChip label={d.locationName} color="var(--color-secondary)" /> : '—',
+      // Same tenant-configurable colour the contact list uses for its Locatie chips.
+      render: (d: Department) => d.locationName ? <SoftChip label={d.locationName} color={chipColors.location} /> : '—',
     }] : []),
     { key: 'status', header: t('departments.col.status'), sortable: true, sortValue: d => d.statusLabel,
       render: d => d.statusLabel ? <SoftChip label={d.statusLabel} color={d.statusColor} /> : '—' },

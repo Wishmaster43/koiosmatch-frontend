@@ -3,48 +3,29 @@
  * Shows each run's workflow, status, start time, duration and processed count;
  * filters come from RightPanelContext. The row drill-down (run meta + per-step
  * INPUT/OUTPUT) is the shared RunDetailDrawer.
+ *
+ * Uses the shared DataTable (§3A) so its sortable headers get real keyboard
+ * reachability + aria-sort for free — this table has no pagination and no
+ * grouped/totals rows, so it fits DataTable's contract without losing anything
+ * (accessibility audit 2026-07-28).
  */
 import { useState, useEffect, useMemo } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, ChevronUp, ChevronDown, ChevronsUpDown, Zap } from 'lucide-react'
+import { Search, Zap } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
+import DataTable from '../ui/DataTable'
+import type { Column } from '../ui/DataTable'
 import { useReportList } from './useReportList'
 import { formatDuration, StatusBadge } from './runFormat'
 import RunDetailDrawer from './RunDetailDrawer'
-import type { RunRow, ReportFilterGroup, SortState } from '@/types/reports'
-
-function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
-  if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
-  return dir === 'asc'
-    ? <ChevronUp size={12} style={{ color: 'var(--color-primary)' }} />
-    : <ChevronDown size={12} style={{ color: 'var(--color-primary)' }} />
-}
-
-// ─── Tabel ────────────────────────────────────────────────────────────────────
-
-const TH: CSSProperties = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-             color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
-             whiteSpace: 'nowrap', userSelect: 'none' }
-const TD: CSSProperties = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
-
-const COL_KEYS = [
-  { key: 'started_at',       tKey: 'started',    sortable: true  },
-  { key: 'workflow_name',    tKey: 'workflow',   sortable: true  },
-  { key: 'status',           tKey: 'status',     sortable: true  },
-  { key: 'candidates_count', tKey: 'candidates', sortable: true  },
-  { key: 'duration_ms',      tKey: 'duration',   sortable: true  },
-  { key: 'trigger',          tKey: 'trigger',    sortable: false },
-]
+import type { RunRow, ReportFilterGroup } from '@/types/reports'
 
 export default function RunsTable() {
   const { t } = useTranslation('reports')
-  const COLS = COL_KEYS.map(c => ({ ...c, label: t(`runs.cols.${c.tKey}`) }))
   // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
   const { rows, loading } = useReportList<RunRow>('/workflow-runs')
   const [search,  setSearch]  = useState('')
   const [drill,   setDrill]   = useState<RunRow | null>(null)
-  const [sort,    setSort]    = useState<SortState>({ key: 'started_at', dir: 'desc' })
   const [selectedStatuses,   setSelectedStatuses]   = useState<Array<string | number>>([])
   const [selectedWorkflows,  setSelectedWorkflows]  = useState<Array<string | number>>([])
 
@@ -71,23 +52,59 @@ export default function RunsTable() {
     })
   }, [rows, search, selectedStatuses, selectedWorkflows])
 
-  const sorted = useMemo(() => {
-    const { key, dir } = sort
-    return [...filtered].sort((a, b) => {
-      const av = key === 'candidates_count' || key === 'duration_ms'
-        ? (a[key] ?? 0)
-        : (a[key] ?? '').toString().toLowerCase()
-      const bv = key === 'candidates_count' || key === 'duration_ms'
-        ? (b[key] ?? 0)
-        : (b[key] ?? '').toString().toLowerCase()
-      if ((av as number) < (bv as number)) return dir === 'asc' ? -1 : 1
-      if ((av as number) > (bv as number)) return dir === 'asc' ?  1 : -1
-      return 0
-    })
-  }, [filtered, sort])
+  // Fallback row id: an object-identity map onto the ORIGINAL fetched list so a
+  // run without an `id` (defensive — real API rows always carry one) still gets
+  // a stable key, mirroring the old `r.id ?? i` fallback without needing an index.
+  const idIndex = useMemo(() => new Map(rows.map((r, i) => [r, i])), [rows])
+  const getRowId = (r: RunRow) => r.id ?? idIndex.get(r) ?? 0
 
-  const setSort_ = (key: string) => setSort(prev =>
-    prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'desc' })
+  // Column definitions handed to the shared DataTable — sorting/aria-sort/keyboard
+  // reach live there (§3A); this component only declares columns + cell rendering.
+  const columns: Column<RunRow>[] = useMemo(() => [
+    {
+      key: 'started_at', header: t('runs.cols.started'), sortable: true,
+      sortValue: r => r.started_at ? new Date(r.started_at).getTime() : null,
+      render: r => (
+        <div>
+          <div style={{ fontWeight: 500, color: 'var(--text)' }}>
+            {r.started_at ? new Date(r.started_at).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+            {r.started_at ? new Date(r.started_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) : ''}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'workflow_name', header: t('runs.cols.workflow'), sortable: true,
+      sortValue: r => r.workflow_name ?? null,
+      render: r => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 500, color: 'var(--text)' }}>
+          <Zap size={13} color="var(--color-primary)" />
+          {r.workflow_name ?? t('runs.drawer.workflowFallback', { id: r.workflow_id ?? r.id })}
+        </div>
+      ),
+    },
+    {
+      key: 'status', header: t('runs.cols.status'), sortable: true,
+      sortValue: r => r.status ?? null,
+      render: r => <StatusBadge status={r.status} />,
+    },
+    {
+      key: 'candidates_count', header: t('runs.cols.candidates'), sortable: true,
+      sortValue: r => r.candidates_count ?? r.candidates ?? null,
+      render: r => r.candidates_count ?? r.candidates ?? <span style={{ color: 'var(--border)' }}>—</span>,
+    },
+    {
+      key: 'duration_ms', header: t('runs.cols.duration'), sortable: true,
+      sortValue: r => r.duration_ms ?? r.duration ?? null,
+      render: r => <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{formatDuration(r.duration_ms ?? r.duration)}</span>,
+    },
+    {
+      key: 'trigger', header: t('runs.cols.trigger'),
+      render: r => <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{r.trigger ?? r.trigger_type ?? <span style={{ color: 'var(--border)' }}>—</span>}</span>,
+    },
+  ], [t])
 
   const filterGroups = useMemo(() => {
     const groups: ReportFilterGroup[] = []
@@ -146,65 +163,16 @@ export default function RunsTable() {
       <div className="flex flex-1 min-h-0 overflow-hidden bg-[var(--surface)] rounded-xl"
         style={{ border: '1px solid var(--border)' }}>
         <div className="flex-1 min-w-0 overflow-auto">
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                {COLS.map(col => (
-                  <th key={col.key} style={TH} onClick={() => col.sortable && setSort_(col.key)}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4,
-                                  cursor: col.sortable ? 'pointer' : 'default' }}>
-                      {col.label}
-                      {col.sortable && <SortIcon active={sort.key === col.key} dir={sort.dir} />}
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {loading && (
-                <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
-                  {t('runs.loading')}
-                </td></tr>
-              )}
-              {!loading && sorted.length === 0 && (
-                <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
-                  {t('runs.empty')}
-                </td></tr>
-              )}
-              {!loading && sorted.map((r, i) => (
-                  <tr key={r.id ?? i}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => setDrill(r)}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                    <td style={{ ...TD, fontSize: 12, whiteSpace: 'nowrap' }}>
-                      <div style={{ fontWeight: 500, color: 'var(--text)' }}>
-                        {r.started_at ? new Date(r.started_at).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}
-                      </div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                        {r.started_at ? new Date(r.started_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) : ''}
-                      </div>
-                    </td>
-                    <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <Zap size={13} color="var(--color-primary)" />
-                        {r.workflow_name ?? t('runs.drawer.workflowFallback', { id: r.workflow_id ?? r.id })}
-                      </div>
-                    </td>
-                    <td style={TD}><StatusBadge status={r.status} /></td>
-                    <td style={{ ...TD, fontWeight: 500 }}>
-                      {r.candidates_count ?? r.candidates ?? <span style={{ color: 'var(--border)' }}>—</span>}
-                    </td>
-                    <td style={{ ...TD, fontSize: 12, color: 'var(--text-muted)' }}>
-                      {formatDuration(r.duration_ms ?? r.duration)}
-                    </td>
-                    <td style={{ ...TD, fontSize: 12, color: 'var(--text-muted)' }}>
-                      {r.trigger ?? r.trigger_type ?? <span style={{ color: 'var(--border)' }}>—</span>}
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+          <DataTable
+            columns={columns}
+            rows={filtered}
+            getRowId={getRowId}
+            onRowClick={setDrill}
+            loading={loading}
+            loadingText={t('runs.loading')}
+            emptyText={t('runs.empty')}
+            defaultSort={{ key: 'started_at', dir: 'desc' }}
+          />
         </div>
       </div>
 
