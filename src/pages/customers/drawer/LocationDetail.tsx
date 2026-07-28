@@ -85,7 +85,6 @@ export default function LocationDetail({
     { key: 'name', label: t('locations.detail.name'), type: 'text', group: t('subModal.groups.general') },
     // JOB-STATUS-1: status moved OUT of this field table into the title-row badge
     // (see the render below) — no longer a row here, Danny 28-07: "moet HIER".
-    { key: 'isHeadquarter', label: t('locations.detail.headquarter'), type: 'checkbox', group: t('subModal.groups.general') },
     { key: 'address', label: t('subModal.groups.address'), type: 'address', group: t('subModal.groups.address'),
       addressFields: [
         { key: 'street', label: t('locations.detail.street'), type: 'text' },
@@ -111,7 +110,7 @@ export default function LocationDetail({
   ]
 
   const values = {
-    name: l.name, isHeadquarter: l.isHeadquarter,
+    name: l.name,
     street: l.street, houseNumber: l.houseNumber, houseNumberSuffix: l.houseNumberSuffix,
     postalCode: l.postalCode, city: l.city, state: l.state, country: l.country,
     cocNumber: l.cocNumber, vatNumber: l.vatNumber,
@@ -121,7 +120,7 @@ export default function LocationDetail({
 
   const save = (v: Record<string, unknown>) => {
     onSave(l.id as Id, {
-      name: v.name as string, isHeadquarter: Boolean(v.isHeadquarter),
+      name: v.name as string,
       street: v.street as string, houseNumber: v.houseNumber as string, houseNumberSuffix: v.houseNumberSuffix as string,
       postalCode: v.postalCode as string, city: v.city as string, state: v.state as string, country: v.country as string,
       cocNumber: v.cocNumber as string, vatNumber: v.vatNumber as string,
@@ -195,7 +194,13 @@ export default function LocationDetail({
 
       {/* Adres & gegevens — no repeated title (it would duplicate the sub-tab label). */}
       {subTab === 'address' && (
-        <EditableFieldTable title="" fields={generalFields} value={values} onSave={save} labelWidth={140} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {[t('subModal.groups.general'), t('subModal.groups.address'),
+            t('locations.detail.registrationTitle'), t('locations.detail.contactTitle')].map(group => (
+            <EditableFieldTable key={group} title={group} labelWidth={140} value={values} onSave={save}
+              fields={generalFields.filter(f => f.group === group).map(f => ({ ...f, group: undefined }))} />
+          ))}
+        </div>
       )}
 
       {subTab === 'billing' && (

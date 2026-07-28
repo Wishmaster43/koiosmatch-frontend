@@ -1,7 +1,7 @@
 /**
  * useCustomerLocations — a customer's locations: GET/POST /customers/{id}/locations +
  * PATCH/DELETE …/locations/{locId}. Full C-6 address + registration + billing fields,
- * plus the SUB-STATUS-1 lifecycle status and the `is_headquarter` toggle. Optimistic
+ * plus the SUB-STATUS-1 lifecycle status. Optimistic
  * add/update/remove, reconciled with the server row; reverts + toasts on failure
  * (mirrors usePriceAgreements — one shared shape for entity sub-resource CRUD).
  */
@@ -28,7 +28,6 @@ export interface LocationPayload {
   contactName: string
   phone: string
   email: string
-  isHeadquarter: boolean
   costCenter: string
   billingEmail: string
   statusId: Id | null
@@ -54,7 +53,6 @@ const toApi = (p: Partial<LocationPayload>) => ({
   ...(p.contactName !== undefined ? { contact_name: p.contactName } : {}),
   ...(p.phone !== undefined ? { phone: p.phone } : {}),
   ...(p.email !== undefined ? { email: p.email } : {}),
-  ...(p.isHeadquarter !== undefined ? { is_headquarter: p.isHeadquarter } : {}),
   ...(p.costCenter !== undefined ? { cost_center: p.costCenter } : {}),
   ...(p.billingEmail !== undefined ? { billing_email: p.billingEmail } : {}),
   ...(p.statusId !== undefined ? { status_id: p.statusId || null } : {}),

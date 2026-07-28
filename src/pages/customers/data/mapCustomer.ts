@@ -109,7 +109,6 @@ export function mapLocation(l: ApiLocation = {}): Location {
     contactName: l.contact_name ?? '',
     phone: l.phone ?? '',
     email: l.email ?? '',
-    isHeadquarter: Boolean(l.is_headquarter),
     costCenter: l.cost_center ?? '',
     billingEmail: l.billing_email ?? '',
     address: addressLine(l),

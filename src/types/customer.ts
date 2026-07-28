@@ -85,7 +85,6 @@ export interface Location {
   contactName: string
   phone: string
   email: string
-  isHeadquarter: boolean
   costCenter: string
   billingEmail: string
   address: string
@@ -219,7 +218,7 @@ export interface ApiLocation {
   id?: Id; reference_number?: string; name?: string; street?: string; house_number?: string; house_number_suffix?: string
   postcode?: string; postal_code?: string; city?: string; state?: string; country?: string; coc_number?: string; vat_number?: string
   contact_name?: string; phone?: string; email?: string
-  is_headquarter?: unknown; cost_center?: string; billing_email?: string
+  cost_center?: string; billing_email?: string
   departments?: ApiDepartment[]; contacts?: ApiContact[]
   status?: ApiStatusRef | null; status_id?: Id | null
   custom_fields?: Record<string, unknown>

@@ -11,7 +11,10 @@ function primaryLocation(c: Customer): Location | undefined {
   // The LIST payload carries only locations_count; the array arrives with the
   // detail fetch — this builder can run in between (smoke 16-07: hard crash).
   const locations = c.locations ?? []
-  return locations.find(l => l.isHeadquarter) ?? locations[0]
+  // The hoofdvestiging flag was removed (Danny 28-07 — the address moves onto the
+  // customer itself), so the advice simply looks at the first location. Once the customer
+  // carries its own address (KLANT-ADRES-1) this should judge THAT instead of a location.
+  return locations[0]
 }
 
 /**

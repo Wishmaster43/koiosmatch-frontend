@@ -19,7 +19,7 @@ import { useState } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { X, MapPin } from 'lucide-react'
-import { Field, TextField, CheckboxField } from '@/components/forms/fields'
+import { Field, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
@@ -41,7 +41,7 @@ const API_TO_FORM: Record<string, string> = {
   name: 'name', street: 'street', house_number: 'houseNumber', house_number_suffix: 'houseNumberSuffix',
   postcode: 'postalCode', city: 'city', state: 'state', country: 'country',
   coc_number: 'cocNumber', vat_number: 'vatNumber', contact_name: 'contactName',
-  phone: 'phone', email: 'email', is_headquarter: 'isHeadquarter',
+  phone: 'phone', email: 'email',
   cost_center: 'costCenter', status_id: 'statusId',
 }
 
@@ -70,7 +70,6 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
     contactName: initial?.contactName ?? '',
     phone: initial?.phone ?? '',
     email: initial?.email ?? '',
-    isHeadquarter: initial?.isHeadquarter ?? false,
     costCenter: initial?.costCenter ?? '',
     // No billingEmail INPUT anymore (Danny 2026-07-22: facturatie always comes from
     // the customer, see OverviewTab) — kept here only as an untouched passthrough so
@@ -133,7 +132,7 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Algemeen — name, status, hoofdvestiging. */}
+          {/* Algemeen — name + status. */}
           <div>
             <div style={cardHead}>{t('subModal.groups.general')}</div>
             <div style={cardBox}>
@@ -148,10 +147,7 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
                   <CreatableSelect value={form.statusId ? String(form.statusId) : null} onChange={v => set('statusId', v || null)} allowCreate={false}
                     placeholder={t('subModal.selectStatus')} options={statusOptions} />
                 </Field>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 7, paddingBottom: 8 }}>
-                  <CheckboxField checked={form.isHeadquarter} onChange={v => set('isHeadquarter', v)} />
-                  <span style={{ fontSize: 12, color: 'var(--text)' }}>{t('subModal.headquarter')}</span>
-                </label>
+                <div />
               </div>
             </div>
           </div>
