@@ -163,8 +163,17 @@ export default function ContactDetail({ contact, locations, departments, statuse
   // one location, so any location change invalidates the previous pick).
   // Coupling — the shared +Vestiging-shaped section (Danny 28-07). Saving is immediate,
   // like the branch picker: pick and it is stored, remove the chip and it is cleared.
-  const saveLink = (patch: { locationId?: Id | null; departmentId?: Id | null }) =>
+  const saveLink = (patch: { locationIds?: Id[]; departmentIds?: Id[] }) =>
     onSave(contact.id as Id, patch)
+
+  // Array OR singular, same rule the list uses: the pivots are near-empty today, so a
+  // contact whose only link is the legacy singular id must still show that link here.
+  const linkedLocationIds = contact.locations.length > 0
+    ? contact.locations.map(l => l.id)
+    : (contact.locationId != null ? [contact.locationId] : [])
+  const linkedDepartmentIds = contact.departments.length > 0
+    ? contact.departments.map(d => d.id)
+    : (contact.departmentId != null ? [contact.departmentId] : [])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -222,7 +231,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
             editing={editing} onStartEdit={() => setEditing(true)} onCancel={() => setEditing(false)} labelWidth={130} />
 
           {/* Koppeling — same shape and behaviour as "+ Vestiging" (Danny 28-07). */}
-          <ContactLinkSection locationId={contact.locationId} departmentId={contact.departmentId}
+          <ContactLinkSection locationIds={linkedLocationIds} departmentIds={linkedDepartmentIds}
             locations={locations} departments={departments} onChange={saveLink} />
 
         </>

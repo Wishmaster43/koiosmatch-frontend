@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import VacanciesReport from './VacanciesReport'
 import type { VacanciesReportData } from '@/types/analytics'
 
@@ -50,5 +51,24 @@ describe('VacanciesReport (DataTable conversion, §4 blueprint conformance)', ()
     expect(screen.getByText('Rivas Zorggroep')).toBeInTheDocument()
     // "Open" is ambiguous (also a KPI label) — assert the row's status chip via its code instead.
     expect(screen.getByText('VAC-1')).toBeInTheDocument()
+  })
+
+  // Integration proof (WCAG 2.2 AA audit, §6): the "Vacature" column is wired with
+  // `sortable: true` into the shared DataTable, so its header must render as a real,
+  // keyboard-operable button whose aria-sort reflects the current sort — not just in
+  // DataTable's own isolated unit test, but end-to-end through this page's columns.
+  it('sorts the Vacature column via a keyboard Enter press and reflects it via aria-sort', async () => {
+    const user = userEvent.setup()
+    mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
+    render(<VacanciesReport period="month" />)
+
+    const header = screen.getByText('Vacature').closest('th')
+    expect(header).toHaveAttribute('aria-sort', 'none')
+
+    const sortButton = screen.getByRole('button', { name: /Vacature/ })
+    sortButton.focus()
+    expect(sortButton).toHaveFocus()
+    await user.keyboard('{Enter}')
+    expect(header).toHaveAttribute('aria-sort', 'ascending')
   })
 })

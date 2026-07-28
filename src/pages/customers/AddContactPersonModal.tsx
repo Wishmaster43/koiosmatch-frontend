@@ -114,6 +114,8 @@ export default function AddContactPersonModal({
     role: initial?.role ?? '',
     locationId: initial?.locationId ?? lockLocationId ?? null,
     departmentId: initial?.departmentId ?? lockDepartmentId ?? null,
+    locationIds: initial?.locations?.map(l => l.id) ?? [],
+    departmentIds: initial?.departments?.map(d => d.id) ?? [],
     statusId: initial?.statusId ?? (statuses[0]?.id as string | undefined) ?? null,
     isPrimary: initial?.isPrimary ?? false,
     customFields: initial?.customFields ?? {},
@@ -173,7 +175,15 @@ export default function AddContactPersonModal({
       setErrors(e => ({ ...e, email: !!emailDup, phone: !!phoneDup, mobile: !!mobileDup }))
       return
     }
-    const payload = { ...form, firstName: form.firstName.trim(), middleName: form.middleName.trim(), lastName: form.lastName.trim() }
+    // The pickers here are single-value on purpose — a new contact gets its FIRST
+    // coupling; more are added in the drill-down. The arrays are derived from them so the
+    // pivots are right from the first write instead of only after the next edit.
+    const payload = {
+      ...form,
+      firstName: form.firstName.trim(), middleName: form.middleName.trim(), lastName: form.lastName.trim(),
+      locationIds: form.locationId ? [form.locationId] : [],
+      departmentIds: form.departmentId ? [form.departmentId] : [],
+    }
     // Edit path: update() keeps its existing toast-based error handling (it also
     // backs the couple/uncouple buttons elsewhere) — unchanged, closes immediately.
     if (isEdit) { onCreate?.(payload); onClose(); return }

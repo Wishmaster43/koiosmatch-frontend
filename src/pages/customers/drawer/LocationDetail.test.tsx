@@ -20,6 +20,9 @@ import type { LookupOption } from '@/types/common'
 
 // useCustomFields hits the API in an effect — stub it so the Extra sub-tab stays
 // hidden (no custom fields defined) and no network call happens under test.
+// useLocations is react-query-backed (the Vestiging block's option list) — mocked so
+// this test needs no QueryClientProvider, mirroring OverviewTab.test.tsx.
+vi.mock('@/lib/useLocations', () => ({ useLocations: () => [{ value: 'br-1', label: 'Vestiging Noord' }] }))
 vi.mock('@/lib/useCustomFields', () => ({
   useCustomFields: () => ({ fields: [], allFields: [], loading: false, invalidate: () => {} }),
 }))
@@ -41,6 +44,9 @@ const location = (overrides: Partial<Location> = {}): Location => ({
   street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', city: '', state: '', country: '',
   cocNumber: '', vatNumber: '', contactName: '', phone: '', email: '', isHeadquarter: false,
   costCenter: '', billingEmail: '', address: '', departments: [], contacts: [],
+  // LOCATIE-VESTIGING-1 — no own couplings, so this site inherits the customer's.
+  branchIds: [], branches: [], branchInherited: true, effectiveBranches: [],
+  lat: null, lng: null,
   statusId: 'status-active', status: 'active', statusLabel: 'Actief',
   // eslint-disable-next-line no-restricted-syntax -- DATA fixture, mirrors a tenant lookup colour
   statusColor: '#22C55E',

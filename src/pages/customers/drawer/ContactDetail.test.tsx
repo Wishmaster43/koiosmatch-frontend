@@ -97,7 +97,9 @@ describe('ContactDetail · location/department coupling (+Vestiging shape, 28-07
     expect(screen.queryByRole('button', { name: 'Thuiszorg' })).not.toBeInTheDocument()
   })
 
-  it('picking a location PATCHes it — and clears a department that no longer fits', async () => {
+  // CONTACT-MULTI-1 (Danny 28-07): a contact can serve SEVERAL sites and departments. The
+  // frontend writes the arrays now; the backend has had the pivots all along.
+  it('ADDS a second location instead of replacing the first', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn()
     render(<ContactDetail contact={baseContact({ locationId: 'loc-1', departmentId: 'dep-1' })} locations={locations}
@@ -105,33 +107,34 @@ describe('ContactDetail · location/department coupling (+Vestiging shape, 28-07
 
     await openLocationPicker(user)
     await user.click(screen.getByRole('button', { name: 'Locatie Zuid' }))
-    // Verpleging belongs to Noord, so it may not survive the move.
-    expect(onSave).toHaveBeenCalledWith('c1', { locationId: 'loc-2', departmentId: null })
+    // Both sites, and Verpleging (at Noord) survives because Noord is still linked.
+    expect(onSave).toHaveBeenCalledWith('c1', { locationIds: ['loc-1', 'loc-2'] })
   })
 
-  it('keeps a department that DOES belong to the newly picked location', async () => {
+  it('unlinking a location drops the departments that hung off it', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn()
-    // dep-2 lives at loc-2, so moving the contact to loc-2 must not clear it.
-    render(<ContactDetail contact={baseContact({ locationId: 'loc-1', departmentId: 'dep-2' })} locations={locations}
+    render(<ContactDetail contact={baseContact({ locationId: 'loc-1', departmentId: 'dep-1' })} locations={locations}
       departments={departments} statuses={statuses} onSave={onSave} onDelete={vi.fn()} close={vi.fn()} />)
 
+    // Toggling the only linked location OFF must take Verpleging with it — a department
+    // at a site the contact no longer serves is invalid data, not just untidy.
     await openLocationPicker(user)
-    await user.click(screen.getByRole('button', { name: 'Locatie Zuid' }))
-    expect(onSave).toHaveBeenCalledWith('c1', { locationId: 'loc-2' })
+    await user.click(screen.getByRole('button', { name: 'Locatie Noord' }))
+    expect(onSave).toHaveBeenCalledWith('c1', { locationIds: [], departmentIds: [] })
   })
 
-  it('picking a department PATCHes only that field', async () => {
+  it('adds a department without touching the locations', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn()
     render(<ContactDetail contact={baseContact({ locationId: 'loc-1' })} locations={locations} departments={departments}
       statuses={statuses} onSave={onSave} onDelete={vi.fn()} close={vi.fn()} />)
     await openDepartmentPicker(user)
     await user.click(screen.getByRole('button', { name: 'Verpleging' }))
-    expect(onSave).toHaveBeenCalledWith('c1', { departmentId: 'dep-1' })
+    expect(onSave).toHaveBeenCalledWith('c1', { departmentIds: ['dep-1'] })
   })
 
-  it('removing the location chip clears the department too — never an orphan pair', async () => {
+  it('removing a location chip unlinks just that one', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn()
     render(<ContactDetail contact={baseContact({ locationId: 'loc-1', departmentId: 'dep-1' })} locations={locations}
@@ -140,7 +143,7 @@ describe('ContactDetail · location/department coupling (+Vestiging shape, 28-07
     // also catches the reference-number copy button in the title row.
     const chip = screen.getByText('Locatie Noord').closest('span') as HTMLElement
     await user.click(within(chip).getByRole('button', { name: cm('remove') }))
-    expect(onSave).toHaveBeenCalledWith('c1', { locationId: null, departmentId: null })
+    expect(onSave).toHaveBeenCalledWith('c1', { locationIds: [], departmentIds: [] })
   })
 })
 

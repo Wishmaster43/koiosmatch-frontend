@@ -32,6 +32,11 @@ export interface ContactPayload {
   role: string
   locationId: Id | null
   departmentId: Id | null
+  // CONTACT-MULTI-1: the FULL sets. The backend syncs the pivots from these and derives
+  // customer_location_id from the first one; see toApi for why the department's singular
+  // id has to be sent alongside.
+  locationIds: Id[]
+  departmentIds: Id[]
   statusId: Id | null
   isPrimary: boolean
   // Tenant custom-field values (§3B "Eigen velden" — the Extra sub-tab).
@@ -63,6 +68,16 @@ const toApi = (p: Partial<ContactPayload>) => ({
   ...(p.role !== undefined ? { function: p.role } : {}),
   ...(p.locationId !== undefined ? { customer_location_id: p.locationId || null } : {}),
   ...(p.departmentId !== undefined ? { customer_department_id: p.departmentId || null } : {}),
+  // Sending the ARRAY wins over the singular field (ContactLocationSync). For locations
+  // that is complete — the service derives customer_location_id from the first id. For
+  // DEPARTMENTS it does not, so the singular id is sent explicitly: every existing row and
+  // every list filter still reads it, and leaving it stale would drop the contact out of
+  // its department's list. Reported to the backend as an asymmetry to fix at the source.
+  ...(p.locationIds !== undefined ? { location_ids: p.locationIds } : {}),
+  ...(p.departmentIds !== undefined ? {
+    department_ids: p.departmentIds,
+    customer_department_id: p.departmentIds[0] ?? null,
+  } : {}),
   ...(p.statusId !== undefined ? { status_id: p.statusId || null } : {}),
   ...(p.isPrimary !== undefined ? { is_primary: p.isPrimary } : {}),
   ...(p.customFields !== undefined ? { custom_fields: p.customFields } : {}),

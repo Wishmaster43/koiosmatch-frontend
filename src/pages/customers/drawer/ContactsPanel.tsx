@@ -93,10 +93,17 @@ export default function ContactsPanel({
   // THE membership rule, in one place. A location/department scope reads the singular
   // link id, which is what the frontend actually writes (CONTACT-MULTI-1's arrays exist
   // on the backend but this app never sends them — measured 28-07).
-  const inScope = (c: Contact) =>
-    scope === 'location' ? String(c.locationId) === String(scopeId)
-      : scope === 'department' ? String(c.departmentId) === String(scopeId)
-        : true
+  // Array OR singular — never one of the two. CONTACT-MULTI-1 lets a contact serve
+  // several sites, but the pivots are near-empty today (measured 28-07: 1 and 0 rows
+  // after a fresh reseed, because the seeder writes the singular columns directly), so
+  // scoping on the arrays alone would empty every list; scoping on the singular alone
+  // would hide every extra coupling the moment someone adds one.
+  const inScope = (c: Contact) => {
+    if (scope === 'customer') return true
+    const list = scope === 'location' ? c.locations : c.departments
+    const single = scope === 'location' ? c.locationId : c.departmentId
+    return list.some(x => String(x.id) === String(scopeId)) || String(single) === String(scopeId)
+  }
   const scoped = contacts.filter(inScope)
   // Status filter (Danny 28-07) — same component and same defaulting rule on all three lists.
   const { value: statusFilter, setValue: setStatusFilter, filtered: rows } = useStatusFilter(scoped, statuses)

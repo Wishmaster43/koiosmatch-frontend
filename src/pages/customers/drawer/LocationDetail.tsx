@@ -36,6 +36,8 @@ import DepartmentsPanel from './DepartmentsPanel'
 import ContactsPanel from './ContactsPanel'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import PdokCard from '@/components/drawer/PdokCard'
+import LocationBranchSection from './LocationBranchSection'
+import { useLocations } from '@/lib/useLocations'
 import { buildLocationAdviceInsights } from './locationAiInsights'
 import ContactNameLink from './ContactNameLink'
 import DrillBreadcrumb from '@/components/drawer/DrillBreadcrumb'
@@ -87,6 +89,9 @@ export default function LocationDetail({
   const countryOptions = getCountryOptions(i18n.language).map(o => ({ value: o.label, label: o.label }))
   const countryCode = getCountryOptions(i18n.language).find(o => o.label === (l.country ?? ''))?.value ?? 'NL'
   const { provinces } = useProvinces(countryCode)
+  // The tenant's own establishments — the same GET /locations list the customer's
+  // Vestiging block and the match form offer, so all three show one source.
+  const branchOptions = useLocations().map(b => ({ value: String(b.value), label: b.label }))
   const provinceOptions = provinces.map((p: string) => ({ value: p, label: p }))
 
 
@@ -292,6 +297,14 @@ export default function LocationDetail({
             <EditableFieldTable key={group} title={group} labelWidth={140} value={values} onSave={save}
               fields={generalFields.filter(f => f.group === group).map(f => ({ ...f, group: undefined }))} />
           ))}
+
+          {/* Vestiging — which of OUR branches this site works under, and whether that is
+              inherited from the customer or set here on purpose (LOCATIE-VESTIGING-1). */}
+          <LocationBranchSection
+            branchIds={l.branchIds} branches={l.branches}
+            inherited={l.branchInherited} effectiveBranches={l.effectiveBranches}
+            options={branchOptions}
+            onChange={ids => onSave(l.id as Id, { branchIds: ids })} />
 
           {/* Koios advice, in the same slot the customer tab puts it: after the fields.
               Pure FE heuristics over this location's OWN completeness — no API call. */}

@@ -39,7 +39,7 @@ beforeEach(() => { mockGet.mockReset(); mockPost.mockReset(); mockPatch.mockRese
 // BE 2026-07-20: `mobile` is now a separate field from the landline `phone`.
 const fullPayload: ContactPayload = {
   firstName: 'Anna', middleName: 'de', lastName: 'Bakker', email: 'anna@bakker.nl', phone: '0301234567', mobile: '0612345678', role: 'Manager',
-  locationId: 'loc1', departmentId: 'dep1', statusId: 'st1', isPrimary: true, customFields: { badge: 'vip' },
+  locationId: 'loc1', departmentId: 'dep1', locationIds: ['loc1'], departmentIds: ['dep1'], statusId: 'st1', isPrimary: true, customFields: { badge: 'vip' },
 }
 
 describe('useCustomerContacts · dedupe-by-id on load', () => {
@@ -76,6 +76,7 @@ describe('useCustomerContacts · create payload mapping (toApi)', () => {
     expect(mockPost).toHaveBeenCalledWith('/customers/cust1/contacts', {
       first_name: 'Anna', middle_name: 'de', last_name: 'Bakker', email: 'anna@bakker.nl', phone: '0301234567', mobile: '0612345678', function: 'Manager',
       customer_location_id: 'loc1', customer_department_id: 'dep1', status_id: 'st1', is_primary: true,
+      location_ids: ['loc1'], department_ids: ['dep1'],
       custom_fields: { badge: 'vip' },
     })
   })
@@ -86,10 +87,15 @@ describe('useCustomerContacts · create payload mapping (toApi)', () => {
     const { result } = renderHook(() => useCustomerContacts('cust1'))
     await waitFor(() => expect(result.current.loading).toBe(false))
 
-    await act(async () => { await result.current.add({ ...fullPayload, locationId: null, departmentId: null }) })
+    await act(async () => { await result.current.add({ ...fullPayload, locationId: null, departmentId: null, locationIds: [], departmentIds: [] }) })
 
     const body = mockPost.mock.calls[0][1]
     expect(body.customer_location_id).toBeNull()
+    // An EMPTY ARRAY is a real "clear" for the pivot (ContactLocationSync checks presence,
+    // not truthiness), and the department's singular id must be nulled alongside it —
+    // the sync derives that one for locations but not for departments.
+    expect(body.location_ids).toEqual([])
+    expect(body.department_ids).toEqual([])
     expect(body.customer_department_id).toBeNull()
   })
 
