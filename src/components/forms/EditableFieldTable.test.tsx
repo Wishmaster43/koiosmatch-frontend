@@ -117,3 +117,31 @@ describe('EditableFieldTable · address composite (edit mode)', () => {
     expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true')
   })
 })
+
+// Regression (Danny 28-07, found by an adversarial verification pass): the read view
+// used to follow the last DRAFT, not the source of truth. If the parent stored something
+// different from what was typed — declining "replace the primary contact?" saves
+// isPrimary FALSE — the table kept showing the typed value until it unmounted.
+describe('EditableFieldTable · the read view follows the parent, not the draft', () => {
+  const boolFields: FieldRow[] = [{ key: 'isPrimary', label: 'Primair', type: 'checkbox' }]
+
+  it('follows a value the parent changes from elsewhere while in read mode', () => {
+    const { rerender } = render(<EditableFieldTable fields={boolFields} value={{ isPrimary: false }} onSave={vi.fn()} />)
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'false')
+    // Something else promoted this record (another screen, a server reconcile).
+    rerender(<EditableFieldTable fields={boolFields} value={{ isPrimary: true }} onSave={vi.fn()} />)
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true')
+  })
+
+  it('does not throw away an in-progress draft when the parent re-renders', async () => {
+    const user = userEvent.setup()
+    const { rerender } = render(<EditableFieldTable fields={fields} value={value} onSave={vi.fn()} />)
+    await user.click(screen.getByTitle('edit'))
+    const street = screen.getByDisplayValue('Kerkstraat')
+    await user.clear(street)
+    await user.type(street, 'Nieuwstraat')
+    // A parent re-render mid-edit (a poll, a sibling save) must not reset the draft.
+    rerender(<EditableFieldTable fields={fields} value={{ ...value }} onSave={vi.fn()} />)
+    expect(screen.getByDisplayValue('Nieuwstraat')).toBeInTheDocument()
+  })
+})

@@ -93,7 +93,14 @@ export function useCustomerContacts(customerId: Id | undefined) {
     const tmpId = `tmp-${Date.now()}`
     setContacts(cs => [{ ...mapContact({ id: tmpId } as ApiContact), name: `${payload.firstName} ${payload.lastName}`.trim() }, ...cs])
     return api.post(`/customers/${customerId}/contacts`, toApi(payload))
-      .then(res => { const saved = mapContact(unwrap<ApiContact>(res)); setContacts(cs => cs.map(x => x.id === tmpId ? saved : x)); return saved })
+      .then(res => {
+        const saved = mapContact(unwrap<ApiContact>(res))
+        // Same invariant as update(): a contact created AS primary demotes the previous
+        // one server-side, so the local list must not keep showing two.
+        setContacts(cs => cs.map(x => x.id === tmpId ? saved
+          : (saved.isPrimary && x.isPrimary ? { ...x, isPrimary: false } : x)))
+        return saved
+      })
       .catch(err => { setContacts(cs => cs.filter(x => x.id !== tmpId)); throw err })
   }, [customerId])
 
@@ -101,7 +108,14 @@ export function useCustomerContacts(customerId: Id | undefined) {
   const update = useCallback((id: Id, payload: Partial<ContactPayload>) => {
     if (!customerId) return
     const snapshot = contacts
-    setContacts(cs => cs.map(x => x.id === id ? { ...x, ...(payload as Partial<Contact>) } : x))
+    // Promoting one contact to primary DEMOTES every other one — the backend does that
+    // silently in a saved-event, and it only ever returns the row you patched. Mirroring
+    // the invariant here is what stops two rows both showing "Primair" until the drawer
+    // is reopened (measured 28-07). One primary per customer, on screen too.
+    const demoteOthers = payload.isPrimary === true
+    setContacts(cs => cs.map(x => x.id === id
+      ? { ...x, ...(payload as Partial<Contact>) }
+      : (demoteOthers && x.isPrimary ? { ...x, isPrimary: false } : x)))
     return api.patch(`/customers/${customerId}/contacts/${id}`, toApi(payload))
       .then(res => { const saved = mapContact(unwrap<ApiContact>(res)); setContacts(cs => cs.map(x => x.id === id ? saved : x)); return saved })
       .catch(() => { setContacts(snapshot); notifyError(t('contacts.saveFailed')); return null })

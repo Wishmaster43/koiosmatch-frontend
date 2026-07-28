@@ -530,6 +530,8 @@
     "completePartial": "Kundenprofil ist zu {{pct}}% vollständig. Fügen Sie Handelsregisternummer, USt-IdNr., Branche und Kontaktdaten für ein vollständigeres Bild hinzu.",
     "relationshipLabel": "Beziehung",
     "relationshipActive": "{{vacancies}} offene Stelle(n) · {{matches}} aktive(s) Match(es).",
-    "relationshipNone": "Keine offenen Stellen oder aktiven Matches erfasst."
+    "relationshipNone": "Keine offenen Stellen oder aktiven Matches erfasst.",
+    "locationComplete": "Dieser Standort ist gut gefüllt — Adresse, Registrierung und Kontakt sind bekannt.",
+    "locationPartial": "Dieser Standort ist zu {{pct}}% vollständig. Ergänze Adresse, Neben-Handelsregisternr., USt-IdNr. und Kontaktdaten."
   }
 }

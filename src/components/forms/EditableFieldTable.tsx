@@ -97,6 +97,22 @@ const selectOptions = (options: FieldRow['options']): Array<{ value: string; lab
     ? { value: o, label: o }
     : { value: o.value, label: typeof o.label === 'string' ? o.label : o.value }))
 
+/**
+ * Content comparison, deliberately NOT reference equality: most callers build their
+ * `value` object inline, so a fresh identity arrives on every render — comparing by
+ * reference would set state on every render and spin forever. Arrays are compared
+ * element-wise so a re-mapped chips list does not read as a change either.
+ */
+function sameValues(a: Record<string, unknown>, b: Record<string, unknown>): boolean {
+  const ka = Object.keys(a); const kb = Object.keys(b)
+  if (ka.length !== kb.length) return false
+  return ka.every(k => {
+    const x = a[k]; const y = b[k]
+    if (Array.isArray(x) && Array.isArray(y)) return x.length === y.length && x.every((v, i) => Object.is(v, y[i]))
+    return Object.is(x, y)
+  })
+}
+
 export default function EditableFieldTable({
   title, fields, value = {}, onSave, labelWidth = 130, editButton = 'header',
   editing: editingProp, onStartEdit, onCancel,
@@ -117,6 +133,14 @@ export default function EditableFieldTable({
   const [wasEditing, setWasEditing] = useState(editing)
   if (editing && !wasEditing) { setForm(saved); setWasEditing(true) }
   else if (!editing && wasEditing) setWasEditing(false)
+  // The read view follows the SOURCE OF TRUTH, not the last draft. Until now `saved` was
+  // written only by save(), so a parent that stored something different from what was
+  // typed left this table showing the typed value forever — measured 28-07 on the
+  // contact drawer: declining "replace the primary contact?" saves isPrimary FALSE while
+  // the toggle kept reading ON, and only a remount healed it. Re-syncing while EDITING
+  // would throw away an in-progress draft, so it is deliberately read-mode only.
+  const [lastValue, setLastValue] = useState<Values>(value)
+  if (!sameValues(value, lastValue)) { setLastValue(value); if (!editing) setSaved(value) }
   const setF = (k: string, v: unknown) => setForm(p => ({ ...p, [k]: v }))
 
   const startEdit = () => (controlled ? onStartEdit?.() : setEditingState(true))

@@ -167,3 +167,43 @@ describe('ContactDetail · location/department cascade (BUG FIX 28-07)', () => {
     expect(within(rowFor(ct('contacts.detail.department'))).getByRole('button')).toHaveTextContent('Verpleging')
   })
 })
+
+// Regression (found 28-07 by an adversarial verification pass, reproduced with its own
+// probe): promoting a contact to primary asks whether to replace the current one.
+// Declining saves the rest of the edit with isPrimary FALSE — but the toggle kept
+// reading ON, because the field table shows its own draft after a save. A screen that
+// claims it saved something it did not is the worst failure mode there is.
+describe('ContactDetail · declining the primary-replace question', () => {
+  const other = baseContact({ id: 'c2', firstName: 'Anna', lastName: 'Bakker', name: 'Anna Bakker', isPrimary: true })
+
+  it('saves isPrimary false AND leaves the toggle off on screen', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      existing={[baseContact(), other]} onSave={onSave} onDelete={vi.fn()} close={vi.fn()} />)
+
+    await user.click(screen.getAllByTitle(cm('edit'))[0])
+    await user.click(screen.getByRole('switch', { name: ct('contacts.detail.primary') }))
+    await user.click(screen.getByTitle(cm('save')))
+    await user.click(screen.getByRole('button', { name: ct('subModal.primaryReplace.decline') }))
+
+    // What we stored…
+    expect(onSave).toHaveBeenCalledWith('c1', expect.objectContaining({ isPrimary: false }))
+    // …is what the screen shows.
+    expect(screen.getByRole('switch', { name: ct('contacts.detail.primary') })).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('saves isPrimary true when the replacement is confirmed', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      existing={[baseContact(), other]} onSave={onSave} onDelete={vi.fn()} close={vi.fn()} />)
+
+    await user.click(screen.getAllByTitle(cm('edit'))[0])
+    await user.click(screen.getByRole('switch', { name: ct('contacts.detail.primary') }))
+    await user.click(screen.getByTitle(cm('save')))
+    await user.click(screen.getByRole('button', { name: ct('subModal.primaryReplace.confirm') }))
+
+    expect(onSave).toHaveBeenCalledWith('c1', expect.objectContaining({ isPrimary: true }))
+  })
+})

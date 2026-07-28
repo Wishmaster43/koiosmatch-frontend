@@ -530,6 +530,8 @@
     "completePartial": "Klantprofiel is {{pct}}% compleet. Vul KvK-nummer, btw-nummer, branche en contactgegevens aan voor een vollediger beeld.",
     "relationshipLabel": "Relatie",
     "relationshipActive": "{{vacancies}} open vacature(s) · {{matches}} actieve match(es).",
-    "relationshipNone": "Geen open vacatures of actieve matches geregistreerd."
+    "relationshipNone": "Geen open vacatures of actieve matches geregistreerd.",
+    "locationComplete": "Deze locatie is goed gevuld — adres, registratie en contact zijn bekend.",
+    "locationPartial": "Deze locatie is {{pct}}% compleet. Vul adres, Sub-KvK, BTW-nummer en contactgegevens aan."
   }
 }

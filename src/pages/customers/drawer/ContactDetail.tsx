@@ -68,6 +68,13 @@ export default function ContactDetail({ contact, locations, departments, statuse
   const { t } = useTranslation('customers')
   const { confirm, dialog } = useConfirm()
   const [editing, setEditing] = useState(false)
+  // Bumped to REMOUNT the field table when what we store differs from what was typed.
+  // The table shows the draft optimistically after a save; declining the primary-replace
+  // question stores isPrimary FALSE while the toggle had just been flipped ON, so without
+  // this the read view kept claiming "primary" until the tab was left and re-entered
+  // (measured 28-07 by an adversarial verification pass — a UI that lies about what it
+  // saved is worse than one that fails loudly).
+  const [tableEpoch, setTableEpoch] = useState(0)
   // The Extra sub-tab only shows when the tenant has defined customer_contact custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer_contact')
   const [subTab, setSubTab] = useState<'data' | 'tasks' | 'extra' | 'koppelingen'>('data')
@@ -117,7 +124,9 @@ export default function ContactDetail({ contact, locations, departments, statuse
         title: t('subModal.primaryReplace.title'),
         confirmLabel: t('subModal.primaryReplace.confirm'),
         cancelLabel: t('subModal.primaryReplace.decline'),
-        onCancel: () => commit(false),
+        // Declining still saves the rest of the edit — just not the flag — so the table
+        // must be rebuilt from the stored values instead of its own optimistic draft.
+        onCancel: () => { commit(false); setTableEpoch(e => e + 1) },
       })
       return
     }
@@ -236,7 +245,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
 
       {subTab === 'data' && (
         <>
-          <EditableFieldTable title={t('contacts.detail.infoTitle')} fields={fields} value={values} onSave={save}
+          <EditableFieldTable key={tableEpoch} title={t('contacts.detail.infoTitle')} fields={fields} value={values} onSave={save}
             editing={editing} onStartEdit={() => setEditing(true)} onCancel={() => setEditing(false)} labelWidth={130} />
 
           {/* Koppeling — location/department, own cascading edit block (see file

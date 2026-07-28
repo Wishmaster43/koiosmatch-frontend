@@ -32,8 +32,10 @@ import { emailValue, phoneValue, kvkValue, vatValue } from '@/components/drawer/
 import TitleBadge from '@/components/drawer/TitleBadge'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useConfirm } from '@/hooks/useConfirm'
-import LocationDepartments from './LocationDepartments'
+import DepartmentsPanel from './DepartmentsPanel'
 import ContactsPanel from './ContactsPanel'
+import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+import { buildLocationAdviceInsights } from './locationAiInsights'
 import ContactNameLink from './ContactNameLink'
 import DrillBreadcrumb from '@/components/drawer/DrillBreadcrumb'
 import PlanningSummary from './PlanningSummary'
@@ -91,6 +93,10 @@ export default function LocationDetail({
   // tells the location to stand back (no second title, sub-tab bar or delete button).
   const [openContactId, setOpenContactId] = useState<Id | null>(null)
   const contactOpen = openContactId != null
+  // A department opened from this location's own list — same rule as a contact: it takes
+  // over the body and brings the full trail, so the location shows no second title.
+  const [openDepartmentId, setOpenDepartmentId] = useState<Id | null>(null)
+  const departmentOpen = openDepartmentId != null
 
   const { confirm, dialog } = useConfirm()
   const auth = useAuth()
@@ -108,7 +114,7 @@ export default function LocationDetail({
   // (the 'address' composite, mirrors the candidate profile address row) and only
   // expand to loose fields while editing; state/country stay their own rows.
   const generalFields: FieldRow[] = [
-    { key: 'name', label: t('locations.detail.name'), type: 'text', group: t('subModal.groups.general') },
+    { key: 'name', label: t('locations.detail.name'), type: 'text', group: t('overview.details') },
     // JOB-STATUS-1: status moved OUT of this field table into the title-row badge
     // (see the render below) — no longer a row here, Danny 28-07: "moet HIER".
     { key: 'address', label: t('subModal.groups.address'), type: 'address', group: t('subModal.groups.address'),
@@ -125,9 +131,9 @@ export default function LocationDetail({
     // every stored country on the next save.
     { key: 'state', label: t('locations.detail.state'), type: 'select', options: provinceOptions, group: t('subModal.groups.address') },
     { key: 'country', label: t('locations.detail.country'), type: 'select', options: countryOptions, group: t('subModal.groups.address') },
-    { key: 'cocNumber', label: t('locations.detail.coc'), type: 'text', group: t('locations.detail.registrationTitle'),
+    { key: 'cocNumber', label: t('locations.detail.coc'), type: 'text', group: t('overview.details'),
       renderValue: v => kvkValue(v, t('locations.detail.openKvk')) },
-    { key: 'vatNumber', label: t('locations.detail.vat'), type: 'text', group: t('locations.detail.registrationTitle'),
+    { key: 'vatNumber', label: t('locations.detail.vat'), type: 'text', group: t('overview.details'),
       renderValue: v => vatValue(v, t('locations.detail.openVies')) },
     // "Contact ter plaatse" is FREE TEXT on the location (customer_locations.contact_name),
     // not a reference to a contact record — so it can only become a link when the typed
@@ -198,6 +204,20 @@ export default function LocationDetail({
   // its own breadcrumb (Locaties › deze vestiging › de persoon), so showing the location's
   // title, sub-tab bar and delete button underneath would mean two titles and two delete
   // buttons with different blast radii on one narrow panel.
+  if (departmentOpen) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <DepartmentsPanel scope="location" scopeId={l.id as Id} scopeName={l.name}
+          departments={departments} locations={locations} contacts={contacts}
+          statuses={departmentStatuses} contactStatuses={contactStatuses}
+          openId={openDepartmentId} onOpenChange={setOpenDepartmentId}
+          trail={[{ label: backLabel ?? '', onClick: close }]}
+          onAdd={onAddDepartment} onUpdate={onUpdateDepartment} onRemove={onRemoveDepartment}
+          onAddContact={onAddContact} onUpdateContact={onUpdateContact} onRemoveContact={onRemoveContact} />
+      </div>
+    )
+  }
+
   if (contactOpen) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -265,11 +285,18 @@ export default function LocationDetail({
       {/* Adres & gegevens — no repeated title (it would duplicate the sub-tab label). */}
       {subTab === 'address' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {[t('subModal.groups.general'), t('subModal.groups.address'),
-            t('locations.detail.registrationTitle'), t('locations.detail.contactTitle')].map(group => (
+          {/* Same block order as the customer's Bedrijf tab (Danny 28-07: "zelfde format
+              als klant"): Gegevens · Adres · Contact. Registratie is no longer its own
+              card — KvK and BTW are plain facts about this site, so they sit in Gegevens
+              next to the name instead of behind their own heading. */}
+          {[t('overview.details'), t('subModal.groups.address'), t('locations.detail.contactTitle')].map(group => (
             <EditableFieldTable key={group} title={group} labelWidth={140} value={values} onSave={save}
               fields={generalFields.filter(f => f.group === group).map(f => ({ ...f, group: undefined }))} />
           ))}
+
+          {/* Koios advice, in the same slot the customer tab puts it: after the fields.
+              Pure FE heuristics over this location's OWN completeness — no API call. */}
+          <KoiosAdviceBlock namespace="customers" insights={buildLocationAdviceInsights(l, t)} />
         </div>
       )}
 
@@ -277,9 +304,15 @@ export default function LocationDetail({
         <EditableFieldTable title="" fields={billingFields} value={values} onSave={save} labelWidth={140} />
       )}
 
+      {/* The SAME panel the customer's Afdelingen tab renders — one department surface. */}
       {subTab === 'departments' && (
-        <LocationDepartments locationId={l.id as Id} locationName={l.name} departments={departments} locations={locations}
-          statuses={departmentStatuses} onAdd={onAddDepartment} onUpdate={onUpdateDepartment} onRemove={onRemoveDepartment} />
+        <DepartmentsPanel scope="location" scopeId={l.id as Id} scopeName={l.name}
+          departments={departments} locations={locations} contacts={contacts}
+          statuses={departmentStatuses} contactStatuses={contactStatuses}
+          openId={openDepartmentId} onOpenChange={setOpenDepartmentId}
+          trail={[{ label: backLabel ?? '', onClick: close }]}
+          onAdd={onAddDepartment} onUpdate={onUpdateDepartment} onRemove={onRemoveDepartment}
+          onAddContact={onAddContact} onUpdateContact={onUpdateContact} onRemoveContact={onRemoveContact} />
       )}
 
       {subTab === 'contacts' && (

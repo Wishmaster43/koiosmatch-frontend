@@ -24,6 +24,7 @@ import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import ContactsPanel from './ContactsPanel'
 import DrillBreadcrumb from '@/components/drawer/DrillBreadcrumb'
+import type { Crumb } from '@/components/drawer/DrillBreadcrumb'
 import EditableRichTextField from './EditableRichTextField'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -32,7 +33,7 @@ import type { Id, LookupOption } from '@/types/common'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 
-export default function DepartmentDetail({ department, locations, statuses, contactStatuses = [], departments = [], contacts = [], canLinkBackoffice = false, backLabel, onAddContact, onUpdateContact, onRemoveContact, onSave, onDelete, close }: {
+export default function DepartmentDetail({ department, locations, statuses, contactStatuses = [], departments = [], contacts = [], canLinkBackoffice = false, trail = [], onAddContact, onUpdateContact, onRemoveContact, onSave, onDelete, close }: {
   department: Department
   locations: { id: Id; name: string }[]
   statuses: LookupOption[]
@@ -45,8 +46,13 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   /** Lookups + writers the shared ContactsPanel needs (same set the location gets). */
   contactStatuses?: LookupOption[]
   departments?: Department[]
-  /** Label of the list this department was opened from — the first breadcrumb. */
-  backLabel?: string
+  /**
+   * The clickable ancestors above this department. A department opened from the customer
+   * tab gets one crumb ("Afdelingen"); one opened inside a location gets two
+   * ("Locaties › Vestiging Noord"), so every hop stays one click — the same trail a
+   * contact gets. A single folded label would make the ancestors read as text.
+   */
+  trail?: Crumb[]
   onAddContact: (payload: ContactPayload) => void
   onUpdateContact: (id: Id, payload: Partial<ContactPayload>) => void
   onRemoveContact: (id: Id) => void
@@ -99,9 +105,12 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   if (contactOpen) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* `trail` carries only the ANCESTORS: ContactsPanel appends this department itself
+            as its own list crumb (its scopeName IS department.name), so passing it here too
+            printed "Dagbesteding › Dagbesteding" — measured live 28-07. */}
         <ContactsPanel scope="department" scopeId={department.id as Id} scopeName={department.name}
           contacts={contacts} locations={locations} departments={departments} statuses={contactStatuses}
-          trail={[{ label: backLabel ?? '', onClick: close }]}
+          trail={trail}
           openId={openContactId} onOpenChange={setOpenContactId}
           onAdd={onAddContact} onUpdate={onUpdateContact} onRemove={onRemoveContact} />
       </div>
@@ -111,7 +120,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* One way back per level (see LocationDetail for why this replaced the old button). */}
-      <DrillBreadcrumb trail={[{ label: backLabel ?? '', onClick: close }]} current={department.name} />
+      <DrillBreadcrumb trail={trail} current={department.name} />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{department.name}</div>
         <button onClick={remove} title={t('common:delete')}
@@ -150,11 +159,13 @@ export default function DepartmentDetail({ department, locations, statuses, cont
         <BackofficeLinksTab entity="departments" id={department.id as Id} helloflexLink={department.helloflexLink} shiftmanagerLink={department.shiftmanagerLink} canLink={canLinkBackoffice} />
       )}
 
-      {/* The SAME panel the customer tab and a location render — one contact surface. */}
+      {/* The SAME panel the customer tab and a location render — one contact surface.
+          `trail` carries only the ANCESTORS: the panel appends this department itself as its
+          own list crumb (its scopeName IS department.name). */}
       {subTab === 'contacts' && (
         <ContactsPanel scope="department" scopeId={department.id as Id} scopeName={department.name}
           contacts={contacts} locations={locations} departments={departments} statuses={contactStatuses}
-          trail={[{ label: backLabel ?? '', onClick: close }]}
+          trail={trail}
           openId={openContactId} onOpenChange={setOpenContactId}
           onAdd={onAddContact} onUpdate={onUpdateContact} onRemove={onRemoveContact} />
       )}

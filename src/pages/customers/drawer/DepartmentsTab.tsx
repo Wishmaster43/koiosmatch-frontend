@@ -1,25 +1,21 @@
 /**
- * DepartmentsTab — the customer's departments as a searchable table. Each row shows
- * which LOCATION it's coupled to (Danny: "je moet kunnen zien aan welke locatie
- * die gekoppeld is") as a soft chip, plus its status; a row drills into
- * DepartmentDetail for full edit (incl. moving to another location) + delete.
- * "+ Afdeling toevoegen" opens the full grouped AddDepartmentModal.
+ * DepartmentsTab — the customer drawer's Afdelingen tab. A thin host around the shared
+ * DepartmentsPanel, which is now the ONE department surface: the same table, chips,
+ * search, actions and drill-down are rendered inside a location too (Danny 28-07: "wat je
+ * nu aan het doen bent voor de contactpersonen moet je ook nog doen voor de afdelingen op
+ * een locatie").
+ *
+ * Everything this file used to own — the column definitions, the search shell, the add
+ * modal and the drill-in via SubEntityTab — moved into that panel, so there is one copy
+ * instead of two. The panel keeps its drill-down IN PLACE, which is why this tab no
+ * longer needs SubEntityTab at all.
  */
-import { useState, type ComponentType } from 'react'
-import { useTranslation } from 'react-i18next'
-import { Building } from 'lucide-react'
-import SubEntityTab from './SubEntityTab'
-import DepartmentDetail from './DepartmentDetail'
-import AddDepartmentModal from '../AddDepartmentModal'
-import type { Column } from '@/components/ui/DataTable'
-import SoftChipJs from '@/components/ui/SoftChip'
+import { useState } from 'react'
+import DepartmentsPanel from './DepartmentsPanel'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
-
-type AnyProps = Record<string, unknown>
-const SoftChip = SoftChipJs as unknown as ComponentType<AnyProps>
 
 interface Props {
   customerId?: Id
@@ -40,53 +36,19 @@ interface Props {
   onRemoveContact: (id: Id) => void
 }
 
-export default function DepartmentsTab({ departments = [], contacts = [], locations = [], statuses = [], canLinkBackoffice = false, contactStatuses = [], onAdd, onUpdate, onRemove, onAddContact, onUpdateContact, onRemoveContact }: Props) {
-  const { t } = useTranslation('customers')
-  const [adding, setAdding] = useState(false)
-
-  const columns: Column<Department>[] = [
-    { key: 'name', header: t('departments.col.name'), sortable: true, sortValue: d => d.name,
-      render: d => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Building size={14} color="var(--color-violet)" style={{ flexShrink: 0 }} />
-          <span style={{ color: 'var(--text)' }}>{d.name}</span>
-        </div>
-      ) },
-    { key: 'location', header: t('departments.col.location'), sortable: true, sortValue: d => d.locationName,
-      render: d => d.locationName ? <SoftChip label={d.locationName} color="var(--color-secondary)" /> : '—' },
-    { key: 'status', header: t('departments.col.status'), sortable: true, sortValue: d => d.statusLabel,
-      render: d => d.statusLabel ? <SoftChip label={d.statusLabel} color={d.statusColor} /> : '—' },
-    { key: 'contacts', header: t('departments.col.contacts'), align: 'right', cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, sortable: true,
-      sortValue: d => contacts.filter(c => String(c.departmentId) === String(d.id)).length,
-      render: d => contacts.filter(c => String(c.departmentId) === String(d.id)).length },
-  ]
-
-  const renderDetail = (d: Department, close: () => void) => (
-    <DepartmentDetail department={d} locations={locations} statuses={statuses}
-      contacts={contacts.filter(c => String(c.departmentId) === String(d.id))}
-      canLinkBackoffice={canLinkBackoffice} departments={departments} contactStatuses={contactStatuses}
-      backLabel={t('drawer.tabs.departments')}
-      onAddContact={onAddContact} onUpdateContact={onUpdateContact} onRemoveContact={onRemoveContact}
-      onSave={onUpdate} onDelete={onRemove} close={close} />
-  )
-
+export default function DepartmentsTab({
+  departments = [], contacts = [], locations = [], statuses = [], canLinkBackoffice = false,
+  contactStatuses = [], onAdd, onUpdate, onRemove, onAddContact, onUpdateContact, onRemoveContact,
+}: Props) {
+  // The host owns "which department is open" — the panel is controlled (see its docblock).
+  const [openId, setOpenId] = useState<Id | null>(null)
   return (
-    <>
-      <SubEntityTab
-        items={departments}
-        columns={columns}
-        addLabel={t('departments.add')}
-        emptyText={t('departments.empty')}
-        searchPlaceholder={t('departments.searchPlaceholder')}
-        searchKeys={['name', 'locationName']}
-        onAdd={() => setAdding(true)}
-        renderDetail={renderDetail}
-      />
-      {adding && (
-        <AddDepartmentModal locations={locations} statuses={statuses}
-          onCreate={payload => onAdd(payload, locations.find(l => String(l.id) === String(payload.locationId))?.name)}
-          onClose={() => setAdding(false)} />
-      )}
-    </>
+    <DepartmentsPanel
+      scope="customer" openId={openId} onOpenChange={setOpenId}
+      departments={departments} contacts={contacts} locations={locations} statuses={statuses}
+      contactStatuses={contactStatuses} canLinkBackoffice={canLinkBackoffice}
+      onAdd={onAdd} onUpdate={onUpdate} onRemove={onRemove}
+      onAddContact={onAddContact} onUpdateContact={onUpdateContact} onRemoveContact={onRemoveContact}
+    />
   )
 }

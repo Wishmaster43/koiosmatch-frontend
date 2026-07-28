@@ -530,6 +530,8 @@
     "completePartial": "Profil client complété à {{pct}}%. Ajoutez le numéro d'immatriculation, le numéro de TVA, le secteur et les coordonnées pour une vue plus complète.",
     "relationshipLabel": "Relation",
     "relationshipActive": "{{vacancies}} poste(s) ouvert(s) · {{matches}} match(es) actif(s).",
-    "relationshipNone": "Aucun poste ouvert ni match actif enregistré."
+    "relationshipNone": "Aucun poste ouvert ni match actif enregistré.",
+    "locationComplete": "Ce site est bien renseigné — adresse, immatriculation et contact sont connus.",
+    "locationPartial": "Ce site est complété à {{pct}}%. Ajoutez l’adresse, le sous-numéro RCS, le n° TVA et les coordonnées."
   }
 }
