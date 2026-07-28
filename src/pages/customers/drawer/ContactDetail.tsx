@@ -116,7 +116,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
       confirm(t('subModal.primaryReplace.body', { name: currentPrimary.name }), () => commit(true), {
         title: t('subModal.primaryReplace.title'),
         confirmLabel: t('subModal.primaryReplace.confirm'),
-        cancelLabel: t('subModal.primaryReplace.decline', { name: currentPrimary.name }),
+        cancelLabel: t('subModal.primaryReplace.decline'),
         onCancel: () => commit(false),
       })
       return

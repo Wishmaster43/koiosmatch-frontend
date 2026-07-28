@@ -33,14 +33,16 @@ import { useIndustries } from '@/lib/useIndustries'
 import { useLocations } from '@/lib/useLocations'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import BranchSection from '@/components/drawer/BranchSection'
-import { emailValue, phoneValue, websiteValue } from '@/components/drawer/contactLinks'
+import { emailValue, phoneValue, websiteValue, kvkValue, vatValue } from '@/components/drawer/contactLinks'
 import { useEntityBranches } from '@/components/drawer/useEntityBranches'
+import { useProvinces } from '@/hooks/useProvinces'
+import { getCountryOptions } from '@/lib/countries'
 import EditableRichTextField from './EditableRichTextField'
 import { buildCustomerAdviceInsights } from './customerAiInsights'
 import type { Customer } from '@/types/customer'
 
 export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (values: Record<string, unknown>) => void }) {
-  const { t } = useTranslation('customers')
+  const { t, i18n } = useTranslation('customers')
   const { industries } = useIndustries()
   // The tenant's own establishments (GET /locations) — the same source the match
   // form's Vestiging picker uses, so both screens offer exactly one list.
@@ -48,6 +50,15 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
   // The customer's linked-branches membership (VESTIGING-2 fase 4) — no embedded
   // field on the Customer resource yet, so hydrate it once via GET on mount.
   const branchLinks = useEntityBranches({ prefix: 'customers', id: c.id, options: branchOptions, fetchOnMount: true })
+
+  // Province/country pickers — identical wiring to LocationDetail: the OPTION VALUE is
+  // the country NAME, because that is what the column stores, and the province list
+  // cascades off the SAVED country (the field table owns its own draft, so a mid-edit
+  // country switch is not observable here).
+  const countryOptions = getCountryOptions(i18n.language).map(o => ({ value: o.label, label: o.label }))
+  const countryCode = getCountryOptions(i18n.language).find(o => o.label === (c.country ?? ''))?.value ?? 'NL'
+  const { provinces } = useProvinces(countryCode)
+  const provinceOptions = provinces.map((p: string) => ({ value: p, label: p }))
 
   const gDetails = t('overview.details')
   const gAddress = t('overview.address')
@@ -63,12 +74,31 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
   const fields: FieldRow[] = [
     { key: 'industry',      label: t('overview.industry'),      type: 'select', options: industries, group: gDetails },
     { key: 'employeeCount', label: t('overview.employeeCount'), inputType: 'number', group: gDetails },
+    // KLANT-KVK-1 (backend 28-07): the customer's HEAD registration numbers, linked
+    // through to the public registers. A location carries the sub-number under it —
+    // same renderers, so both read identically.
+    { key: 'cocNumber', label: t('overview.coc'), group: gDetails,
+      renderValue: v => kvkValue(v, t('locations.detail.openKvk')) },
+    { key: 'vatNumber', label: t('overview.vat'), group: gDetails,
+      renderValue: v => vatValue(v, t('locations.detail.openVies')) },
 
-    // ADRES — only `plaats` exists today. The customers table has no street/house
-    // number/postcode/province/country (measured 28-07, filed as KLANT-ADRES-1), so this
-    // is deliberately a one-row block instead of the candidate's composed address line:
-    // rendering "…, Utrecht" from fields that do not exist would be a lie about the data.
-    { key: 'city', label: t('overview.city'), group: gAddress },
+    // ADRES — the customer's own address (KLANT-ADRES-1, backend 28-07). Until today the
+    // customers table had ONLY `city`, so this block was one lonely row; it now mirrors
+    // the location/candidate exactly: street/no/suffix/postcode/city collapse into ONE
+    // composed line in read mode and expand to loose fields while editing.
+    { key: 'address', label: gAddress, type: 'address', group: gAddress,
+      addressFields: [
+        { key: 'street', label: t('locations.detail.street'), type: 'text' },
+        { key: 'houseNumber', label: t('locations.detail.houseNumber'), type: 'text' },
+        { key: 'houseNumberSuffix', label: t('locations.detail.houseNumberSuffix'), type: 'text' },
+        { key: 'postalCode', label: t('locations.detail.postalCode'), type: 'text' },
+        { key: 'city', label: t('overview.city'), type: 'text' },
+      ] },
+    // Searchable pickers, not free text. Same value format as the location: the country
+    // is stored as a NAME ("Nederland"), not an ISO-2 code — using the candidate's
+    // code-based options here would silently rewrite it on the next save.
+    { key: 'state',   label: t('locations.detail.state'),   type: 'select', options: provinceOptions, group: gAddress },
+    { key: 'country', label: t('locations.detail.country'), type: 'select', options: countryOptions, group: gAddress },
 
     // CONTACT — the customer's OWN e-mail/phone (they existed on the API all along;
     // only the frontend never showed them).

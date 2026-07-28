@@ -120,7 +120,9 @@
     "companyText": "Company text",
     "sendEmail": "Send e-mail",
     "callPhone": "Call",
-    "openWebsite": "Open website"
+    "openWebsite": "Open website",
+    "coc": "CoC number",
+    "vat": "VAT number"
   },
   "richText": {
     "empty": "Not filled in yet."
@@ -501,7 +503,7 @@
       "title": "Replace primary contact?",
       "body": "{{name}} is currently the primary contact for this customer. Replace them?",
       "confirm": "Yes, replace",
-      "decline": "No, keep {{name}} primary"
+      "decline": "No, don't replace"
     }
   },
   "changelog": {

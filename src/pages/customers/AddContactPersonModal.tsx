@@ -136,7 +136,7 @@ export default function AddContactPersonModal({
       confirm(t('subModal.primaryReplace.body', { name: currentPrimary.name }), () => set('isPrimary', true), {
         title: t('subModal.primaryReplace.title'),
         confirmLabel: t('subModal.primaryReplace.confirm'),
-        cancelLabel: t('subModal.primaryReplace.decline', { name: currentPrimary.name }),
+        cancelLabel: t('subModal.primaryReplace.decline'),
       })
       return
     }

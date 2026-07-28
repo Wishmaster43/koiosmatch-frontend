@@ -138,7 +138,21 @@ export interface Customer {
   ownerId: Id | null
   ownerInitials: string
   ownerColor: string | null
+  // KLANT-ADRES-1 (delivered by the backend 28-07): the customer's OWN address, the
+  // same column names the candidate and the location already use. Before this the
+  // customers table had only `city`, which is why the Bedrijf tab showed a one-row
+  // address block — see OverviewTab.
+  street: string
+  houseNumber: string
+  houseNumberSuffix: string
+  postalCode: string
   city: string
+  state: string
+  country: string
+  // KLANT-KVK-1: head registration numbers on the customer itself; a location carries
+  // the SUB-registration below it (customer_locations.coc_number).
+  cocNumber: string
+  vatNumber: string
   // JOB-CONTACT-1 (Danny 28-07: "elke hoofdklant moet ... contactgegevens hebben") —
   // the customer's OWN e-mail/phone, distinct from a contact person's. The API
   // already sent these (CustomerDetailResource); only the FE mapper never read them.
@@ -243,6 +257,11 @@ export interface ApiCustomer {
   status_id?: string | number; status_label?: string; status_color?: string
   owner?: { id?: Id; name?: string; avatar_color?: string | null }
   account_manager?: string; owner_name?: string; owner_id?: Id; owner_color?: string | null
+  // KLANT-ADRES-1 / KLANT-KVK-1: the customer's own address + head registration
+  // (CustomerDetailResource, delivered 28-07). `postcode` is the BE name, not postal_code.
+  street?: string; house_number?: string; house_number_suffix?: string
+  postcode?: string; postal_code?: string; state?: string; country?: string
+  coc_number?: string; vat_number?: string
   city?: string; industry?: { name?: string } | string; website?: string
   // JOB-CONTACT-1: the customer's own contact fields (CustomerDetailResource).
   email?: string; phone?: string

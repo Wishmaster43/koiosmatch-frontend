@@ -120,7 +120,9 @@
     "companyText": "Bedrijfstekst",
     "sendEmail": "Stuur e-mail",
     "callPhone": "Bellen",
-    "openWebsite": "Website openen"
+    "openWebsite": "Website openen",
+    "coc": "KvK-nummer",
+    "vat": "BTW-nummer"
   },
   "richText": {
     "empty": "Nog niet ingevuld."
@@ -501,7 +503,7 @@
       "title": "Primair contact vervangen?",
       "body": "{{name}} is nu het primaire contact bij deze klant. Wil je die vervangen?",
       "confirm": "Ja, vervangen",
-      "decline": "Nee, laat {{name}} primair"
+      "decline": "Nee, niet vervangen"
     }
   },
   "changelog": {

@@ -120,7 +120,9 @@
     "companyText": "Texto de empresa",
     "sendEmail": "Enviar correo",
     "callPhone": "Llamar",
-    "openWebsite": "Abrir el sitio web"
+    "openWebsite": "Abrir el sitio web",
+    "coc": "N.º registro mercantil",
+    "vat": "N.º IVA"
   },
   "richText": {
     "empty": "Aún no completado."
@@ -501,7 +503,7 @@
       "title": "¿Reemplazar el contacto principal?",
       "body": "{{name}} es actualmente el contacto principal de este cliente. ¿Reemplazarlo?",
       "confirm": "Sí, reemplazar",
-      "decline": "No, mantener a {{name}} como principal"
+      "decline": "No, no reemplazar"
     }
   },
   "changelog": {

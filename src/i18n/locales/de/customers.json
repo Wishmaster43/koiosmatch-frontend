@@ -120,7 +120,9 @@
     "companyText": "Unternehmenstext",
     "sendEmail": "E-Mail senden",
     "callPhone": "Anrufen",
-    "openWebsite": "Website öffnen"
+    "openWebsite": "Website öffnen",
+    "coc": "Handelsregisternr.",
+    "vat": "USt-IdNr."
   },
   "richText": {
     "empty": "Noch nicht ausgefüllt."
@@ -501,7 +503,7 @@
       "title": "Hauptkontakt ersetzen?",
       "body": "{{name}} ist derzeit der Hauptkontakt dieses Kunden. Ersetzen?",
       "confirm": "Ja, ersetzen",
-      "decline": "Nein, {{name}} bleibt Hauptkontakt"
+      "decline": "Nein, nicht ersetzen"
     }
   },
   "changelog": {

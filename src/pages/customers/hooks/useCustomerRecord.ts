@@ -46,6 +46,13 @@ interface Args {
 // UI field name → API field name for the single-record PATCH.
 const FIELD_MAP: Record<string, string> = {
   name: 'name', debtorNumber: 'debtor_number', city: 'city', industry: 'industry',
+  // KLANT-ADRES-1 / KLANT-KVK-1 (backend 28-07): the customer's own address + head
+  // registration. Every key here is validated by CustomerRequest::sharedRules — a key
+  // MISSING from that list is silently dropped by Laravel, so this map and those rules
+  // must stay in step.
+  street: 'street', houseNumber: 'house_number', houseNumberSuffix: 'house_number_suffix',
+  postalCode: 'postcode', state: 'state', country: 'country',
+  cocNumber: 'coc_number', vatNumber: 'vat_number',
   // JOB-CONTACT-1 (Danny 28-07): the customer's own e-mail/phone Contact card.
   email: 'email', phone: 'phone',
   status: 'status', ownerId: 'owner_id', website: 'website', employeeCount: 'employee_count',

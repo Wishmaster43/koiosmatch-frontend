@@ -165,7 +165,19 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     ownerId: owner.id ?? c.owner_id ?? null,
     ownerInitials: initialsOf(owner.name ?? c.account_manager ?? c.owner_name ?? ''),
     ownerColor: owner.avatar_color ?? c.owner_color ?? null,
+    // KLANT-ADRES-1 (backend 28-07): the customer's own address block. Same defensive
+    // read as the location mapper — the BE field is `postcode`, `postal_code` is only
+    // tolerated for older payloads.
+    street: c.street ?? '',
+    houseNumber: c.house_number ?? '',
+    houseNumberSuffix: c.house_number_suffix ?? '',
+    postalCode: c.postcode ?? c.postal_code ?? '',
     city: c.city ?? '',
+    state: c.state ?? '',
+    country: c.country ?? '',
+    // KLANT-KVK-1: the customer's head KvK/VAT (a location holds the sub-number).
+    cocNumber: c.coc_number ?? '',
+    vatNumber: c.vat_number ?? '',
     // JOB-CONTACT-1 (Danny 28-07): the customer's own e-mail/phone — the backend
     // already sends both (CustomerDetailResource), the mapper simply never read them.
     email: c.email ?? '',

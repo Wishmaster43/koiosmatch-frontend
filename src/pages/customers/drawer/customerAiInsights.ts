@@ -4,17 +4,14 @@ import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
 // A bound-namespace translate function (the caller already resolved the namespace).
 type Tx = (key: string, opts?: Record<string, unknown>) => string
 
-// KvK/BTW/contact info live on a Location, not on the flat Customer shape —
-// prefer the headquarters location, fall back to the first one (mirrors how
-// LocationsTab treats "the" address when several locations exist).
+// Fallback only. The customer now carries its OWN KvK/BTW/address (KLANT-ADRES-1 +
+// KLANT-KVK-1, backend 28-07), so the advice judges the CUSTOMER first and only falls
+// back to a location for records created before those columns existed — otherwise a
+// fully-filled customer would still be scored on a location's empty fields.
 function primaryLocation(c: Customer): Location | undefined {
   // The LIST payload carries only locations_count; the array arrives with the
   // detail fetch — this builder can run in between (smoke 16-07: hard crash).
-  const locations = c.locations ?? []
-  // The hoofdvestiging flag was removed (Danny 28-07 — the address moves onto the
-  // customer itself), so the advice simply looks at the first location. Once the customer
-  // carries its own address (KLANT-ADRES-1) this should judge THAT instead of a location.
-  return locations[0]
+  return (c.locations ?? [])[0]
 }
 
 /**
@@ -30,9 +27,14 @@ function primaryLocation(c: Customer): Location | undefined {
  */
 export function buildCustomerAdviceInsights(c: Customer, t: Tx): KoiosAdviceInsight[] {
   const loc = primaryLocation(c)
+  // Customer-first, location-as-fallback (see primaryLocation): the address counts as
+  // filled once street+city are there, which is what "we can find this company" means.
   const coreFields = [
     c.industry, c.website, c.employeeCount, c.description,
-    loc?.cocNumber, loc?.vatNumber, loc?.phone || loc?.email || loc?.contactName,
+    c.cocNumber || loc?.cocNumber,
+    c.vatNumber || loc?.vatNumber,
+    (c.street && c.city) || loc?.address,
+    c.phone || c.email || loc?.phone || loc?.email || loc?.contactName,
   ]
   const filledPct = Math.round((coreFields.filter(Boolean).length / coreFields.length) * 100)
 

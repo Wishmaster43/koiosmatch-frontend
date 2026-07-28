@@ -18,20 +18,34 @@ describe('buildCustomerAdviceInsights', () => {
     expect(completeness.text).toBe('ai.completePartial|{"pct":0}')
   })
 
-  it('reports 100% completeness once company + headquarters fields are filled', () => {
+  it('reports 100% completeness once company + location fields are filled', () => {
     const c = base({
       industry: 'Zorg', website: 'https://yesway.nl', employeeCount: 40, description: 'Flexpool',
-      locations: [{ isHeadquarter: true, cocNumber: '12345678', vatNumber: 'NL001', phone: '0102345678' } as never],
+      locations: [{ cocNumber: '12345678', vatNumber: 'NL001', phone: '0102345678', address: 'Kerkstraat 1, Utrecht' } as never],
     })
     const [completeness] = buildCustomerAdviceInsights(c, t)
     expect(completeness.text).toBe('ai.completeGood')
   })
 
-  it('falls back to the first location when none is flagged as headquarters', () => {
-    const c = base({ locations: [{ isHeadquarter: false, cocNumber: '1', vatNumber: '2', phone: '3' } as never] })
+  // KLANT-ADRES-1/KLANT-KVK-1 (backend 28-07): the customer carries its own KvK/BTW/
+  // address now, so the score reads THOSE first and only falls back to a location for
+  // records that predate the columns. Eight fields: industry, website, employeeCount,
+  // description, KvK, BTW, address, contact.
+  it('falls back to the first location for a customer with no own registration/address', () => {
+    const c = base({ locations: [{ cocNumber: '1', vatNumber: '2', phone: '3' } as never] })
     const [completeness] = buildCustomerAdviceInsights(c, t)
-    // industry/website/employeeCount/description stay empty → 3 of 7 fields filled.
-    expect(completeness.text).toBe('ai.completePartial|{"pct":43}')
+    // Only the location's KvK/BTW/phone resolve → 3 of 8 fields filled.
+    expect(completeness.text).toBe('ai.completePartial|{"pct":38}')
+  })
+
+  it('scores the CUSTOMER\'s own address/registration, not a location\'s', () => {
+    const c = base({
+      industry: 'Zorg', website: 'https://yesway.nl', employeeCount: 40, description: 'Flexpool',
+      cocNumber: '12345678', vatNumber: 'NL001B01', street: 'Kerkstraat', city: 'Utrecht', phone: '0102345678',
+      locations: [],
+    })
+    const [completeness] = buildCustomerAdviceInsights(c, t)
+    expect(completeness.text).toBe('ai.completeGood')
   })
 
   it('reports no relationship activity when there are no vacancies or matches', () => {

@@ -237,7 +237,7 @@ describe('AddContactPersonModal', () => {
 
     const toggle = screen.getByRole('switch', { name: ct('subModal.isPrimary') })
     await user.click(toggle)
-    await user.click(screen.getByRole('button', { name: ct('subModal.primaryReplace.decline', { name: 'Anna Bakker' }) }))
+    await user.click(screen.getByRole('button', { name: ct('subModal.primaryReplace.decline') }))
 
     expect(toggle).toHaveAttribute('aria-checked', 'false')
   })
