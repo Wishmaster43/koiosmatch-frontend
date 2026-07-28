@@ -108,3 +108,25 @@ export function kvkValue(v: unknown, openLabel: string): ReactNode {
     </span>
   )
 }
+
+/**
+ * A VAT number, linked to the EU VIES validation page (Danny 28-07). VIES is a
+ * single-page app whose form state is NOT addressable through query parameters, so the
+ * link opens the checker rather than pretending to pre-fill it — the number stays on
+ * screen to paste. Building a URL with parameters VIES silently ignores would look like
+ * it works and quietly does not (§3).
+ */
+export function vatValue(v: unknown, openLabel: string): ReactNode {
+  const value = typeof v === 'string' ? v.trim() : ''
+  if (!value) return dash()
+  const href = 'https://ec.europa.eu/taxation_customs/vies/#/vat-validation'
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      <a href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>{value}</a>
+      <a href={href} target="_blank" rel="noopener noreferrer" title={openLabel} aria-label={openLabel}
+        style={iconStyle} {...hover('var(--color-info)')}>
+        <ExternalLink size={13} />
+      </a>
+    </span>
+  )
+}

@@ -184,7 +184,8 @@
       "pickContactEmpty": "Aucun contact disponible à lier.",
       "deleteLocation": "Supprimer le site",
       "confirmDelete": "Supprimer ce site ? Les services et contacts liés restent mais sont déliés.",
-      "openKvk": "Ouvrir dans le registre"
+      "openKvk": "Ouvrir dans le registre",
+      "openVies": "Vérifier dans VIES (UE)"
     },
     "saveFailed": "L'enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",

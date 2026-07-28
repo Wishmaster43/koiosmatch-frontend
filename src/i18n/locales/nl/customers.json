@@ -184,7 +184,8 @@
       "pickContactEmpty": "Geen contactpersonen om te koppelen.",
       "deleteLocation": "Locatie verwijderen",
       "confirmDelete": "Deze locatie verwijderen? Gekoppelde afdelingen en contactpersonen blijven bestaan maar raken ontkoppeld.",
-      "openKvk": "Openen in KvK-register"
+      "openKvk": "Openen in KvK-register",
+      "openVies": "Controleren in VIES (EU)"
     },
     "saveFailed": "Opslaan is mislukt.",
     "deleteFailed": "Verwijderen is mislukt.",

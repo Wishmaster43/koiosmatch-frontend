@@ -184,7 +184,8 @@
       "pickContactEmpty": "No hay contactos disponibles para vincular.",
       "deleteLocation": "Eliminar ubicación",
       "confirmDelete": "¿Eliminar esta ubicación? Los departamentos y contactos vinculados se mantienen pero quedan desvinculados.",
-      "openKvk": "Abrir en el registro"
+      "openKvk": "Abrir en el registro",
+      "openVies": "Comprobar en VIES (UE)"
     },
     "saveFailed": "Error al guardar.",
     "deleteFailed": "Error al eliminar.",

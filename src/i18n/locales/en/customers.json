@@ -184,7 +184,8 @@
       "pickContactEmpty": "No contacts available to link.",
       "deleteLocation": "Delete location",
       "confirmDelete": "Delete this location? Linked departments and contacts stay but become unlinked.",
-      "openKvk": "Open in the CoC register"
+      "openKvk": "Open in the CoC register",
+      "openVies": "Check in VIES (EU)"
     },
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",

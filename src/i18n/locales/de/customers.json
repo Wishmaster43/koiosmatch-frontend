@@ -184,7 +184,8 @@
       "pickContactEmpty": "Keine Kontakte zum Verknüpfen verfügbar.",
       "deleteLocation": "Standort löschen",
       "confirmDelete": "Diesen Standort löschen? Verknüpfte Abteilungen und Kontakte bleiben bestehen, verlieren aber die Verknüpfung.",
-      "openKvk": "Im Handelsregister öffnen"
+      "openKvk": "Im Handelsregister öffnen",
+      "openVies": "In VIES prüfen (EU)"
     },
     "saveFailed": "Speichern fehlgeschlagen.",
     "deleteFailed": "Löschen fehlgeschlagen.",

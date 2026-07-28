@@ -24,7 +24,7 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
-import { emailValue, phoneValue, kvkValue } from '@/components/drawer/contactLinks'
+import { emailValue, phoneValue, kvkValue, vatValue } from '@/components/drawer/contactLinks'
 // JOB-STATUS-1 (Danny 28-07: "Status van locatie moet hier!!") — the read-only
 // title-row badge (§3A(c)) + the searchable picker reused for its inline edit.
 import TitleBadge from '@/components/drawer/TitleBadge'
@@ -99,7 +99,8 @@ export default function LocationDetail({
     { key: 'country', label: t('locations.detail.country'), type: 'text', group: t('subModal.groups.address') },
     { key: 'cocNumber', label: t('locations.detail.coc'), type: 'text', group: t('locations.detail.registrationTitle'),
       renderValue: v => kvkValue(v, t('locations.detail.openKvk')) },
-    { key: 'vatNumber', label: t('locations.detail.vat'), type: 'text', group: t('locations.detail.registrationTitle') },
+    { key: 'vatNumber', label: t('locations.detail.vat'), type: 'text', group: t('locations.detail.registrationTitle'),
+      renderValue: v => vatValue(v, t('locations.detail.openVies')) },
     { key: 'contactName', label: t('locations.detail.contactName'), type: 'text', group: t('locations.detail.contactTitle') },
     { key: 'email', label: t('locations.detail.email'), type: 'text', group: t('locations.detail.contactTitle'),
       renderValue: v => emailValue(v, t('overview.sendEmail')) },
