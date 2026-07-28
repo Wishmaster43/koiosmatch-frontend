@@ -67,15 +67,16 @@ const customer = (overrides: Partial<Customer> = {}): Customer => ({
 } as Customer)
 
 describe('OverviewTab · Contact card', () => {
-  it('renders the customer\'s own e-mail and phone in a Contact card after Algemeen', async () => {
+  it('renders the customer\'s own e-mail and phone in a Contact card, after Gegevens and Adres', async () => {
     const { container } = render(<OverviewTab c={customer()} onSave={vi.fn()} />)
     expect(screen.getByText(ct('overview.contact'))).toBeInTheDocument()
     expect(screen.getByText('info@rivas.nl')).toBeInTheDocument()
     expect(screen.getByText('030-1234567')).toBeInTheDocument()
-    // Card order: Algemeen comes before Contact, which comes before Online.
+    // Card order after the 28-07 restructure: Gegevens · Adres · Contact · Vestiging.
     const html = container.innerHTML
-    expect(html.indexOf(ct('overview.general'))).toBeLessThan(html.indexOf(ct('overview.contact')))
-    expect(html.indexOf(ct('overview.contact'))).toBeLessThan(html.indexOf(ct('overview.online')))
+    expect(html.indexOf(ct('overview.details'))).toBeLessThan(html.indexOf(ct('overview.address')))
+    expect(html.indexOf(ct('overview.address'))).toBeLessThan(html.indexOf(ct('overview.contact')))
+    expect(html.indexOf(ct('overview.contact'))).toBeLessThan(html.indexOf(ct('overview.branch')))
     // Let the branch-links GET (mounted by the new BranchSection block) settle before
     // the test ends, so its state update never lands outside act() in a later test.
     await waitFor(() => expect(apiGet).toHaveBeenCalled())

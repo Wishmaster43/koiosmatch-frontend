@@ -69,7 +69,7 @@
     "back": "Retour",
     "newTask": "Nouvelle tâche",
     "tabs": {
-      "overview": "Aperçu",
+      "overview": "Entreprise",
       "vacancySettings": "Visibilité des postes",
       "locations": "Sites",
       "departments": "Services",
@@ -90,7 +90,7 @@
   },
   "overview": {
     "general": "Général",
-    "branch": "Agence",
+    "branch": "Établissement",
     "branchesLabel": "Agence",
     "branchesLink": "Associer une agence",
     "branchesEmpty": "Aucune agence rattachée.",
@@ -112,7 +112,11 @@
     "recruitmentProblems": "Difficultés de recrutement",
     "billing": "Facturation",
     "costCenter": "Centre de coût",
-    "billingEmail": "E-mail de facturation"
+    "billingEmail": "E-mail de facturation",
+    "details": "Informations",
+    "address": "Adresse",
+    "branchField": "Agence",
+    "notesTitle": "Notes"
   },
   "richText": {
     "empty": "Pas encore renseigné."

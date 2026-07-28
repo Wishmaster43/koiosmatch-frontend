@@ -69,7 +69,7 @@
     "back": "Volver",
     "newTask": "Nueva tarea",
     "tabs": {
-      "overview": "Resumen",
+      "overview": "Empresa",
       "vacancySettings": "Visibilidad de vacantes",
       "locations": "Ubicaciones",
       "departments": "Departamentos",
@@ -90,7 +90,7 @@
   },
   "overview": {
     "general": "General",
-    "branch": "Oficina",
+    "branch": "Sucursal",
     "branchesLabel": "Sucursal",
     "branchesLink": "Vincular sucursal",
     "branchesEmpty": "Aún no hay sede vinculada.",
@@ -112,7 +112,11 @@
     "recruitmentProblems": "Retos de contratación",
     "billing": "Facturación",
     "costCenter": "Centro de coste",
-    "billingEmail": "Correo de facturación"
+    "billingEmail": "Correo de facturación",
+    "details": "Datos",
+    "address": "Dirección",
+    "branchField": "Oficina",
+    "notesTitle": "Notas"
   },
   "richText": {
     "empty": "Aún no completado."

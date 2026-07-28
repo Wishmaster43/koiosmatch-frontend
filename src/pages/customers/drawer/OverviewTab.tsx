@@ -48,54 +48,52 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
   // field on the Customer resource yet, so hydrate it once via GET on mount.
   const branchLinks = useEntityBranches({ prefix: 'customers', id: c.id, options: branchOptions, fetchOnMount: true })
 
-  const gGeneral  = t('overview.general')
-  const gContact  = t('overview.contact')
-  const gOnline   = t('overview.online')
-  const gBilling  = t('overview.billing')
+  const gDetails = t('overview.details')
+  const gAddress = t('overview.address')
+  const gContact = t('overview.contact')
+  const gBranch  = t('overview.branch')
 
   // Field schema → grouped titled cards. Keys match the flat customer shape and
   // are translated to API keys in the page's updateCustomer. Description/
   // recruitmentProblems live in their own Teksten blocks below, not here.
+  // Danny 28-07 restructure of the (renamed) Bedrijf tab: Gegevens · Adres · Contact ·
+  // Vestiging, mirroring the candidate drawer's grouping. Keys match the flat customer
+  // shape and are translated to API keys in the page's updateCustomer.
   const fields: FieldRow[] = [
-    { key: 'city',          label: t('overview.city'),         group: gGeneral },
-    { key: 'industry',      label: t('overview.industry'),     type: 'select', options: industries, group: gGeneral },
-    { key: 'employeeCount', label: t('overview.employeeCount'), inputType: 'number', group: gGeneral },
-    { key: 'toneOfVoice',   label: t('overview.toneOfVoice'),  group: gGeneral },
-    // BRANCH-1: which of the tenant's own establishments owns this customer. Sits at the
-    // BOTTOM of Algemeen (Danny 28-07: "zoals de kandidaten drill down onderop") — it is
-    // context you check, not the first fact you read.
-    { key: 'branchId', label: t('overview.branch'), type: 'select', options: branchOptions, group: gGeneral },
+    { key: 'industry',      label: t('overview.industry'),      type: 'select', options: industries, group: gDetails },
+    { key: 'employeeCount', label: t('overview.employeeCount'), inputType: 'number', group: gDetails },
+    { key: 'toneOfVoice',   label: t('overview.toneOfVoice'),   group: gDetails },
+    { key: 'website',       label: t('overview.website'),       group: gDetails },
 
-    // JOB-CONTACT-1 (Danny 28-07: "Ik wil de klant meer hebben zoals de kandidaat.
-    // Elke hoofdklant moet ... contactgegevens hebben") — the customer's OWN e-mail/
-    // phone, its own titled card right after Algemeen, mirroring the candidate
-    // ProfileTab's Contact card grouping (§3A).
+    // ADRES — only `plaats` exists today. The customers table has no street/house
+    // number/postcode/province/country (measured 28-07, filed as KLANT-ADRES-1), so this
+    // is deliberately a one-row block instead of the candidate's composed address line:
+    // rendering "…, Utrecht" from fields that do not exist would be a lie about the data.
+    { key: 'city', label: t('overview.city'), group: gAddress },
+
+    // CONTACT — the customer's OWN e-mail/phone (they existed on the API all along;
+    // only the frontend never showed them).
     { key: 'email', label: t('overview.email'), inputType: 'email', group: gContact },
     { key: 'phone', label: t('overview.phone'), group: gContact },
 
-    { key: 'website',          label: t('overview.website'),       group: gOnline },
-    { key: 'privacyPolicyUrl', label: t('overview.privacyPolicyUrl'), group: gOnline },
-    // No "Heeft carrièrepagina" (Danny 27-07): the career site is configured in
-    // Settings, so a per-customer flag here was a second truth nobody maintained.
-    // hideCompanyName/showInVacancies/excludeFromSourcing moved to their own
-    // VacancySettingsTab (Danny 27-07) — see the file header comment.
-
-    // Facturatie (Danny 28-07: the debtor number left this tab altogether — it lives on
-    // the list column and the create modal). Kostenplaats is the top of the
-    // afdeling>locatie>klant cascade and the billing email is the ONE source
-    // invoicing reads, regardless of the location/department picked on a match.
-    { key: 'costCenter',  label: t('overview.costCenter'),  group: gBilling },
-    { key: 'billingEmail', label: t('overview.billingEmail'), group: gBilling },
+    // VESTIGING — the single establishment this customer's paperwork/invoicing routes
+    // through (BRANCH-1). Distinct from the linked-branches block at the bottom, which
+    // is about who may SEE this customer; see the file header.
+    { key: 'branchId', label: t('overview.branchField'), type: 'select', options: branchOptions, group: gBranch },
   ]
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <EditableFieldTable fields={fields} value={c as unknown as Record<string, unknown>} onSave={onSave} />
 
-      {/* Teksten — same rich editor + own pencil/save/cancel as the candidate profile text. */}
+      {/* Notities — free text about the relationship, each with its own pencil (§3A).
+          MEASURED 28-07: nothing in the app or the API reads `description` or
+          `recruitment_problems` — they are stored and never consumed. They stay visible
+          because customers already HAVE text in them and hiding the editor would hide
+          real content; whether the columns survive is a product call, not a UI one. */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
-          {t('overview.textsTitle')}
+          {t('overview.notesTitle')}
         </span>
         <EditableRichTextField label={t('overview.description')} value={c.description ?? ''}
           onSave={html => onSave?.({ description: html })} />

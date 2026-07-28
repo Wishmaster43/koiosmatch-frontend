@@ -15,9 +15,11 @@ import { usePriceAgreements } from '../hooks/usePriceAgreements'
 import PriceAgreementForm, { emptyDraft, draftToPayload } from './PriceAgreementForm'
 import type { PriceAgreementDraft } from './PriceAgreementForm'
 import PriceAgreementRow from './PriceAgreementRow'
+import EditableFieldTable from '@/components/forms/EditableFieldTable'
+import type { Customer } from '@/types/customer'
 import type { Id } from '@/types/common'
 
-export default function PriceAgreementsTab({ customerId }: { customerId?: Id }) {
+export default function PriceAgreementsTab({ customerId, c, onSave }: { customerId?: Id; c?: Customer; onSave?: (values: Record<string, unknown>) => void }) {
   const { t } = useTranslation('customers')
   const { agreements, loading, error, reload, add, update, remove } = usePriceAgreements(customerId)
   const [adding, setAdding] = useState(false)
@@ -28,6 +30,23 @@ export default function PriceAgreementsTab({ customerId }: { customerId?: Id }) 
 
   return (
     <div>
+      {/* Facturatie moved here off the company tab (Danny 28-07) — kostenplaats is the
+          top of the afdeling>locatie>klant cascade the placement form reads, and the
+          billing e-mail is the ONE address invoicing uses regardless of which location
+          or department a match picks. Both are money, so they live on the money tab. */}
+      {c && (
+        <div style={{ marginBottom: 14 }}>
+          <EditableFieldTable
+            title={t('overview.billing')}
+            fields={[
+              { key: 'costCenter',   label: t('overview.costCenter') },
+              { key: 'billingEmail', label: t('overview.billingEmail') },
+            ]}
+            value={c as unknown as Record<string, unknown>}
+            onSave={onSave}
+          />
+        </div>
+      )}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
         <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
           {t('drawer.tabs.priceAgreements')} <span style={{ fontWeight: 400 }}>{agreements.length}</span>

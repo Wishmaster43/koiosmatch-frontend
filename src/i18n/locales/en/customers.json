@@ -69,7 +69,7 @@
     "back": "Back",
     "newTask": "New task",
     "tabs": {
-      "overview": "Overview",
+      "overview": "Company",
       "vacancySettings": "Vacancy visibility",
       "locations": "Locations",
       "departments": "Departments",
@@ -112,7 +112,11 @@
     "recruitmentProblems": "Recruitment challenges",
     "billing": "Billing",
     "costCenter": "Cost center",
-    "billingEmail": "Billing email"
+    "billingEmail": "Billing email",
+    "details": "Details",
+    "address": "Address",
+    "branchField": "Branch",
+    "notesTitle": "Notes"
   },
   "richText": {
     "empty": "Not filled in yet."

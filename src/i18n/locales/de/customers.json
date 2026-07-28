@@ -69,7 +69,7 @@
     "back": "Zurück",
     "newTask": "Neue Aufgabe",
     "tabs": {
-      "overview": "Übersicht",
+      "overview": "Unternehmen",
       "vacancySettings": "Stellensichtbarkeit",
       "locations": "Standorte",
       "departments": "Abteilungen",
@@ -112,7 +112,11 @@
     "recruitmentProblems": "Recruiting-Herausforderungen",
     "billing": "Abrechnung",
     "costCenter": "Kostenstelle",
-    "billingEmail": "Rechnungs-E-Mail"
+    "billingEmail": "Rechnungs-E-Mail",
+    "details": "Angaben",
+    "address": "Adresse",
+    "branchField": "Niederlassung",
+    "notesTitle": "Notizen"
   },
   "richText": {
     "empty": "Noch nicht ausgefüllt."

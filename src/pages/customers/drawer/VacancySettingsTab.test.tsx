@@ -15,6 +15,13 @@ import type { Customer } from '@/types/customer'
 // per test; VacancySettingsTab only READS it (saving happens in Settings, out
 // of this tab's scope).
 const blobRef = vi.hoisted(() => ({ current: {} as Record<string, unknown> }))
+// The privacy-URL row renders through the shared EditableFieldTable, which transitively
+// imports the real i18n runtime; stubbed here so t() keeps echoing raw keys and these
+// toggle assertions stay readable. Its own presence is asserted below.
+vi.mock('@/components/forms/EditableFieldTable', () => ({
+  default: ({ title, fields }: { title?: string; fields: Array<{ key: string }> }) =>
+    <div data-testid="field-table">{title}:{fields.map(f => f.key).join(',')}</div>,
+}))
 vi.mock('@/lib/settings/useAllSettings', async () => {
   const actual = await vi.importActual('@/lib/settings/useAllSettings')
   return { ...actual, useAllSettings: () => blobRef.current }

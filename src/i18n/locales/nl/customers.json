@@ -69,7 +69,7 @@
     "back": "Terug",
     "newTask": "Nieuwe taak",
     "tabs": {
-      "overview": "Overzicht",
+      "overview": "Bedrijf",
       "vacancySettings": "Vacature-zichtbaarheid",
       "locations": "Locaties",
       "departments": "Afdelingen",
@@ -112,7 +112,11 @@
     "recruitmentProblems": "Wervingsproblemen",
     "billing": "Facturatie",
     "costCenter": "Kostenplaats",
-    "billingEmail": "Factuur e-mailadres"
+    "billingEmail": "Factuur e-mailadres",
+    "details": "Gegevens",
+    "address": "Adres",
+    "branchField": "Vestiging",
+    "notesTitle": "Notities"
   },
   "richText": {
     "empty": "Nog niet ingevuld."

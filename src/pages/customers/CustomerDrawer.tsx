@@ -207,7 +207,7 @@ export default function CustomerDrawer({
       case 'opportunities': return <OpportunitiesTab customerId={c.id} customerName={c.name} />
       case 'planning':      return <PlanningTab customerId={c.id ?? ''} />
       case 'statistics':    return <StatisticsTab c={c} onGoToVacancies={() => setActiveTab?.('vacancies')} />
-      case 'priceAgreements': return <PriceAgreementsTab customerId={c.id} />
+      case 'priceAgreements': return <PriceAgreementsTab customerId={c.id} c={c} onSave={v => onUpdate?.(c.id, v)} />
       case 'documents':     return <DocumentsTab customerId={c.id} />
       case 'communication': return (
         <CustomerNotesTab
