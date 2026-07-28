@@ -9,7 +9,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ReportFilterGroup } from '@/types/reports'
 
-export default function SearchSelectGroup({ group, plain = false }: { group: ReportFilterGroup; plain?: boolean }) {
+export default function SearchSelectGroup({ group }: { group: ReportFilterGroup }) {
   const { t } = useTranslation('common')
   const [open,  setOpen]  = useState(false)
   const [query, setQuery] = useState('')
@@ -24,18 +24,10 @@ export default function SearchSelectGroup({ group, plain = false }: { group: Rep
   return (
     <div>
       {/* Trigger-knop */}
-      {/* `plain` renders the EXACT trigger box of the shared CreatableSelect — same
-          padding, gap, font and muted chevron — so a filter standing next to those
-          pickers in a drawer toolbar is indistinguishable from them (Danny 28-07). The
-          sidebar variant keeps its own tighter, tintable box: there the colour is how you
-          spot an active filter at a glance. */}
+      {/* Trigger-knop */}
       <button
         onClick={() => setOpen(o => !o)}
-        style={plain ? {
-          display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', width: '100%',
-          boxSizing: 'border-box', border: '1px solid var(--border)', borderRadius: 6,
-          background: 'var(--surface)', cursor: 'pointer',
-        } : {
+        style={{
           width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '5px 8px', borderRadius: 6, fontSize: 12, cursor: 'pointer',
           background: hasSelected ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
@@ -43,18 +35,15 @@ export default function SearchSelectGroup({ group, plain = false }: { group: Rep
           color: hasSelected ? 'var(--color-primary)' : 'var(--text)',
         }}
       >
-        <span className={plain ? undefined : 'truncate'}
-          style={plain ? { fontSize: 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap',
-            overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text)' } : undefined}>
+        <span className="truncate">
           {hasSelected
             ? selected.length === 1
               ? (options.find(o => o.value === selected[0])?.label ?? selected[0])
               : t('filters.selectedCount', { count: selected.length })
             : t('filters.choose', { label: (group.label ?? '').toLowerCase() })}
         </span>
-        <ChevronDown size={12} style={plain
-          ? { color: 'var(--text-muted)', flexShrink: 0 }
-          : { flexShrink: 0, marginLeft: 4, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+        <ChevronDown size={12} style={{ flexShrink: 0, marginLeft: 4,
+          transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
       </button>
 
       {/* Dropdown */}

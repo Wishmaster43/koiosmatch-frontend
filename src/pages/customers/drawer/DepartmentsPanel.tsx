@@ -98,7 +98,7 @@ export default function DepartmentsPanel({
   const inScope = (d: Department) => scope === 'location' ? String(d.locationId) === String(scopeId) : true
   const scoped = departments.filter(inScope)
   // Status filter (Danny 28-07) — same component and same defaulting rule on all three lists.
-  const { value: statusFilter, setValue: setStatusFilter, filtered: rows } = useStatusFilter(scoped, statuses)
+  const { value: statusFilter, toggle: toggleStatus, filtered: rows } = useStatusFilter(scoped, statuses)
   const chipColors = useChipColors()
   // Resolved against the CUSTOMER-WIDE list, never the scoped rows: moving a department to
   // another location must not make its open detail vanish mid-edit.
@@ -154,7 +154,7 @@ export default function DepartmentsPanel({
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder={t('departments.searchPlaceholder')} aria-label={t('departments.searchPlaceholder')} style={searchInput} />
         </div>
-        <StatusFilterSelect value={statusFilter} onChange={setStatusFilter} statuses={statuses} />
+        <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
         <DrawerAddButton onClick={() => setAdding(true)} label={t('departments.add')} />
       </div>
 

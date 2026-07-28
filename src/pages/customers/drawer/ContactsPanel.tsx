@@ -110,7 +110,7 @@ export default function ContactsPanel({
   }
   const scoped = contacts.filter(inScope)
   // Status filter (Danny 28-07) — same component and same defaulting rule on all three lists.
-  const { value: statusFilter, setValue: setStatusFilter, filtered: rows } = useStatusFilter(scoped, statuses)
+  const { value: statusFilter, toggle: toggleStatus, filtered: rows } = useStatusFilter(scoped, statuses)
   // Resolved against the CUSTOMER-WIDE list, never the scoped rows: editing a contact's
   // location moves it out of this scope, and the open detail must not vanish mid-edit.
   const selected = openId != null ? contacts.find(c => String(c.id) === String(openId)) ?? null : null
@@ -220,7 +220,7 @@ export default function ContactsPanel({
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder={t('contacts.searchHere')} aria-label={t('contacts.searchHere')} style={searchInput} />
         </div>
-        <StatusFilterSelect value={statusFilter} onChange={setStatusFilter} statuses={statuses} />
+        <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
         {/* Coupling only exists inside a scope; at customer level a contact is already "here". */}
         {scope !== 'customer' && (
           <DrawerAddButton onClick={() => setModal('couple')} icon={Link2}

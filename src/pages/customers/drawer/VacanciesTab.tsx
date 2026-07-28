@@ -20,7 +20,7 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
-import SearchSelectGroup from '@/components/reports/filter/SearchSelectGroup'
+import StatusFilterSelect, { useStatusFilter } from './StatusFilterSelect'
 import api, { unwrapList } from '@/lib/api'
 import { useCustomerVacancies } from '../hooks/useCustomerDrawerData'
 import type { VacancyRow } from '../hooks/useCustomerDrawerData'
@@ -45,9 +45,6 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
   const [search, setSearch] = useState('')
   const queryClient = useQueryClient()
   const [statusOptions, setStatusOptions] = useState<StatusOpt[]>(SEED_STATUSES)
-  // Defaults to just 'open' once the real lookup resolves; null = "not decided yet".
-  const [selected, setSelected] = useState<string[] | null>(null)
-
   // Has the REAL lookup answered? The seed list must never decide the default
   // selection — see the id/name bug documented below.
   const [resolved, setResolved] = useState(false)
@@ -70,38 +67,22 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
     }).catch(() => setResolved(true))
   }, [])
 
-  // Default-select "open" ONLY once the real list is in. The second half of the same
-  // bug: this used to run against the SEED list, wrote the slug 'open', and then never
-  // reconciled when the real (uuid-keyed) options replaced it — leaving a selection that
-  // matched no option (hence the unchecked box) and no row (hence the empty table).
-  // There is no slug on this lookup, so "open" is matched on the name.
-  useEffect(() => {
-    if (!resolved || selected !== null) return
-    const open = statusOptions.find(o => /^open$/i.test(o.label))
-    setSelected(open ? [open.value] : statusOptions.map(o => o.value))
-  }, [resolved, statusOptions, selected])
+  // The SHARED status filter, same as every other sub-entity list (Danny 28-07:
+  // "vacature status is niet hetzelfde als locatie status???"). Two things make it safe
+  // here: it is handed the statuses ONLY once the real lookup resolved — otherwise it
+  // would propose a default off the seed list's slugs, the other half of the same bug —
+  // and `keyOf` points it at this row's status OBJECT, because comparing a uuid to an
+  // object matches nothing, silently.
+  const { value: statusFilter, toggle: toggleStatus, filtered: statusRows } =
+    useStatusFilter(rows, resolved ? statusOptions.map(o => ({ value: o.value, label: o.label })) : [],
+      v => String(v.status.value ?? ''))
 
-  // Drop selected values that no longer exist in the lookup (a status deleted in
-  // Settings must not keep filtering rows invisibly).
-  useEffect(() => {
-    if (!resolved || selected === null) return
-    const known = new Set(statusOptions.map(o => o.value))
-    const pruned = selected.filter(v => known.has(v))
-    if (pruned.length !== selected.length) setSelected(pruned)
-  }, [resolved, statusOptions, selected])
 
-  const toggle = (v: string | number) => setSelected(p => { const s = p ?? []; const val = String(v); return s.includes(val) ? s.filter(x => x !== val) : [...s, val] })
-
-  // Client-side filter over the rows already fetched (Danny: filter the tab's own
-  // rows, not a new server call) — matched by the status VALUE (slug), not the label.
-  // Depend on `selected` itself (stable state reference), not a derived `?? []`
-  // array, which would be a fresh reference every render and defeat the memo.
+  // Free-text search runs on top of the status filter's rows.
   const filteredRows = useMemo(() => {
-    const byStatus = !selected || selected.length === 0 ? rows : rows.filter(v => selected.includes(v.status.value ?? ''))
     const q = search.trim().toLowerCase()
-    return q ? byStatus.filter(v => String(v.title ?? '').toLowerCase().includes(q)) : byStatus
-  }, [rows, selected, search])
-  const activeSelected = selected ?? []
+    return q ? statusRows.filter(v => String(v.title ?? '').toLowerCase().includes(q)) : statusRows
+  }, [statusRows, search])
 
   const columns: Column<VacancyRow>[] = [
     { key: 'title', header: t('vacancies.col.title'), sortable: true, sortValue: v => v.title, render: v => <EntityLink page="vacancies" id={v.id}>{v.title}</EntityLink> },
@@ -123,9 +104,8 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
             placeholder={t('vacancies.searchPlaceholder')} aria-label={t('vacancies.searchPlaceholder')}
             style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
         </div>
-        <div style={{ width: 170, flexShrink: 0 }}>
-          <SearchSelectGroup plain group={{ key: 'status', label: t('vacancies.filter.status'), options: statusOptions, selected: activeSelected, onToggle: toggle }} />
-        </div>
+        <StatusFilterSelect value={statusFilter} onToggle={toggleStatus}
+          statuses={statusOptions.map(o => ({ value: o.value, label: o.label }))} />
         <DrawerAddButton onClick={() => setAdding(true)} label={t('vacancies.add')} />
       </div>
       <DataTable columns={columns} rows={filteredRows} loading={loading} loadingText={t('page.loading')} emptyText={t('vacancies.empty')} />

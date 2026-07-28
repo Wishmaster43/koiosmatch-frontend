@@ -55,7 +55,7 @@ export default function LocationsTab({
   const [adding, setAdding] = useState(false)
   // Status filter (Danny 28-07). It defaults to "active only" — but only once that is
   // provably a non-empty view; see the hook for why that guard exists.
-  const { value: statusFilter, setValue: setStatusFilter, filtered: visibleLocations } = useStatusFilter(locations, statuses)
+  const { value: statusFilter, toggle: toggleStatus, filtered: visibleLocations } = useStatusFilter(locations, statuses)
 
   const columns: Column<Location>[] = [
     { key: 'name', header: t('locations.col.name'), sortable: true, sortValue: l => l.name,
@@ -100,7 +100,7 @@ export default function LocationsTab({
         emptyText={t('locations.empty')}
         searchPlaceholder={t('locations.searchPlaceholder')}
         searchKeys={['name', 'city']}
-        filter={<StatusFilterSelect value={statusFilter} onChange={setStatusFilter} statuses={statuses} />}
+        filter={<StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />}
         onAdd={() => setAdding(true)}
         renderDetail={renderDetail}
       />
