@@ -192,7 +192,8 @@
         "agent": "Turno del agente",
         "candidate": "Turno del candidato",
         "pending": "Pendiente",
-        "recruiter": "Retomado por ti"
+        "recruiter": "Retomado por ti",
+        "completed": "Finalizado"
       },
       "duration": "Duración de la conversación",
       "durationMinutes": "{{count}} min",

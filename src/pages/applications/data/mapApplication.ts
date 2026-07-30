@@ -26,6 +26,33 @@ import type {
  * action) can map a fresh session straight out of the POST response, without
  * a full application refetch.
  */
+// The backend derives `turn` with a MIXED-LANGUAGE vocabulary — 'agent' and 'recruiter'
+// in English next to 'kandidaat' and 'afgerond' in Dutch (measured 30-07 in
+// ApplicationDetailResource: the derivation around line 261). Our chip looks up an i18n
+// key and a colour by that value, so the two Dutch ones produced a raw key and no colour.
+// Normalised here, at the single boundary where raw becomes ours; a stable English
+// vocabulary at the source is the better fix and is filed with the backend lane.
+const TURN_ALIASES: Record<string, NonNullable<ApplicationInterview['turn']>> = {
+  kandidaat: 'candidate',
+  afgerond: 'completed',
+}
+const mapTurn = (raw: unknown): ApplicationInterview['turn'] => {
+  const v = typeof raw === 'string' ? raw : ''
+  if (!v) return null
+  return TURN_ALIASES[v] ?? (v as NonNullable<ApplicationInterview['turn']>)
+}
+
+// Accepts both the flat (uuid + separate name) and the nested shape.
+const mapPausedBy = (raw: NonNullable<ApiApplication['interview']>): ApplicationInterview['pausedBy'] => {
+  const by = raw.paused_by as unknown
+  if (by && typeof by === 'object') {
+    const o = by as { id?: string; name?: string }
+    return o.id != null ? { id: o.id, name: o.name ?? '' } : null
+  }
+  if (typeof by === 'string' && by) return { id: by, name: (raw as { paused_by_name?: string }).paused_by_name ?? '' }
+  return null
+}
+
 export function mapInterview(raw?: ApiApplication['interview']): ApplicationInterview | null {
   if (!raw) return null
   const category = (raw.category
@@ -38,13 +65,16 @@ export function mapInterview(raw?: ApiApplication['interview']): ApplicationInte
     id: raw.id ?? null,
     agent: raw.agent?.id != null ? { id: raw.agent.id, name: raw.agent.name ?? '' } : null,
     flowName: raw.flow_name ?? null,
-    turn: (raw.turn ?? null) as ApplicationInterview['turn'],
+    turn: mapTurn(raw.turn),
     startedAt: raw.started_at ?? null,
     lastMessageAt: raw.last_message_at ?? null,
     endedAt: raw.ended_at ?? null,
     durationSeconds: raw.duration_seconds ?? null,
     pausedAt: raw.paused_at ?? null,
-    pausedBy: raw.paused_by?.id != null ? { id: raw.paused_by.id, name: raw.paused_by.name ?? '' } : null,
+    // `paused_by` is a BARE uuid with the display name alongside it in `paused_by_name`
+    // (measured 30-07) — reading it as an object made "overgenomen door …" permanently
+    // empty. The object shape is still tolerated in case the resource ever nests it.
+    pausedBy: mapPausedBy(raw),
   }
 }
 

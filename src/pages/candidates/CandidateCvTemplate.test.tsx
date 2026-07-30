@@ -10,6 +10,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import { groupCvSections } from './CandidateCvTemplate'
+import { resolveCvName, makeCvLabeller } from './cv/cvLabels'
 
 describe('groupCvSections', () => {
   it("groups a legacy section list (no placement field) exactly like today's layout", () => {
@@ -88,5 +89,27 @@ describe('groupCvSections', () => {
     ]
     const groups = groupCvSections(sections)
     expect(groups.sidebar).toEqual(['certificates', 'contact', 'languages'])
+  })
+})
+
+// BUG FIX: the CV header name used to be `c?.name ?? [first, middle, last]
+// .filter(Boolean).join(' ') ?? L('nameFallback')` — `.join(' ')` on an all-empty
+// array returns `''`, which is NOT nullish, so the `??` fallback was unreachable
+// and a nameless candidate rendered a blank 24pt heading. resolveCvName checks
+// truthiness explicitly so the fallback label actually reaches the page.
+describe('resolveCvName', () => {
+  const L = makeCvLabeller()
+
+  it('uses the explicit name when present', () => {
+    expect(resolveCvName({ name: 'Jan Jansen' }, L)).toBe('Jan Jansen')
+  })
+
+  it('composes first/middle/last when no explicit name is set', () => {
+    expect(resolveCvName({ firstName: 'Jan', middleName: 'van der', lastName: 'Berg' }, L)).toBe('Jan van der Berg')
+  })
+
+  it('falls back to the label for a genuinely nameless candidate (composed name is an empty string, not nullish)', () => {
+    expect(resolveCvName({}, L)).toBe('Naam')
+    expect(resolveCvName(undefined, L)).toBe('Naam')
   })
 })

@@ -86,7 +86,8 @@
       "communication": "Comunicación",
       "extra": "Extra",
       "financial": "Financiero",
-      "billing": "Facturación"
+      "billing": "Facturación",
+      "tasks": "Tareas"
     },
     "changelog": "Cambios",
     "photoUpload": "Subir logo",
@@ -548,5 +549,14 @@
     "relationshipNone": "No hay vacantes abiertas ni matches activos registrados.",
     "locationComplete": "Esta ubicación está bien completada — dirección, registro y contacto son conocidos.",
     "locationPartial": "Esta ubicación está al {{pct}}%. Añade la dirección, el sub-número CIF, el n.º IVA y los datos de contacto."
+  },
+  "tasks": {
+    "newTask": "Nueva tarea",
+    "open": "Abiertas",
+    "history": "Historial",
+    "empty": "Aún no hay tareas para este cliente",
+    "loading": "Cargando tareas…",
+    "error": "No se pudieron cargar las tareas",
+    "openTask": "Abrir tarea"
   }
 }

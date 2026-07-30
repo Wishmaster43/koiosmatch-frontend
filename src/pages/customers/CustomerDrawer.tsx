@@ -14,6 +14,7 @@ import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import PdokCard from '@/components/drawer/PdokCard'
+import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import { useAuth } from '@/context/AuthContext'
@@ -50,6 +51,10 @@ const TABS = [
   // Danny 28-07: "Prijsafspraken hernoemen naar Financieel, met 2 subtabjes". The tab id
   // stays `priceAgreements` — it is the deep-link token the count-cells and the URL use.
   { id: 'priceAgreements', tKey: 'financial' },
+  // TAKEN-OP-KLANT-1: unblocked 28-07 — GET /tasks?customer={id} really filters now
+  // (TASKS-LINK-FILTER-1). Before that the filter was ignored and this tab would have
+  // shown every task in the tenant, which is why it did not exist.
+  { id: 'tasks',         tKey: 'tasks' },
   { id: 'documents',     tKey: 'documents' },
   // Communicatie is ONE tab with a sub-tab strip (scope correction, Danny 28-07):
   // Notities · Tijdlijn · Vacaturezichtbaarheid live inside CustomerNotesTab.tsx.
@@ -212,6 +217,16 @@ export default function CustomerDrawer({
       case 'planning':      return <PlanningTab customerId={c.id ?? ''} />
       case 'statistics':    return <StatisticsTab c={c} onGoToVacancies={() => setActiveTab?.('vacancies')} />
       case 'priceAgreements': return <PriceAgreementsTab customerId={c.id} c={c} onSave={v => onUpdate?.(c.id, v)} />
+      case 'tasks':         return (
+        <EntityTasksTab
+          linkType="customer" id={c.id}
+          labels={{
+            newTask: t('tasks.newTask'), open: t('tasks.open'), history: t('tasks.history'),
+            empty: t('tasks.empty'), loading: t('tasks.loading'), error: t('tasks.error'),
+            openTask: t('tasks.openTask'),
+          }}
+        />
+      )
       case 'documents':     return <DocumentsTab customerId={c.id} />
       case 'communication': return (
         <CustomerNotesTab

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mapApplication, mapApplicationDetail } from './mapApplication'
+import { mapApplication, mapApplicationDetail, mapInterview } from './mapApplication'
 import type { LookupItem } from '@/context/LookupsContext'
 
 // A tenant that renamed the funnel: 'aangenomen' carries is_match — proves the
@@ -239,5 +239,36 @@ describe('mapApplicationDetail', () => {
     it('defaults to null when interview_consent_given_at is explicitly null', () => {
       expect(mapApplicationDetail({ id: 12, interview_consent_given_at: null }).interviewConsentGivenAt).toBeNull()
     })
+  })
+})
+
+// Regression (30-07): the backend derives `turn` with a MIXED vocabulary — 'agent' and
+// 'recruiter' in English next to 'kandidaat' and 'afgerond' in Dutch — while the chip looks
+// up its label and colour by that value. The two Dutch ones rendered a raw i18n key with no
+// colour. And `paused_by` arrives as a bare uuid with the name in `paused_by_name`, which
+// the mapper read as an object, so "overgenomen door …" was permanently empty.
+describe('mapInterview · the backend contract as it really is', () => {
+  it("maps the Dutch turn values onto our own vocabulary", () => {
+    expect(mapInterview({ turn: 'kandidaat' } as never)?.turn).toBe('candidate')
+    expect(mapInterview({ turn: 'afgerond' } as never)?.turn).toBe('completed')
+  })
+
+  it('passes the English ones through untouched', () => {
+    expect(mapInterview({ turn: 'agent' } as never)?.turn).toBe('agent')
+    expect(mapInterview({ turn: 'recruiter' } as never)?.turn).toBe('recruiter')
+  })
+
+  it('reads paused_by as a bare uuid plus its separate display name', () => {
+    const iv = mapInterview({ paused_by: 'u-1', paused_by_name: 'Kelly Yesway' } as never)
+    expect(iv?.pausedBy).toEqual({ id: 'u-1', name: 'Kelly Yesway' })
+  })
+
+  it('still accepts a nested paused_by, in case the resource ever nests it', () => {
+    const iv = mapInterview({ paused_by: { id: 'u-2', name: 'Tom Demo' } } as never)
+    expect(iv?.pausedBy).toEqual({ id: 'u-2', name: 'Tom Demo' })
+  })
+
+  it('leaves pausedBy null when nobody took over', () => {
+    expect(mapInterview({ turn: 'agent' } as never)?.pausedBy).toBeNull()
   })
 })

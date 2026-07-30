@@ -192,7 +192,8 @@
         "agent": "Aan de beurt: agent",
         "candidate": "Aan de beurt: kandidaat",
         "pending": "Wachtend",
-        "recruiter": "Overgenomen door jou"
+        "recruiter": "Overgenomen door jou",
+        "completed": "Afgerond"
       },
       "duration": "Gespreksduur",
       "durationMinutes": "{{count}} min",

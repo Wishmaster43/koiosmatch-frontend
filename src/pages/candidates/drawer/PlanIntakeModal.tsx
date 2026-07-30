@@ -149,8 +149,11 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
-          <button onClick={form.submit} disabled={form.saving || !form.when || form.apptRuleBlocked}
-            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: '#fff', cursor: (form.when && !form.apptRuleBlocked) ? 'pointer' : 'default', opacity: (form.when && !form.apptRuleBlocked) ? 1 : 0.4 }}>
+          {/* Disabled when `when` OR `type` is missing (no hardcoded type fallback —
+              a tenant with zero configured appointment types has nothing valid to
+              submit, mirrors the existing `when`-empty gate). */}
+          <button onClick={form.submit} disabled={form.saving || !form.when || !form.type || form.apptRuleBlocked}
+            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: '#fff', cursor: (form.when && form.type && !form.apptRuleBlocked) ? 'pointer' : 'default', opacity: (form.when && form.type && !form.apptRuleBlocked) ? 1 : 0.4 }}>
             {form.saving ? t('common:saving') : form.submitLabel}
           </button>
         </div>

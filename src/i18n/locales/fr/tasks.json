@@ -125,7 +125,8 @@
     "required": "Requis",
     "cardTask": "Tâche",
     "cardPlanning": "Planification",
-    "cardLink": "Lien"
+    "cardLink": "Lien",
+    "duePlaceholder": "jj-mm-aaaa"
   },
   "bulk": {
     "selected": "{{count}} sélectionné(e)s",

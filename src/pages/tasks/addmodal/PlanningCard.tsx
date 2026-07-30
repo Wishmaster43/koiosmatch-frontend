@@ -25,7 +25,7 @@ export default function PlanningCard({ t, form, set, priorities, statuses }: {
         {/* TASK-DUE-TIME-1: date + optional time-of-day, paired half-row. */}
         <div style={row2}>
           <Field label={t('modal.due')}>
-            <DateField value={form.due} onChange={v => set('due', v)} placeholder="dd-mm-jjjj" />
+            <DateField value={form.due} onChange={v => set('due', v)} placeholder={t('modal.duePlaceholder')} />
           </Field>
           <Field label={t('modal.dueTime')}>
             <TextField type="time" value={form.dueTime} onChange={v => set('dueTime', v)} />

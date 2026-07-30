@@ -40,3 +40,18 @@ export function makeCvLabeller(t?: TranslateFn): CvLabelFn {
 // A date formatter already bound to the document's locale — passed to the
 // sections so they never need to know which locale the CV is rendered in.
 export type CvDateFn = (d?: string | number | null) => string
+
+// Resolves the CV header name: an explicit `name` first, else the composed
+// first/middle/last. BUG FIX: `[first, middle, last].filter(Boolean).join(' ')`
+// returns an EMPTY STRING (not nullish) when a candidate has none of those
+// fields set, so a `??` chain built on top of it can never reach the fallback
+// label — a genuinely nameless candidate rendered a blank 24pt heading instead
+// of `L('nameFallback')`. Checked with `||` here so an empty string actually
+// falls through.
+export function resolveCvName(
+  c: { name?: string; firstName?: string; middleName?: string; lastName?: string } | undefined,
+  L: CvLabelFn,
+): string {
+  const composed = [c?.firstName, c?.middleName, c?.lastName].filter(Boolean).join(' ')
+  return c?.name || composed || L('nameFallback')
+}

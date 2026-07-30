@@ -12,25 +12,32 @@
  * own header comment); a warn banners but proceeds, a block additionally
  * disables the submit button.
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import PlanIntakeModal, { endTimeOf } from './PlanIntakeModal'
 import api from '@/lib/api'
 import { useActionRulePreflight } from '@/components/actionrules'
+import { useAppointmentTypes } from '@/lib/useAppointmentTypes'
+// Reused so per-test fixtures (incl. an empty-types shape the hook's own typing
+// doesn't perfectly model) don't fight TS literal-widening on `default_modality`.
+type AppointmentTypesResult = ReturnType<typeof useAppointmentTypes>
 
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [{ id: 'u1', name: 'Piet Recruiter' }] }) }))
 // meIsAssignable picks the same user 'u1' the users mock returns — the recruiter
 // auto-default (S24a-e) then has no observable effect on which owner id ends up set.
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1', name: 'Piet Recruiter' } }) }))
-vi.mock('@/lib/useAppointmentTypes', () => ({
-  useAppointmentTypes: () => ({
-    types: [{ value: 'intake_flex', label: 'Intake Flex', default_duration_min: 30, default_modality: 'office', is_intake: true, is_default: true }],
-    intakeTypes: [{ value: 'intake_flex', label: 'Intake Flex', default_duration_min: 30, default_modality: 'office', is_intake: true, is_default: true }],
-    metaOf: () => ({ default_duration_min: 30, default_modality: 'office' }),
-    defaultType: { value: 'intake_flex', label: 'Intake Flex', default_duration_min: 30, default_modality: 'office', is_intake: true, is_default: true },
-  }),
-}))
+// One default type, DEFAULT + FIRST in the list — the common case. `vi.fn` (not a
+// plain arrow) so individual tests below can override it with `mockReturnValue`
+// to exercise a tenant whose default type ISN'T first (S24a-c fix) or has none
+// configured at all (the removed hardcoded 'intake' fallback).
+const DEFAULT_APPT_TYPES = {
+  types: [{ value: 'intake_flex', label: 'Intake Flex', default_duration_min: 30, default_modality: 'office', is_intake: true, is_default: true }],
+  intakeTypes: [{ value: 'intake_flex', label: 'Intake Flex', default_duration_min: 30, default_modality: 'office', is_intake: true, is_default: true }],
+  metaOf: () => ({ default_duration_min: 30, default_modality: 'office' }),
+  defaultType: { value: 'intake_flex', label: 'Intake Flex', default_duration_min: 30, default_modality: 'office', is_intake: true, is_default: true },
+} as AppointmentTypesResult
+vi.mock('@/lib/useAppointmentTypes', () => ({ useAppointmentTypes: vi.fn() }))
 vi.mock('@/lib/useAppointmentLocations', () => ({
   useAppointmentLocations: () => ({
     locations: [{ value: 'kantoor', label: 'Kantoor', is_default: true }],
@@ -58,6 +65,17 @@ vi.mock('@/components/actionrules', async (importOriginal) => ({
 }))
 
 const noop = () => {}
+
+// Reset the appointment-types mock to the common-case fixture before every test —
+// only the tests that need a different tenant configuration override it themselves.
+// Also clear the api spies' call history (no global resetMocks in vite.config.js) —
+// otherwise a "never calls the API" assertion below would see earlier tests' calls.
+beforeEach(() => {
+  vi.mocked(useAppointmentTypes).mockReturnValue(DEFAULT_APPT_TYPES)
+  vi.mocked(api.post).mockClear()
+  vi.mocked(api.get).mockClear()
+  vi.mocked(api.patch).mockClear()
+})
 
 describe('PlanIntakeModal · 422 field mapping', () => {
   it('maps field-level 422 errors onto the corresponding fields', async () => {
@@ -172,6 +190,55 @@ describe('PlanIntakeModal · INTAKE-VACANCY-ID-1 (vacancy_id on the create paylo
     await user.click(screen.getByRole('button', { name: 'work.createIntake' }))
     const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
     expect(body).not.toHaveProperty('vacancy_id')
+  })
+})
+
+// BUG FIX (S24a-c): `duration`/`modality` used to prefill from `typeOptions[0]` —
+// the FIRST option in the list — while `type` itself already prefilled from the
+// resolved DEFAULT option. For a tenant whose default type isn't first, the modal
+// opened showing the right type next to another type's duration/modality, and the
+// type resync effect never caught it (the type itself was already a valid pick).
+describe('PlanIntakeModal · default type/duration/modality come from the SAME option', () => {
+  it('prefills duration + modality from the tenant DEFAULT type even when it is not first in the list', async () => {
+    vi.mocked(useAppointmentTypes).mockReturnValue({
+      types: [
+        { value: 'quick_call', label: 'Quick call', default_duration_min: 15, default_modality: 'phone', is_intake: true, is_default: false },
+        { value: 'intake_flex', label: 'Intake Flex', default_duration_min: 45, default_modality: 'remote', is_intake: true, is_default: true },
+      ],
+      intakeTypes: [
+        { value: 'quick_call', label: 'Quick call', default_duration_min: 15, default_modality: 'phone', is_intake: true, is_default: false },
+        { value: 'intake_flex', label: 'Intake Flex', default_duration_min: 45, default_modality: 'remote', is_intake: true, is_default: true },
+      ],
+      metaOf: () => undefined,
+      defaultType: { value: 'intake_flex', label: 'Intake Flex', default_duration_min: 45, default_modality: 'remote', is_intake: true, is_default: true },
+    } as AppointmentTypesResult)
+    vi.mocked(api.post).mockResolvedValueOnce({ data: {} })
+    const user = userEvent.setup()
+    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await user.click(screen.getByRole('button', { name: 'work.createIntake' }))
+    // The default type ('intake_flex', 45min/remote) must reach the POST body —
+    // not the first list entry's ('quick_call', 15min/phone) duration/modality.
+    expect(api.post).toHaveBeenCalledWith('/candidates/cand-1/appointments', expect.objectContaining({
+      type: 'intake_flex', duration_min: 45, modality: 'remote',
+    }))
+  })
+})
+
+// BUG FIX: the submit body used to fall back to the hardcoded slug `type: type ||
+// 'intake'` — not a real tenant vocabulary entry (appointment types are tenant-
+// configurable, §3B) and never guaranteed to exist. When a tenant has zero
+// appointment types configured, there is nothing honest to submit — the form now
+// refuses (disabled submit button, no POST) instead of guessing a slug.
+describe('PlanIntakeModal · no hardcoded type fallback', () => {
+  it('disables submit and never calls the API when the tenant has no appointment types configured', () => {
+    vi.mocked(useAppointmentTypes).mockReturnValue({
+      types: [], intakeTypes: [], metaOf: () => undefined, defaultType: undefined,
+    } as unknown as AppointmentTypesResult)
+    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    const submitBtn = screen.getByRole('button', { name: 'work.createIntake' })
+    expect(submitBtn).toBeDisabled()
+    fireEvent.click(submitBtn)
+    expect(api.post).not.toHaveBeenCalled()
   })
 })
 

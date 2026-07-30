@@ -192,7 +192,8 @@
         "agent": "Au tour de l'agent",
         "candidate": "Au tour du candidat",
         "pending": "En attente",
-        "recruiter": "Repris par vous"
+        "recruiter": "Repris par vous",
+        "completed": "Terminé"
       },
       "duration": "Durée de la conversation",
       "durationMinutes": "{{count}} min",

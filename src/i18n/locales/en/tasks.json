@@ -139,7 +139,8 @@
     "required": "Required",
     "cardTask": "Task",
     "cardPlanning": "Planning",
-    "cardLink": "Link"
+    "cardLink": "Link",
+    "duePlaceholder": "dd-mm-yyyy"
   },
   "page": {
     "searchPlaceholder": "Search tasks"

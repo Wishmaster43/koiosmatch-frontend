@@ -192,7 +192,8 @@
         "agent": "Agent's turn",
         "candidate": "Candidate's turn",
         "pending": "Pending",
-        "recruiter": "Taken over by you"
+        "recruiter": "Taken over by you",
+        "completed": "Completed"
       },
       "duration": "Conversation duration",
       "durationMinutes": "{{count}} min",

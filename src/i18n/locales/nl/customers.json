@@ -86,7 +86,8 @@
       "communication": "Communicatie",
       "extra": "Extra",
       "financial": "Financieel",
-      "billing": "Facturatie"
+      "billing": "Facturatie",
+      "tasks": "Taken"
     },
     "changelog": "Wijzigingen",
     "photoUpload": "Logo uploaden",
@@ -548,5 +549,14 @@
     "relationshipNone": "Geen open vacatures of actieve matches geregistreerd.",
     "locationComplete": "Deze locatie is goed gevuld — adres, registratie en contact zijn bekend.",
     "locationPartial": "Deze locatie is {{pct}}% compleet. Vul adres, Sub-KvK, BTW-nummer en contactgegevens aan."
+  },
+  "tasks": {
+    "newTask": "Nieuwe taak",
+    "open": "Open",
+    "history": "Historie",
+    "empty": "Nog geen taken voor deze klant",
+    "loading": "Taken laden…",
+    "error": "Taken konden niet worden geladen",
+    "openTask": "Open taak"
   }
 }

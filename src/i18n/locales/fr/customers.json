@@ -86,7 +86,8 @@
       "communication": "Communication",
       "extra": "Extra",
       "financial": "Financier",
-      "billing": "Facturation"
+      "billing": "Facturation",
+      "tasks": "Tâches"
     },
     "changelog": "Historique",
     "photoUpload": "Téléverser le logo",
@@ -548,5 +549,14 @@
     "relationshipNone": "Aucun poste ouvert ni match actif enregistré.",
     "locationComplete": "Ce site est bien renseigné — adresse, immatriculation et contact sont connus.",
     "locationPartial": "Ce site est complété à {{pct}}%. Ajoutez l’adresse, le sous-numéro RCS, le n° TVA et les coordonnées."
+  },
+  "tasks": {
+    "newTask": "Nouvelle tâche",
+    "open": "Ouvertes",
+    "history": "Historique",
+    "empty": "Aucune tâche pour ce client",
+    "loading": "Chargement des tâches…",
+    "error": "Impossible de charger les tâches",
+    "openTask": "Ouvrir la tâche"
   }
 }

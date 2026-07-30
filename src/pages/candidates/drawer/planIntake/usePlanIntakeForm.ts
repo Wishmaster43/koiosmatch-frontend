@@ -75,9 +75,13 @@ export function usePlanIntakeForm({
   const toLocalInput = (iso?: string) => iso ? iso.slice(0, 16) : ''
   const [type, setType] = useState(() => existing?.type ?? defaultTypeOption?.value ?? '')
   const [when, setWhen] = useState(() => existing?.scheduled_at ? toLocalInput(existing.scheduled_at) : defaultWhen())
-  // Duration + modality prefill from the existing appointment, else from the type.
-  const [duration, setDuration] = useState<number>(() => existing?.duration_min ?? typeOptions[0]?.default_duration_min ?? 30)
-  const [modality, setModality] = useState<Modality>(() => (existing?.modality as Modality) ?? typeOptions[0]?.default_modality ?? 'office')
+  // Duration + modality prefill from the existing appointment, else from the SAME
+  // chosen default type (BUG FIX: this used to read `typeOptions[0]` — the FIRST
+  // option in the list — while `type` itself read `defaultTypeOption`; for any
+  // tenant whose default type isn't first, the modal opened showing the right
+  // type next to another type's duration/modality. Both must come from one option.
+  const [duration, setDuration] = useState<number>(() => existing?.duration_min ?? defaultTypeOption?.default_duration_min ?? 30)
+  const [modality, setModality] = useState<Modality>(() => (existing?.modality as Modality) ?? defaultTypeOption?.default_modality ?? 'office')
   // A real tenant location (vs. the plain office/remote/phone presets) — empty = none picked.
   const [locationId, setLocationId] = useState(() => existing?.location_id ? String(existing.location_id) : '')
   // S24a(d): the tenant appointment-locations lookup slug (Kantoor/Online/Telefonisch/
@@ -90,15 +94,16 @@ export function usePlanIntakeForm({
   })
   useEffect(() => {
     if (!vacancyId || vacancyOptions.some(v => String(v.value) === String(vacancyId))) { setExtraVacancy(null); return }
-    let alive = true
-    api.get(`/vacancies/${vacancyId}`, { quiet404: true } as never)
+    // AbortController (§9) — a fast vacancy-id switch must never let a stale
+    // response win; mirrors VacancySearchTab's own vacancy-title fetch.
+    const ctrl = new AbortController()
+    api.get(`/vacancies/${vacancyId}`, { signal: ctrl.signal, quiet404: true })
       .then(r => {
-        if (!alive) return
         const d = unwrap<{ title?: string }>(r)
         setExtraVacancy({ value: String(vacancyId), label: d?.title ? String(d.title) : t('work.vacancyUnknown') })
       })
-      .catch(() => { if (alive) setExtraVacancy({ value: String(vacancyId), label: t('work.vacancyUnknown') }) })
-    return () => { alive = false }
+      .catch(err => { if (err?.code !== 'ERR_CANCELED') setExtraVacancy({ value: String(vacancyId), label: t('work.vacancyUnknown') }) })
+    return () => ctrl.abort()
   }, [vacancyId, vacancyOptions, t])
   // The vacancy option CreatableSelect falls back to displaying its raw `value` the
   // moment no option matches it — computed HERE (render time), not only inside the
@@ -196,12 +201,20 @@ export function usePlanIntakeForm({
 
   // Book the appointment; vacancy_id optional (BE auto-creates the intake application when
   // there is none). application_id only on create — an edit keeps its original link.
+  // BUG FIX: this used to fall back to the hardcoded slug 'intake' — not a real
+  // tenant vocabulary entry (types are tenant-configurable, §3B) and never
+  // guaranteed to exist. `type` is kept in sync with the resolved default by the
+  // resync effect above, so by the time submit runs it normally already holds a
+  // real option; the only way it stays empty is a tenant with zero configured
+  // (intake) appointment types — refuse to submit rather than guess a slug that
+  // may not exist server-side (mirrors the `!when` guard just below, and the
+  // submit button's own disabled state in PlanIntakeModal.tsx).
   const submit = async () => {
-    if (!when) return
+    if (!when || !type) return
     setSaving(true)
     setErrors({}); setSubmitErr(null)
     const body = {
-      scheduled_at: when, type: type || 'intake', duration_min: duration, modality,
+      scheduled_at: when, type, duration_min: duration, modality,
       location_id: locationId || null,
       appointment_location: appointmentLocation || null,
       ...(ownerId ? { owner_id: ownerId } : {}),

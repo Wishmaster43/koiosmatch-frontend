@@ -19,6 +19,8 @@ import type { Id } from '@/types/common'
 const TURN_COLOR: Record<string, string> = {
   agent: 'var(--color-info)',
   candidate: 'var(--color-primary)',
+  // Finished: nobody is on turn, so it reads as neutral, not as a call to act.
+  completed: 'var(--text-muted)',
   pending: 'var(--text-muted)',
   recruiter: 'var(--color-success)',
 }

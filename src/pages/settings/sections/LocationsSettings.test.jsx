@@ -13,7 +13,7 @@
  * along in the create/update payload.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
@@ -285,5 +285,52 @@ describe('LocationsSettings', () => {
       // eslint-disable-next-line no-restricted-syntax -- DATA: asserting the exact stored row colour, not an invented UI colour
       color: '#059669', icon: 'building',
     })))
+  })
+
+  it('LOC-FOCUS-TRAP-1: opening the create modal moves focus in, Escape closes it, and focus returns to the trigger', async () => {
+    // Regression guard for a focus trap that was structurally dead: useFocusTrap
+    // was previously armed in the always-mounted container, so its effect ran once
+    // at page mount with a null ref and never attached a keydown listener at all.
+    api.get.mockResolvedValue({ data: { data: [] } })
+    const user = userEvent.setup()
+    render(<LocationsSettings />)
+    await waitFor(() => expect(screen.getByText(st('locations.empty'))).toBeInTheDocument())
+
+    const createBtn = screen.getByRole('button', { name: st('locations.create') })
+    await user.click(createBtn)
+
+    const dialog = await screen.findByRole('dialog', { name: st('locations.create') })
+    // Focus must move INTO the panel on open — not stay on the trigger behind it.
+    await waitFor(() => expect(dialog).toContainElement(document.activeElement))
+
+    // The trap's own keydown listener closes on Escape (house pattern, §6).
+    fireEvent.keyDown(dialog, { key: 'Escape' })
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    // And focus is restored to whatever opened the dialog.
+    expect(document.activeElement).toBe(createBtn)
+  })
+
+  it('LOC-PAGE-CLAMP-1: deleting the last row of the last page snaps back to page 1 instead of an empty page', async () => {
+    // Regression guard: `page` state used to keep pointing at a page number that no
+    // longer exists once the row count drops, showing the empty state with no way
+    // back except a reload. 11 rows = page 1 (10) + page 2 (the 11th, alone).
+    const rows = Array.from({ length: 11 }, (_, i) => location({ id: `loc${i + 1}`, name: `Vestiging ${i + 1}` }))
+    api.get.mockResolvedValue({ data: { data: rows } })
+    api.delete.mockResolvedValue({})
+    const user = userEvent.setup()
+    render(<LocationsSettings />)
+    await waitFor(() => expect(screen.getByText('Vestiging 1')).toBeInTheDocument())
+
+    // Move to page 2, which holds only the last row.
+    await user.click(screen.getByRole('button', { name: st('locations.next') }))
+    await waitFor(() => expect(screen.getByText('Vestiging 11')).toBeInTheDocument())
+    expect(screen.queryByText('Vestiging 1')).not.toBeInTheDocument()
+
+    await confirmDelete(user, 'Vestiging 11')
+
+    await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/locations/loc11'))
+    // The page must follow the data back to page 1 — never a lingering empty page 2.
+    await waitFor(() => expect(screen.getByText('Vestiging 1')).toBeInTheDocument())
+    expect(screen.queryByText(st('locations.empty'))).not.toBeInTheDocument()
   })
 })

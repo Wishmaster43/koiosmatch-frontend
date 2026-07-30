@@ -4,7 +4,6 @@ import { Plus, Map as MapIcon, AlertTriangle } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useConfirm } from '@/hooks/useConfirm'
 import { DEFAULT_LOCATION_COLOR, DEFAULT_LOCATION_ICON } from '@/lib/locationIcons'
 import LocationsTable from './locations/LocationsTable'
@@ -71,14 +70,15 @@ export default function LocationsSettings() {
   const PER_PAGE = 10
   // a11y (§6): trap focus in the "+ Vestiging" panel + close on Escape while open
   // (Danny 27-07 — the wide-form frame gets the same dialog behaviour as +Match/
-  // +Kandidaat). Safe to call unconditionally: the hook itself no-ops without a
-  // mounted node, so it can sit above the `showModal &&` render branch below.
-  // useCallback keeps ONE stable function identity across re-renders — every
-  // keystroke into `form` re-renders this component, and a fresh inline closure
-  // here would re-trigger useFocusTrap's effect (its deps include `onClose`) on
-  // every keystroke, stealing focus back to the first focusable element each time.
+  // +Kandidaat). The trap itself is armed INSIDE LocationFormModal (see its
+  // docblock) so its effect attaches to a freshly mounted node every time the
+  // dialog opens — arming it here would run once at page mount with no node yet.
+  // useCallback still keeps ONE stable `onClose` identity across re-renders —
+  // every keystroke into `form` re-renders this component and, via props,
+  // LocationFormModal too; a fresh inline closure here would re-trigger the
+  // child's useFocusTrap effect (its deps include `onClose`) on every keystroke,
+  // stealing focus back to the first focusable element each time.
   const closeModal = useCallback(() => setShowModal(false), [])
-  const modalPanelRef = useFocusTrap(closeModal)
   // House confirm dialog (never native window.confirm, §3A) — staged by remove().
   const { confirm, dialog } = useConfirm()
 
@@ -149,8 +149,15 @@ export default function LocationsSettings() {
     confirm(t('locations.confirmDelete', { name: loc.name }), () => doRemove(loc), { danger: true })
   }
 
-  const paginated = locations.slice((page - 1) * PER_PAGE, page * PER_PAGE)
   const totalPages = Math.ceil(locations.length / PER_PAGE)
+  // Clamp the page against the CURRENT page count as a derived render-time value
+  // (no extra effect/state needed — "you might not need an effect"): deleting the
+  // last row of page 2 drops totalPages to 1, and without this the raw `page`
+  // state kept pointing at the now-gone page 2, showing an empty "no locations
+  // yet" table with no way back except a reload. `|| 1` covers the empty-list
+  // case (totalPages 0) so the slice below still reads from page 1.
+  const safePage = Math.min(page, totalPages) || 1
+  const paginated = locations.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
 
   return (
     <div>
@@ -182,12 +189,12 @@ export default function LocationsSettings() {
           <LocationsMapView locations={locations} />
         </Suspense>
       ) : (
-        <LocationsTable isLocked={inUse} rows={paginated} page={page} totalPages={totalPages} onPageChange={setPage}
+        <LocationsTable isLocked={inUse} rows={paginated} page={safePage} totalPages={totalPages} onPageChange={setPage}
           onEdit={openEdit} onDelete={remove} deletingId={deletingId} />
       )}
 
       {showModal && (
-        <LocationFormModal panelRef={modalPanelRef} editingId={editingId} form={form} setForm={setForm}
+        <LocationFormModal editingId={editingId} form={form} setForm={setForm}
           saving={saving} onClose={closeModal} onSubmit={submit} />
       )}
       {/* House confirm dialog (never native window.confirm) — staged by remove(). */}

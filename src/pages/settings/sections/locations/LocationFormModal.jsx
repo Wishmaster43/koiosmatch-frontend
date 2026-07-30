@@ -9,9 +9,14 @@
  * it was more than a third of the file and has nothing to do with loading or
  * deleting locations.
  *
- * `panelRef` is passed IN rather than created here on purpose: the focus trap is
- * armed by the container (see the comment at its useFocusTrap call), so moving the
- * hook in here would change when it runs.
+ * The focus trap is armed HERE, not in the always-mounted container (fixed
+ * 30-07): useFocusTrap's effect attaches to `ref.current` on mount, so it needs
+ * a component that only exists while the dialog is open — mirrors
+ * ConfirmDialog's DialogPanel / AddLocationModal. The container previously called
+ * useFocusTrap unconditionally above its `showModal &&` branch, so the ref was
+ * still null the one time the effect ever ran (page mount) and never fired
+ * again: no trap, no Escape-to-close, no focus restore, despite this docblock's
+ * promise of all three.
  */
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
@@ -19,6 +24,7 @@ import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import { BTN_H } from '@/config/buttonMetrics'
 import { LOCATION_ICON_NAMES, resolveLocationIcon, DEFAULT_LOCATION_COLOR } from '@/lib/locationIcons'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { ColorSwatch } from '../../components/SettingsControls'
 import IconPickerControl from '../IconPickerControl'
 
@@ -28,8 +34,12 @@ import IconPickerControl from '../IconPickerControl'
 const lbl = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }
 const inp = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
 
-export default function LocationFormModal({ panelRef, editingId, form, setForm, saving, onClose, onSubmit }) {
+export default function LocationFormModal({ editingId, form, setForm, saving, onClose, onSubmit }) {
   const { t } = useTranslation(['settings', 'common'])
+  // This component is only mounted while the dialog is open (the container
+  // renders it behind `showModal &&`), so this effect attaches to a real node
+  // every time it opens — Esc-to-close, tab-trap and focus-restore all work.
+  const panelRef = useFocusTrap(onClose)
 
   const setF = (k) => (e) => setForm(x => ({ ...x, [k]: e.target.value }))
   // Called as a function (not <F/>) so inputs keep focus while typing.

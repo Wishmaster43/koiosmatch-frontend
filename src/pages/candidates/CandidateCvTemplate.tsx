@@ -10,7 +10,7 @@
 import { Document, Page, View, Text, Image } from '@react-pdf/renderer'
 import { resolveCvSectionPlacement, CV_DEFAULT_SECTIONS } from '@/lib/useCvSettings'
 import { makeStyles, paletteFor } from './cv/cvStyles'
-import { fmtDate, makeCvLabeller } from './cv/cvLabels'
+import { fmtDate, makeCvLabeller, resolveCvName } from './cv/cvLabels'
 import { SideSection, MainSection } from './cv/CvSectionShells'
 import { renderMovableContent } from './cv/cvMovableContent'
 import { CvEducationSection, CvExperienceSection } from './cv/CvEntrySections'
@@ -67,7 +67,7 @@ export function CvDocument({ c, settings = {}, locale = 'nl-NL', t, redactContac
   const secs    = settings.sections ?? []
   const enabled = (id: string) => secs.length === 0 || (secs.find(s => s.id === id)?.enabled !== false)
 
-  const name  = c?.name ?? [c?.firstName, c?.middleName, c?.lastName].filter(Boolean).join(' ') ?? L('nameFallback')
+  const name  = resolveCvName(c, L)
   const title = c?.title ?? c?.function ?? ''
 
   // Contact block: the proposal variant drops phone/e-mail/address/dob (the four

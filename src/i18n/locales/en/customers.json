@@ -86,7 +86,8 @@
       "communication": "Communication",
       "extra": "Extra",
       "financial": "Financial",
-      "billing": "Billing"
+      "billing": "Billing",
+      "tasks": "Tasks"
     },
     "changelog": "Changelog",
     "photoUpload": "Upload logo",
@@ -548,5 +549,14 @@
     "relationshipNone": "No open vacancies or active matches recorded.",
     "locationComplete": "This location is well filled in — address, registration and contact are known.",
     "locationPartial": "This location is {{pct}}% complete. Add the address, sub CoC number, VAT number and contact details."
+  },
+  "tasks": {
+    "newTask": "New task",
+    "open": "Open",
+    "history": "History",
+    "empty": "No tasks for this customer yet",
+    "loading": "Loading tasks…",
+    "error": "Tasks could not be loaded",
+    "openTask": "Open task"
   }
 }

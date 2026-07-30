@@ -86,7 +86,8 @@
       "communication": "Kommunikation",
       "extra": "Extra",
       "financial": "Finanzen",
-      "billing": "Abrechnung"
+      "billing": "Abrechnung",
+      "tasks": "Aufgaben"
     },
     "changelog": "Änderungen",
     "photoUpload": "Logo hochladen",
@@ -548,5 +549,14 @@
     "relationshipNone": "Keine offenen Stellen oder aktiven Matches erfasst.",
     "locationComplete": "Dieser Standort ist gut gefüllt — Adresse, Registrierung und Kontakt sind bekannt.",
     "locationPartial": "Dieser Standort ist zu {{pct}}% vollständig. Ergänze Adresse, Neben-Handelsregisternr., USt-IdNr. und Kontaktdaten."
+  },
+  "tasks": {
+    "newTask": "Neue Aufgabe",
+    "open": "Offen",
+    "history": "Verlauf",
+    "empty": "Noch keine Aufgaben für diesen Kunden",
+    "loading": "Aufgaben werden geladen…",
+    "error": "Aufgaben konnten nicht geladen werden",
+    "openTask": "Aufgabe öffnen"
   }
 }

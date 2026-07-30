@@ -192,7 +192,8 @@
         "agent": "Agent ist am Zug",
         "candidate": "Kandidat ist am Zug",
         "pending": "Ausstehend",
-        "recruiter": "Von Ihnen übernommen"
+        "recruiter": "Von Ihnen übernommen",
+        "completed": "Abgeschlossen"
       },
       "duration": "Gesprächsdauer",
       "durationMinutes": "{{count}} Min.",

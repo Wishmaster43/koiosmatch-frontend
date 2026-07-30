@@ -139,7 +139,8 @@
     "required": "Verplicht",
     "cardTask": "Taak",
     "cardPlanning": "Planning",
-    "cardLink": "Koppeling"
+    "cardLink": "Koppeling",
+    "duePlaceholder": "dd-mm-jjjj"
   },
   "page": {
     "searchPlaceholder": "Zoek naar taken"
