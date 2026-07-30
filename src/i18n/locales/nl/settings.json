@@ -22,7 +22,8 @@
     "edit": "Bewerken",
     "close": "Sluiten",
     "default": "Standaard",
-    "setDefault": "Maak standaard"
+    "setDefault": "Maak standaard",
+    "invalidColorValue": "Vul een hexkleur (#0EA5E9) of een kleurtoken var(--color-…) in, maximaal 32 tekens."
   },
   "groups": {
     "kpis": "KPI's",
@@ -1277,7 +1278,8 @@
     "tabBackoffice": "Backoffice",
     "tabKoiosAi": "Koios AI",
     "comingSoon": "Binnenkort beschikbaar",
-    "tabTelefonie": "Telefonie"
+    "tabTelefonie": "Telefonie",
+    "tabVerificatie": "Verificatie"
   },
   "modules": {
     "loading": "Pakket ophalen…",
@@ -1821,6 +1823,26 @@
       "customer_department_chip_color": {
         "label": "Kleur afdelingschip",
         "description": "De kleur van elke Afdeling-chip bij een contactpersoon. Leeg = de standaardkleur."
+      },
+      "customer_contact_table_color_location": {
+        "label": "Locatiekleur (contactpersonen)",
+        "description": "Aan = de Locatie-chip bij contactpersonen krijgt kleur. Uit = platte tekst."
+      },
+      "customer_contact_table_color_department": {
+        "label": "Afdelingkleur (contactpersonen)",
+        "description": "Aan = de Afdeling-chip bij contactpersonen krijgt kleur. Uit = platte tekst."
+      },
+      "customer_department_table_color_location": {
+        "label": "Locatiekleur (afdelingen)",
+        "description": "Aan = de Locatie-chip in de afdelingentabel krijgt kleur. Uit = platte tekst."
+      },
+      "customer_location_table_color_status": {
+        "label": "Statuskleur (locaties)",
+        "description": "Aan = de statuschip in de locatietabel krijgt kleur. Uit = platte tekst."
+      },
+      "customer_department_table_color_status": {
+        "label": "Statuskleur (afdelingen)",
+        "description": "Aan = de statuschip in de afdelingentabel krijgt kleur. Uit = platte tekst."
       }
     }
   },

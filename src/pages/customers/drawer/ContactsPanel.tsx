@@ -32,6 +32,7 @@ import { emailValue, phoneValue } from '@/components/drawer/contactLinks'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import { useDateFormat } from '@/lib/datetime'
 import { useChipColors } from '@/lib/settings/useChipColors'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import ContactDetail from './ContactDetail'
 import ContactLinkPicker from './ContactLinkPicker'
 import AddContactPersonModal from '../AddContactPersonModal'
@@ -42,6 +43,9 @@ import type { ContactPayload } from '../hooks/useCustomerContacts'
 type AnyProps = Record<string, unknown>
 const SoftChip = SoftChipJs as unknown as ComponentType<AnyProps>
 const muted = { color: 'var(--text-muted)', fontSize: 12 }
+// Plain-text fallback style for a coloured column toggled off (CHIPKLEUR-INSTELBAAR-1) —
+// mirrors the `plainCell` convention in CandidatesTable/CustomersTable.
+const plainCell = { color: 'var(--text)', fontSize: 12 }
 
 const searchWrap = {
   display: 'flex', alignItems: 'center', gap: 8, flex: 1, padding: '6px 10px',
@@ -91,6 +95,11 @@ export default function ContactsPanel({
   // Tenant-configurable chip colours (CHIPKLEUR-INSTELBAAR-1) — falls back to today's
   // hardcoded colours until a tenant saves an override in Settings.
   const { location: locationChipColor, department: departmentChipColor } = useChipColors()
+  // Colour-on/off flags per column (CHIPKLEUR-INSTELBAAR-1) — both default ON, so an
+  // absent setting keeps today's coloured-chip look.
+  const settings = useAllSettings()
+  const colorLocationCol = getBoolSetting(settings, 'customer_contact_table_color_location', true)
+  const colorDepartmentCol = getBoolSetting(settings, 'customer_contact_table_color_department', true)
   const [search, setSearch] = useState('')
   const [modal, setModal] = useState<'add' | 'couple' | Contact | null>(null)
 
@@ -129,6 +138,9 @@ export default function ContactsPanel({
         {items.map(i => <SoftChip key={String(i.id)} label={i.name} color={color} />)}
       </div>
     )
+  // Plain-text variant for when the column's colour flag is off.
+  const plainList = (items: { id: Id; name: string }[]): ReactNode =>
+    items.length === 0 ? '—' : <span style={plainCell}>{items.map(i => i.name).join(', ')}</span>
 
   // Columns are IDENTICAL everywhere except that a scope drops its own redundant column:
   // inside one location every row says the same location, inside a department the same
@@ -147,11 +159,11 @@ export default function ContactsPanel({
       render: p => p.statusLabel ? <SoftChip label={p.statusLabel} color={p.statusColor} /> : '—' },
     ...(scope === 'customer' ? [{
       key: 'location', header: t('contacts.col.location'), sortable: true, sortValue: (p: Contact) => p.locationName,
-      render: (p: Contact) => chipList(resolvedLocations(p), locationChipColor),
+      render: (p: Contact) => colorLocationCol ? chipList(resolvedLocations(p), locationChipColor) : plainList(resolvedLocations(p)),
     }] : []),
     ...(scope !== 'department' ? [{
       key: 'department', header: t('contacts.col.department'), sortable: true, sortValue: (p: Contact) => p.departmentName,
-      render: (p: Contact) => chipList(resolvedDepartments(p), departmentChipColor),
+      render: (p: Contact) => colorDepartmentCol ? chipList(resolvedDepartments(p), departmentChipColor) : plainList(resolvedDepartments(p)),
     }] : []),
     { key: 'role', header: t('contacts.col.role'), cellStyle: muted, sortable: true, sortValue: p => p.role, render: p => p.role || '—' },
     { key: 'email', header: t('contacts.col.email'), cellStyle: muted, sortable: true, sortValue: p => p.email,

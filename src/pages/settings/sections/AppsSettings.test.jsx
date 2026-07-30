@@ -48,4 +48,24 @@ describe('AppsSettings', () => {
     await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Ongeldige app(s): x'))
     expect(mockSetApps).not.toHaveBeenCalled()
   })
+
+  // VERIFICATIE-TAB-1 (Danny 28-07): kvk/vat query an official register and write
+  // nothing back — "nothing else is built", so the cards must render as an honest
+  // coming-soon gate (§3), never a clickable toggle a tenant could switch on.
+  it('renders the KvK and BTW cards as coming-soon, never toggleable', async () => {
+    render(<AppsSettings />)
+    fireEvent.click(screen.getByRole('tab', { name: 'apps.tabVerificatie' }))
+
+    expect(screen.getByText('KvK / Handelsregister')).toBeInTheDocument()
+    expect(screen.getByText('BTW-validatie (VIES)')).toBeInTheDocument()
+    // Every toggle on this tab is titled "coming soon", never "enable" — the
+    // switch itself stays disabled so clicking it can never PUT the app on.
+    expect(screen.queryAllByTitle('apps.enable')).toHaveLength(0)
+    const toggles = screen.getAllByTitle('apps.comingSoon')
+    expect(toggles.length).toBeGreaterThanOrEqual(2)
+    toggles.forEach(toggle => expect(toggle).toBeDisabled())
+
+    toggles.forEach(toggle => fireEvent.click(toggle))
+    expect(mockPut).not.toHaveBeenCalled()
+  })
 })

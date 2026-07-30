@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { MapPin } from 'lucide-react'
 import SubEntityTab from './SubEntityTab'
 import StatusFilterSelect, { useStatusFilter } from './StatusFilterSelect'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import LocationDetail from './LocationDetail'
 import AddLocationModal from '../AddLocationModal'
 import type { Column } from '@/components/ui/DataTable'
@@ -21,6 +22,9 @@ import type { ContactPayload } from '../hooks/useCustomerContacts'
 
 type AnyProps = Record<string, unknown>
 const SoftChip = SoftChipJs as unknown as ComponentType<AnyProps>
+// Plain-text fallback style for a coloured column toggled off (CHIPKLEUR-INSTELBAAR-1) —
+// mirrors the `plainCell` convention in CandidatesTable/CustomersTable.
+const plainCell = { color: 'var(--text)', fontSize: 12 }
 
 interface Props {
   customerId?: Id
@@ -56,6 +60,10 @@ export default function LocationsTab({
   // Status filter (Danny 28-07). It defaults to "active only" — but only once that is
   // provably a non-empty view; see the hook for why that guard exists.
   const { value: statusFilter, toggle: toggleStatus, filtered: visibleLocations } = useStatusFilter(locations, statuses)
+  // Colour-on/off flag for the status column (CHIPKLEUR-INSTELBAAR-1) — defaults ON,
+  // so an absent setting keeps today's coloured-chip look.
+  const settings = useAllSettings()
+  const colorStatusCol = getBoolSetting(settings, 'customer_location_table_color_status', true)
 
   const columns: Column<Location>[] = [
     { key: 'name', header: t('locations.col.name'), sortable: true, sortValue: l => l.name,
@@ -67,7 +75,9 @@ export default function LocationsTab({
       ) },
     { key: 'city', header: t('locations.col.city'), cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, sortable: true, sortValue: l => l.city, render: l => l.city || '—' },
     { key: 'status', header: t('locations.col.status'), sortable: true, sortValue: l => l.statusLabel,
-      render: l => l.statusLabel ? <SoftChip label={l.statusLabel} color={l.statusColor} /> : '—' },
+      render: l => !l.statusLabel ? '—' : colorStatusCol
+        ? <SoftChip label={l.statusLabel} color={l.statusColor} />
+        : <span style={plainCell}>{l.statusLabel}</span> },
     { key: 'departments', header: t('locations.col.departments'), align: 'right', cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, sortable: true,
       sortValue: l => departments.filter(d => String(d.locationId) === String(l.id)).length,
       render: l => departments.filter(d => String(d.locationId) === String(l.id)).length },

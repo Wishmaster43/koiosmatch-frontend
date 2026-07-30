@@ -17,10 +17,9 @@
  *   SkeletonRows      — loading placeholder
  *   SettingsDirtyContext — lets the shell warn before leaving an unsaved section
  */
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Check, RefreshCw, Save } from 'lucide-react'
-import { ColorSwatch } from './SettingsControls'
 import { SettingsDirtyContext } from '../lib/settingsDirty'
 import ToggleUi from '@/components/ui/Toggle'
 
@@ -148,8 +147,54 @@ export function SelectField({ value, onChange, options }) {
   )
 }
 
-export function ColorField({ value, onChange }) {
-  return <ColorSwatch color={value} onChange={onChange} />
+// Matches the backend's ChipColor rule (App\Rules\ChipColor, CHIPKLEUR-INSTELBAAR-1):
+// a literal hex (#abc / #aabbcc / #aabbccdd) or a var(--color-*) token, max 32 chars.
+// Hand-kept in sync with the backend regex — update both together if either changes.
+const CHIP_COLOR_PATTERN = /^(#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{8}|var\(--color-[a-z0-9-]+\))$/
+
+// Free-text tenant colour field (CHIPKLEUR-INSTELBAAR-1) — distinct from ColorSwatch's
+// curated preset picker (used for lookup-value colours): this accepts ANY valid hex or
+// design-token string, validates it client-side before it ever reaches the API, and
+// treats an empty value as "clear → fall back to the caller's default".
+export function ColorField({ value, onChange, invalidLabel, ariaLabel }) {
+  const [draft, setDraft] = useState(value ?? '')
+  const [invalid, setInvalid] = useState(false)
+
+  // Re-sync the draft when the persisted value changes from outside (load / cancel).
+  useEffect(() => { setDraft(value ?? ''); setInvalid(false) }, [value])
+
+  // Commit on blur/Enter only — never flag a still-typing keystroke as an error.
+  // Empty is valid (clears the setting); anything else must match the backend pattern.
+  const commit = () => {
+    const trimmed = draft.trim()
+    if (trimmed === '' || CHIP_COLOR_PATTERN.test(trimmed)) {
+      setInvalid(false)
+      onChange(trimmed)
+    } else {
+      setInvalid(true)
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span aria-hidden="true" style={{
+          width: 20, height: 20, borderRadius: 5, flexShrink: 0,
+          border: '1px solid var(--border)', background: draft.trim() || 'transparent',
+        }} />
+        <input type="text" value={draft} aria-label={ariaLabel} maxLength={32}
+          placeholder="var(--color-secondary)"
+          onChange={e => setDraft(e.target.value)}
+          onBlur={commit}
+          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); commit() } }}
+          style={{
+            ...inputStyle, width: 180, fontSize: 12, fontFamily: 'monospace',
+            borderColor: invalid ? 'var(--color-danger)' : 'var(--border)',
+          }} />
+      </div>
+      {invalid && <span role="alert" style={{ fontSize: 11, color: 'var(--color-danger)' }}>{invalidLabel}</span>}
+    </div>
+  )
 }
 
 export function StatusBadge({ label, tone = 'neutral' }) {

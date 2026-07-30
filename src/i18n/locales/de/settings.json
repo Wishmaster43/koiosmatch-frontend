@@ -22,7 +22,8 @@
     "edit": "Bearbeiten",
     "close": "Schließen",
     "default": "Standard",
-    "setDefault": "Als Standard festlegen"
+    "setDefault": "Als Standard festlegen",
+    "invalidColorValue": "Geben Sie eine Hex-Farbe (#0EA5E9) oder ein Farbtoken var(--color-…) ein, maximal 32 Zeichen."
   },
   "groups": {
     "kpis": "KPIs",
@@ -1063,7 +1064,8 @@
     "tabBackoffice": "Backoffice",
     "tabKoiosAi": "Koios AI",
     "comingSoon": "Bald verfügbar",
-    "tabTelefonie": "Telefonie"
+    "tabTelefonie": "Telefonie",
+    "tabVerificatie": "Überprüfung"
   },
   "modules": {
     "loading": "Paket wird geladen…",
@@ -1803,6 +1805,26 @@
       "customer_department_chip_color": {
         "label": "Farbe Abteilungs-Chip",
         "description": "Die Farbe jedes Abteilungs-Chips bei einem Kontakt. Leer = die Standardfarbe."
+      },
+      "customer_contact_table_color_location": {
+        "label": "Standortfarbe (Kontakte)",
+        "description": "An = der Standort-Chip bei Kontaktpersonen wird eingefärbt. Aus = einfacher Text."
+      },
+      "customer_contact_table_color_department": {
+        "label": "Abteilungsfarbe (Kontakte)",
+        "description": "An = der Abteilungs-Chip bei Kontaktpersonen wird eingefärbt. Aus = einfacher Text."
+      },
+      "customer_department_table_color_location": {
+        "label": "Standortfarbe (Abteilungen)",
+        "description": "An = der Standort-Chip in der Abteilungstabelle wird eingefärbt. Aus = einfacher Text."
+      },
+      "customer_location_table_color_status": {
+        "label": "Statusfarbe (Standorte)",
+        "description": "An = der Status-Chip in der Standorttabelle wird eingefärbt. Aus = einfacher Text."
+      },
+      "customer_department_table_color_status": {
+        "label": "Statusfarbe (Abteilungen)",
+        "description": "An = der Status-Chip in der Abteilungstabelle wird eingefärbt. Aus = einfacher Text."
       }
     }
   },

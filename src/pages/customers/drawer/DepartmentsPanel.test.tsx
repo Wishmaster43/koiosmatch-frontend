@@ -8,9 +8,11 @@
  */
 import { useState } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
+import api from '@/lib/api'
+import { invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import DepartmentsPanel from './DepartmentsPanel'
 import type { ComponentProps } from 'react'
 import type { Contact, Department } from '@/types/customer'
@@ -141,6 +143,47 @@ describe('DepartmentsPanel · one surface, scope-trimmed columns', () => {
       departments={[inScope, outOfScope]} />)
     expect(screen.getByText('Zorg')).toBeInTheDocument()
     expect(screen.queryByText('Facilitair')).toBeNull()
+  })
+})
+
+describe('DepartmentsPanel · colour on/off flags per column (CHIPKLEUR-INSTELBAAR-1)', () => {
+  beforeEach(() => invalidateAllSettingsCache())
+
+  it('keeps colouring both columns when no flag is saved (today\'s behaviour)', async () => {
+    render(<DepartmentsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" departments={[department()]} />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: 'var(--color-secondary)' })
+      expect(screen.getByText(ct('departments.col.status'))).toBeInTheDocument()
+    })
+  })
+
+  it('renders the Locatie column as plain text once its flag is turned off', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/settings'
+        ? Promise.resolve({ data: { customer_department_table_color_location: 'false' } })
+        : Promise.resolve({ data: { data: [] } }))
+
+    render(<DepartmentsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" departments={[department()]} />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: 'var(--text)' })
+    })
+  })
+
+  it('renders the status chip as plain text once its flag is turned off', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/settings'
+        ? Promise.resolve({ data: { customer_department_table_color_status: 'false' } })
+        : Promise.resolve({ data: { data: [] } }))
+
+    render(<DepartmentsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer"
+      // eslint-disable-next-line no-restricted-syntax -- DATA: arbitrary lookup-value colour simulating a saved status, not a UI colour choice
+      departments={[department({ statusLabel: 'Actief', statusColor: '#16A34A' })]} />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Actief')).toHaveStyle({ color: 'var(--text)' })
+    })
   })
 })
 

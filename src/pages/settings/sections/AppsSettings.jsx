@@ -71,7 +71,7 @@ export default function AppsSettings() {
 
       {/* Tab strip — same look as JobQueueSettings/ApiKeyDetail's inline tabs. */}
       <div role="tablist" style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
-        {[['planning', t('apps.tabPlanning')], ['backoffice', t('apps.tabBackoffice')], ['telefonie', t('apps.tabTelefonie')], ['koios_ai', t('apps.tabKoiosAi')]].map(([id, label]) => {
+        {[['planning', t('apps.tabPlanning')], ['backoffice', t('apps.tabBackoffice')], ['telefonie', t('apps.tabTelefonie')], ['verificatie', t('apps.tabVerificatie')], ['koios_ai', t('apps.tabKoiosAi')]].map(([id, label]) => {
           const active = id === tab
           return (
             <button key={id} role="tab" aria-selected={active} onClick={() => setTab(id)}

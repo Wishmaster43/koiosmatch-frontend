@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode, ComponentType } from 'react'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, Landmark, ShieldCheck } from 'lucide-react'
 import api from '../lib/api'
 import { useAuth } from './AuthContext'
 // Real brand logos (local assets, §7 CSP) for the connectors that have one.
@@ -47,7 +47,9 @@ export interface AppDef {
   border: string
   monthly: boolean
   // APPS-GROUPS-1 (Danny 23-07): the settings subtab this connector lives under.
-  group: 'planning' | 'backoffice' | 'telefonie' | 'koios_ai'
+  // 'verificatie' (VERIFICATIE-TAB-1) is its own group, never 'backoffice': these
+  // query an official register and write nothing back, unlike the two-way sync connectors.
+  group: 'planning' | 'backoffice' | 'telefonie' | 'koios_ai' | 'verificatie'
   // Real brand image (local asset) — rendered instead of the emoji when present.
   image?: string
   // Crisp vector mark component (preferred over image when the system's favicon is tiny).
@@ -67,6 +69,11 @@ interface AppsValue {
 /* eslint-disable no-restricted-syntax -- seed DATA hex: AI-app brand colours, not UI styling */
 const AiPlannerMark = ({ size = 24 }: { size?: number }) => <Sparkles size={size} color="#7C3AED" />
 const AiRecruiterMark = ({ size = 24 }: { size?: number }) => <Sparkles size={size} color="#DB2777" />
+// Verificatie tiles (VERIFICATIE-TAB-1): no third-party brand logo to bundle for an
+// official register lookup, so a plain vector mark stands in — same pattern as the
+// Koios-AI tiles above.
+const KvkMark = ({ size = 24 }: { size?: number }) => <Landmark size={size} color="#0C4A6E" />
+const VatMark = ({ size = 24 }: { size?: number }) => <ShieldCheck size={size} color="#1E3A8A" />
 /* eslint-enable no-restricted-syntax */
 
 const AppsContext = createContext<AppsValue | null>(null)
@@ -332,6 +339,38 @@ export const AVAILABLE_APPS: AppDef[] = [
     bg:          '#FDF2F8',
     border:      '#FBCFE8',
     monthly:     true,
+  },
+  // ---- Verificatie (Danny 28-07, VERIFICATIE-TAB-1) --------------------------
+  // Both query an OFFICIAL register and write nothing back — a different shape than
+  // the two-way backoffice syncs, so they get their own group instead of sitting
+  // between HelloFlex/AFAS/etc. Nothing calls out yet (coming-soon in the FE); the
+  // backend keys already exist (ModuleSettingController::VALID_APPS) so a tenant can
+  // be pre-provisioned ahead of the actual lookup being built.
+  {
+    id:          'kvk',
+    Mark:        KvkMark,
+    label:       'KvK / Handelsregister',
+    description: 'Handelsregister-opzoeking: KvK-nummer geeft naam, adres en status terug.',
+    icon:        '🏛️',
+    group:       'verificatie',
+    color:       '#0C4A6E',
+    bg:          '#F0F9FF',
+    border:      '#BAE6FD',
+    monthly:     false,
+    comingSoon:  true,
+  },
+  {
+    id:          'vat',
+    Mark:        VatMark,
+    label:       'BTW-validatie (VIES)',
+    description: 'BTW-nummer valideren via de Europese VIES-dienst.',
+    icon:        '🇪🇺',
+    group:       'verificatie',
+    color:       '#1E3A8A',
+    bg:          '#EEF2FF',
+    border:      '#C7D2FE',
+    monthly:     false,
+    comingSoon:  true,
   },
 ]
 /* eslint-enable no-restricted-syntax */

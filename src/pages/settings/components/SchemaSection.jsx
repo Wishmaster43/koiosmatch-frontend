@@ -23,7 +23,9 @@ import {
 function FieldControl({ field, value, onChange, t, base }) {
   switch (field.type) {
     case 'toggle':
-      return <Toggle checked={!!value} onChange={onChange} />
+      // Accessible name (§6): the row's own label text is only visually adjacent,
+      // never programmatically associated, so every switch needs its own name.
+      return <Toggle checked={!!value} onChange={onChange} ariaLabel={t(`${base}.label`)} />
     case 'select': {
       const options = field.options.map(opt =>
         typeof opt === 'string'
@@ -34,7 +36,10 @@ function FieldControl({ field, value, onChange, t, base }) {
     case 'text':
       return <TextField value={value} onChange={onChange} placeholder={t(`${base}.placeholder`, '')} />
     case 'color':
-      return <ColorField value={value} onChange={onChange} />
+      // Free-text validated colour (CHIPKLEUR-INSTELBAAR-1) — the field itself shows
+      // the backend's validation message so a tenant gets a useful error, not a 422.
+      return <ColorField value={value} onChange={onChange}
+        invalidLabel={t('common.invalidColorValue')} ariaLabel={t(`${base}.label`)} />
     case 'number':
     default:
       return (

@@ -35,6 +35,7 @@ import type { Column } from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import StatusFilterSelect, { useStatusFilter } from './StatusFilterSelect'
 import { useChipColors } from '@/lib/settings/useChipColors'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import type { Crumb } from '@/components/drawer/DrillBreadcrumb'
 import SoftChipJs from '@/components/ui/SoftChip'
 import DepartmentDetail from './DepartmentDetail'
@@ -47,6 +48,9 @@ import type { ContactPayload } from '../hooks/useCustomerContacts'
 type AnyProps = Record<string, unknown>
 const SoftChip = SoftChipJs as unknown as ComponentType<AnyProps>
 const muted = { color: 'var(--text-muted)', fontSize: 12 }
+// Plain-text fallback style for a coloured column toggled off (CHIPKLEUR-INSTELBAAR-1) —
+// mirrors the `plainCell` convention in CandidatesTable/CustomersTable.
+const plainCell = { color: 'var(--text)', fontSize: 12 }
 
 const searchWrap = {
   display: 'flex', alignItems: 'center', gap: 8, flex: 1, padding: '6px 10px',
@@ -100,6 +104,11 @@ export default function DepartmentsPanel({
   // Status filter (Danny 28-07) — same component and same defaulting rule on all three lists.
   const { value: statusFilter, toggle: toggleStatus, filtered: rows } = useStatusFilter(scoped, statuses)
   const chipColors = useChipColors()
+  // Colour-on/off flags per column (CHIPKLEUR-INSTELBAAR-1) — both default ON, so an
+  // absent setting keeps today's coloured-chip look.
+  const settings = useAllSettings()
+  const colorLocationCol = getBoolSetting(settings, 'customer_department_table_color_location', true)
+  const colorStatusCol = getBoolSetting(settings, 'customer_department_table_color_status', true)
   // Resolved against the CUSTOMER-WIDE list, never the scoped rows: moving a department to
   // another location must not make its open detail vanish mid-edit.
   const selected = openId != null ? departments.find(d => String(d.id) === String(openId)) ?? null : null
@@ -117,10 +126,14 @@ export default function DepartmentsPanel({
     ...(scope === 'customer' ? [{
       key: 'location', header: t('departments.col.location'), sortable: true, sortValue: (d: Department) => d.locationName,
       // Same tenant-configurable colour the contact list uses for its Locatie chips.
-      render: (d: Department) => d.locationName ? <SoftChip label={d.locationName} color={chipColors.location} /> : '—',
+      render: (d: Department) => !d.locationName ? '—' : colorLocationCol
+        ? <SoftChip label={d.locationName} color={chipColors.location} />
+        : <span style={plainCell}>{d.locationName}</span>,
     }] : []),
     { key: 'status', header: t('departments.col.status'), sortable: true, sortValue: d => d.statusLabel,
-      render: d => d.statusLabel ? <SoftChip label={d.statusLabel} color={d.statusColor} /> : '—' },
+      render: d => !d.statusLabel ? '—' : colorStatusCol
+        ? <SoftChip label={d.statusLabel} color={d.statusColor} />
+        : <span style={plainCell}>{d.statusLabel}</span> },
     { key: 'contacts', header: t('departments.col.contacts'), align: 'right', cellStyle: muted, sortable: true,
       sortValue: d => contacts.filter(c => String(c.departmentId) === String(d.id)).length,
       render: d => contacts.filter(c => String(c.departmentId) === String(d.id)).length },

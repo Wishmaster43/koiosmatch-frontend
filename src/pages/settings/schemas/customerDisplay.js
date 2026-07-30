@@ -16,5 +16,13 @@ export default {
     // (SettingController@store's ChipColor block) — absent/cleared keeps today's look.
     { key: 'customer_location_chip_color',   type: 'color', default: 'var(--color-secondary)' },
     { key: 'customer_department_chip_color', type: 'color', default: 'var(--color-violet)' },
+    // CHIPKLEUR-INSTELBAAR-1: five colour-on/off flags — one per coloured column across
+    // the contact/department/location tables. All default ON, so an absent setting keeps
+    // today's look (ContactsPanel/DepartmentsPanel/LocationsTab all default `true` too).
+    { key: 'customer_contact_table_color_location',    type: 'toggle', default: true },
+    { key: 'customer_contact_table_color_department',  type: 'toggle', default: true },
+    { key: 'customer_department_table_color_location', type: 'toggle', default: true },
+    { key: 'customer_location_table_color_status',     type: 'toggle', default: true },
+    { key: 'customer_department_table_color_status',   type: 'toggle', default: true },
   ],
 }

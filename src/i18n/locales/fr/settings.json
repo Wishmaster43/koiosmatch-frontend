@@ -22,7 +22,8 @@
     "edit": "Modifier",
     "close": "Fermer",
     "default": "Par défaut",
-    "setDefault": "Définir par défaut"
+    "setDefault": "Définir par défaut",
+    "invalidColorValue": "Saisissez une couleur hexadécimale (#0EA5E9) ou un jeton de couleur var(--color-…), 32 caractères maximum."
   },
   "groups": {
     "kpis": "KPI",
@@ -1063,7 +1064,8 @@
     "tabBackoffice": "Back-office",
     "tabKoiosAi": "Koios AI",
     "comingSoon": "Bientôt disponible",
-    "tabTelefonie": "Téléphonie"
+    "tabTelefonie": "Téléphonie",
+    "tabVerificatie": "Vérification"
   },
   "modules": {
     "loading": "Chargement du forfait…",
@@ -1803,6 +1805,26 @@
       "customer_department_chip_color": {
         "label": "Couleur puce service",
         "description": "La couleur de chaque puce Service sur un contact. Vide = la couleur par défaut."
+      },
+      "customer_contact_table_color_location": {
+        "label": "Couleur site (contacts)",
+        "description": "Activé = la puce Site des contacts est colorée. Désactivé = texte simple."
+      },
+      "customer_contact_table_color_department": {
+        "label": "Couleur service (contacts)",
+        "description": "Activé = la puce Service des contacts est colorée. Désactivé = texte simple."
+      },
+      "customer_department_table_color_location": {
+        "label": "Couleur site (services)",
+        "description": "Activé = la puce Site dans le tableau des services est colorée. Désactivé = texte simple."
+      },
+      "customer_location_table_color_status": {
+        "label": "Couleur statut (sites)",
+        "description": "Activé = la puce de statut dans le tableau des sites est colorée. Désactivé = texte simple."
+      },
+      "customer_department_table_color_status": {
+        "label": "Couleur statut (services)",
+        "description": "Activé = la puce de statut dans le tableau des services est colorée. Désactivé = texte simple."
       }
     }
   },

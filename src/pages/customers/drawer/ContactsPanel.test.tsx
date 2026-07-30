@@ -193,3 +193,45 @@ describe('ContactsPanel · chip colours read the tenant setting (CHIPKLEUR-INSTE
     })
   })
 })
+
+describe('ContactsPanel · colour on/off flags per column (CHIPKLEUR-INSTELBAAR-1)', () => {
+  beforeEach(() => invalidateAllSettingsCache())
+
+  it('keeps colouring both columns when no flag is saved (today\'s behaviour)', async () => {
+    render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={[contact()]} />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: 'var(--color-secondary)' })
+      expect(screen.getByText('Zorg')).toHaveStyle({ color: 'var(--color-violet)' })
+    })
+  })
+
+  it('renders the Locatie column as plain text once its flag is turned off', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/settings'
+        ? Promise.resolve({ data: { customer_contact_table_color_location: 'false' } })
+        : Promise.resolve({ data: { data: [] } }))
+
+    render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={[contact()]} />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: 'var(--text)' })
+      // The Afdeling column keeps its colour — the two flags are independent.
+      expect(screen.getByText('Zorg')).toHaveStyle({ color: 'var(--color-violet)' })
+    })
+  })
+
+  it('renders the Afdeling column as plain text once its flag is turned off', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/settings'
+        ? Promise.resolve({ data: { customer_contact_table_color_department: 'false' } })
+        : Promise.resolve({ data: { data: [] } }))
+
+    render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={[contact()]} />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Zorg')).toHaveStyle({ color: 'var(--text)' })
+      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: 'var(--color-secondary)' })
+    })
+  })
+})
