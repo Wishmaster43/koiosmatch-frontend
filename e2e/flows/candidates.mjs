@@ -89,6 +89,12 @@ export async function archiveAndFindBack({ page, errors }) {
     const trash = page.locator('button[title*="rchiveren"], button[aria-label*="rchiveren"]').first()
     expect(await trash.count(), 'archiveer-knop niet gevonden in de drawer')
     await trash.click(); await sleep(1500)
+    // Archiving asks for confirmation in OUR OWN dialog now, not the browser's
+    // window.confirm this flow was written against (caught 30-07: the suite hung
+    // clicking "Gearchiveerd" because the confirm backdrop covered it). The native
+    // dialog handler above stays as a safety net for any confirm still left.
+    const confirm = page.locator('[role="dialog"], [role="alertdialog"]').locator('button:has-text("Bevestigen")').first()
+    if (await confirm.count()) { await confirm.click(); await sleep(1500) }
     // Guard modal = this candidate has live business → close and try the next row.
     const guard = page.locator('text=/live sollicitatie|actieve match|lopende/i').first()
     if (await guard.count()) { await page.keyboard.press('Escape'); await sleep(300); await page.keyboard.press('Escape'); await sleep(400); continue }
