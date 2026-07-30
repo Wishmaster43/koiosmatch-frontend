@@ -25,6 +25,7 @@ import EntityDrawer from '@/components/drawer/EntityDrawer'
 import type { EntityTab } from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import TitleBadge from '@/components/drawer/TitleBadge'
+import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { initialsOf } from '@/lib/initials'
 import { useUsers } from '@/lib/queries'
@@ -119,6 +120,8 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{name}</span>
+                {/* NUMMER-3: the copy chip, right after the title and before the status badge (§3A). */}
+                <ReferenceNumberChip value={detail?.reference_number ?? ''} />
                 {/* Status badge — colour-coded, read-only (was the body StatusPill, §3A(c)). */}
                 {/* eslint-disable-next-line no-restricted-syntax -- DATA: matches STATUS_COLOR's own "draft calm" fallback shade, no token available */}
                 <TitleBadge label={t(`status.${st}`, { defaultValue: st })} color={STATUS_COLOR[st] ?? '#94A3B8'} />

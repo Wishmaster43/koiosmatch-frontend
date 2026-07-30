@@ -2,6 +2,18 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import SelectMenu from './SelectMenu'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
+
+// A modal exactly as the app builds them: useFocusTrap on the panel, which closes
+// on Escape. Used to prove an OPEN menu inside one keeps that Escape for itself.
+function TrappedModal({ onClose }: { onClose: () => void }) {
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
+  return (
+    <div ref={panelRef}>
+      <SelectMenu value={null} onChange={() => {}} options={['a', 'b']} placeholder="Pick" />
+    </div>
+  )
+}
 
 // Audit finding (§6, WCAG 2.2 AA): SelectMenu had zero Escape handling and never
 // returned focus to the trigger on close — a keyboard user could only close it
@@ -16,6 +28,28 @@ describe('SelectMenu · keyboard + focus (§6 WCAG 2.2 AA)', () => {
     expect(screen.getByRole('button', { name: 'b' })).toBeInTheDocument()
     await user.keyboard('{Escape}')
     expect(screen.queryByRole('button', { name: 'b' })).not.toBeInTheDocument()
+  })
+
+  // The other half of that rule, and the one that was broken: while the menu IS open,
+  // Escape belongs to the menu and must not reach the modal around it. useFocusTrap
+  // listens on the panel node, which sits closer to the key's target than this menu's
+  // document-level listener, so the trap consumed the key first and closed the whole
+  // modal — throwing away everything the user had filled in (PlanIntakeModal is exactly
+  // this shape: a trapped panel with a SelectMenu inside).
+  it('keeps Escape for itself while open, so the modal around it stays open', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    render(<TrappedModal onClose={onClose} />)
+    await user.click(screen.getByRole('button', { name: 'Pick' }))
+    expect(screen.getByRole('button', { name: 'b' })).toBeInTheDocument()
+    await user.keyboard('{Escape}')
+    // The menu closed…
+    expect(screen.queryByRole('button', { name: 'b' })).not.toBeInTheDocument()
+    // …and the modal did not.
+    expect(onClose).not.toHaveBeenCalled()
+    // A second Escape, with no menu open, now closes the modal as it should.
+    await user.keyboard('{Escape}')
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 
   it('never attaches an Escape listener while closed, so an ancestor still receives the key', async () => {

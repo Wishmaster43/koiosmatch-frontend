@@ -8,6 +8,9 @@ import type { Id } from './common'
 /** The flat opportunity model rendered by the table/insights/drawer. */
 export interface Opportunity {
   id: Id | undefined
+  // NUMMER-3: immutable human-readable display number (D-4), shown as a copy chip
+  // next to the title (OpportunityResource::reference_number).
+  referenceNumber?: string
   title: string
   initials: string
   client: string
@@ -59,6 +62,8 @@ export interface Opportunity {
 /** Raw API opportunity record (read defensively). */
 export interface ApiOpportunity {
   id?: Id
+  // NUMMER-3: OpportunityResource::reference_number (measured, now sent on every row).
+  reference_number?: string
   customer?: { id?: Id; name?: string }
   client?: { id?: Id; name?: string }
   client_name?: string

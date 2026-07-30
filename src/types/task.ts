@@ -16,6 +16,9 @@ export interface TaskLink {
 /** The flat task model rendered by the table/board. */
 export interface Task {
   id: Id | undefined
+  // NUMMER-3: immutable human-readable display number (T-4), shown as a copy chip
+  // next to the title (TaskListResource::reference_number).
+  referenceNumber?: string
   title: string
   typeKey: string | number
   typeLabel: string
@@ -58,6 +61,8 @@ export interface TaskDetail extends Task {
 /** Raw API task record (read defensively). */
 export interface ApiTask {
   id?: Id
+  // NUMMER-3: TaskListResource::reference_number (measured, now sent on every row).
+  reference_number?: string
   title?: string
   name?: string
   type?: unknown

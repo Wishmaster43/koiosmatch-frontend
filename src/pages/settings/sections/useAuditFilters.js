@@ -128,10 +128,18 @@ export function useAuditFilters(logs) {
       })),
       onToggle: v => setSelectedRoles(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
     }] : []),
-    // NOTE: `search` is deliberately absent from these deps — kept exactly as it was
-    // before this file was extracted (see the reported finding); adding it would change
-    // when the panel re-registers.
-  ], [selectedTypes, selectedUsers, selectedRoles, selectedActor, selectedKind, typeOptions, userOptions, roleOptions, logs, dateFrom, dateTo, t])
+    // `search` MUST be a dep: this array is what gets registered in the shared
+    // right panel (below), and registration only re-fires when this memo's
+    // reference changes. Without `search` here, typing into the search box
+    // updated internal filtering correctly (it's a `filteredAll` dep) but the
+    // registered group's `value` stayed the STALE one from the last time some
+    // OTHER filter changed — and since ReportFilterSidebar's search box is a
+    // fully controlled input bound to that stale `value`, the box didn't just
+    // show old text, it silently rejected every keystroke (no re-render ever
+    // reached it) until another filter forced a fresh registration. `onChange`
+    // itself was never stale — it is the `setSearch` state setter, which React
+    // guarantees is referentially stable across renders.
+  ], [search, selectedTypes, selectedUsers, selectedRoles, selectedActor, selectedKind, typeOptions, userOptions, roleOptions, logs, dateFrom, dateTo, t])
 
   useEffect(() => {
     registerFilters('audit-log', filterGroups)

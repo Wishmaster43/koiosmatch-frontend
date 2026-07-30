@@ -8,6 +8,9 @@ import { listCampaigns } from '../data/outreachApi'
 
 export interface Campaign {
   id: string
+  // NUMMER-3: immutable human-readable display number (B-4), shown as a copy chip
+  // next to the title (OutreachCampaignResource::reference_number).
+  reference_number?: string
   name?: string
   channel?: 'call' | 'email' | 'whatsapp' | string
   status?: 'draft' | 'active' | 'done' | string

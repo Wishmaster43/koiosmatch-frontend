@@ -29,6 +29,8 @@ export function mapTask(t: ApiTask = {}): Task {
 
   return {
     id: t.id,
+    // NUMMER-3: the human-readable number, shown as a copy chip next to the title.
+    referenceNumber: t.reference_number ?? '',
     title: t.title ?? t.name ?? '—',
     // Keys resolved against the lookup by the page; payload labels/colours are a fallback.
     typeKey:     asObj(t.type).value ?? t.type_id ?? asKey(t.type) ?? '',

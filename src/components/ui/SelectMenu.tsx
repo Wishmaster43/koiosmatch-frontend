@@ -47,15 +47,25 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
   // Close on outside click or Escape — both listeners only exist while open, so
   // a CLOSED menu never swallows an Escape meant for an ancestor (e.g. a
   // wrapping modal's own close-on-Escape).
+  //
+  // The Escape listener is CAPTURE-phase, deliberately. useFocusTrap closes its
+  // modal from a bubble-phase listener on the panel node, which sits closer to
+  // the key's target than this document-level one — so with both bubbling, the
+  // trap won, called stopPropagation, and this menu never even heard the key:
+  // Escape inside an open dropdown closed the whole modal while leaving the
+  // dropdown standing (PlanIntakeModal is exactly that shape). Capture at the
+  // document runs before any bubble handler, so the innermost open thing closes
+  // first — which is what Escape means. stopPropagation keeps the same key from
+  // also reaching the modal; a second press, with no menu open, closes that.
   useEffect(() => {
     if (!open) return
     const handleClick = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); setOpen(false) } }
     document.addEventListener('mousedown', handleClick)
-    document.addEventListener('keydown', handleKey)
+    document.addEventListener('keydown', handleKey, true)
     return () => {
       document.removeEventListener('mousedown', handleClick)
-      document.removeEventListener('keydown', handleKey)
+      document.removeEventListener('keydown', handleKey, true)
     }
   }, [open])
 

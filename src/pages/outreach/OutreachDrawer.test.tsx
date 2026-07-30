@@ -7,18 +7,23 @@
  * update() is still a plain findOrFail and it's a deliberate product choice either
  * way). (The live seed has no archived campaigns, so this wiring is verified here.)
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 // Real i18n (nl) side-effect init so t() resolves genuine Dutch text.
 import '@/i18n'
 import OutreachDrawer from './OutreachDrawer'
 
 // The detail hook is the drawer's only data source — stub it and observe the id it gets.
-const { detailMock } = vi.hoisted(() => ({ detailMock: vi.fn() }))
+// `detailReturn` is a per-test mutable override so individual tests can supply a real
+// detail payload (e.g. reference_number) instead of the default null/loading stub.
+const { detailMock, detailReturn } = vi.hoisted(() => ({
+  detailMock: vi.fn(),
+  detailReturn: { current: null as Record<string, unknown> | null },
+}))
 vi.mock('./hooks/useOutreachDetail', () => ({
   useOutreachDetail: (id: string | null) => {
     detailMock(id)
-    return { detail: null, loading: false, error: false, setTargetStatus: vi.fn(), setTargetOutcome: vi.fn(), setOwner: vi.fn(), setCustomFields: vi.fn() }
+    return { detail: detailReturn.current, loading: false, error: false, setTargetStatus: vi.fn(), setTargetOutcome: vi.fn(), setOwner: vi.fn(), setCustomFields: vi.fn() }
   },
 }))
 // The targets tab has its own data needs — out of scope for the drawer wiring test.
@@ -57,5 +62,23 @@ describe('OutreachDrawer — archived state', () => {
     expect(screen.queryByText('Gearchiveerd')).toBeNull()
     expect(screen.getByText('Eigenaar')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Herstellen' })).toBeNull()
+  })
+})
+
+// NUMMER-3: OutreachCampaignResource now sends reference_number on every row
+// (measured) — the title row shows it as a copy chip, right before the status
+// badge (§3A). Overrides the module-level stub with a per-test detail payload.
+describe('OutreachDrawer — reference number chip', () => {
+  afterEach(() => { detailReturn.current = null })
+
+  it('shows the copy chip when reference_number is present', () => {
+    detailReturn.current = { id: 'c3', name: 'Bellijst Zorg', reference_number: 'B-9' }
+    render(<OutreachDrawer id="c3" onClose={() => {}} />)
+    expect(screen.getByText('B-9')).toBeInTheDocument()
+  })
+
+  it('renders nothing when reference_number is absent', () => {
+    render(<OutreachDrawer id="c1" onClose={() => {}} />)
+    expect(screen.queryByText(/^B-/)).toBeNull()
   })
 })

@@ -69,7 +69,9 @@ export interface ApplicationInterview {
   id: Id | null
   agent: { id: Id; name: string } | null
   flowName: string | null
-  turn: 'agent' | 'candidate' | 'pending' | 'recruiter' | null
+  // 'completed' is the backend's 'afgerond': nobody is on turn any more because the
+  // interview is finished. Normalised in mapInterview — see the alias table there.
+  turn: 'agent' | 'candidate' | 'completed' | 'pending' | 'recruiter' | null
   startedAt: string | null
   lastMessageAt: string | null
   endedAt: string | null

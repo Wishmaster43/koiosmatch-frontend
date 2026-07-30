@@ -17,6 +17,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within, fireEvent, waitFor } from '@testing-library/react'
 import i18n from '@/i18n'
 import CvTemplateSettings from './CvTemplateSettings'
+import { loadSettings } from '../lib/settingsApi'
 
 // In-memory fake for the shared settings store: real getJsonSetting shape,
 // just no network — saveSettingsKeys mutates the fake blob and notifies
@@ -51,6 +52,7 @@ vi.mock('../lib/settingsApi', () => ({ loadSettings: vi.fn(async () => ({})) }))
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 const ct = (key, opts) => i18n.t(key, { ns: 'candidates', ...opts })
+const cmt = (key, opts) => i18n.t(key, { ns: 'common', ...opts })
 
 // A legacy blob exactly as it would have been saved BEFORE per-section
 // placement AND i18n section labels existed: hardcoded English labels, no
@@ -155,5 +157,71 @@ describe('CvTemplateSettings — moving a section between regions', () => {
     })).not.toBeInTheDocument()
     // Instead a plain, non-interactive region badge is shown.
     expect(within(mainGroup).getAllByText(st('cvTemplate.regionMain')).length).toBeGreaterThan(0)
+  })
+})
+
+// Both the native colour swatch (type="color") and the hex text field share
+// the same accessible name (they edit the same value) — getByLabelText
+// legitimately returns both, so tests that need the TEXT field specifically
+// disambiguate by control type.
+const getHexTextInput = (label) => screen.getAllByLabelText(label).find(el => el.type === 'text')
+
+/* eslint-disable no-restricted-syntax -- DATA: hex values asserted/typed by the test (seed default, arbitrary complete value, fixed swatch colour), not a style rule. */
+describe('CvTemplateSettings — hex field only persists a complete colour', () => {
+  it('never writes a half-typed value to the tenant settings, but keeps the field freely typable', () => {
+    render(<CvTemplateSettings />)
+    const hexInput = getHexTextInput(st('cvTemplate.color1'))
+
+    // Half-typed input: must never reach saveSettingsKeys / the persisted blob.
+    fireEvent.change(hexInput, { target: { value: '#1' } })
+    expect(JSON.parse(fakeBlob.candidate_cv_template).primaryColor).toBe('#19A5CA')
+    // The field itself must still show what the user typed — no caret fight.
+    expect(hexInput.value).toBe('#1')
+
+    // Finishing the value to a complete #RRGGBB now persists it.
+    fireEvent.change(hexInput, { target: { value: '#123ABC' } })
+    expect(JSON.parse(fakeBlob.candidate_cv_template).primaryColor).toBe('#123ABC')
+  })
+
+  it('resyncs the draft from the persisted value when changed from outside the text field (swatch pick)', () => {
+    render(<CvTemplateSettings />)
+    const hexInput = getHexTextInput(st('cvTemplate.color2'))
+    const swatchBtn = screen.getByRole('button', { name: `${st('cvTemplate.color2')} #10B981` })
+    fireEvent.click(swatchBtn)
+    expect(hexInput.value).toBe('#10B981')
+  })
+})
+/* eslint-enable no-restricted-syntax */
+
+describe('CvTemplateSettings — accent swatch accessibility', () => {
+  it('gives every colour swatch an accessible name and conveys selection via aria-pressed, not colour/border alone', () => {
+    render(<CvTemplateSettings />)
+    const selected = screen.getByRole('button', { name: `${st('cvTemplate.color1')} #19A5CA` })
+    expect(selected).toHaveAttribute('aria-pressed', 'true')
+    const unselected = screen.getByRole('button', { name: `${st('cvTemplate.color1')} #1B60A9` })
+    expect(unselected).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('associates a real <label> with each hex input via htmlFor/id', () => {
+    render(<CvTemplateSettings />)
+    // getByLabelText throws if no control is programmatically associated with the text.
+    expect(getHexTextInput(st('cvTemplate.color1'))).toBeInTheDocument()
+    expect(getHexTextInput(st('cvTemplate.color2'))).toBeInTheDocument()
+  })
+})
+
+describe('CvTemplateSettings — brand-settings load failure is distinguishable from "not configured"', () => {
+  it('shows a notice when the brand-settings load fails (never silently reads as empty)', async () => {
+    loadSettings.mockRejectedValueOnce(new Error('network down'))
+    render(<CvTemplateSettings />)
+    await waitFor(() => {
+      expect(screen.getByText(cmt('errorGeneric'))).toBeInTheDocument()
+    })
+  })
+
+  it('shows no notice when the brand settings genuinely resolve empty', async () => {
+    render(<CvTemplateSettings />)
+    await waitFor(() => expect(loadSettings).toHaveBeenCalled())
+    expect(screen.queryByText(cmt('errorGeneric'))).not.toBeInTheDocument()
   })
 })

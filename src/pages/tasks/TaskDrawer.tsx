@@ -5,6 +5,7 @@ import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import type { MetaPicker } from '@/components/drawer/EntityHeader'
 import TitleBadge from '@/components/drawer/TitleBadge'
+import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
@@ -129,6 +130,8 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{task.title}</span>
+                {/* NUMMER-3: the copy chip, right after the title and before the status badge (§3A). */}
+                <ReferenceNumberChip value={task.referenceNumber} />
                 {/* Status badge — colour-coded, read-only (mirrors the candidate phase badge,
                     §3A(c)); the status meta picker below still handles the actual change. */}
                 <TitleBadge label={task.statusLabel} color={task.statusColor} />

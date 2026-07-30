@@ -6,6 +6,7 @@ import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import TitleBadge from '@/components/drawer/TitleBadge'
+import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
@@ -102,9 +103,9 @@ export default function OpportunityDrawer({
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{o.title}</div>
-        {/* Phase = colour-coded read-only badge (shows Gewonnen/Verloren at a glance).
-            NUMMER-3: opportunities carry no reference_number yet (OpportunityResource
-            omits it) — no ReferenceNumberChip until that lands. */}
+        {/* NUMMER-3: the copy chip, right after the title and before the phase badge (§3A). */}
+        <ReferenceNumberChip value={o.referenceNumber} />
+        {/* Phase = colour-coded read-only badge (shows Gewonnen/Verloren at a glance). */}
         <TitleBadge label={o.stage} color={o.stageColor} />
       </div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{o.client || '—'}</div>

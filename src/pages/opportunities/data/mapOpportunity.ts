@@ -27,6 +27,8 @@ export function mapOpportunity(o: ApiOpportunity): Opportunity {
   const rawValue = o.value ?? o.amount ?? o.deal_value
   return {
     id:         o.id,
+    // NUMMER-3: the human-readable number, shown as a copy chip next to the title.
+    referenceNumber: o.reference_number ?? '',
     title,
     initials:   initialsOf([title, client].find(v => v && v !== '—')),
     client,

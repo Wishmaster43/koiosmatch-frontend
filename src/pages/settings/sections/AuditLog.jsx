@@ -26,12 +26,21 @@ export default function AuditLog() {
   const [sortDir, setSortDir] = useState('desc')
   const [page,    setPage]    = useState(1)
 
+  // Load once per mount — alive-guard (CLAUDE.md §9) drops a response that
+  // resolves after unmount. `t` is deliberately NOT a dependency: i18next's `t`
+  // always reads the CURRENT language when called, so the catch's translated
+  // message stays correct even from this mount-time closure; keeping `t` in the
+  // deps re-ran this fetch on every language switch and raced two responses,
+  // with no guard to stop the older one from overwriting the newer.
   useEffect(() => {
+    let alive = true
     api.get('/activity-log')
-      .then(res => setLogs(unwrapList(res).rows))
-      .catch(() => setError(t('audit.unavailable')))
-      .finally(() => setLoading(false))
-  }, [t])
+      .then(res => { if (alive) setLogs(unwrapList(res).rows) })
+      .catch(() => { if (alive) setError(t('audit.unavailable')) })
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see comment above: `t` excluded on purpose
+  }, [])
 
   // All filter axes + the right-panel registration live in the hook; it hands back the
   // surviving rows and a key that changes whenever a filter value does.

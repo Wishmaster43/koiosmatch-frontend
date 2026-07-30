@@ -75,3 +75,17 @@ describe('TaskDrawer — archived state', () => {
     expect(screen.getByText('Markeer afgerond')).toBeInTheDocument()
   })
 })
+
+// NUMMER-3: TaskListResource now sends reference_number on every row (measured) —
+// the title row shows it as a copy chip, right before the status badge (§3A).
+describe('TaskDrawer — reference number chip', () => {
+  it('shows the copy chip when referenceNumber is present', () => {
+    mount({ ...task(false), referenceNumber: 'T-7' })
+    expect(screen.getByText('T-7')).toBeInTheDocument()
+  })
+
+  it('renders nothing when referenceNumber is absent', () => {
+    mount(task(false))
+    expect(screen.queryByText(/^T-/)).toBeNull()
+  })
+})
