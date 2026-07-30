@@ -7,9 +7,10 @@
  * endpoint) + an optional funnel-phase move.
  *
  * Koios still never SENDS anything itself — the propose endpoint only records
- * the proposal (recipient, cv variant, drafted subject/body); there is no
- * share link yet (PROPOSE-SHARE-URL-1 open), so submit() only downloads a PDF
- * client-side and records what happened, it never claims a message went out.
+ * the proposal (recipient, cv variant, drafted subject/body), so submit()
+ * downloads a PDF client-side and records what happened; it never claims a
+ * message went out. That is a MAIL-PROVIDER gap, not a link gap: the share link
+ * itself shipped, and ProposalsBlock hands it to the recruiter to send.
  */
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'

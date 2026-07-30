@@ -5,7 +5,8 @@
  * a revoke() mutation that invalidates the same query key on success.
  *
  * The list resource never carries subject/body (PII minimisation, §8) — only
- * recipient name/email, cv variant and the open/revoke timestamps, which is
+ * recipient name/email, cv variant, the open/revoke timestamps and (since
+ * PROPOSE-SHARE-URL-1 shipped) the recipient-facing share link, which is
  * exactly what ProposalsBlock renders.
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -22,6 +23,12 @@ export interface Proposal {
   opened_at: string | null
   open_count: number
   is_valid: boolean
+  // PROPOSE-SHARE-URL-1: the signed, recipient-facing link + its expiry. The
+  // backend only attaches these for a viewer who may write (applications.update)
+  // and nulls both once the proposal is revoked — a read-only viewer or a
+  // revoked proposal never receives a working link from the API itself.
+  share_url: string | null
+  share_expires_at: string | null
 }
 
 export function useProposals(applicationId: Id | null | undefined) {

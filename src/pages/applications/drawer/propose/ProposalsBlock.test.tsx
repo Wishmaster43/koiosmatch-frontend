@@ -1,8 +1,9 @@
 /**
  * ProposalsBlock — the recorded-proposal history block on the Sollicitatie
  * tab. useProposals is stubbed so this file only tests ProposalsBlock's own
- * rendering rules: no empty frame, the revoked/opened/not-opened states, and
- * that revoke goes through the house confirm path (never fires directly).
+ * rendering rules: no empty frame, the revoked/opened/not-opened states, the
+ * share-link actions (PROPOSE-SHARE-URL-1), and that revoke goes through the
+ * house confirm path (never fires directly).
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -22,7 +23,7 @@ const app = { id: 1 } as ApplicationDetail
 const proposal = (over: Partial<Proposal> = {}): Proposal => ({
   id: 'p1', recipient_name: 'Piet Klaassen', recipient_email: 'piet@zorggroep.nl',
   cv_variant: 'proposal', sent_at: '2026-07-20', revoked_at: null, opened_at: null,
-  open_count: 0, is_valid: true, ...over,
+  open_count: 0, is_valid: true, share_url: null, share_expires_at: null, ...over,
 })
 
 const setProposals = (proposals: Proposal[], over: Partial<{ loading: boolean; error: boolean }> = {}) => {
@@ -64,14 +65,16 @@ describe('ProposalsBlock', () => {
     expect(screen.getByText(/propose\.openCount:/)).toBeInTheDocument()
   })
 
-  // DEFECT 1 regression: opened_at can never become non-null while there is no
-  // shareable link (PROPOSE-SHARE-URL-1) — so a "not opened yet" claim must
-  // never render; the open-state slot stays entirely absent from the DOM.
-  it('renders no open-state text when opened_at is null and the proposal is not revoked', () => {
+  // PROPOSE-SHARE-URL-1 shipped: opened_at now genuinely reflects a customer
+  // visit, so a live, unopened proposal shows "not opened yet" instead of an
+  // absent slot (the old DEFECT-1 gate — "opened_at can never become non-null
+  // so never claim not-opened either" — no longer holds; this replaces that
+  // regression test with the new, real behaviour).
+  it('shows the not-opened-yet state for a live proposal with no opened_at', () => {
     setProposals([proposal()])
     render(<ProposalsBlock application={app} />)
+    expect(screen.getByText('propose.notOpenedYet')).toBeInTheDocument()
     expect(screen.queryByText(/propose\.openedOn/)).toBeNull()
-    expect(screen.queryByText('propose.notOpenedYet')).toBeNull()
   })
 
   it('asks for confirmation before calling revoke on a still-valid proposal', async () => {
@@ -86,5 +89,71 @@ describe('ProposalsBlock', () => {
     const buttons = screen.getAllByRole('button', { name: 'propose.revoke' })
     await user.click(buttons[buttons.length - 1])
     expect(revoke).toHaveBeenCalledWith('p1')
+  })
+
+  // Core new behaviour: a sent, non-revoked proposal with a share_url shows a
+  // copyable link action, and copying puts ONLY the raw URL on the clipboard —
+  // never wrapped in extra text, never logged, never surfaced in the toast.
+  it('shows a copy-link action for a live proposal and copies only the raw URL', async () => {
+    const shareUrl = 'https://app.koiosmatch.test/p/proposal-abc123?signature=xyz'
+    setProposals([proposal({ share_url: shareUrl, share_expires_at: '2026-08-10T00:00:00Z' })])
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    let toastMessage = ''
+    const onToast = (e: Event) => { toastMessage = (e as CustomEvent).detail?.message ?? '' }
+    window.addEventListener('km:toast', onToast)
+
+    render(<ProposalsBlock application={app} />)
+    // The raw URL is never rendered as visible text in the block.
+    expect(screen.queryByText(shareUrl)).toBeNull()
+
+    // userEvent.setup() installs its own real (in-memory) clipboard stub on
+    // navigator.clipboard (jsdom itself ships none) — spy AFTER setup so the
+    // spy wraps that stub instead of being overwritten by it.
+    const user = userEvent.setup()
+    const writeTextSpy = vi.spyOn(navigator.clipboard, 'writeText')
+    await user.click(screen.getByRole('button', { name: 'propose.copyLink' }))
+
+    expect(writeTextSpy).toHaveBeenCalledTimes(1)
+    expect(writeTextSpy).toHaveBeenCalledWith(shareUrl)
+    // The success toast is a static label, never the URL itself.
+    expect(toastMessage).toBe('propose.linkCopied')
+    expect(toastMessage).not.toContain(shareUrl)
+    expect(logSpy).not.toHaveBeenCalled()
+
+    window.removeEventListener('km:toast', onToast)
+    logSpy.mockRestore()
+  })
+
+  // The open-in-new-tab action is a real, safe link — carries the exact
+  // share_url as its href and the required rel attribute (no window.opener
+  // handback to a third-party page).
+  it('renders the open-link action as a safe new-tab anchor', () => {
+    const shareUrl = 'https://app.koiosmatch.test/p/proposal-def456?signature=abc'
+    setProposals([proposal({ share_url: shareUrl })])
+    render(<ProposalsBlock application={app} />)
+    const link = screen.getByRole('link', { name: 'propose.openLink' })
+    expect(link).toHaveAttribute('href', shareUrl)
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+  })
+
+  // A revoked proposal never offers the link — asserted even when the mocked
+  // data defensively still carries a share_url, proving the component itself
+  // gates on !revoked_at rather than only trusting the field's presence.
+  it('never offers the link for a revoked proposal, even if share_url is (defensively) still present', () => {
+    setProposals([proposal({ revoked_at: '2026-07-22', is_valid: false, share_url: 'https://app.koiosmatch.test/p/should-not-show' })])
+    render(<ProposalsBlock application={app} />)
+    expect(screen.queryByRole('button', { name: 'propose.copyLink' })).toBeNull()
+    expect(screen.queryByRole('link', { name: 'propose.openLink' })).toBeNull()
+  })
+
+  // A read-only viewer (or any proposal the API did not attach a link to)
+  // gets no link actions at all — the absence of share_url is honoured, not
+  // worked around.
+  it('offers no link actions when the backend did not attach a share_url', () => {
+    setProposals([proposal({ share_url: null })])
+    render(<ProposalsBlock application={app} />)
+    expect(screen.queryByRole('button', { name: 'propose.copyLink' })).toBeNull()
+    expect(screen.queryByRole('link', { name: 'propose.openLink' })).toBeNull()
   })
 })
