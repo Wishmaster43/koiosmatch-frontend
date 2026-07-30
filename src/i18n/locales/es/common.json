@@ -74,7 +74,9 @@
     "apply": "Aplicar",
     "notFound": "Ubicación no encontrada",
     "toggle": "Mostrar/ocultar filtros",
-    "title": "Filtros"
+    "title": "Filtros",
+    "branch": "Sucursal",
+    "branchExcludesUnassigned": "Un filtro por sucursal oculta los registros sin sucursal vinculada."
   },
   "nav": {
     "dashboard": "Panel",
@@ -271,5 +273,9 @@
       "readOnly": "Las coordenadas provienen de la propia ubicación del cliente; volver a geocodificar aún no es posible aquí."
     }
   },
-  "breadcrumb": "Ruta de navegación"
+  "breadcrumb": "Ruta de navegación",
+  "branchSection": {
+    "widenTitle": "¿Quitar la última sucursal?",
+    "widenMessage": "Esta es la única sucursal vinculada. Quitarla hará que este registro vuelva a ser visible para todas las sucursales."
+  }
 }

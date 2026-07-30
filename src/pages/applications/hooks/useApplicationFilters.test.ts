@@ -99,3 +99,28 @@ describe('useApplicationFilters — candidate_ids deep-link scope (11.1)', () =>
     expect(result.current.filterParams.candidate_ids).toBeUndefined()
   })
 })
+
+// VESTIGING-2: explicit branch filter (inherited from the candidate) — sent as a
+// real server-side array filter (unlike phase_key/vacancy_id above, branch_id[]
+// was delivered multi-value from day one, COORDINATION-LOG 28-07).
+describe('useApplicationFilters — branch filter (VESTIGING-2)', () => {
+  it('sends no branch_id by default', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    expect(result.current.filterParams.branch_id).toBeUndefined()
+  })
+
+  it('sends branch_id as an array once one or more branches are picked, and flips anyFilterActive', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setSelectedBranch(['b1', 'b2']) })
+    expect(result.current.filterParams.branch_id).toEqual(['b1', 'b2'])
+    expect(result.current.anyFilterActive).toBe(true)
+  })
+
+  it('clearAllFilters resets the branch pick', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setSelectedBranch(['b1']) })
+    act(() => { result.current.clearAllFilters() })
+    expect(result.current.selectedBranch).toEqual([])
+    expect(result.current.filterParams.branch_id).toBeUndefined()
+  })
+})

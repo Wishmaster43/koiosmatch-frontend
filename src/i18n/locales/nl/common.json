@@ -74,7 +74,9 @@
     "apply": "Toepassen",
     "notFound": "Locatie niet gevonden",
     "toggle": "Filters tonen/verbergen",
-    "title": "Filters"
+    "title": "Filters",
+    "branch": "Vestiging",
+    "branchExcludesUnassigned": "Een vestigingsfilter verbergt records zonder gekoppelde vestiging."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -271,5 +273,9 @@
       "readOnly": "Coördinaten komen van de klant­locatie zelf; opnieuw geocoderen kan hier nog niet."
     }
   },
-  "breadcrumb": "Kruimelpad"
+  "breadcrumb": "Kruimelpad",
+  "branchSection": {
+    "widenTitle": "Laatste vestiging loskoppelen?",
+    "widenMessage": "Dit is de enige gekoppelde vestiging. Loskoppelen maakt dit record weer zichtbaar voor alle vestigingen."
+  }
 }

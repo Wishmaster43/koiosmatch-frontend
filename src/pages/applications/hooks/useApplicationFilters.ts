@@ -51,6 +51,10 @@ export function useApplicationFilters() {
   const [selectedOwner,  setSelectedOwner]  = usePageMemory<string[]>('apps.owner', [])
   const [selectedSource, setSelectedSource] = usePageMemory<string[]>('apps.source', [])
   const [selectedVac,    setSelectedVac]    = usePageMemory<string[]>('apps.vac', [])
+  // VESTIGING-2: explicit branch filter (inherited from the candidate) — a
+  // narrowing only; the server excludes applications with no branch, see the
+  // ApplicationsPage empty-state notice.
+  const [selectedBranch, setSelectedBranch] = usePageMemory<string[]>('apps.branch', [])
   const [showArchived,   setShowArchived]   = usePageMemory('apps.archived', false)
   const [query,          setQuery]          = usePageMemory('apps.search', '')
   // INTERVIEW-PHASE-1: v1 quick-view — only the 'busy' universal category.
@@ -64,13 +68,13 @@ export function useApplicationFilters() {
   const anyFilterActive = Boolean(query.trim() || attention || showArchived || interviewBusy
     || (bucket !== 'active' && bucket !== 'allActive')
     || selectedPhase.length || selectedOwner.length || selectedSource.length || selectedVac.length
-    || selectedCandidateIds.length)
+    || selectedBranch.length || selectedCandidateIds.length)
   // Remount the (self-stateful) search input on clear so the visible text resets too.
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setAttention(null); setShowArchived(false); setBucket('active')
     setSelectedPhase([]); setSelectedOwner([]); setSelectedSource([]); setSelectedVac([]); setInterviewBusy(false)
-    setSelectedCandidateIds([])
+    setSelectedBranch([]); setSelectedCandidateIds([])
   }
 
   // One row predicate for table + board (the page maps decorate over the result).
@@ -125,8 +129,11 @@ export function useApplicationFilters() {
     // future ApplicationQuery `candidate_ids` filter "just works"; see the header
     // comment for why this has no client-side fallback narrowing today.
     if (selectedCandidateIds.length) p.candidate_ids = selectedCandidateIds
+    // VESTIGING-2: server-side ?branch_id[]= — a narrowing only, gated behind the
+    // tenant's own branch_authz_enabled axis on the backend (off = no effect).
+    if (selectedBranch.length)      p.branch_id = selectedBranch
     return p
-  }, [selectedPhase, selectedVac, query, showArchived, interviewBusy, selectedCandidateIds])
+  }, [selectedPhase, selectedVac, query, showArchived, interviewBusy, selectedCandidateIds, selectedBranch])
 
   // Bucket param — TABLE query only (never board/stats): 'allActive' has no server
   // equivalent (spans two buckets) and showArchived's reveal must not be narrowed by
@@ -140,6 +147,7 @@ export function useApplicationFilters() {
     selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
     selectedVac, setSelectedVac, showArchived, setShowArchived, query, setQuery,
     interviewBusy, setInterviewBusy,
+    selectedBranch, setSelectedBranch,
     selectedCandidateIds, setSelectedCandidateIds,
     anyFilterActive, clearAllFilters, searchEpoch, matchesFilters,
     filterParams, bucketParam, filterKey,

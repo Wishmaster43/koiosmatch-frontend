@@ -74,7 +74,9 @@
     "apply": "Appliquer",
     "notFound": "Lieu introuvable",
     "toggle": "Afficher/masquer les filtres",
-    "title": "Filtres"
+    "title": "Filtres",
+    "branch": "Filiale",
+    "branchExcludesUnassigned": "Un filtre par filiale masque les enregistrements sans filiale liée."
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -271,5 +273,9 @@
       "readOnly": "Les coordonnées proviennent du site client lui-même ; le regéocodage n’est pas encore possible ici."
     }
   },
-  "breadcrumb": "Fil d’Ariane"
+  "breadcrumb": "Fil d’Ariane",
+  "branchSection": {
+    "widenTitle": "Supprimer la dernière filiale ?",
+    "widenMessage": "C'est la seule filiale liée. La supprimer rend cet enregistrement à nouveau visible pour toutes les filiales."
+  }
 }

@@ -25,7 +25,16 @@
  * tenant's branches can access this customer at all (behind the tenant flag
  * `branch_authz_enabled`, default OFF). Both stay — one scopes billing, the other
  * scopes visibility — see the BranchSection block below for why they are not merged.
+ *
+ * VESTIGING-2 (28-07): removing a customer's LAST linked branch does not just clear
+ * a chip — it WIDENS visibility, since an unlinked customer is visible to every
+ * branch again (COORDINATION-LOG 28-07 "Zonder koppeling = zichtbaar voor
+ * iedereen"). That must never happen silently, so the last removal is confirmed via
+ * the shared ConfirmDialog first. Only while `branch_authz_enabled` is actually ON —
+ * while it's off nothing about who sees what changes either way, so no warning is
+ * shown (matches "bouw geen UI op de aanname dat er gefilterd wordt").
  */
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
@@ -33,8 +42,10 @@ import { useIndustries } from '@/lib/useIndustries'
 import { useLocations } from '@/lib/useLocations'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import BranchSection from '@/components/drawer/BranchSection'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { emailValue, phoneValue, websiteValue, kvkValue, vatValue } from '@/components/drawer/contactLinks'
 import { useEntityBranches } from '@/components/drawer/useEntityBranches'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useProvinces } from '@/hooks/useProvinces'
 import { getCountryOptions } from '@/lib/countries'
 import EditableRichTextField from './EditableRichTextField'
@@ -50,6 +61,17 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
   // The customer's linked-branches membership (VESTIGING-2 fase 4) — no embedded
   // field on the Customer resource yet, so hydrate it once via GET on mount.
   const branchLinks = useEntityBranches({ prefix: 'customers', id: c.id, options: branchOptions, fetchOnMount: true })
+  // Tenant flag that turns branch-based visibility restriction on (default off).
+  const branchAuthzEnabled = getBoolSetting(useAllSettings(), 'branch_authz_enabled', false)
+  // Pending confirmation for removing the LAST linked branch (widens visibility) —
+  // holds the branch id awaiting confirm/cancel via the shared dialog.
+  const [pendingLastRemoval, setPendingLastRemoval] = useState<string | null>(null)
+  // Guard the widening case; every other add/remove passes straight through.
+  const handleBranchToggle = (id: string) => {
+    const isLastRemoval = branchLinks.selectedIds.includes(id) && branchLinks.branches.length === 1
+    if (isLastRemoval && branchAuthzEnabled) { setPendingLastRemoval(id); return }
+    branchLinks.toggle(id)
+  }
 
   // Province/country pickers — identical wiring to LocationDetail: the OPTION VALUE is
   // the country NAME, because that is what the column stores, and the province list
@@ -150,9 +172,19 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
           options={branchOptions}
           selectedIds={branchLinks.selectedIds}
           branches={branchLinks.branches}
-          onToggle={branchLinks.toggle}
+          onToggle={handleBranchToggle}
         />
       </div>
+
+      {/* Confirm before the LAST branch comes off — that silently WIDENS visibility
+          rather than narrowing it, so it needs an explicit yes (§3). */}
+      <ConfirmDialog
+        open={pendingLastRemoval != null}
+        title={t('common:branchSection.widenTitle')}
+        message={t('common:branchSection.widenMessage')}
+        onConfirm={() => { if (pendingLastRemoval) branchLinks.toggle(pendingLastRemoval); setPendingLastRemoval(null) }}
+        onCancel={() => setPendingLastRemoval(null)}
+      />
 
     </div>
   )

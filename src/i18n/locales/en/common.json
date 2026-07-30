@@ -74,7 +74,9 @@
     "apply": "Apply",
     "notFound": "Location not found",
     "toggle": "Show/hide filters",
-    "title": "Filters"
+    "title": "Filters",
+    "branch": "Branch",
+    "branchExcludesUnassigned": "A branch filter hides records with no branch linked yet."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -271,5 +273,9 @@
       "readOnly": "Coordinates come from the customer location itself; re-geocoding is not available here yet."
     }
   },
-  "breadcrumb": "Breadcrumb"
+  "breadcrumb": "Breadcrumb",
+  "branchSection": {
+    "widenTitle": "Remove the last branch?",
+    "widenMessage": "This is the only branch linked. Removing it makes this record visible to every branch again."
+  }
 }

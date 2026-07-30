@@ -1,0 +1,134 @@
+/**
+ * OpportunitiesPage · VESTIGING-2 branch filter — covers the two things a page
+ * render can prove that a hook-level test can't: (a) the branch multiselect is
+ * fed to useOpportunitiesData as the real server-side `branchIds` argument
+ * (mirrors the request-assertion in useOpportunitiesData.test.tsx), and (b) an
+ * explicit branch filter that comes back empty renders the honesty notice —
+ * never a bare "nothing here" — per CLAUDE.md §13 ("mutation tests assert the
+ * request, never only that a callback fired").
+ *
+ * The heavy data hook (useOpportunitiesData) is mocked wholesale so this test
+ * never needs a QueryClientProvider/real API — mirrors OverviewTab.test.tsx's
+ * strategy of mocking every fetching hook directly. The right-panel filter UI
+ * itself renders in a DIFFERENT part of the tree (DashboardLayout), so the
+ * 'branch' filter group's own `onToggle` is captured off the registerFilters
+ * call and invoked directly here — exactly what a real click on that filter
+ * chip would trigger.
+ *
+ * usePageMemory (lib/usePageMemory) is a MODULE-LEVEL store shared across every
+ * test in this file (by design — it survives page unmounts), so the toggle test
+ * below cleans its own pick back off at the end to avoid leaking state into a
+ * later test.
+ */
+import { describe, it, expect, vi } from 'vitest'
+import { act, render, screen, waitFor } from '@testing-library/react'
+import i18n from '@/i18n'
+import OpportunitiesPage from './OpportunitiesPage'
+
+const cm = (key: string) => i18n.t(key, { ns: 'common' })
+
+interface FilterGroup { key: string; selected: string[]; onToggle: (v: string) => void }
+
+// OpportunityDrawer's useCustomFields fires GET /custom-fields unconditionally
+// (before its own `if (!o) return null` guard) — mocked so this test never makes
+// a real, unmocked network call (mirrors OverviewTab.test.tsx's approach).
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
+  return { ...actual, default: { get: vi.fn(() => Promise.resolve({ data: { data: [] } })) } }
+})
+import api from '@/lib/api'
+const apiGet = api.get as unknown as ReturnType<typeof vi.fn>
+
+// Captures the exact args OpportunitiesPage calls the data hook with, per render.
+const useOpportunitiesDataMock = vi.fn()
+vi.mock('./hooks/useOpportunitiesData', () => ({
+  useOpportunitiesData: (...args: unknown[]) => useOpportunitiesDataMock(...args),
+}))
+vi.mock('./hooks/useOpportunityArchive', () => ({
+  useOpportunityArchive: () => ({ archiveOpportunity: vi.fn(), restoreOpportunity: vi.fn(), dialog: null }),
+}))
+vi.mock('@/lib/useLocations', () => ({
+  useLocations: () => [{ value: 'b1', label: 'Vestiging Noord' }, { value: 'b2', label: 'Vestiging Zuid' }],
+}))
+vi.mock('@/lib/settings/useAllSettings', () => ({
+  useAllSettings: () => ({}),
+  getBoolSetting: (_s: unknown, _key: string, fallback: boolean) => fallback,
+}))
+// user.branch_ids empty ⇒ unrestricted (every location offered) — the widest,
+// least-surprising default for a test that doesn't care about that narrowing.
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({ user: { branch_ids: [] }, hasPermission: () => true }),
+}))
+// Capture the registered filter groups so the 'branch' group's onToggle can be
+// invoked directly — the real picker renders in DashboardLayout, not this page.
+let capturedGroups: FilterGroup[] = []
+vi.mock('@/context/RightPanelContext', () => ({
+  useRightPanel: () => ({
+    registerFilters: (_key: string, groups: FilterGroup[]) => { capturedGroups = groups },
+    unregisterFilters: () => {},
+    reportPageFilter: () => {},
+  }),
+}))
+
+// Default (no filter active) hook result — individual tests override via mockReturnValue.
+const baseResult = {
+  rows: [], loading: false, error: false, customers: [], users: [], stages: [],
+  selected: null, drawerExpanded: false, setDrawerExpanded: vi.fn(),
+  selectedIds: new Set(), toggleRow: vi.fn(), toggleAll: vi.fn(), clearSelection: vi.fn(),
+  selectOpportunity: vi.fn(), closeDrawer: vi.fn(), handleCreated: vi.fn(), handleMove: vi.fn(),
+  updateOpportunity: vi.fn(), reload: vi.fn(),
+}
+
+describe('OpportunitiesPage · branch filter wiring (VESTIGING-2)', () => {
+  it('calls useOpportunitiesData with the picked branch ids as the second (server-side) argument', async () => {
+    useOpportunitiesDataMock.mockReturnValue(baseResult)
+    render(<OpportunitiesPage />)
+    // Default render: no branch picked yet — sent as an empty array, never
+    // omitted (mirrors the hook's own default), so a later pick is a real change.
+    expect(useOpportunitiesDataMock).toHaveBeenCalledWith(false, [])
+    // Let OpportunityDrawer's own (unconditional) custom-fields fetch settle so its
+    // state update never lands outside act() in a later test (mirrors OverviewTab.test.tsx).
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+  })
+
+  it('does NOT show the branch-exclusion notice when no branch filter is active, even with zero rows', async () => {
+    useOpportunitiesDataMock.mockReturnValue({ ...baseResult, rows: [] })
+    render(<OpportunitiesPage />)
+    expect(screen.queryByText(cm('filters.branchExcludesUnassigned'))).toBeNull()
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+  })
+})
+
+describe('OpportunitiesPage · picking a branch (VESTIGING-2)', () => {
+  it('re-fetches with the picked branch id AND shows the honesty notice once the (branch-filtered) result is empty — never a bare empty state', async () => {
+    useOpportunitiesDataMock.mockReturnValue({ ...baseResult, rows: [] })
+    render(<OpportunitiesPage />)
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+
+    const branchGroup = capturedGroups.find(g => g.key === 'branch')
+    expect(branchGroup).toBeTruthy()
+    // Exactly what clicking the "Vestiging Noord" chip in the real filter panel does.
+    act(() => branchGroup!.onToggle('b1'))
+
+    // The page re-rendered with the pick — the data hook is called again with it.
+    expect(useOpportunitiesDataMock).toHaveBeenLastCalledWith(false, ['b1'])
+    // Zero rows + an explicit branch filter ⇒ the honesty notice, not silence.
+    expect(screen.getByText(cm('filters.branchExcludesUnassigned'))).toBeInTheDocument()
+
+    // Clean up: usePageMemory is a module-level store shared across this file's
+    // tests — toggle the pick back off so it doesn't leak into a later test.
+    act(() => branchGroup!.onToggle('b1'))
+  })
+
+  it('does not show the notice once the branch-filtered result actually has rows', async () => {
+    useOpportunitiesDataMock.mockReturnValue({ ...baseResult, rows: [{ id: 'o1', title: 'Deal A' }] })
+    render(<OpportunitiesPage />)
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+
+    const branchGroup = capturedGroups.find(g => g.key === 'branch')!
+    act(() => branchGroup.onToggle('b1'))
+    expect(screen.queryByText(cm('filters.branchExcludesUnassigned'))).toBeNull()
+
+    act(() => branchGroup.onToggle('b1')) // clean up, see note above
+  })
+})

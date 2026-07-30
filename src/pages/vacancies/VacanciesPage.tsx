@@ -12,6 +12,7 @@ import { Archive, Map as MapIcon } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
+import { useLocations } from '@/lib/useLocations'
 import { isReferenceQuery } from '@/lib/referenceNumber'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import ActionMessageBanner from '@/components/ui/ActionMessageBanner'
@@ -57,6 +58,16 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // Coerce to a string|number-tolerant signature for the bulk hook + updaters.
   const statusMetaSafe = (v?: string | number | null) => statusMeta(v == null ? null : String(v))
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
+  // VESTIGING-2: the signed-in user's own branch scope — `[]` means unrestricted
+  // (auth/me.branch_ids, COORDINATION-LOG 28-07), so the filter then offers every
+  // tenant establishment; otherwise it narrows to just those (never a widening).
+  const me = auth?.user as { branch_ids?: Array<string | number> } | null | undefined
+  const locations = useLocations()
+  const branchOptions = useMemo(() => {
+    const ids = (me?.branch_ids ?? []).map(String)
+    const all = locations.map(l => ({ value: String(l.value), label: l.label }))
+    return ids.length ? all.filter(o => ids.includes(o.value)) : all
+  }, [locations, me?.branch_ids])
 
   const [page,      setPage]      = usePageMemory('vac.page', 1)
   const [pageSize,  setPageSize]  = useState(50)
@@ -72,6 +83,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // V28: functie filter — the by_category donut's click-to-filter target (existing
   // BE `category[]` param, VacancyQuery::filtered()).
   const [selectedCategory, setSelectedCategory] = usePageMemory<string[]>('vac.category', [])
+  // VESTIGING-2: explicit branch filter (narrows within what the user may already
+  // see — server excludes records with no branch, see the notice below).
+  const [selectedBranch, setSelectedBranch] = usePageMemory<string[]>('vac.branch', [])
   const [globalSearch,   setGlobalSearch]   = usePageMemory('vac.search', '')
   const [showArchived,   setShowArchived]   = usePageMemory('vac.archived', false)
   // VAC-AGENT-1: "online without an AI agent" quick view (?without_agent=1).
@@ -112,6 +126,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     if (selectedClient.length)  p.customer_id = selectedClient
     // V28: functie donut filter — VacancyQuery::filtered() already whereIn's on function_title.
     if (selectedCategory.length) p.category  = selectedCategory
+    // VESTIGING-2: server-side ?branch_id[]= — a narrowing only, gated behind the
+    // tenant's own branch_authz_enabled axis on the backend (off = no effect).
+    if (selectedBranch.length)  p.branch_id = selectedBranch
     if (showArchived)           p.include_archived = 1
     // VAC-AGENT-1: quick view onto the vacancies that are online but have no agent linked.
     if (showWithoutAgent)       p.without_agent = 1
@@ -126,7 +143,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     // Map view narrows the list server-side to the chosen circle (STRAAL-1).
     if (view === 'map' && mapStraalActive) { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
     return p
-  }, [globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, showArchived, showWithoutAgent, selectedAgentId, publishedBucket, view, mapCenter, mapRadius, mapStraalActive])
+  }, [globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, selectedBranch, showArchived, showWithoutAgent, selectedAgentId, publishedBucket, view, mapCenter, mapRadius, mapStraalActive])
   const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1; the visible rows change → drop the selection.
@@ -189,7 +206,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     { key: 'owner',    type: 'search-select', category: catOrg, label: t('filters.owner'),    selected: selectedOwner,    options: ownerOptions,    onToggle: tog(setSelectedOwner) },
     { key: 'client',   type: 'search-select', category: catOrg, label: t('filters.client'),   selected: selectedClient,   options: clientOptions,   onToggle: tog(setSelectedClient) },
     { key: 'category', type: 'search-select', category: catOrg, label: t('filters.category'), selected: selectedCategory, options: categoryOptions, onToggle: tog(setSelectedCategory) },
-  ], [t, catOrg, selectedOwner, selectedClient, selectedCategory, ownerOptions, clientOptions, categoryOptions])
+    // VESTIGING-2: values limited to the user's own branch scope (measured above).
+    { key: 'branch',   type: 'search-select', category: catOrg, label: t('common:filters.branch'), selected: selectedBranch, options: branchOptions, onToggle: tog(setSelectedBranch) },
+  ], [t, catOrg, selectedOwner, selectedClient, selectedCategory, selectedBranch, ownerOptions, clientOptions, categoryOptions, branchOptions])
 
   useEffect(() => {
     registerFilters('vacancies-page', filterGroups)
@@ -220,11 +239,11 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   })
   // Shared clear-all (page memory keeps filters sticky).
   const anyFilterActive = Boolean(globalSearch.trim() || showArchived || showWithoutAgent || Boolean(selectedAgentId) || statusBucket !== 'all'
-    || selectedOwner.length || selectedClient.length || selectedCategory.length || publishedBucket !== 'all')
+    || selectedOwner.length || selectedClient.length || selectedCategory.length || selectedBranch.length || publishedBucket !== 'all')
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setShowWithoutAgent(false); setSelectedAgentId(null); setStatusBucket('all')
-    setSelectedOwner([]); setSelectedClient([]); setSelectedCategory([]); setPublishedBucket('all'); setPage(1)
+    setSelectedOwner([]); setSelectedClient([]); setSelectedCategory([]); setSelectedBranch([]); setPublishedBucket('all'); setPage(1)
   }
 
   // Status tab bar: "All" + one button per configured status.
@@ -240,7 +259,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
               V27: the published donut is a real server-wide aggregate, so no more
               STATS-OOM-1 honesty notice here; the agent donut's own honest-gate lives
               in useVacancyInsights.ts (agentData) until VAC-STATS-BYAGENT-1 lands. */}
-          <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
+          <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')}
+            // VESTIGING-2: an explicit branch filter EXCLUDES records with no branch
+            // linked yet — a resulting empty list must say so, not read as "nothing here".
+            notice={selectedBranch.length > 0 && total === 0 ? t('common:filters.branchExcludesUnassigned') : undefined} />
 
           {/* Add/bulk on the left (like Candidates/Applications); status tabs pushed right */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',

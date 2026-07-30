@@ -82,6 +82,35 @@ describe('useOpportunitiesData · ARCHIVE-1', () => {
   })
 })
 
+// VESTIGING-2: explicit branch filter (inherited from the customer) — sent as
+// server-side ?branch_id[]=, a narrowing only. Off (empty) by default so a
+// caller that doesn't pass branchIds keeps the pre-VESTIGING-2 request shape.
+describe('useOpportunitiesData · branch filter (VESTIGING-2)', () => {
+  it('sends no branch_id when no branch is picked (default second argument)', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [] } })
+    const { result } = renderHook(() => useOpportunitiesData(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const oppCall = mockedGet.mock.calls.find(c => c[0] === '/opportunities')
+    expect(oppCall?.[1]?.params).toBeUndefined()
+  })
+
+  it('sends branch_id as an array of the picked ids', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [] } })
+    const { result } = renderHook(() => useOpportunitiesData(false, ['b1', 'b2']), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const oppCall = mockedGet.mock.calls.find(c => c[0] === '/opportunities')
+    expect(oppCall?.[1]?.params).toEqual({ branch_id: ['b1', 'b2'] })
+  })
+
+  it('combines include_archived and branch_id when both are active', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [] } })
+    const { result } = renderHook(() => useOpportunitiesData(true, ['b1']), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const oppCall = mockedGet.mock.calls.find(c => c[0] === '/opportunities')
+    expect(oppCall?.[1]?.params).toEqual({ include_archived: 1, branch_id: ['b1'] })
+  })
+})
+
 describe('useOpportunitiesData · tags PATCH (audit finding: tags never persisted)', () => {
   it('sends { tags } in the PATCH body when the drawer edits tags', async () => {
     mockedGet.mockResolvedValue({ data: { data: [{ id: 'o1', title: 'Deal A', tags: ['foo'] }] } })

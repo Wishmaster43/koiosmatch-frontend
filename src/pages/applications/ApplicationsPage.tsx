@@ -7,6 +7,7 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
+import { useLocations } from '@/lib/useLocations'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
@@ -48,7 +49,7 @@ const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p =>
 export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation('applications')
   const auth = useAuth()
-  const user = auth?.user as { default_per_page?: number } | null | undefined
+  const user = auth?.user as { default_per_page?: number; branch_ids?: Array<string | number> } | null | undefined
   // Detach/restore are destructive → gate in the UI (backend re-checks the perm).
   const canManage = auth?.hasPermission?.('applications.update') ?? false
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -56,6 +57,15 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const { funnelTypes, funnelMeta } = useLookups()
   // Tenant users — options for the editable recruiter (owner) picker in the drawer.
   const { data: users = [] } = useUsers() as { data?: Array<{ id: Id; name: string }> }
+  // VESTIGING-2: the signed-in user's own branch scope — `[]` means unrestricted
+  // (auth/me.branch_ids, COORDINATION-LOG 28-07), so the filter then offers every
+  // tenant establishment; otherwise it narrows to just those (never a widening).
+  const locations = useLocations()
+  const branchOptions = useMemo(() => {
+    const ids = (user?.branch_ids ?? []).map(String)
+    const all = locations.map(l => ({ value: String(l.value), label: l.label }))
+    return ids.length ? all.filter(o => ids.includes(o.value)) : all
+  }, [locations, user?.branch_ids])
 
   const [view,         setView]         = usePageMemory('apps.view', 'table')   // 'table' | 'board'
   const [page,         setPage]         = usePageMemory('apps.page', 1)
@@ -77,6 +87,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
     selectedVac, setSelectedVac, showArchived, setShowArchived, query, setQuery,
     interviewBusy, setInterviewBusy,
+    selectedBranch, setSelectedBranch,
     selectedCandidateIds, setSelectedCandidateIds,
     anyFilterActive, clearAllFilters, searchEpoch, matchesFilters,
     filterParams, bucketParam,
@@ -124,7 +135,10 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     { key: 'owner',   label: t('insights.owner'),  selected: selectedOwner,  options: asOptions(ownerData),  onToggle: tog(setSelectedOwner) },
     { key: 'source',  label: t('insights.source'), selected: selectedSource, options: asOptions(sourceData), onToggle: tog(setSelectedSource) },
     { key: 'vacancy', label: t('cols.vacancy'),    selected: selectedVac,    options: vacOptions,            onToggle: tog(setSelectedVac) },
-  ], [t, selectedPhase, selectedOwner, selectedSource, selectedVac, phaseData, ownerData, sourceData, vacOptions])
+    // VESTIGING-2: inherited from the candidate; values limited to the user's own
+    // branch scope (measured above) — never a widening.
+    { key: 'branch',  label: t('common:filters.branch'), selected: selectedBranch, options: branchOptions, onToggle: tog(setSelectedBranch) },
+  ], [t, selectedPhase, selectedOwner, selectedSource, selectedVac, selectedBranch, phaseData, ownerData, sourceData, vacOptions, branchOptions])
 
   useEffect(() => {
     registerFilters('applications-page', filterGroups)
@@ -204,7 +218,10 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
           // Data honesty (BE gap): owner/source/avgScore/aiTasks have no server-wide
           // aggregate and fall back to the ≤200-row wide sample — label it once that
           // sample doesn't cover every matching application (mirrors CandidatesPage).
-          notice={wideIsPartial ? t('insights.pageScopeNotice') : undefined} />
+          // VESTIGING-2: an explicit branch filter EXCLUDES applications with no
+          // branch yet — a resulting empty list must say so, not read as "nothing here".
+          notice={wideIsPartial ? t('insights.pageScopeNotice')
+            : (selectedBranch.length > 0 && total === 0 ? t('common:filters.branchExcludesUnassigned') : undefined)} />
 
         {/* Tab bar — add + buckets + view toggle */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'space-between',

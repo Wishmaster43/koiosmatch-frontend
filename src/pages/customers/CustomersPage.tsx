@@ -14,6 +14,7 @@ import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import ViewSwitch from '@/components/ui/ViewSwitch'
 import { useUsers } from '@/lib/queries'
 import { useCustomerLookups } from '@/lib/useCustomerLookups'
+import { useLocations } from '@/lib/useLocations'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
@@ -62,6 +63,16 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const hasPermission = auth?.hasPermission ?? (() => false)
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { statuses, statusMeta, locationStatuses, departmentStatuses, contactStatuses } = useCustomerLookups()
+  // VESTIGING-2: the signed-in user's own branch scope — `[]` means unrestricted
+  // (see auth/me.branch_ids contract, COORDINATION-LOG 28-07), so the filter then
+  // offers every tenant establishment; otherwise it narrows to just those.
+  const me = auth?.user as { branch_ids?: Array<string | number> } | null | undefined
+  const locations = useLocations()
+  const branchOptions = useMemo(() => {
+    const ids = (me?.branch_ids ?? []).map(String)
+    const all = locations.map(l => ({ value: String(l.value), label: l.label }))
+    return ids.length ? all.filter(o => ids.includes(o.value)) : all
+  }, [locations, me?.branch_ids])
 
   // ── UI state ──
   const [page,      setPage]      = usePageMemory('cust.page', 1)
@@ -88,6 +99,9 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const [selectedOwner,    setSelectedOwner]    = usePageMemory<string[]>('cust.owner', [])
   const [selectedCity,     setSelectedCity]     = usePageMemory<string[]>('cust.city', [])
   const [selectedIndustry, setSelectedIndustry] = usePageMemory<string[]>('cust.industry', [])
+  // VESTIGING-2: explicit branch filter (narrows within what the user may already
+  // see — never a widening; server excludes records with no branch, see the notice below).
+  const [selectedBranch, setSelectedBranch] = usePageMemory<string[]>('cust.branch', [])
 
   const filterParams = useMemo(() => {
     const p: Record<string, unknown> = {}
@@ -102,13 +116,16 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
     if (selectedOwner.length)    p.owner_id = selectedOwner
     if (selectedCity.length)     p.city     = selectedCity
     if (selectedIndustry.length) p.industry = selectedIndustry
+    // VESTIGING-2: server-side ?branch_id[]= — a narrowing only, gated behind the
+    // tenant's own branch_authz_enabled axis on the backend (off = no effect).
+    if (selectedBranch.length)  p.branch_id = selectedBranch
     if (showArchived)            p.include_archived = 1
     // Map view narrows the list server-side to the chosen circle (STRAAL-1);
     // in table view the sidebar's straal-blok drives the same params.
     if (view === 'map') { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
     else if (geoFilter) { p.lat = geoFilter.lat; p.lng = geoFilter.lng; p.radius = geoFilter.km }
     return p
-  }, [globalSearch, selectedStatus, selectedOwner, selectedCity, selectedIndustry, showArchived, view, mapCenter, mapRadius, geoFilter])
+  }, [globalSearch, selectedStatus, selectedOwner, selectedCity, selectedIndustry, selectedBranch, showArchived, view, mapCenter, mapRadius, geoFilter])
   const filterKey = JSON.stringify(filterParams)
 
   useEffect(() => { setPage(1) }, [filterKey])
@@ -186,7 +203,10 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
       applied: geoFilter ? { label: geoFilter.label } : null, hint: geoHint, km: geoFilter?.km ?? 30,
       onApply: applyGeo, onClear: () => { setGeoFilter(null); setGeoHint(null) } },
     { key: 'owner',    type: 'search-select', category: catOrg,     label: t('filters.accountManager'), selected: selectedOwner,    options: ownerOptions,    onToggle: tog(setSelectedOwner) },
-  ], [t, catGeneral, catOrg, selectedStatus, selectedIndustry, selectedCity, selectedOwner, statusOptions, industryOptions, cityOptions, ownerOptions, geoFilter, geoHint]) // eslint-disable-line react-hooks/exhaustive-deps
+    // VESTIGING-2: values limited to the user's own branch scope (measured above) —
+    // filtering outside it is pointless, never a widening.
+    { key: 'branch',   type: 'search-select', category: catOrg,     label: t('common:filters.branch'),   selected: selectedBranch,   options: branchOptions,   onToggle: tog(setSelectedBranch) },
+  ], [t, catGeneral, catOrg, selectedStatus, selectedIndustry, selectedCity, selectedOwner, selectedBranch, statusOptions, industryOptions, cityOptions, ownerOptions, branchOptions, geoFilter, geoHint]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     registerFilters('customers-page', filterGroups)
@@ -204,11 +224,12 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const toggleKpi = (k: string) => setKpiFilter(p => (p === k ? null : k))
   // Shared clear-all (page memory keeps filters sticky).
   const anyFilterActive = Boolean(globalSearch.trim() || showArchived || kpiFilter || geoFilter
-    || selectedStatus.length || selectedOwner.length || selectedCity.length || selectedIndustry.length)
+    || selectedStatus.length || selectedOwner.length || selectedCity.length || selectedIndustry.length || selectedBranch.length)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setKpiFilter(null)
-    setSelectedStatus([]); setSelectedOwner([]); setSelectedCity([]); setSelectedIndustry([]); setGeoFilter(null); setGeoHint(null); setPage(1)
+    setSelectedStatus([]); setSelectedOwner([]); setSelectedCity([]); setSelectedIndustry([]); setSelectedBranch([])
+    setGeoFilter(null); setGeoHint(null); setPage(1)
   }
 
   // One visible-rows list for BOTH the table and the map pane (STRAAL-1 split view):
@@ -249,7 +270,10 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
       <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-          <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
+          <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')}
+            // VESTIGING-2: an explicit branch filter EXCLUDES records with no branch
+            // linked yet — a resulting empty list must say so, not read as "nothing here".
+            notice={selectedBranch.length > 0 && total === 0 ? t('common:filters.branchExcludesUnassigned') : undefined} />
 
           {/* Shared banner (§0.3 split, audit R1 item 1) — was copy-pasted per page. */}
           <ActionMessageBanner msg={actionMsg} onDismiss={() => setActionMsg(null)} dismissLabel={t('common:close')} />

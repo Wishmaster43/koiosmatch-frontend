@@ -15,6 +15,11 @@
  * ALONGSIDE the active set (mirrors vacancies), not an isolated view — the table
  * chip (OpportunitiesTable) is what tells them apart. The single-record archive/
  * restore (useOpportunityArchive) is unaffected — see its own comment for routes.
+ *
+ * VESTIGING-2: `branchIds` sends the page's explicit branch filter as server-side
+ * `?branch_id[]=` — a narrowing only (opportunities inherit their branch from the
+ * customer), gated behind the tenant's own `branch_authz_enabled` axis on the
+ * backend (off = no effect either way).
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -37,7 +42,8 @@ const EMPTY_OPPORTUNITIES: Opportunity[] = []
 
 // includeArchived (ARCHIVE-1): reveal soft-deleted opportunities alongside the
 // active set (?include_archived=1) — off by default; the page owns the toggle state.
-export function useOpportunitiesData(includeArchived: boolean = false) {
+// branchIds (VESTIGING-2): explicit branch filter, off (empty) by default.
+export function useOpportunitiesData(includeArchived: boolean = false, branchIds: string[] = []) {
   const { t } = useTranslation()
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { stages, stageMeta } = useOpportunityStages()
@@ -50,13 +56,17 @@ export function useOpportunitiesData(includeArchived: boolean = false) {
   // reload (useOpportunityArchive) so a just-archived row drops out of view and
   // a just-restored one comes back. The toggle rides in the query key so
   // flipping it triggers a real refetch instead of silently reusing the cache.
-  const queryKey = ['opportunities', includeArchived] as const
+  const queryKey = ['opportunities', includeArchived, branchIds] as const
   const { data, isLoading: loading, isError: error, refetch } = useQuery({
     queryKey,
     queryFn: async ({ signal }) => {
       try {
-        const params = includeArchived ? { include_archived: 1 } : undefined
-        const r = await api.get('/opportunities', { signal, params })
+        // Build params conditionally so a default call (no archive/branch filter)
+        // still sends `undefined` — mirrors the pre-VESTIGING-2 include_archived-only shape.
+        const params: Record<string, unknown> = {}
+        if (includeArchived)  params.include_archived = 1
+        if (branchIds.length) params.branch_id = branchIds
+        const r = await api.get('/opportunities', { signal, params: Object.keys(params).length ? params : undefined })
         return ((unwrapList(r).rows) as ApiOpportunity[]).map(mapOpportunity)
       } catch (e) {
         if ((e as { response?: { status?: number } })?.response?.status === 404) return [] as Opportunity[]

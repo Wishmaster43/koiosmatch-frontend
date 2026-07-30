@@ -74,7 +74,9 @@
     "apply": "Anwenden",
     "notFound": "Ort nicht gefunden",
     "toggle": "Filter anzeigen/ausblenden",
-    "title": "Filter"
+    "title": "Filter",
+    "branch": "Niederlassung",
+    "branchExcludesUnassigned": "Ein Niederlassungsfilter blendet Datensätze ohne verknüpfte Niederlassung aus."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -271,5 +273,9 @@
       "readOnly": "Die Koordinaten stammen vom Kundenstandort selbst; erneutes Geocoding ist hier noch nicht möglich."
     }
   },
-  "breadcrumb": "Brotkrümelnavigation"
+  "breadcrumb": "Brotkrümelnavigation",
+  "branchSection": {
+    "widenTitle": "Letzte Niederlassung entfernen?",
+    "widenMessage": "Dies ist die einzige verknüpfte Niederlassung. Beim Entfernen wird dieser Datensatz wieder für alle Niederlassungen sichtbar."
+  }
 }

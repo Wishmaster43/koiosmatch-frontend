@@ -14,6 +14,11 @@
  * /customers/{id}/branches on mount, so `@/lib/api` is mocked below (real
  * `unwrapList` kept via importActual) — every existing render in this file would
  * otherwise fire a real, unmocked network request.
+ *
+ * VESTIGING-2: `@/lib/settings/useAllSettings` is mocked so `branch_authz_enabled`
+ * is controllable per test (real `getBoolSetting` kept via importActual, so the
+ * "true"/true coercion the production code relies on is exercised for real) —
+ * the widen-on-last-removal confirm only fires while that tenant flag is on.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -40,13 +45,20 @@ vi.mock('@/lib/api', async () => {
   }
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
+// Mutable per-test settings blob — default {} so branch_authz_enabled falls back
+// to false (matches the real tenant default) unless a test opts in.
+let mockSettings: Record<string, unknown> = {}
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/settings/useAllSettings')>('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => mockSettings }
+})
 import api from '@/lib/api'
 
 const apiGet = api.get as unknown as ReturnType<typeof vi.fn>
 const apiPost = api.post as unknown as ReturnType<typeof vi.fn>
 const apiDelete = api.delete as unknown as ReturnType<typeof vi.fn>
 
-beforeEach(() => vi.clearAllMocks())
+beforeEach(() => { vi.clearAllMocks(); mockSettings = {} })
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
@@ -153,5 +165,64 @@ describe('OverviewTab · Vestiging koppelen (BRANCH-LINKS-1, shared BranchSectio
     // The optimistic chip reverts once the rejected POST settles, leaving only the
     // still-open picker's own option label — the empty state returns underneath it.
     await waitFor(() => expect(screen.getByText(ct('overview.branchesEmpty'))).toBeInTheDocument())
+  })
+})
+
+describe('OverviewTab · removing the LAST branch widens visibility (VESTIGING-2)', () => {
+  it('while branch_authz_enabled is OFF (default), removing the last chip DELETEs immediately — no dialog', async () => {
+    apiGet.mockResolvedValueOnce({ data: { data: [{ id: 'loc-1', name: 'Vestiging Noord' }] } })
+    const user = userEvent.setup()
+    render(<OverviewTab c={customer()} onSave={vi.fn()} />)
+    await screen.findByText('Vestiging Noord')
+    await user.click(screen.getByRole('button', { name: cm('remove') }))
+    expect(apiDelete).toHaveBeenCalledWith('/customers/1/branches/loc-1')
+    expect(screen.queryByText(cm('branchSection.widenTitle'))).toBeNull()
+  })
+
+  it('while branch_authz_enabled is ON, removing the ONLY chip opens the confirm dialog and does NOT delete yet', async () => {
+    mockSettings = { branch_authz_enabled: 'true' }
+    apiGet.mockResolvedValueOnce({ data: { data: [{ id: 'loc-1', name: 'Vestiging Noord' }] } })
+    const user = userEvent.setup()
+    render(<OverviewTab c={customer()} onSave={vi.fn()} />)
+    await screen.findByText('Vestiging Noord')
+    await user.click(screen.getByRole('button', { name: cm('remove') }))
+    expect(await screen.findByText(cm('branchSection.widenTitle'))).toBeInTheDocument()
+    expect(apiDelete).not.toHaveBeenCalled()
+  })
+
+  it('confirming the dialog then DELETEs the branch', async () => {
+    mockSettings = { branch_authz_enabled: 'true' }
+    apiGet.mockResolvedValueOnce({ data: { data: [{ id: 'loc-1', name: 'Vestiging Noord' }] } })
+    const user = userEvent.setup()
+    render(<OverviewTab c={customer()} onSave={vi.fn()} />)
+    await screen.findByText('Vestiging Noord')
+    await user.click(screen.getByRole('button', { name: cm('remove') }))
+    await screen.findByText(cm('branchSection.widenTitle'))
+    await user.click(screen.getByText(cm('confirm')))
+    expect(apiDelete).toHaveBeenCalledWith('/customers/1/branches/loc-1')
+  })
+
+  it('cancelling the dialog leaves the branch linked — no DELETE fires', async () => {
+    mockSettings = { branch_authz_enabled: 'true' }
+    apiGet.mockResolvedValueOnce({ data: { data: [{ id: 'loc-1', name: 'Vestiging Noord' }] } })
+    const user = userEvent.setup()
+    render(<OverviewTab c={customer()} onSave={vi.fn()} />)
+    await screen.findByText('Vestiging Noord')
+    await user.click(screen.getByRole('button', { name: cm('remove') }))
+    await screen.findByText(cm('branchSection.widenTitle'))
+    await user.click(screen.getByText(cm('cancel')))
+    expect(apiDelete).not.toHaveBeenCalled()
+    expect(screen.getByText('Vestiging Noord')).toBeInTheDocument()
+  })
+
+  it('while branch_authz_enabled is ON but a SECOND branch remains, removing one chip DELETEs immediately — no dialog', async () => {
+    mockSettings = { branch_authz_enabled: 'true' }
+    apiGet.mockResolvedValueOnce({ data: { data: [{ id: 'loc-1', name: 'Vestiging Noord' }, { id: 'loc-2', name: 'Vestiging Zuid' }] } })
+    const user = userEvent.setup()
+    render(<OverviewTab c={customer()} onSave={vi.fn()} />)
+    await screen.findByText('Vestiging Noord')
+    await user.click(screen.getAllByRole('button', { name: cm('remove') })[0])
+    expect(apiDelete).toHaveBeenCalledWith('/customers/1/branches/loc-1')
+    expect(screen.queryByText(cm('branchSection.widenTitle'))).toBeNull()
   })
 })
