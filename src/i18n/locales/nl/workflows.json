@@ -57,7 +57,8 @@
     "addModule": "Module toevoegen",
     "closeTitle": "Sluiten zonder opslaan",
     "unsavedConfirm": "Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je wilt sluiten? Je wijzigingen gaan dan verloren.",
-    "liveRunConfirm": "Er loopt nog een uitvoering. Die loopt op de achtergrond gewoon door als je sluit — stoppen kan met de Stoppen-knop. Toch sluiten?"
+    "liveRunConfirm": "Er loopt nog een uitvoering. Die loopt op de achtergrond gewoon door als je sluit — stoppen kan met de Stoppen-knop. Toch sluiten?",
+    "nameAriaLabel": "Naam workflow"
   },
   "fields": {
     "boolOn": "Aan",

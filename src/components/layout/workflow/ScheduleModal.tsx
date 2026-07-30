@@ -114,7 +114,16 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
         {/* Footer */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 20px', borderTop: '1px solid var(--border)' }}>
           <button onClick={onClose} style={{ padding: '7px 16px', borderRadius: 8, fontSize: 13, border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('scheduleModal.cancel')}</button>
-          <button onClick={form.handleSave} style={{ padding: '7px 16px', borderRadius: 8, fontSize: 13, border: 'none', background: 'var(--color-primary)', color: 'white', cursor: 'pointer', fontWeight: 600 }}>{t('scheduleModal.save')}</button>
+          {/* Disabled (not just clamped) whenever the current config would be unusable —
+              e.g. an emptied interval (`+'' === 0`, BUG 3) or a webhook trigger with no
+              agent chosen yet (BUG 4) — a hard backstop regardless of blur/focus state. */}
+          <button onClick={form.handleSave} disabled={!form.canSave}
+            style={{
+              padding: '7px 16px', borderRadius: 8, fontSize: 13, border: 'none', fontWeight: 600,
+              background: form.canSave ? 'var(--color-primary)' : 'var(--border)',
+              color: form.canSave ? 'white' : 'var(--text-muted)',
+              cursor: form.canSave ? 'pointer' : 'not-allowed',
+            }}>{t('scheduleModal.save')}</button>
         </div>
       </div>
     </div>

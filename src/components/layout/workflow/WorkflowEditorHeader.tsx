@@ -69,8 +69,14 @@ export default function WorkflowEditorHeader({
         <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <Zap size={15} color="var(--color-primary)" />
         </div>
+        {/* The workflow name is edited in place, with no visible label anywhere in the
+            header — sighted users read it from its position and weight. A screen reader
+            gets nothing from either, so it carries its own name. No existing key fit:
+            `canvas.routeName`, `ai.field.name` and `fields.itemName` each name a
+            different field, and reusing one would announce the wrong thing. */}
         <input
           value={name} onChange={e => onNameChange(e.target.value)}
+          aria-label={t('editor.nameAriaLabel')}
           style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', border: 'none', background: 'transparent', outline: 'none', minWidth: 60, maxWidth: 240 }}
         />
       </div>
@@ -114,7 +120,9 @@ export default function WorkflowEditorHeader({
 
       <div style={{ width: 1, height: 20, background: 'var(--border)', flexShrink: 0 }} />
 
-      <button onClick={onToggleStatus}
+      {/* BUG 5: the view tabs beside this already carry aria-pressed — this toggle
+          didn't, so a screen reader announced it as a plain button with no on/off state. */}
+      <button onClick={onToggleStatus} aria-pressed={status === 'active'}
         style={{
           display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999,
           background: status === 'active' ? 'var(--color-success-bg)' : 'var(--hover-bg)',
@@ -143,18 +151,22 @@ export default function WorkflowEditorHeader({
       )}
 
       {/* Run feedback: the backend reason (e.g. a draft can't run) or generic.
-          flexShrink 0: the packed header otherwise crushes the message to "D…". */}
+          flexShrink 0: the packed header otherwise crushes the message to "D…".
+          BUG 5: `role="alert"` (implicit aria-live="assertive") so a screen-reader
+          user actually hears the failure — it used to sit in a bare span. */}
       {runError !== null && (
         // eslint-disable-next-line no-restricted-syntax -- DATA: exact-match fallback for var(--color-danger), not an ad-hoc colour
-        <span style={{ fontSize: 11, color: 'var(--color-danger, #DC2626)', maxWidth: 220, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+        <span role="alert" style={{ fontSize: 11, color: 'var(--color-danger, #DC2626)', maxWidth: 220, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
           title={runError || t('common:actionFailed')}>
           {runError || t('common:actionFailed')}
         </span>
       )}
 
-      {/* RUN-CONTROL-1 single-flight: 409 → "loopt al" + the viewer points at that run. */}
+      {/* RUN-CONTROL-1 single-flight: 409 → "loopt al" + the viewer points at that run.
+          Same un-announced-span issue as runError above (BUG 5) — `role="status"`
+          (aria-live="polite") since this is informational, not a hard failure. */}
       {runConflict && (
-        <span style={{ fontSize: 11, color: 'var(--color-warning)', maxWidth: 220, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+        <span role="status" style={{ fontSize: 11, color: 'var(--color-warning)', maxWidth: 220, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
           title={t('runControl.alreadyRunning')}>
           {t('runControl.alreadyRunning')}
         </span>

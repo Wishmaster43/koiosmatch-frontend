@@ -7,6 +7,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ScheduleModal, scheduleLabel } from './ScheduleModal'
 import { WORKFLOW_EVENT_KEYS } from './eventCatalog'
+import api from '@/lib/api'
 
 // The webhook (AI-agent) picker fetches GET /ai/agents on mount — stub it so the
 // test never makes a real network call; keep the real unwrap/unwrapList (importActual).
@@ -60,6 +61,67 @@ describe('ScheduleModal · event trigger', () => {
     const input = screen.getByLabelText('scheduleModal.eventLabel') as HTMLInputElement
     expect(input.value).toBe('triggers.events.candidate_birthday')
   })
+
+  // BUG 2: the modal is wrapped in useFocusTrap, which attaches its own NATIVE
+  // Escape listener to close the WHOLE modal. Escape while the combobox's own
+  // popover is open must close only the popover, never discard the unsaved
+  // trigger config by closing the modal underneath it.
+  it('BUG 2 regression: Escape inside the event picker closes only the picker, never the whole modal', () => {
+    const onClose = vi.fn()
+    render(<ScheduleModal onSave={vi.fn()} onClose={onClose} />)
+    fireEvent.click(screen.getByText('scheduleModal.trigger.event'))
+    const input = screen.getByLabelText('scheduleModal.eventLabel') as HTMLInputElement
+    fireEvent.focus(input)
+    expect(screen.getAllByRole('option').length).toBeGreaterThan(0)
+
+    fireEvent.keyDown(input, { key: 'Escape' })
+
+    // The picker's own dropdown closed…
+    expect(screen.queryAllByRole('option')).toHaveLength(0)
+    // …but the surrounding modal must still be open and onClose must NOT fire.
+    expect(onClose).not.toHaveBeenCalled()
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
+})
+
+// BUG 3: the interval field is a controlled STRING (`intVal`); an emptied field
+// becomes '' and `+''` is 0. The native `min={1}` does nothing outside a real
+// form submit, so Save must be disabled instead.
+describe('ScheduleModal · interval frequency', () => {
+  it('BUG 3 regression: Save is disabled once the interval is cleared to empty/zero', () => {
+    const onSave = vi.fn()
+    render(<ScheduleModal onSave={onSave} onClose={vi.fn()} />)
+    fireEvent.click(screen.getByText('scheduleModal.trigger.scheduled'))
+    fireEvent.click(screen.getByText('scheduleModal.freq.interval'))
+    const saveBtn = screen.getByText('scheduleModal.save') as HTMLButtonElement
+    expect(saveBtn).not.toBeDisabled()
+
+    // Both the number input and the unit <select> share the same aria-label.
+    const intervalInput = screen.getAllByLabelText('scheduleModal.every')
+      .find(el => el.tagName === 'INPUT') as HTMLInputElement
+    fireEvent.change(intervalInput, { target: { value: '' } })
+
+    expect(saveBtn).toBeDisabled()
+    fireEvent.click(saveBtn)
+    expect(onSave).not.toHaveBeenCalled()
+  })
+
+  it('re-enables Save once a valid interval (>= 1) is entered again', () => {
+    const onSave = vi.fn()
+    render(<ScheduleModal onSave={onSave} onClose={vi.fn()} />)
+    fireEvent.click(screen.getByText('scheduleModal.trigger.scheduled'))
+    fireEvent.click(screen.getByText('scheduleModal.freq.interval'))
+    // Both the number input and the unit <select> share the same aria-label.
+    const intervalInput = screen.getAllByLabelText('scheduleModal.every')
+      .find(el => el.tagName === 'INPUT') as HTMLInputElement
+    fireEvent.change(intervalInput, { target: { value: '' } })
+    fireEvent.change(intervalInput, { target: { value: '5' } })
+
+    const saveBtn = screen.getByText('scheduleModal.save') as HTMLButtonElement
+    expect(saveBtn).not.toBeDisabled()
+    fireEvent.click(saveBtn)
+    expect(onSave).toHaveBeenCalledWith('Scheduled', { schedule_type: 'interval', interval_value: 5, interval_unit: 'minutes' })
+  })
 })
 
 describe('scheduleLabel · event trigger', () => {
@@ -98,6 +160,34 @@ describe('ScheduleModal · webhook (AI-agent) trigger', () => {
     render(<ScheduleModal trigger="Webhook" scheduleConfig={{ agent: 'Kees' }} onSave={vi.fn()} onClose={vi.fn()} />)
     const select = await screen.findByLabelText('scheduleModal.agentLabel') as HTMLSelectElement
     expect(select.value).toBe('Kees')
+  })
+
+  // BUG 4: a failed GET /ai/agents used to be swallowed into the same empty list
+  // as "tenant genuinely has zero agents" (`.catch(() => setAgents([]))`) — a
+  // recruiter could never tell a real outage from an empty tenant.
+  it('BUG 4 regression: a failed agent fetch shows a distinct error, never the empty-state copy', async () => {
+    vi.mocked(api.get).mockRejectedValueOnce(new Error('network down'))
+    render(<ScheduleModal onSave={vi.fn()} onClose={vi.fn()} />)
+    fireEvent.click(screen.getByText('scheduleModal.trigger.webhook'))
+
+    const error = await screen.findByRole('alert')
+    expect(error).toHaveTextContent('actionFailed')
+    // Never the misleading "no agents yet" empty-state copy.
+    expect(screen.queryByText('scheduleModal.agentEmpty')).not.toBeInTheDocument()
+    // No picker is rendered at all, so an empty agent can never be saved from here.
+    expect(screen.queryByLabelText('scheduleModal.agentLabel')).not.toBeInTheDocument()
+  })
+
+  it('BUG 4 regression: Save is disabled while no agent is chosen, even once agents load successfully', async () => {
+    const onSave = vi.fn()
+    render(<ScheduleModal onSave={onSave} onClose={vi.fn()} />)
+    fireEvent.click(screen.getByText('scheduleModal.trigger.webhook'))
+    await screen.findByLabelText('scheduleModal.agentLabel')
+
+    const saveBtn = screen.getByText('scheduleModal.save') as HTMLButtonElement
+    expect(saveBtn).toBeDisabled()
+    fireEvent.click(saveBtn)
+    expect(onSave).not.toHaveBeenCalled()
   })
 })
 

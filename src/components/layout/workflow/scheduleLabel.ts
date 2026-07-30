@@ -40,7 +40,14 @@ export function scheduleLabel(t: TFunction, locale: string, trigger?: string, cf
     return t('scheduleModal.label.everyN', { n: cfg.interval_value ?? 1, unit })
   }
   const time = cfg.time ?? '08:00'
-  if (ty === 'daily')     return t('scheduleModal.label.dailyAt', { time })
+  // Daily saves an ARRAY (`cfg.times`, one per run) — `cfg.time` (singular) is
+  // never written for this frequency (useScheduleForm), so reading it here always
+  // fell back to the '08:00' default regardless of what was actually configured.
+  // Join every configured time into the one summary string.
+  if (ty === 'daily') {
+    const list = cfg.times && cfg.times.length > 0 ? cfg.times : [time]
+    return t('scheduleModal.label.dailyAt', { time: list.join(', ') })
+  }
   if (ty === 'weekly') {
     const days = (cfg.days_of_week ?? [1]).map(i => dayName(locale, i)).join(', ')
     return t('scheduleModal.label.weeklyAt', { days, time })

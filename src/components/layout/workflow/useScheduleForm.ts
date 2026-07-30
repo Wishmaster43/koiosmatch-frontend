@@ -43,9 +43,22 @@ export function useScheduleForm(
   const removeTime = (i: number)  => setTimes(ts => ts.filter((_, j) => j !== i))
   const updateTime = (i: number, v: string) => setTimes(ts => ts.map((t, j) => j === i ? v : t))
 
+  // Guards a Save that would persist an unusable config. `min={1}` on the interval
+  // input does nothing outside a real form submit — this is a controlled string
+  // (`intVal`), so an emptied field becomes '' and `+''` is 0, silently saving an
+  // interval of zero. A webhook trigger with no agent chosen would likewise
+  // persist an empty `agent` value. Disabling Save is a hard backstop regardless
+  // of whether the field was ever blurred (a blur-only clamp would miss "delete
+  // then click Save" without tabbing out first).
+  const canSave = !(
+    (type === 'scheduled' && sType === 'interval' && (Number.isNaN(+intVal) || +intVal < 1)) ||
+    (type === 'webhook' && !agentName)
+  )
+
   // Build the trigger name + config the canvas stores; only the fields the
   // chosen frequency actually uses are written, so no stale keys are persisted.
   const handleSave = () => {
+    if (!canSave) return
     if (type === 'manual')  { onSave('Handmatig', null); return }
     if (type === 'instant') { onSave('Direct', null); return }
     // Event trigger: carries the chosen event key, no schedule fields.
@@ -76,7 +89,7 @@ export function useScheduleForm(
     intVal, setIntVal, intUnit, setIntUnit, time, setTime,
     times, addTime, removeTime, updateTime,
     dow, toggleDay, dom, setDom, month, setMonth,
-    handleSave, previewTrigger, previewCfg,
+    handleSave, canSave, previewTrigger, previewCfg,
   }
 }
 

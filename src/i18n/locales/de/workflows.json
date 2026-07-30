@@ -18,7 +18,8 @@
     "addModule": "Modul hinzufügen",
     "closeTitle": "Ohne Speichern schließen",
     "unsavedConfirm": "Sie haben ungespeicherte Änderungen. Möchten Sie wirklich schließen? Ihre Änderungen gehen dann verloren.",
-    "liveRunConfirm": "Es läuft noch eine Ausführung. Sie läuft im Hintergrund weiter, wenn Sie schließen — stoppen können Sie sie mit der Stopp-Taste. Trotzdem schließen?"
+    "liveRunConfirm": "Es läuft noch eine Ausführung. Sie läuft im Hintergrund weiter, wenn Sie schließen — stoppen können Sie sie mit der Stopp-Taste. Trotzdem schließen?",
+    "nameAriaLabel": "Workflow-Name"
   },
   "fields": {
     "boolOn": "An",

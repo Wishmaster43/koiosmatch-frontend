@@ -5,6 +5,24 @@
  *
  * Its own file because it is a self-contained control with three props and its
  * own open/search state — none of which the schedule modal around it cares about.
+ *
+ * ESCAPE BUG FIX: this control lives inside `useFocusTrap`'s panel, which attaches
+ * a NATIVE `keydown` listener directly on the dialog DOM node to close the whole
+ * modal on Escape. That node sits BETWEEN this input and React's root event
+ * delegation, so during the native bubble phase it always fired before this
+ * component's own (bubble-phase) `onKeyDown` ever got a chance — Escape here used
+ * to discard the whole unsaved trigger config (verified with a spike test: a plain
+ * bubble `onKeyDown` never ran before the trap's `onClose`). `SelectMenu`'s own
+ * document-level Escape listener has the exact same latent flaw (also verified);
+ * only `CreatableSelect` truly survives, by portalling its popover out of the
+ * trapped DOM subtree entirely. Portalling this control would mean restructuring
+ * its single always-mounted input into a trigger+portal shape (breaking the
+ * existing tests and drifting from the sibling `MultiSelectField`'s identical
+ * shape), so instead this uses `onKeyDownCapture`: capture-phase listeners are
+ * dispatched at the React root DURING the native capture pass, which completes
+ * BEFORE the bubble phase (and therefore before the trap's node-level bubble
+ * listener) even starts — calling `stopPropagation()` here reliably stops the
+ * event before it ever reaches the trap, closing only this popover.
  */
 import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -35,7 +53,7 @@ export function EventCombobox({ value, onChange, label }: {
           placeholder={labelFor(value)}
           onFocus={() => { setOpen(true); setSearch('') }}
           onChange={e => { setSearch(e.target.value); setOpen(true) }}
-          onKeyDown={e => { if (e.key === 'Escape') setOpen(false) }}
+          onKeyDownCapture={e => { if (e.key === 'Escape') { e.stopPropagation(); setOpen(false) } }}
           style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent',
                    fontSize: 13, color: 'var(--text)' }} />
         <ChevronDown size={13} color="var(--text-muted)" style={{ flexShrink: 0 }} />
