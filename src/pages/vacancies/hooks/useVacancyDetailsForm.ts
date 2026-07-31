@@ -105,7 +105,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     candidateTypes: Array<{ value: string; label: string; color?: string }>
     typeMeta: (v: string) => { label: string; color: string }
   }
-  const { seniorityLevels, educationLevels } = useVacancyLookups()
+  const { seniorityLevels, educationLevels, defaultSeniority, defaultEducation } = useVacancyLookups()
   const { industries } = useIndustries()
   const { functions } = useFunctions() as { functions: Array<string | { value: string; label?: string }> }
   const { formatDate } = useDateFormat()
@@ -190,6 +190,17 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     experienceMin: v.experienceMin, experienceMax: v.experienceMax, seniority: v.seniorityValue, education: v.educationValue,
   })
   const requirementsForm = useEditableForm(seedRequirements)
+  // DEFAULTS-1 (V11/V19): propose the tenant's flagged default seniority/education
+  // into an EMPTY field the moment the Eisen pencil opens. Proposal only — it is
+  // visible in the open form and still needs Save, and a field that already holds a
+  // value is never touched (mirrors useMatchPlacementForm's contract-type proposal).
+  // Runs when edit mode opens or the lookups resolve, so an async lookup still lands.
+  useEffect(() => {
+    if (!requirementsForm.editing) return
+    if (!requirementsForm.form.seniority && defaultSeniority) requirementsForm.setF('seniority', defaultSeniority)
+    if (!requirementsForm.form.education && defaultEducation) requirementsForm.setF('education', defaultEducation)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to opening the editor / the lookups resolving, never to the recruiter's own pick
+  }, [requirementsForm.editing, defaultSeniority, defaultEducation])
   const [skills, setSkills] = useState<string[]>(() => (v.skills ?? []).map(skillStr).filter(Boolean))
   const [newSkill, setNewSkill] = useState('')
   // Skills are quick-editable OUTSIDE the pencil (Danny 2026-07-06: "kan ik niet

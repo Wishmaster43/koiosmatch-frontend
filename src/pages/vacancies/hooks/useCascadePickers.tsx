@@ -27,6 +27,13 @@ interface Args {
  * customer_department_id/contact_id (VacancyWriter's scalar passthrough whitelist),
  * so the picks made here are a real save, not a best-effort no-op — see
  * buildVacancyPatch and DetailsTab's seedCascade.
+ *
+ * VAC-CLEAR-1 (Danny: "gekozen waarde weer leegmaken"): each level is OPTIONAL, so
+ * each level is `clearable`. Clearing emits the empty id, which useVacancyDetailsForm
+ * saves as `null` → buildVacancyPatch → customer_location_id/customer_department_id/
+ * contact_id: null (all three are `sometimes|nullable|uuid` server-side), so an unset
+ * really persists. Clearing the location clears its department too — the same
+ * dependant reset a location SWITCH already does.
  */
 export function useCascadePickers({
   clientId, customerLocationId, onLocationChange, customerDepartmentId, onDepartmentChange, contactId, onContactChange,
@@ -62,14 +69,17 @@ export function useCascadePickers({
   return {
     locationPicker: (
       <CreatableSelect value={customerLocationId || null} onChange={handleLocationChange} allowCreate={false}
+        clearable clearLabel={t('details.customerLocation')}
         placeholder={placeholder} options={opt(locations)} />
     ),
     departmentPicker: (
       <CreatableSelect value={customerDepartmentId || null} onChange={handleDepartmentChange} allowCreate={false}
+        clearable clearLabel={t('details.customerDepartment')}
         placeholder={placeholder} options={opt(departments)} />
     ),
     contactPicker: (
       <CreatableSelect value={contactId || null} onChange={handleContactChange} allowCreate={false}
+        clearable clearLabel={t('details.contactPerson')}
         placeholder={placeholder} options={contacts.map(c => ({ value: String(c.id), label: contactOptionLabel(c) }))} />
     ),
   }

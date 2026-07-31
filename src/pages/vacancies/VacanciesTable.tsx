@@ -63,6 +63,15 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       render: r => <span style={{ color: 'var(--text)', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 300 }} title={r.title}>{r.title}</span>,
     },
     {
+      // Human-readable reference number (V-12, JOB1) — an identifier, so it sits
+      // right after the title. Plain mono text, not the interactive ReferenceNumberChip:
+      // a click-to-copy button nested inside this row's own click-to-open would either
+      // double-fire or need stopPropagation contortions; the drawer chip already copies.
+      key: 'referenceNumber', header: t('columns.referenceNumber'), nowrap: true,
+      cellStyle: { ...mutedCell, fontFamily: 'JetBrains Mono, monospace', fontVariantNumeric: 'tabular-nums' },
+      sortable: true, sortValue: r => r.referenceNumber ?? '', render: r => r.referenceNumber || '—',
+    },
+    {
       key: 'client', header: t('columns.client'), nowrap: true, sortable: true, sortValue: r => r.clientName,
       render: r => r.clientName ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

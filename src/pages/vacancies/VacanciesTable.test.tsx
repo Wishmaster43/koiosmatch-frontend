@@ -167,6 +167,45 @@ describe('VacanciesTable · match count state caveats (VACANCY-LEADS-COUNT-1)', 
   })
 })
 
+// JOB1: the reference number (V-12) is now a real, sortable table column —
+// before this change grepping every pages/*Table.tsx for `referenceNumber`
+// returned nothing at all, so a passing test here MUST fail on a revert.
+// Vacancies carry no backoffice coupling (VacancyResource has no
+// backoffice_links) — JOB2's compact indicator is candidates/customers/matches
+// only, deliberately not added here.
+describe('VacanciesTable · reference number column (JOB1)', () => {
+  it('renders the real referenceNumber value, and a plain dash when absent — never a blank cell', () => {
+    const withRef = { id: 'v1', title: 'Verpleegkundige', referenceNumber: 'V-00012', created: '2024-02-01', createdSort: '2024-02-01' }
+    const withoutRef = { id: 'v2', title: 'Doktersassistent', referenceNumber: '', created: '2024-01-01', createdSort: '2024-01-01' }
+    const { container } = render(<VacanciesTable rows={[withRef, withoutRef] as unknown as Vacancy[]} />)
+
+    const headerCell = screen.getByText('Referentienr.').closest('th') as HTMLElement
+    const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    const tableRows = container.querySelectorAll('tbody tr')
+    const values = Array.from(tableRows).map(r => r.children[colIndex].textContent)
+    expect(values).toContain('V-00012')
+    expect(values).toContain('—')
+  })
+
+  it('sorts by reference number when the column header is clicked', async () => {
+    const user = userEvent.setup()
+    const mixedRows = [
+      { id: 'v1', title: 'A', referenceNumber: 'V-00003', created: '2024-01-01', createdSort: '2024-01-01' },
+      { id: 'v2', title: 'B', referenceNumber: 'V-00001', created: '2024-01-01', createdSort: '2024-01-01' },
+      { id: 'v3', title: 'C', referenceNumber: 'V-00002', created: '2024-01-01', createdSort: '2024-01-01' },
+    ] as unknown as Vacancy[]
+    const { container } = render(<VacanciesTable rows={mixedRows} />)
+
+    const headerCell = screen.getByText('Referentienr.').closest('th') as HTMLElement
+    const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    await user.click(within(headerCell).getByRole('button'))
+
+    const tableRows = container.querySelectorAll('tbody tr')
+    const values = Array.from(tableRows).map(r => r.children[colIndex].textContent)
+    expect(values).toEqual(['V-00001', 'V-00002', 'V-00003'])
+  })
+})
+
 describe('VacanciesTable · default sort (VAC-KPI-REDESIGN 22-07 meelift-fix)', () => {
   it('sorts newest-first by createdAt on first render — defaultSort must match the real column key', () => {
     // The column's real key is 'createdAt' (not 'created'); a stale defaultSort key
