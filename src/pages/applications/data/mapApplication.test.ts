@@ -240,6 +240,32 @@ describe('mapApplicationDetail', () => {
       expect(mapApplicationDetail({ id: 12, interview_consent_given_at: null }).interviewConsentGivenAt).toBeNull()
     })
   })
+
+  // CONTACT-PERSON-1: the vacancy's customer contact, derived by
+  // ApplicationDetailResource::contact() from the linked vacancy's contact_id. These
+  // pin the SEAM — the exact payload that resource emits — because the field was
+  // untested at the mapper level while only the card's render was covered.
+  describe('contact (CONTACT-PERSON-1)', () => {
+    it('maps the resource payload {id,name,email,phone} onto the UI shape', () => {
+      const detail = mapApplicationDetail({
+        id: 13,
+        contact: { id: 'ct-1', name: 'Marieke Jansen', email: 'marieke@zorggroep.nl', phone: '0612345678' },
+      })
+      expect(detail.contact).toEqual({ id: 'ct-1', name: 'Marieke Jansen', email: 'marieke@zorggroep.nl', phone: '0612345678' })
+    })
+
+    // customer_contacts.email/phone are nullable columns, so a REAL contact can arrive
+    // with either missing — consumers gate on truthiness, which needs '' and not null.
+    it("coerces a contact's nullable email/phone to empty strings", () => {
+      const detail = mapApplicationDetail({ id: 14, contact: { id: 'ct-2', name: 'Piet Klaassen', email: null, phone: null } as never })
+      expect(detail.contact).toEqual({ id: 'ct-2', name: 'Piet Klaassen', email: '', phone: '' })
+    })
+
+    it('defaults to null when the vacancy (or its contact_id) is absent', () => {
+      expect(mapApplicationDetail({ id: 15 }).contact).toBeNull()
+      expect(mapApplicationDetail({ id: 16, contact: null }).contact).toBeNull()
+    })
+  })
 })
 
 // Regression (30-07): the backend derives `turn` with a MIXED vocabulary — 'agent' and

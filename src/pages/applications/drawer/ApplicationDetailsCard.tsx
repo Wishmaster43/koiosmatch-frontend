@@ -41,8 +41,9 @@ interface ApplicationDetailsCardProps {
  * pencil → diskette/✕ edit mode as before (S7/S12/S13): the vacancy link and
  * Bron are editable in-place, Klant/Locatie stay read-only (Klant derives from
  * the vacancy, so it is never itself an edit target; phase/recruiter are edited
- * in the drawer header instead). Adds a Contactpersoon row (CONTACT-PERSON-1) —
- * a dash when the application carries no contact at all.
+ * in the drawer header instead). The Contactpersoon row (CONTACT-PERSON-1) is
+ * read-only by derivation, not by omission: it comes from the linked vacancy's
+ * contact_id and is editable only on the vacancy — see the comment at that row.
  */
 export default function ApplicationDetailsCard({ application: a, onLinkVacancy, onUpdateSource }: ApplicationDetailsCardProps) {
   const { t } = useTranslation(['applications', 'common'])
@@ -109,9 +110,15 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
             `ApplicationDetail` before the full GET /applications/{id} resolves —
             `vacancy` only exists once that fetch lands. */}
         <Field label={t('drawer.location')}>{a.vacancy?.location || '—'}</Field>
-        {/* CONTACT-PERSON-1 (Danny 25-07 d): the vacancy/customer contact person —
-            phone/email as a muted second line when present, dash when the
-            application carries no contact at all. */}
+        {/* CONTACT-PERSON-1: the vacancy's customer contact, LIVE on
+            ApplicationDetailResource — phone/email as a muted second line when
+            present, dash when there is none. Deliberately outside the pencil's edit
+            mode: the field is derived from the vacancy's contact_id, and
+            UpdateApplicationRequest has no contact field, so a picker here would
+            PATCH nothing. Changing it happens on the vacancy (Vacature tab →
+            Details → Contactpersoon, PATCH /vacancies/{id}), which is also where the
+            vacancies.update permission is checked. email/phone are nullable, so this
+            gates on truthiness (`a.contact?.name`), never on `!== null`. */}
         <Field label={t('drawer.contactPerson')}>
           {a.contact?.name ? (
             <>

@@ -30,6 +30,13 @@ interface ApplicationTabProps {
   onUpdateSource?: (id: Id | undefined, source: string) => void
 }
 
+// True when the sanitised motivation carries no markup at all. The careersite posts
+// rich text, but the partner API may post PLAIN text whose newlines would otherwise
+// collapse into one unbroken paragraph in the DOM. Only that case gets `pre-wrap`:
+// applying it to real HTML would turn the newlines BETWEEN its <p> tags into visible
+// blank lines. `<` must be followed by a letter, so "5 < 6" is still plain text.
+const isPlainText = (html: string) => !/<[a-z][\s\S]*?>/i.test(html)
+
 /**
  * ApplicationTab — the "Sollicitatie" tab: a thin COMPOSER (Danny 25-07: the
  * screen read as empty/sparse and had a duplicate AI-branded block; both fixed
@@ -74,21 +81,28 @@ export default function ApplicationTab({ application: a, onAdjustScore, onLinkVa
           other applicants (Danny 25-07 d). */}
       <CompetitionBlock application={a} />
 
-      {/* MOTIVATIE-ZICHTBAAR-1 (Danny 23-07): the careersite apply's motivation
-          letter, surfaced for the recruiter — honest-gated on `coverLetter`
-          being non-empty (no dead chrome while CMBE hasn't shipped it on the
-          detail resource yet). It can carry HTML from the public site, so it
-          renders through the shared SafeHtml/DOMPurify (§7), never raw. */}
+      {/* MOTIVATIE-ZICHTBAAR-1: the applicant's motivation letter, delivered by the
+          drawer's own GET /applications/{id} (ApplicationDetailResource.cover_letter).
+          The truthiness check is permanent, NOT a gate on an awaited field: only the
+          public careersite apply and the partner API ever write cover_letter, and a
+          vacancy with app_cover_letter = HIDDEN never stores it — so most applications
+          legitimately have none and a card showing a dash would be pure noise. It also
+          catches the '' the server sends for a letter that stripped to nothing.
+          Untrusted public input: always through SafeHtml/DOMPurify (§7), never raw. */}
       {a.coverLetter && (
         <SectionCard title={t('motivation.title')}>
-          <SafeHtml html={a.coverLetter} style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.5 }} />
+          <SafeHtml html={a.coverLetter} style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.5,
+            whiteSpace: isPlainText(a.coverLetter) ? 'pre-wrap' : undefined }} />
         </SectionCard>
       )}
 
       {/* INTERVIEW-CONSENT-PERSIST-1: the applicant's (AI-)interview consent tick
-          from the public apply form — a calm, one-line AVG evidence row. Honest-
-          gated on the timestamp being non-null (no consent given, or the vacancy's
-          setting hid the field entirely) — no row at all rather than a fake state. */}
+          from the public apply form — a calm, one-line AVG evidence row. The
+          null-check is permanent null-safety, NOT a gate on an awaited backend
+          field: the backend ships the timestamp today, but it is null on every
+          application that did not come through the careersite. Absence therefore
+          proves nothing, so we show the row only as positive evidence — never a
+          "no consent" line, and never an unguarded formatDateTime(null). */}
       {a.interviewConsentGivenAt && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-muted)' }}>
           <ShieldCheck size={12} />

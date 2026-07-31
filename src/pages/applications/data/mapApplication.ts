@@ -250,8 +250,9 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     // MOTIVATIE-ZICHTBAAR-1: the careersite motivation letter, null-safe until
     // CMBE emits `cover_letter` on the detail resource (honest-gated in the tab).
     coverLetter: raw.cover_letter ?? null,
-    // INTERVIEW-CONSENT-PERSIST-1: null-safe read of the consent timestamp —
-    // stays null when no consent was given or the field was hidden on apply.
+    // INTERVIEW-CONSENT-PERSIST-1: null-safe read of the consent timestamp. Null is
+    // the NORMAL case — only the public careersite apply ever writes it — so it means
+    // "no consent recorded", not "consent refused" (see types/application.ts).
     interviewConsentGivenAt: raw.interview_consent_given_at ?? null,
     // Rejection trail (reason + toelichting/note + channel/sent_at) — S9 finding:
     // this was NEVER mapped, so a rejected application always showed just the

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Hand, PlayCircle } from 'lucide-react'
@@ -6,12 +6,13 @@ import Avatar from '@/components/ui/Avatar'
 import SoftChip from '@/components/ui/SoftChip'
 import StatusPill from '@/components/ui/StatusPill'
 import { useAuth } from '@/context/AuthContext'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { BTN_H } from '@/config/buttonMetrics'
 import { interviewCategoryColor } from '../data/applicationsShared'
-import type { ApplicationInterview } from '@/types/application'
+import { mapInterview } from '../data/mapApplication'
+import type { ApiApplication, ApplicationInterview } from '@/types/application'
 import type { Id } from '@/types/common'
 
 // Soft-chip colour per turn (§4 semantic tokens, never ad-hoc hex) — who is
@@ -63,35 +64,49 @@ const actionBtnStyle = (active: boolean, danger: boolean): CSSProperties => ({
 
 /**
  * InterviewStatusCard — the compact "who's talking to whom, right now" summary
- * for the live interview session: agent, flow, turn, step and total duration
- * (INTERVIEW-VISIBILITY-1, speculative — Danny 21-07). Built against the
- * PROPOSED contract; every new field is optional so today's real payload
- * (which only sends category/step/total) renders the calm/honest branches
- * instead of crashing or inventing a value (§3 no fake affordances).
+ * for the live interview session: agent, flow, turn, step and total duration.
+ * Every visibility field stays optional, so a payload that carries only
+ * category/step/total still renders the calm branches instead of inventing a
+ * value (§3 no fake affordances).
  *
- * INTERVIEW-STOP-1 (Danny 22-07): the stop/takeover button now calls the REAL
- * `POST /applications/{id}/stop-interview` — the previous `/interviews/{id}/
- * takeover` route was a phantom endpoint that never existed. A resume
- * affordance mirrors it for the `paused` category → `POST /applications/{id}/
- * resume-interview`. Both honest-gate a real 404 (route not shipped yet) AND
- * the session's own `id` (still awaiting INTERVIEW-SESSION-ID-AGENT) — needs
- * `applicationId` from the caller since neither route embeds the interview id.
+ * INTERVIEW-STOP-1 is LIVE (measured 31-07). `POST /applications/{id}/stop-interview`
+ * and `POST /applications/{id}/resume-interview` are registered inside the tenant
+ * group behind `permission:applications.update` and answer `{status: 'paused' |
+ * 'active', paused_at}`. Consequences encoded below:
+ *  · both routes target the APPLICATION id — the interview session id is never sent,
+ *    so the buttons do NOT gate on `interview.id` (the LIST payload has no session id,
+ *    which made the control read "unavailable" until the detail fetch landed);
+ *  · a 404 is the backend's ordinary "no open interview session for this application"
+ *    reply — it shows a notice and the control stays retryable, it does NOT mean the
+ *    route is missing (that stale reading permanently killed the button);
+ *  · the action responses carry only status/paused_at, so a success reconciles from a
+ *    `GET /applications/{id}` refetch — the backend derives `turn` (and who paused)
+ *    itself, and this card must show that, not a local guess.
  */
 export default function InterviewStatusCard({ interview, applicationId }: { interview: ApplicationInterview | null; applicationId?: Id }) {
   const { t } = useTranslation('applications')
   const auth = useAuth()
-  // Mirrors ApplicationsPage's own canManage gate (applications.update) — this
-  // component can't read ApplicationDrawer's prop (another agent owns that file
-  // right now), so it checks the permission directly, same source of truth.
+  // Mirrors ApplicationsPage's own canManage gate and the route's own
+  // `permission:applications.update` middleware — same permission string, same
+  // source of truth. The backend re-checks (403); the UI only hides what the
+  // user may not do.
   const canManage = auth?.hasPermission?.('applications.update') ?? false
 
-  // Optimistic local override for both actions (stop → paused/recruiter, resume →
-  // busy/agent), plus per-action "the endpoint doesn't exist yet" flags — set only
-  // after a REAL 404, never assumed up front (the honest-gate reacts to the actual response).
-  const [override, setOverride] = useState<{ category: 'busy' | 'paused'; turn: 'agent' | 'recruiter' } | null>(null)
-  const [stopUnavailable, setStopUnavailable] = useState(false)
-  const [resumeUnavailable, setResumeUnavailable] = useState(false)
+  // Session state as the SERVER last reported it (action response + refetch);
+  // null = "nothing newer than the prop". Plus the 404 "no interview running"
+  // notice, which is informative, never a permanent disable.
+  const [refreshed, setRefreshed] = useState<ApplicationInterview | null>(null)
+  const [noSession, setNoSession] = useState(false)
   const [busy, setBusy] = useState(false)
+
+  // Alive guard, re-armed in SETUP (§9: a cleanup-only ref stays false after
+  // StrictMode's double mount and silently kills every later setState).
+  const alive = useRef(true)
+  useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
+
+  // A fresh prop wins over our local copy: once the drawer refetches the
+  // application, its data is the newer truth and this card must not shadow it.
+  useEffect(() => { setRefreshed(null); setNoSession(false) }, [interview])
 
   // No session at all yet — a calm placeholder, not an empty blank area.
   if (!interview) {
@@ -102,78 +117,100 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
     )
   }
 
-  const category = override?.category ?? interview.category
-  const turn = override?.turn ?? interview.turn
-  const durationSeconds = resolveDurationSeconds(interview)
+  const live = refreshed ?? interview
+  const category = live.category
+  const turn = live.turn
+  const durationSeconds = resolveDurationSeconds(live)
   const duration = durationSeconds != null ? splitDuration(durationSeconds) : null
   // True once the backend has actually sent ANY INTERVIEW-VISIBILITY-1 field —
   // until then, show ONE calm notice instead of four separate "unknown" chips.
-  const hasVisibilityData = Boolean(interview.agent || interview.flowName || interview.turn || durationSeconds != null)
+  const hasVisibilityData = Boolean(live.agent || live.flowName || live.turn || durationSeconds != null)
 
-  const canStop = canManage && category === 'busy' && interview.id != null && applicationId != null && !stopUnavailable && turn !== 'recruiter'
+  // Operable whenever there is an application to target and the session looks
+  // live — no session-id precondition (neither route takes one). `applicationId`
+  // is the only hard requirement: without it there is literally no URL to call.
+  const canStop = canManage && category === 'busy' && applicationId != null && turn !== 'recruiter'
   const stopDisabledReason = !canManage ? null
     : turn === 'recruiter' ? null
     : category !== 'busy' ? t('interview.status.takeoverNotActive')
-    : (interview.id == null || applicationId == null || stopUnavailable) ? t('interview.status.takeoverUnavailable')
+    : applicationId == null ? t('interview.status.takeoverUnavailable')
     : null
 
-  const canResume = canManage && category === 'paused' && interview.id != null && applicationId != null && !resumeUnavailable
-  const resumeDisabledReason = (interview.id == null || applicationId == null || resumeUnavailable) ? t('interview.status.resumeUnavailable') : null
+  const canResume = canManage && category === 'paused' && applicationId != null
+  const resumeDisabledReason = applicationId == null ? t('interview.status.resumeUnavailable') : null
 
-  // Real POST — no fake affordance (§3): this really calls the (now real)
-  // stop-interview endpoint. A 404 (endpoint not shipped yet) disables the
-  // button honestly; any other failure surfaces a message but stays retryable.
-  const onStop = async () => {
-    if (!canStop || busy) return
-    setBusy(true)
+  // Re-read this application's interview block after a successful action: the
+  // action response only says paused/active, while `turn` and the pause metadata
+  // are derived server-side. `include_archived` mirrors the drawer's own fetch —
+  // it only widens the lookup, never narrows an active row's.
+  const refreshInterview = async () => {
+    if (applicationId == null) return
     try {
-      await api.post(`/applications/${applicationId}/stop-interview`)
-      setOverride({ category: 'paused', turn: 'recruiter' })
-      notifySuccess(t('interview.status.takeoverSuccess'))
-    } catch (err) {
-      const status = (err as { response?: { status?: number } })?.response?.status
-      if (status === 404) {
-        setStopUnavailable(true)
-        notifyError(t('interview.status.takeoverUnavailable'))
-      } else {
-        notifyError(extractApiError(err, t('interview.status.takeoverFailed')))
-      }
-    } finally {
-      setBusy(false)
+      const res = await api.get(`/applications/${applicationId}`, { params: { include_archived: 1 } })
+      const fresh = mapInterview(unwrap<ApiApplication>(res)?.interview)
+      if (alive.current && fresh) setRefreshed(fresh)
+    } catch {
+      // The action itself already succeeded; keep the response-derived state
+      // rather than reverting to a stale prop or claiming a failure.
     }
   }
 
-  // Mirrors onStop for the reverse action — hands control back to the agent.
-  const onResume = async () => {
-    if (!canResume || busy) return
+  // One runner for both directions — identical seam, different copy. Real POST
+  // to the real route; the server's own verdict drives the new category.
+  const runAction = async (route: 'stop-interview' | 'resume-interview', successKey: string, failedKey: string) => {
+    if (busy || applicationId == null) return
     setBusy(true)
+    setNoSession(false)
     try {
-      await api.post(`/applications/${applicationId}/resume-interview`)
-      setOverride({ category: 'busy', turn: 'agent' })
-      notifySuccess(t('interview.status.resumeSuccess'))
+      const res = await api.post(`/applications/${applicationId}/${route}`)
+      const body = unwrap<{ status?: string; paused_at?: string | null }>(res)
+      const paused = body?.status === 'paused'
+      if (!alive.current) return
+      // Paused ⇒ the backend derives turn='recruiter' from paused_at, so that is
+      // reported, not guessed. Resumed ⇒ it derives agent-vs-candidate from the
+      // last message direction, which only the refetch knows — so blank the turn
+      // instead of showing a made-up one.
+      setRefreshed(prev => ({
+        ...(prev ?? interview),
+        category: paused ? 'paused' : 'busy',
+        pausedAt: body?.paused_at ?? null,
+        turn: paused ? 'recruiter' : null,
+      }))
+      notifySuccess(t(successKey))
+      await refreshInterview()
     } catch (err) {
+      if (!alive.current) return
       const status = (err as { response?: { status?: number } })?.response?.status
       if (status === 404) {
-        setResumeUnavailable(true)
-        notifyError(t('interview.status.resumeUnavailable'))
+        // Business reply, not a missing route: no open interview session for this
+        // application (or an id this tenant cannot see). Say so; stay retryable.
+        setNoSession(true)
+        notifyError(t('interview.status.noRunningSession'))
+      } else if (status === 403) {
+        // Permission revoked since the drawer opened — the backend is the authority.
+        notifyError(t('interview.status.notAllowed'))
       } else {
-        notifyError(extractApiError(err, t('interview.status.resumeFailed')))
+        notifyError(extractApiError(err, t(failedKey)))
       }
     } finally {
-      setBusy(false)
+      if (alive.current) setBusy(false)
     }
   }
+
+  // Pause the AI so the recruiter answers, and hand it back — same runner.
+  const onStop = () => { if (canStop) void runAction('stop-interview', 'interview.status.takeoverSuccess', 'interview.status.takeoverFailed') }
+  const onResume = () => { if (canResume) void runAction('resume-interview', 'interview.status.resumeSuccess', 'interview.status.resumeFailed') }
 
   return (
     <div style={cardStyle}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
         {/* Agent identity — honest "unknown agent" while the field is unconfirmed. */}
-        <Avatar initials={(interview.agent?.name?.[0] ?? '?').toUpperCase()} size={26} />
+        <Avatar initials={(live.agent?.name?.[0] ?? '?').toUpperCase()} size={26} />
         <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
-            {interview.agent?.name || t('interview.status.noAgent')}
+            {live.agent?.name || t('interview.status.noAgent')}
           </span>
-          {interview.flowName && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{interview.flowName}</span>}
+          {live.flowName && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{live.flowName}</span>}
         </div>
 
         {/* Turn — soft chip, colour + TEXT (never colour-only, §6 a11y). */}
@@ -181,9 +218,9 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
 
         {/* Category + step (INTERVIEW-PHASE-1 — already real today). */}
         <StatusPill label={t(`interview.category.${category}`)} color={interviewCategoryColor(category)} />
-        {interview.total > 0 && (
+        {live.total > 0 && (
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-            {t('interview.stepOf', { step: interview.step ?? '–', total: interview.total })}
+            {t('interview.stepOf', { step: live.step ?? '–', total: live.total })}
           </span>
         )}
 
@@ -228,6 +265,14 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
             </button>
           )}
         </div>
+      )}
+
+      {/* The 404 answer, in words: this application has no running interview
+          (any more). Informative — the buttons above stay clickable. */}
+      {noSession && (
+        <span style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+          {t('interview.status.noRunningSession')}
+        </span>
       )}
     </div>
   )

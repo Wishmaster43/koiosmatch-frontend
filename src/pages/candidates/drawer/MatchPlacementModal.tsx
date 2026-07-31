@@ -3,9 +3,12 @@
  * (MATCH-PLACEMENT-1, fase 1). A placement IS the Match (one record), so this
  * POSTs to /matches with the contract/financial layer. The customer→location→
  * department→contact cascade, function + contract-type dropdowns, dates/hours and
- * the purchase/sell/margin block all work now; /matches tolerates the extra fields
- * (ignored until the backend model lands, then persisted). Rates propose from a
- * price agreement / conversion factor once customer + function are picked
+ * the purchase/sell/margin block all work now, and /matches PERSISTS every one of
+ * them (the placement columns are real — StoreMatchRequest validates them via the
+ * shared PlacementRules trait; this used to say they were "ignored until the backend
+ * model lands"). Contract type + CAO are validated against their tenant lookups
+ * server-side, so a value the dropdown never offered is a 422, not a phantom row.
+ * Rates propose from a price agreement / conversion factor once customer + function are picked
  * (MATCH-PLACEMENT-2, useRateProposal) — the margin is shown live. The
  * long-list relational pickers (klant/locatie/afdeling/contactpersoon/functie/
  * vacature) are typeable searchable comboboxes via the shared CreatableSelect

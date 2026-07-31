@@ -222,8 +222,10 @@ describe('ApplicationTab', () => {
     })
   })
 
-  // MOTIVATIE-ZICHTBAAR-1 (Danny 23-07): the careersite motivation letter is
-  // honest-gated — no block at all until CMBE emits `coverLetter`.
+  // MOTIVATIE-ZICHTBAAR-1: the backend ships cover_letter on the detail resource
+  // today, but only careersite/partner-API applies ever populate it. These cases lock
+  // both halves — the letter renders, and its absence renders nothing at all rather
+  // than an empty card — plus the plain-text line-break fallback.
   describe('Motivation section (MOTIVATIE-ZICHTBAAR-1)', () => {
     it('renders the motivation section when coverLetter is present', () => {
       renderTab(<ApplicationTab application={app({ coverLetter: '<p>Ik solliciteer graag op deze functie.</p>' })} />)
@@ -240,10 +242,28 @@ describe('ApplicationTab', () => {
       renderTab(<ApplicationTab application={app({ coverLetter: '' })} />)
       expect(screen.queryByText('motivation.title')).toBeNull()
     })
+
+    // A partner-API apply can post PLAIN text: without pre-wrap its newlines
+    // collapse and the whole letter renders as one unbroken block.
+    it('preserves line breaks for a PLAIN-TEXT motivation (white-space: pre-wrap)', () => {
+      renderTab(<ApplicationTab application={app({ coverLetter: 'Beste,\n\nGraag solliciteer ik.\nMet groet, Anna' })} />)
+      const body = screen.getByText(/Graag solliciteer ik/)
+      expect(body).toHaveStyle({ whiteSpace: 'pre-wrap' })
+    })
+
+    // The inverse guard: real HTML must NOT get pre-wrap, or the newlines between
+    // its <p> tags would render as visible blank lines.
+    it('does NOT apply pre-wrap to an HTML motivation', () => {
+      renderTab(<ApplicationTab application={app({ coverLetter: '<p>Regel een</p>\n<p>Regel twee</p>' })} />)
+      const body = screen.getByText('Regel een').parentElement as HTMLElement
+      expect(body).not.toHaveStyle({ whiteSpace: 'pre-wrap' })
+    })
   })
 
-  // INTERVIEW-CONSENT-PERSIST-1 (Danny 23-07): the consent-tick evidence row is
-  // honest-gated — no row at all until CMBE puts a real timestamp on the field.
+  // INTERVIEW-CONSENT-PERSIST-1: the backend ships the timestamp today, but it is
+  // null on every application that did not come through the careersite. These two
+  // cases lock BOTH halves: positive evidence renders, absence renders nothing —
+  // dropping the null-check would print "…given on Invalid Date" on most rows.
   describe('Interview consent row (INTERVIEW-CONSENT-PERSIST-1)', () => {
     it('renders the consent row with the formatted date when interviewConsentGivenAt is present', () => {
       renderTab(<ApplicationTab application={app({ interviewConsentGivenAt: '2026-07-20T10:00:00Z' })} />)

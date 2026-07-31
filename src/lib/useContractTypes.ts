@@ -1,27 +1,34 @@
 /**
  * useContractTypes — tenant-configurable contract types for a match/placement
  * (Settings → Matches). NBBU/ABU fasen differ per bureau, so it is a tenant lookup,
- * never hardcoded. Fed by GET /contract-types once the backend ships it
- * (MATCH-PLACEMENT-1); a seed fallback drives the dropdown until then.
+ * never hardcoded. Fed by GET /contract-types; a seed fallback drives the dropdown
+ * only when that response carries nothing usable.
  *
- * `options` (7.1, MATCH-CONTRACT-DURATION-1) carries each type's
- * `default_duration_days` alongside value/label, feeding the placement form's
- * end-date PROPOSAL (useEndDateProposal). Honest-gated: the backend column
- * doesn't exist yet, so every row's `default_duration_days` is `null` until it
- * ships — the proposal then simply stays a no-op, never a crash. `types`
- * (string[]) stays exactly as before for the existing callers (ContractSection's
- * dropdown, the matches drawer, the vacancy-generation matcher) that only need
- * the label list.
+ * BACKEND CONTRACT (verified against koiosmatch-api, 2026-07-31 — this replaces the
+ * old "honest-gate" note that said the columns did not exist yet; they do):
+ *  - `GET /contract-types` is registered on the auth:sanctum + tenant group with NO
+ *    permission middleware, so any authenticated tenant user may read it. Only the
+ *    Settings writes (POST/PUT/DELETE) require `permission:settings.update`, which is
+ *    why nothing in this read path is permission-gated.
+ *  - `default_duration_days` (integer|null, validated 1..3650) and `is_default`
+ *    (boolean, a HasSingletonFlag — at most one row carries it) are real columns.
+ *    index() returns raw Eloquent models, so BOTH always serialise — no Resource, no
+ *    whenLoaded, no $hidden to strip them.
+ *  - Each row's `value` is an IMMUTABLE SLUG (`bepaalde_tijd`) and `label` is the
+ *    tenant's editable wording (`Bepaalde tijd`). A placement stores the SLUG:
+ *    App\Support\PlacementRules normalises a posted label to its `value` before
+ *    saving, because the lookup's in-use/DELETE-409 guard JOINs on that column.
+ *    Posting either form is accepted; reading one back always yields the slug.
  *
- * `is_default` (Danny 24-07, "voorstel waarde" for Contractsoort) reuses the same
- * singleton flag as phases/appointment-types/-locations/funnel-stages
- * (Settings → Matches → Contractsoort now passes StatusListEditor's
- * `defaultField`) — useMatchPlacementForm preselects whichever type carries it,
- * into an EMPTY field only. Honest-gated the same way as `default_duration_days`
- * above: `/contract-types` was NOT one of the three lookups the backend shipped
- * `is_default` for (LOOKUP-DEFAULT-1 covered appointment_types/-locations/
- * application_stages only), so this reads `false` from every real API row until
- * a backend follow-up adds the column — a no-op, never a crash, same gate.
+ * OUT OF THE BOX BOTH COLUMNS ARE EMPTY. MatchOutreachLookupSeeder seeds the six
+ * types with value/label/color/sort_order/active only, so a fresh tenant has
+ * `default_duration_days: null` and `is_default: false` on every row. The end-date
+ * proposal and the default preselect are therefore inert until a tenant actually
+ * configures one in Settings — correct honest behaviour, not a gate.
+ *
+ * `types` (string[]) stays exactly as before for the callers that only need the
+ * label list (ContractSection's dropdown, the matches drawer, the vacancy-generation
+ * matcher); `options` carries the full row for the two proposals above.
  *
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
@@ -43,7 +50,8 @@ export const DEFAULT_CONTRACT_TYPES = [
 
 export interface ContractTypeOption { value: string; label: string; default_duration_days: number | null; is_default: boolean }
 
-// Seed carries no duration/default — nothing to propose from until the backend ships either column.
+// Seed rows are label-only (value === label) and carry no duration/default — a
+// fallback list can't know a tenant's configuration, so both proposals stay inert on it.
 const DEFAULT_CONTRACT_TYPE_OPTIONS: ContractTypeOption[] =
   DEFAULT_CONTRACT_TYPES.map(name => ({ value: name, label: name, default_duration_days: null, is_default: false }))
 
@@ -61,7 +69,8 @@ const mapContractTypeOptions = (res: AxiosResponse): ContractTypeOption[] | null
 }
 
 export function useContractTypes() {
-  // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
+  // One cached GET /contract-types per session; the seed list stands in only while
+  // that request is in flight or if it returns nothing usable (mapper → null).
   const { data: options } = useCachedLookup('/contract-types', mapContractTypeOptions, DEFAULT_CONTRACT_TYPE_OPTIONS)
   const types = options.map(o => o.label)
   return { types, options }

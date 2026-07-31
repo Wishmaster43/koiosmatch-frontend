@@ -17,7 +17,10 @@
  *
  * Danny 24-07 additions: contract type/CAO are now lookup-backed (useContractTypes/
  * useCao) instead of a free label/free text, with an is_default-driven PROPOSAL for
- * contract type; the inline new-contact form gained function/phone/mobile fields
+ * contract type (create only) and an end-date proposal from the type's
+ * `default_duration_days` — both backed by real backend columns, both inert until a
+ * tenant configures them (see useContractTypes for the verified contract); the
+ * inline new-contact form gained function/phone/mobile fields
  * (useContactFunctions) plus a client-side duplicate-contact preflight
  * (findDuplicateContact, helpers.ts) since the backend enforces no such uniqueness.
  *
@@ -162,16 +165,29 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, editMatch
   // ── Contract ──
   const [contractType, setContractType] = useState('')
   // Default contract-type PROPOSAL (Danny 24-07 point 4): a tenant can mark ONE
-  // contract type as its default via the shared StatusListEditor singleton flag
-  // (mirrors phases/appointment-types' is_default — see ContractTypesSettings and
-  // useContractTypes' is_default doc comment for the backend honest-gate). This
-  // only preselects an EMPTY field — a value the recruiter already picked wins.
+  // contract type as its default (`is_default`, a real backend singleton flag —
+  // see useContractTypes for the verified contract). CREATE ONLY: proposing into an
+  // existing record would silently rewrite a match the recruiter opened to edit.
+  // One-shot via the ref, so clearing the field by hand keeps it cleared.
+  const contractTypeProposedRef = useRef(false)
   useEffect(() => {
-    if (contractType) return
+    if (editing || contractTypeProposedRef.current || contractType) return
     const def = contractTypeOptions.find(o => o.is_default)
-    if (def) setContractType(def.label)
+    if (!def) return
+    contractTypeProposedRef.current = true
+    setContractType(def.label)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the options list resolving, never to the recruiter's own pick
   }, [contractTypeOptions])
+  // Show the tenant's wording, not the stored slug. A match reads back
+  // `contract_type` as the immutable slug (the backend normalises a posted label to
+  // `value` before saving), while the picker lists labels — so canonicalise once the
+  // options resolve, otherwise an edit form shows a raw `bepaalde_tijd` in the field.
+  // Anything unknown (an unconfigured lookup's free text) is left untouched, never blanked.
+  useEffect(() => {
+    if (!contractType) return
+    const label = contractTypeOptions.find(o => o.value === contractType)?.label
+    if (label && label !== contractType) setContractType(label)
+  }, [contractTypeOptions, contractType])
   // Proposal, not a hard default — the recruiter can freely change it (job 19).
   const [startDate, setStartDate] = useState(todayISO)
   // End-date PROPOSAL (7.1): from the picked contract type's default duration —

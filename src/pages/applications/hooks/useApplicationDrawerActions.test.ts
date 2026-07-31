@@ -24,6 +24,7 @@ import { notifyError, notifySuccess } from '@/lib/notify'
 
 const post = api.post as unknown as ReturnType<typeof vi.fn>
 const apiPatch = api.patch as unknown as ReturnType<typeof vi.fn>
+const apiGet = api.get as unknown as ReturnType<typeof vi.fn>
 const t = ((k: string) => k) as unknown as import('i18next').TFunction
 
 const FUNNEL: LookupItem[] = [
@@ -195,5 +196,64 @@ describe('useApplicationDrawerActions · handleUpdateCustomFields', () => {
     await waitFor(() => expect(notifyError).toHaveBeenCalled())
     expect(result.current.actions.selected?.customFields).toEqual({ shift: 'day' })
     expect(notifyError).toHaveBeenCalledWith('Veld ongeldig')
+  })
+})
+
+/**
+ * MOTIVATIE-ZICHTBAAR-1 — the seam that actually carries the motivation letter.
+ * ApplicationListResource omits `cover_letter` entirely, so the row the table already
+ * holds can NEVER supply it: the drawer's own detail GET is the only delivery path.
+ * These assert the request itself (route + params) and that the response's field lands
+ * on the open drawer — not merely that some handler ran.
+ */
+describe('useApplicationDrawerActions · selectApplication (motivation delivery)', () => {
+  beforeEach(() => { vi.clearAllMocks() })
+
+  it('GETs /applications/{id} with include_archived=1 and lands cover_letter on the drawer', async () => {
+    apiGet.mockResolvedValue({ data: { data: { id: 1, cover_letter: '<p>Waarom ik solliciteer</p>' } } })
+    const { result } = harness([app()])
+    act(() => { result.current.actions.selectApplication(app()) })
+    // include_archived=1 is load-bearing: show() 404s on a soft-deleted row without it,
+    // so an archived application would lose its motivation (and its whole detail).
+    expect(apiGet).toHaveBeenCalledWith('/applications/1', { params: { include_archived: 1 } })
+    await waitFor(() => expect(result.current.actions.selected?.coverLetter).toBe('<p>Waarom ik solliciteer</p>'))
+  })
+
+  it('leaves coverLetter null when the detail response carries no cover_letter', async () => {
+    apiGet.mockResolvedValue({ data: { data: { id: 1 } } })
+    const { result } = harness([app()])
+    act(() => { result.current.actions.selectApplication(app()) })
+    // Wait for the MAPPED detail (customFields only exists after mapApplicationDetail),
+    // not the light row selectApplication shows synchronously first.
+    await waitFor(() => expect(result.current.actions.selected?.customFields).toEqual({}))
+    expect(result.current.actions.selected?.coverLetter).toBeNull()
+  })
+})
+
+/**
+ * INTERVIEW-CONSENT-PERSIST-1 — the AVG evidence seam, end to end. The mapper test
+ * proves raw→model and the tab test proves model→render, but nothing asserted the
+ * REQUEST in between: that opening a drawer really GETs the detail route (the only
+ * resource carrying this field — the list resource omits it) and that the timestamp
+ * survives unwrap+map onto the model the tab reads.
+ */
+describe('useApplicationDrawerActions · selectApplication (INTERVIEW-CONSENT-PERSIST-1)', () => {
+  beforeEach(() => { vi.clearAllMocks() })
+
+  it('GETs the detail route and carries interview_consent_given_at onto the drawer model', async () => {
+    apiGet.mockResolvedValue({ data: { data: { id: 1, interview_consent_given_at: '2026-07-20T10:00:00+00:00' } } })
+    const { result } = harness([app()])
+    act(() => { result.current.actions.selectApplication(app({ id: 1 })) })
+    await waitFor(() => expect(result.current.actions.selected?.interviewConsentGivenAt).toBe('2026-07-20T10:00:00+00:00'))
+    // The exact seam: method, route and params (include_archived so an archived row resolves too).
+    expect(apiGet).toHaveBeenCalledWith('/applications/1', { params: { include_archived: 1 } })
+  })
+
+  it('leaves the model null when the detail response omits the field (the non-careersite norm)', async () => {
+    apiGet.mockResolvedValue({ data: { data: { id: 1 } } })
+    const { result } = harness([app()])
+    act(() => { result.current.actions.selectApplication(app({ id: 1 })) })
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+    await waitFor(() => expect(result.current.actions.selected?.interviewConsentGivenAt).toBeNull())
   })
 })
