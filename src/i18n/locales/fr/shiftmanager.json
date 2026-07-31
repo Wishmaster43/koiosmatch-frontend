@@ -311,9 +311,7 @@
       "byCustomer": "Par client"
     }
   },
-  "customersPage": {
-    "addDisabledReason": "Les nouveaux clients sont créés dans ShiftManager et sont reflétés ici automatiquement."
-  },
+  "customersPage": {},
   "locationsPage": {
     "drawerTitle": "Site",
     "kpi": {

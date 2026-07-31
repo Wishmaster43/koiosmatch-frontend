@@ -311,9 +311,7 @@
       "byCustomer": "Nach Kunde"
     }
   },
-  "customersPage": {
-    "addDisabledReason": "Neue Kunden werden in ShiftManager angelegt und hier automatisch gespiegelt."
-  },
+  "customersPage": {},
   "locationsPage": {
     "drawerTitle": "Standort",
     "kpi": {

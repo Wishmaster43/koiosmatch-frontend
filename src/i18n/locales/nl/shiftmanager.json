@@ -311,9 +311,7 @@
       "byCustomer": "Per klant"
     }
   },
-  "customersPage": {
-    "addDisabledReason": "Nieuwe klanten worden aangemaakt in ShiftManager en hier automatisch gespiegeld."
-  },
+  "customersPage": {},
   "locationsPage": {
     "drawerTitle": "Locatie",
     "kpi": {

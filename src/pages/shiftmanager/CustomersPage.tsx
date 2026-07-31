@@ -7,10 +7,7 @@ import ErrorBanner from '@/components/ui/ErrorBanner'
 import { isAbortError } from '@/lib/mocks'
 import CustomersTable from './CustomersTable'
 import CustomersInsightsRow from './CustomersInsightsRow'
-import AddCustomerModal from './AddCustomerModal'
-import type { CustomerForm } from './AddCustomerModal'
 import PaginationBar from '@/components/ui/PaginationBar'
-import { BTN_H } from '@/config/buttonMetrics'
 import type { SmCustomerRow } from '@/types/shiftmanager'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 
@@ -37,10 +34,6 @@ const STATUS_COLORS: Record<string, string> = {
 }
 const deptCount = (c: SmCustomerRow) => (c.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)
 
-// Monotonic suffix for the (currently unreachable, see onCreate below) optimistic
-// temp-id — `Date.now()` alone collides within the same millisecond (§9).
-let smCustomerTempSeq = 0
-
 // Normalise a raw API customer into the shape the table/insights expect.
 const mapCustomer = (c: RawCustomer): SmCustomerRow => ({
   id:             c.id,
@@ -57,9 +50,8 @@ const mapCustomer = (c: RawCustomer): SmCustomerRow => ({
 })
 
 export default function CustomersPage() {
-  // Default namespace stays 'customers' (shared form/table copy with the native
-  // entity); 'shiftmanager' is only for the one gating string below — see onCreate.
-  const { t } = useTranslation(['customers', 'shiftmanager'])
+  // Shared form/table copy with the native customer entity.
+  const { t } = useTranslation('customers')
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   const [customers, setCustomers] = useState<SmCustomerRow[]>([])
@@ -68,7 +60,6 @@ export default function CustomersPage() {
   const [lastPage,  setLastPage]  = useState(1)
   const [total,     setTotal]     = useState(0)
   const [selected,  setSelected]  = useState<SmCustomerRow | null>(null)
-  const [addOpen,   setAddOpen]   = useState(false)
   const [page,      setPage]      = useState(1)
   const [pageSize,  setPageSize]  = useState(25)
 
@@ -166,39 +157,21 @@ export default function CustomersPage() {
     { key: 'noContact',   label: t('insights.noContact'),   value: noContactCount,   sub: t('insights.noContactSub'),   color: 'var(--color-danger)' },
   ]
 
-  // GATED (§3, WORKLIST LOOKUP-GAP-1 — "besluit Danny": remove or wire up):
-  // /sm_customers has no create route (GET/{id} + /sync only, api-generated.ts) —
-  // this mirrors ShiftManager, so a customer must exist there first. onCreate/the
-  // modal only ever inserted a LOCAL row that vanished on refetch, a false success
-  // (§3 no fake affordances). Kept inert behind the disabled trigger below rather
-  // than deleted, pending that decision; the counter guards against the temp-id
-  // collision risk (§9) if this is ever re-enabled without revisiting the id scheme.
-  const onCreate = (form: CustomerForm) => setCustomers(prev => [mapCustomer({
-    ...form, debtor_number: form.debtorNumber, account_manager: form.accountManager,
-    id: `new-${Date.now()}-${++smCustomerTempSeq}`,
-  }), ...prev])
+  // No create trigger here, deliberately (Danny 31-07). This page MIRRORS ShiftManager:
+  // /sm_customers exposes GET and /sync only, so a customer must be created there — or on
+  // the native Koios customers page — and arrives here by syncing. The button that used to
+  // sit below was inert, and before that it was worse: it inserted a local row that vanished
+  // on the next refetch, so a user could believe they had created a customer that never
+  // existed. Wiring it up for real would mean Koios WRITING into ShiftManager, which needs a
+  // coupling contract from them and makes us responsible for data in someone else's system.
 
   return (
     <>
-      {addOpen && <AddCustomerModal onClose={() => setAddOpen(false)} onCreate={onCreate} />}
       <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
           <CustomersInsightsRow donuts={insightDonuts} kpis={insightKpis} />
 
-          {/* Toolbar row — the one shared spacing spec (§4): identical KPI-row→button gap everywhere */}
-          <div style={{ padding: '0 24px 12px', minHeight: 36, display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0 }}>
-            {/* On-accent button text: '#fff' (not var(--surface), which is dark in dark mode and
-                would fail contrast here) — matches the "+Add" button on every other entity page. */}
-            {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-            {/* Disabled + honest reason (§3): no /sm_customers create route exists — this is a
-                ShiftManager mirror, see the onCreate comment above / WORKLIST LOOKUP-GAP-1. */}
-            <button onClick={() => setAddOpen(true)} disabled title={t('customersPage.addDisabledReason', { ns: 'shiftmanager' })}
-              style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto', height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600,
-              background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'not-allowed', opacity: 0.5 }}>
-              + {t('page.add')}
-            </button>
-          </div>
 
           <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
             {error && <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>}

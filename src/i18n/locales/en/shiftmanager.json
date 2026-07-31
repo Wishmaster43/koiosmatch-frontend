@@ -311,9 +311,7 @@
       "byCustomer": "By customer"
     }
   },
-  "customersPage": {
-    "addDisabledReason": "New customers are created in ShiftManager and mirrored here automatically."
-  },
+  "customersPage": {},
   "locationsPage": {
     "drawerTitle": "Location",
     "kpi": {

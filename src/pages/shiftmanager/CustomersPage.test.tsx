@@ -7,14 +7,12 @@
  * that vanished on refetch — a false success, §3).
  */
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi } from 'vitest'
 import i18n from '@/i18n'
 import CustomersPage from './CustomersPage'
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
-const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'shiftmanager', ...opts })
 
 // One SM customer so the table has a row to render past the loading state.
 vi.mock('@/lib/api', () => ({
@@ -29,19 +27,15 @@ vi.mock('@/context/RightPanelContext', () => ({
   useRightPanel: () => ({ registerFilters: vi.fn(), unregisterFilters: vi.fn() }),
 }))
 
-describe('shiftmanager/CustomersPage · gated +Add (no /sm_customers create route)', () => {
-  it('renders the +Add trigger disabled with the mirror-source reason as its title', async () => {
+describe('shiftmanager/CustomersPage · geen aanmaakknop (spiegelpagina)', () => {
+  // Danny 31-07: the trigger is gone. This page mirrors ShiftManager — /sm_customers has
+  // GET and /sync only — so a customer is created THERE or on the native Koios customers
+  // page. The button was inert, and before that it inserted a local row that vanished on
+  // the next refetch: a user could believe they had created a customer that never existed.
+  // This test keeps it from coming back without a real create route behind it.
+  it('toont geen aanmaakknop', async () => {
     render(<CustomersPage />)
-    const addBtn = await screen.findByRole('button', { name: `+ ${ct('page.add')}` })
-    expect(addBtn).toBeDisabled()
-    expect(addBtn).toHaveAttribute('title', st('customersPage.addDisabledReason'))
-  })
-
-  it('never opens AddCustomerModal — clicking the disabled trigger is a no-op', async () => {
-    const user = userEvent.setup()
-    render(<CustomersPage />)
-    const addBtn = await screen.findByRole('button', { name: `+ ${ct('page.add')}` })
-    await user.click(addBtn)
-    expect(screen.queryByRole('dialog', { name: ct('modal.title') })).not.toBeInTheDocument()
+    await screen.findByText('Zorggroep Noord')
+    expect(screen.queryByRole('button', { name: `+ ${ct('page.add')}` })).not.toBeInTheDocument()
   })
 })
