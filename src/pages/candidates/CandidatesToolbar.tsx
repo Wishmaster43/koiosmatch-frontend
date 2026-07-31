@@ -35,6 +35,8 @@ export interface BulkBarProps {
   // GEO-REGEOCODE-1: bulk "PDOK opnieuw ophalen" (queued + async, gated on candidates.update).
   onGeocode?: () => void
   canGeocode?: boolean
+  // SYNC-BULK-1: bulk backoffice coupling — see CandidatesBulkBar for the gating.
+  onCoupleBackoffice?: (system: 'helloflex' | 'shiftmanager') => void
   users: BulkUser[]
   funnelTypes: LookupOption[]
   candidateTypes: LookupOption[]
@@ -88,6 +90,7 @@ export default function CandidatesToolbar({
           onMerge={bulkBar.onMerge} canMerge={bulkBar.canMerge}
           onManageByApplication={bulkBar.onManageByApplication}
           onGeocode={bulkBar.onGeocode} canGeocode={bulkBar.canGeocode}
+          onCoupleBackoffice={bulkBar.onCoupleBackoffice}
           users={bulkBar.users} funnelTypes={bulkBar.funnelTypes} candidateTypes={bulkBar.candidateTypes}
           phases={bulkBar.phases} statuses={bulkBar.statuses} selectedTags={bulkBar.selectedTags} />
       ) : (

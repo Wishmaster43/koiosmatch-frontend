@@ -315,18 +315,29 @@ export const NAV_GROUPS = [
   },
   {
     // Notitietypes (NOTE-TYPES-2/3, Danny "ieder zijn eigen" 2026-07-20) — own top-level
-    // group, one NoteTypesSettings(entity) sub-tab per backend NoteType::ENTITIES value,
-    // mirroring the custom_fields group above: one shared editor parameterized by
-    // `entity`, never a per-entity fork. Replaces the old flat cross-entity list that
+    // group, one NoteTypesSettings(entity) sub-tab per entity that actually READS the
+    // lookup, mirroring the custom_fields group above: one shared editor parameterized
+    // by `entity`, never a per-entity fork. Replaces the old flat cross-entity list that
     // lived under personalisation.
+    //
+    // ONLY entities with a real reader get a tab (§3 no fake affordances, 2026-07-31).
+    // A sub-tab here is offered iff some screen calls useNoteTypes(<entity>): today that
+    // is candidate (CommunicationTab), application + opportunity (drawer NotesTab) and
+    // customer (CustomerNotesTab). The backend's NoteType::ENTITIES also allows
+    // 'match', 'task' and 'contact', but nothing consumes those:
+    //   • match   — there is no /matches/{id}/notes route, so MatchDrawer deliberately
+    //               ships no Notities tab (see its header comment).
+    //   • task    — the Reacties tab was removed on purpose (TaskDrawer TAB_IDS).
+    //   • contact — the contact drawer/panel has no notes surface at all.
+    // Their tabs were configurable screens whose values were read nowhere, so they are
+    // NOT offered. No tenant data is deleted: the rows stay in note_types and the
+    // endpoint keeps serving them, so re-adding one line here restores the editor the
+    // day that entity grows a notes surface.
     key: 'note_types', icon: MessageSquare,
     items: [
       { id: 'nt_candidate', icon: Users, render: () => <NoteTypesSettings entity="candidate" /> },
       { id: 'nt_application', icon: ClipboardList, render: () => <NoteTypesSettings entity="application" /> },
-      { id: 'nt_match', icon: Sparkles, render: () => <NoteTypesSettings entity="match" /> },
-      { id: 'nt_task', icon: ListChecks, render: () => <NoteTypesSettings entity="task" /> },
       { id: 'nt_customer', icon: Building2, render: () => <NoteTypesSettings entity="customer" /> },
-      { id: 'nt_contact', icon: Users, render: () => <NoteTypesSettings entity="contact" /> },
       { id: 'nt_opportunity', icon: Target, render: () => <NoteTypesSettings entity="opportunity" /> },
     ],
   },
@@ -352,13 +363,18 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    // A ViewConfigEditor sub-tab is offered ONLY for a module some screen actually
+    // renders through <ModuleView> (§3 no fake affordances, 2026-07-31). Today the
+    // single renderer is CustomersReport ("customers"); the planning/sales/candidates
+    // editors saved `view.planning` / `view.sales` / `view.candidates` that nothing
+    // ever read, so a tenant toggling blocks there got nothing, silently. They are NOT
+    // offered. No tenant data is deleted: any saved `view.<module>` key stays in the
+    // settings blob, and adding a <ModuleView module="planning"/> to a real dashboard
+    // is what earns the tab back (the block catalogue is still in moduleRegistry.ts).
     key: 'views', icon: BarChart2,
     items: [
       { id: 'dashboards', icon: BarChart2, component: DashboardsSettings },
       { id: 'view_customers', icon: Building2, render: () => <ViewConfigEditor module="customers" /> },
-      { id: 'view_planning', icon: Clock, render: () => <ViewConfigEditor module="planning" /> },
-      { id: 'view_sales', icon: BarChart2, render: () => <ViewConfigEditor module="sales" /> },
-      { id: 'view_candidates', icon: Users, render: () => <ViewConfigEditor module="candidates" /> },
     ],
   },
   {

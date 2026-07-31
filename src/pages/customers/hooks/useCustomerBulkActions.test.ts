@@ -42,7 +42,7 @@ function harness(initial: Customer[]) {
     const actions = useCustomerBulkActions({
       customers, setCustomers, setTotal, selectedIds, setSelectedIds, notify, statusMeta, t,
     })
-    return { customers, total, setSelectedIds, actions }
+    return { customers, total, selectedIds, setSelectedIds, actions }
   })
 }
 const rowOf = (r: { result: { current: { customers: Customer[] } } }, id: Id) => r.result.current.customers.find(c => c.id === id)
@@ -126,5 +126,56 @@ describe('useCustomerBulkActions · bulkArchive', () => {
     act(() => r.result.current.actions.dialog.props.onCancel())
     expect(post).not.toHaveBeenCalled()
     expect(r.result.current.customers).toHaveLength(1)
+  })
+})
+
+// SYNC-BULK-1: bulk backoffice coupling — the 3rd of the three linking paths
+// (§3B: manual/bulk/workflow). Shares the ONE generic POST /sync/{entity}/bulk
+// endpoint (BackofficeSyncController::bulk) the per-record BackofficeLinksTab
+// already uses. Queued + async — no optimistic row patch — and the { queued,
+// skipped } response must produce an honest partial-result toast, never a bare
+// "success" that hides a matrix-blocked or unknown id (§13: assert the exact
+// request, not just that a callback fired).
+describe('useCustomerBulkActions · bulkCoupleBackoffice (SYNC-BULK-1)', () => {
+  it('POSTs /sync/customers/bulk with the exact ids + system, reports the queued count, and clears the selection', async () => {
+    post.mockResolvedValue({ data: { queued: [1, 2], skipped: [] } })
+    const r = harness([customer({ id: 1 }), customer({ id: 2 })])
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    act(() => r.result.current.actions.bulkCoupleBackoffice('helloflex'))
+    expect(post).toHaveBeenCalledWith('/sync/customers/bulk', { ids: [1, 2], system: 'helloflex' })
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('success', 'bulk.coupleQueued'))
+    expect(r.result.current.selectedIds.size).toBe(0)
+  })
+
+  it('reports a partial result honestly when the server skips some ids', async () => {
+    post.mockResolvedValue({ data: { queued: [1], skipped: [2] } })
+    const r = harness([customer({ id: 1 }), customer({ id: 2 })])
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    act(() => r.result.current.actions.bulkCoupleBackoffice('shiftmanager'))
+    expect(post).toHaveBeenCalledWith('/sync/customers/bulk', { ids: [1, 2], system: 'shiftmanager' })
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('warning', 'bulk.coupleQueuedPartial'))
+    expect(notify).not.toHaveBeenCalledWith('success', expect.anything())
+  })
+
+  it('is a no-op when nothing is selected', () => {
+    const r = harness([customer({ id: 1 })])
+    act(() => r.result.current.actions.bulkCoupleBackoffice('helloflex'))
+    expect(post).not.toHaveBeenCalled()
+  })
+
+  it('treats a 404/503 as "not available yet", never a hard error', async () => {
+    post.mockRejectedValue({ response: { status: 503 } })
+    const r = harness([customer({ id: 1 })])
+    act(() => r.result.current.setSelectedIds(new Set([1])))
+    act(() => r.result.current.actions.bulkCoupleBackoffice('helloflex'))
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('info', 'bulk.coupleUnavailable'))
+  })
+
+  it('shows the generic mutate error toast on any other failure', async () => {
+    post.mockRejectedValue({ response: { status: 500 } })
+    const r = harness([customer({ id: 1 })])
+    act(() => r.result.current.setSelectedIds(new Set([1])))
+    act(() => r.result.current.actions.bulkCoupleBackoffice('helloflex'))
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('error', 'bulk.mutateError'))
   })
 })

@@ -83,9 +83,6 @@
     "application_proposal": "Propuestas",
     "cv_template": "Plantilla de CV",
     "view_customers": "Clientes",
-    "view_planning": "Planificación",
-    "view_sales": "Ventas",
-    "view_candidates": "Candidatos",
     "notif_sollicitaties": "Candidaturas",
     "notif_vacatures": "Vacantes",
     "notif_facturering": "Facturación",
@@ -197,10 +194,7 @@
     "cf_customer_contact": "Contactos",
     "nt_candidate": "Candidatos",
     "nt_application": "Candidaturas",
-    "nt_match": "Coincidencias",
-    "nt_task": "Tareas",
     "nt_customer": "Clientes",
-    "nt_contact": "Contactos",
     "nt_opportunity": "Oportunidades",
     "action_rules": "Reglas de acción",
     "vacancy_generation": "Generación de vacantes",
@@ -1742,6 +1736,32 @@
     "moveDown": "Bajar",
     "hide": "Ocultar",
     "show": "Mostrar"
+  },
+  "moduleView": {
+    "modules": {
+      "customers": "Clientes",
+      "planning": "Planificación",
+      "sales": "Ventas",
+      "candidates": "Candidatos"
+    },
+    "blocks": {
+      "active_customers": "Clientes activos",
+      "total_locations": "Total de ubicaciones",
+      "total_departments": "Total de departamentos",
+      "customers_without_location": "Clientes sin ubicación",
+      "open_shifts": "Turnos abiertos",
+      "filled_shifts": "Turnos cubiertos",
+      "fill_rate": "Tasa de cobertura",
+      "unfilled": "Sin cubrir",
+      "revenue": "Ingresos",
+      "open_deals": "Oportunidades abiertas",
+      "won_deals": "Ganadas este mes",
+      "conversion": "Tasa de conversión",
+      "total_candidates": "Total de candidatos",
+      "available": "Disponibles",
+      "new_candidates": "Nuevos",
+      "in_progress": "En curso"
+    }
   },
   "applicationDisplay": {
     "title": "Vista de tabla",

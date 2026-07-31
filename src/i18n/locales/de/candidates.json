@@ -11,6 +11,8 @@
   },
   "columns": {
     "name": "Name",
+    "referenceNumber": "Referenznr.",
+    "coupling": "Verknüpfung",
     "status": "Status",
     "function": "Funktion",
     "funnelType": "Funnel-Typ",
@@ -100,7 +102,11 @@
       "missing_required_field": "Pflichtfeld fehlt",
       "already_on_phase": "bereits in dieser Phase",
       "not_found": "nicht gefunden"
-    }
+    },
+    "couple": "Mit Backoffice koppeln",
+    "coupleQueued": "{{count}} Kandidat(en) zur Kopplung mit {{target}} eingereiht.",
+    "coupleQueuedPartial": "{{queued}} von {{total}} zur Kopplung mit {{target}} eingereiht; {{skipped}} übersprungen.",
+    "coupleUnavailable": "Backoffice-Kopplung ist noch nicht verfügbar."
   },
   "kpi": {
     "total": "Gesamt",
@@ -960,6 +966,24 @@
     "done": "Kandidaten zusammengeführt.",
     "errForbidden": "Sie dürfen keine Kandidaten zusammenführen.",
     "errFailed": "Zusammenführen fehlgeschlagen. Bitte erneut versuchen."
+  },
+  "duplicate": {
+    "blockedTitle": "Diese Person existiert bereits",
+    "blockedBody": "Es wurde nichts angelegt: Es gibt bereits einen Datensatz mit denselben Kontaktdaten.",
+    "warningTitle": "Möglicher vorhandener Datensatz",
+    "warningBody": "Diese Kontaktdaten kommen bereits in einem vorhandenen Datensatz vor.",
+    "checking": "Prüfung auf doppelte Datensätze…",
+    "unnamed": "Datensatz ohne Namen",
+    "stateActive": "Aktiver Datensatz",
+    "stateArchived": "Archivierter Datensatz",
+    "archivedHint": "Dieser Datensatz ist archiviert. Stellen Sie ihn wieder her, um damit zu arbeiten.",
+    "open": "Vorhandenen Datensatz öffnen",
+    "restoreAndOpen": "Wiederherstellen und öffnen",
+    "restoring": "Wird wiederhergestellt…",
+    "restored": "Datensatz wiederhergestellt.",
+    "restoreFailed": "Wiederherstellen fehlgeschlagen. Bitte erneut versuchen.",
+    "restoreForbidden": "Sie haben keine Berechtigung, einen Datensatz wiederherzustellen.",
+    "editData": "Daten anpassen"
   },
   "integrations": {
     "pdok": {

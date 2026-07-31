@@ -8,8 +8,10 @@ import SoftChip from '@/components/ui/SoftChip'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import BackofficeCouplingIndicator from '@/components/ui/BackofficeCouplingIndicator'
 import { useDateFormat } from '@/lib/datetime'
 import { useLookups } from '@/context/LookupsContext'
+import { useApps } from '@/context/AppsContext'
 import { useGenders } from '@/lib/useGenders'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import LookupIcon from '@/components/ui/LookupIcon'
@@ -103,6 +105,11 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
   // Phase (lifecycle) chip — coloured ON by default (carries meaning, like status).
   const colorPhase  = getBoolSetting(settings, 'candidate_table_color_phase', true)
   const colorOwner  = getBoolSetting(settings, 'candidate_table_color_owner', true)
+  // Backoffice coupling column (JOB2): only shown for systems the tenant actually
+  // enabled — mirrors BackofficeLinksTab's own isAppEnabled('hf'/'shiftmanager') gate.
+  const apps = useApps()
+  const showHelloflex = apps?.isAppEnabled('hf') ?? false
+  const showShiftmanager = apps?.isAppEnabled('shiftmanager') ?? false
 
   // Column defs — memoized so DataTable's per-row memo (audit item 7) actually
   // holds: a stable `columns` reference means a row only re-renders when ITS OWN
@@ -123,6 +130,17 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
             <span style={{ color: 'var(--text)', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 150 }} title={c.name}>{c.name}</span>
           </div>
         ),
+      },
+      {
+        // Human-readable reference number (K-00123, JOB1) — an identifier, so it
+        // sits right after the name, not buried at the end. Plain mono text (not the
+        // interactive ReferenceNumberChip): a click-to-copy button nested inside this
+        // row's own click-to-open would either double-fire or need stopPropagation
+        // contortions; the copy affordance already lives in the drawer chip.
+        key: 'referenceNumber', header: t('columns.referenceNumber'), nowrap: true,
+        cellStyle: { color: 'var(--text-muted)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', fontVariantNumeric: 'tabular-nums' },
+        sortable: true, sortValue: c => c.referenceNumber ?? '',
+        render: c => c.referenceNumber || '—',
       },
       {
         key: 'title', header: t('columns.function'), nowrap: true, cellStyle: { color: 'var(--text)', fontSize: 12 },
@@ -257,6 +275,14 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
           fallbackLabel={action => t(`koios.actions.${action}`, { defaultValue: action })} />,
       },
       {
+        // Backoffice coupling scanning aid (JOB2) — not sortable: a compound
+        // two-system state has no single clean sort order, and this is a glance
+        // aid, not a data axis a recruiter would want to sort a whole list by.
+        key: 'coupling', header: t('columns.coupling'), nowrap: true,
+        render: c => <BackofficeCouplingIndicator helloflexLink={c.helloflexLink} shiftmanagerLink={c.shiftmanagerLink}
+          showHelloflex={showHelloflex} showShiftmanager={showShiftmanager} />,
+      },
+      {
         key: 'owner', header: t('columns.owner'), sortable: true, sortValue: c => c.owner,
         render: c => (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -270,6 +296,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
     t, formatDate, funnelTypes, funnelMeta, statusMeta, phaseMeta, typeMeta,
     genderColor, lastContactLabel, lastContactIcon, adviceOf,
     colorFunnel, colorType, colorPool, colorKoios, coloredByGender, colorStatus, colorPhase, colorOwner,
+    showHelloflex, showShiftmanager,
     onOpenTab,
   ])
 

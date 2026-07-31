@@ -19,6 +19,8 @@
     "candidatePlaceholder": "Select a candidate",
     "vacancy": "Vacancy",
     "vacancyPlaceholder": "Select a vacancy",
+    "phase": "Phase",
+    "phasePlaceholder": "Select a phase",
     "owner": "Recruiter",
     "ownerPlaceholder": "Select a recruiter",
     "search": "Search…",

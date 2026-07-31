@@ -14,6 +14,7 @@
   "empty": "Noch keine Daten.",
   "search": "Suchen…",
   "clear": "Löschen",
+  "clearField": "{{field}} löschen",
   "referenceNumber": {
     "copy": "Nummer kopieren",
     "copied": "Nummer kopiert"
@@ -163,7 +164,8 @@
       "cancelled": "Abgebrochen.",
       "expired": "Dieser Vorschlag ist abgelaufen — bitte erneut fragen.",
       "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
-    }
+    },
+    "resizeHandle": "Panelbreite anpassen"
   },
   "actionRules": {
     "title": "Aktionsprüfung",

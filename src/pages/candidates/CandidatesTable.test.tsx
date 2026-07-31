@@ -1,8 +1,8 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CandidatesTable from './CandidatesTable'
-import type { Candidate } from '@/types/candidate'
+import type { Candidate, CandidateBackofficeLink } from '@/types/candidate'
 
 // Controlled lookup metas — flags drive the deep-link, never the label/slug
 // (mirrors the sibling agents' contract). funnelTypes stays empty (sort order only).
@@ -32,6 +32,16 @@ vi.mock('@/lib/settings/useAllSettings', () => ({
 }))
 // Shared advice resolver (contract D) — stubbed stable so the koios column renders without a real hook.
 vi.mock('@/lib/useCandidateAdvice', () => ({ useCandidateAdvice: () => () => null }))
+// Tenant app gate (JOB2 coupling column) — controlled per test, defaults to "off"
+// so the pre-existing tests above (which never touch it) see the same dash they
+// always did.
+const mockUseApps = vi.fn()
+vi.mock('@/context/AppsContext', () => ({ useApps: () => mockUseApps() }))
+beforeEach(() => { mockUseApps.mockReturnValue({ isAppEnabled: () => false }) })
+
+const link = (overrides: Partial<CandidateBackofficeLink> = {}): CandidateBackofficeLink => ({
+  status: null, externalId: null, lastError: null, lastSyncedAt: null, linkedAt: null, linkedBy: null, ...overrides,
+})
 
 const baseCandidate: Candidate = {
   id: 1, name: 'Jane Doe', initials: 'JD', title: 'Nurse', city: 'Utrecht',
@@ -76,5 +86,77 @@ describe('CandidatesTable cell deep-links', () => {
     render(<CandidatesTable rows={[row]} />)
     expect(screen.queryByRole('button', { name: /matches/i })).toBeNull()
     expect(screen.queryByRole('button', { name: /voorkeuren/i })).toBeNull()
+  })
+})
+
+// JOB1: the reference number (K-00123) is now a real, sortable table column —
+// before this change grepping every pages/*Table.tsx for `referenceNumber`
+// returned nothing at all, so a passing test here MUST fail on a revert.
+describe('CandidatesTable · reference number column (JOB1)', () => {
+  it('renders the real referenceNumber value, and a plain dash when absent — never a blank cell', () => {
+    const withRef = { ...baseCandidate, id: 20, referenceNumber: 'K-00123' }
+    const withoutRef = { ...baseCandidate, id: 21, referenceNumber: '' }
+    const { container } = render(<CandidatesTable rows={[withRef, withoutRef]} />)
+    expect(screen.getByText('K-00123')).toBeInTheDocument()
+
+    const headerCell = screen.getByText('Referentienr.').closest('th') as HTMLElement
+    const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    const rows = container.querySelectorAll('tbody tr')
+    const values = Array.from(rows).map(r => r.children[colIndex].textContent)
+    // Order isn't asserted here (both rows share the same `created`); only that
+    // the row WITH a number shows it and the row WITHOUT one shows a real dash.
+    expect(values).toContain('K-00123')
+    expect(values).toContain('—')
+  })
+
+  it('sorts by reference number when the column header is clicked', async () => {
+    const user = userEvent.setup()
+    const rowA = { ...baseCandidate, id: 30, referenceNumber: 'K-00003' }
+    const rowB = { ...baseCandidate, id: 31, referenceNumber: 'K-00001' }
+    const rowC = { ...baseCandidate, id: 32, referenceNumber: 'K-00002' }
+    const { container } = render(<CandidatesTable rows={[rowA, rowB, rowC]} />)
+
+    const headerCell = screen.getByText('Referentienr.').closest('th') as HTMLElement
+    const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    // First click sorts ascending (mirrors the established convention, e.g. the
+    // Leads column in VacanciesTable.test.tsx).
+    await user.click(within(headerCell).getByRole('button'))
+
+    const rows = container.querySelectorAll('tbody tr')
+    const values = Array.from(rows).map(r => r.children[colIndex].textContent)
+    expect(values).toEqual(['K-00001', 'K-00002', 'K-00003'])
+  })
+})
+
+// JOB2: the compact per-row backoffice coupling indicator — before this change
+// HelloFlexMark was imported by nothing at all (grepped repo-wide) and there was
+// no signal anywhere in a list; a passing test here MUST fail on a revert.
+describe('CandidatesTable · backoffice coupling indicator (JOB2)', () => {
+  it('distinguishes LINKED, FAILED and NOT LINKED with a real accessible name each', () => {
+    mockUseApps.mockReturnValue({ isAppEnabled: () => true })
+    const linked = { ...baseCandidate, id: 40, helloflexLink: link({ status: 'linked' }), shiftmanagerLink: null }
+    const failed = { ...baseCandidate, id: 41, helloflexLink: link({ status: 'failed' }), shiftmanagerLink: null }
+    const notLinked = { ...baseCandidate, id: 42, helloflexLink: null, shiftmanagerLink: null }
+    render(<CandidatesTable rows={[linked, failed, notLinked]} />)
+
+    // Three real, distinct accessible names — never colour alone (§6) — one per state.
+    expect(screen.getByRole('img', { name: 'HelloFlex: Gekoppeld' })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'HelloFlex: Mislukt' })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Niet gekoppeld aan HelloFlex' })).toBeInTheDocument()
+  })
+
+  it('hides a system entirely when the tenant never enabled its app — never a fake "not linked"', () => {
+    const row = { ...baseCandidate, id: 43, helloflexLink: link({ status: 'linked' }), shiftmanagerLink: link({ status: 'failed' }) }
+    mockUseApps.mockReturnValue({ isAppEnabled: () => true })
+    const { rerender } = render(<CandidatesTable rows={[row]} />)
+    // First prove the marks CAN render at all (guards against the assertions
+    // below passing vacuously just because the column doesn't exist).
+    expect(screen.getByRole('img', { name: /HelloFlex/ })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /Shiftmanager/ })).toBeInTheDocument()
+
+    mockUseApps.mockReturnValue({ isAppEnabled: () => false })
+    rerender(<CandidatesTable rows={[row]} />)
+    expect(screen.queryByRole('img', { name: /HelloFlex/ })).toBeNull()
+    expect(screen.queryByRole('img', { name: /Shiftmanager/ })).toBeNull()
   })
 })

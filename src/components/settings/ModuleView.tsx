@@ -8,6 +8,7 @@
  * Adding/removing/reordering a block is done in Settings → Views, never here.
  */
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import KpiBlock from '../ui/KpiBlock'
 import { useModuleView } from '@/lib/settings/useModuleView'
 
@@ -16,6 +17,8 @@ interface BlockData { value?: ReactNode; sub?: ReactNode; onClick?: () => void }
 export default function ModuleView({ module, data = {}, loading = false }: {
   module: string; data?: Record<string, BlockData>; loading?: boolean
 }) {
+  // Block names come from the registry as i18n keys (§5) — translate on render.
+  const { t } = useTranslation('settings')
   const blocks = useModuleView(module)
   const kpis = blocks.filter(b => b.type === 'kpi')
   if (kpis.length === 0) return null
@@ -27,7 +30,7 @@ export default function ModuleView({ module, data = {}, loading = false }: {
         return (
           <KpiBlock
             key={b.id}
-            label={b.label}
+            label={t(b.labelKey)}
             icon={b.icon}
             color={b.color}
             bg={b.bg}

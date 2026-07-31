@@ -16,6 +16,8 @@
   },
   "cols": {
     "name": "Name",
+    "referenceNumber": "Referenznr.",
+    "coupling": "Verknüpfung",
     "debtorNumber": "Debitorennr.",
     "status": "Status",
     "accountManager": "Account-Manager",
@@ -438,7 +440,11 @@
     "tagAdded": "Tag „{{tag}}“ hinzugefügt ({{count}}).",
     "tagRemoved": "Tag „{{tag}}“ entfernt ({{count}}).",
     "noteAdded": "Notiz hinzugefügt ({{count}}).",
-    "mutateError": "Die Aktion ist fehlgeschlagen."
+    "mutateError": "Die Aktion ist fehlgeschlagen.",
+    "couple": "Mit Backoffice koppeln",
+    "coupleQueued": "{{count}} Kunde(n) zur Kopplung mit {{target}} eingereiht.",
+    "coupleQueuedPartial": "{{queued}} von {{total}} zur Kopplung mit {{target}} eingereiht; {{skipped}} übersprungen.",
+    "coupleUnavailable": "Backoffice-Kopplung ist noch nicht verfügbar."
   },
   "modal": {
     "title": "Neuer Kunde",

@@ -16,6 +16,7 @@
   },
   "columns": {
     "title": "Titre",
+    "referenceNumber": "N° réf.",
     "code": "#",
     "status": "Statut",
     "leads": "Leads",
@@ -307,7 +308,9 @@
     "openApplications": "Ouvrir les candidatures"
   },
   "timeline": {
-    "empty": "Aucune activité pour le moment."
+    "empty": "Aucune activité pour le moment.",
+    "openApplication": "Ouvrir la candidature",
+    "openMatch": "Ouvrir le match"
   },
   "modal": {
     "title": "Nouveau poste",

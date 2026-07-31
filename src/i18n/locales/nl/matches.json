@@ -5,10 +5,12 @@
   "error": "Matches konden niet geladen worden.",
   "cols": {
     "candidate": "Kandidaat",
+    "referenceNumber": "Referentienr.",
     "vacancy": "Vacature",
     "client": "Klant",
     "score": "Match",
     "stage": "Fase",
+    "coupling": "Koppeling",
     "owner": "Eigenaar",
     "date": "Aangemaakt",
     "status": "Status"
@@ -86,7 +88,8 @@
       "unavailable": "Contractgegevens zijn nog niet beschikbaar (koppeling niet geconfigureerd).",
       "saveError": "Wijziging kon niet worden opgeslagen.",
       "saved": "Contractgegevens opgeslagen."
-    }
+    },
+    "ownerUnassigned": "Geen eigenaar"
   },
   "approval": {
     "status": {
@@ -119,7 +122,8 @@
     },
     "coupleQueued": "{{count}} match(es) in wachtrij gezet voor koppeling met {{target}}.",
     "coupleUnavailable": "Backoffice-koppeling is nog niet beschikbaar.",
-    "noPermission": "Je hebt geen rechten voor massa-acties."
+    "noPermission": "Je hebt geen rechten voor massa-acties.",
+    "coupleQueuedPartial": "{{queued}} van {{total}} in wachtrij gezet voor koppeling met {{target}}; {{skipped}} overgeslagen."
   },
   "filters": {
     "stage": "Fase",

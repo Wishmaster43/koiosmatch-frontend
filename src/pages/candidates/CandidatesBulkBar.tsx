@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, Archive, ShieldCheck, UserCheck, Activity, GitMerge, RefreshCw, X, ExternalLink } from 'lucide-react'
+import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, Archive, ShieldCheck, UserCheck, Activity, GitMerge, RefreshCw, X, ExternalLink, Link2, Building2, Layers } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import { BTN_H } from '@/config/buttonMetrics'
+import { useAuth } from '@/context/AuthContext'
+import { useApps } from '@/context/AppsContext'
 import { useTenantPools } from './hooks/useCandidatePools'
 import type { CandidatePool } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
@@ -38,6 +40,11 @@ interface CandidatesBulkBarProps {
   // reconcile. Gated on candidates.update, same as the per-record GeocodeButton.
   onGeocode?: () => void
   canGeocode?: boolean
+  // SYNC-BULK-1: bulk backoffice coupling (HelloFlex/Shiftmanager) — queued + async,
+  // authorization + module-availability gated INSIDE this component (mirrors
+  // BackofficeLinksTab's own canLink/useApps checks, §3B). Optional — the menu
+  // entry only renders once the parent wires it (honest gate, like onManageByApplication).
+  onCoupleBackoffice?: (system: 'helloflex' | 'shiftmanager') => void
   users?: BulkUser[]
   funnelTypes?: LookupOption[]
   candidateTypes?: LookupOption[]
@@ -56,11 +63,24 @@ export default function CandidatesBulkBar({
   count, onClear, onAddToPool, onRemoveFromPool, onSetOwner, onSetStage, onSetTypes, onSetConsent,
   onConvertPhase, onSetStatus, onAddTag, onRemoveTag, onAddNote, onArchive, canArchive = false,
   onMerge, canMerge = false, onManageByApplication, onGeocode, canGeocode = false,
+  onCoupleBackoffice,
   users = [], funnelTypes = [], candidateTypes = [], phases = [], statuses = [], selectedTags = [],
 }: CandidatesBulkBarProps) {
   const { t } = useTranslation('candidates')
   // Talent pools for the add/remove option lists (fetch lives in the hook, §3).
   const pools = useTenantPools()
+
+  // SYNC-BULK-1: same permission as the per-record BackofficeLinksTab's `canLink`
+  // (BackofficeEntityRegistry maps the "candidate" entity to candidates.update) —
+  // never a new permission. Module availability mirrors that same tab's `useApps()`
+  // gate so a disabled system (hf/shiftmanager app off for this tenant) is never offered.
+  const auth = useAuth()
+  const hasPermission = auth?.hasPermission ?? (() => false)
+  const apps = useApps()
+  const isAppEnabled = apps?.isAppEnabled ?? (() => false)
+  const canCouple = hasPermission('candidates.update')
+  const showHelloflex = isAppEnabled('hf')
+  const showShiftmanager = isAppEnabled('shiftmanager')
 
   // Build the menu option lists from props/state.
   const poolOptions = pools.map(p => ({ value: p.id ?? p.name ?? '', label: p.name, color: p.color || 'var(--text-muted)' }))
@@ -136,6 +156,14 @@ export default function CandidatesBulkBar({
     // GEO-REGEOCODE-1: reuses the ONE shared common:geocode.refresh label (no
     // per-entity i18n key) — mirrors the per-record GeocodeButton's tooltip text.
     ...(canGeocode && onGeocode ? [{ key: 'geocode', label: t('common:geocode.refresh'), icon: RefreshCw, onSelect: onGeocode }] : []),
+    // SYNC-BULK-1: bulk backoffice coupling — drills into whichever systems are
+    // actually enabled for this tenant (never offer a switched-off system).
+    ...(canCouple && onCoupleBackoffice && (showHelloflex || showShiftmanager) ? [{
+      key: 'couple', label: t('bulk.couple'), icon: Link2, items: [
+        ...(showHelloflex ? [{ key: 'helloflex', label: t('common:backofficeLinks.helloflex.name'), icon: Building2, onSelect: () => onCoupleBackoffice('helloflex') }] : []),
+        ...(showShiftmanager ? [{ key: 'shiftmanager', label: t('common:backofficeLinks.shiftmanager.name'), icon: Layers, onSelect: () => onCoupleBackoffice('shiftmanager') }] : []),
+      ],
+    }] : []),
     ...(canArchive ? [{ key: 'archive', label: t('bulk.archive'), icon: Archive, danger: true, onSelect: onArchive }] : []),
   ]
 

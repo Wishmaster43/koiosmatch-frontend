@@ -16,6 +16,7 @@
   },
   "columns": {
     "title": "Titel",
+    "referenceNumber": "Referentienr.",
     "code": "#",
     "status": "Status",
     "leads": "Leads",
@@ -307,7 +308,9 @@
     "openApplications": "Open de sollicitaties"
   },
   "timeline": {
-    "empty": "Nog geen activiteit."
+    "empty": "Nog geen activiteit.",
+    "openApplication": "Open sollicitatie",
+    "openMatch": "Open match"
   },
   "modal": {
     "title": "Nieuwe vacature",

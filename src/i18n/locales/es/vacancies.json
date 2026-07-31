@@ -16,6 +16,7 @@
   },
   "columns": {
     "title": "Título",
+    "referenceNumber": "N.º ref.",
     "code": "#",
     "status": "Estado",
     "leads": "Leads",
@@ -307,7 +308,9 @@
     "openApplications": "Abrir las candidaturas"
   },
   "timeline": {
-    "empty": "Aún no hay actividad."
+    "empty": "Aún no hay actividad.",
+    "openApplication": "Abrir candidatura",
+    "openMatch": "Abrir match"
   },
   "modal": {
     "title": "Nueva vacante",

@@ -16,6 +16,8 @@
   },
   "cols": {
     "name": "Name",
+    "referenceNumber": "Ref. no.",
+    "coupling": "Link",
     "debtorNumber": "Debtor no.",
     "status": "Status",
     "accountManager": "Account manager",
@@ -438,7 +440,11 @@
     "tagAdded": "Tag “{{tag}}” added ({{count}}).",
     "tagRemoved": "Tag “{{tag}}” removed ({{count}}).",
     "noteAdded": "Note added ({{count}}).",
-    "mutateError": "The action failed."
+    "mutateError": "The action failed.",
+    "couple": "Couple to backoffice",
+    "coupleQueued": "{{count}} customer(s) queued for coupling with {{target}}.",
+    "coupleQueuedPartial": "{{queued}} of {{total}} queued for coupling with {{target}}; {{skipped}} skipped.",
+    "coupleUnavailable": "Backoffice coupling isn't available yet."
   },
   "modal": {
     "title": "New customer",

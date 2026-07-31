@@ -3,6 +3,13 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CustomersBulkBar from './CustomersBulkBar'
 
+// SYNC-BULK-1: the couple-to-backoffice node gates itself on permission (useAuth)
+// + tenant app availability (useApps) — mocked so each test can drive both.
+const mockUseAuth = vi.fn()
+const mockUseApps = vi.fn()
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
+vi.mock('@/context/AppsContext', () => ({ useApps: () => mockUseApps() }))
+
 // i18n is not initialised in tests → t() returns the key, so we drive/assert on keys.
 const baseProps = () => ({
   count: 2, onClear: vi.fn(),
@@ -68,5 +75,41 @@ describe('CustomersBulkBar', () => {
     await user.click(screen.getByText('bulk.actions'))
     await user.click(screen.getByText('common:geocode.refresh'))
     expect(onGeocode).toHaveBeenCalledTimes(1)
+  })
+
+  // SYNC-BULK-1: bulk backoffice coupling — gated on the SAME permission as the
+  // per-record BackofficeLinksTab (customers.update) + tenant app availability
+  // (hf/shiftmanager), never a new permission and never a switched-off system.
+  describe('SYNC-BULK-1 · couple to backoffice', () => {
+    it('hides the couple action without customers.update, even with both systems enabled', async () => {
+      mockUseAuth.mockReturnValue({ hasPermission: () => false })
+      mockUseApps.mockReturnValue({ isAppEnabled: () => true })
+      const user = userEvent.setup()
+      render(<CustomersBulkBar {...baseProps()} onCoupleBackoffice={vi.fn()} />)
+      await user.click(screen.getByText('bulk.actions'))
+      expect(screen.queryByText('bulk.couple')).toBeNull()
+    })
+
+    it('hides the couple action when permitted but neither backoffice app is enabled', async () => {
+      mockUseAuth.mockReturnValue({ hasPermission: () => true })
+      mockUseApps.mockReturnValue({ isAppEnabled: () => false })
+      const user = userEvent.setup()
+      render(<CustomersBulkBar {...baseProps()} onCoupleBackoffice={vi.fn()} />)
+      await user.click(screen.getByText('bulk.actions'))
+      expect(screen.queryByText('bulk.couple')).toBeNull()
+    })
+
+    it('offers only the enabled system (HelloFlex on, Shiftmanager off) and fires the callback with the right system', async () => {
+      mockUseAuth.mockReturnValue({ hasPermission: () => true })
+      mockUseApps.mockReturnValue({ isAppEnabled: (id) => id === 'hf' })
+      const user = userEvent.setup()
+      const onCoupleBackoffice = vi.fn()
+      render(<CustomersBulkBar {...baseProps()} onCoupleBackoffice={onCoupleBackoffice} />)
+      await user.click(screen.getByText('bulk.actions'))
+      await user.click(screen.getByText('bulk.couple'))
+      expect(screen.queryByText('common:backofficeLinks.shiftmanager.name')).toBeNull()
+      await user.click(screen.getByText('common:backofficeLinks.helloflex.name'))
+      expect(onCoupleBackoffice).toHaveBeenCalledWith('helloflex')
+    })
   })
 })

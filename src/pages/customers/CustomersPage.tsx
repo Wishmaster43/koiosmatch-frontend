@@ -135,7 +135,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
     selected, detail, drawerExpanded, setDrawerExpanded, drawerTab,
     closeDrawer, selectCustomer, updateCustomer, handleCreate, addNote,
   } = useCustomerRecord({ setCustomers, setTotal, users, t })
-  const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, bulkGeocode, selectedTags, dialog: bulkConfirmDialog } =
+  const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, bulkGeocode, bulkCoupleBackoffice, selectedTags, dialog: bulkConfirmDialog } =
     useCustomerBulkActions({ customers, setCustomers, setTotal, selectedIds, setSelectedIds, notify, statusMeta, t })
 
   // Open a customer drawer when arriving via a cross-entity link (intent).
@@ -278,6 +278,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
                 onRemoveTag={bulkRemoveTag} onAddNote={bulkAddNote} onArchive={bulkArchive}
                 canArchive={hasPermission('customers.delete')}
                 onGeocode={bulkGeocode} canGeocode={hasPermission('customers.update')}
+                onCoupleBackoffice={bulkCoupleBackoffice}
                 users={users} statuses={statuses} selectedTags={selectedTags} />
             ) : (
               <>

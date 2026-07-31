@@ -5,10 +5,12 @@
   "error": "Matches konnten nicht geladen werden.",
   "cols": {
     "candidate": "Kandidat",
+    "referenceNumber": "Referenznr.",
     "vacancy": "Stelle",
     "client": "Kunde",
     "score": "Match",
     "stage": "Phase",
+    "coupling": "Verknüpfung",
     "owner": "Inhaber",
     "date": "Erstellt",
     "status": "Status"
@@ -86,7 +88,8 @@
       "unavailable": "Vertragsdetails sind noch nicht verfügbar (Integration nicht konfiguriert).",
       "saveError": "Änderung konnte nicht gespeichert werden.",
       "saved": "Vertragsdetails gespeichert."
-    }
+    },
+    "ownerUnassigned": "Kein Inhaber"
   },
   "approval": {
     "status": {
@@ -119,7 +122,8 @@
     },
     "coupleQueued": "{{count}} Match(es) zur Kopplung mit {{target}} eingereiht.",
     "coupleUnavailable": "Backoffice-Kopplung ist noch nicht verfügbar.",
-    "noPermission": "Sie haben keine Berechtigung für Massenaktionen."
+    "noPermission": "Sie haben keine Berechtigung für Massenaktionen.",
+    "coupleQueuedPartial": "{{queued}} von {{total}} zur Kopplung mit {{target}} eingereiht; {{skipped}} übersprungen."
   },
   "filters": {
     "stage": "Phase",

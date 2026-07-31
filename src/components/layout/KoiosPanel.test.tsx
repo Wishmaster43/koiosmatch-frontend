@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import KoiosPanel from './KoiosPanel'
 
@@ -35,5 +35,28 @@ describe('KoiosPanel — landing state', () => {
     // Let the radar's own stats fetch settle (mocked all-zero → empty state) so
     // the async state update lands inside RTL's act(), not after the test ends.
     await screen.findByText('common:koios.radar.empty')
+  })
+})
+
+// Resizable panel (replaces the old two-fixed-width toggle) — the drag handle
+// must render with real separator semantics, and the expand/collapse button
+// must keep working alongside it (§6, requirement: don't silently drop it).
+describe('KoiosPanel — resizable width', () => {
+  beforeEach(() => localStorage.clear())
+
+  it('renders a keyboard-operable resize handle and keeps the expand/collapse button', async () => {
+    render(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    // The handle: real separator role + accessible name (never mouse-only).
+    expect(screen.getByRole('separator', { name: 'koios.resizeHandle' })).toBeInTheDocument()
+    // The pre-existing toggle button is still present, not replaced by the handle.
+    expect(screen.getByRole('button', { name: 'expand' })).toBeInTheDocument()
+  })
+
+  it('restores a previously stored pixel width instead of a fixed preset', async () => {
+    localStorage.setItem('koios.width', '480')
+    const { container } = render(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    expect((container.firstChild as HTMLElement).style.width).toBe('480px')
   })
 })

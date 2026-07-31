@@ -7,6 +7,7 @@ import { useCandidateActivity, type ActivityEvent } from '../hooks/useCandidateD
 import { useLookups } from '@/context/LookupsContext'
 import { escapeCsvCell } from '@/lib/csv'
 import type { Candidate } from '@/types/candidate'
+import { isUuid } from '@/lib/uuid'
 
 // H2 status/phase provenance entry ({ axis, from, to, effective_from, … }) — the semantic
 // transition log the backend writes on every status/phase change (§3B).
@@ -23,7 +24,6 @@ const humanizeField = (f: string) => f.replace(/_/g, ' ').replace(/([a-z])([A-Z]
 const NOISE_FIELDS = new Set(['id', 'tenant_id', 'external_id', 'updated_at', 'created_at', 'remember_token', 'password', 'candidate_user_id', 'user_id', 'initials', 'uuid'])
 
 // Raw references / machine formats the reader can't interpret.
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const DATE_RE = /^\d{4}-\d{2}-\d{2}([T ]|$)/
 
 // Per-field changes from the diff bag — the current resource sends `changes`,
@@ -75,7 +75,7 @@ export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?:
     if (field === 'status')      return statusMeta(s).label
     if (field === 'phase')       return phaseMeta(s).label
     if (field === 'funnel_type') return funnelMeta(s).label
-    if (UUID_RE.test(s))         return null
+    if (isUuid(s))         return null
     if (DATE_RE.test(s))         return formatDate(s)
     return s
   }

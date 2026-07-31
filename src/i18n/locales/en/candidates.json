@@ -11,6 +11,8 @@
   },
   "columns": {
     "name": "Name",
+    "referenceNumber": "Ref. no.",
+    "coupling": "Link",
     "status": "Status",
     "function": "Role",
     "funnelType": "Funnel type",
@@ -122,7 +124,11 @@
       "missing_required_field": "missing required field",
       "already_on_phase": "already in this phase",
       "not_found": "not found"
-    }
+    },
+    "couple": "Couple to backoffice",
+    "coupleQueued": "{{count}} candidate(s) queued for coupling with {{target}}.",
+    "coupleQueuedPartial": "{{queued}} of {{total}} queued for coupling with {{target}}; {{skipped}} skipped.",
+    "coupleUnavailable": "Backoffice coupling isn't available yet."
   },
   "kpi": {
     "total": "Total",
@@ -960,6 +966,24 @@
     "done": "Candidates merged.",
     "errForbidden": "You are not allowed to merge candidates.",
     "errFailed": "Merge failed. Please try again."
+  },
+  "duplicate": {
+    "blockedTitle": "This person already exists",
+    "blockedBody": "Nothing was created: a record with the same contact details already exists.",
+    "warningTitle": "Possible existing record",
+    "warningBody": "These contact details already appear in an existing record.",
+    "checking": "Checking for duplicate records…",
+    "unnamed": "Unnamed record",
+    "stateActive": "Active record",
+    "stateArchived": "Archived record",
+    "archivedHint": "This record is archived. Restore it to work with it again.",
+    "open": "Open existing record",
+    "restoreAndOpen": "Restore and open",
+    "restoring": "Restoring…",
+    "restored": "Record restored.",
+    "restoreFailed": "Restore failed. Please try again.",
+    "restoreForbidden": "You are not allowed to restore a record.",
+    "editData": "Edit details"
   },
   "integrations": {
     "pdok": {

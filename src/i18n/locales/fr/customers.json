@@ -16,6 +16,8 @@
   },
   "cols": {
     "name": "Nom",
+    "referenceNumber": "N° réf.",
+    "coupling": "Connexion",
     "debtorNumber": "N° débiteur",
     "status": "Statut",
     "accountManager": "Gestionnaire de compte",
@@ -438,7 +440,11 @@
     "tagAdded": "Étiquette « {{tag}} » ajoutée ({{count}}).",
     "tagRemoved": "Étiquette « {{tag}} » retirée ({{count}}).",
     "noteAdded": "Note ajoutée ({{count}}).",
-    "mutateError": "L'action a échoué."
+    "mutateError": "L'action a échoué.",
+    "couple": "Coupler au backoffice",
+    "coupleQueued": "{{count}} client(s) mis en file pour le couplage avec {{target}}.",
+    "coupleQueuedPartial": "{{queued}} sur {{total}} mis en file pour le couplage avec {{target}} ; {{skipped}} ignoré(s).",
+    "coupleUnavailable": "Le couplage backoffice n'est pas encore disponible."
   },
   "modal": {
     "title": "Nouveau client",

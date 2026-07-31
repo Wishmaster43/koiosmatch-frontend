@@ -5,10 +5,12 @@
   "error": "Couldn't load matches.",
   "cols": {
     "candidate": "Candidate",
+    "referenceNumber": "Ref. no.",
     "vacancy": "Vacancy",
     "client": "Client",
     "score": "Match",
     "stage": "Stage",
+    "coupling": "Link",
     "owner": "Owner",
     "date": "Created",
     "status": "Status"
@@ -86,7 +88,8 @@
       "unavailable": "Contract details aren't available yet (integration not configured).",
       "saveError": "Couldn't save the change.",
       "saved": "Contract details saved."
-    }
+    },
+    "ownerUnassigned": "No owner"
   },
   "approval": {
     "status": {
@@ -119,7 +122,8 @@
     },
     "coupleQueued": "{{count}} match(es) queued for coupling with {{target}}.",
     "coupleUnavailable": "Backoffice coupling isn't available yet.",
-    "noPermission": "You don't have permission for bulk actions."
+    "noPermission": "You don't have permission for bulk actions.",
+    "coupleQueuedPartial": "{{queued}} of {{total}} queued for coupling with {{target}}; {{skipped}} skipped."
   },
   "filters": {
     "stage": "Stage",

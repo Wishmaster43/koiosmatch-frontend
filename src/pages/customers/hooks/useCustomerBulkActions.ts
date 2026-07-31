@@ -8,7 +8,7 @@
 import { useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
-import api from '@/lib/api'
+import api, { isServiceUnavailable } from '@/lib/api'
 import { initialsOf } from '@/lib/initials'
 import { useConfirm } from '@/hooks/useConfirm'
 import type { Customer } from '@/types/customer'
@@ -112,5 +112,30 @@ export function useCustomerBulkActions({ customers, setCustomers, setTotal, sele
       .catch(() => notify('error', t('bulk.mutateError')))
   }
 
-  return { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, bulkGeocode, selectedTags, dialog }
+  // SYNC-BULK-1 (§3B — bulk is the 3rd of the three backoffice-coupling paths;
+  // manual is BackofficeLinksTab, workflow is a module). Shares the ONE generic
+  // POST /sync/{entity}/bulk endpoint the per-record tab already uses. That
+  // endpoint returns { queued, skipped } — NOT the `updated` shape bulkMutate
+  // reconciles on — so this is a small dedicated adapter rather than a bulkMutate
+  // call: nothing on the row changes visibly on QUEUE (mirrors bulkGeocode — no
+  // optimistic patch), and the toast stays honest: "queued", never "done", plus
+  // the skipped count so a matrix block or an unknown id is never silently swallowed.
+  const bulkCoupleBackoffice = (system: 'helloflex' | 'shiftmanager') => {
+    const ids = [...selectedIds]; if (!ids.length) return
+    setSelectedIds(new Set())
+    const targetLabel = t(`common:backofficeLinks.${system}.name`)
+    api.post('/sync/customers/bulk', { ids, system })
+      .then((res) => {
+        const queued = Array.isArray(res.data?.queued) ? res.data.queued.length : 0
+        const skipped = Array.isArray(res.data?.skipped) ? res.data.skipped.length : 0
+        if (skipped > 0) notify('warning', t('bulk.coupleQueuedPartial', { target: targetLabel, queued, total: queued + skipped, skipped }))
+        else notify('success', t('bulk.coupleQueued', { target: targetLabel, count: queued }))
+      })
+      .catch((err) => {
+        if (err?.response?.status === 404 || isServiceUnavailable(err)) notify('info', t('bulk.coupleUnavailable'))
+        else notify('error', t('bulk.mutateError'))
+      })
+  }
+
+  return { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, bulkGeocode, bulkCoupleBackoffice, selectedTags, dialog }
 }

@@ -68,9 +68,12 @@ export default function ViewConfigEditor({ module }: { module: string }) {
     <div style={{ maxWidth: 640 }}>
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('viewConfig.title', { label: mod.label })}</h2>
+          {/* Module + block names are i18n keys in the registry (§5). No toLowerCase()
+              on the interpolated label: lowercasing a translated noun is wrong in
+              German ("Kunden" → "kunden") and the sentences read fine capitalised. */}
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('viewConfig.title', { label: t(mod.labelKey) })}</h2>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-            {t('viewConfig.description', { label: mod.label.toLowerCase() })}
+            {t('viewConfig.description', { label: t(mod.labelKey) })}
           </p>
         </div>
         <button onClick={save} disabled={saving} aria-label={t('common.save')}
@@ -96,7 +99,7 @@ export default function ViewConfigEditor({ module }: { module: string }) {
                   <Icon size={15} color={block.color} />
                 </div>
               )}
-              <span style={{ flex: 1, fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{block.label}</span>
+              <span style={{ flex: 1, fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{t(block.labelKey)}</span>
 
               <button onClick={() => move(i, -1)} disabled={i === 0} title={t('viewConfig.moveUp')} aria-label={t('viewConfig.moveUp')}
                 style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',

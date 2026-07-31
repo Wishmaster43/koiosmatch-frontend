@@ -16,8 +16,11 @@ import {
 import type { LucideIcon } from 'lucide-react'
 
 // One configurable block in a module view (KPI card for now; charts/tables later).
-export interface ModuleBlock { id: string; type: 'kpi'; label: string; icon: LucideIcon; color: string; bg: string }
-export interface ModuleDef { label: string; blocks: ModuleBlock[] }
+// `labelKey` is an i18n key in the `settings` namespace, never a literal label (§5):
+// the registry is a plain module and cannot hold a hook, so the RENDERER translates
+// (ViewConfigEditor, ModuleView). One source per label — no English string alongside.
+export interface ModuleBlock { id: string; type: 'kpi'; labelKey: string; icon: LucideIcon; color: string; bg: string }
+export interface ModuleDef { labelKey: string; blocks: ModuleBlock[] }
 
 // type: 'kpi' for now (charts/tables can be added later with their own renderers).
 // Block colours mix design tokens with fixed module-category swatches (e.g. the violet/
@@ -26,43 +29,45 @@ export interface ModuleDef { label: string; blocks: ModuleBlock[] }
 /* eslint-disable no-restricted-syntax -- DATA: module/KPI-block colour swatches, mirrors the module registry convention (src/modules/*.ts), not themeable UI colour */
 export const MODULES: Record<string, ModuleDef> = {
   customers: {
-    label: 'Customers',
+    labelKey: 'moduleView.modules.customers',
     blocks: [
-      { id: 'active_customers',           type: 'kpi', label: 'Active customers',          icon: Building2,    color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
-      { id: 'total_locations',            type: 'kpi', label: 'Total locations',           icon: MapPin,       color: '#7C3AED',                bg: '#F5F3FF' },
-      { id: 'total_departments',          type: 'kpi', label: 'Total departments',         icon: Layers,       color: '#059669',                bg: '#ECFDF5' },
-      { id: 'customers_without_location', type: 'kpi', label: 'Customers without location', icon: TrendingUp,   color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)' },
+      { id: 'active_customers',           type: 'kpi', labelKey: 'moduleView.blocks.active_customers',           icon: Building2,  color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
+      { id: 'total_locations',            type: 'kpi', labelKey: 'moduleView.blocks.total_locations',            icon: MapPin,     color: '#7C3AED',                bg: '#F5F3FF' },
+      { id: 'total_departments',          type: 'kpi', labelKey: 'moduleView.blocks.total_departments',          icon: Layers,     color: '#059669',                bg: '#ECFDF5' },
+      { id: 'customers_without_location', type: 'kpi', labelKey: 'moduleView.blocks.customers_without_location', icon: TrendingUp, color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)' },
     ],
   },
+  // NOT exposed in Settings → Views (2026-07-31): no screen mounts <ModuleView
+  // module="planning|sales|candidates"/> yet, so an editor for them would save a
+  // config nothing reads. The catalogues stay here — they are inert DATA, and this
+  // is the file you extend when such a dashboard lands (add the ModuleView, then
+  // re-add the registry.jsx sub-tab). Keep every labelKey translated in all locales.
   planning: {
-    label: 'Planning',
+    labelKey: 'moduleView.modules.planning',
     blocks: [
-      { id: 'open_shifts',   type: 'kpi', label: 'Open shifts',   icon: Calendar,      color: 'var(--color-primary)',   bg: 'var(--color-primary-bg)' },
-      { id: 'filled_shifts', type: 'kpi', label: 'Filled shifts', icon: CheckCircle,   color: 'var(--color-success)',   bg: '#ECFDF5' },
-      { id: 'fill_rate',     type: 'kpi', label: 'Fill rate',     icon: Percent,       color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
-      { id: 'unfilled',      type: 'kpi', label: 'Unfilled',      icon: AlertTriangle, color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)' },
+      { id: 'open_shifts',   type: 'kpi', labelKey: 'moduleView.blocks.open_shifts',   icon: Calendar,      color: 'var(--color-primary)',   bg: 'var(--color-primary-bg)' },
+      { id: 'filled_shifts', type: 'kpi', labelKey: 'moduleView.blocks.filled_shifts', icon: CheckCircle,   color: 'var(--color-success)',   bg: '#ECFDF5' },
+      { id: 'fill_rate',     type: 'kpi', labelKey: 'moduleView.blocks.fill_rate',     icon: Percent,       color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
+      { id: 'unfilled',      type: 'kpi', labelKey: 'moduleView.blocks.unfilled',      icon: AlertTriangle, color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)' },
     ],
   },
   sales: {
-    label: 'Sales',
+    labelKey: 'moduleView.modules.sales',
     blocks: [
-      { id: 'revenue',     type: 'kpi', label: 'Revenue',        icon: Euro,     color: 'var(--color-success)',   bg: '#ECFDF5' },
-      { id: 'open_deals',  type: 'kpi', label: 'Open deals',     icon: Briefcase, color: 'var(--color-primary)',  bg: 'var(--color-primary-bg)' },
-      { id: 'won_deals',   type: 'kpi', label: 'Won this month', icon: Trophy,   color: '#7C3AED',                bg: '#F5F3FF' },
-      { id: 'conversion',  type: 'kpi', label: 'Conversion rate', icon: Percent, color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
+      { id: 'revenue',    type: 'kpi', labelKey: 'moduleView.blocks.revenue',    icon: Euro,      color: 'var(--color-success)',   bg: '#ECFDF5' },
+      { id: 'open_deals', type: 'kpi', labelKey: 'moduleView.blocks.open_deals', icon: Briefcase, color: 'var(--color-primary)',   bg: 'var(--color-primary-bg)' },
+      { id: 'won_deals',  type: 'kpi', labelKey: 'moduleView.blocks.won_deals',  icon: Trophy,    color: '#7C3AED',                bg: '#F5F3FF' },
+      { id: 'conversion', type: 'kpi', labelKey: 'moduleView.blocks.conversion', icon: Percent,   color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
     ],
   },
   candidates: {
-    label: 'Candidates',
+    labelKey: 'moduleView.modules.candidates',
     blocks: [
-      { id: 'total_candidates', type: 'kpi', label: 'Total candidates', icon: Users,    color: 'var(--color-primary)',   bg: 'var(--color-primary-bg)' },
-      { id: 'available',        type: 'kpi', label: 'Available',        icon: UserCheck, color: 'var(--color-success)',  bg: '#ECFDF5' },
-      { id: 'new_candidates',   type: 'kpi', label: 'New',              icon: UserPlus, color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
-      { id: 'in_progress',      type: 'kpi', label: 'In progress',      icon: Clock,    color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)' },
+      { id: 'total_candidates', type: 'kpi', labelKey: 'moduleView.blocks.total_candidates', icon: Users,     color: 'var(--color-primary)',   bg: 'var(--color-primary-bg)' },
+      { id: 'available',        type: 'kpi', labelKey: 'moduleView.blocks.available',        icon: UserCheck, color: 'var(--color-success)',   bg: '#ECFDF5' },
+      { id: 'new_candidates',   type: 'kpi', labelKey: 'moduleView.blocks.new_candidates',   icon: UserPlus,  color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
+      { id: 'in_progress',      type: 'kpi', labelKey: 'moduleView.blocks.in_progress',      icon: Clock,     color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)' },
     ],
   },
 }
 /* eslint-enable no-restricted-syntax */
-
-/** Modules exposed in the Settings → Views area (order matters for the nav). */
-export const VIEW_MODULE_IDS = ['customers', 'planning', 'sales', 'candidates']

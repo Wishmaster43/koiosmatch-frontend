@@ -22,7 +22,7 @@ import { useActionRulePreflight } from '@/components/actionrules'
 vi.mock('../hooks/useVacancyOptions', () => ({
   useVacancyOptions: () => [{ value: 'vac-1', label: 'Verzorgende IG', client: 'Zorggroep A' }],
 }))
-vi.mock('../hooks/useApplicationStages', () => ({
+vi.mock('@/hooks/useApplicationStages', () => ({
   useApplicationStages: () => ({
     stages: [
       { id: 'stage-applied', value: 'applied', label: 'Gesolliciteerd', is_default: true },

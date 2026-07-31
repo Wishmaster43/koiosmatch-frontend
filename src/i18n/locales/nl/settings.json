@@ -86,9 +86,6 @@
     "application_proposal": "Voorstellen",
     "cv_template": "CV-sjabloon",
     "view_customers": "Klanten",
-    "view_planning": "Planning",
-    "view_sales": "Sales",
-    "view_candidates": "Kandidaten",
     "notif_sollicitaties": "Sollicitaties",
     "notif_vacatures": "Vacatures",
     "notif_facturering": "Facturering",
@@ -197,10 +194,7 @@
     "cf_customer_contact": "Contactpersonen",
     "nt_candidate": "Kandidaten",
     "nt_application": "Sollicitaties",
-    "nt_match": "Matches",
-    "nt_task": "Taken",
     "nt_customer": "Klanten",
-    "nt_contact": "Contactpersonen",
     "nt_opportunity": "Kansen",
     "action_rules": "Actieregels",
     "vacancy_generation": "Vacaturegeneratie",
@@ -1764,6 +1758,32 @@
     "moveDown": "Omlaag",
     "hide": "Verbergen",
     "show": "Tonen"
+  },
+  "moduleView": {
+    "modules": {
+      "customers": "Klanten",
+      "planning": "Planning",
+      "sales": "Sales",
+      "candidates": "Kandidaten"
+    },
+    "blocks": {
+      "active_customers": "Actieve klanten",
+      "total_locations": "Totaal locaties",
+      "total_departments": "Totaal afdelingen",
+      "customers_without_location": "Klanten zonder locatie",
+      "open_shifts": "Open diensten",
+      "filled_shifts": "Ingevulde diensten",
+      "fill_rate": "Vullingsgraad",
+      "unfilled": "Niet ingevuld",
+      "revenue": "Omzet",
+      "open_deals": "Open deals",
+      "won_deals": "Gewonnen deze maand",
+      "conversion": "Conversieratio",
+      "total_candidates": "Totaal kandidaten",
+      "available": "Beschikbaar",
+      "new_candidates": "Nieuw",
+      "in_progress": "In behandeling"
+    }
   },
   "functionsSettings": {
     "title": "Functies (kandidaat)",

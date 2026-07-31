@@ -83,9 +83,6 @@
     "application_proposal": "Vorschläge",
     "cv_template": "Lebenslauf-Vorlage",
     "view_customers": "Kunden",
-    "view_planning": "Planung",
-    "view_sales": "Vertrieb",
-    "view_candidates": "Kandidaten",
     "notif_sollicitaties": "Bewerbungen",
     "notif_vacatures": "Stellen",
     "notif_facturering": "Abrechnung",
@@ -197,10 +194,7 @@
     "cf_customer_contact": "Kontakte",
     "nt_candidate": "Kandidaten",
     "nt_application": "Bewerbungen",
-    "nt_match": "Matches",
-    "nt_task": "Aufgaben",
     "nt_customer": "Kunden",
-    "nt_contact": "Kontakte",
     "nt_opportunity": "Chancen",
     "action_rules": "Aktionsregeln",
     "vacancy_generation": "Stellenanzeigen-Generierung",
@@ -1742,6 +1736,32 @@
     "moveDown": "Nach unten",
     "hide": "Ausblenden",
     "show": "Anzeigen"
+  },
+  "moduleView": {
+    "modules": {
+      "customers": "Kunden",
+      "planning": "Planung",
+      "sales": "Vertrieb",
+      "candidates": "Kandidaten"
+    },
+    "blocks": {
+      "active_customers": "Aktive Kunden",
+      "total_locations": "Standorte gesamt",
+      "total_departments": "Abteilungen gesamt",
+      "customers_without_location": "Kunden ohne Standort",
+      "open_shifts": "Offene Dienste",
+      "filled_shifts": "Besetzte Dienste",
+      "fill_rate": "Besetzungsquote",
+      "unfilled": "Unbesetzt",
+      "revenue": "Umsatz",
+      "open_deals": "Offene Deals",
+      "won_deals": "Diesen Monat gewonnen",
+      "conversion": "Konversionsrate",
+      "total_candidates": "Kandidaten gesamt",
+      "available": "Verfügbar",
+      "new_candidates": "Neu",
+      "in_progress": "In Bearbeitung"
+    }
   },
   "applicationDisplay": {
     "title": "Tabellenansicht",

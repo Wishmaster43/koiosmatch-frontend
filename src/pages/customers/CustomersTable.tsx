@@ -5,7 +5,9 @@ import type { Column } from '@/components/ui/DataTable'
 import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import SoftChip from '@/components/ui/SoftChip'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import BackofficeCouplingIndicator from '@/components/ui/BackofficeCouplingIndicator'
 import { useDateFormat } from '@/lib/datetime'
+import { useApps } from '@/context/AppsContext'
 import { KoiosAdvicePill } from '@/lib/koiosAdviceMeta'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import type { Customer } from '@/types/customer'
@@ -58,6 +60,11 @@ export default function CustomersTable({
   const colorStatus = getBoolSetting(settings, 'customer_table_color_status', true)
   const colorOwner  = getBoolSetting(settings, 'customer_table_color_owner', true)
   const colorKoios  = getBoolSetting(settings, 'customer_table_color_koios', false)
+  // Backoffice coupling column (JOB2): only shown for systems the tenant actually
+  // enabled — mirrors BackofficeLinksTab's own isAppEnabled('hf'/'shiftmanager') gate.
+  const apps = useApps()
+  const showHelloflex = apps?.isAppEnabled('hf') ?? false
+  const showShiftmanager = apps?.isAppEnabled('shiftmanager') ?? false
 
   // Column order mirrors the candidates blueprint (§3A): identity → qualification →
   // status → counts → Koios → dates → accountmanager LAST (Danny 2026-07-14 table
@@ -72,6 +79,15 @@ export default function CustomersTable({
           <span style={{ color: 'var(--text)', fontSize: 12, ...nameEllipsis }} title={c.name}>{c.name}</span>
         </div>
       ),
+    },
+    {
+      // Human-readable reference number (D-4, JOB1) — an identifier, so it sits
+      // right after the name. Plain mono text, not the interactive ReferenceNumberChip:
+      // a click-to-copy button nested inside this row's own click-to-open would either
+      // double-fire or need stopPropagation contortions; the drawer chip already copies.
+      key: 'referenceNumber', header: t('cols.referenceNumber'), nowrap: true,
+      cellStyle: { ...mutedCell, fontFamily: 'JetBrains Mono, monospace', fontVariantNumeric: 'tabular-nums' },
+      sortable: true, sortValue: c => c.referenceNumber ?? '', render: c => c.referenceNumber || '—',
     },
     { key: 'industry',    header: t('cols.industry'),    nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.industry, render: c => c.industry || '—' },
     {
@@ -103,6 +119,13 @@ export default function CustomersTable({
       render: c => <KoiosAdvicePill advice={c.koiosAdvice} colored={colorKoios} />,
     },
     { key: 'created',     header: t('cols.createdAt'),   nowrap: true, cellStyle: plainCell, sortable: true, sortValue: c => c.created, render: c => c.created ? formatDate(c.created) : '—' },
+    {
+      // Backoffice coupling scanning aid (JOB2) — not sortable: a compound
+      // two-system state has no single clean sort order, it's a glance aid.
+      key: 'coupling', header: t('cols.coupling'), nowrap: true,
+      render: c => <BackofficeCouplingIndicator helloflexLink={c.helloflexLink} shiftmanagerLink={c.shiftmanagerLink}
+        showHelloflex={showHelloflex} showShiftmanager={showShiftmanager} />,
+    },
     {
       key: 'accountManager', header: t('cols.accountManager'), sortable: true, sortValue: c => c.owner,
       render: c => (

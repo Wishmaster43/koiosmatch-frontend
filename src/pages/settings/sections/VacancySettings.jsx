@@ -72,24 +72,36 @@ export function VacancyPhaseSettings() {
   )
 }
 
-/** Seniority levels — lookup, backend /vacancy-seniority-levels. */
+/**
+ * Seniority levels — lookup, backend /vacancy-seniority-levels.
+ * `is_default` (DEFAULTS-1/V11) is a backend-enforced singleton (HasSingletonFlag,
+ * whitelisted in VacancySeniorityLevelController::lookupExtraRules) — the shared
+ * DefaultToggle promotes one row and clears the rest. Consumed by
+ * VacancyLookupsContext.defaultSeniority → the drawer's Eisen proposal.
+ */
 export function VacancySenioritySettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
       <StatusListEditor compact withColor title={t('vacancy.seniorityTitle')} subtitle={t('vacancy.senioritySubtitle')}
-        endpoint="/vacancy-seniority-levels" addLabel={t('vacancy.seniorityAdd')} />
+        endpoint="/vacancy-seniority-levels" addLabel={t('vacancy.seniorityAdd')}
+        defaultField={{ key: 'is_default' }} />
     </div>
   )
 }
 
-/** Education levels — lookup, backend /vacancy-education-levels. */
+/**
+ * Education levels — lookup, backend /vacancy-education-levels.
+ * Same backend-enforced `is_default` singleton as seniority (DEFAULTS-1/V19);
+ * consumed by VacancyLookupsContext.defaultEducation.
+ */
 export function VacancyEducationSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
       <StatusListEditor compact withColor title={t('vacancy.educationTitle')} subtitle={t('vacancy.educationSubtitle')}
-        endpoint="/vacancy-education-levels" addLabel={t('vacancy.educationAdd')} />
+        endpoint="/vacancy-education-levels" addLabel={t('vacancy.educationAdd')}
+        defaultField={{ key: 'is_default' }} />
     </div>
   )
 }

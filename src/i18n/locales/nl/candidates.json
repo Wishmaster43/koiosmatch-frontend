@@ -11,6 +11,8 @@
   },
   "columns": {
     "name": "Naam",
+    "referenceNumber": "Referentienr.",
+    "coupling": "Koppeling",
     "status": "Status",
     "function": "Functie",
     "funnelType": "Funnel type",
@@ -122,7 +124,11 @@
       "missing_required_field": "verplicht veld ontbreekt",
       "already_on_phase": "al in deze fase",
       "not_found": "niet gevonden"
-    }
+    },
+    "couple": "Koppelen aan backoffice",
+    "coupleQueued": "{{count}} kandidaten in wachtrij gezet voor koppeling met {{target}}.",
+    "coupleQueuedPartial": "{{queued}} van {{total}} in wachtrij gezet voor koppeling met {{target}}; {{skipped}} overgeslagen.",
+    "coupleUnavailable": "Backoffice-koppeling is nog niet beschikbaar."
   },
   "kpi": {
     "total": "Totaal",
@@ -960,6 +966,24 @@
     "done": "Kandidaten samengevoegd.",
     "errForbidden": "Je hebt geen rechten om kandidaten samen te voegen.",
     "errFailed": "Samenvoegen mislukt. Probeer het opnieuw."
+  },
+  "duplicate": {
+    "blockedTitle": "Deze persoon bestaat al",
+    "blockedBody": "Er is niets aangemaakt: er bestaat al een dossier met dezelfde contactgegevens.",
+    "warningTitle": "Mogelijk bestaand dossier",
+    "warningBody": "Deze contactgegevens komen al voor in een bestaand dossier.",
+    "checking": "Controleren op dubbele dossiers…",
+    "unnamed": "Naamloos dossier",
+    "stateActive": "Actief dossier",
+    "stateArchived": "Gearchiveerd dossier",
+    "archivedHint": "Dit dossier is gearchiveerd. Herstel het om er weer mee te werken.",
+    "open": "Bestaand dossier openen",
+    "restoreAndOpen": "Herstellen en openen",
+    "restoring": "Herstellen…",
+    "restored": "Dossier hersteld.",
+    "restoreFailed": "Herstellen mislukt. Probeer het opnieuw.",
+    "restoreForbidden": "Je hebt geen rechten om een dossier te herstellen.",
+    "editData": "Gegevens aanpassen"
   },
   "integrations": {
     "pdok": {

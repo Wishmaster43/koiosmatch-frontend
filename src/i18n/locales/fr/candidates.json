@@ -11,6 +11,8 @@
   },
   "columns": {
     "name": "Nom",
+    "referenceNumber": "N° réf.",
+    "coupling": "Connexion",
     "status": "Statut",
     "function": "Fonction",
     "funnelType": "Type de tunnel",
@@ -100,7 +102,11 @@
       "missing_required_field": "champ obligatoire manquant",
       "already_on_phase": "déjà dans cette phase",
       "not_found": "introuvable"
-    }
+    },
+    "couple": "Coupler au backoffice",
+    "coupleQueued": "{{count}} candidat(s) mis en file pour le couplage avec {{target}}.",
+    "coupleQueuedPartial": "{{queued}} sur {{total}} mis en file pour le couplage avec {{target}} ; {{skipped}} ignoré(s).",
+    "coupleUnavailable": "Le couplage backoffice n'est pas encore disponible."
   },
   "kpi": {
     "total": "Total",
@@ -960,6 +966,24 @@
     "done": "Candidats fusionnés.",
     "errForbidden": "Vous n'êtes pas autorisé à fusionner des candidats.",
     "errFailed": "Échec de la fusion. Veuillez réessayer."
+  },
+  "duplicate": {
+    "blockedTitle": "Cette personne existe déjà",
+    "blockedBody": "Rien n'a été créé : un dossier avec les mêmes coordonnées existe déjà.",
+    "warningTitle": "Dossier existant possible",
+    "warningBody": "Ces coordonnées figurent déjà dans un dossier existant.",
+    "checking": "Recherche de doublons…",
+    "unnamed": "Dossier sans nom",
+    "stateActive": "Dossier actif",
+    "stateArchived": "Dossier archivé",
+    "archivedHint": "Ce dossier est archivé. Restaurez-le pour le réutiliser.",
+    "open": "Ouvrir le dossier existant",
+    "restoreAndOpen": "Restaurer et ouvrir",
+    "restoring": "Restauration…",
+    "restored": "Dossier restauré.",
+    "restoreFailed": "Échec de la restauration. Veuillez réessayer.",
+    "restoreForbidden": "Vous n'avez pas les droits pour restaurer un dossier.",
+    "editData": "Modifier les données"
   },
   "integrations": {
     "pdok": {

@@ -16,6 +16,8 @@
   },
   "cols": {
     "name": "Naam",
+    "referenceNumber": "Referentienr.",
+    "coupling": "Koppeling",
     "debtorNumber": "Debiteurnr.",
     "status": "Status",
     "accountManager": "Accountmanager",
@@ -438,7 +440,11 @@
     "tagAdded": "Tag “{{tag}}” toegevoegd ({{count}}).",
     "tagRemoved": "Tag “{{tag}}” verwijderd ({{count}}).",
     "noteAdded": "Notitie toegevoegd ({{count}}).",
-    "mutateError": "Bewerking is mislukt."
+    "mutateError": "Bewerking is mislukt.",
+    "couple": "Koppelen aan backoffice",
+    "coupleQueued": "{{count}} klant(en) in wachtrij gezet voor koppeling met {{target}}.",
+    "coupleQueuedPartial": "{{queued}} van {{total}} in wachtrij gezet voor koppeling met {{target}}; {{skipped}} overgeslagen.",
+    "coupleUnavailable": "Backoffice-koppeling is nog niet beschikbaar."
   },
   "modal": {
     "title": "Nieuwe klant",

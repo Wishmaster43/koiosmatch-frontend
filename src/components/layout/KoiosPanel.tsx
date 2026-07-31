@@ -5,7 +5,7 @@ import { X, Bot, AtSign, Paperclip, ArrowUp } from 'lucide-react'
 import { useLocale } from '@/lib/datetime'
 import { useKoiosChat } from './koios/useKoiosChat'
 import { useKoiosSettings } from './koios/useKoiosSettings'
-import { useKoiosExpanded } from './koios/useKoiosExpanded'
+import { useKoiosPanelWidth } from './koios/useKoiosPanelWidth'
 import { useKoiosMentionCounts } from './koios/useKoiosMentionCounts'
 import { matchMentionQuery } from './koios/mentionMatch'
 import { resolveScopedQuery } from './koios/mentionScope'
@@ -18,6 +18,7 @@ import KoiosUsage from './koios/KoiosUsage'
 import KoiosModelPicker from './koios/KoiosModelPicker'
 import KoiosMentionMenu from './koios/KoiosMentionMenu'
 import KoiosHeader from './koios/KoiosHeader'
+import KoiosResizeHandle from './koios/KoiosResizeHandle'
 import KoiosPendingActionCard from './koios/KoiosPendingActionCard'
 import KoiosResultCards from './koios/KoiosResultCards'
 import KoiosRadar from './koios/KoiosRadar'
@@ -27,10 +28,6 @@ import type { KoiosChatMessage, KoiosContextRef, TFn } from '@/types/koios'
 
 // gradient used for the assistant avatar + user bubble.
 const GRADIENT = 'linear-gradient(135deg,var(--color-primary),var(--color-violet))'
-
-// Panel width: normal vs. expanded, mirroring EntityDrawer's own proportions.
-const WIDTH_COLLAPSED = 300
-const WIDTH_EXPANDED = 560
 
 // Resolve a message to its display text + whether it's a calm system notice
 // (notices carry no steps/usage). Keeps the JSX below readable.
@@ -121,8 +118,9 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
   const isLanding = messages.length === 1 && messages[0].kind === 'welcome'
   // Settings (selectable models + connection status), loaded on first open.
   const { settings } = useKoiosSettings(open)
-  // Wide/normal toggle, persisted across reloads (mirrors the drawer's expand state).
-  const { expanded, toggle: toggleExpanded } = useKoiosExpanded()
+  // Free-drag width, persisted in px across reloads (§ resizable Koios panel).
+  // The toggle button still snaps between the two known presets — see the hook.
+  const { width, minWidth, maxWidth, isExpanded, isDragging, toggle: toggleExpanded, startDrag, onHandleKeyDown } = useKoiosPanelWidth()
   // Connection status (optimistic until loaded; only `false` flips to "offline").
   const connected = settings?.status?.claude_configured !== false
   const [input,       setInput]       = useState('')
@@ -140,6 +138,11 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const bottomRef   = useRef<HTMLDivElement>(null)
   const mentionRef  = useRef<HTMLDivElement>(null)
+  // prefers-reduced-motion (§6): guarded for jsdom/older browsers where
+  // matchMedia is absent, so it never breaks a plain render.
+  const [reduceMotion, setReduceMotion] = useState(() =>
+    typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   // Real tenant counts for the mention categories — fetched once, lazily, the
   // first time the menu opens (never blocks the menu's first paint).
   const mentionCounts = useKoiosMentionCounts(showMention)
@@ -162,6 +165,16 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  // Track prefers-reduced-motion live, so toggling it in the OS applies
+  // without a reload; no-ops where matchMedia isn't available (jsdom/tests).
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const onChange = () => setReduceMotion(mq.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
   }, [])
 
   // Submit the composer: hand the text + context refs to the hook, then clear + refocus.
@@ -237,13 +250,20 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
   if (!open) return null
 
   return (
-    <div style={{ width: expanded ? WIDTH_EXPANDED : WIDTH_COLLAPSED, flexShrink: 0,
+    <div style={{ width, flexShrink: 0, position: 'relative',
       borderRight: '1px solid var(--sidebar-border)', background: 'var(--sidebar-bg)', height: '100%',
-      display: 'flex', flexDirection: 'column', transition: 'width 0.2s ease' }}>
+      display: 'flex', flexDirection: 'column',
+      // No transition while a live drag is in progress (it would fight the
+      // pointer position) and none for users who opted out of motion (§6).
+      transition: isDragging || reduceMotion ? 'none' : 'width 0.2s ease' }}>
 
       {/* ── Header ── */}
-      <KoiosHeader connected={connected} expanded={expanded} onNewChat={newChat}
+      <KoiosHeader connected={connected} expanded={isExpanded} onNewChat={newChat}
         onToggleExpanded={toggleExpanded} onClose={onClose} t={t} />
+
+      {/* ── Resize handle: drag or arrow-keys to resize, Home/End to the bounds ── */}
+      <KoiosResizeHandle width={width} minWidth={minWidth} maxWidth={maxWidth}
+        onPointerDown={startDrag} onKeyDown={onHandleKeyDown} t={t} />
 
       {/* ── Messages ── */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '14px 12px',
@@ -392,6 +412,9 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
       <style>{`
         @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
         @keyframes fadeSlideIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+        .km-koios-resize-handle:hover, .km-koios-resize-handle:focus-visible {
+          background: color-mix(in srgb, var(--color-primary) 35%, transparent);
+        }
       `}</style>
     </div>
   )

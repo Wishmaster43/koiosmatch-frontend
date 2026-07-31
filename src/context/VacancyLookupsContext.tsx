@@ -19,7 +19,9 @@ import { sortActiveRows, makeMetaResolver } from '../lib/lookupUtils'
  */
 
 // One configurable vacancy lookup row (channels carry no colour).
-export interface VacancyLookupItem { value: string; label: string; color?: string; [k: string]: unknown }
+// `is_default` is the backend's singleton flag (DEFAULTS-1, V11/V19) on the
+// seniority + education lookups — the tenant's proposed value for an empty field.
+export interface VacancyLookupItem { value: string; label: string; color?: string; is_default?: boolean; [k: string]: unknown }
 
 interface VacancyLookupsValue {
   statuses: VacancyLookupItem[]
@@ -32,6 +34,10 @@ interface VacancyLookupsValue {
   phaseMeta: (v?: string | null) => VacancyLookupItem
   seniorityMeta: (v?: string | null) => VacancyLookupItem
   educationMeta: (v?: string | null) => VacancyLookupItem
+  // The tenant's flagged default value ('' when none is flagged) — a PROPOSAL for
+  // an empty field, never an index-0 guess, so an unconfigured tenant keeps "—".
+  defaultSeniority: string
+  defaultEducation: string
 }
 
 // ── Seed defaults (English slugs, tenant-editable labels/colours) ─────────────
@@ -84,11 +90,17 @@ const DEFAULT_CHANNELS: VacancyLookupItem[] = [
   { value: 'werkzoeken', label: 'Werkzoeken' },
 ]
 
+// Tolerant truthy check — the backend may send a real bool, 1/0 or "true"/"false"
+// (mirrors TaskLookupsContext; Laravel serialises tinyint flags inconsistently).
+const truthy = (v: unknown) => v === true || v === 1 || v === '1' || v === 'true'
+
 // Normalise a raw API list: keep active items, sort by order, fall back to seed.
 // `pinId` (channels only): the publish toggle persists channel_id (uuid) per
 // vacancy, so the value must STAY the id — CHANNEL-KEY-1 adds a `key` column
 // server-side and the generic `value ?? key ?? id` chain would silently flip
 // stored references from uuid to key the moment that merges (CMBE 15-07).
+// `is_default` is carried through (DEFAULTS-1): dropping it here is what made the
+// Settings default-toggle unreadable by any consumer.
 function normalize(raw: unknown, fallback: VacancyLookupItem[], pinId = false): VacancyLookupItem[] {
   if (!Array.isArray(raw) || raw.length === 0) return fallback
   return sortActiveRows(raw)
@@ -97,8 +109,13 @@ function normalize(raw: unknown, fallback: VacancyLookupItem[], pinId = false): 
       label: String(it.label ?? it.name ?? it.value ?? it.key),
       // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
       color: (it.color as string) ?? '#6B7280',
+      is_default: truthy(it.is_default),
     }))
 }
+
+// The tenant's flagged default, or '' — no index-0 fallback on purpose: a tenant
+// that flagged nothing must get no proposal at all (§3 no invented behaviour).
+const defaultValueOf = (list: VacancyLookupItem[]): string => list.find(i => i.is_default)?.value ?? ''
 
 const VacancyLookupsContext = createContext<VacancyLookupsValue | null>(null)
 
@@ -130,6 +147,8 @@ export function VacancyLookupsProvider({ children }: { children: ReactNode }) {
     phaseMeta:      makeMetaResolver(phases),
     seniorityMeta:  makeMetaResolver(seniorityLevels),
     educationMeta:  makeMetaResolver(educationLevels),
+    defaultSeniority: defaultValueOf(seniorityLevels),
+    defaultEducation: defaultValueOf(educationLevels),
   }
 
   return <VacancyLookupsContext.Provider value={value}>{children}</VacancyLookupsContext.Provider>

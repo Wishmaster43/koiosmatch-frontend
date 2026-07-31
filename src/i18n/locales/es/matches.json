@@ -5,10 +5,12 @@
   "error": "No se pudieron cargar los matches.",
   "cols": {
     "candidate": "Candidato",
+    "referenceNumber": "N.º ref.",
     "vacancy": "Vacante",
     "client": "Cliente",
     "score": "Match",
     "stage": "Fase",
+    "coupling": "Vínculo",
     "owner": "Responsable",
     "date": "Creado",
     "status": "Estado"
@@ -86,7 +88,8 @@
       "unavailable": "Los detalles del contrato aún no están disponibles (integración no configurada).",
       "saveError": "No se pudo guardar el cambio.",
       "saved": "Detalles del contrato guardados."
-    }
+    },
+    "ownerUnassigned": "Sin responsable"
   },
   "approval": {
     "status": {
@@ -119,7 +122,8 @@
     },
     "coupleQueued": "{{count}} match(es) en cola para vincular con {{target}}.",
     "coupleUnavailable": "La vinculación con el backoffice aún no está disponible.",
-    "noPermission": "No tienes permiso para acciones masivas."
+    "noPermission": "No tienes permiso para acciones masivas.",
+    "coupleQueuedPartial": "{{queued}} de {{total}} en cola para vincular con {{target}}; {{skipped}} omitido(s)."
   },
   "filters": {
     "stage": "Fase",

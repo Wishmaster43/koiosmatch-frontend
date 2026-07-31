@@ -5,10 +5,12 @@
   "error": "Impossible de charger les matchs.",
   "cols": {
     "candidate": "Candidat",
+    "referenceNumber": "N° réf.",
     "vacancy": "Poste",
     "client": "Client",
     "score": "Match",
     "stage": "Phase",
+    "coupling": "Connexion",
     "owner": "Responsable",
     "date": "Créé",
     "status": "Statut"
@@ -86,7 +88,8 @@
       "unavailable": "Les détails du contrat ne sont pas encore disponibles (intégration non configurée).",
       "saveError": "Impossible d'enregistrer la modification.",
       "saved": "Détails du contrat enregistrés."
-    }
+    },
+    "ownerUnassigned": "Aucun responsable"
   },
   "approval": {
     "status": {
@@ -119,7 +122,8 @@
     },
     "coupleQueued": "{{count}} match(es) mis en file pour le couplage avec {{target}}.",
     "coupleUnavailable": "Le couplage backoffice n'est pas encore disponible.",
-    "noPermission": "Vous n'avez pas l'autorisation pour les actions groupées."
+    "noPermission": "Vous n'avez pas l'autorisation pour les actions groupées.",
+    "coupleQueuedPartial": "{{queued}} sur {{total}} mis en file pour le couplage avec {{target}} ; {{skipped}} ignoré(s)."
   },
   "filters": {
     "stage": "Phase",

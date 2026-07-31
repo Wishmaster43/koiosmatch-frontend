@@ -86,9 +86,6 @@
     "application_proposal": "Proposals",
     "cv_template": "CV template",
     "view_customers": "Customers",
-    "view_planning": "Planning",
-    "view_sales": "Sales",
-    "view_candidates": "Candidates",
     "notif_sollicitaties": "Applications",
     "notif_vacatures": "Vacancies",
     "notif_facturering": "Billing",
@@ -197,10 +194,7 @@
     "cf_customer_contact": "Contacts",
     "nt_candidate": "Candidates",
     "nt_application": "Applications",
-    "nt_match": "Matches",
-    "nt_task": "Tasks",
     "nt_customer": "Customers",
-    "nt_contact": "Contacts",
     "nt_opportunity": "Opportunities",
     "action_rules": "Action rules",
     "vacancy_generation": "Vacancy generation",
@@ -1764,6 +1758,32 @@
     "moveDown": "Move down",
     "hide": "Hide",
     "show": "Show"
+  },
+  "moduleView": {
+    "modules": {
+      "customers": "Customers",
+      "planning": "Planning",
+      "sales": "Sales",
+      "candidates": "Candidates"
+    },
+    "blocks": {
+      "active_customers": "Active customers",
+      "total_locations": "Total locations",
+      "total_departments": "Total departments",
+      "customers_without_location": "Customers without location",
+      "open_shifts": "Open shifts",
+      "filled_shifts": "Filled shifts",
+      "fill_rate": "Fill rate",
+      "unfilled": "Unfilled",
+      "revenue": "Revenue",
+      "open_deals": "Open deals",
+      "won_deals": "Won this month",
+      "conversion": "Conversion rate",
+      "total_candidates": "Total candidates",
+      "available": "Available",
+      "new_candidates": "New",
+      "in_progress": "In progress"
+    }
   },
   "functionsSettings": {
     "title": "Functions (candidate)",

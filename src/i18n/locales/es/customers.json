@@ -16,6 +16,8 @@
   },
   "cols": {
     "name": "Nombre",
+    "referenceNumber": "N.º ref.",
+    "coupling": "Vínculo",
     "debtorNumber": "N.º deudor",
     "status": "Estado",
     "accountManager": "Gestor de cuenta",
@@ -438,7 +440,11 @@
     "tagAdded": "Etiqueta «{{tag}}» añadida ({{count}}).",
     "tagRemoved": "Etiqueta «{{tag}}» quitada ({{count}}).",
     "noteAdded": "Nota añadida ({{count}}).",
-    "mutateError": "La acción ha fallado."
+    "mutateError": "La acción ha fallado.",
+    "couple": "Vincular al backoffice",
+    "coupleQueued": "{{count}} cliente(s) en cola para vincular con {{target}}.",
+    "coupleQueuedPartial": "{{queued}} de {{total}} en cola para vincular con {{target}}; {{skipped}} omitido(s).",
+    "coupleUnavailable": "La vinculación con el backoffice aún no está disponible."
   },
   "modal": {
     "title": "Nuevo cliente",

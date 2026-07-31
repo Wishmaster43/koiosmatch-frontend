@@ -11,6 +11,8 @@
   },
   "columns": {
     "name": "Nombre",
+    "referenceNumber": "N.º ref.",
+    "coupling": "Vínculo",
     "status": "Estado",
     "function": "Función",
     "funnelType": "Tipo de embudo",
@@ -100,7 +102,11 @@
       "missing_required_field": "falta un campo obligatorio",
       "already_on_phase": "ya en esta fase",
       "not_found": "no encontrado"
-    }
+    },
+    "couple": "Vincular al backoffice",
+    "coupleQueued": "{{count}} candidato(s) en cola para vincular con {{target}}.",
+    "coupleQueuedPartial": "{{queued}} de {{total}} en cola para vincular con {{target}}; {{skipped}} omitido(s).",
+    "coupleUnavailable": "La vinculación con el backoffice aún no está disponible."
   },
   "kpi": {
     "total": "Total",
@@ -960,6 +966,24 @@
     "done": "Candidatos fusionados.",
     "errForbidden": "No tienes permiso para fusionar candidatos.",
     "errFailed": "Error al fusionar. Inténtalo de nuevo."
+  },
+  "duplicate": {
+    "blockedTitle": "Esta persona ya existe",
+    "blockedBody": "No se ha creado nada: ya existe un expediente con los mismos datos de contacto.",
+    "warningTitle": "Posible expediente existente",
+    "warningBody": "Estos datos de contacto ya aparecen en un expediente existente.",
+    "checking": "Buscando expedientes duplicados…",
+    "unnamed": "Expediente sin nombre",
+    "stateActive": "Expediente activo",
+    "stateArchived": "Expediente archivado",
+    "archivedHint": "Este expediente está archivado. Restáuralo para volver a utilizarlo.",
+    "open": "Abrir expediente existente",
+    "restoreAndOpen": "Restaurar y abrir",
+    "restoring": "Restaurando…",
+    "restored": "Expediente restaurado.",
+    "restoreFailed": "No se ha podido restaurar. Inténtalo de nuevo.",
+    "restoreForbidden": "No tienes permisos para restaurar un expediente.",
+    "editData": "Editar datos"
   },
   "integrations": {
     "pdok": {

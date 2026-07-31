@@ -9,7 +9,9 @@
  * `bulkSetStatus` + the AXIS-MATRIX-2 N2 bulk preflight) lives in
  * `useCandidateStageBulk` (§3 size split, > ~400-line trigger) and is called
  * below — its three functions are re-exported here unchanged so CandidatesPage/
- * CandidatesBulkBar never notice the split.
+ * CandidatesBulkBar never notice the split. The queued/async pair
+ * (`bulkGeocode`/`bulkCoupleBackoffice` — both fire-and-forget, no optimistic
+ * patch) lives in `useCandidateAsyncBulk` for the same size-split reason.
  */
 import { useMemo, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
@@ -20,6 +22,7 @@ import { needsLiveCheck, fetchLiveBlockers, liveFromError } from '../data/archiv
 import { useConfirm } from '@/hooks/useConfirm'
 import { useNavigation } from '@/context/NavigationContext'
 import { useCandidateStageBulk } from './useCandidateStageBulk'
+import { useCandidateAsyncBulk } from './useCandidateAsyncBulk'
 import type { BlockingApplication, BlockingMatch } from '../data/archiveGuard'
 import type { Candidate, CandidatePool } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
@@ -355,23 +358,16 @@ export function useCandidateBulkActions({
     onSuccess: (n, total) => notifyOutcome('bulk.consentChanged', { value: label }, n, total),
   })
 
-  // GEO-REGEOCODE-1: manual "PDOK opnieuw ophalen" for the selection. The endpoint
-  // is queued + rate-limited (202) — no optimistic row patch, no reconcile against
-  // an `updated` list, just fire the bulk POST and say "started" (never "done";
-  // the coordinates land later via the async worker, same honesty as the per-id button).
-  const bulkGeocode = () => {
-    const ids = [...selectedIds]
-    if (!ids.length) return
-    setSelectedIds(new Set())
-    api.post('/candidates/bulk/geocode', { candidate_ids: ids })
-      .then(() => notify('success', t('common:geocode.started')))
-      .catch(() => notify('error', t('bulk.mutateError')))
-  }
+  // Queued/async cluster (§3 size split) — bulkGeocode (GEO-REGEOCODE-1) and
+  // bulkCoupleBackoffice (SYNC-BULK-1) share the same fire-and-forget shape (no
+  // optimistic patch, no `updated`-list reconcile); both now live in their own
+  // hook and are re-exported below unchanged.
+  const { bulkGeocode, bulkCoupleBackoffice } = useCandidateAsyncBulk({ selectedIds, setSelectedIds, notify, t })
 
   return {
     toggleRow, toggleAll, bulkAddToPool, bulkRemoveFromPool,
     bulkSetOwner, bulkSetStage, bulkSetTypes, bulkSetConsent, bulkConvertPhase, bulkSetStatus, bulkAddTag,
-    selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive, manageByApplication, bulkGeocode,
+    selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive, manageByApplication, bulkGeocode, bulkCoupleBackoffice,
     bulkArchiveGuard, setBulkArchiveGuard, resolveBulkArchiveGuard,
     bulkMergeTarget, bulkMergePrompt, resolveBulkMerge,
     dialog,
