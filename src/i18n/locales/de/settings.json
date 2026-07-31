@@ -73,7 +73,7 @@
     "branding": "Marke",
     "security": "Sicherheit",
     "company": "Allgemein",
-    "locations": "Standorte",
+    "locations": "Niederlassungen",
     "memory": "Speicher",
     "candidate_lookups": "Status & Phasen",
     "phases": "Phasen",
@@ -390,8 +390,8 @@
     "bannerUploadFailed": "Banner-Upload fehlgeschlagen"
   },
   "locations": {
-    "title": "Standorte",
-    "subtitle": "Verwalten Sie alle Büros und Standorte an einem Ort.",
+    "title": "Niederlassungen",
+    "subtitle": "Verwalten Sie alle eigenen Niederlassungen an einem Ort.",
     "create": "Standort erstellen",
     "colName": "Name",
     "colAddress": "Adresse",
@@ -2024,6 +2024,9 @@
     "deleteBlocked": "Kann nicht gelöscht werden — Feld hat Daten",
     "activate": "Aktivieren",
     "deactivate": "Deaktivieren",
+    "showInUi": "In der UI anzeigen",
+    "hideFromUi": "Aus der UI ausblenden",
+    "apiOnly": "nur API",
     "types": {
       "text": "Text",
       "textarea": "Langer Text",

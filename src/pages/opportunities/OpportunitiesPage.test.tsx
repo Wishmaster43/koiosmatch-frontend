@@ -99,6 +99,37 @@ describe('OpportunitiesPage · branch filter wiring (VESTIGING-2)', () => {
   })
 })
 
+describe('OpportunitiesPage · view switcher (shared ViewModeToggle, soft-fill audit)', () => {
+  it('switches table ⇄ board on click, reflected in aria-pressed and the mounted content', async () => {
+    useOpportunitiesDataMock.mockReturnValue(baseResult)
+    render(<OpportunitiesPage />)
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+
+    // 'rowsPerPage' only renders inside the table view's PaginationBar (ViewSwitch
+    // keeps both views mounted, toggling display — never unmounted), so its
+    // visibility is a real, content-level proof the active view actually changed.
+    const opportunitiesT = (key: string) => i18n.t(key, { ns: 'opportunities' })
+    const tableToggle = screen.getByRole('button', { name: opportunitiesT('view.table') })
+    const boardToggle = screen.getByRole('button', { name: opportunitiesT('view.board') })
+
+    // Initial state: table is active.
+    expect(tableToggle).toHaveAttribute('aria-pressed', 'true')
+    expect(boardToggle).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByText(cm('rowsPerPage'))).toBeVisible()
+
+    // Click board — the switch fires and the board content becomes the visible one.
+    act(() => boardToggle.click())
+    expect(boardToggle).toHaveAttribute('aria-pressed', 'true')
+    expect(tableToggle).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByText(cm('rowsPerPage'))).not.toBeVisible()
+
+    // Click back to table — round-trip proves the toggle is fully wired, not one-way.
+    act(() => tableToggle.click())
+    expect(tableToggle).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByText(cm('rowsPerPage'))).toBeVisible()
+  })
+})
+
 describe('OpportunitiesPage · picking a branch (VESTIGING-2)', () => {
   it('re-fetches with the picked branch id AND shows the honesty notice once the (branch-filtered) result is empty — never a bare empty state', async () => {
     useOpportunitiesDataMock.mockReturnValue({ ...baseResult, rows: [] })

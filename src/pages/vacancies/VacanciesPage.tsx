@@ -12,7 +12,7 @@ import { Archive, Map as MapIcon } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
-import { useLocations } from '@/lib/useLocations'
+import { useBranchOptions } from '@/lib/useBranchOptions'
 import { isReferenceQuery } from '@/lib/referenceNumber'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import ActionMessageBanner from '@/components/ui/ActionMessageBanner'
@@ -58,16 +58,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // Coerce to a string|number-tolerant signature for the bulk hook + updaters.
   const statusMetaSafe = (v?: string | number | null) => statusMeta(v == null ? null : String(v))
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
-  // VESTIGING-2: the signed-in user's own branch scope — `[]` means unrestricted
-  // (auth/me.branch_ids, COORDINATION-LOG 28-07), so the filter then offers every
-  // tenant establishment; otherwise it narrows to just those (never a widening).
-  const me = auth?.user as { branch_ids?: Array<string | number> } | null | undefined
-  const locations = useLocations()
-  const branchOptions = useMemo(() => {
-    const ids = (me?.branch_ids ?? []).map(String)
-    const all = locations.map(l => ({ value: String(l.value), label: l.label }))
-    return ids.length ? all.filter(o => ids.includes(o.value)) : all
-  }, [locations, me?.branch_ids])
+  // VESTIGING-2: the branch values this user may filter on — see useBranchOptions for
+  // why an empty scope means unrestricted rather than none.
+  const branchOptions = useBranchOptions()
 
   const [page,      setPage]      = usePageMemory('vac.page', 1)
   const [pageSize,  setPageSize]  = useState(50)

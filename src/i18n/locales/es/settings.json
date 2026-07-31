@@ -73,7 +73,7 @@
     "branding": "Marca",
     "security": "Seguridad",
     "company": "General",
-    "locations": "Ubicaciones",
+    "locations": "Sucursales",
     "memory": "Memoria",
     "candidate_lookups": "Estados y fases",
     "phases": "Fases",
@@ -390,8 +390,8 @@
     "bannerUploadFailed": "Error al subir el banner"
   },
   "locations": {
-    "title": "Ubicaciones",
-    "subtitle": "Gestiona todas tus oficinas y ubicaciones en un solo lugar.",
+    "title": "Sucursales",
+    "subtitle": "Gestiona todas tus propias sucursales en un solo lugar.",
     "create": "Crear ubicación",
     "colName": "Nombre",
     "colAddress": "Dirección",
@@ -2024,6 +2024,9 @@
     "deleteBlocked": "No se puede eliminar — el campo tiene datos",
     "activate": "Activar",
     "deactivate": "Desactivar",
+    "showInUi": "Mostrar en la interfaz",
+    "hideFromUi": "Ocultar de la interfaz",
+    "apiOnly": "solo API",
     "types": {
       "text": "Texto",
       "textarea": "Texto largo",

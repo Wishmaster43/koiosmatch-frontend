@@ -35,6 +35,10 @@ interface OpportunitiesInsightsRowProps {
   onClearClient: () => void
   // Direct setter for the stage filter — the KPI cards drive it (won/lost/open/closed).
   onSetStageFilter: (labels: string[]) => void
+  // Honesty notice rendered above the cards (e.g. "a branch filter hides records with
+  // no branch"). Forwarded straight to the shared InsightsRow, which already owns that
+  // banner — this wrapper adds donut/KPI config, not a second styling of the same thing.
+  notice?: string
 }
 
 /**
@@ -46,7 +50,7 @@ interface OpportunitiesInsightsRowProps {
 export default function OpportunitiesInsightsRow({
   rows, stages, valueInHours, stage, owner, client,
   onPickStage, onClearStage, onPickOwner, onClearOwner, onPickClient, onClearClient,
-  onSetStageFilter,
+  onSetStageFilter, notice,
 }: OpportunitiesInsightsRowProps) {
   const { t } = useTranslation('opportunities')
 
@@ -112,5 +116,5 @@ export default function OpportunitiesInsightsRow({
       onClick: () => toggleStages([wonLabel, lostLabel]), active: activeIs([wonLabel, lostLabel]) },
   ]
 
-  return <InsightsRow donuts={donuts} kpis={kpis} clearTitle={t('insights.clearFilter')} />
+  return <InsightsRow donuts={donuts} kpis={kpis} clearTitle={t('insights.clearFilter')} notice={notice} />
 }

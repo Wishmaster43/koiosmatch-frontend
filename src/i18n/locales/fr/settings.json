@@ -73,7 +73,7 @@
     "branding": "Marque",
     "security": "Sécurité",
     "company": "Général",
-    "locations": "Emplacements",
+    "locations": "Agences",
     "memory": "Mémoire",
     "candidate_lookups": "Statuts et étapes",
     "phases": "Phases",
@@ -390,8 +390,8 @@
     "bannerUploadFailed": "Échec du téléversement de la bannière"
   },
   "locations": {
-    "title": "Emplacements",
-    "subtitle": "Gérez tous vos bureaux et emplacements au même endroit.",
+    "title": "Agences",
+    "subtitle": "Gérez toutes vos propres agences au même endroit.",
     "create": "Créer un emplacement",
     "colName": "Nom",
     "colAddress": "Adresse",
@@ -2024,6 +2024,9 @@
     "deleteBlocked": "Impossible de supprimer — le champ contient des données",
     "activate": "Activer",
     "deactivate": "Désactiver",
+    "showInUi": "Afficher dans l'UI",
+    "hideFromUi": "Masquer de l'UI",
+    "apiOnly": "API uniquement",
     "types": {
       "text": "Texte",
       "textarea": "Texte long",

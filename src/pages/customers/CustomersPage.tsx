@@ -14,7 +14,7 @@ import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import ViewSwitch from '@/components/ui/ViewSwitch'
 import { useUsers } from '@/lib/queries'
 import { useCustomerLookups } from '@/lib/useCustomerLookups'
-import { useLocations } from '@/lib/useLocations'
+import { useBranchOptions } from '@/lib/useBranchOptions'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
@@ -63,16 +63,9 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const hasPermission = auth?.hasPermission ?? (() => false)
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { statuses, statusMeta, locationStatuses, departmentStatuses, contactStatuses } = useCustomerLookups()
-  // VESTIGING-2: the signed-in user's own branch scope — `[]` means unrestricted
-  // (see auth/me.branch_ids contract, COORDINATION-LOG 28-07), so the filter then
-  // offers every tenant establishment; otherwise it narrows to just those.
-  const me = auth?.user as { branch_ids?: Array<string | number> } | null | undefined
-  const locations = useLocations()
-  const branchOptions = useMemo(() => {
-    const ids = (me?.branch_ids ?? []).map(String)
-    const all = locations.map(l => ({ value: String(l.value), label: l.label }))
-    return ids.length ? all.filter(o => ids.includes(o.value)) : all
-  }, [locations, me?.branch_ids])
+  // VESTIGING-2: the branch values this user may filter on — see useBranchOptions for
+  // why an empty scope means unrestricted rather than none.
+  const branchOptions = useBranchOptions()
 
   // ── UI state ──
   const [page,      setPage]      = usePageMemory('cust.page', 1)

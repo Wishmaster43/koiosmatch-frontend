@@ -74,7 +74,7 @@
     "branding": "Brand",
     "security": "Security",
     "company": "General",
-    "locations": "Locations",
+    "locations": "Branches",
     "memory": "Memory",
     "candidate_lookups": "Statuses & stages",
     "pools": "Talent pools",
@@ -412,8 +412,8 @@
     "bannerUploadFailed": "Banner upload failed"
   },
   "locations": {
-    "title": "Locations",
-    "subtitle": "Manage all your offices and locations in one place.",
+    "title": "Branches",
+    "subtitle": "Manage all your own branches in one place.",
     "create": "Create location",
     "colName": "Name",
     "colAddress": "Address",
@@ -2024,6 +2024,9 @@
     "deleteBlocked": "Cannot delete — field has data",
     "activate": "Activate",
     "deactivate": "Deactivate",
+    "showInUi": "Show in UI",
+    "hideFromUi": "Hide from UI",
+    "apiOnly": "API only",
     "types": {
       "text": "Text",
       "textarea": "Long text",

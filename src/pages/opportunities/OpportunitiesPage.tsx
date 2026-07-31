@@ -5,11 +5,12 @@ import { LayoutList, Kanban, Archive } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
-import { useLocations } from '@/lib/useLocations'
+import { useBranchOptions } from '@/lib/useBranchOptions'
 import OpportunitiesInsightsRow from './OpportunitiesInsightsRow'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import ViewSwitch from '@/components/ui/ViewSwitch'
+import ViewModeToggle from '@/components/ui/ViewModeToggle'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import OpportunitiesTable from './OpportunitiesTable'
 import OpportunitiesBoard from './OpportunitiesBoard'
@@ -53,12 +54,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   // notice below. Values limited to the user's own branch scope (`[]` = unrestricted,
   // auth/me.branch_ids, COORDINATION-LOG 28-07).
   const [selectedBranch, setSelectedBranch] = usePageMemory<string[]>('opps.branch', [])
-  const locations = useLocations()
-  const branchOptions = useMemo(() => {
-    const ids = (user?.branch_ids ?? []).map(String)
-    const all = locations.map(l => ({ value: String(l.value), label: l.label }))
-    return ids.length ? all.filter(o => ids.includes(o.value)) : all
-  }, [locations, user?.branch_ids])
+  const branchOptions = useBranchOptions()
 
   // Data layer (§3): list + customers + selection + optimistic mutations.
   const {
@@ -181,20 +177,11 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
             onPickOwner={pickOne(setOwner)} onClearOwner={() => setOwner([])}
             onPickClient={pickOne(setClient)} onClearClient={() => setClient([])}
             onSetStageFilter={setStage}
+            /* VESTIGING-2: an explicit branch filter EXCLUDES deals with no branch linked
+               yet — an empty list must say so, not read as "nothing here". The shared
+               InsightsRow already owns this banner; the wrapper just forwards it. */
+            notice={selectedBranch.length > 0 && totalRows === 0 ? t('common:filters.branchExcludesUnassigned') : undefined}
           />
-
-          {/* VESTIGING-2: an explicit branch filter EXCLUDES deals with no branch
-              linked yet — a resulting empty list must say so, not read as "nothing
-              here". OpportunitiesInsightsRow has no `notice` slot (unlike the
-              generic InsightsRow the other three list pages use), so this mirrors
-              that component's own honesty-notice styling inline. */}
-          {selectedBranch.length > 0 && totalRows === 0 && (
-            <div role="status" style={{ margin: '10px 24px -6px', padding: '5px 10px', fontSize: 11, borderRadius: 7,
-              color: 'var(--color-warning)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
-              border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)', width: 'fit-content' }}>
-              {t('common:filters.branchExcludesUnassigned')}
-            </div>
-          )}
 
           {/* Toolbar — add on the LEFT, archived toggle + view toggle on the RIGHT. */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10,
@@ -222,20 +209,12 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
                   alongside the active set (OpportunitiesTable renders the "Gearchiveerd" chip). */}
               <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
                 label={t('view.archived')} color="var(--color-archive)" icon={Archive} />
-              <div style={{ display: 'flex', gap: 4 }}>
-                <button onClick={() => setView('table')} title={t('view.table')} aria-label={t('view.table')}
-                  style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
-                    background: view === 'table' ? 'var(--color-primary)' : 'var(--surface)',
-                    color: view === 'table' ? '#fff' : 'var(--text)' }}>
-                  <LayoutList size={16} />
-                </button>
-                <button onClick={() => setView('board')} title={t('view.board')} aria-label={t('view.board')}
-                  style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
-                    background: view === 'board' ? 'var(--color-primary)' : 'var(--surface)',
-                    color: view === 'board' ? '#fff' : 'var(--text)' }}>
-                  <Kanban size={16} />
-                </button>
-              </div>
+              {/* Table/board switcher — shared soft-tint component (§4), never a solid
+                  fill (last hand-rolled instance across the entity pages, audit sweep). */}
+              <ViewModeToggle value={view} onChange={setView} options={[
+                { id: 'table', icon: LayoutList, label: t('view.table') },
+                { id: 'board', icon: Kanban, label: t('view.board') },
+              ]} />
             </div>
           </div>
 

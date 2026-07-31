@@ -7,7 +7,7 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
-import { useLocations } from '@/lib/useLocations'
+import { useBranchOptions } from '@/lib/useBranchOptions'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
@@ -57,15 +57,9 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const { funnelTypes, funnelMeta } = useLookups()
   // Tenant users — options for the editable recruiter (owner) picker in the drawer.
   const { data: users = [] } = useUsers() as { data?: Array<{ id: Id; name: string }> }
-  // VESTIGING-2: the signed-in user's own branch scope — `[]` means unrestricted
-  // (auth/me.branch_ids, COORDINATION-LOG 28-07), so the filter then offers every
-  // tenant establishment; otherwise it narrows to just those (never a widening).
-  const locations = useLocations()
-  const branchOptions = useMemo(() => {
-    const ids = (user?.branch_ids ?? []).map(String)
-    const all = locations.map(l => ({ value: String(l.value), label: l.label }))
-    return ids.length ? all.filter(o => ids.includes(o.value)) : all
-  }, [locations, user?.branch_ids])
+  // VESTIGING-2: the branch values this user may filter on — see useBranchOptions for
+  // why an empty scope means unrestricted rather than none.
+  const branchOptions = useBranchOptions()
 
   const [view,         setView]         = usePageMemory('apps.view', 'table')   // 'table' | 'board'
   const [page,         setPage]         = usePageMemory('apps.page', 1)

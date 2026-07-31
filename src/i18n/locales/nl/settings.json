@@ -74,7 +74,7 @@
     "branding": "Huisstijl",
     "security": "Beveiliging",
     "company": "Algemeen",
-    "locations": "Locaties",
+    "locations": "Vestigingen",
     "memory": "Geheugen",
     "candidate_lookups": "Statussen & fasen",
     "pools": "Talentenpools",
@@ -412,8 +412,8 @@
     "bannerUploadFailed": "Banner uploaden mislukt"
   },
   "locations": {
-    "title": "Locaties",
-    "subtitle": "Beheer al je kantoren en locaties op één plek.",
+    "title": "Vestigingen",
+    "subtitle": "Beheer al je eigen vestigingen op één plek.",
     "create": "Locatie aanmaken",
     "colName": "Naam",
     "colAddress": "Adres",
@@ -2024,6 +2024,9 @@
     "deleteBlocked": "Kan niet verwijderd worden — veld heeft data",
     "activate": "Activeren",
     "deactivate": "Deactiveren",
+    "showInUi": "Tonen in de UI",
+    "hideFromUi": "Verbergen uit de UI",
+    "apiOnly": "alleen API",
     "types": {
       "text": "Tekst",
       "textarea": "Lange tekst",
