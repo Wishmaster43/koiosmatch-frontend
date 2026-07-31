@@ -41,12 +41,18 @@ export default function DetailsLocationTab({ vacancy: v, location }: Props) {
         searchable dropdowns; the province list scopes to the picked country
         (useProvinces(form.country) in the hook), and an already-filled province
         that no longer exists in the new country's list is cleared automatically.
-        Read-mode resolves the country's display name, never the bare ISO code. */}
+        Read-mode resolves the country's display name, never the bare ISO code.
+        VAC-CLEAR-1 (Danny: "gekozen waarde weer leegmaken"): both fields are
+        optional and both persist an empty value for real (`province`/`country`
+        are sometimes|nullable server-side, mapped onto location_province/
+        location_country), so both carry the clear affordance. */}
     {row(t('details.province'), v.province || dash,
       <CreatableSelect value={form.province || null} onChange={(val: string) => setF('province', val)} allowCreate={false}
+        clearable clearLabel={t('details.province')}
         placeholder={t('common:select')} options={provinces.map((p: string) => ({ value: p, label: p }))} />, editing)}
     {row(t('details.country'), v.country ? getCountryName(v.country, i18n.language) : dash,
       <CreatableSelect value={form.country || null} onChange={(val: string) => setF('country', val)} allowCreate={false}
+        clearable clearLabel={t('details.country')}
         placeholder={t('common:select')} options={countryOptions} />, editing)}
   </>, controls(t, editing, save, cancel, () => setEditing(true)))
 }

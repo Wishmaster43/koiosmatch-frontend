@@ -14,6 +14,10 @@ const mockedGet = vi.mocked(api.get)
 
 afterEach(() => vi.clearAllMocks())
 
+// An avatar_color value straight off the API payload under test — DATA, not UI styling.
+// eslint-disable-next-line no-restricted-syntax -- API fixture value, never rendered as a style literal
+const OWNER_COLOR = '#123456'
+
 describe('useMatches', () => {
   it('maps the flat candidate_id/vacancy_id/customer_id FKs onto the row', async () => {
     mockedGet.mockResolvedValue({
@@ -30,6 +34,27 @@ describe('useMatches', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.rows).toHaveLength(1)
     expect(result.current.rows[0]).toMatchObject({ candidateId: 'c1', vacancyId: 'v1', clientId: 'cu1' })
+  })
+
+  // MATCH-OWNER-1: the resource carries owner.id (MatchListResource.php:50) but the
+  // mapper dropped it, so the drawer's picker had nothing to preselect against.
+  it('maps the owner id alongside the name/colour', async () => {
+    mockedGet.mockResolvedValue({
+      data: {
+        data: [{ id: 'm1', owner: { id: 'u-9', name: 'Piet de Vries', avatar_color: OWNER_COLOR } }],
+        meta: { last_page: 1 },
+      },
+    })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.rows[0]).toMatchObject({ ownerId: 'u-9', owner: 'Piet de Vries', ownerInitials: 'PD', ownerColor: OWNER_COLOR })
+  })
+
+  it('leaves ownerId null on an ownerless row', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'm1' }], meta: { last_page: 1 } } })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.rows[0].ownerId).toBeNull()
   })
 
   it('falls back to the nested objects\' ids when the flat FK is absent', async () => {

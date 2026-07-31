@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useId } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ComponentType, ReactNode, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -8,11 +8,17 @@ import { extractApiError } from '@/lib/extractApiError'
 import { useUsers } from '@/lib/queries'
 import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
+// Funnel stages WITH their real row id — LookupsContext's `funnelTypes` drops it, and
+// `application_stage_id` needs the id. Same hook the candidate drawer's "+ Solliciteren"
+// modal uses (single source); it lives under pages/candidates today, which is a §2
+// cross-page import — moving it to src/hooks/ is a separate, repo-wide change.
+import { useApplicationStages } from '@/hooks/useApplicationStages'
 import { mapApplication } from './data/mapApplication'
 import { BTN_H } from '@/config/buttonMetrics'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
+import { isUuid } from '@/lib/uuid'
 
 type AnyProps = Record<string, unknown>
 const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
@@ -25,7 +31,12 @@ interface AppUser { id: Id; name?: string }
 // only sharpens which picker the message is about; the inline message stays).
 const API_TO_FORM: Record<string, string> = {
   candidate_id: 'candidateId', vacancy_id: 'vacancyId', owner_id: 'ownerId',
+  application_stage_id: 'phase',
 }
+
+// A submittable stage id is the uuid the backend validates against
+// (StoreApplicationRequest: uuid|exists:application_stages,id). useApplicationStages
+// seeds slug ids ("applied") until /application-stages resolves — those would 422.
 
 // Field label + shared searchable single-select (CreatableSelect) — replaces the
 // old inline SearchField dropdown (DUP-1). allowCreate off = pick-only. `style`
@@ -39,10 +50,14 @@ const API_TO_FORM: Record<string, string> = {
 // showed BLANK instead of "Selecteer een kandidaat/vacature/recruiter". Mirrors
 // MatchPlacementModal's own `value={x || null}` pickers (job 17/18).
 function PickField({ label, style, value, ...rest }: { label: ReactNode; style?: CSSProperties; value?: string } & AnyProps) {
+  // §6: a <button> trigger cannot be labelled by a bare <div>, so the picker used to
+  // announce only its value ("Piet Recruiter") with no field name. CreatableSelect
+  // prefixes aria-labelledby with the label, so it now reads "Recruiter, Piet Recruiter".
+  const labelId = useId()
   return (
     <div>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{label}</div>
-      <CreatableSelect allowCreate={false} menuWidth={320} value={value || null} style={{ width: '100%', ...style }} {...rest} />
+      <div id={labelId} style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{label}</div>
+      <CreatableSelect allowCreate={false} menuWidth={320} aria-labelledby={labelId} value={value || null} style={{ width: '100%', ...style }} {...rest} />
     </div>
   )
 }
@@ -87,6 +102,23 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   useEffect(() => { if (meIsAssignable && !ownerId) setOwnerId(String(me!.id)) }, [meIsAssignable]) // eslint-disable-line react-hooks/exhaustive-deps
   const [saving, setSaving]           = useState(false)
 
+  // Start stage ("fase") — V17: "+ Sollicitant" used to POST candidate/vacancy/owner only,
+  // so a recruiter adding an applicant from a vacancy could not say where they enter.
+  const { stages } = useApplicationStages()
+  // Only stages the backend would accept: while the lookup is still its seed the ids are
+  // slugs, and offering an option that is a guaranteed 422 is a fake affordance. Empty =>
+  // no picker at all and the field is omitted, so the server applies the tenant's
+  // is_default stage itself (ApplicationController::store) — never a stage we invented.
+  const stageOptions = useMemo(() => stages.filter(s => isUuid(s.id)), [stages])
+  const defaultStageId = stageOptions.find(s => s.is_default)?.id ?? ''
+  const [phaseId, setPhaseId] = useState('')
+  // Propose the tenant's flagged default as soon as the real lookup lands (the seed is
+  // gone by then); re-sync whenever the held value is not a real, submittable option.
+  useEffect(() => {
+    if (phaseId && stageOptions.some(s => s.id === phaseId)) return
+    setPhaseId(defaultStageId)
+  }, [defaultStageId, stageOptions, phaseId])
+
   // Load candidate options always; the vacancy list only when NOT locked (data
   // minimisation, §8/§9 — a locked value never needs the full option list).
   useEffect(() => {
@@ -113,7 +145,12 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
     setCreateError(null)
     setErrors({})
     try {
-      const res = await api.post('/applications', { candidate_id: candidateId, vacancy_id: vacancyId, owner_id: ownerId || null })
+      // application_stage_id is omitted (not null-ed) when unset so the backend's own
+      // `?? ApplicationStage::defaultStageId()` fallback decides the start stage.
+      const res = await api.post('/applications', {
+        candidate_id: candidateId, vacancy_id: vacancyId, owner_id: ownerId || null,
+        ...(phaseId ? { application_stage_id: phaseId } : {}),
+      })
       onCreated(mapApplication(unwrap(res), funnelTypes))
     } catch (err) {
       // Show field-level errors from 422 validation responses (highlights the
@@ -128,6 +165,13 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
       setCreateError(extractApiError(err, t('common:errorGeneric')))
     } finally { setSaving(false) }
   }
+
+  // Declared once — it renders either on its own row or paired with the phase picker.
+  const ownerField = (
+    <PickField label={t('add.owner')} placeholder={t('add.ownerPlaceholder')}
+      options={ownerOptions} value={ownerId} onChange={setOwnerId}
+      style={errors.ownerId ? { borderColor: 'var(--color-danger)' } : undefined} />
+  )
 
   return (
     <>
@@ -144,7 +188,7 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
         </div>
 
         {/* Candidate + vacancy side by side — the two "big" relational pickers get
-            equal, comfortable room; owner stays its own row below. */}
+            equal, comfortable room; owner (+ start stage) sit on the row below. */}
         <div style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <PickField label={t('add.candidate')} placeholder={t('add.candidatePlaceholder')}
@@ -164,9 +208,18 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
                 style={errors.vacancyId ? { borderColor: 'var(--color-danger)' } : undefined} />
             )}
           </div>
-          <PickField label={t('add.owner')} placeholder={t('add.ownerPlaceholder')}
-            options={ownerOptions} value={ownerId} onChange={setOwnerId}
-            style={errors.ownerId ? { borderColor: 'var(--color-danger)' } : undefined} />
+          {/* Owner + start stage share a row (§3A: pair short fields into two columns).
+              The phase picker only exists when the tenant lookup gave us real, submittable
+              stages — otherwise owner keeps the full width and the server picks the stage. */}
+          {stageOptions.length > 0 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              {ownerField}
+              <PickField label={t('add.phase')} placeholder={t('add.phasePlaceholder')}
+                options={stageOptions.map(s => ({ value: s.id, label: s.label }))}
+                value={phaseId} onChange={setPhaseId}
+                style={errors.phase ? { borderColor: 'var(--color-danger)' } : undefined} />
+            </div>
+          ) : ownerField}
         </div>
 
         {/* Server-side rejection (validation / matrix-guard) — shown in place, modal stays open. */}

@@ -29,7 +29,9 @@ export interface RawMatch {
   stage?: string
   status?: string
   stage_color?: string
-  owner?: { name?: string; avatar_color?: string | null }
+  // MATCH-OWNER-1: the owner ID rides along on every row (MatchListResource.php:50),
+  // so the drawer's owner picker can preselect the current owner by id, not by name.
+  owner?: { id?: string | number; name?: string; avatar_color?: string | null }
   owner_name?: string
   created_at?: string
   matched_at?: string
@@ -68,6 +70,9 @@ export interface MatchRow {
   status: string
   stageColor: string
   owner: string
+  // MATCH-OWNER-1: the owner's user id — what the drawer's picker matches against
+  // and what a reassignment PATCHes as `owner_id`; null when the row has no owner.
+  ownerId: Id | null
   // Owner avatar (§3A owner-cell convention) — colour is null when the API/mapper
   // has none, so the table falls back to the neutral grey (never a blank bubble).
   ownerInitials: string

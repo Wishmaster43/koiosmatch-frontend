@@ -47,6 +47,10 @@ export function mapMatch(m: RawMatch): MatchRow {
     // eslint-disable-next-line no-restricted-syntax -- seed DATA fallback, not UI styling; no semantic token matches this hue
     stageColor: m.stage_color ?? '#6E8FD6',
     owner:      m.owner?.name ?? m.owner_name ?? '',
+    // MATCH-OWNER-1: keep the owner's id — the drawer's owner picker preselects on
+    // it and PATCHes it back as owner_id; the mapper used to drop it, which is why
+    // the header could only ever show the name as dead text.
+    ownerId:    m.owner?.id ?? null,
     // Owner avatar (§3A) — the resource already carries avatar_color; only the
     // mapper was dropping it (Danny 2026-07-14 table standardization).
     ownerInitials: initialsOf(m.owner?.name ?? m.owner_name),

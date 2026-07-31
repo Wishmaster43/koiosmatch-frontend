@@ -7,6 +7,7 @@ import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { escapeCsvCell } from '@/lib/csv'
 import { useVacancyActivity, type VacancyActivityEvent } from '../hooks/useVacancyActivity'
 import type { VacancyDetail } from '@/types/vacancy'
+import { isUuid } from '@/lib/uuid'
 
 // One rendered card: HelloFlex-style — a header line (when · who · action · field)
 // plus an old → new body row (or a single readable line, unused here today but kept
@@ -22,7 +23,6 @@ const humanizeField = (f: string) => f.replace(/_/g, ' ').replace(/([a-z])([A-Z]
 const NOISE_FIELDS = new Set(['id', 'tenant_id', 'created_at', 'updated_at', 'deleted_at'])
 
 // Raw references / machine formats the reader can't interpret.
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const DATE_RE = /^\d{4}-\d{2}-\d{2}([T ]|$)/
 
 // Per-field changes from the diff bag — the resource sends `changes` (Spatie
@@ -77,7 +77,7 @@ export default function ChangelogTab({ vacancy: v, bare = false }: { vacancy: Va
     if (Array.isArray(val)) return val.length ? val.map(String).join(', ') : t('changelog.emptyValue')
     if (typeof val === 'object') return JSON.stringify(val)
     const s = String(val)
-    if (UUID_RE.test(s)) return null
+    if (isUuid(s)) return null
     if (DATE_RE.test(s)) return formatDate(s)
     return s
   }

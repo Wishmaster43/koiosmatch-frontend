@@ -7,7 +7,9 @@ import Avatar from '@/components/ui/Avatar'
 import EntityNameCell from '@/components/ui/EntityNameCell'
 import StatusPill from '@/components/ui/StatusPill'
 import SoftChip from '@/components/ui/SoftChip'
+import BackofficeCouplingIndicator from '@/components/ui/BackofficeCouplingIndicator'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
+import { useApps } from '@/context/AppsContext'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import ScorePill from './ScorePill'
 import type { MatchRow } from '@/types/match'
@@ -48,6 +50,11 @@ export default function MatchesTable({
   const settings = useAllSettings()
   const colorStatus = getBoolSetting(settings, 'match_table_color_status', true)
   const colorOwner  = getBoolSetting(settings, 'match_table_color_owner', true)
+  // Backoffice coupling column (JOB2): only shown for systems the tenant actually
+  // enabled — mirrors BackofficeLinksTab's own isAppEnabled('hf'/'shiftmanager') gate.
+  const apps = useApps()
+  const showHelloflex = apps?.isAppEnabled('hf') ?? false
+  const showShiftmanager = apps?.isAppEnabled('shiftmanager') ?? false
 
   // MATCH-APPROVAL-1: no dedicated approval_status column here on purpose — the
   // row already carries one status-shaped chip (the "stage" column above) and adding
@@ -66,6 +73,16 @@ export default function MatchesTable({
           <span style={{ fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 150 }} title={r.candidate}>{r.candidate}</span>
         </span>
       ) },
+    {
+      // Human-readable reference number (M-00042, JOB1) — an identifier, so it sits
+      // right after the candidate identity column. Plain mono text, not the interactive
+      // ReferenceNumberChip: a click-to-copy button nested inside this row's own
+      // click-to-open would either double-fire or need stopPropagation contortions;
+      // the drawer chip already copies.
+      key: 'referenceNumber', header: t('cols.referenceNumber'), nowrap: true,
+      cellStyle: { color: 'var(--text-muted)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', fontVariantNumeric: 'tabular-nums' },
+      sortable: true, sortValue: r => r.referenceNumber ?? '', render: r => r.referenceNumber || '—',
+    },
     { key: 'vacancy', header: t('cols.vacancy'), sortable: true, nowrap: false },
     // Klant — soft avatar + name (AVATAR-CHIP-1: same chip as the candidate identity
     // column), muted text keeps it reading as a secondary reference.
@@ -89,6 +106,13 @@ export default function MatchesTable({
     // Raw ISO from the API → locale format (Danny 2026-07-13: "datum staat raar").
     { key: 'date',    header: t('cols.date'),  sortable: true, sortValue: r => r.date,
       cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => r.date ? formatDate(r.date) : '—' },
+    {
+      // Backoffice coupling scanning aid (JOB2) — not sortable: a compound
+      // two-system state has no single clean sort order, it's a glance aid.
+      key: 'coupling', header: t('cols.coupling'), nowrap: true,
+      render: r => <BackofficeCouplingIndicator helloflexLink={r.helloflexLink} shiftmanagerLink={r.shiftmanagerLink}
+        showHelloflex={showHelloflex} showShiftmanager={showShiftmanager} />,
+    },
     // Owner — avatar + name, colour if the mapper resolved one AND the toggle is on,
     // else neutral grey. LAST column (§3A convention).
     { key: 'owner', header: t('cols.owner'), sortable: true, sortValue: r => r.owner,

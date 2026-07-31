@@ -41,10 +41,16 @@ function useHarness(initial: MatchRow[]) {
 const row = (over: Partial<MatchRow> = {}): MatchRow => ({
   id: 'm1', candidate: 'Jane', initials: 'J', vacancy: 'V', client: 'C',
   candidateId: null, vacancyId: null, clientId: null, score: null, stage: '',
-  status: 'open', stageColor: '#000', owner: '', ownerInitials: '', ownerColor: null,
+  status: 'open', stageColor: '#000', owner: '', ownerId: null, ownerInitials: '', ownerColor: null,
   date: '', customFieldValues: {}, helloflexLink: null, shiftmanagerLink: null,
   ...over,
 })
+
+// avatar_color values from the /users payload — DATA fixtures, not UI styling.
+// eslint-disable-next-line no-restricted-syntax -- API fixture value, never rendered as a style literal
+const OWNER_COLOR_OLD = '#abcdef'
+// eslint-disable-next-line no-restricted-syntax -- API fixture value, never rendered as a style literal
+const OWNER_COLOR_NEW = '#123456'
 
 beforeEach(() => { patch.mockReset(); vi.mocked(notify).mockClear() })
 
@@ -94,6 +100,54 @@ describe('useMatchMutations · setStatus (board drag + drawer status picker)', (
     expect(result.current.rows.find(r => r.id === 'm2')?.status).toBe('placed')
     await waitFor(() => expect(result.current.rows.find(r => r.id === 'm2')?.status).toBe('open'))
     expect(result.current.selected).toBeNull()
+  })
+})
+
+describe('useMatchMutations · setOwner (drawer owner picker, MATCH-OWNER-1)', () => {
+  it('PATCHes owner_id to the match route (the seam: method + route + body)', async () => {
+    patch.mockResolvedValue({})
+    const { result } = renderHook(() => useHarness([row()]))
+    act(() => { result.current.setOwner('m1', { id: 'u-7', name: 'Piet de Vries', avatar_color: OWNER_COLOR_NEW }) })
+    await waitFor(() => expect(patch).toHaveBeenCalledWith('/matches/m1', { owner_id: 'u-7' }))
+  })
+
+  it('writes all four owner display fields optimistically (name, id, initials, colour)', () => {
+    patch.mockResolvedValue({})
+    const { result } = renderHook(() => useHarness([row({ owner: 'Jan Jansen', ownerId: 'u-1', ownerInitials: 'JJ', ownerColor: OWNER_COLOR_OLD })]))
+    act(() => { result.current.setOwner('m1', { id: 'u-7', name: 'Piet de Vries', avatar_color: OWNER_COLOR_NEW }) })
+    expect(result.current.rows[0]).toMatchObject({ owner: 'Piet de Vries', ownerId: 'u-7', ownerInitials: 'PD', ownerColor: OWNER_COLOR_NEW })
+    expect(result.current.selected).toMatchObject({ owner: 'Piet de Vries', ownerId: 'u-7' })
+  })
+
+  it('reverts BOTH the row list and the open drawer copy when the PATCH rejects', async () => {
+    patch.mockRejectedValue(new Error('network'))
+    const { result } = renderHook(() => useHarness([row({ owner: 'Jan Jansen', ownerId: 'u-1', ownerInitials: 'JJ', ownerColor: OWNER_COLOR_OLD })]))
+
+    act(() => { result.current.setOwner('m1', { id: 'u-7', name: 'Piet de Vries', avatar_color: OWNER_COLOR_NEW }) })
+    expect(result.current.rows[0].owner).toBe('Piet de Vries')
+
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('error', expect.any(String)))
+    // The dead-box bug's mirror image: a rejected reassignment must not leave the
+    // new owner on screen. Every owner field snaps back, in both state slices.
+    expect(result.current.rows[0]).toMatchObject({ owner: 'Jan Jansen', ownerId: 'u-1', ownerInitials: 'JJ', ownerColor: OWNER_COLOR_OLD })
+    expect(result.current.selected).toMatchObject({ owner: 'Jan Jansen', ownerId: 'u-1' })
+  })
+
+  it('never touches an unrelated field on revert (surgical, not whole-row)', async () => {
+    patch.mockRejectedValue(new Error('network'))
+    const { result } = renderHook(() => useHarness([row({ owner: 'Jan Jansen', ownerId: 'u-1', status: 'open' })]))
+    act(() => { result.current.setOwner('m1', { id: 'u-7', name: 'Piet de Vries' }) })
+    act(() => { result.current.updateMatch('m1', { status: 'placed' }) })
+    await waitFor(() => expect(result.current.rows[0].owner).toBe('Jan Jansen'))
+    expect(result.current.rows[0].status).toBe('placed')
+  })
+
+  it('sends nothing when the match id or the user id is missing (no ownerless PATCH)', () => {
+    patch.mockResolvedValue({})
+    const { result } = renderHook(() => useHarness([row()]))
+    act(() => { result.current.setOwner(undefined, { id: 'u-7', name: 'Piet' }) })
+    act(() => { result.current.setOwner('m1', { id: undefined as unknown as string, name: 'Piet' }) })
+    expect(patch).not.toHaveBeenCalled()
   })
 })
 

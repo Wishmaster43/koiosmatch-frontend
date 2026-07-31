@@ -1,7 +1,8 @@
 /**
  * useMatchMutations — the match record's optimistic single-field mutations: the
  * board drag (status), the drawer's status picker (same status field, a
- * different caller) and the Extra tab's tenant custom fields. Bug-class fix
+ * different caller), the drawer's owner picker and the Extra tab's tenant custom
+ * fields. Bug-class fix
  * (mirrors useCustomerRecord.updateCustomer / useEntityDocuments.remove): the
  * previous inline handlers only showed a toast on a rejected PATCH, leaving the
  * new value sitting on screen as if it had saved. Each mutation here snapshots
@@ -15,7 +16,16 @@ import { useTranslation } from 'react-i18next'
 import type { Dispatch, SetStateAction } from 'react'
 import api from '@/lib/api'
 import { notify } from '@/lib/notify'
+import { initialsOf } from '@/lib/initials'
 import type { MatchRow } from '@/types/match'
+import type { Id } from '@/types/common'
+
+// The tenant user a match can be reassigned to (the /users row shape useUsers returns).
+export interface OwnerCandidate {
+  id: Id
+  name?: string
+  avatar_color?: string | null
+}
 
 interface Args {
   rows: MatchRow[]
@@ -59,6 +69,22 @@ export function useMatchMutations({ rows, selected, updateMatch, setSelected }: 
     api.patch(`/matches/${id}`, { status }).catch(() => { revert(); notify('error', t('bulk.mutateError')) })
   }
 
+  // MATCH-OWNER-1: reassign the match's owner. PATCH /matches/{id} accepts
+  // `owner_id` (UpdateMatchRequest → PlacementRules::placementRules, tenant-validated
+  // via placementOwnerBelongsToTenant), so this is a real persistence path — the
+  // drawer's owner was a dead read-only box until now. Writes all four owner display
+  // fields optimistically so the header AND the table row update in one go.
+  const setOwner = (id: MatchRow['id'], user: OwnerCandidate) => {
+    if (id == null || user?.id == null) return
+    const revert = applyOptimistic(id, {
+      ownerId: user.id,
+      owner: user.name ?? '',
+      ownerInitials: initialsOf(user.name),
+      ownerColor: user.avatar_color ?? null,
+    })
+    api.patch(`/matches/${id}`, { owner_id: user.id }).catch(() => { revert(); notify('error', t('bulk.mutateError')) })
+  }
+
   // Extra tab's tenant custom fields: merge the partial patch into the full map
   // so the backend persists it whole. Reverts to the pre-merge map on failure.
   const updateCustomFields = (id: MatchRow['id'], patch: Record<string, unknown>) => {
@@ -67,5 +93,5 @@ export function useMatchMutations({ rows, selected, updateMatch, setSelected }: 
     api.patch(`/matches/${id}`, { custom_fields: merged }).catch(() => { revert(); notify('error', t('bulk.mutateError')) })
   }
 
-  return { setStatus, updateCustomFields }
+  return { setStatus, setOwner, updateCustomFields }
 }

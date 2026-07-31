@@ -85,6 +85,28 @@ export interface Vacancy {
   interviewFlowId: Id | null
 }
 
+/**
+ * One merged timeline event on a vacancy (V21-23). The backend
+ * (VacancyTimeline.php) emits notes, applications received and matches made,
+ * each with a COMPOSITE id (`note-<uuid>` / `application-<uuid>` /
+ * `match-<uuid>`) and no explicit link target — `linkPage`/`linkId` are the
+ * frontend's resolved target (see resolveTimelineLink in data/mapVacancy.ts),
+ * null when the event kind has no own record page (notes).
+ */
+export interface VacancyTimelineEvent {
+  id: Id | undefined
+  // Event kind as sent by the backend: 'note' | 'application' | 'match' (open-ended on purpose).
+  type: string
+  author: string
+  initials: string
+  description: string
+  ai: boolean
+  time: string
+  // Resolved in-app link target; both null when the event is not linkable.
+  linkPage: string | null
+  linkId: string | null
+}
+
 /** The enriched vacancy model rendered by the drawer tabs. */
 export interface VacancyDetail extends Vacancy {
   // Raw lookup slugs, so the Details tab can edit in-place (bind a select to the
@@ -144,7 +166,7 @@ export interface VacancyDetail extends Vacancy {
   // Per-vacancy custom-field values keyed by field key (for the Extra tab).
   customFieldValues: Record<string, unknown>
   documents: Array<{ id: Id | undefined; name: string; size: unknown }>
-  timeline: Array<{ id: Id | undefined; author: string; initials: string; description: string; ai: boolean; time: string }>
+  timeline: VacancyTimelineEvent[]
   notes: Array<{ id: Id | undefined; author: string; text: string; time: string }>
 }
 
@@ -264,7 +286,8 @@ export interface ApiVacancy {
   }>
   custom_fields?: Array<{ id?: Id; name?: string; label?: string; value?: unknown }>
   documents?: Array<{ id?: Id; name?: string; size?: unknown }>
-  timeline?: Array<{ id?: Id; author?: string; author_initials?: string; description?: string; ai?: unknown; created_at?: string; time?: string }>
+  // V21-23: `type` is the event kind the aggregator sends alongside the composite id.
+  timeline?: Array<{ id?: Id; type?: string; author?: string; author_initials?: string; description?: string; ai?: unknown; created_at?: string; time?: string }>
   notes?: Array<{ id?: Id; author?: string; text?: string; created_at?: string }>
   // VAC-CASCADE-1: klant → locatie → afdeling → contactpersoon — ids + resolved {id,name}.
   customer_location_id?: Id

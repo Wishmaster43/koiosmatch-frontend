@@ -127,6 +127,30 @@ const valueOf = (x: unknown): string => {
 // Numeric-ish field → string for the form (empty when absent).
 const numStr = (x: unknown): string => (x == null ? '' : String(x))
 
+// V21-23: which app page owns each linkable timeline event kind. `note` is absent
+// on purpose — notes have no own record page, so a note event stays plain text.
+const TIMELINE_LINK_PAGE: Record<string, string> = { application: 'applications', match: 'matches' }
+
+/**
+ * resolveTimelineLink — the ONE place that turns a vacancy timeline event into an
+ * in-app link target. VacancyTimeline.php emits COMPOSITE ids (`note-<uuid>` /
+ * `application-<uuid>` / `match-<uuid>`) and carries no explicit target, so the
+ * prefix is the only signal we have; splitting it lives here (mapper) instead of
+ * in JSX so the tab stays declarative and the contract has a single owner.
+ * Falls back to the id's own prefix when the backend omits `type`.
+ * Both fields are null for anything we cannot open — never a link that 404s.
+ */
+export function resolveTimelineLink(type: string, compositeId: string): { linkPage: string | null; linkId: string | null } {
+  const dash = compositeId.indexOf('-')
+  const kind = type || (dash > 0 ? compositeId.slice(0, dash) : '')
+  const page = TIMELINE_LINK_PAGE[kind]
+  if (!page) return { linkPage: null, linkId: null }
+  // Strip exactly the `<kind>-` prefix: a UUID itself contains dashes, so never split on the first one.
+  const prefix = `${kind}-`
+  const bare = compositeId.startsWith(prefix) ? compositeId.slice(prefix.length) : ''
+  return bare ? { linkPage: page, linkId: bare } : { linkPage: null, linkId: null }
+}
+
 /**
  * mapVacancyDetail — raw API detail (GET /vacancies/{id}) → the enriched shape the
  * drawer tabs render. Builds on mapVacancy and normalises the nested objects
@@ -242,10 +266,14 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
       return (raw.custom_field_values ?? {}) as Record<string, unknown>
     })(),
     documents: (raw.documents ?? []).map(d => ({ id: d.id, name: d.name ?? '', size: d.size ?? '' })),
-    timeline: (raw.timeline ?? []).map(ev => ({
-      id: ev.id, author: ev.author ?? '', initials: ev.author_initials ?? initialsOf(ev.author ?? ''),
-      description: ev.description ?? '', ai: Boolean(ev.ai), time: ev.created_at ?? ev.time ?? '',
-    })),
+    timeline: (raw.timeline ?? []).map(ev => {
+      const type = String(ev.type ?? '')
+      return {
+        id: ev.id, type, author: ev.author ?? '', initials: ev.author_initials ?? initialsOf(ev.author ?? ''),
+        description: ev.description ?? '', ai: Boolean(ev.ai), time: ev.created_at ?? ev.time ?? '',
+        ...resolveTimelineLink(type, ev.id == null ? '' : String(ev.id)),
+      }
+    }),
     // V24 fix: VacancyNoteController's shared shape returns the note body as `body`
     // (the DB column is `text`, but the API contract mirrors the shared notes shape,
     // { id, author, body, type, created_at }) — reading `n.text` left every note

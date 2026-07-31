@@ -12,11 +12,11 @@
  * routes/api/tenant/applications-matches.php — only CRUD + approve/reject/contract
  * exist), so ChangelogTab stays the icon-popover it already was rather than a fake
  * tab. Header meta row (DRAWER-STD-1, 2026-07-14): a standard Status picker (the
- * same /match-statuses lookup the board/table use, ~160) + Eigenaar. UpdateMatchRequest
- * does not accept owner_id (MATCH-OWNER-1 — grepped app/Http/Requests/JobMatch), so
- * the owner is a read-only labelled value, not a picker, until that lands. Thin
- * container: header config + tab list + the useMatchApproval wiring; all body markup
- * lives in the tab/header components.
+ * same /match-statuses lookup the board/table use, ~160) + a real Eigenaar picker
+ * (MATCH-OWNER-1, 2026-07-31) — PATCH /matches/{id} accepts `owner_id`
+ * (UpdateMatchRequest → PlacementRules trait, tenant-validated), so reassigning
+ * persists like every other entity. Thin container: header config + tab list + the
+ * useMatchApproval wiring; all body markup lives in the tab/header components.
  */
 import { useTranslation } from 'react-i18next'
 import { Trash2 } from 'lucide-react'
@@ -30,6 +30,8 @@ import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import { useDateFormat } from '@/lib/datetime'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useCustomFields } from '@/lib/useCustomFields'
+import { useUsers } from '@/lib/queries'
+import { initialsOf } from '@/lib/initials'
 import ScorePill from './ScorePill'
 import OverviewTab from './drawer/OverviewTab'
 import RelationsTab from './drawer/RelationsTab'
@@ -39,6 +41,7 @@ import ChangelogTab from './drawer/ChangelogTab'
 import MatchApprovalBadge from './drawer/MatchApprovalBadge'
 import MatchApprovalActions from './drawer/MatchApprovalActions'
 import { useMatchApproval } from './hooks/useMatchApproval'
+import type { OwnerCandidate } from './hooks/useMatchMutations'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 
@@ -49,6 +52,9 @@ interface MatchDrawerProps {
   onToggleExpand?: () => void
   // R-1b: change the lifecycle status (lookup-driven); omitting keeps the tab read-only.
   onSetStatus?: (status: string) => void
+  // MATCH-OWNER-1: reassign the match's owner (PATCH owner_id). Omitting it — or an
+  // archived match — renders the owner as an honest read-only value, never a dead picker.
+  onSetOwner?: (user: OwnerCandidate) => void
   // Approval workflow (§7 — UI-only gate; the backend re-checks matches.update).
   canApprove?: boolean
   onApprovalChange?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void
@@ -68,7 +74,7 @@ interface MatchDrawerProps {
 }
 
 export default function MatchDrawer({
-  match, onClose, expanded = false, onToggleExpand, onSetStatus, canApprove = false, onApprovalChange, onUpdate, onUpdateCustomFields,
+  match, onClose, expanded = false, onToggleExpand, onSetStatus, onSetOwner, canApprove = false, onApprovalChange, onUpdate, onUpdateCustomFields,
   onArchive, onRestore, canLinkBackoffice = false,
 }: MatchDrawerProps) {
   const { t } = useTranslation('matches')
@@ -80,7 +86,31 @@ export default function MatchDrawer({
   const { statuses: matchStatuses } = useMatchStatuses()
   // The Extra tab only shows when the tenant has defined match custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('match')
+  // MATCH-OWNER-1: the tenant's users, the owner picker's options (cached app-wide).
+  const { data: users = [] } = useUsers() as { data?: OwnerCandidate[] }
   if (!match) return null
+
+  // Owner picker options, mirroring CandidateDrawer: a synthetic entry for the
+  // CURRENT owner only when that user is missing from /users (a deactivated or
+  // not-yet-loaded owner must still show its name, and always prepending it would
+  // duplicate the owner). It renders DISABLED: it is a label, not a target, and a
+  // clickable row that silently does nothing reads as broken.
+  const ownerInUsers = match.ownerId != null && users.some(u => String(u.id) === String(match.ownerId))
+  const ownerOptions = [
+    ...(ownerInUsers || !match.owner ? [] : [{ value: '__current', label: match.owner, initials: match.ownerInitials || initialsOf(match.owner), disabled: true }]),
+    ...users.map(u => ({ value: String(u.id), label: u.name ?? '', initials: initialsOf(u.name) })),
+  ]
+  // Resolve the picked id back to the full user so the caller can write the name/
+  // colour optimistically as well as PATCH the id.
+  const handleOwnerChange = (value: string) => {
+    if (value === '__current') return
+    const user = users.find(u => String(u.id) === value)
+    if (user) onSetOwner?.(user)
+  }
+  // The picker only renders with a real persistence path (§3 no fake affordances):
+  // a handler wired AND a live record. Otherwise the owner shows as read-only text.
+  const canEditOwner = Boolean(onSetOwner) && !match.archived
+  const ownerValue = ownerInUsers ? String(match.ownerId) : (match.owner ? '__current' : null)
 
   // Tabs are config (§3A). Record history is the changelog ICON-popover in the title row
   // (never a tab) — see titleActions below. Contract/financial reuses drawer.contract.title
@@ -159,24 +189,31 @@ export default function MatchDrawer({
               rejectOpen={rejectOpen} onOpenReject={() => setRejectOpen(true)} onCancelReject={() => setRejectOpen(false)}
               onApprove={approve} onReject={reject} />
           }
-          // Standard meta-picker row (§3A(c)): Status (~160, tenant lookup) + Eigenaar.
-          // Eigenaar stays a read-only labelled value — UpdateMatchRequest has no
-          // owner_id field yet (MATCH-OWNER-1), so a picker would silently no-op.
-          // ARCHIVED: no status changes on a soft-deleted placement — restore first (mirrors candidates).
-          meta={onSetStatus && !match.archived ? [
-            { key: 'status', label: t('drawer.fields.status'), value: match.status,
+          // Standard meta-picker row (§3A(c)): Status (~160, tenant lookup) + Eigenaar
+          // (MATCH-OWNER-1 — a real picker now that PATCH /matches/{id} takes owner_id).
+          // ARCHIVED: no status/owner changes on a soft-deleted placement — restore first (mirrors candidates).
+          meta={[
+            ...(onSetStatus && !match.archived ? [{
+              key: 'status', label: t('drawer.fields.status'), value: match.status,
               options: matchStatuses.map(s => ({ value: s.value, label: s.label })),
-              onChange: onSetStatus, menuWidth: 170, width: 160 },
-          ] : []}
-          metaExtra={
+              onChange: onSetStatus, menuWidth: 170, width: 160,
+            }] : []),
+            ...(canEditOwner ? [{
+              key: 'owner', label: t('drawer.fields.owner'), value: ownerValue,
+              options: ownerOptions, onChange: handleOwnerChange,
+              placeholder: t('drawer.ownerUnassigned'), menuWidth: 200, width: 190,
+            }] : []),
+          ]}
+          // Read-only owner whenever the picker is gated off — the fact stays visible.
+          metaExtra={canEditOwner ? undefined : (
             <div style={{ maxWidth: 190 }}>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{t('drawer.fields.owner')}</div>
               <div style={{ fontSize: 12, padding: '5px 10px', border: '1px solid var(--border)', borderRadius: 7,
                 background: 'var(--bg)', color: match.owner ? 'var(--text)' : 'var(--text-muted)' }}>
-                {match.owner || '—'}
+                {match.owner || t('drawer.ownerUnassigned')}
               </div>
             </div>
-          }
+          )}
         >
           {/* Archived banner (ARCHIVE-1): since-when + restore, right under the header —
               server-backed (mapMatch reads archived/deleted_at, see the type comment on

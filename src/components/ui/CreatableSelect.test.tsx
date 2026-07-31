@@ -156,3 +156,85 @@ describe('CreatableSelect · focus restoration on close', () => {
     expect(trigger).not.toHaveFocus()
   })
 })
+
+// VAC-CLEAR-1 (Danny: "gekozen waarde weer leegmaken"): once a value was picked
+// there was no way back to empty — the vacancy cascade (klantlocatie/afdeling/
+// contactpersoon) and the land/provincie pair are all OPTIONAL, yet a mis-pick
+// was permanent. The clear affordance is OPT-IN because this component is shared
+// by ~90 call sites: it must be invisible (and layout-neutral) to every caller
+// that did not ask for it. No i18n resources are loaded in this suite, so
+// react-i18next falls back to the raw key ('clear' / 'clearField') — the same
+// convention ConfirmDialog.test.tsx uses.
+describe('CreatableSelect · clearable (opt-in)', () => {
+  it('sends the EMPTY value to onChange when the clear button is pressed', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    render(<CreatableSelect value="A" onChange={onChange} options={['A', 'B']} placeholder="Select" allowCreate={false} clearable />)
+    await user.click(screen.getByRole('button', { name: 'clear' }))
+    // The empty string IS the unset value every caller's form state uses; the
+    // vacancy save maps it to `null` in the PATCH body (customer_location_id etc.).
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(onChange).toHaveBeenCalledWith('')
+  })
+
+  it('does NOT render the clear control when nothing is selected', () => {
+    const { rerender } = render(
+      <CreatableSelect value={null} onChange={() => {}} options={['A', 'B']} placeholder="Select" allowCreate={false} clearable />,
+    )
+    expect(screen.queryByRole('button', { name: 'clear' })).not.toBeInTheDocument()
+    // '' is the other shape of "unset" (form state seeded with an empty string —
+    // the same case that once made the trigger render blank instead of the
+    // placeholder); it must not offer a clear either.
+    rerender(<CreatableSelect value="" onChange={() => {}} options={['A', 'B']} placeholder="Select" allowCreate={false} clearable />)
+    expect(screen.queryByRole('button', { name: 'clear' })).not.toBeInTheDocument()
+  })
+
+  it('does not render the clear control at all for a caller that did not opt in', () => {
+    render(<CreatableSelect value="A" onChange={() => {}} options={['A', 'B']} placeholder="Select" allowCreate={false} />)
+    // The trigger is the ONLY button — no extra control appeared on the ~90
+    // existing call sites, and the label reserves no extra room either.
+    expect(screen.getAllByRole('button')).toHaveLength(1)
+    expect(screen.queryByRole('button', { name: 'clear' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'A' }).querySelector('span')?.style.marginRight).toBe('')
+  })
+
+  it('is keyboard reachable and fires on Enter, with a field-specific accessible name', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    render(<CreatableSelect value="A" onChange={onChange} options={['A', 'B']} placeholder="Select" allowCreate={false} clearable clearLabel="Provincie" />)
+    // Tab order: trigger first, then the clear control (a real sibling <button> —
+    // nesting it inside the trigger would drop it from the tab order entirely).
+    await user.tab()
+    expect(screen.getByRole('button', { name: 'A' })).toHaveFocus()
+    await user.tab()
+    const clear = screen.getByRole('button', { name: 'clearField' })
+    expect(clear).toHaveFocus()
+    await user.keyboard('{Enter}')
+    expect(onChange).toHaveBeenCalledWith('')
+  })
+
+  it('closes an open popover when clearing, so the field is not left half-open', async () => {
+    const user = userEvent.setup()
+    render(<CreatableSelect value="A" onChange={() => {}} options={['A', 'B']} placeholder="Select" allowCreate={false} clearable />)
+    await user.click(screen.getByRole('button', { name: 'A' }))
+    expect(screen.getByPlaceholderText('Select')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'clear' }))
+    expect(screen.queryByPlaceholderText('Select')).not.toBeInTheDocument()
+  })
+})
+
+// The clear button is a sibling of the trigger and the existing close-focus
+// effect only restores focus when NOTHING else claimed it — clearing must not
+// regress that (the X keeps focus, it is what the user just pressed).
+describe('CreatableSelect · clearable does not disturb focus handling', () => {
+  it('leaves focus on the clear button after clearing, never yanks it to the trigger', async () => {
+    const user = userEvent.setup()
+    render(<CreatableSelect value="A" onChange={() => {}} options={['A', 'B']} placeholder="Select" allowCreate={false} clearable />)
+    await user.click(screen.getByRole('button', { name: 'A' }))
+    const clear = screen.getByRole('button', { name: 'clear' })
+    await user.click(clear)
+    // The value prop is controlled by the caller, so the X is still rendered here;
+    // focus must stay on it rather than jumping back to the trigger.
+    expect(screen.getByRole('button', { name: 'clear' })).toHaveFocus()
+  })
+})

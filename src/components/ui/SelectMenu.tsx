@@ -17,6 +17,10 @@ interface SelectOption {
   value: string
   label: ReactNode
   initials?: string
+  // A row that is shown for context but cannot be chosen — e.g. the current owner
+  // when they are not in the selectable list. Without this it rendered as an ordinary
+  // clickable button whose handler silently did nothing, which reads as broken (§3).
+  disabled?: boolean
 }
 
 interface SelectMenuProps {
@@ -109,11 +113,13 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
           boxShadow: '0 4px 16px rgba(0,0,0,0.1)', overflow: 'hidden', maxHeight: 240, overflowY: 'auto' }}>
           {opts.length === 0 && <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{placeholder ?? '—'}</div>}
           {opts.map(o => (
-            <button key={o.value} onClick={() => { onChange(o.value); setOpen(false) }}
-              aria-current={value === o.value}
+            <button key={o.value} onClick={() => { if (o.disabled) return; onChange(o.value); setOpen(false) }}
+              aria-current={value === o.value} disabled={o.disabled} aria-disabled={o.disabled || undefined}
               style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%',
-                padding: '8px 12px', textAlign: 'left', fontSize: 12, cursor: 'pointer', border: 'none',
-                background: value === o.value ? 'var(--color-primary-bg)' : 'none', color: 'var(--text)' }}>
+                padding: '8px 12px', textAlign: 'left', fontSize: 12,
+                cursor: o.disabled ? 'default' : 'pointer', border: 'none',
+                background: value === o.value ? 'var(--color-primary-bg)' : 'none',
+                color: o.disabled ? 'var(--text-muted)' : 'var(--text)' }}>
               {o.initials && <Avatar initials={o.initials} size={20} />}
               <span style={{ flex: 1 }}>{o.label}</span>
               {value === o.value && <Check size={13} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />}

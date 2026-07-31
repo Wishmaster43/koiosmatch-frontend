@@ -264,7 +264,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // snapshot/revert logic (both the row list and the open drawer, per field)
   // now lives in useMatchMutations, kept out of the page so it stays under the
   // ~400-line split trigger (§3) and each mutation is unit-testable on its own.
-  const { setStatus, updateCustomFields } = useMatchMutations({ rows, selected, updateMatch, setSelected })
+  const { setStatus, setOwner, updateCustomFields } = useMatchMutations({ rows, selected, updateMatch, setSelected })
   // Drag a card to another column → change the match's STATUS.
   const handleMove = (id: Id, statusKey: string) => setStatus(id, statusKey)
 
@@ -289,7 +289,6 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
               onClear={() => setSelectedIds(new Set())}
               onCoupleHelloFlex={bulkCoupleHelloFlex}
               onCoupleShiftmanager={bulkCoupleShiftmanager}
-              canCouple={hasPermission('matches.couple')}
             />
           ) : (
             // Create a direct match (candidate + vacancy) from the Matches page.
@@ -355,6 +354,9 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       <MatchDrawer match={selected} onClose={() => setSelected(null)}
         expanded={drawerExpanded} onToggleExpand={() => setDrawerExpanded(v => !v)}
         onSetStatus={(status) => { if (selected?.id != null) setStatus(selected.id, status) }}
+        // MATCH-OWNER-1: reassign the owner (PATCH owner_id) — same optimistic-revert
+        // path as the status picker. Gated on matches.update (the backend re-checks, §7).
+        onSetOwner={hasPermission('matches.update') ? (user) => { if (selected?.id != null) setOwner(selected.id, user) } : undefined}
         // Approval workflow (§7 — UI-only gate; the backend re-checks matches.update).
         canApprove={hasPermission('matches.update')}
         onApprovalChange={patchRow}

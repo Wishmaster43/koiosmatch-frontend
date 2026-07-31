@@ -6,6 +6,11 @@
  * One stored value (a string) regardless of mode — no second field. Closes on
  * outside click. Styling matches SelectMenu so pickers look consistent.
  *
+ * CLEAR (VAC-CLEAR-1, Danny: "gekozen waarde weer leegmaken"): pass `clearable`
+ * to get an X that emits the empty value. Opt-in on purpose — the component is
+ * shared by ~90 call sites, and a picker may only offer "unset" where the caller
+ * genuinely persists an empty value (§3 no fake affordances).
+ *
  * PORTAL (Danny, live: the drawer's Profiel-tab province/country picker still
  * rendered "incomplete", cut off): a field near the bottom of a scrollable panel
  * used to render a downward popover that got clipped by that panel's own
@@ -22,8 +27,15 @@
 import { useState, useRef, useEffect, useId } from 'react'
 import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
-import { ChevronDown, Check, Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { ChevronDown, Check, Plus, X } from 'lucide-react'
 import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_Z_INDEX } from '@/lib/useDropdownPlacement'
+
+// Footprint of the opt-in clear button: a 24px WCAG 2.2 (2.5.8) target, parked
+// left of the chevron. The label span reserves exactly this much extra room so a
+// long value ellipsises BEFORE the X instead of sliding underneath it.
+const CLEAR_BUTTON_SIZE = 24
+const CLEAR_BUTTON_RIGHT = 26
 
 interface CreatableOption {
   value: string
@@ -43,12 +55,23 @@ interface CreatableSelectProps {
   allowCreate?: boolean
   menuWidth?: number
   style?: CSSProperties
+  // VAC-CLEAR-1: opt-in "unset this value" affordance. OFF by default because this
+  // component is shared by ~90 call sites — an always-on X would silently reshape
+  // every one of them (and clearing is only honest where the caller really persists
+  // an empty value). Renders only while a value is actually set.
+  clearable?: boolean
+  // Field name woven into the clear button's accessible name ("Klantlocatie
+  // wissen"), so several clearable pickers on one card don't all announce as a
+  // bare "Wissen". Composed via ICU interpolation, never string concatenation (§5).
+  clearLabel?: string
 }
 
 export default function CreatableSelect({
   id, 'aria-labelledby': ariaLabelledBy,
   value, options = [], onChange, placeholder, allowCreate = true, menuWidth = 220, style,
+  clearable = false, clearLabel,
 }: CreatableSelectProps) {
+  const { t } = useTranslation('common')
   const listId = useId()
   const autoId = useId()
   const triggerId = id ?? autoId
@@ -106,6 +129,14 @@ export default function CreatableSelect({
 
   const pick = (v: string) => { onChange(v); setOpen(false); setQuery('') }
 
+  // The clear affordance only exists once something is actually picked — an unset
+  // field shows the placeholder and nothing to press. `''` is the empty value
+  // every caller's form state already uses (never null: onChange is (string)=>void).
+  const hasValue = value != null && value !== ''
+  const showClear = clearable && hasValue
+  const clearId = `${triggerId}-clear`
+  const clearName = clearLabel ? t('clearField', { field: clearLabel }) : t('clear')
+
   return (
     <div ref={ref} style={{ position: 'relative' }}>
       {/* Announced as a disclosure, NOT role="combobox": the options are real focusable
@@ -119,9 +150,14 @@ export default function CreatableSelect({
         style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', width: '100%',
           boxSizing: 'border-box', border: '1px solid var(--border)', borderRadius: 6,
           background: 'var(--surface)', cursor: 'pointer', ...style }}>
-        {/* The trigger label follows an explicit style.fontSize (modal-sized fields). */}
+        {/* The trigger label follows an explicit style.fontSize (modal-sized fields).
+            `marginRight` (NOT the button's padding) reserves the clear button's slot:
+            padding would push the chevron inward too, and it would also be overridable
+            by a caller's own `style`. Applied only while the X is showing, so a caller
+            that never opts in keeps its exact current layout. */}
         <span style={{ fontSize: (style as { fontSize?: number } | undefined)?.fontSize ?? 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden',
-          textOverflow: 'ellipsis', color: (current || value) ? 'var(--text)' : 'var(--text-muted)' }}>
+          textOverflow: 'ellipsis', color: (current || value) ? 'var(--text)' : 'var(--text-muted)',
+          ...(showClear ? { marginRight: CLEAR_BUTTON_SIZE } : {}) }}>
           {/* `value || placeholder`, NOT `value ?? placeholder`: an unset field commonly
               holds an EMPTY STRING (form state seeded with ''), which ?? happily renders —
               leaving the trigger with no text at all. The placeholder then never showed AND
@@ -132,6 +168,24 @@ export default function CreatableSelect({
         </span>
         <ChevronDown size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
       </button>
+      {/* Clear — a SIBLING of the trigger, never a child: a <button> inside a
+          <button> is invalid HTML and browsers drop the inner one from the tab
+          order. Absolutely positioned over the trigger's reserved slot, so it is
+          a real focusable control (Tab reaches it, Enter/Space fire it) with a
+          text accessible name — an icon-only div would have neither (§6).
+          Clearing is treated exactly like a pick: emit the empty value and close. */}
+      {showClear && (
+        <button type="button" id={clearId} title={clearName}
+          aria-labelledby={ariaLabelledBy && !clearLabel ? `${clearId} ${ariaLabelledBy}` : undefined}
+          onClick={() => { onChange(''); setOpen(false); setQuery('') }}
+          style={{ position: 'absolute', right: CLEAR_BUTTON_RIGHT, top: '50%', transform: 'translateY(-50%)',
+            width: CLEAR_BUTTON_SIZE, height: CLEAR_BUTTON_SIZE, display: 'flex', alignItems: 'center',
+            justifyContent: 'center', padding: 0, border: 'none', borderRadius: 6,
+            background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer' }}>
+          <X size={12} aria-hidden="true" />
+          <span className="sr-only">{clearName}</span>
+        </button>
+      )}
       {open && createPortal(
         <div ref={menuRef} style={{
           position: 'fixed', zIndex: DROPDOWN_PORTAL_Z_INDEX, minWidth: menuWidth, maxHeight: menuMaxHeight,

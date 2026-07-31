@@ -48,22 +48,31 @@ describe('useMatchesBulkActions · selection', () => {
   })
 })
 
+// SYNC-BULK-1: the ONE real endpoint (BackofficeSyncController::bulk) — the old
+// /matches/bulk/couple + { match_ids, target } shape this hook used to call never
+// existed on the backend (verified against routes/api/tenant/backoffice-sync.php
+// + BackofficeEntityRegistry), so this whole block replaces the previous
+// assertions that only proved a dead route was called correctly.
 describe('useMatchesBulkActions · bulkCouple', () => {
-  it('posts the selection + target, reports the `queued` count, and clears the selection', async () => {
-    post.mockResolvedValue({ data: { queued: [1] } })
+  it('POSTs /sync/matches/bulk with the exact ids + system, reports the queued count, and clears the selection', async () => {
+    post.mockResolvedValue({ data: { queued: [1, 2], skipped: [] } })
     const r = harness()
     act(() => r.result.current.actions.bulkCoupleHelloFlex())
-    expect(post).toHaveBeenCalledWith('/matches/bulk/couple', { match_ids: [1, 2], target: 'helloflex' })
+    expect(post).toHaveBeenCalledWith('/sync/matches/bulk', { ids: [1, 2], system: 'helloflex' })
     await waitFor(() => expect(notify).toHaveBeenCalledWith('success', expect.any(String)))
     expect(r.result.current.selectedIds.size).toBe(0)
   })
 
-  it('falls back to the `updated` list\'s length when `queued` is absent', async () => {
-    post.mockResolvedValue({ data: { updated: [1, 2] } })
+  // The endpoint's { queued, skipped } contract (a matrix block or an unknown/
+  // other-tenant id is skipped, never a mid-batch 422) — a partial result must
+  // read as partial, never as a plain "success" hiding the skip.
+  it('reports a partial result honestly when some ids are skipped', async () => {
+    post.mockResolvedValue({ data: { queued: [1], skipped: [2] } })
     const r = harness()
     act(() => r.result.current.actions.bulkCoupleShiftmanager())
-    expect(post).toHaveBeenCalledWith('/matches/bulk/couple', { match_ids: [1, 2], target: 'shiftmanager' })
-    await waitFor(() => expect(notify).toHaveBeenCalledWith('success', expect.any(String)))
+    expect(post).toHaveBeenCalledWith('/sync/matches/bulk', { ids: [1, 2], system: 'shiftmanager' })
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('info', 'bulk.coupleQueuedPartial'))
+    expect(notify).not.toHaveBeenCalledWith('success', expect.anything())
   })
 
   it('a 404 (endpoint not built yet) is treated as "not available", never a hard error', async () => {
