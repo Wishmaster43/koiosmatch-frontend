@@ -16,6 +16,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { UserPlus } from 'lucide-react'
 import { useLookups } from '@/context/LookupsContext'
+import { useNavigation } from '@/context/NavigationContext'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { useUsers } from '@/lib/queries'
 import { useGenders } from '@/lib/useGenders'
@@ -30,6 +31,9 @@ import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 import ModalHeader from './addmodal/ModalHeader'
+import DuplicateNotice from './addmodal/DuplicateNotice'
+import { useRestoreDuplicate } from './addmodal/useDuplicateProbe'
+import type { DuplicateMatch } from './addmodal/useDuplicateProbe'
 import PersonalCard from './addmodal/PersonalCard'
 import ContactCard from './addmodal/ContactCard'
 import WorkCard from './addmodal/WorkCard'
@@ -70,7 +74,10 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const { t } = useTranslation(['candidates', 'common'])
   const { phases } = useLookups() as unknown as { phases: LookupOption[] }
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
-  const { user: me } = useAuth() as unknown as { user: { id?: Id; branch_ids?: Array<string | number> } | null }
+  const { user: me, hasPermission } = useAuth() as unknown as {
+    user: { id?: Id; branch_ids?: Array<string | number> } | null
+    hasPermission?: (perm: string) => boolean
+  }
   const settings = useAllSettings()
   const { genders } = useGenders()
   // Zoekbare comboboxen (Danny r2): functietitel uit de functies-lookup (free-entry-
@@ -79,6 +86,10 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   // Esc sluit + tab-trap + focus-restore (huispatroon).
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { createCandidate, saving } = useCreateCandidate()
+  // Cross-entity jump (house pattern, same as EntityLink): opens the candidates
+  // page + drawer for an existing record without prop-drilling a callback.
+  const { openEntity } = useNavigation()
+  const { restore, restoring } = useRestoreDuplicate()
 
   // On create you pick the PHASE (Lead/Kandidaat); deployability defaults to available.
   const entryStatuses = phases.filter(s => CREATE_STATUSES.includes(s.value))
@@ -89,6 +100,10 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const [status,    setStatus]    = useState(defaultStatus)
   const [errors,    setErrors]    = useState<Record<string, boolean>>({})
   const [submitErr, setSubmitErr] = useState<string | null>(null)
+  // C-29: the duplicate the server REFUSED the create on (409 `existing`), kept so
+  // the user gets a real panel instead of the raw server sentence.
+  const [dupBlock,  setDupBlock]  = useState<DuplicateMatch | null>(null)
+  // Which advisory probe hit the user waved away (so "edit data" really dismisses).
   // Punt 10: vestiging-chips — voorgevuld met de eigen koppelingen uit /auth/me
   // (ME-BRANCHES-1). Leeg = veld weglaten → de backend koppelt automatisch de
   // maker-vestigingen (punt 9); een afwijkende keuze gaat expliciet mee in de
@@ -123,7 +138,25 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
     setSubmitErr(null)
+    // Editing anything invalidates the refused-create verdict; the next submit re-asks
+    // the server (which stays the only authority on what is a duplicate).
+    setDupBlock(null)
   }
+
+  // The duplicate panel is driven by the create 409 alone. A live "warn while you
+  // type" probe was built here and removed the same day: GET /candidates/check-duplicate
+  // takes the email and mobile as QUERY PARAMETERS, so every keystroke would have written
+  // a candidate's contact details into web-server access logs, proxies and browser
+  // history — exactly what §7 forbids. A POST variant is requested from the backend; the
+  // 409 was always the real gate, so nothing protective was lost.
+  const dupNotice = dupBlock
+  const dismissNotice = () => setDupBlock(null)
+
+  // Leave the create form and open the existing dossier (nothing was created here).
+  const openExisting = (id: Id) => { onClose(); openEntity('candidates', id) }
+  // Archived duplicate: bring it back, then open it. Restore is permission-gated in
+  // the UI and re-checked by the backend (§7).
+  const restoreAndOpen = async (id: Id) => { if (await restore(id)) openExisting(id) }
 
   // Required fields for the chosen phase (Settings → Verplichte velden), with a
   // sensible fallback. Maps the backend field keys to this form's field names.
@@ -184,9 +217,17 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
       onClose()
     } catch (err) {
       // Show field-level errors from 422 validation responses.
-      const ex = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } }; message?: string }
+      const ex = err as { response?: { status?: number; data?: { errors?: Record<string, unknown>; message?: string; existing?: DuplicateMatch } }; message?: string }
       const apiErrors = ex?.response?.data?.errors
-      if (apiErrors) {
+      // C-29 duplicate (409): render the `existing` payload as a real panel. Without
+      // it we fell through to the raw Dutch server sentence — untranslated for every
+      // tenant — and threw the one thing that could help the user away.
+      if (ex?.response?.status === 409) {
+        const existing = ex.response.data?.existing
+        setDupBlock(existing ?? null)
+        // No payload (older API build): still our own translated line, never the server's.
+        setSubmitErr(existing ? null : t('duplicate.blockedTitle'))
+      } else if (apiErrors) {
         const e2: Record<string, boolean> = {}
         Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
         setErrors(e2)
@@ -258,6 +299,14 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
             )}
           </div>
 
+          {/* Duplicate: the refused create (409) or the live probe hit — one panel,
+              with real actions (open / restore-and-open). */}
+          {dupNotice && (
+            <DuplicateNotice match={dupNotice} variant={dupBlock ? 'blocked' : 'warning'}
+              canRestore={hasPermission?.('candidates.update') ?? false} restoring={restoring}
+              onOpen={() => openExisting(dupNotice.id)} onRestore={() => restoreAndOpen(dupNotice.id)}
+              onDismiss={dismissNotice} />
+          )}
           {/* General submit error (non-422 responses) */}
           {submitErr && (
             <div style={{ margin: '0 24px 8px', padding: '10px 14px', borderRadius: 8, fontSize: 12,
