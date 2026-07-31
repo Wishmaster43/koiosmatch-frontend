@@ -11,7 +11,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Trash2, ChevronDown, ChevronUp, Eye, EyeOff } from 'lucide-react'
+import { Plus, Trash2, ChevronDown, ChevronUp, Eye, EyeOff, Monitor, MonitorOff } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { DragList } from '../components/SettingsControls'
@@ -34,7 +34,9 @@ const toSlug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g
 // Pick a label for the active language (fallback lang-base → en → nl → any → key).
 const pickLabel = (l, lang, key) => l ? (l[lang] ?? l[lang.split('-')[0]] ?? l.en ?? l.nl ?? Object.values(l)[0] ?? key) : key
 // Map a generic /custom-fields def to the shape this editor renders (label + has_data).
-const toField = (d, lang) => ({ ...d, label: pickLabel(d.label_i18n, lang, d.key), has_data: !!d.in_use })
+// visible_in_ui defaults true (backend default) — worklist #44: API-only fields stay
+// listed and editable here, they only stop rendering on the entity's Extra tab.
+const toField = (d, lang) => ({ ...d, label: pickLabel(d.label_i18n, lang, d.key), has_data: !!d.in_use, visible_in_ui: d.visible_in_ui !== false })
 
 const cardStyle = {
   background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 8,
@@ -80,6 +82,18 @@ export default function CustomFieldsSettings({ entityType }) {
     const patched = { ...field, active: !field.active }
     setFields(p => p.map(f => f.id === field.id ? patched : f))
     await api.patch(`/custom-fields/${field.id}`, { active: patched.active })
+      .then(() => invalidate())
+      .catch(() => { setFields(p => p.map(f => f.id === field.id ? field : f)) })
+  }
+
+  // Worklist #44: toggle visible_in_ui without opening the full edit card — the
+  // field stays active/writable via the API either way, this only hides it from
+  // the entity's Extra tab. Optimistic with rollback on failure, then invalidate
+  // so every open drawer's gated tab list refetches the new state.
+  const toggleVisibleInUi = async (field) => {
+    const patched = { ...field, visible_in_ui: !field.visible_in_ui }
+    setFields(p => p.map(f => f.id === field.id ? patched : f))
+    await api.patch(`/custom-fields/${field.id}`, { visible_in_ui: patched.visible_in_ui })
       .then(() => invalidate())
       .catch(() => { setFields(p => p.map(f => f.id === field.id ? field : f)) })
   }
@@ -176,6 +190,9 @@ export default function CustomFieldsSettings({ entityType }) {
                     <code style={{ fontFamily: 'JetBrains Mono, monospace' }}>{field.key}</code>
                     {' · '}{t(`customFieldsSettings.types.${field.type}`)}
                     {field.has_data && <span style={{ color: 'var(--color-warning)', marginLeft: 6 }}>· {t('customFieldsSettings.hasData')}</span>}
+                    {/* Worklist #44: legible in words, not just icon colour — a tenant
+                        must understand WHY a field they configured isn't showing up. */}
+                    {!field.visible_in_ui && <span style={{ color: 'var(--color-info)', marginLeft: 6 }}>· {t('customFieldsSettings.apiOnly')}</span>}
                   </div>
                 </div>
 
@@ -183,6 +200,15 @@ export default function CustomFieldsSettings({ entityType }) {
                 <button onClick={() => toggleActive(field)} title={field.active ? t('customFieldsSettings.deactivate') : t('customFieldsSettings.activate')}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: field.active ? 'var(--color-primary)' : 'var(--text-muted)', padding: 4 }}>
                   {field.active ? <Eye size={14} /> : <EyeOff size={14} />}
+                </button>
+
+                {/* Visible-in-UI toggle (worklist #44) — independent of active: the field
+                    stays reachable via the API/imports either way, this only hides it from
+                    the entity's rendered Extra tab. Monitor/MonitorOff so it reads as a
+                    distinct control from the Eye/EyeOff active toggle above. */}
+                <button onClick={() => toggleVisibleInUi(field)} title={field.visible_in_ui ? t('customFieldsSettings.hideFromUi') : t('customFieldsSettings.showInUi')}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: field.visible_in_ui ? 'var(--color-primary)' : 'var(--text-muted)', padding: 4 }}>
+                  {field.visible_in_ui ? <Monitor size={14} /> : <MonitorOff size={14} />}
                 </button>
 
                 {/* Expand / collapse */}

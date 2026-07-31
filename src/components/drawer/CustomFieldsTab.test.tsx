@@ -30,7 +30,7 @@ describe('CustomFieldsTab', () => {
 
   it('renders the field label + current value once ≥1 active def exists', () => {
     mockedUseCustomFields.mockReturnValue({
-      fields: [{ key: 'budget', label: 'Budget', type: 'number', sort_order: 0, active: true, has_data: false }],
+      fields: [{ key: 'budget', label: 'Budget', type: 'number', sort_order: 0, active: true, has_data: false, visible_in_ui: true }],
       allFields: [],
       loading: false,
       invalidate: vi.fn(),
@@ -44,7 +44,7 @@ describe('CustomFieldsTab', () => {
   // (border/surface + uppercase group title) — it used to float with no card at all.
   it('renders the simple fields inside a titled, bordered card', () => {
     mockedUseCustomFields.mockReturnValue({
-      fields: [{ key: 'budget', label: 'Budget', type: 'number', sort_order: 0, active: true, has_data: false }],
+      fields: [{ key: 'budget', label: 'Budget', type: 'number', sort_order: 0, active: true, has_data: false, visible_in_ui: true }],
       allFields: [],
       loading: false,
       invalidate: vi.fn(),

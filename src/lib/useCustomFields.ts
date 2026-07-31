@@ -33,6 +33,9 @@ export interface CustomFieldDef {
   sort_order: number
   active: boolean
   has_data: boolean
+  // Worklist #44: field stays writable via the API/imports either way — this only
+  // gates whether it renders on the entity's Extra tab (settings keeps it editable).
+  visible_in_ui: boolean
 }
 
 // The generic /custom-fields definition shape as the API sends it (identical for every entity).
@@ -40,6 +43,7 @@ interface RawDef {
   id?: string | number; key?: string; label_i18n?: Record<string, string>
   type?: CustomFieldType; options?: unknown
   required_phases?: string[]; sort_order?: number; active?: boolean; in_use?: boolean
+  visible_in_ui?: boolean
 }
 
 // One session cache per entity type.
@@ -79,6 +83,7 @@ export function useCustomFields(entityType: CustomFieldEntityType) {
       required_for: d.required_phases ?? [],
       sort_order: d.sort_order ?? 0,
       active: d.active !== false, has_data: !!d.in_use,
+      visible_in_ui: d.visible_in_ui !== false,
     }))
     .filter(f => f.key), [raw, i18n.language])
 
@@ -86,5 +91,8 @@ export function useCustomFields(entityType: CustomFieldEntityType) {
   // (create/update/delete/reorder) refetches on the next mount, other entities untouched.
   const invalidate = () => { cacheByEntity.delete(entityType) }
 
-  return { fields: allFields.filter(f => f.active), allFields, loading, invalidate }
+  // fields = what the entity's Extra tab renders and gates on: active AND
+  // visible_in_ui. A field kept active-but-API-only stays reachable via the API/
+  // imports (settings still lists it in allFields) while disappearing from the UI.
+  return { fields: allFields.filter(f => f.active && f.visible_in_ui), allFields, loading, invalidate }
 }
