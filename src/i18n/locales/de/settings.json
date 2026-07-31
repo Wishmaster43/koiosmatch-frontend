@@ -1814,6 +1814,10 @@
         "label": "Abteilungsfarbe (Kontakte)",
         "description": "An = der Abteilungs-Chip bei Kontaktpersonen wird eingefärbt. Aus = einfacher Text."
       },
+      "customer_contact_table_color_status": {
+        "label": "Statusfarbe (Ansprechpartner)",
+        "description": "Ein = der Status eines Ansprechpartners als farbiges Label. Aus = einfacher Text."
+      },
       "customer_department_table_color_location": {
         "label": "Standortfarbe (Abteilungen)",
         "description": "An = der Standort-Chip in der Abteilungstabelle wird eingefärbt. Aus = einfacher Text."

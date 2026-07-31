@@ -1814,6 +1814,10 @@
         "label": "Color departamento (contactos)",
         "description": "Activado = el chip de Departamento en contactos tiene color. Desactivado = texto plano."
       },
+      "customer_contact_table_color_status": {
+        "label": "Color de estado (contactos)",
+        "description": "Activado = el estado de un contacto como etiqueta de color. Desactivado = texto sin formato."
+      },
       "customer_department_table_color_location": {
         "label": "Color ubicación (departamentos)",
         "description": "Activado = el chip de Ubicación en la tabla de departamentos tiene color. Desactivado = texto plano."

@@ -1832,6 +1832,10 @@
         "label": "Department colour (contacts)",
         "description": "On = the Department chip on contact persons is coloured. Off = plain text."
       },
+      "customer_contact_table_color_status": {
+        "label": "Status colour (contacts)",
+        "description": "On = a contact's status as a coloured label. Off = plain text."
+      },
       "customer_department_table_color_location": {
         "label": "Location colour (departments)",
         "description": "On = the Location chip in the department table is coloured. Off = plain text."

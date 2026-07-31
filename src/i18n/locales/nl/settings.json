@@ -1832,6 +1832,10 @@
         "label": "Afdelingkleur (contactpersonen)",
         "description": "Aan = de Afdeling-chip bij contactpersonen krijgt kleur. Uit = platte tekst."
       },
+      "customer_contact_table_color_status": {
+        "label": "Statuskleur (contactpersonen)",
+        "description": "Aan = de status van een contactpersoon als gekleurd label. Uit = platte tekst."
+      },
       "customer_department_table_color_location": {
         "label": "Locatiekleur (afdelingen)",
         "description": "Aan = de Locatie-chip in de afdelingentabel krijgt kleur. Uit = platte tekst."

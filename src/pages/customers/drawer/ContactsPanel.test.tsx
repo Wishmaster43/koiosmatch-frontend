@@ -234,4 +234,29 @@ describe('ContactsPanel · colour on/off flags per column (CHIPKLEUR-INSTELBAAR-
       expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: 'var(--color-secondary)' })
     })
   })
+
+  // The status flag was left out of the original contract because this list had no
+  // status column. It has one now, and no backend change was needed: SettingController
+  // validates the whole `*_table_color_*` family by pattern, not against a fixed list.
+  it('renders the status as a coloured chip by default, and as plain text once its flag is off', async () => {
+    const withStatus = contact({ statusId: 's1', statusLabel: 'Actief', statusColor: '#10B981' })
+
+    const { unmount } = render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={[withStatus]} />)
+    await waitFor(() => expect(screen.getByText('Actief')).toHaveStyle({ color: '#10B981' }))
+    unmount()
+
+    invalidateAllSettingsCache()
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/settings'
+        ? Promise.resolve({ data: { customer_contact_table_color_status: 'false' } })
+        : Promise.resolve({ data: { data: [] } }))
+
+    render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={[withStatus]} />)
+    await waitFor(() => {
+      const cell = screen.getByText('Actief')
+      expect(cell).not.toHaveStyle({ color: '#10B981' })
+      // The other two columns are unaffected — the three flags are independent.
+      expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: 'var(--color-secondary)' })
+    })
+  })
 })

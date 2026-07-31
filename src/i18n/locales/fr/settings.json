@@ -1814,6 +1814,10 @@
         "label": "Couleur service (contacts)",
         "description": "Activé = la puce Service des contacts est colorée. Désactivé = texte simple."
       },
+      "customer_contact_table_color_status": {
+        "label": "Couleur du statut (contacts)",
+        "description": "Activé = le statut d'un contact sous forme d'étiquette colorée. Désactivé = texte brut."
+      },
       "customer_department_table_color_location": {
         "label": "Couleur site (services)",
         "description": "Activé = la puce Site dans le tableau des services est colorée. Désactivé = texte simple."

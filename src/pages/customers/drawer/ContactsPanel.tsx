@@ -100,6 +100,11 @@ export default function ContactsPanel({
   const settings = useAllSettings()
   const colorLocationCol = getBoolSetting(settings, 'customer_contact_table_color_location', true)
   const colorDepartmentCol = getBoolSetting(settings, 'customer_contact_table_color_department', true)
+  // The status column's own flag. It was left out of the original contract because the
+  // contact list had no status column; it has one now, and the backend needs no change —
+  // SettingController validates this family by PATTERN (`str_contains(key,
+  // '_table_color_')`), not against a fixed list, so the key is accepted as-is.
+  const colorStatusCol = getBoolSetting(settings, 'customer_contact_table_color_status', true)
   const [search, setSearch] = useState('')
   const [modal, setModal] = useState<'add' | 'couple' | Contact | null>(null)
 
@@ -156,7 +161,8 @@ export default function ContactsPanel({
         </div>
       ) },
     { key: 'status', header: t('contacts.col.status'), sortable: true, sortValue: p => p.statusLabel,
-      render: p => p.statusLabel ? <SoftChip label={p.statusLabel} color={p.statusColor} /> : '—' },
+      render: p => !p.statusLabel ? '—'
+        : colorStatusCol ? <SoftChip label={p.statusLabel} color={p.statusColor} /> : <>{p.statusLabel}</> },
     ...(scope === 'customer' ? [{
       key: 'location', header: t('contacts.col.location'), sortable: true, sortValue: (p: Contact) => p.locationName,
       render: (p: Contact) => colorLocationCol ? chipList(resolvedLocations(p), locationChipColor) : plainList(resolvedLocations(p)),
