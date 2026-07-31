@@ -1158,26 +1158,85 @@
     "started": "Sync started — this can take a few minutes. Refresh the lists later for the updated data."
   },
   "import": {
-    "types": {
-      "candidates": "Candidates",
-      "cvs": "CVs",
-      "vacancies": "Vacancies",
-      "documents": "Documents",
-      "customers": "Customers",
-      "shifts": "Shifts"
+    "title": "Import",
+    "subtitle": "Bring in your customer data from a CSV file — one entity at a time, in the right order.",
+    "entities": {
+      "customers": {
+        "label": "Customers",
+        "desc": "Company records: name, contact details, KvK/VAT number, website and industry."
+      },
+      "locations": {
+        "label": "Locations",
+        "desc": "A customer's site addresses. Requires an existing customer."
+      },
+      "departments": {
+        "label": "Departments",
+        "desc": "Departments within a location. Requires an existing customer and location."
+      },
+      "contacts": {
+        "label": "Contacts",
+        "desc": "Contact persons. Requires an existing customer, location and department."
+      }
     },
-    "title": "Import {{type}}",
-    "subtitle": "Import your existing {{type}} data with a CSV file.",
-    "fileTitle": "Import your file",
-    "step": "Current step: {{step}} / {{total}}",
-    "dropHere": "Drag your files here",
-    "selectCsv": "Select CSV",
-    "fileSelected": "File selected. Click Next to map the columns.",
-    "mapColumns": "Map the columns from your CSV to the system fields.",
-    "mapColumnsHint": "Column mapping is configured after upload.",
-    "doneTitle": "Import complete!",
-    "doneDesc": "Your data was imported successfully.",
-    "newImport": "New import"
+    "order": {
+      "title": "Import in this order",
+      "hint": "Each row links to the one before it by name — import that one first.",
+      "customersHint": "Start here — nothing else needs to exist yet.",
+      "locationsHint": "Links to an existing customer by name (klant_naam) — import customers first.",
+      "departmentsHint": "Links to an existing customer and location by name (klant_naam, locatie_naam) — import those first.",
+      "contactsHint": "Links to an existing customer, location and department by name (klant_naam, locatie_naam, afdeling_naam) — import those first."
+    },
+    "loadingTemplates": "Loading import types…",
+    "loadTemplatesError": "Could not load the import types. Please try again.",
+    "noTemplates": "No import types are available yet.",
+    "downloadTemplate": "Download example file",
+    "downloadTemplateHint": "A filled-in example file with the exact column names — the fastest way to prepare your data.",
+    "downloadError": "Could not download the example file. Please try again.",
+    "noViewPermission": "You don't have permission to view this template.",
+    "noImportPermission": "You can view the example file, but you don't have permission to run an import. Ask an administrator.",
+    "dropHere": "Drag your CSV file here",
+    "selectCsv": "Select file",
+    "acceptedTypes": "CSV or TXT, max 5 MB, up to 2,000 rows.",
+    "wrongFileType": "That looks like an Excel file. Save it as CSV first (File → Save As → CSV) and upload that file instead.",
+    "fileSelected": "Selected: {{name}}",
+    "replaceFile": "Choose a different file",
+    "runPreview": "Preview import",
+    "runningPreview": "Checking your file…",
+    "previewErrorFallback": "The file could not be read. Check the format and try again.",
+    "preview": {
+      "title": "Preview",
+      "subtitle": "This is what WOULD happen. Nothing has been saved yet.",
+      "nothingToImport": "No rows would be created or updated — there is nothing to import.",
+      "confirm": "Run the real import",
+      "running": "Importing…",
+      "back": "Choose a different file",
+      "confirmError": "The import could not be completed. Please try again."
+    },
+    "result": {
+      "title": "Import result",
+      "subtitleSuccess": "All rows were imported successfully.",
+      "subtitlePartial": "{{errorCount}} of {{total}} rows could not be imported — see below.",
+      "newImport": "Import another file"
+    },
+    "stats": {
+      "rows": "Rows",
+      "create": "New",
+      "update": "Updated",
+      "skip": "Skipped",
+      "error": "Failed"
+    },
+    "unknownColumns": {
+      "title": "Unrecognised columns (ignored)",
+      "hint": "These columns in your file don't match a known field. They were ignored — nothing else was affected."
+    },
+    "rows": {
+      "errorTitle": "{{count}} rows with an error",
+      "allTitle": "All {{count}} rows",
+      "showAll": "Show all {{count}} rows",
+      "showErrorsOnly": "Show only failed rows",
+      "noErrors": "No rows failed.",
+      "row": "Row {{row}}"
+    }
   },
   "facebookLeads": {
     "title": "Facebook Leads",

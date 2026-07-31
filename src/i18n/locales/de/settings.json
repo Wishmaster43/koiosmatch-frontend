@@ -944,26 +944,85 @@
     "started": "Synchronisierung gestartet — dies kann einige Minuten dauern. Aktualisieren Sie die Listen später für die neuen Daten."
   },
   "import": {
-    "types": {
-      "candidates": "Kandidaten",
-      "cvs": "Lebensläufe",
-      "vacancies": "Stellen",
-      "documents": "Dokumente",
-      "customers": "Kunden",
-      "shifts": "Dienste"
+    "title": "Importieren",
+    "subtitle": "Übertragen Sie Ihre Kundendaten aus einer CSV-Datei — pro Entität, in der richtigen Reihenfolge.",
+    "entities": {
+      "customers": {
+        "label": "Kunden",
+        "desc": "Firmendaten: Name, Kontaktdaten, Handelsregister-/USt-IdNr., Website und Branche."
+      },
+      "locations": {
+        "label": "Standorte",
+        "desc": "Standortadressen eines Kunden. Erfordert einen bestehenden Kunden."
+      },
+      "departments": {
+        "label": "Abteilungen",
+        "desc": "Abteilungen innerhalb eines Standorts. Erfordert einen bestehenden Kunden und Standort."
+      },
+      "contacts": {
+        "label": "Kontakte",
+        "desc": "Kontaktpersonen. Erfordert einen bestehenden Kunden, Standort und eine Abteilung."
+      }
     },
-    "title": "{{type}} importieren",
-    "subtitle": "Importieren Sie Ihre bestehenden {{type}}-Daten mit einer CSV-Datei.",
-    "fileTitle": "Datei importieren",
-    "step": "Aktueller Schritt: {{step}} / {{total}}",
-    "dropHere": "Ziehen Sie Ihre Dateien hierher",
-    "selectCsv": "CSV auswählen",
-    "fileSelected": "Datei ausgewählt. Klicken Sie auf Weiter, um die Spalten zuzuordnen.",
-    "mapColumns": "Ordnen Sie die Spalten Ihrer CSV den Systemfeldern zu.",
-    "mapColumnsHint": "Die Spaltenzuordnung wird nach dem Upload konfiguriert.",
-    "doneTitle": "Import abgeschlossen!",
-    "doneDesc": "Ihre Daten wurden erfolgreich importiert.",
-    "newImport": "Neuer Import"
+    "order": {
+      "title": "Importieren Sie in dieser Reihenfolge",
+      "hint": "Jede Zeile verknüpft sich per Name mit der vorherigen — importieren Sie diese zuerst.",
+      "customersHint": "Beginnen Sie hier — es muss noch nichts anderes existieren.",
+      "locationsHint": "Verknüpft sich mit einem bestehenden Kunden per Name (klant_naam) — importieren Sie zuerst Kunden.",
+      "departmentsHint": "Verknüpft sich mit einem bestehenden Kunden und Standort per Name (klant_naam, locatie_naam) — importieren Sie diese zuerst.",
+      "contactsHint": "Verknüpft sich mit einem bestehenden Kunden, Standort und einer Abteilung per Name (klant_naam, locatie_naam, afdeling_naam) — importieren Sie diese zuerst."
+    },
+    "loadingTemplates": "Importtypen werden geladen…",
+    "loadTemplatesError": "Die Importtypen konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
+    "noTemplates": "Es sind noch keine Importtypen verfügbar.",
+    "downloadTemplate": "Beispieldatei herunterladen",
+    "downloadTemplateHint": "Eine ausgefüllte Beispieldatei mit den genauen Spaltennamen — der schnellste Weg, Ihre Daten vorzubereiten.",
+    "downloadError": "Die Beispieldatei konnte nicht heruntergeladen werden. Bitte versuchen Sie es erneut.",
+    "noViewPermission": "Sie haben keine Berechtigung, diese Vorlage anzusehen.",
+    "noImportPermission": "Sie können die Beispieldatei ansehen, haben aber keine Berechtigung, einen Import durchzuführen. Wenden Sie sich an einen Administrator.",
+    "dropHere": "Ziehen Sie Ihre CSV-Datei hierher",
+    "selectCsv": "Datei auswählen",
+    "acceptedTypes": "CSV oder TXT, max. 5 MB, bis zu 2000 Zeilen.",
+    "wrongFileType": "Das sieht nach einer Excel-Datei aus. Speichern Sie sie zuerst als CSV (Datei → Speichern unter → CSV) und laden Sie diese Datei hoch.",
+    "fileSelected": "Ausgewählt: {{name}}",
+    "replaceFile": "Andere Datei wählen",
+    "runPreview": "Vorschau anzeigen",
+    "runningPreview": "Datei wird geprüft…",
+    "previewErrorFallback": "Die Datei konnte nicht gelesen werden. Prüfen Sie das Format und versuchen Sie es erneut.",
+    "preview": {
+      "title": "Vorschau",
+      "subtitle": "Dies ist, was passieren WÜRDE. Es wurde noch nichts gespeichert.",
+      "nothingToImport": "Es würden keine Zeilen angelegt oder aktualisiert — es gibt nichts zu importieren.",
+      "confirm": "Echten Import ausführen",
+      "running": "Wird importiert…",
+      "back": "Andere Datei wählen",
+      "confirmError": "Der Import konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut."
+    },
+    "result": {
+      "title": "Importergebnis",
+      "subtitleSuccess": "Alle Zeilen wurden erfolgreich importiert.",
+      "subtitlePartial": "{{errorCount}} von {{total}} Zeilen konnten nicht importiert werden — siehe unten.",
+      "newImport": "Weitere Datei importieren"
+    },
+    "stats": {
+      "rows": "Zeilen",
+      "create": "Neu",
+      "update": "Aktualisiert",
+      "skip": "Übersprungen",
+      "error": "Fehlgeschlagen"
+    },
+    "unknownColumns": {
+      "title": "Unbekannte Spalten (ignoriert)",
+      "hint": "Diese Spalten in Ihrer Datei entsprechen keinem bekannten Feld. Sie wurden ignoriert — sonst wurde nichts beeinflusst."
+    },
+    "rows": {
+      "errorTitle": "{{count}} Zeilen mit Fehler",
+      "allTitle": "Alle {{count}} Zeilen",
+      "showAll": "Alle {{count}} Zeilen anzeigen",
+      "showErrorsOnly": "Nur fehlgeschlagene Zeilen anzeigen",
+      "noErrors": "Keine Zeile ist fehlgeschlagen.",
+      "row": "Zeile {{row}}"
+    }
   },
   "facebookLeads": {
     "title": "Facebook Leads",

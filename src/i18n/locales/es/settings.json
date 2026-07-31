@@ -944,26 +944,85 @@
     "started": "Sincronización iniciada — puede tardar unos minutos. Actualiza las listas más tarde para ver los datos actualizados."
   },
   "import": {
-    "types": {
-      "candidates": "Candidatos",
-      "cvs": "CV",
-      "vacancies": "Vacantes",
-      "documents": "Documentos",
-      "customers": "Clientes",
-      "shifts": "Turnos"
+    "title": "Importar",
+    "subtitle": "Trae tus datos de clientes desde un archivo CSV — una entidad a la vez, en el orden correcto.",
+    "entities": {
+      "customers": {
+        "label": "Clientes",
+        "desc": "Datos de la empresa: nombre, datos de contacto, número KvK/CIF, sitio web y sector."
+      },
+      "locations": {
+        "label": "Ubicaciones",
+        "desc": "Direcciones de las sedes de un cliente. Requiere un cliente existente."
+      },
+      "departments": {
+        "label": "Departamentos",
+        "desc": "Departamentos dentro de una ubicación. Requiere un cliente y una ubicación existentes."
+      },
+      "contacts": {
+        "label": "Contactos",
+        "desc": "Personas de contacto. Requiere un cliente, una ubicación y un departamento existentes."
+      }
     },
-    "title": "Importar {{type}}",
-    "subtitle": "Importa tus datos de {{type}} existentes con un archivo CSV.",
-    "fileTitle": "Importa tu archivo",
-    "step": "Paso actual: {{step}} / {{total}}",
-    "dropHere": "Arrastra tus archivos aquí",
-    "selectCsv": "Seleccionar CSV",
-    "fileSelected": "Archivo seleccionado. Haz clic en Siguiente para asignar las columnas.",
-    "mapColumns": "Asigna las columnas de tu CSV a los campos del sistema.",
-    "mapColumnsHint": "La asignación de columnas se configura tras la subida.",
-    "doneTitle": "¡Importación completa!",
-    "doneDesc": "Tus datos se importaron correctamente.",
-    "newImport": "Nueva importación"
+    "order": {
+      "title": "Importa en este orden",
+      "hint": "Cada fila se vincula a la anterior por su nombre — impórtala primero.",
+      "customersHint": "Empieza aquí — todavía no es necesario que exista nada más.",
+      "locationsHint": "Se vincula a un cliente existente por su nombre (klant_naam) — importa primero los clientes.",
+      "departmentsHint": "Se vincula a un cliente y una ubicación existentes por su nombre (klant_naam, locatie_naam) — impórtalos primero.",
+      "contactsHint": "Se vincula a un cliente, una ubicación y un departamento existentes por su nombre (klant_naam, locatie_naam, afdeling_naam) — impórtalos primero."
+    },
+    "loadingTemplates": "Cargando tipos de importación…",
+    "loadTemplatesError": "No se pudieron cargar los tipos de importación. Inténtalo de nuevo.",
+    "noTemplates": "Todavía no hay tipos de importación disponibles.",
+    "downloadTemplate": "Descargar archivo de ejemplo",
+    "downloadTemplateHint": "Un archivo de ejemplo ya completado con los nombres de columna exactos — la forma más rápida de preparar tus datos.",
+    "downloadError": "No se pudo descargar el archivo de ejemplo. Inténtalo de nuevo.",
+    "noViewPermission": "No tienes permiso para ver esta plantilla.",
+    "noImportPermission": "Puedes ver el archivo de ejemplo, pero no tienes permiso para ejecutar una importación. Pide ayuda a un administrador.",
+    "dropHere": "Arrastra tu archivo CSV aquí",
+    "selectCsv": "Seleccionar archivo",
+    "acceptedTypes": "CSV o TXT, máx. 5 MB, hasta 2000 filas.",
+    "wrongFileType": "Esto parece un archivo de Excel. Guárdalo primero como CSV (Archivo → Guardar como → CSV) y sube ese archivo.",
+    "fileSelected": "Seleccionado: {{name}}",
+    "replaceFile": "Elegir otro archivo",
+    "runPreview": "Vista previa de la importación",
+    "runningPreview": "Comprobando tu archivo…",
+    "previewErrorFallback": "No se pudo leer el archivo. Comprueba el formato e inténtalo de nuevo.",
+    "preview": {
+      "title": "Vista previa",
+      "subtitle": "Esto es lo que OCURRIRÍA. Todavía no se ha guardado nada.",
+      "nothingToImport": "No se crearía ni actualizaría ninguna fila — no hay nada que importar.",
+      "confirm": "Ejecutar la importación real",
+      "running": "Importando…",
+      "back": "Elegir otro archivo",
+      "confirmError": "No se pudo completar la importación. Inténtalo de nuevo."
+    },
+    "result": {
+      "title": "Resultado de la importación",
+      "subtitleSuccess": "Todas las filas se importaron correctamente.",
+      "subtitlePartial": "{{errorCount}} de {{total}} filas no se pudieron importar — consulta más abajo.",
+      "newImport": "Importar otro archivo"
+    },
+    "stats": {
+      "rows": "Filas",
+      "create": "Nuevas",
+      "update": "Actualizadas",
+      "skip": "Omitidas",
+      "error": "Fallidas"
+    },
+    "unknownColumns": {
+      "title": "Columnas no reconocidas (ignoradas)",
+      "hint": "Estas columnas de tu archivo no coinciden con ningún campo conocido. Se ignoraron — no se vio afectado nada más."
+    },
+    "rows": {
+      "errorTitle": "{{count}} filas con error",
+      "allTitle": "Las {{count}} filas",
+      "showAll": "Mostrar las {{count}} filas",
+      "showErrorsOnly": "Mostrar solo las filas fallidas",
+      "noErrors": "Ninguna fila falló.",
+      "row": "Fila {{row}}"
+    }
   },
   "facebookLeads": {
     "title": "Facebook Leads",

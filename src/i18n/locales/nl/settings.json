@@ -1158,26 +1158,85 @@
     "started": "Synchronisatie gestart — dit kan enkele minuten duren. Ververs de lijsten later voor de bijgewerkte data."
   },
   "import": {
-    "types": {
-      "candidates": "Kandidaten",
-      "cvs": "CV's",
-      "vacancies": "Vacatures",
-      "documents": "Documenten",
-      "customers": "Klanten",
-      "shifts": "Diensten"
+    "title": "Importeren",
+    "subtitle": "Breng je klantgegevens over vanuit een CSV-bestand — per entiteit, in de juiste volgorde.",
+    "entities": {
+      "customers": {
+        "label": "Klanten",
+        "desc": "Bedrijfsgegevens: naam, contactgegevens, KvK/btw-nummer, website en branche."
+      },
+      "locations": {
+        "label": "Locaties",
+        "desc": "Vestigingsadressen van een klant. Vereist een bestaande klant."
+      },
+      "departments": {
+        "label": "Afdelingen",
+        "desc": "Afdelingen binnen een locatie. Vereist een bestaande klant en locatie."
+      },
+      "contacts": {
+        "label": "Contactpersonen",
+        "desc": "Contactpersonen. Vereist een bestaande klant, locatie en afdeling."
+      }
     },
-    "title": "{{type}} importeren",
-    "subtitle": "Importeer je bestaande {{type}}-gegevens met een CSV-bestand.",
-    "fileTitle": "Importeer je bestand",
-    "step": "Huidige stap: {{step}} / {{total}}",
-    "dropHere": "Sleep je bestanden hierheen",
-    "selectCsv": "Selecteer CSV",
-    "fileSelected": "Bestand geselecteerd. Klik op Volgende om de kolommen te koppelen.",
-    "mapColumns": "Koppel de kolommen uit je CSV aan de systeemvelden.",
-    "mapColumnsHint": "Kolomkoppeling wordt na upload geconfigureerd.",
-    "doneTitle": "Import klaar!",
-    "doneDesc": "Je gegevens zijn succesvol geïmporteerd.",
-    "newImport": "Nieuw importeren"
+    "order": {
+      "title": "Importeer in deze volgorde",
+      "hint": "Elke regel koppelt aan de vorige op naam — importeer die eerst.",
+      "customersHint": "Begin hier — er hoeft nog niets anders te bestaan.",
+      "locationsHint": "Koppelt aan een bestaande klant op naam (klant_naam) — importeer klanten eerst.",
+      "departmentsHint": "Koppelt aan een bestaande klant en locatie op naam (klant_naam, locatie_naam) — importeer die eerst.",
+      "contactsHint": "Koppelt aan een bestaande klant, locatie en afdeling op naam (klant_naam, locatie_naam, afdeling_naam) — importeer die eerst."
+    },
+    "loadingTemplates": "Importtypen laden…",
+    "loadTemplatesError": "Kon de importtypen niet laden. Probeer het opnieuw.",
+    "noTemplates": "Er zijn nog geen importtypen beschikbaar.",
+    "downloadTemplate": "Download voorbeeldbestand",
+    "downloadTemplateHint": "Een ingevuld voorbeeldbestand met de exacte kolomnamen — de snelste manier om je gegevens voor te bereiden.",
+    "downloadError": "Kon het voorbeeldbestand niet downloaden. Probeer het opnieuw.",
+    "noViewPermission": "Je hebt geen rechten om dit voorbeeldbestand te bekijken.",
+    "noImportPermission": "Je kunt het voorbeeldbestand bekijken, maar hebt geen rechten om een import uit te voeren. Vraag een beheerder.",
+    "dropHere": "Sleep je CSV-bestand hierheen",
+    "selectCsv": "Selecteer bestand",
+    "acceptedTypes": "CSV of TXT, max. 5 MB, tot 2000 rijen.",
+    "wrongFileType": "Dit lijkt een Excel-bestand. Sla het eerst op als CSV (Bestand → Opslaan als → CSV) en upload dat bestand.",
+    "fileSelected": "Geselecteerd: {{name}}",
+    "replaceFile": "Kies een ander bestand",
+    "runPreview": "Voorbeeld bekijken",
+    "runningPreview": "Bestand wordt gecontroleerd…",
+    "previewErrorFallback": "Het bestand kon niet worden gelezen. Controleer het formaat en probeer opnieuw.",
+    "preview": {
+      "title": "Voorbeeldweergave",
+      "subtitle": "Dit is wat ER ZOU gebeuren. Er is nog niets opgeslagen.",
+      "nothingToImport": "Er zouden geen rijen worden aangemaakt of bijgewerkt — er is niets om te importeren.",
+      "confirm": "Voer de echte import uit",
+      "running": "Bezig met importeren…",
+      "back": "Kies een ander bestand",
+      "confirmError": "De import kon niet worden voltooid. Probeer het opnieuw."
+    },
+    "result": {
+      "title": "Importresultaat",
+      "subtitleSuccess": "Alle rijen zijn succesvol geïmporteerd.",
+      "subtitlePartial": "{{errorCount}} van {{total}} rijen konden niet worden geïmporteerd — zie hieronder.",
+      "newImport": "Nog een bestand importeren"
+    },
+    "stats": {
+      "rows": "Rijen",
+      "create": "Nieuw",
+      "update": "Bijgewerkt",
+      "skip": "Overgeslagen",
+      "error": "Mislukt"
+    },
+    "unknownColumns": {
+      "title": "Onherkende kolommen (genegeerd)",
+      "hint": "Deze kolommen in je bestand komen niet overeen met een bekend veld. Ze zijn genegeerd — verder is er niets mee gebeurd."
+    },
+    "rows": {
+      "errorTitle": "{{count}} rijen met een fout",
+      "allTitle": "Alle {{count}} rijen",
+      "showAll": "Toon alle {{count}} rijen",
+      "showErrorsOnly": "Toon alleen mislukte rijen",
+      "noErrors": "Geen rijen mislukt.",
+      "row": "Rij {{row}}"
+    }
   },
   "facebookLeads": {
     "title": "Facebook Leads",
