@@ -6,7 +6,7 @@
  * (`getVacancyTabDefaults`) computes every seed-based default and both the
  * settings screen and the search-tab hook read the same values (Danny 23-07: a
  * Lead usually has no context yet to search open vacancies against, a candidate
- * flagged Unavailable/blacklisted shouldn't be pushed toward new placements, and
+ * flagged Unavailable/blacklisted shouldn't be pushed toward new matches, and
  * only some contract forms may be relevant — but all three are Settings-driven,
  * never hardcoded).
  */

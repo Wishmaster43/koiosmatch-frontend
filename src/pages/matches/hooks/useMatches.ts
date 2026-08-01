@@ -81,7 +81,7 @@ export function useMatches(ref: string | null = null, includeArchived: boolean =
   const [rows,    setRows]    = useState<MatchRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
-  // Bumping the tick re-runs the fetch — used after creating a placement (the
+  // Bumping the tick re-runs the fetch — used after creating a match (the
   // server derives stage/status/rate fields, so a refetch beats hand-mapping) and
   // after an archive/restore (useMatchArchive) so a just-archived row drops out of
   // the list and a just-restored one comes back.

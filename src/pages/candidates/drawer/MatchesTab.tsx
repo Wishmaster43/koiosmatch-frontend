@@ -20,12 +20,12 @@ function ScorePill({ value }: { value?: number | null }) {
 /**
  * MatchesTab — READ-ONLY view of the candidate's matches (decided model: a Match
  * is its own entity; the contract lives in HelloFlex, we only show its status).
- * Placement fields (customer/contract/financial) ARE editable via the pencil
- * (point 2, Danny live P1) — it reopens the same MatchPlacementModal in EDIT mode
+ * Match fields (customer/contract/financial) ARE editable via the pencil
+ * (point 2, Danny live P1) — it reopens the same MatchModal in EDIT mode
  * (PATCH /matches/{id}); the lifecycle status itself still isn't touched here.
  */
 export default function MatchesTab({ c, onEdit }: { c: Candidate
-  // Opens the match in MatchPlacementModal as an edit (WorkTab owns the modal state).
+  // Opens the match in MatchModal as an edit (WorkTab owns the modal state).
   onEdit?: (matchId: Id) => void }) {
   const { t } = useTranslation('candidates')
   // Match lifecycle lookup (R-1b) — resolves the "Fase" row's label/colour from the
@@ -68,8 +68,8 @@ export default function MatchesTab({ c, onEdit }: { c: Candidate
                 <ExternalLink size={12} />
               </a>
             )}
-            {/* Point 2 (Danny live P1): edit this match's placement fields — reopens
-                MatchPlacementModal in EDIT mode (PATCH /matches/{id}). */}
+            {/* Point 2 (Danny live P1): edit this match's contract fields — reopens
+                MatchModal in EDIT mode (PATCH /matches/{id}). */}
             {onEdit && m.id != null && (
               <button type="button" onClick={() => onEdit(m.id as Id)}
                 title={t('common:edit')} aria-label={t('common:edit')}

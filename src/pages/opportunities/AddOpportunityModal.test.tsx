@@ -5,7 +5,7 @@
  * <select>). Behaviour must stay identical: same POST/PATCH payload, same
  * validation, same 422 mapping, same onCreated/onClose callbacks. The tenant
  * lookup + cascade hooks are a different file's scope — mocked directly (no
- * QueryClientProvider needed), mirroring MatchPlacementModal.test.tsx.
+ * QueryClientProvider needed), mirroring MatchModal.test.tsx.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
@@ -27,7 +27,7 @@ vi.mock('@/lib/useOpportunityLookups', () => ({
   useOpportunityAgreementTypes: () => ({ agreementTypes: [{ id: 'agr-1', value: 'framework', label: 'Mantelovereenkomst' }] }),
 }))
 // The customer→location→department→contact cascade (a different file's scope,
-// network-backed) — a minimal fixture, mirrors MatchPlacementModal.test.tsx.
+// network-backed) — a minimal fixture, mirrors MatchModal.test.tsx.
 vi.mock('./hooks/useCustomerCascade', () => ({
   useCustomerCascade: () => ({
     locations: [{ id: 'loc-1', name: 'Locatie Noord', departments: [{ id: 'dep-1', name: 'Afdeling A' }] }],
@@ -54,7 +54,7 @@ vi.mock('@/lib/api', async () => {
 const noop = () => {}
 // Scope a CreatableSelect trigger by its Field label (the house pattern for
 // pickers that share a generic placeholder like 'common:select' — mirrors
-// MatchPlacementModal.test.tsx's branchField/ownerField helpers).
+// MatchModal.test.tsx's branchField/ownerField helpers).
 const fieldTrigger = (label: string) => within(screen.getByText(label).parentElement as HTMLElement).getByRole('button')
 
 beforeEach(() => vi.clearAllMocks())

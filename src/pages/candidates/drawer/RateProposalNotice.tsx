@@ -1,9 +1,9 @@
 /**
- * RateProposalNotice — the two small presentational bits the placement form's rate
+ * RateProposalNotice — the two small presentational bits the match form's rate
  * proposal (MATCH-PLACEMENT-2) needs: a subtle "voorstel" hint under the purchase/
  * sell fields, and the deviation-guard confirm box shown when the recruiter's own
  * rates differ from a FOUND agreement proposal (Danny's "weet je het zeker?").
- * Split out of MatchPlacementModal to keep that file under the size cap (§0.3).
+ * Split out of MatchModal to keep that file under the size cap (§0.3).
  */
 import { useTranslation } from 'react-i18next'
 import type { RateProposal } from '../hooks/useRateProposal'

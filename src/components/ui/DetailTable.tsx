@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
  * DetailTable — read-only list of label/value rows.
  *
  * Replaces the repeated `[['Label', value], …].map(...)` blocks in the drawer
- * (plaatsingen, dienst-detail, inplanning, statistieken). Empty values show "-".
+ * (matches, dienst-detail, inplanning, statistieken). Empty values show "-".
  */
 interface DetailTableProps {
   rows?: Array<[label: string, value: ReactNode]>

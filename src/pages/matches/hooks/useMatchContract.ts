@@ -1,5 +1,5 @@
 /**
- * useMatchContract — the placement's contract/financial layer for one match
+ * useMatchContract — the contract/financial layer for one match
  * (contract type/CAO/dates/hours/scale/step/rates/cost centre/billing emails/
  * remarks + the backend-derived margin). These are detail-only fields (§8 data
  * minimization — the list row never carries them), so this fetches

@@ -38,7 +38,7 @@
     "archiveConfirm": "Deze match archiveren? Je kunt hem daarna herstellen.",
     "archived": "Match gearchiveerd.",
     "archiveFailed": "Match kon niet gearchiveerd worden.",
-    "archiveBlockedActiveContract": "Deze plaatsing heeft een actief contract — beëindig dat eerst.",
+    "archiveBlockedActiveContract": "Deze match heeft een actief contract — beëindig dat eerst.",
     "archivedBanner": {
       "since": "Gearchiveerd sinds {{date}}",
       "flag": "Gearchiveerd",

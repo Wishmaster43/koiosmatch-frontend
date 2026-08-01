@@ -1,8 +1,8 @@
 /**
  * FormField (F) — a labelled field wrapper shared by every section of the
- * placement form. Optional `error` shows the shared required-field message (the
- * 422 field mapping in useMatchPlacementForm sets these booleans). Split out of
- * MatchPlacementModal.tsx (audit R1 item 1, MUST-SPLIT).
+ * match form. Optional `error` shows the shared required-field message (the
+ * 422 field mapping in useMatchForm sets these booleans). Split out of
+ * MatchModal.tsx (audit R1 item 1, MUST-SPLIT).
  */
 import { useTranslation } from 'react-i18next'
 import { lbl, errMsg } from './styles'

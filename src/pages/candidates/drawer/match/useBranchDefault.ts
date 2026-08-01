@@ -1,5 +1,5 @@
 /**
- * useBranchDefault — proposes a branch (vestiging) for the placement (7.4,
+ * useBranchDefault — proposes a branch (vestiging) for the match (7.4,
  * MATCH-BRANCH-DEFAULT-1): the picked customer's own branch first, else the
  * recruiter's own first linked branch (`useAuth().user.branch_ids[0]` — the
  * ME-BRANCHES-1 view-set already shipped and used the same way in

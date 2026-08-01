@@ -15,7 +15,7 @@
  * vacancy proposal never falls back to a raw id while its title is in flight.
  *
  * AXIS-MATRIX-2 (CMFE audit R1): wires the shared action-rule preflight for
- * `appointment.create` (mirrors MatchPlacementModal's match.create) — CREATE only,
+ * `appointment.create` (mirrors MatchModal's match.create) — CREATE only,
  * since the backend's own guard (AppointmentController::store) only runs on create,
  * never on the PATCH edit path. A warn cell shows an inline banner and still lets
  * the recruiter proceed; a block cell additionally disables the submit button.
@@ -29,7 +29,7 @@
  * the candidate's applications resolve to exactly ONE distinct vacancy —
  * otherwise it stays empty and this picker decides (see WorkTab.tsx).
  *
- * This is a thin container (mirrors MatchPlacementModal, the sibling reference
+ * This is a thin container (mirrors MatchModal, the sibling reference
  * shape): all state/effects/submit/422-mapping live in `planIntake/
  * usePlanIntakeForm`, the pure date/name/error-key helpers in `planIntake/
  * helpers` and the panel/field styling in `planIntake/styles`. What is left here

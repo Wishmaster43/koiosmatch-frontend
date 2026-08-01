@@ -9,7 +9,7 @@
  *
  * Popup redesign (Danny 27-07 #tasks): every dropdown is now a searchable
  * CreatableSelect, not a native <select> — the combobox-role assertions below
- * became button/portal-menu assertions (mirrors MatchPlacementModal.test.tsx's
+ * became button/portal-menu assertions (mirrors MatchModal.test.tsx's
  * established pattern), plus new coverage for the required-field guard and the
  * searchable-filter behaviour the redesign adds.
  */
@@ -110,7 +110,7 @@ describe('AddTaskModal · edit mode prefill + PATCH (Danny 20-07)', () => {
     expect(screen.getByText('modal.editTitle')).toBeInTheDocument()
     // Type/assignee are searchable CreatableSelects now — a prefilled value shows
     // as the matched option's LABEL on the trigger button, not a native <select>'s
-    // .value (mirrors MatchPlacementModal.test.tsx's established pattern).
+    // .value (mirrors MatchModal.test.tsx's established pattern).
     // Name is now just the field label (aria-labelledby self-reference drops the
     // button's own visible text) — find by label, assert the picked value via text.
     expect(screen.getByRole('button', { name: /modal\.type/ })).toHaveTextContent('Belafspraak')

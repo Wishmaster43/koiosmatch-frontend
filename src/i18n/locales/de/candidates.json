@@ -467,7 +467,7 @@
     "timelineVia": "über {{name}}"
   },
   "statistics": {
-    "placements": "Vermittlungen",
+    "placements": "Matches",
     "applications": "Bewerbungen",
     "shifts": "Dienste",
     "hoursWorked": "Geleistete Stunden",
@@ -580,8 +580,8 @@
     "documentsEmpty": "Keine Dokumente.",
     "branch": "Niederlassung",
     "branchLink": "Niederlassung verknüpfen",
-    "placements": "Vermittlungen",
-    "placementsEmpty": "Noch keine Vermittlungen.",
+    "placements": "Matches",
+    "placementsEmpty": "Noch keine Matches.",
     "applications": "Bewerbungen",
     "applicationsEmpty": "Noch keine Bewerbungen.",
     "notes": "Notizen",
@@ -698,7 +698,7 @@
     "matchText": "Basierend auf dem Profil ist die beste Übereinstimmung: Verzorgende IG und Helpende Plus bei Pflegeeinrichtungen in der Region.",
     "engagementLabel": "Engagement",
     "engagementContacted": "Letzter Kontakt am {{date}} erfasst. Profil wird aktiv überwacht.",
-    "engagementNone": "Kein aktueller Kontakt erfasst. Ein Follow-up erhöht die Chance auf eine erfolgreiche Vermittlung.",
+    "engagementNone": "Kein aktueller Kontakt erfasst. Ein Follow-up erhöht die Chance auf einen erfolgreichen Match.",
     "adviceNoneLabel": "Keine Aktion erforderlich"
   },
   "cv": {
@@ -944,7 +944,7 @@
       "conversionFactor": "Vorschlag (Umrechnungsfaktor): {{purchase}} Einkauf / {{sell}} Verkauf",
       "purchaseOnly": "Vorschlag — nur Einkaufstarif bekannt: {{purchase}}",
       "deviationWarning": "Die Preisvereinbarung schlägt {{proposalPurchase}} Einkauf / {{proposalSell}} Verkauf vor — Sie haben {{enteredPurchase}} / {{enteredSell}} eingegeben. Sind Sie sicher?",
-      "deviationConfirm": "Ja, trotzdem platzieren",
+      "deviationConfirm": "Ja, Match trotzdem erstellen",
       "deviationCancel": "Tarife anpassen"
     },
     "candidate": "Kandidat",

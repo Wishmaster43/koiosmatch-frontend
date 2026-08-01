@@ -262,9 +262,9 @@
         "unit": "elementos"
       },
       "placements_target": {
-        "label": "Objetivo de colocaciones / mes",
-        "description": "Objetivo mensual de colocaciones",
-        "unit": "colocaciones"
+        "label": "Objetivo de matches / mes",
+        "description": "Objetivo mensual de matches",
+        "unit": "matches"
       },
       "fill_rate_target": {
         "label": "Objetivo de tasa de cobertura",
@@ -1085,7 +1085,7 @@
       },
       "matches": {
         "title": "Matches",
-        "desc": "Matches con candidato, vacante, estado y datos de colocación."
+        "desc": "Matches con candidato, vacante, estado y detalles."
       },
       "tasks": {
         "title": "Tareas",
@@ -1675,13 +1675,13 @@
     "perVacancyHint": "Lo que importa por vacante (cualificaciones, ubicación, …) se configura en la propia vacante.",
     "approval": {
       "title": "Aprobación",
-      "subtitle": "Cuándo una colocación necesita aprobación previa.",
+      "subtitle": "Cuándo un match necesita aprobación previa.",
       "off": "Desactivado",
-      "offDesc": "Nunca requiere aprobación — cada colocación pasa directamente.",
+      "offDesc": "Nunca requiere aprobación — cada match pasa directamente.",
       "deviation": "En caso de desviación",
-      "deviationDesc": "Aprobación solo cuando la colocación se desvía de lo acordado.",
+      "deviationDesc": "Aprobación solo cuando el match se desvía de lo acordado.",
       "always": "Siempre",
-      "alwaysDesc": "Cada colocación necesita primero aprobación.",
+      "alwaysDesc": "Cada match necesita primero aprobación.",
       "saveFailed": "Error al guardar — se restableció la selección."
     }
   },
@@ -1782,10 +1782,10 @@
       "functionMatchAllDesc": "Cuenta cualquier función; la función no influye en los leads.",
       "excludeAlreadyAppliedLabel": "Excluir candidatos con una solicitud activa",
       "excludeAlreadyAppliedHint": "Un candidato que ya ha solicitado esta vacante deja de contar como lead.",
-      "includeExpiringPlacementsLabel": "Contar colocaciones próximas a vencer",
+      "includeExpiringPlacementsLabel": "Contar matches próximos a vencer",
       "includeExpiringPlacementsHint": "Los candidatos colocados ahora mismo, pero cuya coincidencia finaliza dentro de los días configurados, también cuentan como lead.",
       "expiringWithinDaysLabel": "Número de días",
-      "expiringWithinDaysHint": "Cuántos días de antelación ya cuenta una colocación a punto de vencer como lead (1–365)."
+      "expiringWithinDaysHint": "Cuántos días de antelación ya cuenta un match a punto de vencer como lead (1–365)."
     }
   },
   "viewConfig": {
@@ -1956,7 +1956,7 @@
   "dashboardsCanSwitch": "Puede cambiar",
   "dashboardsDesc": {
     "admin": "Visión completa: todos los KPI, gráficos y listas.",
-    "management": "Gestión de entradas, salidas, pipeline y colocaciones.",
+    "management": "Gestión de entradas, salidas, pipeline y matches.",
     "recruitment": "Enfocado en candidatos: puntos de contacto, seguimiento, embudo y conversaciones.",
     "backoffice": "Documentos, contratos, vinculaciones y ejecuciones.",
     "sales": "Oportunidades, valor del pipeline y leads.",
@@ -2285,7 +2285,7 @@
       "application_create": "Crear solicitud",
       "application_couple_vacancy": "Vincular vacante a la solicitud",
       "appointment_create": "Planificar cita/intake",
-      "match_create": "Crear match/colocación",
+      "match_create": "Crear match",
       "task_create": "Crear tarea",
       "calllist_add": "Añadir a la lista de llamadas",
       "whatsapp_send": "Enviar mensaje de WhatsApp",
@@ -2294,7 +2294,7 @@
       "candidate_sync": "Sincronizar con el backoffice",
       "opportunity_create": "Crear oportunidad",
       "vacancy_create": "Crear/abrir vacante",
-      "customer_match": "Match/colocación con el cliente",
+      "customer_match": "Match con el cliente",
       "customer_propose": "Proponer candidato"
     },
     "conditions": {
@@ -2315,7 +2315,7 @@
       "P3": "Lista negra — bloqueado estrictamente",
       "P4": "Archivado/papelera — bloqueado estrictamente",
       "P5": "Todavía Lead — ventana de confirmación",
-      "P6": "Colocación doble — ventana de confirmación",
+      "P6": "Match doble — ventana de confirmación",
       "P7": "Lista negra, administrativo — ventana de confirmación",
       "P8": "Sin consentimiento de WhatsApp (RGPD) — bloqueado estrictamente",
       "P9": "Cliente inactivo/bloqueado — ventana de confirmación",

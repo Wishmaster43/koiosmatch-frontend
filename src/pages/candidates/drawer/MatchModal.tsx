@@ -1,10 +1,10 @@
 /**
- * MatchPlacementModal — the full "+ Match" form on the candidate Match tab
- * (MATCH-PLACEMENT-1, fase 1). A placement IS the Match (one record), so this
+ * MatchModal — the full "+ Match" form on the candidate Match tab
+ * (MATCH-PLACEMENT-1, fase 1). A match IS the Match (one record), so this
  * POSTs to /matches with the contract/financial layer. The customer→location→
  * department→contact cascade, function + contract-type dropdowns, dates/hours and
  * the purchase/sell/margin block all work now, and /matches PERSISTS every one of
- * them (the placement columns are real — StoreMatchRequest validates them via the
+ * them (the match columns are real — StoreMatchRequest validates them via the
  * shared PlacementRules trait; this used to say they were "ignored until the backend
  * model lands"). Contract type + CAO are validated against their tenant lookups
  * server-side, so a value the dropdown never offered is a 422, not a phantom row.
@@ -24,13 +24,13 @@
  *
  * This is a thin container (audit R1 item 1, MUST-SPLIT — used to be 532 lines
  * with 4 inline api-calls): all state/effects/submit/422-mapping now live in
- * `matchPlacement/useMatchPlacementForm`, and the JSX splits into
- * `matchPlacement/{RelationsSection,ContractSection,FinancialSection}`. This file
+ * `match/useMatchForm`, and the JSX splits into
+ * `match/{RelationsSection,ContractSection,FinancialSection}`. This file
  * only wires the hook to the shared drawer chrome (overlay/panel/focus-trap) and
  * composes the sections + footer.
  *
  * Danny 24-07 points 3/6: the panel now shares its exact frame footprint with
- * AddCandidateModal (modalMetrics.ts, via matchPlacement/styles' panel), and each
+ * AddCandidateModal (modalMetrics.ts, via match/styles' panel), and each
  * section renders as a titled CARD — the shared `@/components/ui/modalCards`
  * chrome (`cardHead`/`cardBox`, CLAUDE.md §11: one source instead of a per-entity
  * copy) — instead of a bare uppercase label over an unbordered block. Opmerkingen
@@ -42,16 +42,16 @@ import { X } from 'lucide-react'
 import { RateDeviationWarning } from './RateProposalNotice'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { ActionRuleBanner } from '@/components/actionrules'
-import { useMatchPlacementForm } from './matchPlacement/useMatchPlacementForm'
-import RelationsSection from './matchPlacement/RelationsSection'
-import ContractSection from './matchPlacement/ContractSection'
-import FinancialSection from './matchPlacement/FinancialSection'
-import RemarksSection from './matchPlacement/RemarksSection'
-import { overlay, panel, twoColSections } from './matchPlacement/styles'
+import { useMatchForm } from './match/useMatchForm'
+import RelationsSection from './match/RelationsSection'
+import ContractSection from './match/ContractSection'
+import FinancialSection from './match/FinancialSection'
+import RemarksSection from './match/RemarksSection'
+import { overlay, panel, twoColSections } from './match/styles'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import type { Id } from '@/types/common'
 
-export default function MatchPlacementModal({ candidateId: fixedCandidateId, editMatchId, onClose, onCreated }: {
+export default function MatchModal({ candidateId: fixedCandidateId, editMatchId, onClose, onCreated }: {
   // Fixed when opened from a candidate's Match tab; absent on the Matches page —
   // then a candidate picker appears at the top of RELATIES (Danny 2026-07-13).
   candidateId?: Id
@@ -63,7 +63,7 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, edi
 }) {
   // All state, effects, submit + 422-mapping live in the hook — this component
   // only wires it to the shared chrome and the three section components below.
-  const form = useMatchPlacementForm({ candidateId: fixedCandidateId, editMatchId, onClose, onCreated })
+  const form = useMatchForm({ candidateId: fixedCandidateId, editMatchId, onClose, onCreated })
   const { t, editing } = form
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const title = t(editing ? 'placement.editTitle' : 'placement.title')

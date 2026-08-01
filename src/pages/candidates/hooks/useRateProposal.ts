@@ -1,5 +1,5 @@
 /**
- * useRateProposal — MATCH-PLACEMENT-2 rate proposal for the placement form.
+ * useRateProposal — MATCH-PLACEMENT-2 rate proposal for the match form.
  * Debounced GET /matches/rate-proposal keyed on customer + function (+ optional
  * cao/scale/step); quiet on error (a proposal is a convenience, never a hard
  * block — §3B) and cancels the in-flight request on param change/unmount (§9).

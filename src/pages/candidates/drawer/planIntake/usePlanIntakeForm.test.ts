@@ -12,7 +12,7 @@
  *    types there is nothing honest to send; submit now refuses instead of
  *    guessing a slug that may not exist server-side.
  *
- * These run at the HOOK level (mirrors matchPlacement/useCascadeDefaults.test.ts)
+ * These run at the HOOK level (mirrors match/useCascadeDefaults.test.ts)
  * so the assertions reach the internal guard/effect directly, independent of the
  * component's own disabled-button gate (covered separately in
  * PlanIntakeModal.test.tsx).

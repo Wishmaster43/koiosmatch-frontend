@@ -33,7 +33,7 @@ export function useMatchArchive({ onPatch, onReload }: Args) {
   const { confirm, dialog } = useConfirm()
 
   // DELETE /matches/{id} — reversible soft-delete. The backend refuses with 409
-  // while the placement's HelloFlex contract is still active (end it first) —
+  // while the match's HelloFlex contract is still active (end it first) —
   // surfaced as its own message rather than the generic failure toast.
   const archiveMatch = (id: MatchRow['id']) => {
     if (id == null || archiving) return

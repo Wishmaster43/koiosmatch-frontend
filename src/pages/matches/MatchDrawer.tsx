@@ -1,8 +1,8 @@
 /**
  * MatchDrawer — the drill-down for one match, built on the shared EntityDrawer +
  * EntityHeader shell (§3A blueprint). The match facts (candidate/vacancy/client/
- * score/stage) stay read-only — a match is the continuation of an application →
- * placement (§3B) and those are derived — but the placement's contract/financial
+ * score/stage) stay read-only — a match is the continuation of a Hired
+ * application (§3B) and those are derived — but the match's contract/financial
  * layer IS editable in-place. Three real tabs (Danny, 2026-07-14: "ook tabjes maken
  * voor de drill down" — one tab used to wear the summary + the whole contract form
  * at once): Overzicht (facts/score/status), Contract & financieel
@@ -183,7 +183,7 @@ export default function MatchDrawer({
             </>
           )}
           // MatchApprovalActions moves into the header actions slot (was the body headerChips row).
-          // ARCHIVED: no review action on a soft-deleted placement — restore first.
+          // ARCHIVED: no review action on a soft-deleted match — restore first.
           actions={
             <MatchApprovalActions status={match.approval_status} reason={reason} canUpdate={canApprove && !match.archived} busy={busy}
               rejectOpen={rejectOpen} onOpenReject={() => setRejectOpen(true)} onCancelReject={() => setRejectOpen(false)}
@@ -191,7 +191,7 @@ export default function MatchDrawer({
           }
           // Standard meta-picker row (§3A(c)): Status (~160, tenant lookup) + Eigenaar
           // (MATCH-OWNER-1 — a real picker now that PATCH /matches/{id} takes owner_id).
-          // ARCHIVED: no status/owner changes on a soft-deleted placement — restore first (mirrors candidates).
+          // ARCHIVED: no status/owner changes on a soft-deleted match — restore first (mirrors candidates).
           meta={[
             ...(onSetStatus && !match.archived ? [{
               key: 'status', label: t('drawer.fields.status'), value: match.status,

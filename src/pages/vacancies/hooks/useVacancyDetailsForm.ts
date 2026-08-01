@@ -193,7 +193,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
   // DEFAULTS-1 (V11/V19): propose the tenant's flagged default seniority/education
   // into an EMPTY field the moment the Eisen pencil opens. Proposal only — it is
   // visible in the open form and still needs Save, and a field that already holds a
-  // value is never touched (mirrors useMatchPlacementForm's contract-type proposal).
+  // value is never touched (mirrors useMatchForm's contract-type proposal).
   // Runs when edit mode opens or the lookups resolve, so an async lookup still lands.
   useEffect(() => {
     if (!requirementsForm.editing) return

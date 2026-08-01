@@ -1,7 +1,7 @@
 /**
- * useMatchPlacementForm — all state, effects, submit and 422-field-mapping for
- * the "+ Match" placement form (MATCH-PLACEMENT-1). Split out of
- * MatchPlacementModal.tsx (audit R1 item 1, MUST-SPLIT: the component was 532
+ * useMatchForm — all state, effects, submit and 422-field-mapping for
+ * the "+ Match" match form (MATCH-PLACEMENT-1). Split out of
+ * MatchModal.tsx (audit R1 item 1, MUST-SPLIT: the component was 532
  * lines with 4 inline api-calls). The customer→location→department→contact
  * cascade now runs through the ONE shared `useCustomerCascade` hook (audit R1
  * item 2 — this used to be its own inline fetch here, triplicated with
@@ -26,7 +26,7 @@
  *
  * EDIT-MATCH-1 (point 2, Danny live P1): `editMatchId` reopens this SAME form as an
  * edit. The candidate's own embedded `matches` row is thin (read-only display fields
- * only — no placement/contract/financial columns, MATCH-EMBED-1), so this fetches the
+ * only — no match/contract/financial columns, MATCH-EMBED-1), so this fetches the
  * full GET /matches/{id} record once and prefills every field from it; submit then
  * PATCHes instead of POSTing. Every "propose but freeze on edit" sibling hook
  * (branch/end-date/cost-centre/billing-email) gets its own *Dirty flag forced true
@@ -66,7 +66,10 @@ import type { Id } from '@/types/common'
 interface UserLike { id?: Id; name?: string }
 
 // The GET /matches/{id} shape this hook prefills from (MatchDetailResource — the
-// list row's fields plus the full placement() block; see the backend resource).
+// list row's fields plus the full block that resource builds). That method is still
+// called placement() on the backend: the vocabulary rename of 31-07 covers our side,
+// theirs follows in MATCH-VOCABULAIRE-1. Naming it match() here would point the next
+// reader at a symbol that does not exist over there.
 interface MatchEditDetail {
   customer_id?: Id | null; customer_location_id?: Id | null; customer_department_id?: Id | null
   contact_id?: Id | null; branch_id?: Id | null; vacancy_id?: Id | null
@@ -78,7 +81,7 @@ interface MatchEditDetail {
   cost_center?: string | null; billing_emails?: string[] | null; remarks?: string | null
 }
 
-export function useMatchPlacementForm({ candidateId: fixedCandidateId, editMatchId, onClose, onCreated }: {
+export function useMatchForm({ candidateId: fixedCandidateId, editMatchId, onClose, onCreated }: {
   // Fixed when opened from a candidate's Match tab; absent on the Matches page —
   // then a candidate picker appears at the top of RELATIES (Danny 2026-07-13).
   candidateId?: Id
@@ -235,7 +238,7 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, editMatch
   const hasRates = purchase !== '' && sell !== ''
 
   // EDIT-MATCH-1: fetch the full record once — the candidate's embedded `matches`
-  // row (MATCH-EMBED-1) carries none of the placement/contract/financial fields.
+  // row (MATCH-EMBED-1) carries none of the match/contract/financial fields.
   const [editDetail, setEditDetail] = useState<MatchEditDetail | null>(null)
   useEffect(() => {
     if (!editMatchId) return
@@ -278,7 +281,7 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, editMatch
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editDetail])
 
-  // POST (create) or PATCH (edit) the placement. vacancy_id + department are
+  // POST (create) or PATCH (edit) the match. vacancy_id + department are
   // optional; the rest form the contract layer. Identity (candidate/vacancy) is
   // NOT accepted by UpdateMatchRequest (mirrors the backend docblock) — the PATCH
   // body below deliberately omits both, RelationsSection renders vacancy read-only
@@ -287,7 +290,7 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, editMatch
     if (!candidateId || !customerId || !func) return
     setSaving(true)
     setErrors({}); setSubmitErr(null)
-    const placement = {
+    const match = {
       customer_id: customerId,
       customer_location_id: locationId || null,
       customer_department_id: departmentId || null,
@@ -309,8 +312,8 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, editMatch
       ...(ownerId ? { owner_id: ownerId } : {}),
     }
     const body: Record<string, unknown> = editing
-      ? placement // PATCH — no candidate_id/vacancy_id (identity stays fixed).
-      : { candidate_id: candidateId, ...placement, ...(vacancyId ? { vacancy_id: vacancyId } : {}) }
+      ? match // PATCH — no candidate_id/vacancy_id (identity stays fixed).
+      : { candidate_id: candidateId, ...match, ...(vacancyId ? { vacancy_id: vacancyId } : {}) }
     try {
       if (editing) await api.patch(`/matches/${editMatchId}`, body)
       else         await api.post('/matches', body)
@@ -321,7 +324,7 @@ export function useMatchPlacementForm({ candidateId: fixedCandidateId, editMatch
       // The frontend must NOT post one anymore (the old interim bridge is removed).
 
       // Mismatch resolution: recruiter chose to move the candidate's branch along.
-      // Best-effort AFTER the placement — its failure must NOT roll back or lose
+      // Best-effort AFTER the match — its failure must NOT roll back or lose
       // the match that was just created, so this stays a separate, non-fatal call.
       // BUG CLASS FIX: it used to end in `.catch(() => {})` — a fully silent
       // best-effort write, so the recruiter believed the branch moved when it

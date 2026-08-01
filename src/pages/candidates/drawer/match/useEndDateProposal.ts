@@ -1,5 +1,5 @@
 /**
- * useEndDateProposal — proposes the placement's end date from the picked
+ * useEndDateProposal — proposes the match's end date from the picked
  * contract type's default duration (7.1, MATCH-CONTRACT-DURATION-1). Honest-
  * gated: `options` carries `default_duration_days: null` for every row until the
  * backend column ships (useContractTypes), so this simply stays a no-op — never

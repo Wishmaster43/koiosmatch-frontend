@@ -467,7 +467,7 @@
     "timelineVia": "vía {{name}}"
   },
   "statistics": {
-    "placements": "Colocaciones",
+    "placements": "Matches",
     "applications": "Candidaturas",
     "shifts": "Turnos",
     "hoursWorked": "Horas trabajadas",
@@ -580,8 +580,8 @@
     "documentsEmpty": "Sin documentos.",
     "branch": "Sucursal",
     "branchLink": "Vincular sucursal",
-    "placements": "Colocaciones",
-    "placementsEmpty": "Aún no hay colocaciones.",
+    "placements": "Matches",
+    "placementsEmpty": "Aún no hay matches.",
     "applications": "Candidaturas",
     "applicationsEmpty": "Aún no hay candidaturas.",
     "notes": "Notas",
@@ -698,7 +698,7 @@
     "matchText": "Según el perfil, la mejor coincidencia esperada es: Verzorgende IG y Helpende Plus en centros de atención de la región.",
     "engagementLabel": "Compromiso",
     "engagementContacted": "Último contacto registrado el {{date}}. Perfil monitorizado activamente.",
-    "engagementNone": "No hay contacto reciente registrado. Un seguimiento aumenta la probabilidad de una colocación exitosa.",
+    "engagementNone": "No hay contacto reciente registrado. Un seguimiento aumenta la probabilidad de un match exitoso.",
     "adviceNoneLabel": "No se requiere ninguna acción"
   },
   "cv": {
@@ -944,7 +944,7 @@
       "conversionFactor": "Propuesta (factor de conversión): {{purchase}} compra / {{sell}} venta",
       "purchaseOnly": "Propuesta — solo se conoce la tarifa de compra: {{purchase}}",
       "deviationWarning": "El acuerdo de tarifa propone {{proposalPurchase}} compra / {{proposalSell}} venta — has introducido {{enteredPurchase}} / {{enteredSell}}. ¿Estás seguro/a?",
-      "deviationConfirm": "Sí, colocar de todos modos",
+      "deviationConfirm": "Sí, crear el match de todos modos",
       "deviationCancel": "Ajustar tarifas"
     },
     "candidate": "Candidato",

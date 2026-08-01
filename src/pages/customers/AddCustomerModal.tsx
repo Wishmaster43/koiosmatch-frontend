@@ -124,7 +124,7 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
 
         {/* Body — titled bordered cards: Bedrijf full width; Vestiging&plaats /
             Eigenaar&status paired; Online / Facturatie paired (mirrors the
-            placement modal's "full-width block + paired cards below" idiom). */}
+            match modal's "full-width block + paired cards below" idiom). */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
             <div style={cardHead}>{t('modal.fields.cardCompany')}</div>

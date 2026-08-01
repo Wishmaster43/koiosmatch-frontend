@@ -1,6 +1,6 @@
 /**
  * useMatchesBulkActions — bulk operations for MatchesPage. A match is read-only
- * (§3B: the continuation of an application → placement), so the only bulk
+ * (§3B: the continuation of a Hired application), so the only bulk
  * operations are row/all selection and authorization-gated *coupling* to an
  * external backoffice (HelloFlex / Shiftmanager). SYNC-BULK-1: this shares the
  * ONE generic POST /sync/{entity}/bulk endpoint the per-record BackofficeLinksTab

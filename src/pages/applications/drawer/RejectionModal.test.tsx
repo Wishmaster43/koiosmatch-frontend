@@ -4,7 +4,7 @@
  * S9 (the toelichting/note is the shared rich-text block, not a bare textarea).
  * Moved from the old RejectionBlock (deleted, Danny 25-07: the reject form is
  * now a footer button + confirm modal). RichTextEditor's own Tiptap internals
- * are out of scope here (stubbed, mirrors MatchPlacementModal.test.tsx).
+ * are out of scope here (stubbed, mirrors MatchModal.test.tsx).
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'

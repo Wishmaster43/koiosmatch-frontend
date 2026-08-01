@@ -242,7 +242,7 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     })),
     applications:    c.applications ?? [],
     // Matches = own entity (read-only on the candidate). The contract lives in
-    // HelloFlex — we only surface its status + the link GUID. No placements/contract fields.
+    // HelloFlex — we only surface its status + the link GUID. No matches/contract fields.
     matches:         (c.matches ?? []).map((m): CandidateMatch => ({
       ...m,
       vacancyId:      m.vacancy?.id ?? m.vacancy_id ?? null,

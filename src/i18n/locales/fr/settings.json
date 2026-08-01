@@ -262,9 +262,9 @@
         "unit": "éléments"
       },
       "placements_target": {
-        "label": "Objectif placements / mois",
-        "description": "Objectif mensuel de placements",
-        "unit": "placements"
+        "label": "Objectif matchs / mois",
+        "description": "Objectif mensuel de matchs",
+        "unit": "matchs"
       },
       "fill_rate_target": {
         "label": "Objectif taux de remplissage",
@@ -1085,7 +1085,7 @@
       },
       "matches": {
         "title": "Matches",
-        "desc": "Matches avec candidat, poste, statut et détails de placement."
+        "desc": "Matches avec candidat, poste, statut et détails."
       },
       "tasks": {
         "title": "Tâches",
@@ -1675,13 +1675,13 @@
     "perVacancyHint": "Ce qui compte par poste (qualifications, localisation, …) se règle sur le poste lui-même.",
     "approval": {
       "title": "Approbation",
-      "subtitle": "Quand un placement doit d’abord être approuvé.",
+      "subtitle": "Quand un match doit d’abord être approuvé.",
       "off": "Désactivé",
-      "offDesc": "Jamais d’approbation requise — chaque placement passe directement.",
+      "offDesc": "Jamais d’approbation requise — chaque match passe directement.",
       "deviation": "En cas d’écart",
-      "deviationDesc": "Approbation uniquement lorsque le placement s’écarte des accords convenus.",
+      "deviationDesc": "Approbation uniquement lorsque le match s’écarte des accords convenus.",
       "always": "Toujours",
-      "alwaysDesc": "Chaque placement nécessite d’abord une approbation.",
+      "alwaysDesc": "Chaque match nécessite d’abord une approbation.",
       "saveFailed": "Échec de l’enregistrement — le choix a été rétabli."
     }
   },
@@ -1782,10 +1782,10 @@
       "functionMatchAllDesc": "Chaque fonction compte ; la fonction n'a aucun rôle dans les leads.",
       "excludeAlreadyAppliedLabel": "Exclure les candidats ayant une candidature en cours",
       "excludeAlreadyAppliedHint": "Un candidat ayant déjà postulé à ce poste ne compte plus comme lead.",
-      "includeExpiringPlacementsLabel": "Compter les placements bientôt expirés",
+      "includeExpiringPlacementsLabel": "Compter les matchs bientôt expirés",
       "includeExpiringPlacementsHint": "Les candidats actuellement placés mais dont le match se termine dans le nombre de jours configuré comptent aussi comme lead.",
       "expiringWithinDaysLabel": "Nombre de jours",
-      "expiringWithinDaysHint": "Combien de jours à l'avance un placement expirant compte déjà comme lead (1–365)."
+      "expiringWithinDaysHint": "Combien de jours à l'avance un match expirant compte déjà comme lead (1–365)."
     }
   },
   "viewConfig": {
@@ -1956,7 +1956,7 @@
   "dashboardsCanSwitch": "Peut changer",
   "dashboardsDesc": {
     "admin": "Vue complète — tous les KPI, graphiques et listes.",
-    "management": "Pilotage des entrées, sorties, pipeline et placements.",
+    "management": "Pilotage des entrées, sorties, pipeline et matchs.",
     "recruitment": "Axé candidat : points de contact, suivi, entonnoir et conversations.",
     "backoffice": "Documents, contrats, couplages et exécutions.",
     "sales": "Opportunités, valeur du pipeline et leads.",
@@ -2285,7 +2285,7 @@
       "application_create": "Créer une candidature",
       "application_couple_vacancy": "Associer une offre à la candidature",
       "appointment_create": "Planifier un rendez-vous/intake",
-      "match_create": "Créer un match/placement",
+      "match_create": "Créer un match",
       "task_create": "Créer une tâche",
       "calllist_add": "Ajouter à la liste d'appels",
       "whatsapp_send": "Envoyer un message WhatsApp",
@@ -2294,7 +2294,7 @@
       "candidate_sync": "Synchroniser avec le backoffice",
       "opportunity_create": "Créer une opportunité",
       "vacancy_create": "Créer/ouvrir une offre",
-      "customer_match": "Match/placement chez le client",
+      "customer_match": "Match chez le client",
       "customer_propose": "Proposer un candidat"
     },
     "conditions": {
@@ -2315,7 +2315,7 @@
       "P3": "Liste noire — bloqué strictement",
       "P4": "Archivé/corbeille — bloqué strictement",
       "P5": "Encore Lead — popup de confirmation",
-      "P6": "Double placement — popup de confirmation",
+      "P6": "Double match — popup de confirmation",
       "P7": "Liste noire, administratif — popup de confirmation",
       "P8": "Pas de consentement WhatsApp (RGPD) — bloqué strictement",
       "P9": "Client inactif/bloqué — popup de confirmation",

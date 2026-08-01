@@ -93,7 +93,7 @@ export const kpisCalllists = {
   ],
 }
 
-// Matches — placement output targets.
+// Matches — output targets.
 export const kpisMatches = {
   ...base, titleI18n: 'nav.kpis_matches',
   fields: [

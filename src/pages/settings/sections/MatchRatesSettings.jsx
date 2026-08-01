@@ -7,7 +7,7 @@ import { notifyError } from '@/lib/notify'
 /**
  * MatchRatesSettings — Settings → Matches → the purchase→sale conversion factor.
  * Danny 22-07: this is a MATCH concept (the rate-proposal fallback: purchase rate ×
- * this factor when no price agreement fits a placement's function/CAO/schaal/trede),
+ * this factor when no price agreement fits a match's function/CAO/schaal/trede),
  * so it lives here as its own block, not under Vacancies → Matching where it used to
  * render (VacancyMatchingSettings). Only the SCREEN moved — it still persists to the
  * same tenant-wide /settings/matching resource the vacancy strictness slider uses.

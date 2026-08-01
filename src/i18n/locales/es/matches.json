@@ -38,7 +38,7 @@
     "archiveConfirm": "¿Archivar este match? Podrás restaurarlo después.",
     "archived": "Match archivado.",
     "archiveFailed": "No se pudo archivar el match.",
-    "archiveBlockedActiveContract": "Esta colocación tiene un contrato activo — finalízalo primero.",
+    "archiveBlockedActiveContract": "Este match tiene un contrato activo — finalízalo primero.",
     "archivedBanner": {
       "since": "Archivado desde el {{date}}",
       "flag": "Archivado",

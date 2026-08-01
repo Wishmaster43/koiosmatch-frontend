@@ -4,7 +4,7 @@
  * and cao are tenant lookups (useFunctions/useCao) with an explicit "any" option at
  * the top, since each of function_title/cao/scale/step is an optional wildcard match
  * criterion on the backend (§ MATCH-PLC price-agreements). Mirrors the contract/
- * financial field layout of MatchPlacementModal.
+ * financial field layout of MatchModal.
  */
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -66,7 +66,7 @@ const lbl: CSSProperties = { fontSize: 12, color: 'var(--text-muted)', marginBot
 const input: CSSProperties = { width: '100%', height: 34, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
 const row2: CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }
 
-// A labelled field wrapper — mirrors MatchPlacementModal's F().
+// A labelled field wrapper — mirrors MatchModal's F().
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return <div><div style={lbl}>{label}</div>{children}</div>
 }

@@ -140,7 +140,7 @@ export function useDashboardViewModel({
 
   // Attention/metrics merged from every source the backend may use: /candidates/stats
   // `attention`, plus the /dashboard payload (nested `attention` or numeric top-level fields
-  // like placements/intakes/wa_queue/incomplete_runs). So delivered metrics light up
+  // like matches/intakes/wa_queue/incomplete_runs). So delivered metrics light up
   // regardless of exact nesting — no waiting on a path confirmation.
   const att: Record<string, number | null | undefined> = {
     ...(stats?.attention ?? {}),

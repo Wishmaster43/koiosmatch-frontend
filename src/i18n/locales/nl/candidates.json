@@ -720,7 +720,7 @@
     "matchText": "Op basis van het profiel is de verwachte beste match: Verzorgende IG en Helpende Plus bij zorginstellingen in de regio.",
     "engagementLabel": "Betrokkenheid",
     "engagementContacted": "Laatste contactmoment geregistreerd op {{date}}. Profiel is actief bewaakt.",
-    "engagementNone": "Geen recent contactmoment geregistreerd. Een follow-up verhoogt de kans op succesvolle plaatsing.",
+    "engagementNone": "Geen recent contactmoment geregistreerd. Een follow-up verhoogt de kans op een succesvolle match.",
     "adviceNoneLabel": "Geen actie nodig"
   },
   "cv": {
@@ -944,7 +944,7 @@
       "conversionFactor": "Voorstel (omrekenfactor): {{purchase}} inkoop / {{sell}} verkoop",
       "purchaseOnly": "Voorstel — alleen inkooptarief bekend: {{purchase}}",
       "deviationWarning": "De prijsafspraak stelt {{proposalPurchase}} inkoop / {{proposalSell}} verkoop voor — jij vult {{enteredPurchase}} / {{enteredSell}} in. Weet je het zeker?",
-      "deviationConfirm": "Ja, toch plaatsen",
+      "deviationConfirm": "Ja, match toch aanmaken",
       "deviationCancel": "Tarieven aanpassen"
     },
     "candidate": "Kandidaat",

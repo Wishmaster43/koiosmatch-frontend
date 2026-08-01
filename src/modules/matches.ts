@@ -1,5 +1,5 @@
 // matches module — the per-entity Matches module (fetch + filter inline, plus
-// create/update). A match is the continuation of an application → placement.
+// create/update). A match is the continuation of a Hired application.
 import { Handshake } from 'lucide-react'
 import makeEntityModule from './_entityModule'
 

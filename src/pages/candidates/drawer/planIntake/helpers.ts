@@ -5,7 +5,7 @@
  * PlanIntakeModal.tsx (406 lines) because none of it touches React: keeping it
  * here lets the date maths be unit-tested directly (PlanIntakeModal.test.tsx
  * imports `endTimeOf`) and keeps usePlanIntakeForm to state + effects only.
- * Mirrors the sibling matchPlacement/helpers.ts.
+ * Mirrors the sibling match/helpers.ts.
  */
 import type { Id } from '@/types/common'
 

@@ -22,10 +22,10 @@ const NotesTab = NotesTabJs as unknown as ComponentType<AnyProps>
 // or flattened directly onto the event — since the exact wire shape isn't final
 // yet (CMBE ticket). Returns null for every OTHER timeline item, so nothing
 // renders differently until the backend actually ships the event.
-function placementContext(ev: Record<string, unknown>): Record<string, unknown> | null {
+function matchContext(ev: Record<string, unknown>): Record<string, unknown> | null {
   const ctx = (ev.context ?? ev.payload ?? ev) as Record<string, unknown>
-  const isPlacement = ev.type === 'match.created' || typeof ctx.customer_name === 'string'
-  return isPlacement ? ctx : null
+  const isMatch = ev.type === 'match.created' || typeof ctx.customer_name === 'string'
+  return isMatch ? ctx : null
 }
 
 // Known sub-tab ids (deep-link validation lives here, not in the drawer).
@@ -104,8 +104,8 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   // Returns null for every OTHER timeline item, so NotesTab falls back to the
   // plain `ev.text`/`ev.description` line unchanged (honest gate: nothing renders
   // differently until the backend actually ships the event).
-  const renderPlacementTimeline = (ev: Record<string, unknown>) => {
-    const ctx = placementContext(ev)
+  const renderMatchTimeline = (ev: Record<string, unknown>) => {
+    const ctx = matchContext(ev)
     if (!ctx) return null
     const customer = typeof ctx.customer_name === 'string' ? ctx.customer_name : undefined
     const location = typeof ctx.location_name === 'string' ? ctx.location_name : undefined
@@ -138,8 +138,8 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
     timelineInitials: c.initials,
     // Job A pencil on the "Statuswissel" timeline row — see the prop comment above.
     onEditStatusEvent,
-    // Point 3 — see renderPlacementTimeline above.
-    renderTimelineContent: renderPlacementTimeline,
+    // Point 3 — see renderMatchTimeline above.
+    renderTimelineContent: renderMatchTimeline,
     labels: {
       // No section titles (Danny addendum 4): notes/timeline/conversations each
       // render as the SOLE visible NotesTab section for their own sub-tab, whose

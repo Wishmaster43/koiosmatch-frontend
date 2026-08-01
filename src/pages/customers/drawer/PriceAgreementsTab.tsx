@@ -1,6 +1,6 @@
 /**
  * PriceAgreementsTab — the customer's price agreements (MATCH-PLC, 2026-07-09):
- * the purchase/sale rates a placement should use for a given function/CAO/schaal/
+ * the purchase/sale rates a match should use for a given function/CAO/schaal/
  * trede combination (each optional = wildcard). Add via an inline form (soft
  * primary-tinted panel, mirrors DocumentsTab's pending-upload panel); each row is
  * a PriceAgreementRow with in-place edit + delete. Handles all four UI states.
@@ -48,7 +48,7 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
       />
 
       {/* Facturatie — kostenplaats is the top of the afdeling>locatie>klant cascade the
-          placement form reads, and the billing e-mail is the ONE address invoicing uses
+          match form reads, and the billing e-mail is the ONE address invoicing uses
           regardless of which location or department a match picks. */}
       {subTab === 'billing' && c && (
         <div style={{ marginTop: 14 }}>

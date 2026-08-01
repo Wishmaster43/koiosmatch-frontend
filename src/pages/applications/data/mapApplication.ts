@@ -169,8 +169,8 @@ export function mapMatchSummary(raw?: ApiApplication['match']): ApplicationMatch
     referenceNumber: raw.reference_number ?? '',
     statusLabel: raw.status_label ?? '',
     statusColor: raw.status_color ?? 'var(--text-muted)',
-    placementStart: raw.placement_start ?? null,
-    placementEnd: raw.placement_end ?? null,
+    matchStart: raw.placement_start ?? null,
+    matchEnd: raw.placement_end ?? null,
   }
 }
 

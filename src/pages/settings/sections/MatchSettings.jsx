@@ -21,9 +21,9 @@ export function MatchStatusSettings() {
 }
 
 /**
- * Contract types — the placement form's "Contractsoort" dropdown (Backend
+ * Contract types — the match form's "Contractsoort" dropdown (Backend
  * /contract-types). The numberField (7.1, MATCH-CONTRACT-DURATION-1) lets a
- * tenant set each type's default duration in days, feeding the placement
+ * tenant set each type's default duration in days, feeding the match
  * form's end-date PROPOSAL (useEndDateProposal). Honest-gate: the backend
  * doesn't persist this column yet, so saved values are silently dropped until
  * it ships — same gate the field's own hook already documents.
@@ -32,7 +32,7 @@ export function MatchStatusSettings() {
  * same is_default singleton toggle as appointment-types/-locations/funnel
  * stages (LOOKUP-DEFAULT-1) — StatusListEditor's DefaultToggle promotes one
  * row and clears the rest; the +Match form preselects whichever type is
- * marked default (useMatchPlacementForm), into an empty field only. Contract
+ * marked default (useMatchForm), into an empty field only. Contract
  * types were NOT one of the three lookups the backend shipped is_default for
  * yet — honest-gated like numberField above until a BE follow-up adds it.
  */

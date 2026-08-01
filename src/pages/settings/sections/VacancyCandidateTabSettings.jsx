@@ -133,7 +133,7 @@ function VacancyCandidateTabSettingsInner() {
     const n = Math.min(500, Math.max(1, Number(raw) || 1))
     persist({ default_radius_km: n })
   }
-  // Same clamp discipline for the expiring-placement lookahead window (1..365 days).
+  // Same clamp discipline for the expiring-match lookahead window (1..365 days).
   const setExpiringDays = (raw) => {
     const n = Math.min(365, Math.max(1, Number(raw) || 1))
     persist({ expiring_within_days: n })
@@ -249,7 +249,7 @@ function VacancyCandidateTabSettingsInner() {
         </div>
 
         {/* (f) include_expiring_placements — a candidate placed right now still
-            counts as a lead while their placement/match ends within
+            counts as a lead while their match ends within
             expiring_within_days (Danny: "kandidaten die nu geplaatst zijn maar
             wiens match afloopt"). */}
         <div>

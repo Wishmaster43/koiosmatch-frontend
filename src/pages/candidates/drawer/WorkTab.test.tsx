@@ -25,13 +25,13 @@ vi.mock('./PlanIntakeModal', () => ({
     <div data-testid="plan-intake-modal" data-default-vacancy-id={defaultVacancyId ?? ''} data-existing-vacancy-id={existing?.vacancy_id ?? ''} />
   ),
 }))
-// MatchPlacementModal is a different file's scope (customer/vacancy/rate hooks) —
+// MatchModal is a different file's scope (customer/vacancy/rate hooks) —
 // stand in with a marker exposing `editMatchId` + a trigger button for `onCreated`
 // (§13: this is how point 1's refresh-callback wiring and point 2's pencil wiring
 // below get exercised without mounting the real form).
-vi.mock('./MatchPlacementModal', () => ({
+vi.mock('./MatchModal', () => ({
   default: ({ editMatchId, onCreated }: { editMatchId?: string | number | null; onCreated: () => void }) => (
-    <div data-testid="match-placement-modal" data-edit-match-id={editMatchId ?? ''}>
+    <div data-testid="match-modal" data-edit-match-id={editMatchId ?? ''}>
       <button onClick={onCreated}>trigger-match-created</button>
     </div>
   ),
@@ -190,11 +190,11 @@ describe('WorkTab · shared record refresh after create (point 1, Danny live P1)
 // with `editMatchId` set — WorkTab owns the state, MatchesTab only reports which
 // row was clicked.
 describe('WorkTab · pencil on a match row opens the edit modal (point 2)', () => {
-  it('opens MatchPlacementModal with editMatchId set to the clicked row', async () => {
+  it('opens MatchModal with editMatchId set to the clicked row', async () => {
     const user = userEvent.setup()
     render(<WorkTab c={candidate([], [{ id: 'match-7', vacancyTitle: 'Verpleegkundige', client: 'Yesway' }])} />)
     await user.click(screen.getByRole('tab', { name: 'sections.placements' }))
     await user.click(screen.getByRole('button', { name: 'common:edit' }))
-    expect(screen.getByTestId('match-placement-modal')).toHaveAttribute('data-edit-match-id', 'match-7')
+    expect(screen.getByTestId('match-modal')).toHaveAttribute('data-edit-match-id', 'match-7')
   })
 })

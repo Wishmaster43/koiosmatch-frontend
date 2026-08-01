@@ -1,6 +1,6 @@
 /**
- * matchPlacement/styles — shared inline-style constants for the placement modal
- * and its section components. Split out of MatchPlacementModal.tsx (audit R1
+ * match/styles — shared inline-style constants for the match modal
+ * and its section components. Split out of MatchModal.tsx (audit R1
  * item 1, MUST-SPLIT) so every section imports the SAME tokens instead of each
  * redefining its own — one look, one place to change it.
  */

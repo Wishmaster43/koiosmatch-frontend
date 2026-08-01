@@ -334,7 +334,7 @@
   "planning": {
     "title": "Planning",
     "activeNow": "Currently at work",
-    "activeNowSub": "active placements",
+    "activeNowSub": "active matches",
     "upcoming": "Upcoming shifts",
     "upcomingEmpty": "No upcoming shifts.",
     "off": "Planning information appears once the Planning module is active.",

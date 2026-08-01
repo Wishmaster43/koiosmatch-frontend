@@ -108,7 +108,7 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stages])
 
-  // Klant → locatie → afdeling → contactpersoon cascade (mirrors MatchPlacementModal).
+  // Klant → locatie → afdeling → contactpersoon cascade (mirrors MatchModal).
   // All three stay optional; picking a different client resets the dependent picks.
   const [locationId,   setLocationId]   = useState(existing?.locationId != null ? String(existing.locationId) : '')
   const [departmentId, setDepartmentId] = useState(existing?.departmentId != null ? String(existing.departmentId) : '')
@@ -208,7 +208,7 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
         </div>
 
         {/* Form — two titled cards side by side (house wide-frame idiom, mirrors
-            the +Match placement modal's Relaties/Contract/Financieel cards).
+            the +Match modal's Relaties/Contract/Financieel cards).
             Every dropdown is a searchable CreatableSelect (allowCreate=false) —
             no bare <select> is left in this modal. */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 22px' }}>
@@ -216,7 +216,7 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
           <div style={cardPair}>
 
             {/* Algemeen — title + the customer→location→department→contact
-                relations + owner (mirrors MatchPlacementModal's Relaties card). */}
+                relations + owner (mirrors MatchModal's Relaties card). */}
             <div>
               <div style={cardHead}>{t('modal.groups.general')}</div>
               <div style={cardBox}>

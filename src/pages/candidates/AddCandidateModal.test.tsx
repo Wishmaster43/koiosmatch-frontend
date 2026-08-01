@@ -6,7 +6,7 @@
  * explicit location_ids chips and the omit-when-empty rule (punt 10). Network-
  * backed hooks are mocked directly (no QueryClientProvider needed); the shared
  * form fields render for real. i18next is uninitialised in tests, so t() returns
- * raw keys — assertions query those keys (same pattern as MatchPlacementModal.test).
+ * raw keys — assertions query those keys (same pattern as MatchModal.test).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'

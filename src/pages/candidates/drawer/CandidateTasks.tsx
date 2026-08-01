@@ -12,7 +12,7 @@
  * pencil at the row's bottom-right opens the shared modal in EDIT mode.
  *
  * AXIS-MATRIX-2 (CMFE audit R1): wires the shared action-rule preflight for
- * `task.create` (mirrors MatchPlacementModal's match.create). The actual create/
+ * `task.create` (mirrors MatchModal's match.create). The actual create/
  * edit form is the shared AddTaskModal (owned outside this file's scope, reused by
  * every entity — never forked here), so this component is the only choke point
  * available to gate creation: a warn cell shows the banner but leaves "+ Taak"

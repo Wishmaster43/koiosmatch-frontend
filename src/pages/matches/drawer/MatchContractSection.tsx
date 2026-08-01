@@ -1,5 +1,5 @@
 /**
- * MatchContractSection — the editable placement/contract layer, rendered as its
+ * MatchContractSection — the editable match/contract layer, rendered as its
  * own drawer tab ("Contract & financieel", wired in MatchDrawer — split out from
  * OverviewTab's read-only summary per the §3A blueprint's real-tabs rule, 2026-07-14).
  * Grouped into CONTRACT + FINANCIEEL cards via the shared EditableFieldTable (§3A
@@ -7,7 +7,7 @@
  * and saved via useMatchContract's optimistic PATCH /matches/{id} (revert + toast
  * on 422/409). Billing emails have no dedicated tenant lookup, so they're edited
  * as one line/comma-separated text field and mapped back to the array the
- * backend expects (the placement-form multi-input list was judged out of scope
+ * backend expects (the match-form multi-input list was judged out of scope
  * for the shared table component — see the Self-Audit note).
  */
 import { useTranslation } from 'react-i18next'

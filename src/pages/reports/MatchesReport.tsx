@@ -1,9 +1,9 @@
 /**
- * MatchesReport — matches & placements summary (GET /reports/matches).
+ * MatchesReport — matches summary (GET /reports/matches).
  *
- * KPI strip (total · via-funnel vs direct) over a placements breakdown
+ * KPI strip (total · via-funnel vs direct) over a matches breakdown
  * (sent/active/ended by HelloFlex contract status). `avg_placement_duration_days`
- * is honestly null until the HelloFlex coupling fills placement start/end — we
+ * is honestly null until the HelloFlex coupling fills match start/end — we
  * show a note rather than a fabricated number. Data lives in useMatchesReport.
  */
 import { useState } from 'react'
@@ -16,7 +16,7 @@ import type { DrillSpec } from './ReportDrillDrawer'
 import { useMatchesReport } from './useMatchesReport'
 import type { ReportPeriod } from '@/types/analytics'
 
-// One placement stat tile.
+// One match stat tile.
 function StatTile({ label, value, accent }: { label: string; value: number; accent?: boolean }) {
   return (
     <div style={{ flex: 1, minWidth: 120, padding: '14px 16px', borderRadius: 10,
@@ -93,7 +93,7 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
 
       {!loading && !error && !isEmpty && data && (
         <>
-          {/* Placements breakdown (KPI strip is rendered above the tabs) */}
+          {/* Matches breakdown (KPI strip is rendered above the tabs) */}
           <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', padding: 20 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('matches.placements.title')}</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>

@@ -92,9 +92,9 @@ export interface MatchesReportData {
   total: number
   // funnel = from an application; direct = created without one.
   by_origin: { funnel: number; direct: number }
-  // Placement counts by HelloFlex contract status.
+  // Match counts by HelloFlex contract status.
   placements: { sent: number; active: number; ended: number; total: number }
-  // Deliberately null until the HelloFlex coupling fills placement start/end.
+  // Deliberately null until the HelloFlex coupling fills match start/end.
   avg_placement_duration_days: number | null
 }
 

@@ -4,7 +4,7 @@
  * it). Covers: the four existing fields render, the shared pencil opens the
  * edit inputs and saving calls both callbacks, the Contactpersoon row (present
  * with a phone/email second line, and a dash when absent — never crash), and
- * the APP-MATCH-SUMMARY-1 Match row (link + status chip + placement period,
+ * the APP-MATCH-SUMMARY-1 Match row (link + status chip + match period,
  * rendered ONLY when the application actually carries a match — never a dash
  * row for an absent relation).
  */
@@ -96,13 +96,13 @@ describe('ApplicationDetailsCard', () => {
     expect(screen.getByText('drawer.contactPerson')).toBeInTheDocument()
   })
 
-  it('renders the Match row with its reference/status/placement period when a match exists', () => {
+  it('renders the Match row with its reference/status/match period when a match exists', () => {
     render(<ApplicationDetailsCard application={app({
       match: {
         id: 'm1', referenceNumber: 'M-00042', statusLabel: 'Active',
         // eslint-disable-next-line no-restricted-syntax -- DATA fixture (a tenant lookup colour), not a UI colour choice
         statusColor: '#79B58E',
-        placementStart: '2026-08-01', placementEnd: '2026-09-01',
+        matchStart: '2026-08-01', matchEnd: '2026-09-01',
       },
     })} />)
     expect(screen.getByText('M-00042')).toBeInTheDocument()
@@ -110,13 +110,13 @@ describe('ApplicationDetailsCard', () => {
     expect(screen.getByText('drawer.placementPeriod')).toBeInTheDocument()
   })
 
-  it('shows the ongoing placement label when the match has no end date', () => {
+  it('shows the ongoing match label when the match has no end date', () => {
     render(<ApplicationDetailsCard application={app({
       match: {
         id: 'm2', referenceNumber: 'M-00043', statusLabel: 'Active',
         // eslint-disable-next-line no-restricted-syntax -- DATA fixture (a tenant lookup colour), not a UI colour choice
         statusColor: '#79B58E',
-        placementStart: '2026-08-01', placementEnd: null,
+        matchStart: '2026-08-01', matchEnd: null,
       },
     })} />)
     expect(screen.getByText('drawer.placementPeriod')).toBeInTheDocument()

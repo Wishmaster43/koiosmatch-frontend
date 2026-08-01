@@ -334,7 +334,7 @@
   "planning": {
     "title": "Planning",
     "activeNow": "Nu aan het werk",
-    "activeNowSub": "actieve plaatsingen",
+    "activeNowSub": "actieve matches",
     "upcoming": "Aankomende diensten",
     "upcomingEmpty": "Geen aankomende diensten.",
     "off": "Planning-informatie komt zodra de Planning-module actief is.",

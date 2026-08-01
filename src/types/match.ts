@@ -1,5 +1,5 @@
 /**
- * Match types. A match is the continuation of an application → placement; this
+ * Match types. A match is the continuation of a Hired application; this
  * feature is a read-only list (page + table), so we type the raw API shape we
  * map from and the flat row the table renders.
  */

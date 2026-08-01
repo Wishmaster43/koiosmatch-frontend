@@ -1,8 +1,8 @@
 /**
- * ContractSection — the "Contract" block of the placement form: contract type,
- * CAO, start/end date and hours per week. Split out of MatchPlacementModal.tsx
+ * ContractSection — the "Contract" block of the match form: contract type,
+ * CAO, start/end date and hours per week. Split out of MatchModal.tsx
  * (audit R1 item 1, MUST-SPLIT) — pure presentational, all state via props from
- * useMatchPlacementForm. Contract type + CAO are searchable single-pick combos
+ * useMatchForm. Contract type + CAO are searchable single-pick combos
  * (Danny 24-07 points 1/5) — allowCreate={false}: both are tenant lookups, never
  * a free-text create.
  */
@@ -31,7 +31,7 @@ export default function ContractSection({
       <div style={row2}>
         {/* Contractsoort — searchable tenant lookup (Danny 24-07 point 1), was a
             plain non-searchable SelectMenu; may PROPOSE a tenant-marked default
-            (useMatchPlacementForm, is_default) into an otherwise empty field. */}
+            (useMatchForm, is_default) into an otherwise empty field. */}
         <F label={t('placement.contractType')} error={errors.contractType}>
           <CreatableSelect value={contractType || null} onChange={setContractType} allowCreate={false}
             placeholder={t('placement.pickContractType')} menuWidth={pickerMenuWidth}

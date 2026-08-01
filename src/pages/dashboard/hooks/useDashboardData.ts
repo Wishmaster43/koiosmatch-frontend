@@ -85,7 +85,7 @@ export function useDashboardData<Stats, Opp, Dash, Charts>({ tenantId, filterPar
     return () => ctrl.abort()
   }, [tenantId, filterKey, retryKey])
 
-  // Plaatsingen/vacatures = light meta.total fetches (Danny 2026-07-06) until
+  // Matches/vacatures = light meta.total fetches (Danny 2026-07-06) until
   // dedicated backend feeds land.
   useEffect(() => {
     let alive = true

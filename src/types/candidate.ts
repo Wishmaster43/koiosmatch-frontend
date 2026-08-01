@@ -104,7 +104,7 @@ export interface CandidateMatch {
   contractStatus: string | null
   // MATCH-EMBED-1: contract FORM (Contractvorm) — a free-text tenant value
   // (Settings → Matches → Contract types), distinct from contractStatus (active/
-  // pending/ended, the placement's lifecycle on the candidate side).
+  // pending/ended, the match's lifecycle on the candidate side).
   contractType: string | null
   createdAt: string | null
   [k: string]: unknown
@@ -258,7 +258,7 @@ export interface ApiCandidateMatch {
   stage_color?: string | null
   contract_status?: string | null
   contractStatus?: string | null
-  // MATCH-EMBED-1: contract form (Contractvorm), function title, and the placement
+  // MATCH-EMBED-1: contract form (Contractvorm), function title, and the match
   // period — the card renders Contractvorm; the rest is not shown here yet.
   contract_type?: string | null
   contractType?: string | null

@@ -5,7 +5,7 @@
  *
  * Departments: this modal has no separate "Location" picker (unlike the
  * customer→location→department→contact chain in AddOpportunityModal/
- * MatchPlacementModal), so the three-level `useCustomerCascade` doesn't fit —
+ * MatchModal), so the three-level `useCustomerCascade` doesn't fit —
  * measured instead against `useCustomerDepartments` (customers feature), which
  * already returns the flat per-customer department list + loading/error, exactly
  * what this modal's single Department select needs.

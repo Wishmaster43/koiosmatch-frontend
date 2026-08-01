@@ -5,8 +5,8 @@
  * title), the AXIS-MATRIX-2 preflight, the "where" pick logic (tenant lookup vs.
  * a real branch) and the create/edit submit with its 422 field mapping. Split
  * out of PlanIntakeModal.tsx (406 lines) so that file is a thin container that
- * only renders — the same shape as the sibling matchPlacement/
- * useMatchPlacementForm. Hooks are called in the exact order the component used
+ * only renders — the same shape as the sibling match/
+ * useMatchForm. Hooks are called in the exact order the component used
  * to call them itself, so behaviour is unchanged.
  */
 import { useState, useEffect } from 'react'
@@ -121,7 +121,7 @@ export function usePlanIntakeForm({
   const [submitErr, setSubmitErr] = useState<string | null>(null)
   const editing = !!existing
 
-  // AXIS-MATRIX-2 preflight (mirrors MatchPlacementModal's match.create wiring, the
+  // AXIS-MATRIX-2 preflight (mirrors MatchModal's match.create wiring, the
   // reference implementation): POST /candidates/{id}/appointments enforces
   // appointment.create against the candidate server-side (AppointmentController::
   // store) — surface the same warn/block decision here BEFORE submit. Only relevant

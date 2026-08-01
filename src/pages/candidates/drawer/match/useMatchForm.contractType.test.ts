@@ -1,5 +1,5 @@
 /**
- * useMatchPlacementForm — contract-type lookup coverage for the two tenant-
+ * useMatchForm — contract-type lookup coverage for the two tenant-
  * configurable columns GET /contract-types really returns: `is_default` (the
  * singleton "propose this type" flag) and `default_duration_days` (the end-date
  * proposal). Both were previously documented as not-yet-shipped backend columns;
@@ -11,7 +11,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useMatchPlacementForm } from './useMatchPlacementForm'
+import { useMatchForm } from './useMatchForm'
 import { addDays } from './helpers'
 
 // The lookup as the real API serialises it: an immutable slug `value`, the tenant's
@@ -46,7 +46,7 @@ vi.mock('@/lib/useContractTypes', async () => {
 })
 
 // Minimal static mocks for every other relational/lookup hook (mirrors the sibling
-// useMatchPlacementForm.test.ts setup) — none of them is under test here.
+// useMatchForm.test.ts setup) — none of them is under test here.
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 vi.mock('@/pages/vacancies/hooks/useCustomerOptions', () => ({ useCustomerOptions: () => [] }))
 vi.mock('@/pages/candidates/hooks/useVacancyOptions', () => ({ useVacancyOptions: () => [] }))
@@ -91,11 +91,11 @@ const apiPatch = api.patch as unknown as ReturnType<typeof vi.fn>
 function harness(editMatchId?: string) {
   const onClose = vi.fn()
   const onCreated = vi.fn()
-  const { result } = renderHook(() => useMatchPlacementForm({ candidateId: 'cand-1', editMatchId, onClose, onCreated }))
+  const { result } = renderHook(() => useMatchForm({ candidateId: 'cand-1', editMatchId, onClose, onCreated }))
   return { result, onClose, onCreated }
 }
 
-describe('useMatchPlacementForm · contract-type lookup (is_default + default_duration_days)', () => {
+describe('useMatchForm · contract-type lookup (is_default + default_duration_days)', () => {
   beforeEach(() => { vi.clearAllMocks(); editRecord = {} })
 
   it('CREATE: posts the tenant is_default type as its label, which the backend normalises to the slug', async () => {

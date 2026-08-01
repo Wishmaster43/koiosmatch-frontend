@@ -2,7 +2,7 @@
  * AddForm — schema-driven inline "add a record" form.
  *
  * Drives every "+ Toevoegen" panel in the candidate drawer (experience, education,
- * languages, certifications, skills, placements). A field is described once and
+ * languages, certifications, skills, matches). A field is described once and
  * rendered by type; `half` pairs two fields on one row, `separator` puts a "tot"
  * label between a start/end pair.
  */

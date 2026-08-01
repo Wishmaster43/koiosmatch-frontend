@@ -2,10 +2,10 @@
  * useCustomerCascade — the ONE shared implementation of the customer → location →
  * department → contact cascade (GET /customers/{id}), re-fetching whenever the id
  * changes. Promoted from pages/opportunities/hooks (audit R1 item 2: this exact
- * fetch was triplicated across opportunities/candidates(MatchPlacementModal)/
+ * fetch was triplicated across opportunities/candidates(MatchModal)/
  * vacancies). Exposes the full `detail` payload too — not just locations/contacts —
  * so callers that also need the takeover-default fields (branch, cost_center,
- * billing_email at each level; MatchPlacementModal's cascade proposal) don't need
+ * billing_email at each level; MatchModal's cascade proposal) don't need
  * their own fetch; callers that only need locations/contacts (KlantTab,
  * AddOpportunityModal) simply ignore the extra fields. `refetch` lets a caller
  * force a re-fetch of the SAME customer id (e.g. after inline-creating a contact).
@@ -30,7 +30,7 @@ export interface CascadeOption {
 }
 // Department/location takeover-default fields (cost centre / billing email) —
 // optional because most callers' API responses don't carry them yet on
-// departments (a known backend gap noted where MatchPlacementModal reads them).
+// departments (a known backend gap noted where MatchModal reads them).
 export interface CascadeDepartment extends CascadeOption { cost_center?: string | null; billing_email?: string | null }
 export interface CascadeLocation extends CascadeOption {
   departments?: CascadeDepartment[]
@@ -49,7 +49,7 @@ export const contactFunctionOf = (c: CascadeOption): string =>
 // modal's contact picker showed the same name several times over — one row per
 // location/department coupling — with nothing to tell them apart). Mirrors the
 // " — " subtitle convention already used for contacts elsewhere (RelationsSection's
-// match-placement contact picker, ProposeCandidateModal's recipient picker) — pure
+// match contact picker, ProposeCandidateModal's recipient picker) — pure
 // data concatenation, not a translatable UI string, so no i18n key. Never leaves a
 // dangling separator when the function is absent.
 export const contactOptionLabel = (c: CascadeOption): string => {
@@ -86,7 +86,7 @@ export function useCustomerCascade(customerId: string) {
     return () => { alive = false }
   }, [customerId])
 
-  // Force a re-fetch of the SAME customer id — e.g. MatchPlacementModal's inline
+  // Force a re-fetch of the SAME customer id — e.g. MatchModal's inline
   // "add contact" needs the fresh contact list before selecting the new one.
   const refetch = () => {
     if (!customerId) return Promise.resolve()

@@ -1,5 +1,5 @@
 /**
- * useMatchPlacementForm — branch-mismatch resolution PATCH regression coverage
+ * useMatchForm — branch-mismatch resolution PATCH regression coverage
  * (the post-submit best-effort branch move, fase 3). BUG CLASS FIX: this call
  * used to end in `.catch(() => {})` — a fully silent best-effort write, so a
  * failed branch move left the recruiter believing the candidate's branch had
@@ -12,7 +12,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useMatchPlacementForm } from './useMatchPlacementForm'
+import { useMatchForm } from './useMatchForm'
 
 // Customer fixture: its OWN branch differs from the candidate's branch below, so
 // `branchMismatch` (useBranchMismatch) resolves true once both GETs settle.
@@ -23,7 +23,7 @@ const mockCustomer = {
 }
 
 // Every relational/tenant-lookup hook this form pulls in gets a minimal, static
-// mock (mirrors MatchPlacementModal.test.tsx's own setup) — this test only cares
+// mock (mirrors MatchModal.test.tsx's own setup) — this test only cares
 // about the branch-mismatch resolution PATCH, not the rest of the form's wiring.
 // useCustomerCascade/useBranchMismatch stay REAL (driven by the mocked api.get
 // below) since the mismatch itself is what's under test.
@@ -43,7 +43,7 @@ vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() })
 // GET /customers/{id} → the fixture; GET /candidates/{id} → a branch that
 // deliberately differs from the customer's, so the mismatch logic fires. CAO
 // (/cao) and contact-functions (/contact-functions) fall through to their real
-// seed fallbacks (kept un-mocked, same as MatchPlacementModal.test.tsx).
+// seed fallbacks (kept un-mocked, same as MatchModal.test.tsx).
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
   const get = vi.fn((url: string) => {
@@ -74,11 +74,11 @@ const apiPost = api.post as unknown as ReturnType<typeof vi.fn>
 function harness() {
   const onClose = vi.fn()
   const onCreated = vi.fn()
-  const { result } = renderHook(() => useMatchPlacementForm({ candidateId: 'cand-1', onClose, onCreated }))
+  const { result } = renderHook(() => useMatchForm({ candidateId: 'cand-1', onClose, onCreated }))
   return { result, onClose, onCreated }
 }
 
-describe('useMatchPlacementForm · branch-mismatch resolution PATCH', () => {
+describe('useMatchForm · branch-mismatch resolution PATCH', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
   // Drives the harness up to a submit-ready, mismatched, "also move" state.
@@ -118,12 +118,12 @@ describe('useMatchPlacementForm · branch-mismatch resolution PATCH', () => {
     expect(onClose).toHaveBeenCalled()
   })
 
-  it('never sends the branch-move PATCH when the recruiter keeps the default "placement only" choice', async () => {
+  it('never sends the branch-move PATCH when the recruiter keeps the default "match only" choice', async () => {
     const { result } = harness()
     act(() => { result.current.setCustomerId('cust-1') })
     act(() => { result.current.setFunc('Verzorgende IG') })
     await waitFor(() => expect(result.current.branchMismatch).toBe(true))
-    // mismatchChoice stays at its default ('placement') — never touched here.
+    // mismatchChoice stays at its default ('match') — never touched here.
 
     act(() => { result.current.handleSubmitClick() })
 

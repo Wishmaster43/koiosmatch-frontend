@@ -58,6 +58,12 @@ export function RightPanelProvider({ children }: { children: ReactNode }) {
   // Remove a registration when the component unmounts.
   const unregisterFilters = useCallback((key: string) => {
     setRegistry(prev => {
+      // Symmetric with registerFilters' content guard: removing a key that is not there
+      // must not produce a new object. Without this, an effect whose cleanup runs on
+      // every dependency change kept setting state even when nothing changed, so an
+      // unstable registrant turned into an infinite loop instead of a wasted render
+      // (the applications-page loop, 01-08). Defence in depth, on both sides.
+      if (!(key in prev)) return prev
       const next = { ...prev }
       delete next[key]
       return next

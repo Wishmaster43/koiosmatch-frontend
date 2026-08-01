@@ -1,6 +1,6 @@
 /**
- * matchPlacement/helpers — pure functions shared by useMatchPlacementForm and its
- * section components. Split out of MatchPlacementModal.tsx (audit R1 item 1,
+ * match/helpers — pure functions shared by useMatchForm and its
+ * section components. Split out of MatchModal.tsx (audit R1 item 1,
  * MUST-SPLIT) so the 422-mapping table and the cascade/date math don't live
  * inside a 500+ line component file.
  */

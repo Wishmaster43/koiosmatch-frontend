@@ -1,11 +1,11 @@
 /**
- * RelationsSection — the "Relaties" block of the placement form: optional
+ * RelationsSection — the "Relaties" block of the match form: optional
  * candidate picker, customer→location→department→contact cascade (typeable
  * searchable pickers, allowCreate=false — never a free-text create for a real
  * relational id), inline contact creation, function/owner, optional vacancy,
- * and the branch-mismatch banner. Split out of MatchPlacementModal.tsx (audit
+ * and the branch-mismatch banner. Split out of MatchModal.tsx (audit
  * R1 item 1, MUST-SPLIT) — pure presentational, all state/handlers via props
- * from useMatchPlacementForm.
+ * from useMatchForm.
  *
  * Danny 24-07: Vestiging AND Recruiter are now searchable CreatableSelects
  * (both were a plain SelectMenu); the contact picker shows "Naam —
@@ -82,7 +82,7 @@ export default function RelationsSection({
   branchId: string; setBranchId: (v: string) => void; setBranchDirty: (v: boolean) => void; branchLocations: LocationOption[]
   vacancyId: string; setVacancyId: (v: string) => void; vacancyOptions: VacancyOption[]
   branchMismatch: boolean; candBranch: { id: Id | null; name: string } | null; detail: CustomerCascadeDetail | null
-  mismatchChoice: 'placement' | 'candidate'; setMismatchChoice: (v: 'placement' | 'candidate') => void
+  mismatchChoice: 'match' | 'candidate'; setMismatchChoice: (v: 'match' | 'candidate') => void
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -214,7 +214,7 @@ export default function RelationsSection({
       )}
 
       {/* Vestiging-mismatch (fase 3): candidate branch ≠ customer branch → calm
-          inline choice. Default: only this placement; opt-in: move the candidate. */}
+          inline choice. Default: only this match; opt-in: move the candidate. */}
       {branchMismatch && (
         <div role="group" aria-label={t('placement.branchMismatch')}
           style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '9px 11px', borderRadius: 8, fontSize: 12,
@@ -223,10 +223,10 @@ export default function RelationsSection({
           <span style={{ fontWeight: 600 }}>
             {t('placement.branchMismatchDesc', { candidate: candBranch?.name || '—', customer: detail?.branch?.name || '—' })}
           </span>
-          {(['placement', 'candidate'] as const).map(v => (
+          {(['match', 'candidate'] as const).map(v => (
             <label key={v} style={{ display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer', color: 'var(--text)' }}>
               <input type="radio" name="branch-mismatch" checked={mismatchChoice === v} onChange={() => setMismatchChoice(v)} />
-              {t(v === 'placement' ? 'placement.branchKeep' : 'placement.branchMove')}
+              {t(v === 'match' ? 'placement.branchKeep' : 'placement.branchMove')}
             </label>
           ))}
         </div>

@@ -151,7 +151,7 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
             </Field>
           )}
         </div>
-        {/* APP-MATCH-SUMMARY-1: the linked Match (Hired -> placement) — renders
+        {/* APP-MATCH-SUMMARY-1: the linked Match (Hired -> match) — renders
             NOTHING when the application has no Match at all, never a dash row
             for an absent relation (mirrors the honest-gate convention above). */}
         {a.match && (
@@ -165,11 +165,11 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
                 </EntityLink>
                 <SoftChip label={a.match.statusLabel} color={a.match.statusColor} />
               </div>
-              {a.match.placementStart && (
+              {a.match.matchStart && (
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>
                   {t('drawer.placementPeriod', {
-                    start: formatDate(a.match.placementStart),
-                    end: a.match.placementEnd ? formatDate(a.match.placementEnd) : t('drawer.placementOngoing'),
+                    start: formatDate(a.match.matchStart),
+                    end: a.match.matchEnd ? formatDate(a.match.matchEnd) : t('drawer.placementOngoing'),
                   })}
                 </div>
               )}

@@ -1,5 +1,5 @@
 /**
- * useContractTypes — tenant-configurable contract types for a match/placement
+ * useContractTypes — tenant-configurable contract types for a match
  * (Settings → Matches). NBBU/ABU fasen differ per bureau, so it is a tenant lookup,
  * never hardcoded. Fed by GET /contract-types; a seed fallback drives the dropdown
  * only when that response carries nothing usable.
@@ -15,7 +15,7 @@
  *    index() returns raw Eloquent models, so BOTH always serialise — no Resource, no
  *    whenLoaded, no $hidden to strip them.
  *  - Each row's `value` is an IMMUTABLE SLUG (`bepaalde_tijd`) and `label` is the
- *    tenant's editable wording (`Bepaalde tijd`). A placement stores the SLUG:
+ *    tenant's editable wording (`Bepaalde tijd`). A match stores the SLUG:
  *    App\Support\PlacementRules normalises a posted label to its `value` before
  *    saving, because the lookup's in-use/DELETE-409 guard JOINs on that column.
  *    Posting either form is accepted; reading one back always yields the slug.

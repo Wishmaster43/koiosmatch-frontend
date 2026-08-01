@@ -262,9 +262,9 @@
         "unit": "items"
       },
       "placements_target": {
-        "label": "Doel plaatsingen / maand",
-        "description": "Maandelijks streefgetal voor plaatsingen",
-        "unit": "plaatsingen"
+        "label": "Doel matches / maand",
+        "description": "Maandelijks streefgetal voor matches",
+        "unit": "matches"
       },
       "fill_rate_target": {
         "label": "Invulgraad doel",
@@ -728,13 +728,13 @@
     "perVacancyHint": "Wat per vacature belangrijk is (kwalificaties, locatie, …) stel je op de vacature zelf in.",
     "approval": {
       "title": "Goedkeuring",
-      "subtitle": "Wanneer een plaatsing eerst goedgekeurd moet worden.",
+      "subtitle": "Wanneer een match eerst goedgekeurd moet worden.",
       "off": "Uit",
-      "offDesc": "Nooit goedkeuring nodig — elke plaatsing gaat direct door.",
+      "offDesc": "Nooit goedkeuring nodig — elke match gaat direct door.",
       "deviation": "Bij afwijking",
-      "deviationDesc": "Alleen goedkeuring wanneer de plaatsing afwijkt van de gemaakte afspraken.",
+      "deviationDesc": "Alleen goedkeuring wanneer de match afwijkt van de gemaakte afspraken.",
       "always": "Altijd",
-      "alwaysDesc": "Elke plaatsing heeft eerst goedkeuring nodig.",
+      "alwaysDesc": "Elke match heeft eerst goedkeuring nodig.",
       "saveFailed": "Opslaan mislukt — de keuze is teruggezet."
     }
   },
@@ -1299,7 +1299,7 @@
       },
       "matches": {
         "title": "Matches",
-        "desc": "Matches met kandidaat, vacature, status en plaatsingsgegevens."
+        "desc": "Matches met kandidaat, vacature, status en details."
       },
       "tasks": {
         "title": "Taken",
@@ -1804,10 +1804,10 @@
       "functionMatchAllDesc": "Elke functie telt mee; functie speelt geen rol bij leads.",
       "excludeAlreadyAppliedLabel": "Kandidaten met een lopende sollicitatie uitsluiten",
       "excludeAlreadyAppliedHint": "Een kandidaat die al op deze vacature solliciteert, telt niet nogmaals mee als lead.",
-      "includeExpiringPlacementsLabel": "Bijna aflopende plaatsingen meetellen",
+      "includeExpiringPlacementsLabel": "Bijna aflopende matches meetellen",
       "includeExpiringPlacementsHint": "Kandidaten die nu geplaatst zijn maar van wie de match binnen het ingestelde aantal dagen afloopt, tellen ook mee als lead.",
       "expiringWithinDaysLabel": "Aantal dagen",
-      "expiringWithinDaysHint": "Hoeveel dagen van tevoren een aflopende plaatsing al als lead meetelt (1–365)."
+      "expiringWithinDaysHint": "Hoeveel dagen van tevoren een aflopende match al als lead meetelt (1–365)."
     }
   },
   "viewConfig": {
@@ -1956,7 +1956,7 @@
   "dashboardsCanSwitch": "Kan wisselen",
   "dashboardsDesc": {
     "admin": "Volledig overzicht — alle KPI's, grafieken en lijsten.",
-    "management": "Sturing op instroom, uitstroom, pijplijn en plaatsingen.",
+    "management": "Sturing op instroom, uitstroom, pijplijn en matches.",
     "recruitment": "Kandidaatgericht: touchpoints, opvolging, funnel en gesprekken.",
     "backoffice": "Documenten, contracten, koppelingen en runs.",
     "sales": "Kansen, pijplijnwaarde en leads.",
@@ -2285,7 +2285,7 @@
       "application_create": "Sollicitatie aanmaken",
       "application_couple_vacancy": "Vacature koppelen aan sollicitatie",
       "appointment_create": "Afspraak/intake plannen",
-      "match_create": "Match/plaatsing maken",
+      "match_create": "Match maken",
       "task_create": "Taak aanmaken",
       "calllist_add": "Toevoegen aan bellijst",
       "whatsapp_send": "WhatsApp-bericht sturen",
@@ -2294,7 +2294,7 @@
       "candidate_sync": "Koppelen aan backoffice (sync)",
       "opportunity_create": "Kans aanmaken",
       "vacancy_create": "Vacature aanmaken/openzetten",
-      "customer_match": "Match/plaatsing bij klant",
+      "customer_match": "Match bij klant",
       "customer_propose": "Kandidaat voorstellen"
     },
     "conditions": {
@@ -2315,7 +2315,7 @@
       "P3": "Blacklist — hard geblokkeerd",
       "P4": "Archief/prullenbak — hard geblokkeerd",
       "P5": "Nog Lead — bevestig-popup",
-      "P6": "Dubbele plaatsing — bevestig-popup",
+      "P6": "Dubbele match — bevestig-popup",
       "P7": "Blacklist, administratief — bevestig-popup",
       "P8": "Geen WhatsApp-toestemming (AVG) — hard geblokkeerd",
       "P9": "Klant inactief/geblokkeerd — bevestig-popup",

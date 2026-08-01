@@ -19,7 +19,7 @@ interface Args {
  * Algemeen card (V4-V6, VACATURES-100), each a bare CreatableSelect (allowCreate=false)
  * so the caller places them in its own labelled row (mirrors DetailsTab's row()
  * convention — the client field already has its own row). Cascade fetch + reset
- * logic mirrors KlantTab/MatchPlacementModal (useCustomerCascade): picking a
+ * logic mirrors KlantTab/MatchModal (useCustomerCascade): picking a
  * department directly auto-fills its parent location; narrowing to one location's
  * departments once one is picked.
  *

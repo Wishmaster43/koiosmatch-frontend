@@ -720,7 +720,7 @@
     "matchText": "Based on the profile, the expected best match is: Verzorgende IG and Helpende Plus at care institutions in the region.",
     "engagementLabel": "Engagement",
     "engagementContacted": "Last contact recorded on {{date}}. Profile is actively monitored.",
-    "engagementNone": "No recent contact recorded. A follow-up increases the chance of a successful placement.",
+    "engagementNone": "No recent contact recorded. A follow-up increases the chance of a successful match.",
     "adviceNoneLabel": "No action needed"
   },
   "cv": {
@@ -944,7 +944,7 @@
       "conversionFactor": "Suggested (conversion factor): {{purchase}} purchase / {{sell}} sell",
       "purchaseOnly": "Suggested — only the purchase rate is known: {{purchase}}",
       "deviationWarning": "The rate agreement proposes {{proposalPurchase}} purchase / {{proposalSell}} sell — you entered {{enteredPurchase}} / {{enteredSell}}. Are you sure?",
-      "deviationConfirm": "Yes, place anyway",
+      "deviationConfirm": "Yes, create the match anyway",
       "deviationCancel": "Adjust rates"
     },
     "candidate": "Candidate",

@@ -42,13 +42,13 @@ const API_TO_FORM: Record<string, string> = {
 // old inline SearchField dropdown (DUP-1). allowCreate off = pick-only. `style`
 // (e.g. a 422 field-error border) merges with the base width, it never replaces it.
 // S2 (Danny): comfortable menu width now that the panel is wide (mirrors
-// MatchPlacementModal's pickerMenuWidth) — the shared component's 220px default
+// MatchModal's pickerMenuWidth) — the shared component's 220px default
 // read cramped for a full candidate/vacancy "title · client" label. `value || null`
 // (measured live, S2): this form's state starts at '' (empty string, not null/
 // undefined), and CreatableSelect's `value ?? placeholder` only falls through to
 // the placeholder on null/undefined — '' short-circuited it, so every picker
 // showed BLANK instead of "Selecteer een kandidaat/vacature/recruiter". Mirrors
-// MatchPlacementModal's own `value={x || null}` pickers (job 17/18).
+// MatchModal's own `value={x || null}` pickers (job 17/18).
 function PickField({ label, style, value, ...rest }: { label: ReactNode; style?: CSSProperties; value?: string } & AnyProps) {
   // §6: a <button> trigger cannot be labelled by a bare <div>, so the picker used to
   // announce only its value ("Piet Recruiter") with no field name. CreatableSelect
@@ -177,7 +177,7 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={onClose} />
       {/* S2 (Danny): widened to the same 720px two-column pattern as
-          MatchPlacementModal — the 440px panel read cramped for a full
+          MatchModal — the 440px panel read cramped for a full
           candidate/vacancy "title · client" label + its search box. */}
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('add.title')} tabIndex={-1}
         className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)',

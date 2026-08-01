@@ -8,9 +8,9 @@
  * pattern for prose. Industry options come from the /industries lookup (never
  * hardcoded). Saving flows back through onSave → the page's optimistic PATCH.
  * Billing card (Danny 2026-07-22): cost-centre is the TOP of the afdeling >
- * locatie > klant cascade read by the placement form; billing email here is
+ * locatie > klant cascade read by the match form; billing email here is
  * the customer's own — the ONE source invoicing always reads from, regardless
- * of the location/department picked on a match (see matchPlacement/helpers.ts).
+ * of the location/department picked on a match (see match/helpers.ts).
  *
  * The vacancy-visibility flags (hideCompanyName/showInVacancies/excludeFromSourcing,
  * formerly the "Instellingen" group here) moved to their own VacancySettingsTab
@@ -20,7 +20,7 @@
  * "Vestiging koppelen" block at the bottom mirrors the candidate drawer's
  * BranchSection verbatim (shared component, §3A/§11) via useEntityBranches. This
  * is a DIFFERENT axis from the `branchId` field above: `branchId` (BRANCH-1,
- * MATCH-PLACEMENT-1) is the single establishment a placement's paperwork/invoicing
+ * MATCH-PLACEMENT-1) is the single establishment a match's paperwork/invoicing
  * routes through; the linked-branches list (VESTIGING-2 fase 4) is which of the
  * tenant's branches can access this customer at all (behind the tenant flag
  * `branch_authz_enabled`, default OFF). Both stay — one scopes billing, the other

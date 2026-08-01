@@ -7,8 +7,8 @@ import Slider from '@/components/ui/Slider'
 
 /**
  * VacancyMatchingSettings — the GLOBAL matching strictness (how critical the AI
- * matcher is overall) plus the placement APPROVAL mode (per-tenant: off = every
- * placement is always OK). The per-vacancy dimension importance (qualifications,
+ * matcher is overall) plus the match APPROVAL mode (per-tenant: off = every
+ * match is always OK). The per-vacancy dimension importance (qualifications,
  * location, …) lives on each vacancy itself, not here. Persists to /settings/matching.
  */
 // The backend strictness is an enum; the slider is a 3-step index onto it.
@@ -87,7 +87,7 @@ export default function VacancyMatchingSettings() {
 
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 22 }}>{t('matching.perVacancyHint')}</p>
 
-      {/* Placement approval — three-option radio; native inputs keep keyboard support. */}
+      {/* Match approval — three-option radio; native inputs keep keyboard support. */}
       <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
         <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('matching.approval.title')}</h3>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('matching.approval.subtitle')}</p>

@@ -1,12 +1,12 @@
 /**
- * RemarksSection — the "Opmerkingen" block of the placement form, its OWN card
+ * RemarksSection — the "Opmerkingen" block of the match form, its OWN card
  * (Danny 24-07: split out of FinancialSection into its own left-column block
  * "zodat het beter past"). Starts COLLAPSED ("dicht geklapt laten") — a dashed
  * ghost affordance, not the RichTextEditor itself — and only reveals the editor
  * on an explicit click; never auto-opens. Cancel (✕) reverts to the text as it
  * was when the editor opened and collapses again (Danny 24-07: "je moet ook
  * weer kunnen annuleren"), mirroring the house pencil ↔ ✕ idiom. Pure
- * presentational, all state via props from useMatchPlacementForm.
+ * presentational, all state via props from useMatchForm.
  */
 import { useRef } from 'react'
 import { Pencil, X } from 'lucide-react'

@@ -334,7 +334,7 @@
   "planning": {
     "title": "Planung",
     "activeNow": "Aktuell im Einsatz",
-    "activeNowSub": "aktive Einsätze",
+    "activeNowSub": "aktive Matches",
     "upcoming": "Kommende Dienste",
     "upcomingEmpty": "Keine kommenden Dienste.",
     "off": "Planungsinformationen erscheinen, sobald das Planungsmodul aktiv ist.",

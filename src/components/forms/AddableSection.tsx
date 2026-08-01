@@ -2,7 +2,7 @@
  * AddableSection — a titled card that lists items and can add, EDIT and remove them.
  *
  * Collapses the near-identical drawer sections (experience, education, certifications,
- * skills) and placements into one component. Each caller supplies the title, the
+ * skills) and matches into one component. Each caller supplies the title, the
  * `fields`, an `onAdd` handler and a `renderItem`. Pass `onEdit(index, values)` and/or
  * `onRemove(index)` to enable the in-place pencil (→ prefilled form, save/cancel as
  * diskette/✕) and the trash button per item.

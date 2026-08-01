@@ -245,7 +245,7 @@ describe('CommunicationTab · match.created timeline card (point 3, Danny live P
   const goToTimeline = (user: ReturnType<typeof userEvent.setup>) =>
     user.click(screen.getByRole('tab', { name: 'sections.timeline' }))
 
-  it('renders the readable placement card for a match.created timeline item', async () => {
+  it('renders the readable match card for a match.created timeline item', async () => {
     const user = userEvent.setup()
     render(<CommunicationTab c={candidate({}, { timeline: [{
       type: 'match.created', created_at: '2026-07-01T00:00:00.000Z',

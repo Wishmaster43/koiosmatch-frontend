@@ -4,7 +4,7 @@
  * house-button swap: the bare text+Plus link is now the shared DrawerAddButton,
  * same onClick (opens AddOpportunityModal, prefilled with this customer). The
  * modal itself is a different file's scope (its own lookup/cascade hooks) —
- * stood in with a marker, mirroring WorkTab.test.tsx's MatchPlacementModal stub.
+ * stood in with a marker, mirroring WorkTab.test.tsx's MatchModal stub.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'

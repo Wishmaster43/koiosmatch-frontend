@@ -1,9 +1,9 @@
 /**
- * FinancialSection — the "Financieel" block of the placement form: schaal/trede,
+ * FinancialSection — the "Financieel" block of the match form: schaal/trede,
  * purchase/sell rate + live margin, the rate-proposal hint, cost centre and
- * billing email(s). Split out of MatchPlacementModal.tsx (audit R1 item 1,
+ * billing email(s). Split out of MatchModal.tsx (audit R1 item 1,
  * MUST-SPLIT) — pure presentational, all state via props from
- * useMatchPlacementForm. Opmerkingen moved OUT into its own `RemarksSection`
+ * useMatchForm. Opmerkingen moved OUT into its own `RemarksSection`
  * card (Danny 24-07 point: its own left-column block, collapsed by default).
  */
 import { X } from 'lucide-react'

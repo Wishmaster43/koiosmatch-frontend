@@ -1,6 +1,6 @@
 /**
  * useCascadeDefaults — cost-centre and billing-email takeover-default PROPOSALS
- * for the placement form (job 21/22). The two fields follow DIFFERENT rules
+ * for the match form (job 21/22). The two fields follow DIFFERENT rules
  * (Danny 2026-07-22): cost-centre follows the customer→location→department
  * cascade's deepest picked level, while billing email is ALWAYS the customer's
  * own address regardless of the picked location/department ("facturatie blijft
@@ -8,7 +8,7 @@
  * useRateProposal's "propose but never overwrite a manual edit" pattern: each
  * field freezes the instant the recruiter edits it (the *Dirty flag), so a later
  * customer/location/department pick never clobbers a manual value. Split out of
- * useMatchPlacementForm (audit R1 item 1, MUST-SPLIT) to keep that hook's own
+ * useMatchForm (audit R1 item 1, MUST-SPLIT) to keep that hook's own
  * single purpose (candidate/relations/contract/financial state + submit) from
  * growing past its size target.
  */

@@ -4,7 +4,7 @@
  * decisions below (the non-scrolling panel that fixed the clipped dropdown, the
  * exact "+ Kandidaat toevoegen" input footprint) live in one place with their
  * reasoning, instead of scrolling past every time the markup is read. Mirrors
- * the sibling matchPlacement/styles.ts.
+ * the sibling match/styles.ts.
  */
 
 export const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 60 }

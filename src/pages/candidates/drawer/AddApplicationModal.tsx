@@ -13,7 +13,7 @@
  * preselects the tenant's flagged default stage (falling back to the first stage).
  *
  * AXIS-MATRIX-2 (CMFE audit R1): wires the shared action-rule preflight for
- * `application.create` (mirrors MatchPlacementModal's match.create) — a warn cell
+ * `application.create` (mirrors MatchModal's match.create) — a warn cell
  * shows an inline banner and still lets the recruiter proceed; a block cell (e.g. an
  * archived/blacklisted candidate) additionally disables Create, matching what the
  * backend's own ApplicationController::store guard will refuse anyway.
@@ -33,7 +33,7 @@ import type { Id } from '@/types/common'
 const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 60 }
 const panel: React.CSSProperties = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 61, width: 420, maxWidth: '92vw', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: '0 20px 60px rgba(0,0,0,0.18)' }
 const fieldLabel: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }
-// Consistent searchable-menu width (mirrors PlanIntakeModal/MatchPlacementModal's vacancy picker).
+// Consistent searchable-menu width (mirrors PlanIntakeModal/MatchModal's vacancy picker).
 const pickerMenuWidth = 340
 // S24c (Danny 24-07): the exact "+ Kandidaat toevoegen" combobox footprint
 // (mirrors addmodal/fields.tsx's CreatableSelect wrapper) — every searchable
@@ -53,7 +53,7 @@ export default function AddApplicationModal({ candidateId, onClose, onCreated }:
   // S24b: the real stage id (not just the slug) — needed to submit application_stage_id.
   const { stages, defaultStage } = useApplicationStages()
 
-  // AXIS-MATRIX-2 preflight (mirrors MatchPlacementModal's match.create wiring, the
+  // AXIS-MATRIX-2 preflight (mirrors MatchModal's match.create wiring, the
   // reference implementation): POST /applications enforces application.create against
   // the candidate server-side (ApplicationController::store) — surface the same
   // warn/block decision here BEFORE submit. warn stays a banner only (proceed

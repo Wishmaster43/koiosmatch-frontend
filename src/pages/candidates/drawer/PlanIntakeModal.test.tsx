@@ -1,6 +1,6 @@
 /**
  * PlanIntakeModal — regression test for the 422 field mapping (mirrors the house
- * pattern in AddCandidateModal/AddCustomerModal, see MatchPlacementModal.test.tsx):
+ * pattern in AddCandidateModal/AddCustomerModal, see MatchModal.test.tsx):
  * the catch used to only fire a generic toast; it must now map `errors.{field}`
  * onto the matching field and fall back to a server message/generic banner
  * otherwise. The appointment-type/user/vacancy/location lookups hit the network

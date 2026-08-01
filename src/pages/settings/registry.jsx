@@ -278,7 +278,7 @@ export const NAV_GROUPS = [
       { id: 'appointment_types', icon: CalendarCheck, component: AppointmentTypeSettings },
       { id: 'appointment_locations', icon: MapPin, component: AppointmentLocationSettings },
       // Purchase→sale conversion factor (Danny 22-07) — moved here from Vacancies →
-      // Matching: it's a match/placement rate concept, not a per-vacancy one.
+      // Matching: it's a match rate concept, not a per-vacancy one.
       { id: 'match_rates', icon: Percent, component: MatchRatesSettings },
       { id: 'match_display', icon: Palette, schema: matchDisplay },
     ],

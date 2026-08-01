@@ -334,7 +334,7 @@
   "planning": {
     "title": "Planning",
     "activeNow": "Actuellement en poste",
-    "activeNowSub": "placements actifs",
+    "activeNowSub": "matches actifs",
     "upcoming": "Missions à venir",
     "upcomingEmpty": "Aucune mission à venir.",
     "off": "Les informations de planning apparaissent dès que le module Planning est actif.",

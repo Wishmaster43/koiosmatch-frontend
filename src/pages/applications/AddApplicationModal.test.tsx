@@ -1,6 +1,6 @@
 /**
  * AddApplicationModal — covers S2 (Danny): the widened 720px two-column panel
- * (mirrors MatchPlacementModal) with comfortable candidate/vacancy/owner pickers.
+ * (mirrors MatchModal) with comfortable candidate/vacancy/owner pickers.
  * Layout/CSS is not asserted pixel-by-pixel (implementation detail); this checks
  * the panel actually renders wider than the old 440px modal and that all pickers
  * are the shared searchable CreatableSelect, never a bare `<select>`.

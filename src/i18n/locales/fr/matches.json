@@ -38,7 +38,7 @@
     "archiveConfirm": "Archiver ce match ? Vous pourrez le restaurer ensuite.",
     "archived": "Match archivé.",
     "archiveFailed": "Impossible d'archiver le match.",
-    "archiveBlockedActiveContract": "Ce placement a un contrat actif — mettez-y fin d'abord.",
+    "archiveBlockedActiveContract": "Ce match a un contrat actif — mettez-y fin d'abord.",
     "archivedBanner": {
       "since": "Archivé depuis le {{date}}",
       "flag": "Archivé",

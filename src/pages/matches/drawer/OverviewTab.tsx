@@ -1,7 +1,7 @@
 /**
  * OverviewTab — the match facts: a read-only summary card (candidate/vacancy/client/
- * score/stage/status). Stays read-only — a match is the continuation of an
- * application → placement (§3B) and those facts are derived. The editable
+ * score/stage/status). Stays read-only — a match is the continuation of a
+ * Hired application (§3B) and those facts are derived. The editable
  * contract/financial layer used to live inline here; it is now its own drawer tab
  * (MatchContractSection, wired directly in MatchDrawer) and the candidate/vacancy/
  * client relations + their hyperlinks are the Relations tab (RelationsTab) — one

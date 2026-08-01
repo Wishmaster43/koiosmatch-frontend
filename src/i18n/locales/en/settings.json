@@ -262,9 +262,9 @@
         "unit": "items"
       },
       "placements_target": {
-        "label": "Placements target / month",
-        "description": "Monthly target for placements",
-        "unit": "placements"
+        "label": "Matches target / month",
+        "description": "Monthly target for matches",
+        "unit": "matches"
       },
       "fill_rate_target": {
         "label": "Fill rate target",
@@ -728,13 +728,13 @@
     "perVacancyHint": "What matters per vacancy (qualifications, location, …) is set on the vacancy itself.",
     "approval": {
       "title": "Approval",
-      "subtitle": "When a placement needs approval before it goes ahead.",
+      "subtitle": "When a match needs approval before it goes ahead.",
       "off": "Off",
-      "offDesc": "Never requires approval — every placement goes through immediately.",
+      "offDesc": "Never requires approval — every match goes through immediately.",
       "deviation": "On deviation",
-      "deviationDesc": "Approval only when the placement deviates from the agreed terms.",
+      "deviationDesc": "Approval only when the match deviates from the agreed terms.",
       "always": "Always",
-      "alwaysDesc": "Every placement requires approval first.",
+      "alwaysDesc": "Every match requires approval first.",
       "saveFailed": "Saving failed — your choice was reverted."
     }
   },
@@ -1299,7 +1299,7 @@
       },
       "matches": {
         "title": "Matches",
-        "desc": "Matches with candidate, vacancy, status and placement details."
+        "desc": "Matches with candidate, vacancy, status and details."
       },
       "tasks": {
         "title": "Tasks",
@@ -1804,10 +1804,10 @@
       "functionMatchAllDesc": "Every function counts; function plays no role in leads.",
       "excludeAlreadyAppliedLabel": "Exclude candidates with a live application",
       "excludeAlreadyAppliedHint": "A candidate who already applied to this vacancy no longer counts as a lead.",
-      "includeExpiringPlacementsLabel": "Count soon-to-expire placements",
+      "includeExpiringPlacementsLabel": "Count soon-to-expire matches",
       "includeExpiringPlacementsHint": "Candidates who are placed right now but whose match ends within the configured number of days also count as a lead.",
       "expiringWithinDaysLabel": "Number of days",
-      "expiringWithinDaysHint": "How many days ahead an expiring placement already counts as a lead (1–365)."
+      "expiringWithinDaysHint": "How many days ahead an expiring match already counts as a lead (1–365)."
     }
   },
   "viewConfig": {
@@ -1956,7 +1956,7 @@
   "dashboardsCanSwitch": "Can switch",
   "dashboardsDesc": {
     "admin": "Full overview — all KPIs, charts and lists.",
-    "management": "Steering on inflow, outflow, pipeline and placements.",
+    "management": "Steering on inflow, outflow, pipeline and matches.",
     "recruitment": "Candidate-focused: touchpoints, follow-up, funnel and conversations.",
     "backoffice": "Documents, contracts, couplings and runs.",
     "sales": "Opportunities, pipeline value and leads.",
@@ -2285,7 +2285,7 @@
       "application_create": "Create application",
       "application_couple_vacancy": "Couple vacancy to application",
       "appointment_create": "Schedule appointment/intake",
-      "match_create": "Create match/placement",
+      "match_create": "Create match",
       "task_create": "Create task",
       "calllist_add": "Add to call list",
       "whatsapp_send": "Send WhatsApp message",
@@ -2294,7 +2294,7 @@
       "candidate_sync": "Sync to backoffice",
       "opportunity_create": "Create opportunity",
       "vacancy_create": "Create/open vacancy",
-      "customer_match": "Match/placement at customer",
+      "customer_match": "Match at customer",
       "customer_propose": "Propose candidate"
     },
     "conditions": {
@@ -2315,7 +2315,7 @@
       "P3": "Blacklist — hard blocked",
       "P4": "Archived/trash — hard blocked",
       "P5": "Still Lead — confirm popup",
-      "P6": "Double placement — confirm popup",
+      "P6": "Double match — confirm popup",
       "P7": "Blacklist, administrative — confirm popup",
       "P8": "No WhatsApp consent (AVG) — hard blocked",
       "P9": "Customer inactive/blocked — confirm popup",

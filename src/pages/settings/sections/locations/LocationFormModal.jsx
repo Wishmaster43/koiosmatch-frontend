@@ -29,7 +29,7 @@ import { ColorSwatch } from '../../components/SettingsControls'
 import IconPickerControl from '../IconPickerControl'
 
 // House field footprint (Danny 27-07 point D): 11px uppercase muted label above
-// each input, fontSize 13 / borderRadius 8 — mirrors matchPlacement/styles.ts'
+// each input, fontSize 13 / borderRadius 8 — mirrors match/styles.ts'
 // `lbl`/`input` exactly.
 const lbl = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }
 const inp = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
@@ -55,8 +55,8 @@ export default function LocationFormModal({ editingId, form, setForm, saving, on
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={onClose} />
       {/* Wide-form frame (Danny 27-07: "+ vestiging... moet net zo breed en hoog
           worden als + match of + nieuwe kandidaat") — same WIDE_MODAL footprint
-          as AddCandidateModal/MatchPlacementModal, `94vw` cap so it still breathes
-          on narrow viewports (mirrors matchPlacement/styles.ts' `panel`, this
+          as AddCandidateModal/MatchModal, `94vw` cap so it still breathes
+          on narrow viewports (mirrors match/styles.ts' `panel`, this
           component being `position: fixed` with no flex-centering overlay of its
           own). role="dialog" + useFocusTrap (§6): focus trap, Escape-to-close,
           focus restore — this panel had none of that before. */}

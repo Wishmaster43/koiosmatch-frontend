@@ -17,9 +17,9 @@ import type { BoardColumn } from './MatchesBoard'
 import MatchDrawer from './MatchDrawer'
 import { usePageMemory } from '@/lib/usePageMemory'
 import MatchesBulkBar from './MatchesBulkBar'
-// The full placement form (§3B "direct match" path) — shared with the candidate
+// The full match form (§3B "direct match" path) — shared with the candidate
 // drawer; without a fixed candidateId it shows its own candidate picker.
-import MatchPlacementModal from '@/pages/candidates/drawer/MatchPlacementModal'
+import MatchModal from '@/pages/candidates/drawer/MatchModal'
 import PaginationBar from '@/components/ui/PaginationBar'
 import ViewSwitch from '@/components/ui/ViewSwitch'
 import HeaderSearch from '@/components/ui/HeaderSearch'
@@ -369,9 +369,9 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
         // EXTRACT-1: same matches.update gate as canApprove/canArchive above.
         canLinkBackoffice={hasPermission('matches.update')} />
 
-      {/* Direct-match creation: the full placement form (rate proposal, contract,
+      {/* Direct-match creation: the full match form (rate proposal, contract,
           cost center) with a candidate picker; refetch so server-derived fields land. */}
-      {addOpen && <MatchPlacementModal onClose={() => setAddOpen(false)} onCreated={reload} />}
+      {addOpen && <MatchModal onClose={() => setAddOpen(false)} onCreated={reload} />}
       {archiveConfirmDialog}
     </div>
   )

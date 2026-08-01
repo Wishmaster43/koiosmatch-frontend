@@ -467,7 +467,7 @@
     "timelineVia": "via {{name}}"
   },
   "statistics": {
-    "placements": "Placements",
+    "placements": "Matchs",
     "applications": "Candidatures",
     "shifts": "Vacations",
     "hoursWorked": "Heures travaillées",
@@ -580,8 +580,8 @@
     "documentsEmpty": "Aucun document.",
     "branch": "Agence",
     "branchLink": "Associer une agence",
-    "placements": "Placements",
-    "placementsEmpty": "Aucun placement.",
+    "placements": "Matchs",
+    "placementsEmpty": "Aucun match.",
     "applications": "Candidatures",
     "applicationsEmpty": "Aucune candidature.",
     "notes": "Notes",
@@ -698,7 +698,7 @@
     "matchText": "D'après le profil, la meilleure correspondance attendue est : Verzorgende IG et Helpende Plus dans les établissements de soins de la région.",
     "engagementLabel": "Engagement",
     "engagementContacted": "Dernier contact enregistré le {{date}}. Profil suivi activement.",
-    "engagementNone": "Aucun contact récent enregistré. Un suivi augmente les chances de placement réussi.",
+    "engagementNone": "Aucun contact récent enregistré. Un suivi augmente les chances d'un match réussi.",
     "adviceNoneLabel": "Aucune action nécessaire"
   },
   "cv": {
@@ -944,7 +944,7 @@
       "conversionFactor": "Suggestion (facteur de conversion) : {{purchase}} achat / {{sell}} vente",
       "purchaseOnly": "Suggestion — seul le tarif d'achat est connu : {{purchase}}",
       "deviationWarning": "L'accord tarifaire propose {{proposalPurchase}} achat / {{proposalSell}} vente — vous avez saisi {{enteredPurchase}} / {{enteredSell}}. Êtes-vous sûr(e) ?",
-      "deviationConfirm": "Oui, placer quand même",
+      "deviationConfirm": "Oui, créer le match quand même",
       "deviationCancel": "Ajuster les tarifs"
     },
     "candidate": "Candidat",

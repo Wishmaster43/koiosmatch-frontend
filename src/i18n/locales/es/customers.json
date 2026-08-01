@@ -334,7 +334,7 @@
   "planning": {
     "title": "Planificación",
     "activeNow": "Trabajando ahora",
-    "activeNowSub": "colocaciones activas",
+    "activeNowSub": "matches activos",
     "upcoming": "Próximos turnos",
     "upcomingEmpty": "No hay próximos turnos.",
     "off": "La información de planificación aparece cuando el módulo de Planificación esté activo.",

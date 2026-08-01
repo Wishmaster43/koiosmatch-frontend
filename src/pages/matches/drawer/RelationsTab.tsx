@@ -3,7 +3,7 @@
  * each a hyperlink to that record's own page + drawer (EntityLink → NavigationContext
  * → the hash-router's `{ open: id }` intent — same mechanism as the Klant tab's
  * cross-entity links on Opportunities, and CandidateTab/VacancyTab elsewhere).
- * Read-only: a match is the continuation of an application → placement (§3B), so
+ * Read-only: a match is the continuation of a Hired application (§3B), so
  * these relations themselves never change here — only navigated to. EntityLink
  * degrades to plain (unlinked) text when an id is absent, so an older match row
  * without the flat FK never renders a dead link.

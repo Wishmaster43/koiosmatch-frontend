@@ -183,7 +183,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
               <>
               {/* Afwijzen (Danny 25-07): the reject FORM moved out of the tab into
                   this footer button + confirm modal — hidden once already rejected
-                  or matched (a placement can no longer be rejected). */}
+                  or matched (a match can no longer be rejected). */}
               {a.bucket !== 'rejected' && a.bucket !== 'matched' && (
                 <button onClick={() => setRejectModalOpen(true)}
                   style={{ display: 'flex', alignItems: 'center', gap: 5,

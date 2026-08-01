@@ -10,7 +10,7 @@ import EntityLink from '@/components/ui/EntityLink'
 import AddApplicationModal from './AddApplicationModal'
 import PlanIntakeModal from './PlanIntakeModal'
 import type { ExistingAppointment } from './PlanIntakeModal'
-import MatchPlacementModal from './MatchPlacementModal'
+import MatchModal from './MatchModal'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock, rememberReturnTab } from './constants'
@@ -52,7 +52,7 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
   const [modal, setModal] = useState<null | 'apply' | 'intake' | 'match'>(null)
   // The appointment being edited (pencil on the appointment line) → prefilled intake modal.
   const [editAppt, setEditAppt] = useState<ExistingAppointment | null>(null)
-  // The match being edited (pencil on a MatchesTab row) → MatchPlacementModal in EDIT mode.
+  // The match being edited (pencil on a MatchesTab row) → MatchModal in EDIT mode.
   const [editMatchId, setEditMatchId] = useState<Id | null>(null)
   // Reset the local list when the drawer switches to another candidate / fuller detail.
   useEffect(() => { setApps((c.applications ?? []) as unknown as AppRow[]); setPage(1) }, [c.id, c.applications])
@@ -228,12 +228,12 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
 
       {modal === 'apply'  && <AddApplicationModal candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
       {modal === 'intake' && <PlanIntakeModal     candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} defaultVacancyId={soleVacancyId} />}
-      {modal === 'match'  && <MatchPlacementModal candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
+      {modal === 'match'  && <MatchModal candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
       {editAppt && <PlanIntakeModal candidateId={c.id} existing={editAppt} onClose={() => setEditAppt(null)} onCreated={reload} />}
       {/* Pencil on a MatchesTab row (point 2) — same modal, in EDIT mode: prefills
           from GET /matches/{id} (the candidate's own embedded row is thin) and
           PATCHes instead of POSTing. */}
-      {editMatchId != null && <MatchPlacementModal candidateId={c.id} editMatchId={editMatchId} onClose={() => setEditMatchId(null)} onCreated={reload} />}
+      {editMatchId != null && <MatchModal candidateId={c.id} editMatchId={editMatchId} onClose={() => setEditMatchId(null)} onCreated={reload} />}
     </div>
   )
 }

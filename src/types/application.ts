@@ -22,16 +22,16 @@ export interface ApplicationStageDuration {
 /**
  * The linked Match summary (GET /applications/{id} → `match`), null when no
  * Match hangs on this application yet. A Match is the continuation of a
- * Hired application into a placement — this is a read-only summary, never
- * the full Match record.
+ * Hired application — this is a read-only summary, never the full Match
+ * record.
  */
 export interface ApplicationMatchSummary {
   id: Id
   referenceNumber: string
   statusLabel: string
   statusColor: string
-  placementStart: string | null
-  placementEnd: string | null
+  matchStart: string | null
+  matchEnd: string | null
 }
 
 /** Owner/recruiter chip on an application row. */
@@ -201,7 +201,7 @@ export interface ApplicationDetail extends Application {
   // sends none — the status strip falls back through currentStageEnteredAt
   // then the created-date line rather than ever fabricating a duration.
   stageDurations: ApplicationStageDuration[]
-  // APP-MATCH-SUMMARY-1: the linked Match (Hired → placement), null when this
+  // APP-MATCH-SUMMARY-1: the linked Match (Hired → match), null when this
   // application has no Match yet — the details card renders nothing for this
   // row rather than a dash when it is absent.
   match: ApplicationMatchSummary | null
