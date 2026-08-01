@@ -197,21 +197,25 @@
         "recruiter": "Von Ihnen übernommen",
         "completed": "Abgeschlossen"
       },
-      "duration": "Gesprächsdauer",
+      "duration": "Laufzeit",
       "durationMinutes": "{{count}} Min.",
       "durationHours": "{{hours}} Std. {{minutes}} Min.",
+      "durationDays": "{{days}} T. {{hours}} Std.",
       "durationUnknown": "Unbekannt",
-      "visibilityPending": "Agent, Gesprächsseite und Dauer erscheinen, sobald die Backend-Anbindung aktiv ist.",
+      "durationHint": "Vergangene Zeit seit dem Start des Interviews — Nächte und Wochenenden eingeschlossen. Das ist keine Gesprächszeit.",
+      "visibilityPending": "Agent, Gesprächsseite und Laufzeit sind für diese Sitzung nicht verfügbar.",
       "takeover": "Agent stoppen / übernehmen",
       "takeoverBusy": "Wird ausgeführt…",
       "takeoverSuccess": "Sie haben das Gespräch übernommen.",
-      "takeoverUnavailable": "Übernahme ist noch nicht verfügbar — wartet auf die Backend-Anbindung.",
+      "takeoverUnavailable": "Übernahme nicht möglich: Es gibt keine Bewerbung, auf die sie wirken kann.",
       "takeoverNotActive": "Kein aktives Interview zum Übernehmen.",
       "takeoverFailed": "Übernahme fehlgeschlagen.",
       "resumeBusy": "Wird ausgeführt…",
       "resumeSuccess": "Sie haben das Gespräch fortgesetzt.",
-      "resumeUnavailable": "Fortsetzen ist noch nicht verfügbar — wartet auf die Backend-Anbindung.",
-      "resumeFailed": "Fortsetzen ist fehlgeschlagen."
+      "resumeUnavailable": "Fortsetzen nicht möglich: Es gibt keine Bewerbung, auf die es wirken kann.",
+      "resumeFailed": "Fortsetzen ist fehlgeschlagen.",
+      "noRunningSession": "Für diese Bewerbung läuft kein Interview (mehr).",
+      "notAllowed": "Sie haben keine Berechtigung, dieses Interview zu steuern."
     }
   },
   "appointments": {

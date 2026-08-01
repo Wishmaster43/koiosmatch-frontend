@@ -197,21 +197,25 @@
         "recruiter": "Retomado por ti",
         "completed": "Finalizado"
       },
-      "duration": "Duración de la conversación",
+      "duration": "Tiempo transcurrido",
       "durationMinutes": "{{count}} min",
       "durationHours": "{{hours}} h {{minutes}} min",
+      "durationDays": "{{days}} d {{hours}} h",
       "durationUnknown": "Desconocida",
-      "visibilityPending": "El agente, el turno y la duración de la conversación aparecerán en cuanto la conexión con el backend esté activa.",
+      "durationHint": "Tiempo transcurrido desde que empezó la entrevista — noches y fines de semana incluidos. No es tiempo de conversación.",
+      "visibilityPending": "El agente, el turno y el tiempo transcurrido no están disponibles para esta sesión.",
       "takeover": "Detener agente / retomar",
       "takeoverBusy": "Procesando…",
       "takeoverSuccess": "Has retomado la conversación.",
-      "takeoverUnavailable": "Retomar aún no está disponible — a la espera de la conexión con el backend.",
+      "takeoverUnavailable": "No se puede retomar: no hay ninguna solicitud sobre la que actuar.",
       "takeoverNotActive": "No hay ninguna entrevista activa para retomar.",
       "takeoverFailed": "No se pudo retomar la conversación.",
       "resumeBusy": "Procesando…",
       "resumeSuccess": "Has reanudado la conversación.",
-      "resumeUnavailable": "Reanudar aún no está disponible — a la espera de la conexión con el backend.",
-      "resumeFailed": "No se pudo reanudar la conversación."
+      "resumeUnavailable": "No se puede reanudar: no hay ninguna solicitud sobre la que actuar.",
+      "resumeFailed": "No se pudo reanudar la conversación.",
+      "noRunningSession": "Ya no hay ninguna entrevista en curso para esta solicitud.",
+      "notAllowed": "No tienes permiso para controlar esta entrevista."
     }
   },
   "appointments": {

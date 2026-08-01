@@ -15,11 +15,17 @@ import type {
  * absent. Null (no session at all) stays null — that's the `interview_status=
  * none` filter bucket, never a synthetic 'none' category value.
  *
- * INTERVIEW-VISIBILITY-1 (speculative, awaiting CMBE's confirmed contract):
- * `id`/`agent`/`flowName`/`turn`/timing map defensively off the PROPOSED raw
- * field names below — every one defaults to null so today's real payload
- * (which sends none of them yet) still maps cleanly. A backend field-name
- * change is a one-line fix here, not a UI rewrite.
+ * INTERVIEW-VISIBILITY-1 is LIVE (measured 01-08 in InterviewSessionResource).
+ * Which endpoint carries what is NOT uniform, so read the split before using a
+ * field on a new surface:
+ *  · BOTH list and detail send `id`, `category`, `current_status`, `step`,
+ *    `total`, `flow_name`, `completed_at`, `last_sent_at`;
+ *  · DETAIL ONLY (InterviewSessionResource::block) adds `agent`, `turn`,
+ *    `started_at`, `duration_seconds`, `disqualified_reason`, `statuses`,
+ *    `collected` and the `paused_at`/`paused_by`/`paused_by_name` trio.
+ * So a table/board/KPI row may render category/step/flow name, but NEVER agent,
+ * turn, duration or pause state — those are null there and would read as "no
+ * agent"/"unknown" on every row.
  *
  * INTERVIEW-STOP-1 (Danny 22-07): `paused_at`/`paused_by` map the same way —
  * nullable/defensive. Exported so Flow B (InterviewsTab's "start interview"
@@ -44,12 +50,9 @@ const mapTurn = (raw: unknown): ApplicationInterview['turn'] => {
 
 // Accepts both the flat (uuid + separate name) and the nested shape.
 const mapPausedBy = (raw: NonNullable<ApiApplication['interview']>): ApplicationInterview['pausedBy'] => {
-  const by = raw.paused_by as unknown
-  if (by && typeof by === 'object') {
-    const o = by as { id?: string; name?: string }
-    return o.id != null ? { id: o.id, name: o.name ?? '' } : null
-  }
-  if (typeof by === 'string' && by) return { id: by, name: (raw as { paused_by_name?: string }).paused_by_name ?? '' }
+  const by = raw.paused_by
+  if (by && typeof by === 'object') return by.id != null ? { id: by.id, name: by.name ?? '' } : null
+  if (typeof by === 'string' && by) return { id: by, name: raw.paused_by_name ?? '' }
   return null
 }
 
@@ -67,8 +70,15 @@ export function mapInterview(raw?: ApiApplication['interview']): ApplicationInte
     flowName: raw.flow_name ?? null,
     turn: mapTurn(raw.turn),
     startedAt: raw.started_at ?? null,
-    lastMessageAt: raw.last_message_at ?? null,
-    endedAt: raw.ended_at ?? null,
+    // The UI names stay `lastMessageAt`/`endedAt`, but the COLUMNS behind them are
+    // `last_sent_at` and `completed_at`. There is no `last_message_at`/`ended_at`
+    // column and the backend never sent either, so mapping those spellings kept both
+    // fields permanently null and left the duration fallback dead code (measured 01-08).
+    lastMessageAt: raw.last_sent_at ?? null,
+    endedAt: raw.completed_at ?? null,
+    // Wall-clock seconds from session creation to completion (or to now while live) —
+    // detail-only. NOT talk time: nights and weekends are inside it, so every label
+    // built on it must say "elapsed since start", never "conversation duration".
     durationSeconds: raw.duration_seconds ?? null,
     pausedAt: raw.paused_at ?? null,
     // `paused_by` is a BARE uuid with the display name alongside it in `paused_by_name`

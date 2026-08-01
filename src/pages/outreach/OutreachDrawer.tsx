@@ -8,8 +8,11 @@
  * `children` now sits in the title as a read-only badge (mirrors the candidate
  * phase badge). Owner is a real picker — UpdateOutreachCampaignRequest accepts
  * owner_id (measured in app/Http/Requests/Outreach) — via useOutreachDetail.setOwner.
- * No changelog icon: there is no /outreach-campaigns/{id}/activity route yet
- * (grepped routes/api/tenant/tasks-outreach.php) — OUTREACH-ACTIVITY-1.
+ * Record history is the shared ChangelogPopover icon in the title row (§3A(d)),
+ * fed by GET /outreach-campaigns/{id}/activity — MEASURED as live in
+ * routes/api/tenant/tasks-outreach.php (OutreachCampaignController::activityLog,
+ * the same LogsEntityActivity feed the customer/candidate/vacancy tabs read), so
+ * the old "no activity route yet" gate (OUTREACH-ACTIVITY-1) is gone.
  *
  * W2 delivered (measured): OutreachCampaignController::show is now withTrashed and
  * OutreachCampaignResource carries `archived`/`deleted_at`, so an archived campaign
@@ -27,10 +30,12 @@ import EntityHeader from '@/components/drawer/EntityHeader'
 import TitleBadge from '@/components/drawer/TitleBadge'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
+import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import { initialsOf } from '@/lib/initials'
 import { useUsers } from '@/lib/queries'
 import { useOutreachDetail } from './hooks/useOutreachDetail'
 import TargetsTab from './drawer/TargetsTab'
+import ChangelogTab from './drawer/ChangelogTab'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import type { Id } from '@/types/common'
 
@@ -116,6 +121,11 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
         <EntityHeader
           label={t('drawer.label')}
           avatar={{ initials: initialsOf(name), soft: true }}
+          // Changelog icon (§3A(d)) — the ONE shared house popover shell, same as the
+          // other seven entities. Its content mounts (and only then fetches) on open.
+          // Stays available while archived: activityLog resolves withTrashed, so an
+          // archived bellijst keeps its history readable (ARCH-READ-1).
+          titleActions={<ChangelogPopover><ChangelogTab campaignId={id} /></ChangelogPopover>}
           renderTitle={() => (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>

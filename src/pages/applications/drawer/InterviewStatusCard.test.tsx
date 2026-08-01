@@ -95,12 +95,22 @@ describe('resolveDurationSeconds (pure)', () => {
 })
 
 describe('splitDuration (pure)', () => {
-  it('splits into hours + minutes for a duration over an hour', () => {
-    expect(splitDuration(3720)).toEqual({ hours: 1, minutes: 2 })
+  it('splits into hours + minutes for a span over an hour', () => {
+    expect(splitDuration(3720)).toEqual({ days: 0, hours: 1, minutes: 2 })
   })
 
-  it('reports zero hours for a duration under an hour', () => {
-    expect(splitDuration(420)).toEqual({ hours: 0, minutes: 7 })
+  it('reports zero hours and days for a span under an hour', () => {
+    expect(splitDuration(420)).toEqual({ days: 0, hours: 0, minutes: 7 })
+  })
+
+  // The value is wall clock since the session started, so a WhatsApp thread answered
+  // after a weekend really is days — 98 hours must not render as "98u".
+  it('carries hours over into days, keeping hours as the remainder within the day', () => {
+    expect(splitDuration(4 * 86400 + 2 * 3600 + 300)).toEqual({ days: 4, hours: 2, minutes: 5 })
+  })
+
+  it('keeps a span just under a day in hours', () => {
+    expect(splitDuration(23 * 3600 + 3540)).toEqual({ days: 0, hours: 23, minutes: 59 })
   })
 })
 
@@ -124,11 +134,36 @@ describe('InterviewStatusCard · rich render', () => {
     expect(screen.getByText('interview.status.turn.agent')).toBeInTheDocument()
   })
 
+  // The flow's name is the card's subtitle. It stayed invisible until the backend
+  // started sending `flow_name`, so both branches are pinned.
+  it('renders the flow name as the subtitle, and nothing in its place when absent', () => {
+    const { rerender } = render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
+    expect(screen.getByText('Verpleegkundige intake')).toBeInTheDocument()
+    rerender(<InterviewStatusCard interview={fullInterview({ flowName: null })} applicationId="app-1" />)
+    expect(screen.queryByText('Verpleegkundige intake')).toBeNull()
+  })
+
   it('picks the minutes-only key under an hour, and the hours+minutes key over an hour', () => {
     const { rerender } = render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
     expect(screen.getByText('interview.status.durationMinutes')).toBeInTheDocument()
     rerender(<InterviewStatusCard interview={fullInterview({ durationSeconds: 3720 })} applicationId="app-1" />)
     expect(screen.getByText('interview.status.durationHours')).toBeInTheDocument()
+  })
+
+  // `duration_seconds` is wall clock from session creation, so a thread answered days
+  // later must read in days rather than as a three-digit hour count.
+  it('picks the days key for a multi-day elapsed span', () => {
+    render(<InterviewStatusCard interview={fullInterview({ durationSeconds: 4 * 86400 })} applicationId="app-1" />)
+    expect(screen.getByText('interview.status.durationDays')).toBeInTheDocument()
+    expect(screen.queryByText('interview.status.durationHours')).toBeNull()
+  })
+
+  // The label must not promise conversation time: the tooltip states what the number
+  // really measures, so the copy cannot silently drift back to "talk time".
+  it('labels the value as elapsed time and explains it in the tooltip', () => {
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
+    const label = screen.getByText(/interview\.status\.duration:/)
+    expect(label).toHaveAttribute('title', 'interview.status.durationHint')
   })
 
   it('does not show the visibility-pending notice once real data is present', () => {

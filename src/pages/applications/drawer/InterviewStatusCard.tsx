@@ -27,11 +27,13 @@ const TURN_COLOR: Record<string, string> = {
 }
 
 /**
- * resolveDurationSeconds — the live duration: prefer the explicit seconds field
- * (once the backend sends it), else derive it from started_at → (ended_at ??
- * last_message_at). Null when neither timing signal is present — never a
- * guessed number. Pure/exported so the derivation is unit-testable without
- * rendering (no lib/datetime dependency — out of scope for this task).
+ * resolveDurationSeconds — ELAPSED seconds since the session started, NOT how
+ * long the conversation took: the backend measures created_at → completed_at ??
+ * now(), so an overnight WhatsApp thread legitimately reads as days. Prefer that
+ * explicit field (detail contract); otherwise derive the same span from
+ * started_at → (endedAt ?? lastMessageAt), which is all a list payload could
+ * offer. Null when no timing signal exists — never a guessed number. Pure/
+ * exported so the derivation is unit-testable without rendering.
  */
 export function resolveDurationSeconds(iv: ApplicationInterview): number | null {
   if (iv.durationSeconds != null) return iv.durationSeconds
@@ -43,10 +45,16 @@ export function resolveDurationSeconds(iv: ApplicationInterview): number | null 
   return Math.max(0, Math.round((stop - start) / 1000))
 }
 
-/** splitDuration — whole seconds → {hours, minutes}, the two i18n placeholders. */
-export function splitDuration(totalSeconds: number): { hours: number; minutes: number } {
+/**
+ * splitDuration — whole seconds → {days, hours, minutes}. Days exist because this
+ * is wall-clock elapsed time: a thread answered the next morning is ~14 hours and
+ * one answered after a weekend is days, and "96u 15min" is unreadable. `hours` is
+ * the remainder within the day, so days+hours+minutes always describe one span.
+ */
+export function splitDuration(totalSeconds: number): { days: number; hours: number; minutes: number } {
   const totalMinutes = Math.max(0, Math.round(totalSeconds / 60))
-  return { hours: Math.floor(totalMinutes / 60), minutes: totalMinutes % 60 }
+  const totalHours = Math.floor(totalMinutes / 60)
+  return { days: Math.floor(totalHours / 24), hours: totalHours % 24, minutes: totalMinutes % 60 }
 }
 
 const cardStyle: CSSProperties = {
@@ -64,10 +72,18 @@ const actionBtnStyle = (active: boolean, danger: boolean): CSSProperties => ({
 
 /**
  * InterviewStatusCard — the compact "who's talking to whom, right now" summary
- * for the live interview session: agent, flow, turn, step and total duration.
+ * for the live interview session: agent, flow, turn, step and elapsed time.
  * Every visibility field stays optional, so a payload that carries only
  * category/step/total still renders the calm branches instead of inventing a
  * value (§3 no fake affordances).
+ *
+ * INTERVIEW-VISIBILITY-1 is LIVE (measured 01-08 in InterviewSessionResource):
+ * `flow_name` comes off the flow relation and the agent is resolved
+ * DETERMINISTICALLY (InterviewSession::resolveAgent — vacancy-coupled agent, then
+ * the flow's persona, then the oldest agent on the flow ordered by created_at,
+ * id), so both are presented plainly here. This card is DRAWER-ONLY on purpose:
+ * `agent`, `turn` and `duration_seconds` exist only on the detail resource, so no
+ * table, board or KPI may render them.
  *
  * INTERVIEW-STOP-1 is LIVE (measured 31-07). `POST /applications/{id}/stop-interview`
  * and `POST /applications/{id}/resume-interview` are registered inside the tenant
@@ -122,8 +138,10 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
   const turn = live.turn
   const durationSeconds = resolveDurationSeconds(live)
   const duration = durationSeconds != null ? splitDuration(durationSeconds) : null
-  // True once the backend has actually sent ANY INTERVIEW-VISIBILITY-1 field —
-  // until then, show ONE calm notice instead of four separate "unknown" chips.
+  // True when this payload carries ANY of the visibility fields. The detail
+  // contract always does, so in the drawer this is effectively always true; a
+  // block reduced to category/step (a list-shaped object handed in) gets ONE calm
+  // notice instead of four separate "unknown" chips.
   const hasVisibilityData = Boolean(live.agent || live.flowName || live.turn || durationSeconds != null)
 
   // Operable whenever there is an application to target and the session looks
@@ -204,12 +222,17 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
   return (
     <div style={cardStyle}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        {/* Agent identity — honest "unknown agent" while the field is unconfirmed. */}
+        {/* Agent identity, stated plainly: the backend resolves the running agent
+            deterministically (vacancy-coupled → flow persona → oldest by
+            created_at/id), so the name is a fact, not a best guess. "Unknown
+            agent" only for a payload that carries no agent at all (list rows). */}
         <Avatar initials={(live.agent?.name?.[0] ?? '?').toUpperCase()} size={26} />
         <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
             {live.agent?.name || t('interview.status.noAgent')}
           </span>
+          {/* The flow's own name (interview_flows.name) — the subtitle that stayed
+              invisible until the resource started sending `flow_name`. */}
           {live.flowName && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{live.flowName}</span>}
         </div>
 
@@ -224,15 +247,20 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
           </span>
         )}
 
-        {/* Total conversation duration — the value sits in its OWN span so the
-            label and the value stay two distinct, independently queryable nodes. */}
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+        {/* ELAPSED time since the interview started — deliberately NOT called
+            conversation duration: the backend counts wall clock from session
+            creation, so nights and weekends are inside this number. The tooltip
+            spells that out; the value sits in its OWN span so label and value
+            stay two distinct, independently queryable nodes. */}
+        <span style={{ fontSize: 12, color: 'var(--text-muted)' }} title={t('interview.status.durationHint')}>
           {t('interview.status.duration')}:{' '}
           <span>
             {duration ? (
-              duration.hours > 0
-                ? t('interview.status.durationHours', duration)
-                : t('interview.status.durationMinutes', { count: duration.minutes })
+              duration.days > 0
+                ? t('interview.status.durationDays', duration)
+                : duration.hours > 0
+                  ? t('interview.status.durationHours', duration)
+                  : t('interview.status.durationMinutes', { count: duration.minutes })
             ) : t('interview.status.durationUnknown')}
           </span>
         </span>

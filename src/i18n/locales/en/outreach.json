@@ -115,5 +115,29 @@
     "matchFailed": "Creating the match failed.",
     "owner": "Owner",
     "selectOwner": "Select owner"
+  },
+  "changelog": {
+    "loading": "Loading…",
+    "error": "Changelog could not be loaded.",
+    "empty": "No changes yet.",
+    "system": "System",
+    "emptyValue": "Empty",
+    "updatedValue": "updated",
+    "actions": {
+      "created": "Created",
+      "updated": "Updated",
+      "deleted": "Archived",
+      "restored": "Restored"
+    },
+    "fields": {
+      "name": "Name",
+      "channel": "Channel",
+      "status": "Status",
+      "source_pool_id": "Source pool",
+      "owner_id": "Owner",
+      "created_by": "Created by",
+      "custom_fields": "Custom fields",
+      "reference_number": "Reference number"
+    }
   }
 }

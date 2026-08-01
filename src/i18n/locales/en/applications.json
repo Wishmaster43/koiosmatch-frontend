@@ -197,21 +197,25 @@
         "recruiter": "Taken over by you",
         "completed": "Completed"
       },
-      "duration": "Conversation duration",
+      "duration": "Elapsed",
       "durationMinutes": "{{count}} min",
       "durationHours": "{{hours}}h {{minutes}}min",
+      "durationDays": "{{days}}d {{hours}}h",
       "durationUnknown": "Unknown",
-      "visibilityPending": "Agent, turn and conversation duration will show once the backend link is active.",
+      "durationHint": "Time elapsed since the interview started — nights and weekends included. This is not talk time.",
+      "visibilityPending": "Agent, turn and elapsed time aren't available for this session.",
       "takeover": "Stop agent / take over",
       "takeoverBusy": "Working…",
       "takeoverSuccess": "You've taken over the conversation.",
-      "takeoverUnavailable": "Taking over isn't available yet — waiting on the backend link.",
+      "takeoverUnavailable": "Can't take over: there's no application to act on.",
       "takeoverNotActive": "No active interview to take over.",
       "takeoverFailed": "Taking over failed.",
       "resumeBusy": "Working…",
       "resumeSuccess": "You've resumed the conversation.",
-      "resumeUnavailable": "Resuming isn't available yet — waiting on the backend link.",
-      "resumeFailed": "Resuming failed."
+      "resumeUnavailable": "Can't resume: there's no application to act on.",
+      "resumeFailed": "Resuming failed.",
+      "noRunningSession": "There's no interview running for this application (any more).",
+      "notAllowed": "You don't have permission to control this interview."
     }
   },
   "appointments": {

@@ -49,34 +49,43 @@ export interface ApplicationOwner {
  * flow may have 3 steps, a Verpleegkundige flow 12). Null = no interview
  * session at all (the backend's `interview_status=none` filter bucket).
  *
- * INTERVIEW-VISIBILITY-1 (speculative, Danny 21-07): `id`/`agent`/`flowName`/
- * `turn`/timing fields are awaiting CMBE's confirmed contract — today's real
- * ApplicationDetailResource::interviewSession() sends none of them, so they
- * stay nullable and default to null. The UI honest-gates on their absence
- * rather than assuming a fake value (§3).
+ * INTERVIEW-VISIBILITY-1 is LIVE (measured 01-08). Fields stay nullable because
+ * they are NOT uniformly available: `id`/`flowName`/`endedAt`/`lastMessageAt`
+ * come from list AND detail, while `agent`/`turn`/`startedAt`/`durationSeconds`/
+ * `pausedAt`/`pausedBy` are DETAIL-ONLY. Anything rendering a list row must
+ * therefore stick to the first group (§3 no fake affordances).
  *
  * INTERVIEW-STOP-1 (Danny 22-07): `paused` is the category a session moves to
  * once a recruiter stops the agent (`POST /applications/{id}/stop-interview`);
- * `pausedAt`/`pausedBy` record when/who — both nullable until that ships.
+ * `pausedAt`/`pausedBy` record when/who.
  */
 export interface ApplicationInterview {
   category: 'busy' | 'completed' | 'disqualified' | 'paused'
   currentStatus: string | null
   step: number | null
   total: number
-  // The interview session's own id — awaited from INTERVIEW-SESSION-ID-AGENT;
-  // the stop/resume actions honest-gate on its presence rather than assume it.
+  // The interview session's own id. Present on both contracts, but the stop/resume
+  // routes target the APPLICATION id, so no action gates on it.
   id: Id | null
+  // The AI agent running the session — resolved deterministically server-side
+  // (InterviewSession::resolveAgent orders by created_at, then id), so the name
+  // is authoritative and may be shown plainly. Detail-only.
   agent: { id: Id; name: string } | null
+  // The interview flow's own name (interview_flows.name), via the relation.
   flowName: string | null
   // 'completed' is the backend's 'afgerond': nobody is on turn any more because the
   // interview is finished. Normalised in mapInterview — see the alias table there.
   turn: 'agent' | 'candidate' | 'completed' | 'pending' | 'recruiter' | null
   startedAt: string | null
+  // Backed by `last_sent_at` — the last moment WE sent, not the last message overall.
   lastMessageAt: string | null
+  // Backed by `completed_at` — there is no `ended_at` column.
   endedAt: string | null
+  // ELAPSED wall-clock seconds since the session started (nights and weekends
+  // included), NOT time spent conversing. Detail-only; label it accordingly.
   durationSeconds: number | null
   pausedAt: string | null
+  // Flattened from the bare `paused_by` uuid + its sibling `paused_by_name`.
   pausedBy: { id: Id; name: string } | null
 }
 
@@ -287,11 +296,14 @@ export interface ApiApplication {
   // (ApplicationListResource::interviewSummary); the detail contract's
   // interview() omits it but sends completed_at/disqualified_reason instead —
   // mapApplication derives category from those when absent. Null = no session.
-  // INTERVIEW-VISIBILITY-1 (speculative): `id`/`agent`/`flow_name`/`turn`/timing
-  // fields per the proposed-but-unconfirmed contract — all optional so today's
-  // real payload (which omits them) still maps cleanly.
-  // INTERVIEW-STOP-1: `paused_at`/`paused_by` ride along once a recruiter stops
-  // the agent — also optional/nullable, same defensive treatment.
+  // INTERVIEW-VISIBILITY-1 (LIVE, measured 01-08): every key below is a REAL
+  // interview_sessions column or relation. Both spellings the FE once guessed at —
+  // `ended_at` and `last_message_at` — are gone: those columns do not exist, the
+  // end of an interview IS `completed_at` and the last send IS `last_sent_at`.
+  // Optional per key because the LIST resource sends a subset (no agent/turn/
+  // started_at/duration_seconds/paused_*).
+  // INTERVIEW-STOP-1: `paused_by` is a BARE uuid; the display name travels
+  // separately in `paused_by_name` (the nested object is tolerated, never sent).
   interview?: {
     id?: Id
     category?: string
@@ -300,16 +312,16 @@ export interface ApiApplication {
     step?: number | null
     total?: number
     completed_at?: string | null
+    last_sent_at?: string | null
     disqualified_reason?: string | null
     agent?: { id?: Id; name?: string } | null
     flow_name?: string | null
     turn?: string | null
     started_at?: string | null
-    last_message_at?: string | null
-    ended_at?: string | null
     duration_seconds?: number | null
     paused_at?: string | null
-    paused_by?: { id?: Id; name?: string } | null
+    paused_by?: Id | { id?: Id; name?: string } | null
+    paused_by_name?: string | null
   } | null
   interviews?: Array<{
     id?: Id; channel?: string; status?: string; created_at?: string; time?: string; summary?: string

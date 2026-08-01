@@ -197,21 +197,25 @@
         "recruiter": "Overgenomen door jou",
         "completed": "Afgerond"
       },
-      "duration": "Gespreksduur",
+      "duration": "Doorlooptijd",
       "durationMinutes": "{{count}} min",
       "durationHours": "{{hours}}u {{minutes}}min",
+      "durationDays": "{{days}}d {{hours}}u",
       "durationUnknown": "Onbekend",
-      "visibilityPending": "Agent, beurt en gespreksduur zijn beschikbaar zodra de backend-koppeling actief is.",
+      "durationHint": "Verstreken tijd sinds de start van het interview — nachten en weekenden tellen mee. Dit is geen spreektijd.",
+      "visibilityPending": "Agent, beurt en doorlooptijd zijn niet beschikbaar voor deze sessie.",
       "takeover": "Agent stoppen / overnemen",
       "takeoverBusy": "Bezig…",
       "takeoverSuccess": "Je hebt het gesprek overgenomen.",
-      "takeoverUnavailable": "Overnemen is nog niet beschikbaar — wacht op de backend-koppeling.",
+      "takeoverUnavailable": "Overnemen kan niet: er is geen sollicitatie om aan te spreken.",
       "takeoverNotActive": "Geen actief interview om over te nemen.",
       "takeoverFailed": "Overnemen is mislukt.",
       "resumeBusy": "Bezig…",
       "resumeSuccess": "Je hebt het gesprek hervat.",
-      "resumeUnavailable": "Hervatten is nog niet beschikbaar — wacht op de backend-koppeling.",
-      "resumeFailed": "Hervatten is mislukt."
+      "resumeUnavailable": "Hervatten kan niet: er is geen sollicitatie om aan te spreken.",
+      "resumeFailed": "Hervatten is mislukt.",
+      "noRunningSession": "Er loopt geen interview (meer) voor deze sollicitatie.",
+      "notAllowed": "Je hebt geen rechten om dit interview te bedienen."
     }
   },
   "appointments": {

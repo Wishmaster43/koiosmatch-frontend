@@ -115,5 +115,29 @@
     "matchFailed": "Match maken mislukt.",
     "owner": "Eigenaar",
     "selectOwner": "Kies eigenaar"
+  },
+  "changelog": {
+    "loading": "Laden…",
+    "error": "Wijzigingslog laden is mislukt.",
+    "empty": "Nog geen wijzigingen.",
+    "system": "Systeem",
+    "emptyValue": "Leeg",
+    "updatedValue": "bijgewerkt",
+    "actions": {
+      "created": "Aangemaakt",
+      "updated": "Bijgewerkt",
+      "deleted": "Gearchiveerd",
+      "restored": "Hersteld"
+    },
+    "fields": {
+      "name": "Naam",
+      "channel": "Kanaal",
+      "status": "Status",
+      "source_pool_id": "Bron-pool",
+      "owner_id": "Eigenaar",
+      "created_by": "Aangemaakt door",
+      "custom_fields": "Extra velden",
+      "reference_number": "Nummer"
+    }
   }
 }

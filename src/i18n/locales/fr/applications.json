@@ -197,21 +197,25 @@
         "recruiter": "Repris par vous",
         "completed": "Terminé"
       },
-      "duration": "Durée de la conversation",
+      "duration": "Temps écoulé",
       "durationMinutes": "{{count}} min",
       "durationHours": "{{hours}} h {{minutes}} min",
+      "durationDays": "{{days}} j {{hours}} h",
       "durationUnknown": "Inconnue",
-      "visibilityPending": "L'agent, le tour et la durée de la conversation s'afficheront dès que la liaison backend sera active.",
+      "durationHint": "Temps écoulé depuis le début de l'entretien — nuits et week-ends compris. Il ne s'agit pas du temps de conversation.",
+      "visibilityPending": "L'agent, le tour et le temps écoulé ne sont pas disponibles pour cette session.",
       "takeover": "Arrêter l'agent / reprendre la main",
       "takeoverBusy": "En cours…",
       "takeoverSuccess": "Vous avez repris la conversation.",
-      "takeoverUnavailable": "La reprise n'est pas encore disponible — en attente de la liaison backend.",
+      "takeoverUnavailable": "Reprise en main impossible : aucune candidature sur laquelle agir.",
       "takeoverNotActive": "Aucun entretien actif à reprendre.",
       "takeoverFailed": "La reprise a échoué.",
       "resumeBusy": "En cours…",
       "resumeSuccess": "Vous avez remis la conversation à l'agent.",
-      "resumeUnavailable": "La reprise n'est pas encore disponible — en attente de la liaison backend.",
-      "resumeFailed": "La reprise a échoué."
+      "resumeUnavailable": "Impossible de rendre la main à l'agent : aucune candidature sur laquelle agir.",
+      "resumeFailed": "La reprise a échoué.",
+      "noRunningSession": "Aucun entretien n'est (plus) en cours pour cette candidature.",
+      "notAllowed": "Vous n'avez pas l'autorisation de piloter cet entretien."
     }
   },
   "appointments": {

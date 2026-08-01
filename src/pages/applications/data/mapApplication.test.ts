@@ -133,11 +133,11 @@ describe('mapApplication', () => {
     })
   })
 
-  // INTERVIEW-VISIBILITY-1 (speculative — awaiting CMBE's confirmed contract):
-  // agent/flow/turn/timing map defensively off the PROPOSED raw field names;
-  // none of them exist on today's real payload, so absence must stay null,
-  // never a crash or a synthetic placeholder value.
-  describe('interview visibility fields (INTERVIEW-VISIBILITY-1, speculative)', () => {
+  // INTERVIEW-VISIBILITY-1 is LIVE (measured 01-08 in InterviewSessionResource):
+  // agent/flow_name/turn/timing are really sent, off REAL column names. Absence
+  // still maps to null — the list resource sends a subset — but the field names
+  // below are the resource's, not a guess.
+  describe('interview visibility fields (INTERVIEW-VISIBILITY-1)', () => {
     it('maps the session id, agent identity, flow name and turn when present', () => {
       const mapped = mapApplication({
         id: 22,
@@ -163,10 +163,13 @@ describe('mapApplication', () => {
       expect(mapped.interview?.durationSeconds).toBe(720)
     })
 
-    it('maps started_at/last_message_at/ended_at, defaulting all timing to null when absent', () => {
+    // The columns are `started_at`, `last_sent_at` and `completed_at`. There is no
+    // `last_message_at`/`ended_at` column and the backend never sent either, so
+    // mapping those two spellings left lastMessageAt/endedAt permanently null.
+    it('reads lastMessageAt from last_sent_at and endedAt from completed_at', () => {
       const withTiming = mapApplication({
         id: 25,
-        interview: { category: 'busy', started_at: '2026-07-21T09:00:00Z', last_message_at: '2026-07-21T09:10:00Z', ended_at: '2026-07-21T09:12:00Z' },
+        interview: { category: 'busy', started_at: '2026-07-21T09:00:00Z', last_sent_at: '2026-07-21T09:10:00Z', completed_at: '2026-07-21T09:12:00Z' },
       })
       expect(withTiming.interview).toMatchObject({
         startedAt: '2026-07-21T09:00:00Z', lastMessageAt: '2026-07-21T09:10:00Z', endedAt: '2026-07-21T09:12:00Z',
@@ -296,5 +299,66 @@ describe('mapInterview · the backend contract as it really is', () => {
 
   it('leaves pausedBy null when nobody took over', () => {
     expect(mapInterview({ turn: 'agent' } as never)?.pausedBy).toBeNull()
+  })
+})
+
+// The exact body InterviewSessionResource::block() emits (measured 01-08), mapped in
+// one go. It guards the two seams that were silently dead: `flow_name` (added by the
+// backend — the drawer subtitle had nothing to render before) and the timing pair,
+// which the mapper read under column names that do not exist.
+describe('mapInterview · the real InterviewSessionResource payload', () => {
+  const resourceBody = {
+    id: 'sess-1',
+    flow_id: 'flow-1',
+    flow_name: 'Verpleegkundige intake',
+    current_status: 'ACTIVE_IN_CARE',
+    statuses: ['START', 'ACTIVE_IN_CARE', 'DONE'],
+    step: 2,
+    total: 3,
+    collected: {},
+    started_at: '2026-07-28T09:00:00Z',
+    completed_at: '2026-08-01T11:30:00Z',
+    last_sent_at: '2026-08-01T11:25:00Z',
+    duration_seconds: 354600,
+    turn: 'afgerond',
+    disqualified_reason: null,
+    paused_at: null,
+    paused_by: null,
+    paused_by_name: null,
+    agent: { id: 'agent-1', name: 'Yesway Zorg-agent' },
+  }
+
+  it('maps every field of the resource body, including the flow name the card subtitles with', () => {
+    expect(mapInterview(resourceBody as never)).toEqual({
+      category: 'completed',
+      currentStatus: 'ACTIVE_IN_CARE',
+      step: 2,
+      total: 3,
+      id: 'sess-1',
+      agent: { id: 'agent-1', name: 'Yesway Zorg-agent' },
+      flowName: 'Verpleegkundige intake',
+      turn: 'completed',
+      startedAt: '2026-07-28T09:00:00Z',
+      lastMessageAt: '2026-08-01T11:25:00Z',
+      endedAt: '2026-08-01T11:30:00Z',
+      durationSeconds: 354600,
+      pausedAt: null,
+      pausedBy: null,
+    })
+  })
+
+  // The list resource sends a strict subset: no agent, turn, started_at,
+  // duration_seconds or pause metadata. Those must map to null, so no list surface
+  // can accidentally present an empty value as a real one.
+  it('maps the LIST subset without inventing the detail-only fields', () => {
+    const listRow = {
+      id: 'sess-1', category: 'busy', current_status: 'ACTIVE_IN_CARE', step: 2, total: 3,
+      flow_name: 'Verpleegkundige intake', completed_at: null, last_sent_at: '2026-08-01T11:25:00Z',
+    }
+    expect(mapInterview(listRow as never)).toMatchObject({
+      category: 'busy', flowName: 'Verpleegkundige intake', lastMessageAt: '2026-08-01T11:25:00Z',
+      agent: null, turn: null, startedAt: null, durationSeconds: null, endedAt: null,
+      pausedAt: null, pausedBy: null,
+    })
   })
 })

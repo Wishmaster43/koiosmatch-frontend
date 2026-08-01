@@ -115,5 +115,29 @@
     "matchFailed": "Match erstellen fehlgeschlagen.",
     "owner": "Eigentümer",
     "selectOwner": "Inhaber wählen"
+  },
+  "changelog": {
+    "loading": "Wird geladen…",
+    "error": "Änderungsprotokoll konnte nicht geladen werden.",
+    "empty": "Noch keine Änderungen.",
+    "system": "System",
+    "emptyValue": "Leer",
+    "updatedValue": "aktualisiert",
+    "actions": {
+      "created": "Erstellt",
+      "updated": "Aktualisiert",
+      "deleted": "Archiviert",
+      "restored": "Wiederhergestellt"
+    },
+    "fields": {
+      "name": "Name",
+      "channel": "Kanal",
+      "status": "Status",
+      "source_pool_id": "Quell-Pool",
+      "owner_id": "Eigentümer",
+      "created_by": "Erstellt von",
+      "custom_fields": "Zusatzfelder",
+      "reference_number": "Referenznummer"
+    }
   }
 }

@@ -115,5 +115,29 @@
     "matchFailed": "Error al crear el match.",
     "owner": "Responsable",
     "selectOwner": "Seleccionar responsable"
+  },
+  "changelog": {
+    "loading": "Cargando…",
+    "error": "No se ha podido cargar el registro de cambios.",
+    "empty": "Todavía no hay cambios.",
+    "system": "Sistema",
+    "emptyValue": "Vacío",
+    "updatedValue": "actualizado",
+    "actions": {
+      "created": "Creado",
+      "updated": "Actualizado",
+      "deleted": "Archivado",
+      "restored": "Restaurado"
+    },
+    "fields": {
+      "name": "Nombre",
+      "channel": "Canal",
+      "status": "Estado",
+      "source_pool_id": "Pool de origen",
+      "owner_id": "Responsable",
+      "created_by": "Creado por",
+      "custom_fields": "Campos personalizados",
+      "reference_number": "Número de referencia"
+    }
   }
 }

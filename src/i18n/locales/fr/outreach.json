@@ -115,5 +115,29 @@
     "matchFailed": "Échec de la création du match.",
     "owner": "Responsable",
     "selectOwner": "Sélectionner un responsable"
+  },
+  "changelog": {
+    "loading": "Chargement…",
+    "error": "Impossible de charger le journal des modifications.",
+    "empty": "Aucune modification pour l'instant.",
+    "system": "Système",
+    "emptyValue": "Vide",
+    "updatedValue": "mis à jour",
+    "actions": {
+      "created": "Créé",
+      "updated": "Mis à jour",
+      "deleted": "Archivé",
+      "restored": "Restauré"
+    },
+    "fields": {
+      "name": "Nom",
+      "channel": "Canal",
+      "status": "Statut",
+      "source_pool_id": "Pool source",
+      "owner_id": "Responsable",
+      "created_by": "Créé par",
+      "custom_fields": "Champs supplémentaires",
+      "reference_number": "Numéro de référence"
+    }
   }
 }

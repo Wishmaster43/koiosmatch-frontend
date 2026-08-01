@@ -11,6 +11,8 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 // Real i18n (nl) side-effect init so t() resolves genuine Dutch text.
 import '@/i18n'
+import nlCommon from '@/i18n/locales/nl/common.json'
+import nlOutreach from '@/i18n/locales/nl/outreach.json'
 import OutreachDrawer from './OutreachDrawer'
 
 // The detail hook is the drawer's only data source — stub it and observe the id it gets.
@@ -28,6 +30,9 @@ vi.mock('./hooks/useOutreachDetail', () => ({
 }))
 // The targets tab has its own data needs — out of scope for the drawer wiring test.
 vi.mock('./drawer/TargetsTab', () => ({ default: () => null }))
+// The changelog CONTENT has its own test (drawer/ChangelogTab.test.tsx); here we only
+// assert the drawer wires the shared popover shell into the title row.
+vi.mock('./drawer/ChangelogTab', () => ({ default: () => <div data-testid="changelog-body" /> }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [] }) }))
 
@@ -80,5 +85,36 @@ describe('OutreachDrawer — reference number chip', () => {
   it('renders nothing when reference_number is absent', () => {
     render(<OutreachDrawer id="c1" onClose={() => {}} />)
     expect(screen.queryByText(/^B-/)).toBeNull()
+  })
+})
+
+// CMFE 20: bellijsten were the LAST entity without a change log. GET
+// /outreach-campaigns/{id}/activity is live (measured in
+// routes/api/tenant/tasks-outreach.php), so the drawer now carries the house
+// affordance: a changelog ICON in the title row opening the shared popover — never a
+// tab (§3A(d)). Regression guard for the stale "no activity route yet" gate.
+describe('OutreachDrawer — changelog icon (§3A(d))', () => {
+  const openChangelog = () => fireEvent.click(screen.getByRole('button', { name: nlCommon.changelog }))
+
+  it('puts the changelog icon in the title row and opens the shared popover, never a tab', () => {
+    render(<OutreachDrawer id="c1" onClose={() => {}} />)
+    // Icon present, popover closed until clicked (content mounts = fetches on open).
+    const icon = screen.getByRole('button', { name: nlCommon.changelog })
+    expect(icon).toHaveAttribute('aria-haspopup', 'dialog')
+    expect(icon).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByTestId('changelog-body')).toBeNull()
+    // It is NOT a tab: the tab bar holds only the call list (no custom fields defined).
+    expect(screen.queryByRole('tab', { name: nlOutreach.changelog.empty })).toBeNull()
+    expect(screen.queryByText(nlCommon.changelog, { selector: 'button[role="tab"]' })).toBeNull()
+
+    openChangelog()
+    expect(screen.getByRole('dialog', { name: nlCommon.changelog })).toBeInTheDocument()
+    expect(screen.getByTestId('changelog-body')).toBeInTheDocument()
+  })
+
+  it('keeps the changelog reachable on an archived bellijst (activityLog is withTrashed)', () => {
+    render(<OutreachDrawer id="c1" archived fallbackName="Bellijst Zorg" onClose={() => {}} />)
+    openChangelog()
+    expect(screen.getByTestId('changelog-body')).toBeInTheDocument()
   })
 })
