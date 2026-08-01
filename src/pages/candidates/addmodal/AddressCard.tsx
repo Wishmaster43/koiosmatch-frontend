@@ -4,7 +4,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import type { FormState } from '../AddCandidateModal'
-import { Field, TextField, CreatableSelect, cardHead, cardBox, row } from './fields'
+import { Field, CvField, TextField, CreatableSelect, cardHead, cardBox, row } from './fields'
 import { getCountryOptions } from '@/lib/countries'
 
 interface AddressCardProps {
@@ -25,23 +25,23 @@ export default function AddressCard({ form, errors, set, isReq, provinces }: Add
       <div style={cardHead}>{t('modal.fields.cardAddress')}</div>
       <div style={cardBox}>
         <div style={row('2fr 1fr 1fr')}>
-          <Field label={t('modal.fields.street')} required={isReq('street')}>
+          <CvField name="street" label={t('modal.fields.street')} required={isReq('street')}>
             <TextField value={form.street} onChange={v => set('street', v)} placeholder={t('modal.fields.streetPlaceholder')} error={errors.street} />
-          </Field>
-          <Field label={t('modal.fields.houseNumber')}>
+          </CvField>
+          <CvField name="houseNumber" label={t('modal.fields.houseNumber')}>
             <TextField value={form.houseNumber} onChange={v => set('houseNumber', v)} />
-          </Field>
+          </CvField>
           <Field label={t('modal.fields.houseNumberSuffix')}>
             <TextField value={form.houseNumberSuffix} onChange={v => set('houseNumberSuffix', v)} />
           </Field>
         </div>
         <div style={row('1fr 2fr')}>
-          <Field label={t('modal.fields.postalCode')} required={isReq('postalCode')}>
+          <CvField name="postalCode" label={t('modal.fields.postalCode')} required={isReq('postalCode')}>
             <TextField value={form.postalCode} onChange={v => set('postalCode', v)} error={errors.postalCode} />
-          </Field>
-          <Field label={t('modal.fields.city')} required={isReq('city')}>
+          </CvField>
+          <CvField name="city" label={t('modal.fields.city')} required={isReq('city')}>
             <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('modal.fields.cityPlaceholder')} error={errors.city} />
-          </Field>
+          </CvField>
         </div>
         <div style={row('1fr 1fr')}>
           <Field label={t('modal.fields.province')}>

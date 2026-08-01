@@ -61,6 +61,8 @@ export function mapContact(p: ApiContact = {}): Contact {
     id: p.id,
     // NUMMER-2: the human-readable number, shown as a copy chip next to the name.
     referenceNumber: p.reference_number ?? '',
+    // The owning customer — the merge route is scoped to it, so the drill-down needs it.
+    customerId: p.customer_id ?? null,
     firstName: p.first_name ?? '',
     middleName: p.middle_name ?? '',
     lastName: p.last_name ?? '',
@@ -74,6 +76,9 @@ export function mapContact(p: ApiContact = {}): Contact {
     // is the new separate mobile number the WhatsApp shortcut uses.
     phone: p.phone ?? '',
     mobile: p.mobile ?? '',
+    // CONTACT-GESLACHT-1: the gender VALUE SLUG (male|female|other) straight off the
+    // resource — never an id, so the /genders lookup resolves label+colour from it.
+    gender: p.gender ?? '',
     isPrimary: Boolean(p.is_primary ?? p.isPrimary),
     locationId: p.customer_location_id ?? p.location_id ?? p.locationId ?? null,
     locationName: p.location_name ?? p.location?.name ?? locations[0]?.name ?? '',
@@ -83,8 +88,9 @@ export function mapContact(p: ApiContact = {}): Contact {
     departments,
     statusId: p.status_id ?? null,
     ...mapStatusRef(p.status),
-    // Mirrors mapCandidate's identical pair — CustomerContactResource doesn't send
-    // these yet, so this always resolves to null today (see the Contact type comment).
+    // CONTACT-LAATSTE-CONTACT-1: mirrors mapCandidate's identical pair. LIVE — the
+    // resource now sends both, so the table's "Laatste contact" column shows real data
+    // (it rendered a blanket dash for as long as the resource omitted the columns).
     lastContactAt: p.last_contact_at ?? null,
     lastContactType: p.last_contact_type ?? null,
     customFields: p.custom_fields ?? {},

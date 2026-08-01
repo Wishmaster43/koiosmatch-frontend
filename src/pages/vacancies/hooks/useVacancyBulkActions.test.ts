@@ -16,8 +16,8 @@ const statusMeta = (v?: string | number | null) => ({ label: `L:${v}`, color: '#
 function harness() {
   return renderHook(() => {
     const [vacancies, setVacancies] = useState<Array<Record<string, unknown>>>([
-      { id: 1, statusValue: 'draft', tags: ['x'] },
-      { id: 2, statusValue: 'draft', tags: ['x'] },
+      { id: 1, statusValue: 'draft', tags: ['x'], aiAgentId: 'old', aiAgentName: 'Oud' },
+      { id: 2, statusValue: 'draft', tags: ['x'], aiAgentId: null, aiAgentName: '' },
     ])
     const [total, setTotal] = useState(2)
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
@@ -97,5 +97,57 @@ describe('useVacancyBulkActions · archive + tag removal', () => {
     await waitFor(() => expect(notify).toHaveBeenCalledWith('success', 'bulk.tagRemoved'))
     expect(tagsOf(r, 1)).toEqual([])      // confirmed
     expect(tagsOf(r, 2)).toEqual(['x'])   // skipped → reverted
+  })
+})
+
+// VAC-BULK-AGENT-1: these assert the REQUEST (route + body), not just that a
+// callback fired — the decouple case only works because `ai_agent_id: null` is
+// actually IN the body (the API validates it `present, nullable`), and a body that
+// silently omitted the key would 422 while a callback-only test stayed green.
+const agentOf = (r: { result: { current: { vacancies: Array<Record<string, unknown>> } } }, id: number) =>
+  r.result.current.vacancies.find(v => v.id === id)
+
+describe('useVacancyBulkActions · bulkSetAiAgent (couple + decouple)', () => {
+  it('POSTs /vacancies/bulk/ai-agent with the picked agent id and patches the rows', async () => {
+    post.mockResolvedValue({ data: { updated: [1, 2], skipped: [] } })
+    const r = harness()
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    act(() => r.result.current.actions.bulkSetAiAgent({ id: 'a1', name: 'Koios' }))
+    expect(post).toHaveBeenCalledWith('/vacancies/bulk/ai-agent', { vacancy_ids: [1, 2], ai_agent_id: 'a1' })
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('success', 'bulk.agentLinked'))
+    expect(agentOf(r, 1)).toMatchObject({ aiAgentId: 'a1', aiAgentName: 'Koios' })
+    expect(agentOf(r, 2)).toMatchObject({ aiAgentId: 'a1', aiAgentName: 'Koios' })
+  })
+
+  it('sends ai_agent_id: null — the key is PRESENT — to decouple the batch', async () => {
+    post.mockResolvedValue({ data: { updated: [1], skipped: [2] } })
+    const r = harness()
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    act(() => r.result.current.actions.bulkSetAiAgent(null))
+    const [url, body] = post.mock.calls[0]
+    expect(url).toBe('/vacancies/bulk/ai-agent')
+    expect(Object.keys(body)).toContain('ai_agent_id')   // present, not omitted
+    expect(body).toEqual({ vacancy_ids: [1, 2], ai_agent_id: null })
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('success', 'bulk.agentUnlinked'))
+    expect(agentOf(r, 1)).toMatchObject({ aiAgentId: null, aiAgentName: '' })
+  })
+
+  it('reverts the rows the server skipped and keeps the confirmed ones', async () => {
+    post.mockResolvedValue({ data: { updated: [2], skipped: [1] } })
+    const r = harness()
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    act(() => r.result.current.actions.bulkSetAiAgent({ id: 'a1', name: 'Koios' }))
+    await waitFor(() => expect(notify).toHaveBeenCalled())
+    expect(agentOf(r, 1)).toMatchObject({ aiAgentId: 'old', aiAgentName: 'Oud' })   // skipped → reverted
+    expect(agentOf(r, 2)).toMatchObject({ aiAgentId: 'a1', aiAgentName: 'Koios' })  // confirmed
+  })
+
+  it('reverts everything and flags an error when the call fails', async () => {
+    post.mockRejectedValue(new Error('boom'))
+    const r = harness()
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    act(() => r.result.current.actions.bulkSetAiAgent(null))
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('error', 'bulk.mutateError'))
+    expect(agentOf(r, 1)).toMatchObject({ aiAgentId: 'old', aiAgentName: 'Oud' })
   })
 })

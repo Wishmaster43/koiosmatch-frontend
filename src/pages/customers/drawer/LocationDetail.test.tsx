@@ -10,7 +10,7 @@
  * assertions through the ACTIVE locale's own copy instead of guessing/hardcoding
  * a language.
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
@@ -26,6 +26,28 @@ vi.mock('@/lib/useLocations', () => ({ useLocations: () => [{ value: 'br-1', lab
 vi.mock('@/lib/useCustomFields', () => ({
   useCustomFields: () => ({ fields: [], allFields: [], loading: false, invalidate: () => {} }),
 }))
+// KLANTLOCATIE-GEOCODE-1: the Koppelingen sub-tab's PDOK card fires a REAL POST, so the
+// client is stubbed (get too — useProvinces reads /provinces on mount) while the module's
+// named helpers stay real. GeocodeButton hides itself without the permission, so useAuth
+// is stubbed to grant it; hasModule stays false, exactly like the unprovided context did.
+const mockPost = vi.fn()
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
+  return {
+    ...actual,
+    default: {
+      get: vi.fn().mockResolvedValue({ data: [] }),
+      post: (...args: unknown[]) => mockPost(...args),
+      patch: vi.fn(), delete: vi.fn(),
+    },
+  }
+})
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({ hasPermission: () => true, hasModule: () => false }),
+}))
+vi.mock('@/lib/notify', () => ({ notifySuccess: vi.fn(), notifyError: vi.fn() }))
+
+beforeEach(() => { vi.clearAllMocks(); mockPost.mockResolvedValue({ status: 202, data: {} }) })
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
@@ -110,5 +132,62 @@ describe('LocationDetail · title-row status badge', () => {
     render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
     // Only ONE "Actief" on screen — the title badge — not a second one inside a field row.
     expect(screen.getAllByText('Actief')).toHaveLength(1)
+  })
+})
+
+/**
+ * KLANTLOCATIE-GEOCODE-1 (backend 2026-08-01) — until today the customer LOCATION was the
+ * only geocodable record without a per-record re-geocode route, so its PDOK card could
+ * only read. The route now exists and the card acts, mirroring the customer's own card.
+ * Assert the REQUEST (§13): a card that renders a button which POSTs the wrong URL is a
+ * 404 nobody sees, which is exactly the failure this test exists to catch.
+ */
+const openKoppelingen = async (user: ReturnType<typeof userEvent.setup>) =>
+  user.click(screen.getByRole('tab', { name: cm('backofficeLinks.tabLabel') }))
+
+describe('LocationDetail · PDOK card in Koppelingen', () => {
+  it('POSTs the per-location geocode route, addressed through its customer', async () => {
+    const user = userEvent.setup()
+    render(<LocationDetail location={location({ city: 'Gorinchem' })} onSave={vi.fn()} {...baseProps} />)
+    await openKoppelingen(user)
+
+    await user.click(screen.getByRole('button', { name: cm('geocode.refresh') }))
+    expect(mockPost).toHaveBeenCalledTimes(1)
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/locations/loc-1/geocode')
+  })
+
+  it('renders the coordinates it already has instead of "not geocoded"', async () => {
+    const user = userEvent.setup()
+    render(<LocationDetail location={location({ city: 'Gorinchem', lat: 51.8367, lng: 4.9705 })} onSave={vi.fn()} {...baseProps} />)
+    await openKoppelingen(user)
+    expect(screen.getByText('51.83670, 4.97050')).toBeInTheDocument()
+    expect(screen.queryByText(cm('backofficeLinks.pdok.notGeocoded'))).not.toBeInTheDocument()
+  })
+
+  it('disables the trigger and fires nothing while the site has no address worth geocoding', async () => {
+    const user = userEvent.setup()
+    render(<LocationDetail location={location({ city: '' })} onSave={vi.fn()} {...baseProps} />)
+    await openKoppelingen(user)
+
+    const btn = screen.getByRole('button', { name: cm('geocode.refresh') })
+    expect(btn).toBeDisabled()
+    await user.click(btn)
+    expect(mockPost).not.toHaveBeenCalled()
+  })
+
+  it('stays honestly read-only (no trigger at all) when there is no customer to address the route through', async () => {
+    const user = userEvent.setup()
+    render(<LocationDetail location={location({ city: 'Gorinchem' })} onSave={vi.fn()} {...baseProps} customerId={undefined} />)
+    await openKoppelingen(user)
+
+    expect(screen.queryByRole('button', { name: cm('geocode.refresh') })).toBeNull()
+    expect(screen.getByText(cm('backofficeLinks.pdok.readOnly'))).toBeInTheDocument()
+  })
+
+  it('never fires the geocode POST on mount — only on an explicit click', async () => {
+    const user = userEvent.setup()
+    render(<LocationDetail location={location({ city: 'Gorinchem' })} onSave={vi.fn()} {...baseProps} />)
+    await openKoppelingen(user)
+    expect(mockPost).not.toHaveBeenCalled()
   })
 })

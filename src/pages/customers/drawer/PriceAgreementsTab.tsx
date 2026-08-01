@@ -4,6 +4,12 @@
  * trede combination (each optional = wildcard). Add via an inline form (soft
  * primary-tinted panel, mirrors DocumentsTab's pending-upload panel); each row is
  * a PriceAgreementRow with in-place edit + delete. Handles all four UI states.
+ *
+ * FACTUURADRES-1 (Danny 2026-08-01): the Facturatie sub-tab also carries the customer's
+ * OWN invoice address, next to the billing e-mail and the billing vestiging it belongs
+ * with. A main customer may invoice through a PO box, which can never be a vestiging.
+ * Leaving the block empty means "use the visit address", so nobody maintains one address
+ * twice — while it is empty the block shows the visit address and says it is being used.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -16,13 +22,16 @@ import PriceAgreementForm, { emptyDraft, draftToPayload } from './PriceAgreement
 import type { PriceAgreementDraft } from './PriceAgreementForm'
 import PriceAgreementRow from './PriceAgreementRow'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
+import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import { useLocations } from '@/lib/useLocations'
 import SubTabBar from '@/components/drawer/SubTabBar'
+import { getCountryOptions } from '@/lib/countries'
+import { resolveCustomerBillingAddress } from '../hooks/customerBillingAddress'
 import type { Customer } from '@/types/customer'
 import type { Id } from '@/types/common'
 
 export default function PriceAgreementsTab({ customerId, c, onSave }: { customerId?: Id; c?: Customer; onSave?: (values: Record<string, unknown>) => void }) {
-  const { t } = useTranslation('customers')
+  const { t, i18n } = useTranslation('customers')
   const { agreements, loading, error, reload, add, update, remove } = usePriceAgreements(customerId)
   // Same establishment list the match form uses, so both offer exactly one source.
   const branchOptions = useLocations().map(l => ({ value: String(l.value), label: l.label }))
@@ -35,6 +44,48 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
 
   // Submit the add-form, then close it and reset for the next entry.
   const saveNew = () => { add(draftToPayload(draft)); setAdding(false); setDraft(emptyDraft()) }
+
+  // FACTUURADRES-1 — which address an invoice goes to, resolved client-side so the block
+  // flips the instant an optimistic PATCH lands (see the hook for the full reasoning).
+  const billing = resolveCustomerBillingAddress(c)
+  // The invoice-address table's edit toggle is owned here, because the READ view swaps
+  // between two different shapes (the own address vs. the visit-address fallback) and
+  // only this component knows which one to show.
+  const [editingBillingAddress, setEditingBillingAddress] = useState(false)
+  // ISO-2 country codes as VALUES: `billing_country` runs through the backend's
+  // CountryCodeCast, which normalises every write to ISO-2 and returns it verbatim
+  // (LAND-ISO-1). Sending a country NAME here would store a second vocabulary.
+  const countryOptions = getCountryOptions(i18n.language)
+  // Loose rows, never the shared 'address' composite: that composite reads the fixed
+  // visit-address keys, and an incomplete invoice address must stay visibly incomplete
+  // so somebody fixes it rather than hiding behind a composed line. No province row —
+  // a Dutch invoice does not carry one, so the column deliberately does not exist.
+  const billingAddressFields: FieldRow[] = [
+    { key: 'billingPoBox', label: t('overview.billingAddress.poBox') },
+    { key: 'billingStreet', label: t('locations.detail.street') },
+    { key: 'billingHouseNumber', label: t('locations.detail.houseNumber') },
+    { key: 'billingHouseNumberSuffix', label: t('locations.detail.houseNumberSuffix') },
+    { key: 'billingPostalCode', label: t('locations.detail.postalCode') },
+    { key: 'billingCity', label: t('locations.detail.city') },
+    { key: 'billingCountry', label: t('locations.detail.country'), type: 'select', options: countryOptions },
+  ]
+  // Read view while the block is empty: the visit address, plus the line saying it is
+  // the one being used — that is what "empty means use the visit address" looks like.
+  const fallbackRow: FieldRow = {
+    key: 'billingVisitAddress',
+    label: t('overview.address'),
+    renderValue: () => (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <span style={{ fontSize: 12, color: billing.visitLine ? 'var(--text)' : 'var(--text-muted)' }}>
+          {billing.visitLine || t('overview.billingAddress.visitEmpty')}
+        </span>
+        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('overview.billingAddress.usesVisitAddress')}</span>
+      </div>
+    ),
+  }
+  // Save closes the edit cycle here (a controlled EditableFieldTable never closes itself)
+  // and hands the raw billing keys to the page's optimistic PATCH.
+  const saveBillingAddress = (values: Record<string, unknown>) => { setEditingBillingAddress(false); onSave?.(values) }
 
   return (
     <div>
@@ -51,7 +102,7 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
           match form reads, and the billing e-mail is the ONE address invoicing uses
           regardless of which location or department a match picks. */}
       {subTab === 'billing' && c && (
-        <div style={{ marginTop: 14 }}>
+        <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 14 }}>
           <EditableFieldTable
             title={t('overview.billing')}
             fields={[
@@ -65,6 +116,29 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
             value={c as unknown as Record<string, unknown>}
             onSave={onSave}
           />
+
+          {/* FACTUURADRES-1 — the customer's own invoice address, right where the other
+              billing settings live. It edits the RAW columns only: pre-filling the visit
+              address into the form would turn "same as visit address" into a frozen copy
+              that then drifts, which is exactly what this design avoids. */}
+          <div>
+            <EditableFieldTable
+              title={t('overview.billingAddress.title')}
+              fields={billing.own || editingBillingAddress ? billingAddressFields : [fallbackRow]}
+              value={billing.fields as unknown as Record<string, unknown>}
+              onSave={saveBillingAddress}
+              editing={editingBillingAddress}
+              onStartEdit={() => setEditingBillingAddress(true)}
+              onCancel={() => setEditingBillingAddress(false)}
+            />
+            {/* Only while editing: the emptying rule is a property of the FORM, and
+                repeating it in read mode would just restate the fallback line above. */}
+            {editingBillingAddress && (
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '-6px 0 0' }}>
+                {t('overview.billingAddress.hint')}
+              </p>
+            )}
+          </div>
         </div>
       )}
       {subTab === 'prices' && (

@@ -220,7 +220,45 @@
       "other": "Andere / keine Angabe"
     },
     "vacancyFallback": "Stelle {{id}}",
-    "statusPanelHint": "Standard: Lead. Ein neuer Kandidat beginnt als Lead."
+    "statusPanelHint": "Standard: Lead. Ein neuer Kandidat beginnt als Lead.",
+    "cv": {
+      "title": "Kandidat aus Lebenslauf",
+      "intro": "Laden Sie einen Lebenslauf (PDF) hoch. Koios liest die Daten aus und füllt dieses Formular vor. Es wird nichts gespeichert: Sie prüfen die Felder und klicken selbst auf Anlegen.",
+      "choose": "Lebenslauf wählen",
+      "hint": "Nur PDF · max. 10 MB",
+      "uploading": "Lebenslauf wird hochgeladen…",
+      "reading": "Lebenslauf wird gelesen…",
+      "readingHint": "Das dauert meist 10 bis 40 Sekunden.",
+      "cancel": "Abbrechen",
+      "another": "Anderer Lebenslauf",
+      "retry": "Erneut versuchen",
+      "badge": "cv",
+      "badgeTitle": "Aus dem Lebenslauf übernommen — bitte prüfen",
+      "checkNotice": "Prüfen Sie die markierten Felder: Datumsangaben und Arbeitgeber werden regelmäßig falsch gelesen.",
+      "filled_one": "{{count}} Feld aus dem Lebenslauf vorausgefüllt",
+      "filled_other": "{{count}} Felder aus dem Lebenslauf vorausgefüllt",
+      "none": "Dieser Lebenslauf enthielt keine Daten, die in dieses Formular passen.",
+      "skipped_one": "{{count}} Feld übersprungen, weil Sie es bereits ausgefüllt hatten.",
+      "skipped_other": "{{count}} Felder übersprungen, weil Sie sie bereits ausgefüllt hatten.",
+      "unreadableDate": "Das Geburtsdatum im Lebenslauf war nicht eindeutig lesbar und wurde nicht übernommen.",
+      "extraExperiences_one": "Der Lebenslauf enthält außerdem {{count}} Berufserfahrung. Fügen Sie sie nach dem Anlegen im Dossier hinzu.",
+      "extraExperiences_other": "Der Lebenslauf enthält außerdem {{count}} Berufserfahrungen. Fügen Sie sie nach dem Anlegen im Dossier hinzu.",
+      "extraEducations_one": "Der Lebenslauf enthält außerdem {{count}} Ausbildung. Fügen Sie sie nach dem Anlegen im Dossier hinzu.",
+      "extraEducations_other": "Der Lebenslauf enthält außerdem {{count}} Ausbildungen. Fügen Sie sie nach dem Anlegen im Dossier hinzu.",
+      "noFreeText": "Freitext aus dem Lebenslauf (Zusammenfassung, Motivation, Anmerkungen) wird bewusst nicht übernommen.",
+      "error": {
+        "notPdf": "Es kann nur eine PDF-Datei gelesen werden.",
+        "tooLarge": "Diese Datei ist größer als 10 MB.",
+        "throttled": "Zu viele Lebensläufe hintereinander. Warten Sie eine Minute und versuchen Sie es erneut.",
+        "forbidden": "Sie haben keine Berechtigung, einen Lebenslauf lesen zu lassen.",
+        "expired": "Diese Anfrage ist abgelaufen. Laden Sie den Lebenslauf erneut hoch.",
+        "budget": "Das KI-Budget dieses Monats ist erreicht. Bitte tragen Sie die Daten manuell ein.",
+        "unreadable": "Dieser Lebenslauf konnte nicht gelesen werden. Bitte tragen Sie die Daten manuell ein.",
+        "unavailable": "Der Lebenslauf-Leser ist derzeit nicht verfügbar. Versuchen Sie es später erneut.",
+        "timeout": "Das Lesen dieses Lebenslaufs hat zu lange gedauert. Versuchen Sie es erneut oder tragen Sie die Daten manuell ein.",
+        "generic": "Der Lebenslauf konnte nicht gelesen werden."
+      }
+    }
   },
   "drawer": {
     "availability": "Verfügbarkeit",

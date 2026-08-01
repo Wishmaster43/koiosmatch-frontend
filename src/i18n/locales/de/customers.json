@@ -129,7 +129,14 @@
     "callPhone": "Anrufen",
     "openWebsite": "Website öffnen",
     "coc": "Handelsregisternr.",
-    "vat": "USt-IdNr."
+    "vat": "USt-IdNr.",
+    "billingAddress": {
+      "title": "Rechnungsadresse",
+      "poBox": "Postfach",
+      "usesVisitAddress": "Leer — die Rechnung geht an die Besuchsadresse.",
+      "visitEmpty": "Keine Besuchsadresse hinterlegt",
+      "hint": "Leer lassen, wenn die Rechnung an die Besuchsadresse geht. Nur bei abweichender Adresse oder Postfach ausfüllen."
+    }
   },
   "richText": {
     "empty": "Noch nicht ausgefüllt."
@@ -276,7 +283,8 @@
       },
       "linkLocation": "Standort verknüpfen",
       "linkDepartment": "Abteilung verknüpfen",
-      "middleName": "Namenszusatz"
+      "middleName": "Namenszusatz",
+      "gender": "Geschlecht"
     },
     "deleteConfirm": "Diesen Kontakt löschen?",
     "saveFailed": "Speichern fehlgeschlagen.",
@@ -294,7 +302,24 @@
     },
     "openContact": "Kontakt öffnen",
     "backTo": "Zurück zu {{name}}",
-    "searchHere": "Kontakt suchen…"
+    "searchHere": "Kontakt suchen…",
+    "merge": {
+      "title": "Kontaktperson zusammenführen",
+      "intro": "Wählen Sie die doppelte Kontaktperson bei diesem Kunden und danach, welcher Datensatz bleibt. {{name}} ist der geöffnete Datensatz.",
+      "searchPlaceholder": "Suche nach Name, Nummer oder E-Mail…",
+      "noResults": "Keine Kontaktpersonen gefunden.",
+      "noOthers": "Dieser Kunde hat keine weitere Kontaktperson zum Zusammenführen.",
+      "stays": "Dieser Datensatz bleibt",
+      "thisRecord": "Geöffneter Datensatz",
+      "otherRecord": "Gefundener Datensatz",
+      "warning": "Die Daten von {{source}} werden in {{target}} übernommen; {{source}} verschwindet danach. Dies kann nicht rückgängig gemacht werden.",
+      "back": "Zurück",
+      "cancel": "Abbrechen",
+      "confirm": "Zusammenführen",
+      "done": "Kontaktpersonen zusammengeführt.",
+      "errForbidden": "Sie haben keine Berechtigung, Kontaktpersonen zusammenzuführen.",
+      "errFailed": "Zusammenführen fehlgeschlagen. Bitte erneut versuchen."
+    }
   },
   "vacancies": {
     "empty": "Keine Stellen für diesen Kunden.",
@@ -534,7 +559,8 @@
       "confirm": "Ja, ersetzen",
       "decline": "Nein, nicht ersetzen"
     },
-    "middleName": "Namenszusatz"
+    "middleName": "Namenszusatz",
+    "gender": "Geschlecht"
   },
   "changelog": {
     "empty": "Noch keine Änderungen."

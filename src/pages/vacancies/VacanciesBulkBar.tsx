@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { ListChecks, UserCog, CircleDot, Building2, Globe, GlobeLock, Tag, StickyNote, Archive, X } from 'lucide-react'
+import { ListChecks, UserCog, CircleDot, Building2, Globe, GlobeLock, Bot, BotOff, Tag, StickyNote, Archive, X } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import { BTN_H } from '@/config/buttonMetrics'
@@ -7,6 +7,7 @@ import type { Id, LookupOption } from '@/types/common'
 
 interface BulkUser { id: Id; name: string }
 interface BulkCustomer { id: Id; name: string }
+interface BulkAiAgent { id: Id; name: string }
 
 interface VacanciesBulkBarProps {
   count: number
@@ -16,6 +17,8 @@ interface VacanciesBulkBarProps {
   onSetClient: (c: BulkCustomer) => void
   onPublish: () => void
   onUnpublish: () => void
+  // VAC-BULK-AGENT-1: `null` = decouple the agent from the batch (a real mutation).
+  onSetAiAgent: (agent: BulkAiAgent | null) => void
   onRemoveTag: (tag: string) => void
   onAddNote: (text: string) => void
   onArchive: () => void
@@ -23,6 +26,7 @@ interface VacanciesBulkBarProps {
   users?: BulkUser[]
   statuses?: LookupOption[]
   customers?: BulkCustomer[]
+  aiAgents?: BulkAiAgent[]
   selectedTags?: string[]
 }
 
@@ -33,9 +37,9 @@ interface VacanciesBulkBarProps {
  * a thin assembler. Mirrors CandidatesBulkBar — extend by adding a node.
  */
 export default function VacanciesBulkBar({
-  count, onClear, onSetOwner, onSetStatus, onSetClient, onPublish, onUnpublish,
+  count, onClear, onSetOwner, onSetStatus, onSetClient, onPublish, onUnpublish, onSetAiAgent,
   onRemoveTag, onAddNote, onArchive, canArchive = false,
-  users = [], statuses = [], customers = [], selectedTags = [],
+  users = [], statuses = [], customers = [], aiAgents = [], selectedTags = [],
 }: VacanciesBulkBarProps) {
   const { t } = useTranslation('vacancies')
 
@@ -43,11 +47,13 @@ export default function VacanciesBulkBar({
   const userOptions = users.map(u => ({ value: u.id, label: u.name }))
   const statusOptions = statuses.map(s => ({ value: s.value, label: s.label, color: s.color }))
   const customerOptions = customers.map(c => ({ value: c.id, label: c.name }))
+  const agentOptions = aiAgents.map(a => ({ value: a.id, label: a.name }))
   const tagOptions = selectedTags.map(tg => ({ value: tg, label: tg }))
 
-  // Resolve a picked user/customer id back to the full object the parent needs.
+  // Resolve a picked user/customer/agent id back to the full object the parent needs.
   const pickUser = (handler: (u: BulkUser) => void) => (id: string | number) => { const u = users.find(x => x.id === id); if (u) handler(u) }
   const pickCustomer = (handler: (c: BulkCustomer) => void) => (id: string | number) => { const c = customers.find(x => x.id === id); if (c) handler(c) }
+  const pickAgent = (id: string | number) => { const a = aiAgents.find(x => x.id === id); if (a) onSetAiAgent(a) }
 
   // Declarative bulk-action tree; archive is gated (server re-checks).
   const items: MenuNode[] = [
@@ -61,6 +67,16 @@ export default function VacanciesBulkBar({
       { key: 'publish',   label: t('bulk.publish'),   icon: Globe,     onSelect: onPublish },
       { key: 'unpublish', label: t('bulk.unpublish'), icon: GlobeLock, onSelect: onUnpublish },
     ] },
+    // VAC-BULK-AGENT-1: couple/decouple the AI-agent — same submenu shape as
+    // publishing above. Decouple is a REAL mutation (ai_agent_id: null), so it is
+    // offered next to the picker instead of leaving "remove" impossible in bulk.
+    // Hidden while no agent is available to pick (module off / none configured /
+    // list unavailable): an option list that can only ever be empty is a dead end.
+    ...(agentOptions.length ? [{ key: 'aiAgent', label: t('bulk.aiAgent'), icon: Bot, items: [
+      { key: 'aiAgentLink',   label: t('bulk.linkAgent'),   icon: Bot,
+        searchPlaceholder: t('bulk.searchAgent'), emptyText: t('bulk.noAgents'), options: agentOptions, onPick: pickAgent },
+      { key: 'aiAgentUnlink', label: t('bulk.unlinkAgent'), icon: BotOff, onSelect: () => onSetAiAgent(null) },
+    ] }] : []),
     { key: 'tag', label: t('bulk.removeTag'), icon: Tag,
       searchPlaceholder: t('bulk.searchTag'), emptyText: t('bulk.noTags'), options: tagOptions, onPick: v => onRemoveTag(String(v)) },
     { key: 'note', label: t('bulk.addNote'), icon: StickyNote, input: true,

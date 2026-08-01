@@ -50,6 +50,7 @@ const contact = (over: Partial<Contact> = {}): Contact => ({
   email: 'eva@klant.test', phone: '', mobile: '0612345678', isPrimary: false,
   locationId: 'loc-1', locationName: '', departmentId: 'dep-1', departmentName: '',
   locations: [], departments: [], statusId: null, status: '', statusLabel: '', statusColor: '',
+  customerId: 'cust-1', gender: '',
   lastContactAt: null, lastContactType: null, customFields: {},
   ...over,
 } as Contact)
@@ -258,5 +259,39 @@ describe('ContactsPanel · colour on/off flags per column (CHIPKLEUR-INSTELBAAR-
       // The other two columns are unaffected — the three flags are independent.
       expect(screen.getByText('Vestiging Noord')).toHaveStyle({ color: 'var(--color-secondary)' })
     })
+  })
+})
+
+/**
+ * CONTACT-LAATSTE-CONTACT-1 — Danny asked for "laatste contact datum en type" in the
+ * contacts table weeks ago. The columns always existed; CustomerContactResource simply
+ * never sent them, so the column rendered a dash for every row. Now that it does, the
+ * date must render DD-MM-YYYY through lib/formatters' locale-aware helper — never a
+ * hand-rolled slice of the ISO string, and never the raw ISO value.
+ */
+describe('ContactsPanel · last contact column', () => {
+  const lastContactCell = (name: string) => {
+    const row = screen.getByText(name).closest('tr')!
+    return row.querySelectorAll('td')
+  }
+
+  it('renders the date DD-MM-YYYY, not the raw ISO timestamp', () => {
+    render(<Host {...base} scope="customer"
+      contacts={[contact({ lastContactAt: '2026-07-14T09:30:00+02:00', lastContactType: 'phone' })]} />)
+    expect(screen.getByText('14-07-2026')).toBeInTheDocument()
+    expect(screen.queryByText(/2026-07-14T/)).not.toBeInTheDocument()
+  })
+
+  it('falls back to a dash when the contact was never contacted', () => {
+    render(<Host {...base} scope="customer" contacts={[contact({ lastContactAt: null, lastContactType: null })]} />)
+    const cells = [...lastContactCell('Eva Bos')].map(c => c.textContent)
+    expect(cells).toContain('—')
+  })
+
+  it('keeps the column on every scope — it is the same one surface', () => {
+    render(<Host {...base} scope="location" scopeId="loc-1"
+      contacts={[contact({ lastContactAt: '2026-07-14T09:30:00+02:00', lastContactType: 'phone' })]} />)
+    expect(screen.getByText(ct('contacts.col.lastContact'))).toBeInTheDocument()
+    expect(screen.getByText('14-07-2026')).toBeInTheDocument()
   })
 })

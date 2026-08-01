@@ -15,6 +15,7 @@ import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { mapCustomer } from '../data/mapCustomer'
+import { mapCustomerBilling, BILLING_API_FIELDS } from './customerBillingAddress'
 import type { Customer, ApiCustomer } from '@/types/customer'
 import type { Id } from '@/types/common'
 
@@ -65,7 +66,17 @@ const FIELD_MAP: Record<string, string> = {
   branchId: 'location_id',
   // §3B "Eigen velden" — the Extra tab patches the full merged map at once.
   customFields: 'custom_fields',
+  // FACTUURADRES-1 (Danny 2026-08-01): the customer's own invoice address. Spread from
+  // the ONE key map so this list can never drift from the mapper that reads them back
+  // (every key here is validated by CustomerRequest::sharedRules).
+  ...BILLING_API_FIELDS,
 }
+
+// Full customer detail → the mapped record plus the invoice-address block. The billing
+// columns are not part of data/mapCustomer.ts yet, so they
+// are folded in at the single place the detail/create responses are read.
+const mapCustomerDetail = (raw: ApiCustomer): Customer =>
+  ({ ...mapCustomer(raw), ...mapCustomerBilling(raw) })
 
 export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
   const [selected,       setSelected]       = useState<Customer | null>(null)
@@ -86,7 +97,7 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
     selectedIdRef.current = c.id ?? null
     setSelected(c); setDetail(null); setDrawerExpanded(false)
     api.get(`/customers/${c.id}`)
-      .then(r => { if (selectedIdRef.current === c.id) setDetail(mapCustomer(unwrap(r))) })
+      .then(r => { if (selectedIdRef.current === c.id) setDetail(mapCustomerDetail(unwrap<ApiCustomer>(r))) })
       .catch(err => {
         // Bug class fix: this was a completely empty catch — the worst variant, the
         // drawer sat stuck on the light row forever with NO signal the detail load
@@ -155,7 +166,7 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
       const v = form[formKey]
       if (typeof v === 'string' && v.trim() !== '') body[apiKey] = v.trim()
     })
-    return api.post('/customers', body).then(r => { const c = mapCustomer(unwrap(r)); setCustomers(prev => prev.map(x => x.id === optimistic.id ? c : x)); return c })
+    return api.post('/customers', body).then(r => { const c = mapCustomerDetail(unwrap<ApiCustomer>(r)); setCustomers(prev => prev.map(x => x.id === optimistic.id ? c : x)); return c })
       .catch(err => { setCustomers(prev => prev.filter(x => x.id !== tmpId)); setTotal(tt => tt - 1); throw err })
   }
 

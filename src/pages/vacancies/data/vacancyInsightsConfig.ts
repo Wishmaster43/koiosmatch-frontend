@@ -31,6 +31,9 @@ interface Args {
   // one definition (VacanciesPage) so all three stay in sync.
   toggleWithoutAgent: () => void
   applicationsTotal: number
+  // VAC-HAS-APPLICATIONS-1: the applications KPI card's server-side quick view
+  // (?has_applications=1) — vacancies with ≥1 coupled application.
+  hasApplications: boolean; setHasApplications: Dispatch<SetStateAction<boolean>>
 }
 
 export function buildVacancyInsightsConfig({
@@ -38,6 +41,7 @@ export function buildVacancyInsightsConfig({
   statusBucket, setStatusBucket, selectedOwner, pickOwner, clearOwner, selectedClient, pickClient, clearClient,
   selectedCategory, pickCategory, clearCategory, publishedBucket, setPublishedBucket,
   selectedAgentId, setSelectedAgentId, showWithoutAgent, setShowWithoutAgent, toggleWithoutAgent, applicationsTotal,
+  hasApplications, setHasApplications,
 }: Args) {
   // 7 donuts (VAC-KPI-REDESIGN 22-07: was 5 donuts + 6 funnel-KPI cards = 11 tiles;
   // the funnel collapsed into one donut and an AI-agent donut was added, keeping
@@ -88,8 +92,14 @@ export function buildVacancyInsightsConfig({
     // #1: vacancies without a linked AI agent — same quick view as the toolbar toggle.
     { key: 'withoutAgent', label: t('kpi.withoutAgent'), value: agentNoneCount, color: 'var(--color-violet)',
       onClick: toggleWithoutAgent, active: showWithoutAgent },
-    // #2: total applications across every funnel phase — informational only (no filter).
-    { key: 'applicationsTotal', label: t('kpi.applicationsTotal'), value: applicationsTotal, color: 'var(--color-primary)' },
+    // #2: total applications across every funnel phase. VAC-HAS-APPLICATIONS-1: the
+    // card is now click-to-filter like every other one — it narrows the list to the
+    // vacancies that HAVE applications (?has_applications=1, a real server-wide
+    // whereHas). The `sub` line spells that out because the number counts
+    // APPLICATIONS while the filter selects VACANCIES — two different units, so the
+    // click must never read as "show me these 42 rows".
+    { key: 'applicationsTotal', label: t('kpi.applicationsTotal'), value: applicationsTotal, color: 'var(--color-primary)',
+      sub: t('kpi.applicationsTotalHint'), onClick: () => setHasApplications(v => !v), active: hasApplications },
   ]
 
   return { donuts, kpis }

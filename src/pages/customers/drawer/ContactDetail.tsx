@@ -30,7 +30,7 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash2, Edit2, Save, X } from 'lucide-react'
+import { Trash2, Edit2, Save, X, GitMerge } from 'lucide-react'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import CreatableSelect from '@/components/ui/CreatableSelect'
@@ -42,15 +42,18 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
+import MergeContactModal from './MergeContactModal'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useContactFunctions } from '@/lib/useContactFunctions'
+import { useGenders } from '@/lib/useGenders'
 import { useConfirm } from '@/hooks/useConfirm'
+import { useAuth } from '@/context/AuthContext'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 
 
-export default function ContactDetail({ contact, locations, departments, statuses, existing = [], canLinkBackoffice = false, onSave, onDelete, close }: {
+export default function ContactDetail({ contact, locations, departments, statuses, existing = [], canLinkBackoffice = false, onSave, onDelete, close, onMerged }: {
   contact: Contact
   locations: { id: Id; name: string }[]
   departments: Department[]
@@ -63,6 +66,8 @@ export default function ContactDetail({ contact, locations, departments, statuse
   onSave: (id: Id, payload: Partial<ContactPayload>) => void
   onDelete: (id: Id) => void
   close: () => void
+  /** Called with the SURVIVOR's id after a merge, so the host can open that record. */
+  onMerged?: (survivorId: Id) => void
 }) {
   const { t } = useTranslation('customers')
   const { confirm, dialog } = useConfirm()
@@ -80,6 +85,14 @@ export default function ContactDetail({ contact, locations, departments, statuse
   // Contact function (job title) is a lookup combobox, split from the candidate
   // function list (FUNCTIONS-SPLIT-1) — never a plain free-text field.
   const { contactFunctions, allowFreeEntry } = useContactFunctions()
+  // CONTACT-GESLACHT-1: the SAME tenant /genders lookup a candidate uses — three
+  // hardcoded options would be a second, drifting vocabulary.
+  const { genders } = useGenders()
+  // Merge is destructive and irreversible, so it is permission-gated in the UI
+  // (customers.update — the route's own middleware; the backend re-checks anyway, §7).
+  const auth = useAuth()
+  const canMerge = (auth?.hasPermission ?? (() => false))('customers.update')
+  const [merging, setMerging] = useState(false)
 
   // Location/department are no longer in this table — see the Koppeling block
   // below (file header BUG FIX 28-07): a chip-select field can't cascade off
@@ -94,6 +107,14 @@ export default function ContactDetail({ contact, locations, departments, statuse
     // CONTACT-TUSSENVOEGSEL-1: editing a contact used to drop this silently.
     { key: 'middleName', label: t('contacts.detail.middleName'), type: 'text' },
     { key: 'lastName', label: t('subModal.lastName'), type: 'text' },
+    // Gender stores the lookup VALUE SLUG; the read view resolves its label below.
+    { key: 'gender', label: t('contacts.detail.gender'), type: 'creatable', allowCreate: false,
+      options: genders.map(g => ({ value: g.value, label: g.label })),
+      renderValue: v => {
+        const slug = String(v ?? '')
+        const hit = genders.find(g => g.value === slug || g.label === slug)
+        return <span style={{ color: slug ? 'var(--text)' : 'var(--text-muted)' }}>{hit?.label ?? slug ?? '—'}</span>
+      } },
     { key: 'role', label: t('contacts.detail.role'), type: 'creatable', options: contactFunctions, allowCreate: allowFreeEntry },
     { key: 'email', label: t('contacts.detail.email'), type: 'text',
       renderValue: v => emailValue(v, t('contacts.detail.email')) },
@@ -110,6 +131,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
     firstName: contact.firstName,
     middleName: contact.middleName,
     lastName: contact.lastName,
+    gender: contact.gender,
     role: contact.role,
     email: contact.email,
     mobile: contact.mobile,
@@ -125,6 +147,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
     const commit = (isPrimary: boolean) => {
       onSave(contact.id as Id, {
         firstName: v.firstName as string, middleName: v.middleName as string, lastName: v.lastName as string,
+        gender: v.gender as string,
         role: v.role as string, email: v.email as string,
         mobile: v.mobile as string, phone: v.phone as string,
         isPrimary,
@@ -206,10 +229,21 @@ export default function ContactDetail({ contact, locations, departments, statuse
             </>
           )}
         </div>
-        <button onClick={remove} title={t('common:delete')}
-          style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--color-danger)' }}>
-          <Trash2 size={13} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          {/* Merge — title-row action, exactly like the candidate drawer (§3A). Hidden
+              without customers.update and when this customer has no second contact to
+              merge with: a button that can only ever fail is a fake affordance. */}
+          {canMerge && contact.customerId != null && existing.length > 1 && (
+            <button onClick={() => setMerging(true)} title={t('contacts.merge.title')} aria-label={t('contacts.merge.title')}
+              style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)' }}>
+              <GitMerge size={13} />
+            </button>
+          )}
+          <button onClick={remove} title={t('common:delete')} aria-label={t('common:delete')}
+            style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--color-danger)' }}>
+            <Trash2 size={13} />
+          </button>
+        </div>
       </div>
 
       {/* Sub-tab strip — EXTRACT-1 made it unconditional (the Koppelingen sub-tab
@@ -261,6 +295,13 @@ export default function ContactDetail({ contact, locations, departments, statuse
       )}
       {subTab === 'koppelingen' && (
         <BackofficeLinksTab entity="contacts" id={contact.id as Id} helloflexLink={contact.helloflexLink} shiftmanagerLink={contact.shiftmanagerLink} canLink={canLinkBackoffice} />
+      )}
+      {/* `existing` is the CUSTOMER-WIDE list, which is exactly the set the scoped merge
+          route can resolve — a contact from another customer is a 404 by design. */}
+      {merging && contact.customerId != null && (
+        <MergeContactModal customerId={contact.customerId} current={contact} others={existing}
+          onClose={() => setMerging(false)}
+          onMerged={survivorId => { setMerging(false); onMerged?.(survivorId) }} />
       )}
       {dialog}
     </div>

@@ -220,7 +220,45 @@
       "other": "Autre / non précisé"
     },
     "vacancyFallback": "Offre {{id}}",
-    "statusPanelHint": "Par défaut Lead. Un nouveau candidat commence comme Lead."
+    "statusPanelHint": "Par défaut Lead. Un nouveau candidat commence comme Lead.",
+    "cv": {
+      "title": "Candidat à partir d'un CV",
+      "intro": "Téléversez un CV (PDF). Koios en extrait les données et préremplit ce formulaire. Rien n'est enregistré : vous vérifiez les champs et cliquez vous-même sur créer.",
+      "choose": "Choisir un CV",
+      "hint": "PDF uniquement · max. 10 Mo",
+      "uploading": "Téléversement du CV…",
+      "reading": "Lecture du CV…",
+      "readingHint": "Cela prend généralement 10 à 40 secondes.",
+      "cancel": "Annuler",
+      "another": "Autre CV",
+      "retry": "Réessayer",
+      "badge": "cv",
+      "badgeTitle": "Repris du CV — vérifiez cette valeur",
+      "checkNotice": "Vérifiez les champs marqués : les dates et les employeurs sont régulièrement mal lus.",
+      "filled_one": "{{count}} champ prérempli à partir du CV",
+      "filled_other": "{{count}} champs préremplis à partir du CV",
+      "none": "Ce CV ne contenait aucune donnée correspondant à ce formulaire.",
+      "skipped_one": "{{count}} champ ignoré parce que vous l'aviez déjà rempli.",
+      "skipped_other": "{{count}} champs ignorés parce que vous les aviez déjà remplis.",
+      "unreadableDate": "La date de naissance du CV n'était pas lisible sans ambiguïté et n'a pas été reprise.",
+      "extraExperiences_one": "Le CV contient aussi {{count}} expérience professionnelle. Ajoutez-la dans le dossier après la création du candidat.",
+      "extraExperiences_other": "Le CV contient aussi {{count}} expériences professionnelles. Ajoutez-les dans le dossier après la création du candidat.",
+      "extraEducations_one": "Le CV contient aussi {{count}} formation. Ajoutez-la dans le dossier après la création du candidat.",
+      "extraEducations_other": "Le CV contient aussi {{count}} formations. Ajoutez-les dans le dossier après la création du candidat.",
+      "noFreeText": "Le texte libre du CV (résumé, motivation, commentaires) n'est délibérément pas repris.",
+      "error": {
+        "notPdf": "Seul un fichier PDF peut être lu.",
+        "tooLarge": "Ce fichier dépasse 10 Mo.",
+        "throttled": "Trop de CV à la suite. Attendez une minute et réessayez.",
+        "forbidden": "Vous n'avez pas le droit de faire lire un CV.",
+        "expired": "Cette demande a expiré. Téléversez à nouveau le CV.",
+        "budget": "Le budget IA de ce mois est atteint. Saisissez les données manuellement.",
+        "unreadable": "Ce CV n'a pas pu être lu. Saisissez les données manuellement.",
+        "unavailable": "Le lecteur de CV est indisponible pour le moment. Réessayez plus tard.",
+        "timeout": "La lecture de ce CV a pris trop de temps. Réessayez ou saisissez les données manuellement.",
+        "generic": "Le CV n'a pas pu être lu."
+      }
+    }
   },
   "drawer": {
     "availability": "Disponibilité",

@@ -1,7 +1,7 @@
 /**
  * useVacancyBulkActions — the bulk operations for VacanciesPage: row/all selection
- * toggles, owner/status/client/publish mutations, tag removal, note add and
- * archive. Each mutation is optimistic, persists, then reconciles against the
+ * toggles, owner/status/client/publish/ai-agent mutations, tag removal, note add
+ * and archive. Each mutation is optimistic, persists, then reconciles against the
  * server's `updated`/`archived` list (reverts on failure). Selection state + the
  * toast `notify` live in the container; `statusMeta` comes from the lookups.
  */
@@ -16,6 +16,8 @@ import type { Id } from '@/types/common'
 
 interface BulkUser { id: Id; name: string }
 interface BulkCustomer { id: Id; name: string }
+// VAC-BULK-AGENT-1: the agent to couple; `null` is the explicit DEcouple intent.
+export interface BulkAiAgent { id: Id; name: string }
 interface StatusMetaLike { label?: string; color?: string }
 
 interface UseVacancyBulkActionsArgs {
@@ -77,6 +79,20 @@ export function useVacancyBulkActions({ vacancies, setVacancies, setTotal, selec
     onSuccess: n => notify('success', t(published ? 'bulk.published' : 'bulk.unpublished', { count: n })),
   })
 
+  // VAC-BULK-AGENT-1: couple ONE AI-agent to the batch, or decouple it (`agent`
+  // null). The API validates `ai_agent_id` as present-but-nullable, so the key is
+  // ALWAYS in the body — null is the decouple intent, never an omitted field.
+  // Route is /vacancies/bulk/ai-agent (hyphenated), not /bulk/agent.
+  const bulkSetAiAgent = (agent: BulkAiAgent | null) => bulkMutate({
+    url: '/vacancies/bulk/ai-agent', body: { ai_agent_id: agent ? agent.id : null },
+    patch: { aiAgentId: agent ? agent.id : null, aiAgentName: agent ? agent.name : '' },
+    keys: ['aiAgentId', 'aiAgentName'],
+    // The server skips rows already on that agent, so `n` is the real change count.
+    onSuccess: n => notify('success', agent
+      ? t('bulk.agentLinked', { name: agent.name, count: n })
+      : t('bulk.agentUnlinked', { count: n })),
+  })
+
   // Remove a tag from every selected vacancy that has it (optimistic + reconcile).
   const bulkRemoveTag = (tag: string) => {
     const ids = [...selectedIds]
@@ -129,5 +145,5 @@ export function useVacancyBulkActions({ vacancies, setVacancies, setTotal, selec
     return [...set]
   }, [vacancies, selectedIds])
 
-  return { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkSetClient, bulkPublish, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags, dialog }
+  return { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkSetClient, bulkPublish, bulkSetAiAgent, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags, dialog }
 }

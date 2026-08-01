@@ -4,7 +4,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import type { FormState } from '../AddCandidateModal'
-import { Field, TextField, cardHead, cardBox, row } from './fields'
+import { CvField, TextField, cardHead, cardBox, row } from './fields'
 
 interface ContactCardProps {
   form: FormState
@@ -19,16 +19,16 @@ export default function ContactCard({ form, errors, set, isReq }: ContactCardPro
     <div>
       <div style={cardHead}>{t('modal.fields.cardContact')}</div>
       <div style={cardBox}>
-        <Field label={t('modal.fields.email')} required={isReq('email')}>
+        <CvField name="email" label={t('modal.fields.email')} required={isReq('email')}>
           <TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder={t('modal.fields.emailPlaceholder')} error={errors.email} />
-        </Field>
+        </CvField>
         <div style={row('1fr 1fr')}>
-          <Field label={t('modal.fields.phone')} required={isReq('phone')}>
+          <CvField name="phone" label={t('modal.fields.phone')} required={isReq('phone')}>
             <TextField type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder={t('modal.fields.phonePlaceholder')} error={errors.phone} />
-          </Field>
-          <Field label={t('modal.fields.mobile')}>
+          </CvField>
+          <CvField name="mobile" label={t('modal.fields.mobile')}>
             <TextField type="tel" value={form.mobile} onChange={v => set('mobile', v)} placeholder={t('modal.fields.mobilePlaceholder')} />
-          </Field>
+          </CvField>
         </div>
       </div>
     </div>

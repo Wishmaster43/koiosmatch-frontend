@@ -52,7 +52,8 @@
   },
   "kpi": {
     "withoutAgent": "Sin agente IA",
-    "applicationsTotal": "Solicitudes totales"
+    "applicationsTotal": "Solicitudes totales",
+    "applicationsTotalHint": "Clic: solo vacantes con solicitudes"
   },
   "filters": {
     "search": "Buscar",
@@ -101,7 +102,14 @@
     "noteAdded": "Nota añadida a {{count}} vacantes.",
     "archived": "{{count}} vacantes archivadas.",
     "mutateError": "No se pudo aplicar el cambio.",
-    "archiveError": "No se pudo archivar."
+    "archiveError": "No se pudo archivar.",
+    "aiAgent": "Agente IA",
+    "linkAgent": "Vincular agente IA",
+    "unlinkAgent": "Desvincular agente IA",
+    "searchAgent": "Buscar agente IA",
+    "noAgents": "Sin agentes IA",
+    "agentLinked": "Agente IA «{{name}}» vinculado a {{count}} vacantes.",
+    "agentUnlinked": "Agente IA desvinculado de {{count}} vacantes."
   },
   "drawer": {
     "entityLabel": "Vacante",

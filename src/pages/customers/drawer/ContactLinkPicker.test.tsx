@@ -23,6 +23,8 @@ const locations = [{ id: 'loc-1', name: 'Locatie Noord' }, { id: 'loc-2', name: 
 // baseContact) — only the fields each test cares about vary.
 const baseContact = (overrides: Partial<Contact> = {}): Contact => ({
   id: 'c1', helloflexLink: null, shiftmanagerLink: null,
+  // CONTACT-GESLACHT-1 + the merge scope id — both required on Contact now.
+  customerId: 'cust-1', gender: '',
   firstName: 'Jan', middleName: '', lastName: 'Jansen', name: 'Jan Jansen',
   role: '', email: '', phone: '', mobile: '', isPrimary: false,
   locationId: null, locationName: '', departmentId: null, departmentName: '',

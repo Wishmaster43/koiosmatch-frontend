@@ -29,6 +29,9 @@ export interface ContactPayload {
   phone: string
   // Split from `phone` (BE 2026-07-20): the separate mobile number (WhatsApp shortcut).
   mobile: string
+  // CONTACT-GESLACHT-1: the candidate_genders VALUE SLUG (male|female|other). The
+  // backend validates it with `exists:candidate_genders,value` — sending an id 422s.
+  gender: string
   role: string
   locationId: Id | null
   departmentId: Id | null
@@ -42,6 +45,16 @@ export interface ContactPayload {
   // Tenant custom-field values (§3B "Eigen velden" — the Extra sub-tab).
   customFields: Record<string, unknown>
 }
+
+/**
+ * Broadcast name for "this customer's contact list changed underneath you".
+ * A MERGE rewrites two rows at once (the survivor absorbs the duplicate, which then
+ * disappears) and is fired from the drill-down, five ContactsPanel call sites away from
+ * this hook. Rather than prop-drill a writer through all five, the merge dispatches this
+ * and the one hook that OWNS the list refetches — the same `km:` CustomEvent convention
+ * the app already uses for km:toast / km:auth-expired / km:open-changelog.
+ */
+export const CONTACTS_CHANGED_EVENT = 'km:contacts-changed'
 
 const isTemp = (id: Id | undefined) => typeof id === 'string' && id.startsWith('tmp-')
 
@@ -65,6 +78,8 @@ const toApi = (p: Partial<ContactPayload>) => ({
   ...(p.email !== undefined ? { email: p.email } : {}),
   ...(p.phone !== undefined ? { phone: p.phone } : {}),
   ...(p.mobile !== undefined ? { mobile: p.mobile } : {}),
+  // Empty string → null: the column is nullable, but '' fails the exists: rule.
+  ...(p.gender !== undefined ? { gender: p.gender || null } : {}),
   ...(p.role !== undefined ? { function: p.role } : {}),
   ...(p.locationId !== undefined ? { customer_location_id: p.locationId || null } : {}),
   ...(p.departmentId !== undefined ? { customer_department_id: p.departmentId || null } : {}),
@@ -100,6 +115,16 @@ export function useCustomerContacts(customerId: Id | undefined) {
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId])
   useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
+
+  // Refetch when an out-of-tree writer (the merge modal) changed this list. The listener
+  // is registered in the effect SETUP and torn down in its cleanup, so StrictMode's
+  // setup→cleanup→setup in dev re-arms it instead of leaving it permanently dead (§9).
+  useEffect(() => {
+    const ctrl = new AbortController()
+    const onChanged = () => load(ctrl.signal)
+    window.addEventListener(CONTACTS_CHANGED_EVENT, onChanged)
+    return () => { window.removeEventListener(CONTACTS_CHANGED_EVENT, onChanged); ctrl.abort() }
+  }, [load])
 
   // Create — optimistic row with a temp id, swapped for the server row on success.
   // Only the Add-modal's create path calls this (couple/uncouple + inline edits go

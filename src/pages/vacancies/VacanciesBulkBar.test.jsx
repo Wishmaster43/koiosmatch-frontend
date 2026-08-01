@@ -7,11 +7,12 @@ import VacanciesBulkBar from './VacanciesBulkBar'
 const baseProps = () => ({
   count: 3, onClear: vi.fn(),
   onSetOwner: vi.fn(), onSetStatus: vi.fn(), onSetClient: vi.fn(),
-  onPublish: vi.fn(), onUnpublish: vi.fn(),
+  onPublish: vi.fn(), onUnpublish: vi.fn(), onSetAiAgent: vi.fn(),
   onRemoveTag: vi.fn(), onAddNote: vi.fn(), onArchive: vi.fn(),
   users: [{ id: 'u1', name: 'Bente de Jong' }, { id: 'u2', name: 'Kelly van Vliet' }],
   statuses: [{ value: 'open', label: 'Open' }, { value: 'closed', label: 'Gesloten' }],
   customers: [{ id: 'c1', name: 'Yesway zorg' }],
+  aiAgents: [{ id: 'a1', name: 'Koios Recruiter' }, { id: 'a2', name: 'Intake Bot' }],
   selectedTags: ['Den Haag', 'zorg'],
 })
 
@@ -61,5 +62,38 @@ describe('VacanciesBulkBar', () => {
     await user.click(screen.getByText('bulk.publishing'))
     await user.click(screen.getByText('bulk.publish'))
     expect(props.onPublish).toHaveBeenCalledTimes(1)
+  })
+})
+
+// VAC-BULK-AGENT-1: the AI-agent node must offer BOTH directions — a decouple that
+// silently does nothing would be worse than not offering it at all.
+describe('VacanciesBulkBar · AI-agent node', () => {
+  it('couples the picked agent as the full object', async () => {
+    const user = userEvent.setup()
+    const props = baseProps()
+    render(<VacanciesBulkBar {...props} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.aiAgent'))
+    await user.click(screen.getByText('bulk.linkAgent'))
+    await user.click(screen.getByText('Intake Bot'))
+    expect(props.onSetAiAgent).toHaveBeenCalledWith({ id: 'a2', name: 'Intake Bot' })
+  })
+
+  it('decouples with null from the same submenu', async () => {
+    const user = userEvent.setup()
+    const props = baseProps()
+    render(<VacanciesBulkBar {...props} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.aiAgent'))
+    await user.click(screen.getByText('bulk.unlinkAgent'))
+    expect(props.onSetAiAgent).toHaveBeenCalledWith(null)
+  })
+
+  it('hides the whole node when no agent can be picked (no dead-end picker)', async () => {
+    const user = userEvent.setup()
+    render(<VacanciesBulkBar {...baseProps()} aiAgents={[]} />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.getByText('bulk.changeOwner')).toBeInTheDocument()
+    expect(screen.queryByText('bulk.aiAgent')).toBeNull()
   })
 })

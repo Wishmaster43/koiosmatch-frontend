@@ -52,6 +52,8 @@ const departments = [dept('dep-1', 'Verpleging', 'loc-1'), dept('dep-2', 'Thuisz
 // email/phone/mobile duplicate check.
 const contact = (overrides: Partial<Contact>): Contact => ({
   id: 'c-other', helloflexLink: null, shiftmanagerLink: null, firstName: 'Anna', middleName: '', lastName: 'Bakker', name: 'Anna Bakker',
+  // CONTACT-GESLACHT-1 + the merge scope id — both required on Contact now.
+  customerId: 'cust-1', gender: '',
   role: '', email: '', phone: '', mobile: '', isPrimary: false,
   locationId: null, locationName: '', departmentId: null, departmentName: '',
   locations: [], departments: [], statusId: null, status: '', statusLabel: '', statusColor: '', customFields: {},
@@ -187,6 +189,8 @@ describe('AddContactPersonModal', () => {
     // real label, never fall back to rendering the raw id.
     const initial = {
       id: 'c1', helloflexLink: null, shiftmanagerLink: null, firstName: 'Jan', middleName: '', lastName: 'Jansen', name: 'Jan Jansen',
+      // CONTACT-GESLACHT-1 + the merge scope id — both required on Contact now.
+      customerId: 'cust-1', gender: '',
       role: '', email: '', phone: '', mobile: '', isPrimary: false,
       locationId: null, locationName: '', departmentId: 'dep-1', departmentName: 'Verpleging',
       locations: [], departments: [], statusId: null, status: '', statusLabel: '', statusColor: '', customFields: {},
@@ -342,5 +346,49 @@ describe('AddContactPersonModal · tussenvoegsel', () => {
     await user.click(screen.getByRole('button', { name: ct('subModal.save') }))
 
     expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ firstName: 'Johan', middleName: 'van der' }))
+  })
+})
+
+/**
+ * CONTACT-GESLACHT-1 — Danny asked for gender on the create form; it was left out because
+ * the column did not exist. It does now, as `gender` carrying the candidate_genders VALUE
+ * SLUG (male|female|other), validated server-side with exists:candidate_genders,value.
+ * The options come from the tenant /genders lookup — never three hardcoded literals — so
+ * these assert that the picker offers the LOOKUP labels and the payload carries the SLUG.
+ */
+describe('AddContactPersonModal · geslacht', () => {
+  it('offers the tenant gender lookup and submits the SLUG, not the label', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Anna')
+    await user.type(screen.getByLabelText(ct('subModal.lastName'), { exact: false }), 'Bakker')
+
+    await user.click(screen.getByRole('button', { name: ct('subModal.gender') }))
+    // The seed lookup's human labels are what a recruiter picks from.
+    await user.click(screen.getByRole('button', { name: 'Vrouw' }))
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+
+    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ gender: 'female' }))
+  })
+
+  it('leaves gender empty when it is not picked — the field is optional', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(<AddContactPersonModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Anna')
+    await user.type(screen.getByLabelText(ct('subModal.lastName'), { exact: false }), 'Bakker')
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+
+    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ gender: '' }))
+  })
+
+  it('prefills the stored gender when an existing contact is edited', () => {
+    render(<AddContactPersonModal onClose={() => {}} onCreate={vi.fn()} locations={locations} statuses={statuses}
+      initial={contact({ gender: 'male' })} />)
+    // The trigger shows the resolved LABEL for the stored slug.
+    expect(screen.getByRole('button', { name: ct('subModal.gender') })).toHaveTextContent('Man')
   })
 })

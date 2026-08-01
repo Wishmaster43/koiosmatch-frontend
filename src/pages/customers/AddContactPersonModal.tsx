@@ -41,6 +41,7 @@ import { Field, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import Toggle from '@/components/ui/Toggle'
 import { useContactFunctions } from '@/lib/useContactFunctions'
+import { useGenders } from '@/lib/useGenders'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
@@ -67,7 +68,7 @@ const normalizeDigits = (v: string) => String(v ?? '').replace(/\D/g, '')
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
-  first_name: 'firstName', middle_name: 'middleName', last_name: 'lastName', email: 'email', phone: 'phone', mobile: 'mobile',
+  first_name: 'firstName', middle_name: 'middleName', last_name: 'lastName', email: 'email', phone: 'phone', mobile: 'mobile', gender: 'gender',
   function: 'role', customer_location_id: 'locationId', customer_department_id: 'departmentId',
   status_id: 'statusId', is_primary: 'isPrimary',
 }
@@ -104,6 +105,9 @@ export default function AddContactPersonModal({
   // Contact function (job title) is a lookup combobox, split from the candidate
   // function list (FUNCTIONS-SPLIT-1) — never a plain free-text field.
   const { contactFunctions, allowFreeEntry } = useContactFunctions()
+  // CONTACT-GESLACHT-1: the SAME tenant /genders lookup a candidate uses — the field
+  // stores the value SLUG (male|female|other), never a hardcoded three-option list.
+  const { genders } = useGenders()
   const [form, setForm] = useState<ContactPayload>({
     firstName: initial?.firstName ?? '',
     middleName: initial?.middleName ?? '',
@@ -111,6 +115,7 @@ export default function AddContactPersonModal({
     email: initial?.email ?? '',
     phone: initial?.phone ?? '',
     mobile: initial?.mobile ?? '',
+    gender: initial?.gender ?? '',
     role: initial?.role ?? '',
     locationId: initial?.locationId ?? lockLocationId ?? null,
     departmentId: initial?.departmentId ?? lockDepartmentId ?? null,
@@ -283,7 +288,14 @@ export default function AddContactPersonModal({
                   <CreatableSelect value={form.role} onChange={v => set('role', v)} options={contactFunctions}
                     allowCreate={allowFreeEntry} placeholder={t('common:select')} style={CREATABLE_STYLE} />
                 </Field>
-                <div />
+                {/* Geslacht (Danny's original request, unblocked now the column exists):
+                    options come from the tenant /genders lookup and the field stores the
+                    VALUE SLUG the backend validates with exists:candidate_genders,value. */}
+                <Field label={t('subModal.gender')}>
+                  <CreatableSelect value={form.gender || null} onChange={v => set('gender', v)} allowCreate={false}
+                    placeholder={t('subModal.noneOption')} style={CREATABLE_STYLE}
+                    options={genders.map(g => ({ value: g.value, label: g.label }))} />
+                </Field>
               </div>
             </div>
           </div>

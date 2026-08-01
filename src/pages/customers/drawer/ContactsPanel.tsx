@@ -214,9 +214,13 @@ export default function ContactsPanel({
     return (
       <div>
         <DrillBreadcrumb trail={[...trail, listCrumb]} current={selected.name} />
+        {/* After a merge the duplicate row is gone server-side; switch the drill-down to
+            the SURVIVOR so the open panel never points at a record that no longer exists.
+            The list itself refetches via the hook's CONTACTS_CHANGED_EVENT listener. */}
         <ContactDetail contact={selected} locations={locations} departments={departments} statuses={statuses}
           existing={contacts} canLinkBackoffice={canLinkBackoffice}
-          onSave={onUpdate} onDelete={onRemove} close={() => onOpenChange(null)} />
+          onSave={onUpdate} onDelete={onRemove} close={() => onOpenChange(null)}
+          onMerged={survivorId => onOpenChange(survivorId)} />
       </div>
     )
   }

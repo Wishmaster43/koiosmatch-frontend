@@ -220,7 +220,45 @@
       "other": "Otro / no especificado"
     },
     "vacancyFallback": "Vacante {{id}}",
-    "statusPanelHint": "Por defecto Lead. Un candidato nuevo empieza como Lead."
+    "statusPanelHint": "Por defecto Lead. Un candidato nuevo empieza como Lead.",
+    "cv": {
+      "title": "Candidato a partir de un CV",
+      "intro": "Sube un CV (PDF). Koios extrae los datos y rellena este formulario. No se guarda nada: tú revisas los campos y haces clic en crear.",
+      "choose": "Elegir CV",
+      "hint": "Solo PDF · máx. 10 MB",
+      "uploading": "Subiendo el CV…",
+      "reading": "Leyendo el CV…",
+      "readingHint": "Esto suele tardar entre 10 y 40 segundos.",
+      "cancel": "Cancelar",
+      "another": "Otro CV",
+      "retry": "Intentar de nuevo",
+      "badge": "cv",
+      "badgeTitle": "Tomado del CV — comprueba este valor",
+      "checkNotice": "Comprueba los campos marcados: las fechas y los empleadores se leen mal con frecuencia.",
+      "filled_one": "{{count}} campo rellenado desde el CV",
+      "filled_other": "{{count}} campos rellenados desde el CV",
+      "none": "Este CV no contenía datos que encajen en este formulario.",
+      "skipped_one": "{{count}} campo omitido porque ya lo habías rellenado.",
+      "skipped_other": "{{count}} campos omitidos porque ya los habías rellenado.",
+      "unreadableDate": "La fecha de nacimiento del CV no se pudo leer sin ambigüedad y no se ha rellenado.",
+      "extraExperiences_one": "El CV también contiene {{count}} experiencia laboral. Añádela en el expediente después de crear el candidato.",
+      "extraExperiences_other": "El CV también contiene {{count}} experiencias laborales. Añádelas en el expediente después de crear el candidato.",
+      "extraEducations_one": "El CV también contiene {{count}} formación. Añádela en el expediente después de crear el candidato.",
+      "extraEducations_other": "El CV también contiene {{count}} formaciones. Añádelas en el expediente después de crear el candidato.",
+      "noFreeText": "El texto libre del CV (resumen, motivación, comentarios) no se copia de forma deliberada.",
+      "error": {
+        "notPdf": "Solo se puede leer un archivo PDF.",
+        "tooLarge": "Este archivo supera los 10 MB.",
+        "throttled": "Demasiados CV seguidos. Espera un minuto e inténtalo de nuevo.",
+        "forbidden": "No tienes permiso para hacer leer un CV.",
+        "expired": "Esta solicitud ha caducado. Vuelve a subir el CV.",
+        "budget": "Se ha alcanzado el presupuesto de IA de este mes. Introduce los datos manualmente.",
+        "unreadable": "Este CV no se ha podido leer. Introduce los datos manualmente.",
+        "unavailable": "El lector de CV no está disponible ahora. Inténtalo más tarde.",
+        "timeout": "La lectura de este CV ha tardado demasiado. Inténtalo de nuevo o introduce los datos manualmente.",
+        "generic": "El CV no se ha podido leer."
+      }
+    }
   },
   "drawer": {
     "availability": "Disponibilidad",

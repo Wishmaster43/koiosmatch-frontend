@@ -15,6 +15,10 @@ export interface Contact {
   // backoffice_links[] — same shape/endpoint every entity shares.
   helloflexLink: BackofficeLink | null
   shiftmanagerLink: BackofficeLink | null
+  // The owning customer — the merge route is scoped to it (POST /customers/{customerId}/
+  // contacts/{id}/merge), so the drill-down can fire the merge without the parent
+  // prop-drilling the id down through five ContactsPanel call sites.
+  customerId: Id | null
   firstName: string
   // CONTACT-TUSSENVOEGSEL-1: the Dutch tussenvoegsel, same field the candidate has. The
   // backend composes `name` from first + middle + last; without this the FE PATCHed a
@@ -28,6 +32,10 @@ export interface Contact {
   // Split from `phone` (BE 2026-07-20): phone stays the landline/"vast" number,
   // mobile is the separate mobile number the WhatsApp shortcut uses.
   mobile: string
+  // CONTACT-GESLACHT-1: the candidate_genders VALUE SLUG (male|female|other) — a plain
+  // column, NOT a gender_id. Label/colour resolve through the shared /genders lookup
+  // exactly like a candidate, so the option list is never hardcoded here.
+  gender: string
   isPrimary: boolean
   // Derived PRIMARY link (first of the full set below) — kept for the single-value
   // pickers/filters (e.g. LocationContacts' "belongs to this location" scoping).
@@ -44,11 +52,11 @@ export interface Contact {
   status: string
   statusLabel: string
   statusColor: string
-  // `customer_contacts.last_contact_at` — always null today: CustomerContactResource
-  // does not expose it yet (backend ticket filed); wired here so it lights up the
-  // moment the resource sends it.
+  // CONTACT-LAATSTE-CONTACT-1: `customer_contacts.last_contact_at`, stamped by the
+  // backend's RecordsLastContact trait. LIVE since CustomerContactResource started
+  // exposing it — the columns always existed, only the resource was missing them.
   lastContactAt: string | null
-  // `customer_contacts.last_contact_type` — same gap as lastContactAt above.
+  // The channel slug (a last_contact_types lookup value); label/icon resolve via useLastContactTypes.
   lastContactType: string | null
   customFields: Record<string, unknown>
 }
@@ -222,6 +230,10 @@ export interface ApiContact {
   id?: Id; reference_number?: string; first_name?: string; middle_name?: string; last_name?: string; name?: string; function?: string; role?: string; email?: string; phone?: string
   // Split from `phone` (BE 2026-07-20): the mobile number (CustomerContactResource `mobile`).
   mobile?: string
+  // CONTACT-GESLACHT-1: the candidate_genders value slug (male|female|other), NOT an id.
+  gender?: string | null
+  // The owning customer (CustomerContactResource `customer_id`) — scopes the merge route.
+  customer_id?: Id
   is_primary?: unknown; isPrimary?: unknown
   // The BE field is `customer_location_id` / `customer_department_id`; location_id/locationId tolerated for older payloads.
   customer_location_id?: Id; location_id?: Id; locationId?: Id; location_name?: string; location?: { name?: string }
@@ -231,7 +243,7 @@ export interface ApiContact {
   locations?: { id?: Id; name?: string }[]
   departments?: { id?: Id; name?: string }[]
   status?: ApiStatusRef | null; status_id?: Id | null
-  // Not yet sent by CustomerContactResource (see the Contact interface comment above).
+  // CONTACT-LAATSTE-CONTACT-1: both live on CustomerContactResource (ISO-8601 + slug).
   last_contact_at?: string | null; last_contact_type?: string | null
   custom_fields?: Record<string, unknown>
   // EXTRACT-1: the shared raw shape (src/lib/backofficeLink).

@@ -52,7 +52,8 @@
   },
   "kpi": {
     "withoutAgent": "Without AI agent",
-    "applicationsTotal": "Total applications"
+    "applicationsTotal": "Total applications",
+    "applicationsTotalHint": "Click: only vacancies with applications"
   },
   "filters": {
     "search": "Search",
@@ -101,7 +102,14 @@
     "noteAdded": "Note added to {{count}} vacancies.",
     "archived": "{{count}} vacancies archived.",
     "mutateError": "Couldn't apply the change.",
-    "archiveError": "Couldn't archive."
+    "archiveError": "Couldn't archive.",
+    "aiAgent": "AI agent",
+    "linkAgent": "Link AI agent",
+    "unlinkAgent": "Unlink AI agent",
+    "searchAgent": "Search AI agent",
+    "noAgents": "No AI agents",
+    "agentLinked": "AI agent “{{name}}” linked to {{count}} vacancies.",
+    "agentUnlinked": "AI agent unlinked from {{count}} vacancies."
   },
   "drawer": {
     "entityLabel": "Vacancy",

@@ -52,7 +52,7 @@ type Values = Record<string, unknown>
 // Compose the standard NL one-line address (mirrors candidates/drawer/ProfileTab's
 // addressRow): "Straat 12a, 1234 AB Plaats". Fixed key names — every 'address' row
 // across the app (candidate profile, customer location) shares this shape.
-const composeAddressLine = (v: Values): string => {
+export const composeAddressLine = (v: Values): string => {
   const houseNo = [v.houseNumber, v.houseNumberSuffix].filter(Boolean).join('-')
   const line1 = [v.street, houseNo].filter(Boolean).join(' ')
   const line2 = [v.postalCode, v.city].filter(Boolean).join(' ')

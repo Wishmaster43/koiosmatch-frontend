@@ -242,7 +242,45 @@
       "other": "Anders / niet opgegeven"
     },
     "vacancyFallback": "Vacature {{id}}",
-    "statusPanelHint": "Standaard Lead. Een nieuwe kandidaat begint als Lead."
+    "statusPanelHint": "Standaard Lead. Een nieuwe kandidaat begint als Lead.",
+    "cv": {
+      "title": "Kandidaat uit cv",
+      "intro": "Upload een cv (pdf). Koios leest de gegevens eruit en vult dit formulier alvast in. Er wordt niets opgeslagen: jij controleert de velden en klikt zelf op aanmaken.",
+      "choose": "Cv kiezen",
+      "hint": "Alleen pdf · max. 10 MB",
+      "uploading": "Cv wordt geüpload…",
+      "reading": "Cv wordt gelezen…",
+      "readingHint": "Dit duurt meestal 10 tot 40 seconden.",
+      "cancel": "Annuleren",
+      "another": "Ander cv",
+      "retry": "Opnieuw proberen",
+      "badge": "cv",
+      "badgeTitle": "Overgenomen uit het cv — controleer deze waarde",
+      "checkNotice": "Controleer de gemarkeerde velden: datums en werkgevers worden regelmatig verkeerd gelezen.",
+      "filled_one": "{{count}} veld ingevuld uit het cv",
+      "filled_other": "{{count}} velden ingevuld uit het cv",
+      "none": "In dit cv stonden geen gegevens die in dit formulier passen.",
+      "skipped_one": "{{count}} veld overgeslagen omdat je het zelf al had ingevuld.",
+      "skipped_other": "{{count}} velden overgeslagen omdat je ze zelf al had ingevuld.",
+      "unreadableDate": "De geboortedatum uit het cv was niet eenduidig te lezen en is niet ingevuld.",
+      "extraExperiences_one": "Het cv bevat ook {{count}} werkervaring. Voeg die toe in het dossier nadat de kandidaat is aangemaakt.",
+      "extraExperiences_other": "Het cv bevat ook {{count}} werkervaringen. Voeg die toe in het dossier nadat de kandidaat is aangemaakt.",
+      "extraEducations_one": "Het cv bevat ook {{count}} opleiding. Voeg die toe in het dossier nadat de kandidaat is aangemaakt.",
+      "extraEducations_other": "Het cv bevat ook {{count}} opleidingen. Voeg die toe in het dossier nadat de kandidaat is aangemaakt.",
+      "noFreeText": "Vrije tekst uit het cv (samenvatting, motivatie, toelichting) wordt bewust niet overgenomen.",
+      "error": {
+        "notPdf": "Alleen een pdf-bestand kan gelezen worden.",
+        "tooLarge": "Dit bestand is groter dan 10 MB.",
+        "throttled": "Te veel cv's achter elkaar. Wacht een minuut en probeer het opnieuw.",
+        "forbidden": "Je hebt geen rechten om een cv te laten lezen.",
+        "expired": "Deze aanvraag is verlopen. Upload het cv opnieuw.",
+        "budget": "Het AI-budget van deze maand is bereikt. Vul de gegevens handmatig in.",
+        "unreadable": "Dit cv kon niet gelezen worden. Vul de gegevens handmatig in.",
+        "unavailable": "De cv-lezer is nu niet beschikbaar. Probeer het later opnieuw.",
+        "timeout": "Het lezen van dit cv duurde te lang. Probeer het opnieuw of vul de gegevens handmatig in.",
+        "generic": "Het cv kon niet gelezen worden."
+      }
+    }
   },
   "drawer": {
     "availability": "Beschikbaarheid",

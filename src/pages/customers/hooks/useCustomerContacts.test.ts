@@ -8,7 +8,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { useCustomerContacts, type ContactPayload } from './useCustomerContacts'
+import { useCustomerContacts, CONTACTS_CHANGED_EVENT, type ContactPayload } from './useCustomerContacts'
 
 // Stub only the axios-like client; unwrap/unwrapList stay real (pure, no network).
 vi.mock('@/lib/api', () => ({
@@ -39,6 +39,8 @@ beforeEach(() => { mockGet.mockReset(); mockPost.mockReset(); mockPatch.mockRese
 // BE 2026-07-20: `mobile` is now a separate field from the landline `phone`.
 const fullPayload: ContactPayload = {
   firstName: 'Anna', middleName: 'de', lastName: 'Bakker', email: 'anna@bakker.nl', phone: '0301234567', mobile: '0612345678', role: 'Manager',
+  // CONTACT-GESLACHT-1: the gender VALUE SLUG, not an id.
+  gender: 'female',
   locationId: 'loc1', departmentId: 'dep1', locationIds: ['loc1'], departmentIds: ['dep1'], statusId: 'st1', isPrimary: true, customFields: { badge: 'vip' },
 }
 
@@ -75,6 +77,7 @@ describe('useCustomerContacts · create payload mapping (toApi)', () => {
 
     expect(mockPost).toHaveBeenCalledWith('/customers/cust1/contacts', {
       first_name: 'Anna', middle_name: 'de', last_name: 'Bakker', email: 'anna@bakker.nl', phone: '0301234567', mobile: '0612345678', function: 'Manager',
+      gender: 'female',
       customer_location_id: 'loc1', customer_department_id: 'dep1', status_id: 'st1', is_primary: true,
       location_ids: ['loc1'], department_ids: ['dep1'],
       custom_fields: { badge: 'vip' },
@@ -164,5 +167,108 @@ describe('useCustomerContacts · mobile passthrough on mapContact (BE 2026-07-20
 
     expect(result.current.contacts[0].phone).toBe('0301234567')
     expect(result.current.contacts[0].mobile).toBe('0612345678')
+  })
+})
+
+/**
+ * CONTACT-GESLACHT-1 — the backend column is `gender` and carries the candidate_genders
+ * VALUE SLUG, validated with `exists:candidate_genders,value`. Sending `gender_id`, or an
+ * id, or an empty string all 422 — so the request itself is what these assert.
+ */
+describe('useCustomerContacts · gender (CONTACT-GESLACHT-1)', () => {
+  it('PATCHes the gender SLUG under the key `gender` — never gender_id', async () => {
+    mockGet.mockResolvedValue({ data: { data: [{ id: 'c1', first_name: 'Jill', last_name: 'A' }] } })
+    mockPatch.mockResolvedValue({ data: { data: { id: 'c1', gender: 'male' } } })
+    const { result } = renderHook(() => useCustomerContacts('cust1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.update('c1', { gender: 'male' }) })
+
+    expect(mockPatch).toHaveBeenCalledWith('/customers/cust1/contacts/c1', { gender: 'male' })
+    expect(mockPatch.mock.calls[0][1]).not.toHaveProperty('gender_id')
+  })
+
+  it('sends null for a cleared gender — the column is nullable but "" fails the exists: rule', async () => {
+    mockGet.mockResolvedValue({ data: { data: [{ id: 'c1', first_name: 'Jill', last_name: 'A' }] } })
+    mockPatch.mockResolvedValue({ data: { data: { id: 'c1' } } })
+    const { result } = renderHook(() => useCustomerContacts('cust1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => { await result.current.update('c1', { gender: '' }) })
+
+    expect(mockPatch).toHaveBeenCalledWith('/customers/cust1/contacts/c1', { gender: null })
+  })
+
+  it('maps the resource `gender` slug onto the contact', async () => {
+    mockGet.mockResolvedValue({ data: { data: [{ id: 'c1', first_name: 'Jill', last_name: 'A', gender: 'female' }] } })
+    const { result } = renderHook(() => useCustomerContacts('cust1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    expect(result.current.contacts[0].gender).toBe('female')
+  })
+})
+
+/**
+ * CONTACT-LAATSTE-CONTACT-1 — the columns always existed; CustomerContactResource simply
+ * never exposed them, so the table's "Laatste contact" column rendered a dash forever.
+ */
+describe('useCustomerContacts · last contact passthrough', () => {
+  it('maps last_contact_at + last_contact_type off the resource', async () => {
+    mockGet.mockResolvedValue({ data: { data: [
+      { id: 'c1', first_name: 'Jill', last_name: 'A', last_contact_at: '2026-07-14T09:30:00+02:00', last_contact_type: 'phone' },
+    ] } })
+    const { result } = renderHook(() => useCustomerContacts('cust1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    expect(result.current.contacts[0].lastContactAt).toBe('2026-07-14T09:30:00+02:00')
+    expect(result.current.contacts[0].lastContactType).toBe('phone')
+  })
+
+  it('leaves both null when the resource omits them (never an empty-string date)', async () => {
+    mockGet.mockResolvedValue({ data: { data: [{ id: 'c1', first_name: 'Jill', last_name: 'A' }] } })
+    const { result } = renderHook(() => useCustomerContacts('cust1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    expect(result.current.contacts[0].lastContactAt).toBeNull()
+    expect(result.current.contacts[0].lastContactType).toBeNull()
+  })
+
+  it('maps customer_id, which scopes the merge route', async () => {
+    mockGet.mockResolvedValue({ data: { data: [{ id: 'c1', first_name: 'Jill', last_name: 'A', customer_id: 'cust1' }] } })
+    const { result } = renderHook(() => useCustomerContacts('cust1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    expect(result.current.contacts[0].customerId).toBe('cust1')
+  })
+})
+
+/**
+ * The merge happens five ContactsPanel call sites away from this hook, so it broadcasts
+ * CONTACTS_CHANGED_EVENT instead of prop-drilling a writer. If this listener regresses,
+ * a merged-away duplicate keeps rendering until the whole drawer is reopened.
+ */
+describe('useCustomerContacts · CONTACTS_CHANGED_EVENT', () => {
+  it('refetches the list when the event fires', async () => {
+    mockGet.mockResolvedValue({ data: { data: [{ id: 'c1', first_name: 'Jill', last_name: 'A' }] } })
+    const { result } = renderHook(() => useCustomerContacts('cust1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const initialCalls = mockGet.mock.calls.length
+
+    await act(async () => { window.dispatchEvent(new CustomEvent(CONTACTS_CHANGED_EVENT)) })
+
+    await waitFor(() => expect(mockGet.mock.calls.length).toBe(initialCalls + 1))
+    expect(mockGet.mock.calls.at(-1)?.[0]).toBe('/customers/cust1/contacts')
+  })
+
+  it('stops listening once unmounted — no refetch for a drawer that is gone', async () => {
+    mockGet.mockResolvedValue({ data: { data: [] } })
+    const { result, unmount } = renderHook(() => useCustomerContacts('cust1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    unmount()
+    const afterUnmount = mockGet.mock.calls.length
+
+    await act(async () => { window.dispatchEvent(new CustomEvent(CONTACTS_CHANGED_EVENT)) })
+
+    expect(mockGet.mock.calls.length).toBe(afterUnmount)
   })
 })

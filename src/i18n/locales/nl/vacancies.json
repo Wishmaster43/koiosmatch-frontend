@@ -52,7 +52,8 @@
   },
   "kpi": {
     "withoutAgent": "Zonder AI-agent",
-    "applicationsTotal": "Sollicitaties totaal"
+    "applicationsTotal": "Sollicitaties totaal",
+    "applicationsTotalHint": "Klik: alleen vacatures met sollicitaties"
   },
   "filters": {
     "search": "Zoeken",
@@ -101,7 +102,14 @@
     "noteAdded": "Notitie toegevoegd aan {{count}} vacatures.",
     "archived": "{{count}} vacatures gearchiveerd.",
     "mutateError": "De wijziging kon niet worden toegepast.",
-    "archiveError": "Archiveren is mislukt."
+    "archiveError": "Archiveren is mislukt.",
+    "aiAgent": "AI-agent",
+    "linkAgent": "AI-agent koppelen",
+    "unlinkAgent": "AI-agent ontkoppelen",
+    "searchAgent": "Zoek AI-agent",
+    "noAgents": "Geen AI-agents",
+    "agentLinked": "AI-agent “{{name}}” gekoppeld aan {{count}} vacatures.",
+    "agentUnlinked": "AI-agent ontkoppeld van {{count}} vacatures."
   },
   "drawer": {
     "entityLabel": "Vacature",

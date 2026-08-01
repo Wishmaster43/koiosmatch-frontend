@@ -129,7 +129,14 @@
     "callPhone": "Call",
     "openWebsite": "Open website",
     "coc": "CoC number",
-    "vat": "VAT number"
+    "vat": "VAT number",
+    "billingAddress": {
+      "title": "Invoice address",
+      "poBox": "PO box",
+      "usesVisitAddress": "Empty — invoices go to the visit address.",
+      "visitEmpty": "No visit address on file",
+      "hint": "Leave this empty to invoice the visit address. Fill it in only for a different address or a PO box."
+    }
   },
   "richText": {
     "empty": "Not filled in yet."
@@ -276,7 +283,8 @@
       },
       "linkLocation": "Link location",
       "linkDepartment": "Link department",
-      "middleName": "Middle name"
+      "middleName": "Middle name",
+      "gender": "Gender"
     },
     "deleteConfirm": "Delete this contact?",
     "saveFailed": "Saving failed.",
@@ -294,7 +302,24 @@
     },
     "openContact": "Open contact",
     "backTo": "Back to {{name}}",
-    "searchHere": "Search contact…"
+    "searchHere": "Search contact…",
+    "merge": {
+      "title": "Merge contact",
+      "intro": "Pick the duplicate contact at this customer, then choose which record remains. {{name}} is the open record.",
+      "searchPlaceholder": "Search by name, number or email…",
+      "noResults": "No contacts found.",
+      "noOthers": "This customer has no other contact to merge with.",
+      "stays": "This record remains",
+      "thisRecord": "Open record",
+      "otherRecord": "Found record",
+      "warning": "{{source}}'s data is absorbed into {{target}}; {{source}} then disappears. This cannot be undone.",
+      "back": "Back",
+      "cancel": "Cancel",
+      "confirm": "Merge",
+      "done": "Contacts merged.",
+      "errForbidden": "You are not allowed to merge contacts.",
+      "errFailed": "Merge failed. Please try again."
+    }
   },
   "vacancies": {
     "empty": "No vacancies for this customer.",
@@ -534,7 +559,8 @@
       "confirm": "Yes, replace",
       "decline": "No, don't replace"
     },
-    "middleName": "Middle name"
+    "middleName": "Middle name",
+    "gender": "Gender"
   },
   "changelog": {
     "empty": "No changes yet."

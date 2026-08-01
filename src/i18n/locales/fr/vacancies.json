@@ -52,7 +52,8 @@
   },
   "kpi": {
     "withoutAgent": "Sans agent IA",
-    "applicationsTotal": "Candidatures totales"
+    "applicationsTotal": "Candidatures totales",
+    "applicationsTotalHint": "Clic : seules les offres avec candidatures"
   },
   "filters": {
     "search": "Rechercher",
@@ -101,7 +102,14 @@
     "noteAdded": "Note ajoutée à {{count}} postes.",
     "archived": "{{count}} postes archivés.",
     "mutateError": "Impossible d'appliquer la modification.",
-    "archiveError": "Impossible d'archiver."
+    "archiveError": "Impossible d'archiver.",
+    "aiAgent": "Agent IA",
+    "linkAgent": "Lier l’agent IA",
+    "unlinkAgent": "Dissocier l’agent IA",
+    "searchAgent": "Rechercher un agent IA",
+    "noAgents": "Aucun agent IA",
+    "agentLinked": "Agent IA « {{name}} » lié à {{count}} offres.",
+    "agentUnlinked": "Agent IA dissocié de {{count}} offres."
   },
   "drawer": {
     "entityLabel": "Poste",

@@ -337,12 +337,19 @@ export default function LocationDetail({
 
       {subTab === 'koppelingen' && (
         <BackofficeLinksTab entity="locations" id={l.id as Id} helloflexLink={l.helloflexLink} shiftmanagerLink={l.shiftmanagerLink} canLink={canLinkBackoffice}>
-          {/* PDOK sits in Koppelingen, like every other integration (Danny 28-07). No
-              `endpoint`: a customer location has lat/lng and the backend fills them, but
-              there is no per-location re-geocode route yet — so the card reads, it does
-              not pretend to act. HelloFlex/Shiftmanager gate themselves on the tenant's
-              connector apps, which is why Yesway sees Shiftmanager and not HelloFlex. */}
-          <PdokCard lat={l.lat} lng={l.lng} permission="customers.update" />
+          {/* PDOK sits in Koppelingen, like every other integration (Danny 28-07).
+              KLANTLOCATIE-GEOCODE-1 (backend 2026-08-01): the per-site re-geocode route
+              now exists, so this card ACTS as well as reads — mirroring the customer's
+              own card verbatim (CustomerDrawer, /customers/{id}/geocode), same shared
+              GeocodeButton, same customers.update gate, same `disabled` rule.
+              The route is addressed THROUGH the customer, so without a customerId there
+              is nothing to POST to and the endpoint is left off — the card then stays
+              honestly read-only rather than firing a /customers/undefined/… 404 (§3).
+              HelloFlex/Shiftmanager gate themselves on the tenant's connector apps,
+              which is why Yesway sees Shiftmanager and not HelloFlex. */}
+          <PdokCard lat={l.lat} lng={l.lng} permission="customers.update"
+            endpoint={customerId ? `/customers/${customerId}/locations/${l.id}/geocode` : undefined}
+            disabled={!l.city} />
         </BackofficeLinksTab>
       )}
 

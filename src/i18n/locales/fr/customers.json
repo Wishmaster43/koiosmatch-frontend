@@ -129,7 +129,14 @@
     "callPhone": "Appeler",
     "openWebsite": "Ouvrir le site",
     "coc": "N° RCS",
-    "vat": "N° TVA"
+    "vat": "N° TVA",
+    "billingAddress": {
+      "title": "Adresse de facturation",
+      "poBox": "Boîte postale",
+      "usesVisitAddress": "Vide — la facture est envoyée à l'adresse de visite.",
+      "visitEmpty": "Aucune adresse de visite renseignée",
+      "hint": "Laissez vide pour facturer à l'adresse de visite. À remplir uniquement en cas d'adresse différente ou de boîte postale."
+    }
   },
   "richText": {
     "empty": "Pas encore renseigné."
@@ -276,7 +283,8 @@
       },
       "linkLocation": "Lier un site",
       "linkDepartment": "Lier un service",
-      "middleName": "Particule"
+      "middleName": "Particule",
+      "gender": "Genre"
     },
     "deleteConfirm": "Supprimer ce contact ?",
     "saveFailed": "L'enregistrement a échoué.",
@@ -294,7 +302,24 @@
     },
     "openContact": "Ouvrir le contact",
     "backTo": "Retour à {{name}}",
-    "searchHere": "Rechercher un contact…"
+    "searchHere": "Rechercher un contact…",
+    "merge": {
+      "title": "Fusionner le contact",
+      "intro": "Choisissez le contact en double chez ce client, puis quelle fiche est conservée. {{name}} est la fiche ouverte.",
+      "searchPlaceholder": "Rechercher par nom, numéro ou e-mail…",
+      "noResults": "Aucun contact trouvé.",
+      "noOthers": "Ce client n'a pas d'autre contact avec lequel fusionner.",
+      "stays": "Cette fiche est conservée",
+      "thisRecord": "Fiche ouverte",
+      "otherRecord": "Fiche trouvée",
+      "warning": "Les données de {{source}} sont intégrées à {{target}} ; {{source}} disparaît ensuite. Cette action est irréversible.",
+      "back": "Retour",
+      "cancel": "Annuler",
+      "confirm": "Fusionner",
+      "done": "Contacts fusionnés.",
+      "errForbidden": "Vous n'êtes pas autorisé à fusionner des contacts.",
+      "errFailed": "Échec de la fusion. Veuillez réessayer."
+    }
   },
   "vacancies": {
     "empty": "Aucun poste pour ce client.",
@@ -534,7 +559,8 @@
       "confirm": "Oui, remplacer",
       "decline": "Non, ne pas remplacer"
     },
-    "middleName": "Particule"
+    "middleName": "Particule",
+    "gender": "Genre"
   },
   "changelog": {
     "empty": "Aucun changement pour le moment."

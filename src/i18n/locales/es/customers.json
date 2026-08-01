@@ -129,7 +129,14 @@
     "callPhone": "Llamar",
     "openWebsite": "Abrir el sitio web",
     "coc": "N.º registro mercantil",
-    "vat": "N.º IVA"
+    "vat": "N.º IVA",
+    "billingAddress": {
+      "title": "Dirección de facturación",
+      "poBox": "Apartado de correos",
+      "usesVisitAddress": "Vacío: la factura se envía a la dirección de visita.",
+      "visitEmpty": "No hay dirección de visita registrada",
+      "hint": "Déjalo vacío para facturar a la dirección de visita. Rellénalo solo si la dirección es distinta o es un apartado de correos."
+    }
   },
   "richText": {
     "empty": "Aún no completado."
@@ -276,7 +283,8 @@
       },
       "linkLocation": "Vincular ubicación",
       "linkDepartment": "Vincular departamento",
-      "middleName": "Partícula"
+      "middleName": "Partícula",
+      "gender": "Género"
     },
     "deleteConfirm": "¿Eliminar este contacto?",
     "saveFailed": "Error al guardar.",
@@ -294,7 +302,24 @@
     },
     "openContact": "Abrir contacto",
     "backTo": "Volver a {{name}}",
-    "searchHere": "Buscar contacto…"
+    "searchHere": "Buscar contacto…",
+    "merge": {
+      "title": "Combinar contacto",
+      "intro": "Elige el contacto duplicado de este cliente y luego qué registro se mantiene. {{name}} es el registro abierto.",
+      "searchPlaceholder": "Buscar por nombre, número o correo…",
+      "noResults": "No se encontraron contactos.",
+      "noOthers": "Este cliente no tiene otro contacto con el que combinar.",
+      "stays": "Este registro se mantiene",
+      "thisRecord": "Registro abierto",
+      "otherRecord": "Registro encontrado",
+      "warning": "Los datos de {{source}} se incorporan a {{target}}; {{source}} desaparece después. Esta acción no se puede deshacer.",
+      "back": "Atrás",
+      "cancel": "Cancelar",
+      "confirm": "Combinar",
+      "done": "Contactos combinados.",
+      "errForbidden": "No tienes permiso para combinar contactos.",
+      "errFailed": "Error al combinar. Inténtalo de nuevo."
+    }
   },
   "vacancies": {
     "empty": "No hay vacantes para este cliente.",
@@ -534,7 +559,8 @@
       "confirm": "Sí, reemplazar",
       "decline": "No, no reemplazar"
     },
-    "middleName": "Partícula"
+    "middleName": "Partícula",
+    "gender": "Género"
   },
   "changelog": {
     "empty": "Aún no hay cambios."

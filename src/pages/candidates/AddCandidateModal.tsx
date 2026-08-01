@@ -12,7 +12,7 @@
  * component under `addmodal/` (props in, callbacks out); this file owns state,
  * validation and the submit/422 logic.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { UserPlus } from 'lucide-react'
 import { useLookups } from '@/context/LookupsContext'
@@ -39,6 +39,9 @@ import ContactCard from './addmodal/ContactCard'
 import WorkCard from './addmodal/WorkCard'
 import AddressCard from './addmodal/AddressCard'
 import BranchesCard from './addmodal/BranchesCard'
+import CvUploadCard from './addmodal/CvUploadCard'
+import { CvFilledContext } from './addmodal/cvFilledContext'
+import { useCvPrefill } from './addmodal/useCvPrefill'
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
@@ -134,10 +137,20 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved province list changing, not every form edit
   }, [provinces])
 
+  // CV-PARSER-1 (Danny 2026-07-31): a parsed CV PREFILLS this form and never saves —
+  // the recruiter's own create click stays the single confirmation step.
+  const applyCvPatch = useCallback((patch: Partial<FormState>) => {
+    setForm(f => ({ ...f, ...patch }))
+    setErrors({})
+  }, [])
+  const { cv, cvFilled, summary: cvSummary, clearMark } = useCvPrefill(form, applyCvPatch)
+
   const set = (k: keyof FormState, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
     setSubmitErr(null)
+    // Editing a CV-prefilled field means the recruiter checked it — drop the mark.
+    clearMark(k)
     // Editing anything invalidates the refused-create verdict; the next submit re-asks
     // the server (which stays the only authority on what is a duplicate).
     setDupBlock(null)
@@ -242,6 +255,8 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const selectedStatus = phases.find(s => s.value === status)
   const canSubmit      = !!status && requiredForm.every(k => String(form[k] ?? '').trim())
   const statusLabel    = selectedStatus?.label ?? ''
+  // Both parse routes are gated on candidates.update (measured, candidates.php:56-57).
+  const canParseCv     = hasPermission?.('candidates.update') ?? false
 
   // Gender options come from the /genders tenant lookup (CFG-1), not hardcoded.
   const genderOptions = genders.map(g => ({ value: g.value, label: g.label }))
@@ -289,13 +304,23 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
               // Two-column grid of titled cards (Optie A) — Persoonlijk/Adres span both
               // columns (their paired rows need the width); Contact/Werk sit side by side.
               // Each card is a presentational component under addmodal/ (§refactor 2026-07-20).
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, alignItems: 'start' }}>
-                <PersonalCard form={form} errors={errors} set={set} isReq={isReq} genderOptions={genderOptions} />
-                <ContactCard form={form} errors={errors} set={set} isReq={isReq} />
-                <WorkCard form={form} set={set} isReq={isReq} allowFreeEntry={allowFreeEntry} functions={functions} ownerOptions={ownerOptions} />
-                <AddressCard form={form} errors={errors} set={set} isReq={isReq} provinces={provinces} />
-                <BranchesCard branchIds={branchIds} setBranchIds={setBranchIds} locations={locations} />
-              </div>
+              // CvFilledContext lets each card mark its own CV-prefilled fields
+              // without drilling the set through two levels (§3).
+              <CvFilledContext.Provider value={cvFilled}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, alignItems: 'start' }}>
+                  {/* Both parse routes require candidates.update — hide the control when
+                      it would 403 rather than offer an affordance that cannot work. */}
+                  {canParseCv && (
+                    <CvUploadCard phase={cv.phase} errorKey={cv.errorKey} fileName={cv.fileName}
+                      summary={cvSummary} onFile={cv.start} onReset={cv.reset} />
+                  )}
+                  <PersonalCard form={form} errors={errors} set={set} isReq={isReq} genderOptions={genderOptions} />
+                  <ContactCard form={form} errors={errors} set={set} isReq={isReq} />
+                  <WorkCard form={form} set={set} isReq={isReq} allowFreeEntry={allowFreeEntry} functions={functions} ownerOptions={ownerOptions} />
+                  <AddressCard form={form} errors={errors} set={set} isReq={isReq} provinces={provinces} />
+                  <BranchesCard branchIds={branchIds} setBranchIds={setBranchIds} locations={locations} />
+                </div>
+              </CvFilledContext.Provider>
             )}
           </div>
 

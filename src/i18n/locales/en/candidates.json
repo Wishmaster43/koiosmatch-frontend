@@ -242,7 +242,45 @@
       "other": "Other / not specified"
     },
     "vacancyFallback": "Vacancy {{id}}",
-    "statusPanelHint": "Defaults to Lead. A new candidate starts as a Lead."
+    "statusPanelHint": "Defaults to Lead. A new candidate starts as a Lead.",
+    "cv": {
+      "title": "Candidate from CV",
+      "intro": "Upload a CV (PDF). Koios reads the details and prefills this form. Nothing is saved: you check the fields and click create yourself.",
+      "choose": "Choose CV",
+      "hint": "PDF only · max. 10 MB",
+      "uploading": "Uploading CV…",
+      "reading": "Reading CV…",
+      "readingHint": "This usually takes 10 to 40 seconds.",
+      "cancel": "Cancel",
+      "another": "Another CV",
+      "retry": "Try again",
+      "badge": "cv",
+      "badgeTitle": "Taken from the CV — check this value",
+      "checkNotice": "Check the marked fields: dates and employers are misread regularly.",
+      "filled_one": "{{count}} field prefilled from the CV",
+      "filled_other": "{{count}} fields prefilled from the CV",
+      "none": "This CV contained no details that fit this form.",
+      "skipped_one": "{{count}} field skipped because you had already filled it in.",
+      "skipped_other": "{{count}} fields skipped because you had already filled them in.",
+      "unreadableDate": "The date of birth in the CV could not be read unambiguously and was left empty.",
+      "extraExperiences_one": "The CV also contains {{count}} work experience. Add it in the dossier after creating the candidate.",
+      "extraExperiences_other": "The CV also contains {{count}} work experiences. Add them in the dossier after creating the candidate.",
+      "extraEducations_one": "The CV also contains {{count}} education. Add it in the dossier after creating the candidate.",
+      "extraEducations_other": "The CV also contains {{count}} educations. Add them in the dossier after creating the candidate.",
+      "noFreeText": "Free text from the CV (summary, motivation, personal notes) is deliberately not copied over.",
+      "error": {
+        "notPdf": "Only a PDF file can be read.",
+        "tooLarge": "This file is larger than 10 MB.",
+        "throttled": "Too many CVs in a row. Wait a minute and try again.",
+        "forbidden": "You are not allowed to have a CV read.",
+        "expired": "This request has expired. Upload the CV again.",
+        "budget": "This month's AI budget has been reached. Fill in the details manually.",
+        "unreadable": "This CV could not be read. Fill in the details manually.",
+        "unavailable": "The CV reader is unavailable right now. Try again later.",
+        "timeout": "Reading this CV took too long. Try again or fill in the details manually.",
+        "generic": "The CV could not be read."
+      }
+    }
   },
   "drawer": {
     "availability": "Availability",

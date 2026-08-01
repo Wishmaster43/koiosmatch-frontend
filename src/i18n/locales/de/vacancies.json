@@ -52,7 +52,8 @@
   },
   "kpi": {
     "withoutAgent": "Ohne KI-Agent",
-    "applicationsTotal": "Bewerbungen gesamt"
+    "applicationsTotal": "Bewerbungen gesamt",
+    "applicationsTotalHint": "Klick: nur Stellen mit Bewerbungen"
   },
   "filters": {
     "search": "Suchen",
@@ -101,7 +102,14 @@
     "noteAdded": "Notiz zu {{count}} Stellen hinzugefügt.",
     "archived": "{{count}} Stellen archiviert.",
     "mutateError": "Änderung konnte nicht angewendet werden.",
-    "archiveError": "Archivieren fehlgeschlagen."
+    "archiveError": "Archivieren fehlgeschlagen.",
+    "aiAgent": "KI-Agent",
+    "linkAgent": "KI-Agent verknüpfen",
+    "unlinkAgent": "KI-Agent trennen",
+    "searchAgent": "KI-Agent suchen",
+    "noAgents": "Keine KI-Agenten",
+    "agentLinked": "KI-Agent „{{name}}“ mit {{count}} Stellen verknüpft.",
+    "agentUnlinked": "KI-Agent von {{count}} Stellen getrennt."
   },
   "drawer": {
     "entityLabel": "Stelle",

@@ -9,7 +9,7 @@
  * resets an invalid department, and the saved payload always carries a matching
  * pair (assert the REQUEST — CLAUDE.md §13, not just that onSave fired).
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
@@ -23,6 +23,14 @@ import type { Contact, Department } from '@/types/customer'
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
   return { ...actual, default: { get: vi.fn().mockResolvedValue({ data: { data: [] } }), post: vi.fn(), patch: vi.fn(), delete: vi.fn() } }
+})
+
+// Merge is permission-gated (customers.update). Default null = no auth context at all,
+// which is what every pre-existing test in this file renders under.
+const mockAuth: { current: { hasPermission: (p: string) => boolean } | null } = { current: null }
+vi.mock('@/context/AuthContext', async () => {
+  const actual = await vi.importActual('@/context/AuthContext')
+  return { ...actual, useAuth: () => mockAuth.current }
 })
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
@@ -42,12 +50,13 @@ const departments = [dept('dep-1', 'Verpleging', 'loc-1'), dept('dep-2', 'Thuisz
 
 const baseContact = (overrides: Partial<Contact> = {}): Contact => ({
   id: 'c1', helloflexLink: null, shiftmanagerLink: null,
+  // CONTACT-GESLACHT-1 + the merge scope id — both required on Contact now.
+  customerId: 'cust-1', gender: '',
   firstName: 'Jan', middleName: '', lastName: 'Jansen', name: 'Jan Jansen',
   role: '', email: '', phone: '', mobile: '', isPrimary: false,
   locationId: null, locationName: '', departmentId: null, departmentName: '',
   locations: [], departments: [], statusId: null, status: '', statusLabel: '', statusColor: '', customFields: {},
-  // Last-contact pair (customer_contacts.last_contact_at / _type) — null here, as the
-  // API sends it today: CustomerContactResource does not expose the columns yet.
+  // Last-contact pair — the resource sends both now; null here means "never contacted".
   lastContactAt: null, lastContactType: null,
   ...overrides,
 })
@@ -180,5 +189,82 @@ describe('ContactDetail · declining the primary-replace question', () => {
     await user.click(screen.getByRole('button', { name: ct('subModal.primaryReplace.confirm') }))
 
     expect(onSave).toHaveBeenCalledWith('c1', expect.objectContaining({ isPrimary: true }))
+  })
+})
+
+/**
+ * CONTACT-GESLACHT-1 — the column is `gender` and stores the candidate_genders VALUE
+ * SLUG, so the field must (a) offer the tenant /genders lookup rather than three
+ * hardcoded options and (b) SAVE the slug while DISPLAYING the label. `@/lib/api` is
+ * mocked to an empty response above, so useGenders falls back to its seed list.
+ */
+describe('ContactDetail · gender', () => {
+  it('renders the lookup LABEL in read mode, not the stored slug', () => {
+    render(<ContactDetail contact={baseContact({ gender: 'female' })} locations={locations} departments={departments}
+      statuses={statuses} onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    expect(screen.getByText('Vrouw')).toBeInTheDocument()
+    expect(screen.queryByText('female')).not.toBeInTheDocument()
+  })
+
+  it('saves the SLUG, never the label', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      onSave={onSave} onDelete={vi.fn()} close={vi.fn()} />)
+
+    await user.click(screen.getAllByTitle(cm('edit'))[0])
+    // Open the gender combobox (the row is label-span + control-div) and pick by label.
+    await user.click(screen.getByText(ct('contacts.detail.gender')).parentElement!.querySelector('button')!)
+    await user.click(await screen.findByText('Man'))
+    await user.click(screen.getByTitle(cm('save')))
+
+    expect(onSave).toHaveBeenCalledWith('c1', expect.objectContaining({ gender: 'male' }))
+  })
+})
+
+/**
+ * CMFE-16 merge entry point. Merging is destructive and irreversible, so the trigger is
+ * permission-gated in the UI (customers.update — the backend re-checks anyway) and is
+ * absent whenever it could not possibly succeed: no customer scope, or no second contact
+ * at this customer to merge with. A button that can only ever fail is a fake affordance.
+ */
+describe('ContactDetail · merge entry point', () => {
+  const other = baseContact({ id: 'c2', firstName: 'Jan', lastName: 'Janssen', name: 'Jan Janssen' })
+  const allowed = { hasPermission: (p: string) => p === 'customers.update' }
+
+  afterEach(() => { mockAuth.current = null })
+
+  const renderDetail = (existing: Contact[]) =>
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      existing={existing} onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+
+  it('shows the merge action with customers.update and a second contact present', () => {
+    mockAuth.current = allowed
+    renderDetail([baseContact(), other])
+    expect(screen.getByRole('button', { name: ct('contacts.merge.title') })).toBeInTheDocument()
+  })
+
+  it('HIDES the merge action without customers.update', () => {
+    mockAuth.current = { hasPermission: () => false }
+    renderDetail([baseContact(), other])
+    expect(screen.queryByRole('button', { name: ct('contacts.merge.title') })).not.toBeInTheDocument()
+  })
+
+  it('HIDES the merge action when this customer has no second contact', () => {
+    mockAuth.current = allowed
+    renderDetail([baseContact()])
+    expect(screen.queryByRole('button', { name: ct('contacts.merge.title') })).not.toBeInTheDocument()
+  })
+
+  it('opens the merge dialog, scoped to this contact and its customer', async () => {
+    mockAuth.current = allowed
+    const user = userEvent.setup()
+    renderDetail([baseContact(), other])
+
+    await user.click(screen.getByRole('button', { name: ct('contacts.merge.title') }))
+
+    expect(screen.getByRole('dialog', { name: ct('contacts.merge.title') })).toBeInTheDocument()
+    // The other contact of THIS customer is offered as the duplicate.
+    expect(screen.getByText('Jan Janssen')).toBeInTheDocument()
   })
 })

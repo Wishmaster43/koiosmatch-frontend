@@ -128,4 +128,48 @@ describe('useCustomerRecord · updateCustomer', () => {
     await waitFor(() => expect(r.result.current.customers[0].email).toBe('new@rivas.nl'))
     expect(r.result.current.customers[0].phone).toBe('010-111')
   })
+
+  // FACTUURADRES-1 (Danny 2026-08-01): the invoice-address block. A key MISSING from
+  // FIELD_MAP is silently dropped before the request is built, so the assertion is on
+  // the exact PATCH body — the seam, not the callback.
+  it('maps the invoice address to its billing_* API keys', async () => {
+    mockedPatch.mockResolvedValue({})
+    const r = harness([customer({ id: 1 })])
+    act(() => {
+      r.result.current.record.updateCustomer(1, {
+        billingPoBox: 'Postbus 1234', billingStreet: 'Keizersgracht', billingHouseNumber: '7',
+        billingHouseNumberSuffix: 'B', billingPostalCode: '1015 CJ', billingCity: 'Amsterdam',
+        billingCountry: 'NL',
+      })
+    })
+    expect(mockedPatch).toHaveBeenCalledWith('/customers/1', {
+      billing_po_box: 'Postbus 1234', billing_street: 'Keizersgracht', billing_house_number: '7',
+      billing_house_number_suffix: 'B', billing_postcode: '1015 CJ', billing_city: 'Amsterdam',
+      billing_country: 'NL',
+    })
+    await waitFor(() => expect((r.result.current.customers[0] as unknown as Record<string, unknown>).billingCity).toBe('Amsterdam'))
+  })
+
+  // Clearing the block is what makes it fall back to the visit address again, so the
+  // empty strings must actually travel instead of being dropped as "nothing changed".
+  it('sends explicit empty strings when the invoice address is cleared (empty = use the visit address)', () => {
+    mockedPatch.mockResolvedValue({})
+    const r = harness([customer({ id: 1 })])
+    act(() => { r.result.current.record.updateCustomer(1, { billingPoBox: '', billingCity: '' }) })
+    expect(mockedPatch).toHaveBeenCalledWith('/customers/1', { billing_po_box: '', billing_city: '' })
+  })
+})
+
+describe('useCustomerRecord · invoice-address block on the fetched detail', () => {
+  it('folds the billing_* columns onto the detail record so the Facturatie tab can read them', async () => {
+    mockedGet.mockResolvedValue({ data: { id: 1, name: 'Rivas', billing_po_box: 'Postbus 1234', billing_city: 'Gorinchem' } })
+    const r = harness([customer({ id: 1 })])
+    act(() => { r.result.current.record.selectCustomer(customer({ id: 1 })) })
+    await waitFor(() => expect(r.result.current.record.detail?.id).toBe(1))
+    const detail = r.result.current.record.detail as unknown as Record<string, unknown>
+    expect(detail.billingPoBox).toBe('Postbus 1234')
+    expect(detail.billingCity).toBe('Gorinchem')
+    // A column the response does not carry reads as '' — never `undefined` in the form.
+    expect(detail.billingStreet).toBe('')
+  })
 })

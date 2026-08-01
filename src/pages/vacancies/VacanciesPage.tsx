@@ -13,7 +13,6 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
 import { useBranchOptions } from '@/lib/useBranchOptions'
-import { isReferenceQuery } from '@/lib/referenceNumber'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import ActionMessageBanner from '@/components/ui/ActionMessageBanner'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
@@ -32,6 +31,8 @@ import { useNavigation } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { useVacanciesData } from './hooks/useVacanciesData'
+import { useVacancyFilterParams } from './hooks/useVacancyFilterParams'
+import { useAiAgents } from './hooks/useAiAgents'
 import { useVacancyRecord } from './hooks/useVacancyRecord'
 import { useVacancyInsights } from './hooks/useVacancyInsights'
 import { useOpenFromIntent } from '@/context/NavigationContext'
@@ -87,6 +88,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // Mutually exclusive with showWithoutAgent — see toggleWithoutAgent + the 'agent'
   // donut's onPick below, which keep only one of the two ever set.
   const [selectedAgentId, setSelectedAgentId] = usePageMemory<string | null>('vac.agent', null)
+  // VAC-HAS-APPLICATIONS-1: "only vacancies with applications" — a real server-side
+  // filter (VacancyQuery BOOLEAN_FILTERS → whereHas('applications')), driven by the
+  // applications KPI card. Before this landed the card could not filter at all.
+  const [hasApplications, setHasApplications] = usePageMemory('vac.hasApplications', false)
   // V27: Gepubliceerd/Niet-gepubliceerd — a real server-side filter (VacancyQuery::
   // rules()/filtered() already accept a `published` boolean on both /vacancies and
   // /vacancies/stats), just never wired into the UI before.
@@ -102,41 +107,13 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
 
   const handlePageSizeChange = (newSize: number) => { setPageSize(newSize); setPage(1) }
 
-  // Server-side filter params (axios serialises arrays as `key[]`).
-  const filterParams = useMemo(() => {
-    const p: Record<string, unknown> = {}
-    // NUMMER-1: a typed reference number (V-12) does an exact server-side `?ref=`
-    // lookup instead of the normal free-text search; the server ignores other filters.
-    if (globalSearch.trim()) {
-      const q = globalSearch.trim()
-      if (isReferenceQuery(q)) p.ref = q
-      else p.search = q
-    }
-    // '__none' = the "Geen status" donut segment → server-side no_status filter (VAC-NOSTATUS-1).
-    if (statusBucket === '__none')   p.no_status = 1
-    else if (statusBucket !== 'all') p.status    = [statusBucket]
-    if (selectedOwner.length)   p.owner_id    = selectedOwner
-    if (selectedClient.length)  p.customer_id = selectedClient
-    // V28: functie donut filter — VacancyQuery::filtered() already whereIn's on function_title.
-    if (selectedCategory.length) p.category  = selectedCategory
-    // VESTIGING-2: server-side ?branch_id[]= — a narrowing only, gated behind the
-    // tenant's own branch_authz_enabled axis on the backend (off = no effect).
-    if (selectedBranch.length)  p.branch_id = selectedBranch
-    if (showArchived)           p.include_archived = 1
-    // VAC-AGENT-1: quick view onto the vacancies that are online but have no agent linked.
-    if (showWithoutAgent)       p.without_agent = 1
-    // VAC-KPI-REDESIGN 22-07: the AI-agent donut's real-agent segment click.
-    else if (selectedAgentId)   p.agent_id = selectedAgentId
-    // V27: server-side published/unpublished filter (honoured by both the list and
-    // stats). Laravel's `boolean` rule only accepts true/false/0/1/'0'/'1' — NOT the
-    // strings "true"/"false" a JS boolean serialises to in a query string — so this
-    // sends 1/0 (numeric), mirroring `include_archived`/`no_status` above (a real
-    // 422 caught by the live read-only probe before this fix).
-    if (publishedBucket !== 'all') p.published = publishedBucket === 'published' ? 1 : 0
-    // Map view narrows the list server-side to the chosen circle (STRAAL-1).
-    if (view === 'map' && mapStraalActive) { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
-    return p
-  }, [globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, selectedBranch, showArchived, showWithoutAgent, selectedAgentId, publishedBucket, view, mapCenter, mapRadius, mapStraalActive])
+  // Server-side filter params (axios serialises arrays as `key[]`). The exact wire
+  // shape lives in its own hook so it stays unit-testable (§3 size discipline).
+  const filterParams = useVacancyFilterParams({
+    globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, selectedBranch,
+    showArchived, showWithoutAgent, selectedAgentId, hasApplications, publishedBucket,
+    view, mapCenter, mapRadius, mapStraalActive,
+  })
   const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1; the visible rows change → drop the selection.
@@ -209,8 +186,14 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // ── Bulk actions ──
-  const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkSetClient, bulkPublish, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags, dialog: bulkConfirmDialog } =
+  const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkSetClient, bulkPublish, bulkSetAiAgent, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags, dialog: bulkConfirmDialog } =
     useVacancyBulkActions({ vacancies, setVacancies, setTotal, selectedIds, setSelectedIds, notify, t, statusMeta: statusMetaSafe })
+
+  // VAC-BULK-AGENT-1: the agent picker's option source (shared cached query with the
+  // drawer's AI-agent tab). Only fetched for users who may actually bulk-update —
+  // a read-only viewer gets 403 on the bulk route anyway, so don't ask for the list.
+  const { options: aiAgentOptions } = useAiAgents(hasPermission('vacancies.update'))
+  const aiAgents = aiAgentOptions.map(o => ({ id: o.value, name: o.label }))
 
   // VAC-KPI-REDESIGN 22-07: toggling "no agent" always clears the picked real-agent
   // id (mutually exclusive) — shared by the toolbar QuickViewToggle, the agent
@@ -228,15 +211,15 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     selectedCategory, pickCategory: pickOne(setSelectedCategory), clearCategory: () => setSelectedCategory([]),
     publishedBucket, setPublishedBucket,
     selectedAgentId, setSelectedAgentId, showWithoutAgent, setShowWithoutAgent, toggleWithoutAgent,
-    applicationsTotal,
+    applicationsTotal, hasApplications, setHasApplications,
   })
   // Shared clear-all (page memory keeps filters sticky).
   const anyFilterActive = Boolean(globalSearch.trim() || showArchived || showWithoutAgent || Boolean(selectedAgentId) || statusBucket !== 'all'
-    || selectedOwner.length || selectedClient.length || selectedCategory.length || selectedBranch.length || publishedBucket !== 'all')
+    || selectedOwner.length || selectedClient.length || selectedCategory.length || selectedBranch.length || publishedBucket !== 'all' || hasApplications)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setShowWithoutAgent(false); setSelectedAgentId(null); setStatusBucket('all')
-    setSelectedOwner([]); setSelectedClient([]); setSelectedCategory([]); setSelectedBranch([]); setPublishedBucket('all'); setPage(1)
+    setSelectedOwner([]); setSelectedClient([]); setSelectedCategory([]); setSelectedBranch([]); setPublishedBucket('all'); setHasApplications(false); setPage(1)
   }
 
   // Status tab bar: "All" + one button per configured status.
@@ -265,9 +248,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                 <VacanciesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
                   onSetOwner={bulkSetOwner} onSetStatus={bulkSetStatus} onSetClient={bulkSetClient}
                   onPublish={() => bulkPublish(true)} onUnpublish={() => bulkPublish(false)}
+                  onSetAiAgent={bulkSetAiAgent}
                   onRemoveTag={bulkRemoveTag} onAddNote={bulkAddNote} onArchive={bulkArchive}
                   canArchive={hasPermission('vacancies.delete')}
-                  users={users} statuses={statuses} customers={customerList} selectedTags={selectedTags} />
+                  users={users} statuses={statuses} customers={customerList} aiAgents={aiAgents} selectedTags={selectedTags} />
               ) : (
                 <>
                   {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}

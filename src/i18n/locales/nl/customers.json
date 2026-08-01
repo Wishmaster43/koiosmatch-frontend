@@ -129,7 +129,14 @@
     "callPhone": "Bellen",
     "openWebsite": "Website openen",
     "coc": "KvK-nummer",
-    "vat": "BTW-nummer"
+    "vat": "BTW-nummer",
+    "billingAddress": {
+      "title": "Factuuradres",
+      "poBox": "Postbus",
+      "usesVisitAddress": "Leeg — de factuur gaat naar het bezoekadres.",
+      "visitEmpty": "Geen bezoekadres ingevuld",
+      "hint": "Laat dit leeg als de factuur naar het bezoekadres mag. Vul het alleen in bij een afwijkend adres of een postbus."
+    }
   },
   "richText": {
     "empty": "Nog niet ingevuld."
@@ -276,7 +283,8 @@
       },
       "linkLocation": "Locatie koppelen",
       "linkDepartment": "Afdeling koppelen",
-      "middleName": "Tussenvoegsel"
+      "middleName": "Tussenvoegsel",
+      "gender": "Geslacht"
     },
     "deleteConfirm": "Deze contactpersoon verwijderen?",
     "saveFailed": "Opslaan is mislukt.",
@@ -294,7 +302,24 @@
     },
     "openContact": "Open contactpersoon",
     "backTo": "Terug naar {{name}}",
-    "searchHere": "Zoek contactpersoon…"
+    "searchHere": "Zoek contactpersoon…",
+    "merge": {
+      "title": "Contactpersoon samenvoegen",
+      "intro": "Kies de dubbele contactpersoon bij deze klant en bepaal daarna welk record blijft. {{name}} is het geopende record.",
+      "searchPlaceholder": "Zoek op naam, nummer of e-mailadres…",
+      "noResults": "Geen contactpersonen gevonden.",
+      "noOthers": "Deze klant heeft geen andere contactpersoon om mee samen te voegen.",
+      "stays": "Dit record blijft",
+      "thisRecord": "Geopend record",
+      "otherRecord": "Gevonden record",
+      "warning": "De gegevens van {{source}} worden opgenomen in {{target}}; {{source}} verdwijnt daarna. Dit is niet ongedaan te maken.",
+      "back": "Terug",
+      "cancel": "Annuleren",
+      "confirm": "Samenvoegen",
+      "done": "Contactpersonen samengevoegd.",
+      "errForbidden": "Je hebt geen rechten om contactpersonen samen te voegen.",
+      "errFailed": "Samenvoegen mislukt. Probeer het opnieuw."
+    }
   },
   "vacancies": {
     "empty": "Geen vacatures voor deze klant.",
@@ -534,7 +559,8 @@
       "confirm": "Ja, vervangen",
       "decline": "Nee, niet vervangen"
     },
-    "middleName": "Tussenvoegsel"
+    "middleName": "Tussenvoegsel",
+    "gender": "Geslacht"
   },
   "changelog": {
     "empty": "Nog geen wijzigingen."
