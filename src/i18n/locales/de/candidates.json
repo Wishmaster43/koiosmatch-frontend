@@ -874,7 +874,8 @@
     "onMap": "{{count}} Stellen auf der Karte",
     "empty": "Keine Stellen innerhalb dieser Filter gefunden.",
     "centerHome": "Wohnadresse des Kandidaten",
-    "aiAdvised": "Von Koios empfohlen"
+    "aiAdvised": "Von Koios empfohlen",
+    "openInApp": "In Koios öffnen"
   },
   "erase": {
     "trashView": "Papierkorb",

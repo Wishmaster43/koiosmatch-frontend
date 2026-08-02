@@ -213,7 +213,15 @@
       "branchOwn": "Definido aparte",
       "branchLink": "Vincular sede",
       "branchEmpty": "Sin sede propia — esta ubicación sigue al cliente.",
-      "branchHint": "Dejarlo vacío significa: mismas sedes que el cliente. Vincular una aquí crea una excepción deliberada."
+      "branchHint": "Dejarlo vacío significa: mismas sedes que el cliente. Vincular una aquí crea una excepción deliberada.",
+      "isPrimaryContact": "Contacto principal de esta ubicación",
+      "setPrimaryContact": "Convertir en contacto principal de esta ubicación",
+      "setPrimaryContactDone": "{{name}} es ahora el contacto principal de esta ubicación.",
+      "setPrimaryContactFailed": "No se pudo establecer el contacto principal.",
+      "setPrimaryContactUnavailable": "El servidor aún no ha aplicado este cambio. Vuelve a intentarlo cuando la base de datos esté actualizada.",
+      "primaryContactTitle": "Contacto principal",
+      "noPrimaryContact": "Aún no hay contacto principal para esta ubicación",
+      "pickPrimaryContact": "Elige un contacto principal"
     },
     "saveFailed": "Error al guardar.",
     "deleteFailed": "Error al eliminar.",
@@ -263,7 +271,8 @@
       "phone": "Teléfono",
       "status": "Estado",
       "mobile": "Móvil",
-      "lastContact": "Último contacto"
+      "lastContact": "Último contacto",
+      "locationPrimary": "Contacto del sitio"
     },
     "detail": {
       "infoTitle": "Contacto",
@@ -321,7 +330,9 @@
       "done": "Contactos combinados.",
       "errForbidden": "No tienes permiso para combinar contactos.",
       "errFailed": "Error al combinar. Inténtalo de nuevo."
-    }
+    },
+    "primaryCustomerChip": "Principal del cliente",
+    "primaryLocationChip": "Principal aquí"
   },
   "vacancies": {
     "empty": "No hay vacantes para este cliente.",

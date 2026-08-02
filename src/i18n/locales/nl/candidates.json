@@ -874,7 +874,8 @@
     "onMap": "{{count}} vacatures op de kaart",
     "empty": "Geen vacatures gevonden binnen deze filters.",
     "centerHome": "Woonadres kandidaat",
-    "aiAdvised": "Door Koios geadviseerd"
+    "aiAdvised": "Door Koios geadviseerd",
+    "openInApp": "Openen in Koios"
   },
   "erase": {
     "trashView": "Prullenbak",

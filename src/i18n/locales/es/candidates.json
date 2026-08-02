@@ -874,7 +874,8 @@
     "onMap": "{{count}} vacantes en el mapa",
     "empty": "No se han encontrado vacantes con estos filtros.",
     "centerHome": "Domicilio del candidato",
-    "aiAdvised": "Recomendado por Koios"
+    "aiAdvised": "Recomendado por Koios",
+    "openInApp": "Abrir en Koios"
   },
   "erase": {
     "trashView": "Papelera",

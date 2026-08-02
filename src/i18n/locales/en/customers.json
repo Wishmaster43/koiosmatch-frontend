@@ -213,7 +213,15 @@
       "branchOwn": "Set separately",
       "branchLink": "Link branch",
       "branchEmpty": "No branch of its own — this location follows the customer.",
-      "branchHint": "Leaving this empty means the location works under the same branches as the customer. Linking one here makes it deviate on purpose."
+      "branchHint": "Leaving this empty means the location works under the same branches as the customer. Linking one here makes it deviate on purpose.",
+      "isPrimaryContact": "Primary contact for this location",
+      "setPrimaryContact": "Make primary contact for this location",
+      "setPrimaryContactDone": "{{name}} is now the primary contact for this location.",
+      "setPrimaryContactFailed": "Could not set the primary contact.",
+      "setPrimaryContactUnavailable": "The server has not applied this yet. Try again once the database has been updated.",
+      "primaryContactTitle": "Primary contact",
+      "noPrimaryContact": "No primary contact for this location yet",
+      "pickPrimaryContact": "Choose a primary contact"
     },
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",
@@ -263,7 +271,8 @@
       "phone": "Phone",
       "status": "Status",
       "mobile": "Mobile",
-      "lastContact": "Last contact"
+      "lastContact": "Last contact",
+      "locationPrimary": "Main contact"
     },
     "detail": {
       "infoTitle": "Contact",
@@ -321,7 +330,9 @@
       "done": "Contacts merged.",
       "errForbidden": "You are not allowed to merge contacts.",
       "errFailed": "Merge failed. Please try again."
-    }
+    },
+    "primaryCustomerChip": "Primary for customer",
+    "primaryLocationChip": "Primary here"
   },
   "vacancies": {
     "empty": "No vacancies for this customer.",

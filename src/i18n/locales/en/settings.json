@@ -1177,7 +1177,15 @@
       "contacts": {
         "label": "Contacts",
         "desc": "Contact persons. Requires an existing customer, location and department."
+      },
+      "customer_tree": {
+        "label": "Customer (complete)",
+        "desc": "Builds a customer together with its locations, departments and contacts in one go — for a customer that doesn't exist yet."
       }
+    },
+    "groups": {
+      "wholeTree": "All in one file",
+      "perEntity": "Separate per part"
     },
     "order": {
       "title": "Import in this order",
@@ -1185,7 +1193,18 @@
       "customersHint": "Start here — nothing else needs to exist yet.",
       "locationsHint": "Links to an existing customer by name (klant_naam) — import customers first.",
       "departmentsHint": "Links to an existing customer and location by name (klant_naam, locatie_naam) — import those first.",
-      "contactsHint": "Links to an existing customer, location and department by name (klant_naam, locatie_naam, afdeling_naam) — import those first."
+      "contactsHint": "Links to an existing customer, location and department by name (klant_naam, locatie_naam, afdeling_naam) — import those first.",
+      "treeAlternative": "Building a brand-new customer from scratch?",
+      "switchToTree": "Use the combined file"
+    },
+    "tree": {
+      "title": "This import builds",
+      "replacesOrder": "No fixed order needed — this one file replaces the four separate steps.",
+      "rowGrain": "One row = one contact person, with the customer, location and department repeated alongside it. So forty rows isn't forty customers.",
+      "levelTruncation": "Leave a name field blank on a row (say, the department) and that row stops there — nothing is created for that level or beyond.",
+      "allOrNothing": "One row is all-or-nothing: if the contact fails, the customer, location and department on that same row aren't created either. A customer an earlier row already created stays put.",
+      "separateAlternative": "Adding something to a customer that already exists?",
+      "switchToSeparate": "Use the separate files"
     },
     "loadingTemplates": "Loading import types…",
     "loadTemplatesError": "Could not load the import types. Please try again.",
@@ -1216,6 +1235,7 @@
     "result": {
       "title": "Import result",
       "subtitleSuccess": "All rows were imported successfully.",
+      "subtitleSuccessWithRemarks": "Everything was imported, but {{count}} rows landed with something left out — see below.",
       "subtitlePartial": "{{errorCount}} of {{total}} rows could not be imported — see below.",
       "newImport": "Import another file"
     },
@@ -1224,18 +1244,22 @@
       "create": "New",
       "update": "Updated",
       "skip": "Skipped",
-      "error": "Failed"
+      "error": "Failed",
+      "remarks": "Remarks",
+      "rowsAreRows": "These counts are rows in the file.",
+      "rowsAreRowsTree": "These are rows, not customers — one row can create a customer, a location, a department and a contact all at once."
     },
     "unknownColumns": {
       "title": "Unrecognised columns (ignored)",
       "hint": "These columns in your file don't match a known field. They were ignored — nothing else was affected."
     },
     "rows": {
-      "errorTitle": "{{count}} rows with an error",
+      "attentionTitle": "{{count}} rows that need attention",
       "allTitle": "All {{count}} rows",
       "showAll": "Show all {{count}} rows",
-      "showErrorsOnly": "Show only failed rows",
-      "noErrors": "No rows failed.",
+      "showAttentionOnly": "Show only rows that need attention",
+      "noAttention": "No rows need attention.",
+      "remark": "Note:",
       "row": "Row {{row}}"
     }
   },
@@ -1736,7 +1760,7 @@
     },
     "statuses": {
       "title": "Customer statuses",
-      "subtitle": "Manage the statuses a customer can have (Active, Prospect, …).",
+      "subtitle": "Manage the statuses a customer can have (Active, Inactive, …). Whether they are a prospect or a customer is set under Customer phase.",
       "add": "Add status"
     },
     "locationStatuses": {

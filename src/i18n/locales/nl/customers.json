@@ -213,7 +213,15 @@
       "branchOwn": "Afwijkend ingesteld",
       "branchLink": "Vestiging koppelen",
       "branchEmpty": "Nog geen eigen vestiging — deze locatie volgt de klant.",
-      "branchHint": "Leeg laten betekent: deze locatie werkt onder dezelfde vestigingen als de klant. Koppel je er zelf een, dan wijkt deze locatie bewust af."
+      "branchHint": "Leeg laten betekent: deze locatie werkt onder dezelfde vestigingen als de klant. Koppel je er zelf een, dan wijkt deze locatie bewust af.",
+      "isPrimaryContact": "Primaire contactpersoon van deze locatie",
+      "setPrimaryContact": "Maak primaire contactpersoon van deze locatie",
+      "setPrimaryContactDone": "{{name}} is nu de primaire contactpersoon van deze locatie.",
+      "setPrimaryContactFailed": "Instellen van de primaire contactpersoon is niet gelukt.",
+      "setPrimaryContactUnavailable": "De server heeft dit nog niet doorgevoerd. Probeer het opnieuw nadat de database is bijgewerkt.",
+      "primaryContactTitle": "Primaire contactpersoon",
+      "noPrimaryContact": "Nog geen primaire contactpersoon voor deze locatie",
+      "pickPrimaryContact": "Kies een primaire contactpersoon"
     },
     "saveFailed": "Opslaan is mislukt.",
     "deleteFailed": "Verwijderen is mislukt.",
@@ -263,7 +271,8 @@
       "phone": "Telefoon",
       "status": "Status",
       "mobile": "Mobiel",
-      "lastContact": "Laatste contact"
+      "lastContact": "Laatste contact",
+      "locationPrimary": "Hoofdcontact"
     },
     "detail": {
       "infoTitle": "Contactpersoon",
@@ -321,7 +330,9 @@
       "done": "Contactpersonen samengevoegd.",
       "errForbidden": "Je hebt geen rechten om contactpersonen samen te voegen.",
       "errFailed": "Samenvoegen mislukt. Probeer het opnieuw."
-    }
+    },
+    "primaryCustomerChip": "Primair bij klant",
+    "primaryLocationChip": "Primair hier"
   },
   "vacancies": {
     "empty": "Geen vacatures voor deze klant.",

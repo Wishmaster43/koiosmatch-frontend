@@ -213,7 +213,15 @@
       "branchOwn": "Abweichend gesetzt",
       "branchLink": "Standort verknüpfen",
       "branchEmpty": "Kein eigener Standort — dieser Standort folgt dem Kunden.",
-      "branchHint": "Leer lassen bedeutet: gleiche Standorte wie beim Kunden. Eine eigene Verknüpfung weicht bewusst ab."
+      "branchHint": "Leer lassen bedeutet: gleiche Standorte wie beim Kunden. Eine eigene Verknüpfung weicht bewusst ab.",
+      "isPrimaryContact": "Primärer Ansprechpartner dieses Standorts",
+      "setPrimaryContact": "Zum primären Ansprechpartner dieses Standorts machen",
+      "setPrimaryContactDone": "{{name}} ist jetzt der primäre Ansprechpartner dieses Standorts.",
+      "setPrimaryContactFailed": "Der primäre Ansprechpartner konnte nicht gesetzt werden.",
+      "setPrimaryContactUnavailable": "Der Server hat dies noch nicht übernommen. Versuchen Sie es erneut, sobald die Datenbank aktualisiert ist.",
+      "primaryContactTitle": "Primärer Ansprechpartner",
+      "noPrimaryContact": "Noch kein primärer Ansprechpartner für diesen Standort",
+      "pickPrimaryContact": "Primären Ansprechpartner wählen"
     },
     "saveFailed": "Speichern fehlgeschlagen.",
     "deleteFailed": "Löschen fehlgeschlagen.",
@@ -263,7 +271,8 @@
       "phone": "Telefon",
       "status": "Status",
       "mobile": "Mobil",
-      "lastContact": "Letzter Kontakt"
+      "lastContact": "Letzter Kontakt",
+      "locationPrimary": "Hauptkontakt"
     },
     "detail": {
       "infoTitle": "Kontakt",
@@ -321,7 +330,9 @@
       "done": "Kontaktpersonen zusammengeführt.",
       "errForbidden": "Sie haben keine Berechtigung, Kontaktpersonen zusammenzuführen.",
       "errFailed": "Zusammenführen fehlgeschlagen. Bitte erneut versuchen."
-    }
+    },
+    "primaryCustomerChip": "Primär beim Kunden",
+    "primaryLocationChip": "Hier primär"
   },
   "vacancies": {
     "empty": "Keine Stellen für diesen Kunden.",

@@ -963,7 +963,15 @@
       "contacts": {
         "label": "Contactos",
         "desc": "Personas de contacto. Requiere un cliente, una ubicación y un departamento existentes."
+      },
+      "customer_tree": {
+        "label": "Cliente (completo)",
+        "desc": "Crea un cliente junto con sus ubicaciones, departamentos y contactos de una sola vez — para un cliente que todavía no existe."
       }
+    },
+    "groups": {
+      "wholeTree": "Todo en un archivo",
+      "perEntity": "Por separado"
     },
     "order": {
       "title": "Importa en este orden",
@@ -971,7 +979,18 @@
       "customersHint": "Empieza aquí — todavía no es necesario que exista nada más.",
       "locationsHint": "Se vincula a un cliente existente por su nombre (klant_naam) — importa primero los clientes.",
       "departmentsHint": "Se vincula a un cliente y una ubicación existentes por su nombre (klant_naam, locatie_naam) — impórtalos primero.",
-      "contactsHint": "Se vincula a un cliente, una ubicación y un departamento existentes por su nombre (klant_naam, locatie_naam, afdeling_naam) — impórtalos primero."
+      "contactsHint": "Se vincula a un cliente, una ubicación y un departamento existentes por su nombre (klant_naam, locatie_naam, afdeling_naam) — impórtalos primero.",
+      "treeAlternative": "¿Estás creando un cliente completamente nuevo?",
+      "switchToTree": "Usar el archivo combinado"
+    },
+    "tree": {
+      "title": "Esta importación crea",
+      "replacesOrder": "No hace falta un orden fijo — este único archivo sustituye los cuatro pasos separados.",
+      "rowGrain": "Una fila = una persona de contacto, con el cliente, la ubicación y el departamento repetidos junto a ella. Así que cuarenta filas no son cuarenta clientes.",
+      "levelTruncation": "Si dejas en blanco un campo de nombre en una fila (por ejemplo, el departamento), esa fila se detiene ahí: no se crea nada para ese nivel ni los siguientes.",
+      "allOrNothing": "Una fila es todo o nada: si el contacto falla, tampoco se crean el cliente, la ubicación ni el departamento de esa misma fila. Un cliente que ya creó una fila anterior se mantiene sin cambios.",
+      "separateAlternative": "¿Quieres añadir algo a un cliente que ya existe?",
+      "switchToSeparate": "Usar los archivos separados"
     },
     "loadingTemplates": "Cargando tipos de importación…",
     "loadTemplatesError": "No se pudieron cargar los tipos de importación. Inténtalo de nuevo.",
@@ -1002,6 +1021,7 @@
     "result": {
       "title": "Resultado de la importación",
       "subtitleSuccess": "Todas las filas se importaron correctamente.",
+      "subtitleSuccessWithRemarks": "Todo se importó, pero en {{count}} filas se dejó algo fuera — consulta más abajo.",
       "subtitlePartial": "{{errorCount}} de {{total}} filas no se pudieron importar — consulta más abajo.",
       "newImport": "Importar otro archivo"
     },
@@ -1010,18 +1030,22 @@
       "create": "Nuevas",
       "update": "Actualizadas",
       "skip": "Omitidas",
-      "error": "Fallidas"
+      "error": "Fallidas",
+      "remarks": "Observaciones",
+      "rowsAreRows": "Estas cifras cuentan filas del archivo.",
+      "rowsAreRowsTree": "Esto son filas, no clientes — una fila puede crear a la vez un cliente, una ubicación, un departamento y un contacto."
     },
     "unknownColumns": {
       "title": "Columnas no reconocidas (ignoradas)",
       "hint": "Estas columnas de tu archivo no coinciden con ningún campo conocido. Se ignoraron — no se vio afectado nada más."
     },
     "rows": {
-      "errorTitle": "{{count}} filas con error",
+      "attentionTitle": "{{count}} filas que necesitan atención",
       "allTitle": "Las {{count}} filas",
       "showAll": "Mostrar las {{count}} filas",
-      "showErrorsOnly": "Mostrar solo las filas fallidas",
-      "noErrors": "Ninguna fila falló.",
+      "showAttentionOnly": "Mostrar solo las filas que necesitan atención",
+      "noAttention": "Ninguna fila necesita atención.",
+      "remark": "Nota:",
       "row": "Fila {{row}}"
     }
   },
@@ -1543,7 +1567,7 @@
     },
     "statuses": {
       "title": "Estados de cliente",
-      "subtitle": "Gestiona los estados que puede tener un cliente (Activo, Prospecto, …).",
+      "subtitle": "Gestiona los estados que puede tener un cliente (Activo, Inactivo, …). Si es un prospecto o un cliente se define en Fase del cliente.",
       "add": "Añadir estado"
     },
     "locationStatuses": {

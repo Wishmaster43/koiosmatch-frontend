@@ -213,7 +213,15 @@
       "branchOwn": "Défini séparément",
       "branchLink": "Lier un établissement",
       "branchEmpty": "Aucun établissement propre — ce site suit le client.",
-      "branchHint": "Laisser vide signifie : mêmes établissements que le client. En lier un ici crée une dérogation volontaire."
+      "branchHint": "Laisser vide signifie : mêmes établissements que le client. En lier un ici crée une dérogation volontaire.",
+      "isPrimaryContact": "Contact principal de ce site",
+      "setPrimaryContact": "Définir comme contact principal de ce site",
+      "setPrimaryContactDone": "{{name}} est désormais le contact principal de ce site.",
+      "setPrimaryContactFailed": "Impossible de définir le contact principal.",
+      "setPrimaryContactUnavailable": "Le serveur n'a pas encore appliqué cette modification. Réessayez une fois la base de données mise à jour.",
+      "primaryContactTitle": "Contact principal",
+      "noPrimaryContact": "Pas encore de contact principal pour ce site",
+      "pickPrimaryContact": "Choisir un contact principal"
     },
     "saveFailed": "L'enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
@@ -263,7 +271,8 @@
       "phone": "Téléphone",
       "status": "Statut",
       "mobile": "Mobile",
-      "lastContact": "Dernier contact"
+      "lastContact": "Dernier contact",
+      "locationPrimary": "Contact du site"
     },
     "detail": {
       "infoTitle": "Contact",
@@ -321,7 +330,9 @@
       "done": "Contacts fusionnés.",
       "errForbidden": "Vous n'êtes pas autorisé à fusionner des contacts.",
       "errFailed": "Échec de la fusion. Veuillez réessayer."
-    }
+    },
+    "primaryCustomerChip": "Principal chez le client",
+    "primaryLocationChip": "Principal ici"
   },
   "vacancies": {
     "empty": "Aucun poste pour ce client.",

@@ -1177,7 +1177,15 @@
       "contacts": {
         "label": "Contactpersonen",
         "desc": "Contactpersonen. Vereist een bestaande klant, locatie en afdeling."
+      },
+      "customer_tree": {
+        "label": "Klant (compleet)",
+        "desc": "Bouwt een klant met locaties, afdelingen en contactpersonen in één keer op — voor een klant die nog niet bestaat."
       }
+    },
+    "groups": {
+      "wholeTree": "Alles in één bestand",
+      "perEntity": "Apart per onderdeel"
     },
     "order": {
       "title": "Importeer in deze volgorde",
@@ -1185,7 +1193,18 @@
       "customersHint": "Begin hier — er hoeft nog niets anders te bestaan.",
       "locationsHint": "Koppelt aan een bestaande klant op naam (klant_naam) — importeer klanten eerst.",
       "departmentsHint": "Koppelt aan een bestaande klant en locatie op naam (klant_naam, locatie_naam) — importeer die eerst.",
-      "contactsHint": "Koppelt aan een bestaande klant, locatie en afdeling op naam (klant_naam, locatie_naam, afdeling_naam) — importeer die eerst."
+      "contactsHint": "Koppelt aan een bestaande klant, locatie en afdeling op naam (klant_naam, locatie_naam, afdeling_naam) — importeer die eerst.",
+      "treeAlternative": "Ben je een compleet nieuwe klant aan het opbouwen?",
+      "switchToTree": "Gebruik het complete bestand"
+    },
+    "tree": {
+      "title": "Deze import bouwt",
+      "replacesOrder": "Er is geen vaste volgorde nodig — dit ene bestand vervangt de vier aparte stappen.",
+      "rowGrain": "Eén regel = één contactpersoon, met klant, locatie en afdeling erbij herhaald. Veertig regels zijn dus geen veertig klanten.",
+      "levelTruncation": "Laat je op een regel een naamveld leeg (bijvoorbeeld de afdeling), dan stopt die regel dáár: er wordt niets voor dat niveau of erna aangemaakt.",
+      "allOrNothing": "Eén regel is alles-of-niets: gaat er iets mis met de contactpersoon, dan worden ook de klant, locatie en afdeling van díe regel niet aangemaakt. Een klant die een eerdere regel al heeft aangemaakt, blijft gewoon staan.",
+      "separateAlternative": "Wil je iets toevoegen aan een klant die al bestaat?",
+      "switchToSeparate": "Gebruik de aparte bestanden"
     },
     "loadingTemplates": "Importtypen laden…",
     "loadTemplatesError": "Kon de importtypen niet laden. Probeer het opnieuw.",
@@ -1216,6 +1235,7 @@
     "result": {
       "title": "Importresultaat",
       "subtitleSuccess": "Alle rijen zijn succesvol geïmporteerd.",
+      "subtitleSuccessWithRemarks": "Alles is geïmporteerd, maar bij {{count}} rijen is iets niet meegenomen — zie hieronder.",
       "subtitlePartial": "{{errorCount}} van {{total}} rijen konden niet worden geïmporteerd — zie hieronder.",
       "newImport": "Nog een bestand importeren"
     },
@@ -1224,18 +1244,22 @@
       "create": "Nieuw",
       "update": "Bijgewerkt",
       "skip": "Overgeslagen",
-      "error": "Mislukt"
+      "error": "Mislukt",
+      "remarks": "Opmerkingen",
+      "rowsAreRows": "Deze aantallen tellen rijen in het bestand.",
+      "rowsAreRowsTree": "Dit zijn rijen, geen klanten — één rij kan tegelijk een klant, een locatie, een afdeling én een contactpersoon aanmaken."
     },
     "unknownColumns": {
       "title": "Onherkende kolommen (genegeerd)",
       "hint": "Deze kolommen in je bestand komen niet overeen met een bekend veld. Ze zijn genegeerd — verder is er niets mee gebeurd."
     },
     "rows": {
-      "errorTitle": "{{count}} rijen met een fout",
+      "attentionTitle": "{{count}} rijen die aandacht nodig hebben",
       "allTitle": "Alle {{count}} rijen",
       "showAll": "Toon alle {{count}} rijen",
-      "showErrorsOnly": "Toon alleen mislukte rijen",
-      "noErrors": "Geen rijen mislukt.",
+      "showAttentionOnly": "Toon alleen rijen die aandacht nodig hebben",
+      "noAttention": "Geen rijen die aandacht nodig hebben.",
+      "remark": "Opmerking:",
       "row": "Rij {{row}}"
     }
   },
@@ -1736,7 +1760,7 @@
     },
     "statuses": {
       "title": "Klant statussen",
-      "subtitle": "Beheer de statussen die een klant kan hebben (Actief, Prospect, …).",
+      "subtitle": "Beheer de statussen die een klant kan hebben (Actief, Niet actief, …). Of het een prospect of een klant is, staat bij Klantfase.",
       "add": "Status toevoegen"
     },
     "locationStatuses": {

@@ -963,7 +963,15 @@
       "contacts": {
         "label": "Contacts",
         "desc": "Personnes de contact. Nécessite un client, un site et un service existants."
+      },
+      "customer_tree": {
+        "label": "Client (complet)",
+        "desc": "Crée un client avec ses sites, services et contacts en une seule fois — pour un client qui n'existe pas encore."
       }
+    },
+    "groups": {
+      "wholeTree": "Tout en un fichier",
+      "perEntity": "Séparé par élément"
     },
     "order": {
       "title": "Importez dans cet ordre",
@@ -971,7 +979,18 @@
       "customersHint": "Commencez ici — rien d'autre n'a besoin d'exister encore.",
       "locationsHint": "Se rattache à un client existant par son nom (klant_naam) — importez d'abord les clients.",
       "departmentsHint": "Se rattache à un client et un site existants par leur nom (klant_naam, locatie_naam) — importez-les d'abord.",
-      "contactsHint": "Se rattache à un client, un site et un service existants par leur nom (klant_naam, locatie_naam, afdeling_naam) — importez-les d'abord."
+      "contactsHint": "Se rattache à un client, un site et un service existants par leur nom (klant_naam, locatie_naam, afdeling_naam) — importez-les d'abord.",
+      "treeAlternative": "Vous créez un client entièrement nouveau ?",
+      "switchToTree": "Utiliser le fichier combiné"
+    },
+    "tree": {
+      "title": "Cet import crée",
+      "replacesOrder": "Aucun ordre fixe requis — ce fichier unique remplace les quatre étapes séparées.",
+      "rowGrain": "Une ligne = une personne de contact, avec le client, le site et le service répétés à côté. Quarante lignes ne veulent donc pas dire quarante clients.",
+      "levelTruncation": "Si vous laissez un champ de nom vide sur une ligne (par exemple le service), cette ligne s'arrête là — rien n'est créé pour ce niveau ni au-delà.",
+      "allOrNothing": "Une ligne, c'est tout ou rien : si le contact échoue, le client, le site et le service de cette même ligne ne sont pas créés non plus. Un client déjà créé par une ligne précédente, lui, reste en place.",
+      "separateAlternative": "Vous voulez ajouter quelque chose à un client déjà existant ?",
+      "switchToSeparate": "Utiliser les fichiers séparés"
     },
     "loadingTemplates": "Chargement des types d'import…",
     "loadTemplatesError": "Impossible de charger les types d'import. Réessayez.",
@@ -1002,6 +1021,7 @@
     "result": {
       "title": "Résultat de l'import",
       "subtitleSuccess": "Toutes les lignes ont été importées avec succès.",
+      "subtitleSuccessWithRemarks": "Tout a été importé, mais {{count}} lignes ont été importées avec un élément manquant — voir ci-dessous.",
       "subtitlePartial": "{{errorCount}} lignes sur {{total}} n'ont pas pu être importées — voir ci-dessous.",
       "newImport": "Importer un autre fichier"
     },
@@ -1010,18 +1030,22 @@
       "create": "Nouvelles",
       "update": "Mises à jour",
       "skip": "Ignorées",
-      "error": "Échouées"
+      "error": "Échouées",
+      "remarks": "Remarques",
+      "rowsAreRows": "Ces chiffres comptent les lignes du fichier.",
+      "rowsAreRowsTree": "Ce sont des lignes, pas des clients — une ligne peut créer en même temps un client, un site, un service et un contact."
     },
     "unknownColumns": {
       "title": "Colonnes non reconnues (ignorées)",
       "hint": "Ces colonnes de votre fichier ne correspondent à aucun champ connu. Elles ont été ignorées — rien d'autre n'a été affecté."
     },
     "rows": {
-      "errorTitle": "{{count}} lignes en erreur",
+      "attentionTitle": "{{count}} lignes qui demandent votre attention",
       "allTitle": "Les {{count}} lignes",
       "showAll": "Afficher les {{count}} lignes",
-      "showErrorsOnly": "Afficher uniquement les lignes échouées",
-      "noErrors": "Aucune ligne n'a échoué.",
+      "showAttentionOnly": "Afficher uniquement les lignes qui demandent votre attention",
+      "noAttention": "Aucune ligne ne nécessite d'attention.",
+      "remark": "Remarque :",
       "row": "Ligne {{row}}"
     }
   },
@@ -1543,7 +1567,7 @@
     },
     "statuses": {
       "title": "Statuts clients",
-      "subtitle": "Gérez les statuts qu’un client peut avoir (Actif, Prospect, …).",
+      "subtitle": "Gérez les statuts qu’un client peut avoir (Actif, Inactif, …). Qu’il s’agisse d’un prospect ou d’un client se définit sous Phase client.",
       "add": "Ajouter un statut"
     },
     "locationStatuses": {

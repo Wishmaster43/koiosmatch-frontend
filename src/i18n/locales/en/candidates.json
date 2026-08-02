@@ -874,7 +874,8 @@
     "onMap": "{{count}} vacancies on the map",
     "empty": "No vacancies found within these filters.",
     "centerHome": "Candidate's home address",
-    "aiAdvised": "Advised by Koios"
+    "aiAdvised": "Advised by Koios",
+    "openInApp": "Open in Koios"
   },
   "erase": {
     "trashView": "Trash",
