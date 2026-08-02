@@ -65,7 +65,7 @@ export default function SchemaSection({ schema }) {
   return (
     <SettingsScaffold
       title={t(schema.titleI18n ?? `${k}.title`)}
-      subtitle={opt(`${k}.subtitle`)}
+      subtitle={opt(schema.subtitleI18n ?? `${k}.subtitle`)}
       maxWidth={schema.maxWidth ?? 720}
       form={form}>
       <SettingCardList>

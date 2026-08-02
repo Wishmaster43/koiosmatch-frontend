@@ -59,7 +59,8 @@
     "activeMatches": "Actuellement en poste",
     "activeMatchesSub": "matches actifs",
     "noContact": "Sans contact",
-    "noContactSub": "aucun contact lié"
+    "noContactSub": "aucun contact lié",
+    "noStatus": "Sans statut"
   },
   "drawer": {
     "entityLabel": "Client",
@@ -111,7 +112,6 @@
     "textsTitle": "Textes",
     "website": "Site web",
     "employeeCount": "Employés",
-    "toneOfVoice": "Ton de communication",
     "industry": "Secteur",
     "debtorNumber": "Numéro de débiteur",
     "city": "Ville",
@@ -221,7 +221,8 @@
       "setPrimaryContactUnavailable": "Le serveur n'a pas encore appliqué cette modification. Réessayez une fois la base de données mise à jour.",
       "primaryContactTitle": "Contact principal",
       "noPrimaryContact": "Pas encore de contact principal pour ce site",
-      "pickPrimaryContact": "Choisir un contact principal"
+      "pickPrimaryContact": "Choisir un contact principal",
+      "description": "Description"
     },
     "saveFailed": "L'enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
@@ -494,8 +495,6 @@
     "fields": {
       "name": "Nom",
       "namePlaceholder": "P. ex. Groupe de soins Rivas",
-      "debtorNumber": "Numéro de débiteur",
-      "status": "Statut",
       "accountManager": "Gestionnaire de compte",
       "selectOwner": "Choisir un gestionnaire",
       "industry": "Secteur",
@@ -504,8 +503,14 @@
       "cityPlaceholder": "P. ex. Gorinchem",
       "cardCompany": "Entreprise",
       "cardBranch": "Agence & ville",
-      "cardOwnerStatus": "Propriétaire & statut",
-      "phase": "Phase"
+      "cardOwner": "Responsable",
+      "phase": "Phase",
+      "branchAdd": "Ajouter une agence",
+      "branchAutoHint": "Vide = automatiquement les agences auxquelles vous êtes rattaché."
+    },
+    "import": {
+      "title": "Client depuis un fichier",
+      "intro": "L'import d'un fichier crée ce client — avec ses sites, services et contacts — immédiatement. Il ne remplit pas le formulaire ci-dessous ; vérifiez l'aperçu avant de confirmer."
     }
   },
   "subModal": {
@@ -574,7 +579,18 @@
       "decline": "Non, ne pas remplacer"
     },
     "middleName": "Particule",
-    "gender": "Genre"
+    "gender": "Genre",
+    "import": {
+      "title": "{{entity}} depuis un fichier",
+      "intro": "L'importation d'un fichier crée directement {{entity}} — le formulaire ci-dessous n'est pas rempli. Vérifiez d'abord l'aperçu avant de confirmer.",
+      "parentWarning": "Le nom du client dans le fichier détermine quel client reçoit les lignes — ce n'est pas forcément « {{customerName}} ». Vérifiez l'aperçu.",
+      "mismatchWarning": "{{count}} ligne(s) de ce fichier appartiennent à un client différent de celui-ci ({{names}}) — ces lignes seront créées là-bas, pas ici.",
+      "mismatchConfirm": "{{count}} ligne(s) de ce fichier seront créées ou mises à jour chez un autre client ({{names}}), pas chez le client actuellement ouvert. Continuer quand même ?",
+      "mismatchTitle": "Client différent dans le fichier",
+      "mismatchProceed": "Importer quand même"
+    },
+    "contactPersonHint": "Choisissez un contact existant de ce client, ou saisissez un nouveau nom.",
+    "contactCouplingFailed": "L'établissement « {{name}} » a été créé, mais la liaison avec le contact a échoué. Liez-le manuellement plus tard depuis l'établissement."
   },
   "changelog": {
     "empty": "Aucun changement pour le moment."

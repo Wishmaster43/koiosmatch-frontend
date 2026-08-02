@@ -7,13 +7,22 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useIndustries } from '@/lib/useIndustries'
 import { useLocations } from '@/lib/useLocations'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
+import { useProvinces } from '@/hooks/useProvinces'
+import { useAuth } from '@/context/AuthContext'
 import { BTN_H } from '@/config/buttonMetrics'
+import SearchSelect from '@/components/ui/SearchSelect'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
-import { cardHead, cardBox, row2, row3Even, cardPair } from '@/components/ui/modalCards'
+import { cardHead, cardBox, row2, cardPair } from '@/components/ui/modalCards'
+import AddressCard from './addmodal/AddressCard'
+import CustomerImportCard from './addmodal/CustomerImportCard'
+import { useCustomerImport } from './addmodal/useCustomerImport'
 import type { Id, LookupOption } from '@/types/common'
 
-interface CustomerForm {
-  name: string; debtorNumber: string; status: string; ownerId: string; industry: string; city: string
+// Exported so addmodal/AddressCard shares this exact shape (type-only import,
+// mirrors AddCandidateModal's exported FormState).
+export interface CustomerForm {
+  name: string; status: string; ownerId: string; industry: string; city: string
   // KLANT-FASE-1: lifecycle phase slug (Prospect → Klant). Pre-selected from the
   // lookup's is_default FLAG, never from a hardcoded "prospect" slug.
   phase: string
@@ -25,21 +34,29 @@ interface CustomerForm {
   // CustomerRequest::sharedRules fields this create form never collected, even
   // though create+update share the same validator. All optional.
   website: string; employeeCount: string; toneOfVoice: string; costCenter: string; billingEmail: string
+  // KLANT-ADRES-1 (Danny 02-08): the customer's own visiting address, mirroring the
+  // candidate's home-address fields one-for-one — see addmodal/AddressCard.
+  street: string; houseNumber: string; houseNumberSuffix: string; postalCode: string; province: string; country: string
 }
 interface ModalUser { id: Id; name: string }
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
+// No `debtor_number` entry (DEBITEURNUMMER-1, Danny 02-08): the field is no longer
+// collected at creation, so a 422 on it can never occur from this form.
 const API_TO_FORM: Record<string, string> = {
-  name: 'name', debtor_number: 'debtorNumber', status: 'status', owner_id: 'ownerId', industry: 'industry', city: 'city',
+  name: 'name', status: 'status', owner_id: 'ownerId', industry: 'industry', city: 'city',
   location_id: 'branchId', website: 'website', employee_count: 'employeeCount', tone_of_voice: 'toneOfVoice',
   cost_center: 'costCenter', billing_email: 'billingEmail', phase: 'phase',
+  street: 'street', house_number: 'houseNumber', house_number_suffix: 'houseNumberSuffix',
+  postcode: 'postalCode', province: 'province', country: 'country',
 }
 
 /**
- * AddCustomerModal — create a customer. Status comes from the tenant lookup,
- * account manager from the user list, industry from /industries and the
- * establishment from /locations — never hardcoded option lists. Awaits onCreate
- * (the page's POST) and only closes on success (C-18).
+ * AddCustomerModal — create a customer. Status comes from the tenant lookup
+ * (its default, hidden — see below), account manager from the user list,
+ * industry from /industries and the establishment from /locations — never
+ * hardcoded option lists. Awaits onCreate (the page's POST) and only closes on
+ * success (C-18).
  *
  * Widened to the house WIDE_MODAL frame and regrouped into titled bordered cards
  * (Danny 27-07: "+ Klant is niet zo groot als + match en + nieuwe kandidaat EN
@@ -48,11 +65,35 @@ const API_TO_FORM: Record<string, string> = {
  * (branch/website/employeeCount/toneOfVoice/costCenter/billingEmail) — all
  * optional, so a quick "just the name" create still works unchanged. This modal
  * hands the WHOLE form object to `onCreate` (unchanged behaviour), so the new
- * fields already ride along; the page's create handler still needs to pick them
- * up into the actual POST body — see the delivery report for the exact diff.
+ * fields already ride along; useCustomerRecord's handleCreate picks them up into
+ * the actual POST body.
+ *
+ * Brought in line with AddCandidateModal (Danny 02-08, "de + nieuwe klant popup
+ * moet lijken op + nieuwe kandidaat"): the debtor number is no longer collected
+ * here (it stays editable everywhere else — the customer's own accounting number,
+ * rarely known yet for a new prospect); status is hidden (the phase pills already
+ * carry the lifecycle choice, so status just rides along at its lookup default);
+ * a full address card was added (addmodal/AddressCard, same field grouping and
+ * country/province cascade as the candidate); and the account manager defaults to
+ * the logged-in user when they are assignable (mirrors AddApplicationModal).
+ *
+ * CUSTOMER-IMPORT-1 (Danny 02-08: "bovenin ... import cvs of excel file"): the
+ * italic bottom-of-modal hint that only NAMED the Settings import screen is gone;
+ * in its place (top of the modal, CvUploadCard's exact spot) sits
+ * CustomerImportCard, which actually RUNS the customer_tree importer here — dry
+ * run first, then confirm. Unlike the CV card this does not prefill the form: a
+ * real import writes the customer (+ locations/departments/contacts) directly, so
+ * a clean result (something landed) closes this modal and refreshes the list
+ * instead of leaving an untouched create form open behind a customer that already
+ * exists (that invites a duplicate). While the import is past its upload step, the
+ * manual submit below is disabled for the same reason — never two creation paths
+ * armed at once.
  */
-export default function AddCustomerModal({ onClose, onCreate, users = [], statuses = [] }: {
-  onClose: () => void; onCreate?: (form: CustomerForm) => unknown; users?: ModalUser[]; statuses?: LookupOption[]
+export default function AddCustomerModal({ onClose, onCreate, onImported, users = [], statuses = [] }: {
+  onClose: () => void; onCreate?: (form: CustomerForm) => unknown
+  /** Called once a real import lands at least one record — the parent refreshes its list. */
+  onImported?: () => void
+  users?: ModalUser[]; statuses?: LookupOption[]
 }) {
   const { t } = useTranslation(['customers', 'common'])
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
@@ -61,14 +102,38 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
   const { phases, defaultPhase } = useCustomerPhases()
   // The tenant's own establishments (GET /locations) — same source as OverviewTab's Vestiging picker.
   const branchOptions = useLocations().map(l => ({ value: String(l.value), label: l.label }))
+  // ACCOUNTMANAGER-DEFAULT-1 (Danny 02-08: "Accountmanager moet voorstel waarde zijn
+  // van de gebruiker die hem aanmaakt") — mirrors AddApplicationModal's identical
+  // owner-default guard: only propose the LOGGED-IN user when they actually appear
+  // in the tenant's assignable `users` list, never a super-admin or non-tenant
+  // account the server would 422 on (owner_id is validated against tenant users).
+  const authCtx = useAuth() as unknown as {
+    user: { id?: Id; name?: string } | null
+    hasPermission?: (permName: string) => boolean
+  }
+  const { user: me } = authCtx
+  const meIsAssignable = me?.id != null && users.some(u => String(u.id) === String(me.id))
+  // CUSTOMER-IMPORT-1: falls back to "no permission" rather than crashing when the
+  // context is mid-boot (mirrors ImporterenSettings' own hasPermission fallback).
+  // The wizard/permission/auto-close wiring itself lives in useCustomerImport (kept
+  // out of this container to stay under the ~400-line split trigger, CLAUDE.md §3).
+  const hasPermission = authCtx.hasPermission ?? (() => false)
+  const { wizard: importWizard, canView: canViewImportTemplate, canImport: canRunImport } =
+    useCustomerImport({ hasPermission, onImported, onClose })
+  // DEBITEURNUMMER-1 (Danny 02-08): status is HIDDEN in this form (the phase pills
+  // replace it — a new customer starts on the tenant's default status), so the
+  // default must come from the lookup's own is_default FLAG, exactly like the
+  // candidate modal's phase default — never an invented literal or an empty string.
+  const defaultStatusValue = statuses.find(s => (s as { isDefault?: boolean }).isDefault)?.value ?? statuses[0]?.value ?? ''
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   // Non-field 422/generic failure.
   const [createError, setCreateError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState<CustomerForm>({
-    name: '', debtorNumber: '', status: statuses[0]?.value ?? '', ownerId: '', industry: '', city: '',
+    name: '', status: defaultStatusValue, ownerId: '', industry: '', city: '',
     phase: defaultPhase,
     branchId: '', website: '', employeeCount: '', toneOfVoice: '', costCenter: '', billingEmail: '',
+    street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', province: '', country: '',
   })
 
   // The lookup arrives async (one cached GET), so seed the default phase once it lands —
@@ -76,6 +141,28 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
   useEffect(() => {
     setForm(f => (f.phase ? f : { ...f, phase: defaultPhase }))
   }, [defaultPhase])
+
+  // Same pattern for the (now hidden) status default — the recruiter never picks it
+  // here, so this is the ONLY thing that ever sets it.
+  useEffect(() => {
+    setForm(f => (f.status ? f : { ...f, status: defaultStatusValue }))
+  }, [defaultStatusValue])
+
+  // Propose the current user as account manager ONCE they are known to be
+  // assignable; a value the recruiter already picked (or picks later) is never
+  // overwritten — the functional update only fires while ownerId is still empty.
+  useEffect(() => {
+    if (meIsAssignable) setForm(f => (f.ownerId ? f : { ...f, ownerId: String(me!.id) }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to assignability resolving, mirrors AddApplicationModal's owner-default effect
+  }, [meIsAssignable])
+
+  // KLANT-ADRES-1: province list CASCADES on the picked country, same shared hook
+  // (and same clear-on-mismatch behaviour) as the candidate's home address.
+  const { provinces } = useProvinces(form.country)
+  useEffect(() => {
+    if (form.province && !provinces.includes(form.province)) setForm(f => ({ ...f, province: '' }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved province list changing, not every form edit
+  }, [provinces])
 
   const set = (k: keyof CustomerForm, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -105,9 +192,12 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
       setSaving(false)
     }
   }
-  const canSubmit = !!form.name.trim() && !saving
-  const statusOptions = statuses.map(s => ({ value: s.value, label: s.label }))
-  const phaseOptions = phases.map(p => ({ value: p.value, label: p.label }))
+  // CUSTOMER-IMPORT-1: blocked while an import is past its upload step (preview or
+  // result) — never let the manual form fire a SECOND create while the import is
+  // mid-decision or has just written its own records.
+  const canSubmit = !!form.name.trim() && !saving && importWizard.step === 'upload'
+  // The phase the title names — the pills below are the only way to change it.
+  const selectedPhase = phases.find(p => String(p.value) === String(form.phase))
   const userOptions = users.map(u => ({ value: String(u.id), label: u.name }))
 
   return (
@@ -127,19 +217,45 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
               <Building2 size={16} color="var(--color-primary)" />
             </div>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('modal.title')}</div>
+              {/* The chosen phase is in the TITLE, exactly as the candidate modal reads
+                  "Nieuwe — Lead" (Danny 02-08: "die fase moet zijn zoals + nieuwe
+                  kandidaat"). A phase buried in a card is a phase nobody notices. */}
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>
+                {selectedPhase ? `${t('modal.title')} — ${selectedPhase.label}` : t('modal.title')}
+              </div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('modal.subtitle')}</div>
             </div>
+          </div>
+          {/* Phase choice — two compact pills, the same control the candidate uses. */}
+          <div style={{ display: 'flex', gap: 8, marginLeft: 'auto', marginRight: 12, flexShrink: 0 }}>
+            {phases.map(ph => {
+              const active = form.phase === ph.value
+              return (
+                <button key={String(ph.value)} type="button" onClick={() => set('phase', String(ph.value))}
+                  aria-pressed={active} title={ph.label}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, height: BTN_H, padding: '0 14px',
+                    borderRadius: 999, cursor: 'pointer', transition: 'all 0.15s',
+                    border: `1.5px solid ${active ? (ph.color ?? 'var(--color-primary)') : 'var(--border)'}`,
+                    background: active ? (ph.color ?? 'var(--color-primary)') + '14' : 'var(--surface)' }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: ph.color ?? 'var(--color-primary)', flexShrink: 0 }} />
+                  <span style={{ fontSize: 13, fontWeight: active ? 600 : 500,
+                    color: active ? (ph.color ?? 'var(--color-primary)') : 'var(--text)' }}>{ph.label}</span>
+                </button>
+              )
+            })}
           </div>
           <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
             <X size={18} />
           </button>
         </div>
 
-        {/* Body — titled bordered cards: Bedrijf full width; Vestiging&plaats /
-            Eigenaar&status paired; Online / Facturatie paired (mirrors the
-            match modal's "full-width block + paired cards below" idiom). */}
+        {/* Body — titled bordered cards: Bedrijf and Adres full width (mirrors
+            AddCandidateModal 1:1, Danny 02-08); Eigenaar full width (status is
+            hidden — see below); Online / Facturatie paired. */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* CUSTOMER-IMPORT-1: the file-import path, same top spot as CvUploadCard. */}
+          <CustomerImportCard wizard={importWizard} canView={canViewImportTemplate} canImport={canRunImport} />
+
           <div>
             <div style={cardHead}>{t('modal.fields.cardCompany')}</div>
             <div style={cardBox}>
@@ -149,10 +265,10 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
                 </Field>
                 {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
               </div>
-              <div style={row3Even}>
-                <Field label={t('modal.fields.debtorNumber')}>
-                  <TextField value={form.debtorNumber} onChange={v => set('debtorNumber', v)} placeholder="10042" />
-                </Field>
+              {/* DEBITEURNUMMER-1 (Danny 02-08): the debtor number is no longer collected
+                  here — it is the customer's own accounting number, decided later, and
+                  stays editable everywhere else (drawer/table/search). Two fields remain. */}
+              <div style={row2}>
                 {/* Branche (industry/sector) — searchable tenant lookup, distinct from the
                     "Vestiging" (establishment) picker below. */}
                 <Field label={t('modal.fields.industry')}>
@@ -166,45 +282,21 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
             </div>
           </div>
 
-          <div style={cardPair}>
-            <div>
-              <div style={cardHead}>{t('modal.fields.cardBranch')}</div>
-              <div style={cardBox}>
-                <div style={row2}>
-                  {/* Vestiging (establishment) — searchable, same /locations source as
-                      OverviewTab's picker (BRANCH-1, Danny 27-07). */}
-                  <Field label={t('overview.branch')}>
-                    <CreatableSelect value={form.branchId || null} onChange={v => set('branchId', v)} allowCreate={false}
-                      placeholder={t('common:select')} options={branchOptions} />
-                  </Field>
-                  <Field label={t('modal.fields.city')}>
-                    <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('modal.fields.cityPlaceholder')} />
-                  </Field>
-                </div>
-              </div>
-            </div>
-            <div>
-              <div style={cardHead}>{t('modal.fields.cardOwnerStatus')}</div>
-              <div style={cardBox}>
-                <Field label={t('modal.fields.accountManager')}>
-                  <CreatableSelect value={form.ownerId || null} onChange={v => set('ownerId', v)} allowCreate={false}
-                    placeholder={t('modal.fields.selectOwner')} options={userOptions} />
-                </Field>
-                <div style={row2}>
-                  {/* KLANT-FASE-1: lifecycle phase beside the status — two axes, two
-                      pickers. Pre-selected on the lookup's is_default row. */}
-                  <Field label={t('modal.fields.phase')}>
-                    <CreatableSelect value={form.phase || null} onChange={v => set('phase', v)} allowCreate={false}
-                      placeholder={t('modal.fields.phase')} options={phaseOptions} />
-                  </Field>
-                  <Field label={t('modal.fields.status')}>
-                    {/* Placeholder given even though a default is always selected — it
-                        becomes the search box's accessible label once opened (§6). */}
-                    <CreatableSelect value={form.status || null} onChange={v => set('status', v)} allowCreate={false}
-                      placeholder={t('modal.fields.status')} options={statusOptions} />
-                  </Field>
-                </div>
-              </div>
+          {/* KLANT-ADRES-1 (Danny 02-08): the customer's own visiting address, the
+              same full-width card/field grouping as AddCandidateModal's AddressCard. */}
+          <AddressCard form={form} set={set} provinces={provinces} />
+
+          <div>
+            {/* STATUS-HIDDEN-1 (Danny 02-08): deployability status is no longer picked
+                here — the phase pills above already carry the lifecycle choice, and a
+                new customer starts on the tenant's default status (see defaultStatusValue
+                above), sent along unseen. Only the owner picker remains in this card. */}
+            <div style={cardHead}>{t('modal.fields.cardOwner')}</div>
+            <div style={cardBox}>
+              <Field label={t('modal.fields.accountManager')}>
+                <CreatableSelect value={form.ownerId || null} onChange={v => set('ownerId', v)} allowCreate={false}
+                  placeholder={t('modal.fields.selectOwner')} options={userOptions} />
+              </Field>
             </div>
           </div>
 
@@ -218,7 +310,13 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
                   <Field label={t('overview.website')}>
                     <TextField value={form.website} onChange={v => set('website', v)} placeholder="https://" />
                   </Field>
-                  <Field label={t('overview.toneOfVoice')}>
+                  {/* BEDRIJFSTEKST-1 (Danny 02-08): "Schrijfstijl" is renamed "Bedrijfstekst" —
+                      reuses the SAME overview.companyText key the drawer's merged company-text
+                      field already uses (one label, not a second "Bedrijfstekst" copy). The
+                      internal `toneOfVoice` form/API-mapping key is unchanged (see
+                      useCustomerRecord's OPTIONAL_CREATE_FIELDS, now pointed at `description` —
+                      the backend column `tone_of_voice` was dropped and merged into it). */}
+                  <Field label={t('overview.companyText')}>
                     <TextField value={form.toneOfVoice} onChange={v => set('toneOfVoice', v)} />
                   </Field>
                 </div>
@@ -237,6 +335,35 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
                   </Field>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Vestigingen — last block, exactly as the candidate modal does it: the heading
+              with its own add trigger on the right, chips below, and the sentence saying
+              what LEAVING IT EMPTY means. That sentence is the point: empty is a real,
+              useful choice here, not an unfinished field. */}
+          <div style={{ marginTop: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
+              <div style={{ ...cardHead, marginBottom: 0 }}>{t('overview.branch')}</div>
+              <SearchSelect triggerLabel={t('modal.fields.branchAdd')} options={branchOptions}
+                selected={form.branchId ? [form.branchId] : []}
+                onToggle={(id: string) => set('branchId', form.branchId === id ? '' : id)}
+                menuAlign="right"
+                renderTrigger={(toggleOpen: () => void) => <DrawerAddButton onClick={toggleOpen} label={t('modal.fields.branchAdd')} />} />
+            </div>
+            <div style={cardBox}>
+              {form.branchId ? (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '3px 8px',
+                    borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
+                    {branchOptions.find(o => String(o.value) === form.branchId)?.label ?? form.branchId}
+                    <button type="button" onClick={() => set('branchId', '')} aria-label={t('common:remove')}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
+                  </span>
+                </div>
+              ) : (
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', margin: 0 }}>{t('modal.fields.branchAutoHint')}</p>
+              )}
             </div>
           </div>
         </div>

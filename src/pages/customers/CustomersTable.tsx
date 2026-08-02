@@ -4,6 +4,7 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import SoftChip from '@/components/ui/SoftChip'
+import CustomerStatusChip from '@/components/ui/CustomerStatusChip'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import BackofficeCouplingIndicator from '@/components/ui/BackofficeCouplingIndicator'
 import { useDateFormat } from '@/lib/datetime'
@@ -68,7 +69,11 @@ export default function CustomersTable({
   const showShiftmanager = apps?.isAppEnabled('shiftmanager') ?? false
   // KLANT-FASE-1: the lifecycle-phase lookup (session-cached, one GET). Fetched here
   // rather than passed in, so the phase chip needs no new page-level plumbing.
-  const { phaseMeta } = useCustomerPhases()
+  const { phaseMeta, phases } = useCustomerPhases()
+  // Entry (default) phase — a Prospect has no status yet (Danny 02-08, mirrors the
+  // candidate Lead rule). Resolved via the `is_default` FLAG, never an array
+  // position, so reordering the phase lookup in Settings never silently misfires.
+  const entryPhaseValue = phases.find(p => p.isDefault)?.value
 
   // Column order mirrors the candidates blueprint (§3A): identity → qualification →
   // status → counts → Koios → dates → accountmanager LAST (Danny 2026-07-14 table
@@ -108,14 +113,16 @@ export default function CustomersTable({
       },
     },
     {
-      key: 'status', header: t('cols.status'), sortable: true, sortValue: c => statusMeta(String(c.status)).label ?? String(c.status),
-      render: c => {
-        const m = statusMeta(String(c.status))
-        const label = c.statusLabel ?? m.label
-        if (!colorStatus) return <span style={plainCell}>{label ?? '—'}</span>
-        // Status is a lifecycle axis — round chip, mirrors candidates (Danny 2026-07-14).
-        return <SoftChip label={label} color={c.statusColor ?? m.color} round />
-      },
+      // Danny 02-08: a Prospect (entry phase) has no status yet — the shared
+      // CustomerStatusChip renders a dash instead of a chip for it (mirrors the
+      // candidate deployability rule, § CustomerStatusChip docblock). Sort value
+      // mirrors that: an entry-phase or unset status sorts as empty, never a
+      // stray "undefined"/"null" label.
+      key: 'status', header: t('cols.status'), sortable: true,
+      sortValue: c => (c.phase && c.phase === entryPhaseValue) || !c.status ? '' : (statusMeta(String(c.status)).label ?? String(c.status)),
+      // Customer.status is typed string|number for legacy/API reasons (mirrors the
+      // debtor/reference-number style scalars); the chip only deals in slugs.
+      render: c => <CustomerStatusChip status={c.status != null ? String(c.status) : null} phase={c.phase} plain={!colorStatus} round />,
     },
     { key: 'city',        header: t('cols.city'),        nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.city, render: c => c.city || '—' },
     // Counts deep-link to the matching drawer tab (Danny 2026-07-14) — zero still

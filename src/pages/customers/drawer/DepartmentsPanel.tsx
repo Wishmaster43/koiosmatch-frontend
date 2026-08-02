@@ -35,7 +35,7 @@ import type { Column } from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import StatusFilterSelect, { useStatusFilter } from './StatusFilterSelect'
 import { useChipColors } from '@/lib/settings/useChipColors'
-import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings, useSettingsLoaded, getBoolSetting, getStringSetting } from '@/lib/settings/useAllSettings'
 import type { Crumb } from '@/components/drawer/DrillBreadcrumb'
 import SoftChipJs from '@/components/ui/SoftChip'
 import DepartmentDetail from './DepartmentDetail'
@@ -101,14 +101,21 @@ export default function DepartmentsPanel({
   // THE membership rule, in one place. A department always carries a single locationId.
   const inScope = (d: Department) => scope === 'location' ? String(d.locationId) === String(scopeId) : true
   const scoped = departments.filter(inScope)
-  // Status filter (Danny 28-07) — same component and same defaulting rule on all three lists.
-  const { value: statusFilter, toggle: toggleStatus, filtered: rows } = useStatusFilter(scoped, statuses)
   const chipColors = useChipColors()
   // Colour-on/off flags per column (CHIPKLEUR-INSTELBAAR-1) — both default ON, so an
   // absent setting keeps today's coloured-chip look.
   const settings = useAllSettings()
   const colorLocationCol = getBoolSetting(settings, 'customer_department_table_color_location', true)
   const colorStatusCol = getBoolSetting(settings, 'customer_department_table_color_status', true)
+  // Tenant-configured default status filter (TENANT-DEFAULT-1, Danny 02-08) — replaces
+  // the old "active only" guess when Settings → Klanten → Tabelweergave → Afdelingen has
+  // one saved; absent (null) falls back to that original guess unchanged. `settingsLoaded`
+  // stops the hook from deciding before /settings has actually answered (see its own docblock).
+  const settingsLoaded = useSettingsLoaded()
+  const defaultStatusFilter = getStringSetting(settings, 'customer_department_default_status_filter')
+  // Status filter (Danny 28-07) — same component and same defaulting rule on all three lists.
+  const { value: statusFilter, toggle: toggleStatus, filtered: rows } =
+    useStatusFilter(scoped, statuses, undefined, defaultStatusFilter, settingsLoaded)
   // Resolved against the CUSTOMER-WIDE list, never the scoped rows: moving a department to
   // another location must not make its open detail vanish mid-edit.
   const selected = openId != null ? departments.find(d => String(d.id) === String(openId)) ?? null : null

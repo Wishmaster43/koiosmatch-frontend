@@ -73,11 +73,14 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
     branchLinks.toggle(id)
   }
 
-  // Province/country pickers — identical wiring to LocationDetail: the OPTION VALUE is
-  // the country NAME, because that is what the column stores, and the province list
-  // cascades off the SAVED country (the field table owns its own draft, so a mid-edit
-  // country switch is not observable here).
-  const countryOptions = getCountryOptions(i18n.language).map(o => ({ value: o.label, label: o.label }))
+  // Province/country pickers. The OPTION VALUE is the ISO-2 CODE, which is what the
+  // column actually stores: the backend normalises any country input through
+  // CountryCode::normalise (LAND-ISO-1) and the seeder writes 'NL'. This used to remap
+  // the options to value=NAME, on the belief that the column held a name — so read mode
+  // showed the raw "NL" (no option matched) while edit mode listed "Nederland", and the
+  // candidate screens showed the name correctly all along (Danny 02-08). The province
+  // list cascades off the same code, which is what useProvinces expects.
+  const countryOptions = getCountryOptions(i18n.language)
   const countryCode = getCountryOptions(i18n.language).find(o => o.label === (c.country ?? ''))?.value ?? 'NL'
   const { provinces } = useProvinces(countryCode)
   const provinceOptions = provinces.map((p: string) => ({ value: p, label: p }))
@@ -99,6 +102,12 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
     // KLANT-KVK-1 (backend 28-07): the customer's HEAD registration numbers, linked
     // through to the public registers. A location carries the sub-number under it —
     // same renderers, so both read identically.
+    // The customer's own accounting reference — theirs, not ours (our number is the
+    // reference chip beside the title). It left the create form because a new prospect
+    // rarely has one yet; this is where it gets filled in (Danny 02-08). It is also what
+    // links a customer to the financial administration and the ShiftManager mirror, so it
+    // sits with the other identifiers rather than off on its own.
+    { key: 'debtorNumber', label: t('overview.debtorNumber'), group: gDetails },
     { key: 'cocNumber', label: t('overview.coc'), group: gDetails,
       renderValue: v => kvkValue(v, t('locations.detail.openKvk')) },
     { key: 'vatNumber', label: t('overview.vat'), group: gDetails,

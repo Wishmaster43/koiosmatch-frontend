@@ -1911,11 +1911,11 @@
       },
       "customer_location_chip_color": {
         "label": "Farbe Standort-Chip",
-        "description": "Die Farbe jedes Standort-Chips bei einem Kontakt. Leer = die Standardfarbe."
+        "description": "Die Farbe des Standort-Chips in den Tabellen Abteilungen und Kontakte. Leer = die Standardfarbe."
       },
       "customer_department_chip_color": {
         "label": "Farbe Abteilungs-Chip",
-        "description": "Die Farbe jedes Abteilungs-Chips bei einem Kontakt. Leer = die Standardfarbe."
+        "description": "Die Farbe des Abteilungs-Chips in der Tabelle Kontakte. Leer = die Standardfarbe."
       },
       "customer_contact_table_color_location": {
         "label": "Standortfarbe (Kontakte)",
@@ -1941,6 +1941,34 @@
         "label": "Statusfarbe (Abteilungen)",
         "description": "An = der Status-Chip in der Abteilungstabelle wird eingefärbt. Aus = einfacher Text."
       }
+    },
+    "tabs": {
+      "customerTable": {
+        "title": "Kundenliste",
+        "subtitle": "Bestimmt das Aussehen der Kundentabelle auf der Hauptseite Kunden."
+      },
+      "locations": {
+        "title": "Standorte",
+        "subtitle": "Bestimmt das Aussehen und den Standardfilter des Tabs Standorte beim Öffnen eines Kunden."
+      },
+      "departments": {
+        "title": "Abteilungen",
+        "subtitle": "Bestimmt das Aussehen und den Standardfilter des Tabs Abteilungen beim Öffnen eines Kunden."
+      },
+      "contacts": {
+        "title": "Kontakte",
+        "subtitle": "Bestimmt das Aussehen und den Standardfilter des Tabs Kontakte beim Öffnen eines Kunden."
+      },
+      "vacancies": {
+        "title": "Stellen",
+        "subtitle": "Bestimmt den Standardfilter des Tabs Stellen beim Öffnen eines Kunden."
+      }
+    },
+    "defaultFilter": {
+      "title": "Standard-Statusfilter",
+      "allOption": "Alle Status",
+      "chosenHint": "Dieser Status ist direkt ausgewählt, sobald dieser Tab geöffnet wird.",
+      "autoHint": "Noch nicht gewählt — das ist derzeit automatisch der Status, der wie 'aktiv' aussieht (oder Alle, falls keiner existiert)."
     }
   },
   "customerVacancyDefaults": {

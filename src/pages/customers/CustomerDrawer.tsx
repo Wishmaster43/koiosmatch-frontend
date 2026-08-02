@@ -168,6 +168,13 @@ export default function CustomerDrawer({
   // which useCustomerRecord maps onto the `phase` column (PATCH /customers/{id}).
   const currentPhase  = phase ?? c.phase
   const changePhase   = (v: string) => { setPhase(v); onUpdate?.(c.id, { phase: v }) }
+  // Danny 02-08: "Prospect heeft geen status" — mirrors the candidate drawer's
+  // showStatus gate (useCandidateStatus.ts): a customer still in the ENTRY phase
+  // isn't deployable yet, so the Status picker doesn't show at all. Resolved via
+  // the `is_default` FLAG (never an array position — see CustomerStatusChip for
+  // why that matters), so reordering the phase lookup in Settings never misfires.
+  const entryPhaseValue = phases.find(p => p.isDefault)?.value
+  const showStatus = !!currentPhase && currentPhase !== entryPhaseValue
 
   // Owner (account manager) picker — a fallback entry ONLY when the current
   // owner is not in the selectable `users` list (always prepending it duplicated
@@ -323,8 +330,12 @@ export default function CustomerDrawer({
             // question, and the order mirrors the table columns (phase → status).
             { key: 'phase', label: t('drawer.phase'), value: currentPhase, width: 160,
               options: phases.map(p => ({ value: p.value, label: p.label })), onChange: changePhase, menuWidth: 170 },
-            { key: 'status', label: t('drawer.status'), value: currentStatus, width: 160,
-              options: statuses.map(s => ({ value: s.value, label: s.label })), onChange: changeStatus, menuWidth: 170 },
+            // Danny 02-08: no Status picker at all while in the entry phase — a
+            // Prospect has no deployability status yet (mirrors the candidate
+            // drawer's showStatus gate; see CustomerStatusChip for the read-only
+            // display-side counterpart of this same rule).
+            ...(showStatus ? [{ key: 'status', label: t('drawer.status'), value: currentStatus, width: 160,
+              options: statuses.map(s => ({ value: s.value, label: s.label })), onChange: changeStatus, menuWidth: 170 }] : []),
             { key: 'owner', label: t('drawer.owner'), value: ownerValue, width: 200,
               options: ownerOptions, onChange: onOwnerChange, menuWidth: 200 },
           ]}

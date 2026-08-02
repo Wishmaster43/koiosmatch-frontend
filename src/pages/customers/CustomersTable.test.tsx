@@ -41,6 +41,16 @@ vi.mock('@/lib/useCustomerPhases', () => ({
   }),
 }))
 /* eslint-enable no-restricted-syntax */
+// CustomerStatusChip resolves its own statusMeta via this hook (mirrors
+// CandidateStatusChip's internal useLookups() call) — stub it so the status
+// column is deterministic and never fires a real network request in tests.
+/* eslint-disable no-restricted-syntax -- DATA: fixture colours as the API returns them, not UI styling */
+vi.mock('@/lib/useCustomerLookups', () => ({
+  useCustomerLookups: () => ({
+    statusMeta: (v?: string | null) => (v === 'active' ? { value: 'active', label: 'Actief', color: '#16A34A' } : { value: v ?? '', label: v ?? '—', color: '#9CA3AF' }),
+  }),
+}))
+/* eslint-enable no-restricted-syntax */
 beforeEach(() => { mockUseApps.mockReturnValue({ isAppEnabled: () => false }) })
 // Real (nl) translations, since mocking '@/lib/datetime' above removes the
 // transitive '@/i18n' side-effect import the production component relies on.
@@ -127,7 +137,9 @@ describe('CustomersTable · lifecycle phase chip (KLANT-FASE-1)', () => {
   })
 
   it('puts the phase column directly NEXT TO the status column — two chips, two questions', () => {
-    const row = { ...baseCustomer, id: 51, phase: 'interesse' } as Customer
+    // 'vaste_klant' (NOT the entry phase) — a customer past entry keeps its status
+    // chip; the entry-phase dash rule is covered separately below (Danny 02-08).
+    const row = { ...baseCustomer, id: 51, phase: 'vaste_klant' } as Customer
     const { container } = render(<CustomersTable rows={[row]} statusMeta={statusMeta} />)
 
     const headers = Array.from(container.querySelectorAll('thead th'))
@@ -138,7 +150,7 @@ describe('CustomersTable · lifecycle phase chip (KLANT-FASE-1)', () => {
 
     // Both cells carry a chip in the same row — the phase one is not swallowed by status.
     const cells = container.querySelectorAll('tbody tr td')
-    expect(cells[phaseIdx].textContent).toBe('Interesse')
+    expect(cells[phaseIdx].textContent).toBe('Vaste klant')
     expect(cells[statusIdx].textContent).toBe('Actief')
   })
 
@@ -150,5 +162,28 @@ describe('CustomersTable · lifecycle phase chip (KLANT-FASE-1)', () => {
     const phaseIdx = headers.findIndex(h => h.textContent?.includes('Fase'))
     const cells = container.querySelectorAll('tbody tr td')
     expect(cells[phaseIdx].textContent).toBe('—')
+  })
+})
+
+describe('CustomersTable · status chip suppressed in the entry phase (Danny 02-08)', () => {
+  it('renders a DASH — not a status chip — for a customer still in the entry (Prospect-equivalent) phase, even with a status value set', () => {
+    const row = { ...baseCustomer, id: 53, phase: 'interesse', status: 'active' } as Customer
+    const { container } = render(<CustomersTable rows={[row]} statusMeta={statusMeta} />)
+
+    const headers = Array.from(container.querySelectorAll('thead th'))
+    const statusIdx = headers.findIndex(h => h.textContent?.includes('Status'))
+    const cells = container.querySelectorAll('tbody tr td')
+    expect(cells[statusIdx].textContent).toBe('—')
+    expect(cells[statusIdx].textContent).not.toBe('Actief')
+  })
+
+  it('renders the real status chip for a customer past the entry phase', () => {
+    const row = { ...baseCustomer, id: 54, phase: 'vaste_klant', status: 'active' } as Customer
+    const { container } = render(<CustomersTable rows={[row]} statusMeta={statusMeta} />)
+
+    const headers = Array.from(container.querySelectorAll('thead th'))
+    const statusIdx = headers.findIndex(h => h.textContent?.includes('Status'))
+    const cells = container.querySelectorAll('tbody tr td')
+    expect(cells[statusIdx].textContent).toBe('Actief')
   })
 })

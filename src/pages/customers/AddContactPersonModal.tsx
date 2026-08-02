@@ -32,19 +32,22 @@
  * siblings sharing their grid row — mirrors the identical fix already applied in
  * `pages/candidates/addmodal/fields.tsx` for the same trigger-vs-input mismatch.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '@/context/AuthContext'
 import { X, Users } from 'lucide-react'
 import { Field, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import Toggle from '@/components/ui/Toggle'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useGenders } from '@/lib/useGenders'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
+import SubEntityImportCard from './SubEntityImportCard'
+import ContactLinkCard from './ContactLinkCard'
+import { useImportWizard } from '@/pages/settings/sections/importeren/useImportWizard'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
@@ -81,10 +84,12 @@ function FieldError({ text }: { text?: string }) {
 }
 
 export default function AddContactPersonModal({
-  onClose, onCreate, customerName, locations = [], departments = [], statuses = [], initial, lockLocationId, lockDepartmentId, existing = [],
+  onClose, onCreate, onImported, customerName, locations = [], departments = [], statuses = [], initial, lockLocationId, lockDepartmentId, existing = [],
 }: {
   onClose: () => void
   onCreate?: (v: ContactPayload) => void
+  /** Called once a real CSV import lands at least one record — the parent refreshes its list. */
+  onImported?: () => void
   customerName?: string
   locations?: OptionRow[]
   departments?: Department[]
@@ -101,6 +106,15 @@ export default function AddContactPersonModal({
   const { t } = useTranslation(['customers', 'common'])
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { confirm, dialog } = useConfirm()
+  const authCtx = useAuth() as unknown as { hasPermission?: (permName: string) => boolean } | null
+  // SUBENTITY-IMPORT-1: falls back to "no permission" rather than crashing when the
+  // context is mid-boot OR genuinely absent (this modal is also mounted from screens
+  // with no AuthProvider ancestor in tests) — mirrors AddCustomerModal's own fallback.
+  const hasPermission = authCtx?.hasPermission ?? (() => false)
+  const canViewImportTemplate = hasPermission('customers.view')
+  const canRunImport = hasPermission('customers.create')
+  // The wizard state lives HERE (container), not in the card — mirrors AddCustomerModal.
+  const importWizard = useImportWizard('contacts')
   const isEdit = Boolean(initial)
   // Contact function (job title) is a lookup combobox, split from the candidate
   // function list (FUNCTIONS-SPLIT-1) — never a plain free-text field.
@@ -137,6 +151,18 @@ export default function AddContactPersonModal({
     if (fieldMessages[k]) setFieldMessages(m => ({ ...m, [k]: '' }))
     setCreateError(null)
   }
+
+  // SUBENTITY-IMPORT-1: a real run that landed at least one row means the contact(s)
+  // already exist — close this modal (and let the parent refresh its list) so the
+  // untouched manual form below can never also fire a second, duplicate create.
+  useEffect(() => {
+    if (importWizard.run.status !== 'success') return
+    const { summary } = importWizard.run.result
+    if (summary.create + summary.update === 0) return
+    onImported?.()
+    onClose()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the run RESULT changing, not onClose/onImported identity
+  }, [importWizard.run])
 
   // The contact who currently holds the primary flag (excluding the one being
   // edited, so re-saving the already-primary contact never prompts).
@@ -219,7 +245,6 @@ export default function AddContactPersonModal({
   }
 
   const canSubmit = !!form.firstName.trim() && !!form.lastName.trim() && !emailDup && !phoneDup && !mobileDup
-  const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
   // Department options stay EMPTY until a location is picked — mirrors AddShiftModal's
   // customer->department cascade (PLAN-LOOKUP-1). Never fall back to "every department
   // of this customer": a department belongs to exactly one location, so offering the
@@ -260,6 +285,14 @@ export default function AddContactPersonModal({
           <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}><X size={18} /></button>
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* SUBENTITY-IMPORT-1: the file-import path, CREATE only — same top spot as
+              CvUploadCard/CustomerImportCard. Editing a single contact has no batch
+              concept, so the card never renders there. */}
+          {!isEdit && (
+            <SubEntityImportCard entity="contacts" wizard={importWizard} customerName={customerName}
+              canView={canViewImportTemplate} canImport={canRunImport} />
+          )}
+
           {/* Persoon — name + function (Danny 27-07 card split: name/lastname/functie). */}
           <div>
             <div style={cardHead}>{t('subModal.groups.person')}</div>
@@ -328,51 +361,24 @@ export default function AddContactPersonModal({
           </div>
 
           {/* Koppeling — locatie/afdeling (searchable, allowCreate=false: real relational
-              ids) + status/primair-vlag for that link. */}
-          <div>
-            <div style={cardHead}>{t('subModal.groups.link')}</div>
-            <div style={cardBox}>
-              {/* Location is picked at the top-level Contactpersonen tab —
-                  `lockLocationId` (adding "at this location") hides ONLY this field.
-                  Department is picked from the top-level tab or a location's nested
-                  list — `lockDepartmentId` (adding "in this department") hides ONLY
-                  that field. Whichever field stays visible keeps its half-width
-                  column via an empty filler cell, never a lone full-width control
-                  (mirrors the Function row above); when BOTH are locked the row
-                  folds away since there is nothing left to pick. */}
-              {(showLocationPicker || showDepartmentPicker) && (
-                <div style={row2}>
-                  {showLocationPicker && (
-                    <Field label={t('subModal.selectLocation')}>
-                      <CreatableSelect value={form.locationId ? String(form.locationId) : null} allowCreate={false}
-                        onChange={v => { set('locationId', v || null); set('departmentId', null) }}
-                        placeholder={t('subModal.noneOption')} options={locations.map(l => ({ value: String(l.id), label: l.name }))}
-                        style={CREATABLE_STYLE} />
-                    </Field>
-                  )}
-                  {showDepartmentPicker && (
-                    <Field label={t('subModal.selectDepartment')}>
-                      <CreatableSelect value={form.departmentId ? String(form.departmentId) : null} allowCreate={false}
-                        onChange={v => set('departmentId', v || null)}
-                        placeholder={departmentPlaceholder} options={departmentOptions} style={CREATABLE_STYLE} />
-                    </Field>
-                  )}
-                  {showLocationPicker !== showDepartmentPicker && <div />}
-                </div>
-              )}
-              <div style={{ ...row2, alignItems: 'end' }}>
-                <Field label={t('subModal.status')}>
-                  <CreatableSelect value={form.statusId ? String(form.statusId) : null} allowCreate={false}
-                    onChange={v => set('statusId', v || null)} placeholder={t('subModal.selectStatus')} options={statusOptions}
-                    style={CREATABLE_STYLE} />
-                </Field>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7, paddingBottom: 8 }}>
-                  <Toggle checked={form.isPrimary} onChange={handlePrimaryToggle} ariaLabel={t('subModal.isPrimary')} />
-                  <span style={{ fontSize: 12, color: 'var(--text)' }}>{t('subModal.isPrimary')}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+              ids) + status/primair-vlag for that link. Extracted into its own component
+              (ContactLinkCard) to keep this file under the ~400-line split trigger. */}
+          <ContactLinkCard
+            locationId={form.locationId ? String(form.locationId) : null}
+            departmentId={form.departmentId ? String(form.departmentId) : null}
+            statusId={form.statusId ? String(form.statusId) : null}
+            isPrimary={form.isPrimary}
+            locationOptions={locations.map(l => ({ value: String(l.id), label: l.name }))}
+            departmentOptions={departmentOptions}
+            departmentPlaceholder={departmentPlaceholder}
+            statusOptions={statuses}
+            showLocationPicker={showLocationPicker}
+            showDepartmentPicker={showDepartmentPicker}
+            onLocationChange={v => { set('locationId', v || null); set('departmentId', null) }}
+            onDepartmentChange={v => set('departmentId', v || null)}
+            onStatusChange={v => set('statusId', v || null)}
+            onPrimaryToggle={handlePrimaryToggle}
+          />
         </div>
 
         {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}

@@ -76,5 +76,13 @@ export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
     })
   }, [queryClient, filterParams, page, pageSize])
 
-  return { customers, setCustomers, loading, error, total, setTotal, lastPage, stats }
+  // CUSTOMER-IMPORT-1: a side-channel write (the create-modal's file import) has no
+  // single record to prepend optimistically like handleCreate does — it can create
+  // any number of customers/locations/departments/contacts in one run — so the
+  // honest refresh is a real refetch of both the list and the stats query.
+  const refresh = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['customers'] })
+  }, [queryClient])
+
+  return { customers, setCustomers, loading, error, total, setTotal, lastPage, stats, refresh }
 }

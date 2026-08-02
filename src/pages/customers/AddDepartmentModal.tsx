@@ -19,9 +19,10 @@
  * genuinely has fewer fields than Location (5 vs 13), so its cards stay
  * lighter — see report re: not padding the layout with empty space.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '@/context/AuthContext'
 import { X, Building } from 'lucide-react'
 import { Field, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
@@ -29,6 +30,8 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
+import SubEntityImportCard from './SubEntityImportCard'
+import { useImportWizard } from '@/pages/settings/sections/importeren/useImportWizard'
 import type { DepartmentPayload } from './hooks/useCustomerDepartments'
 import type { Department } from '@/types/customer'
 import type { Id } from '@/types/common'
@@ -42,9 +45,11 @@ const API_TO_FORM: Record<string, string> = {
   cost_center: 'costCenter',
 }
 
-export default function AddDepartmentModal({ onClose, onCreate, locations = [], customerName, statuses = [], initial, lockLocationId }: {
+export default function AddDepartmentModal({ onClose, onCreate, onImported, locations = [], customerName, statuses = [], initial, lockLocationId }: {
   onClose: () => void
   onCreate?: (v: DepartmentPayload) => void
+  /** Called once a real CSV import lands at least one record — the parent refreshes its list. */
+  onImported?: () => void
   locations?: LocationOption[]
   customerName?: string
   statuses?: LookupOption[]
@@ -54,6 +59,15 @@ export default function AddDepartmentModal({ onClose, onCreate, locations = [], 
 }) {
   const { t } = useTranslation(['customers', 'common'])
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
+  const authCtx = useAuth() as unknown as { hasPermission?: (permName: string) => boolean } | null
+  // SUBENTITY-IMPORT-1: falls back to "no permission" rather than crashing when the
+  // context is mid-boot OR genuinely absent (this modal is also mounted from screens
+  // with no AuthProvider ancestor in tests) — mirrors AddCustomerModal's own fallback.
+  const hasPermission = authCtx?.hasPermission ?? (() => false)
+  const canViewImportTemplate = hasPermission('customers.view')
+  const canRunImport = hasPermission('customers.create')
+  // The wizard state lives HERE (container), not in the card — mirrors AddCustomerModal.
+  const importWizard = useImportWizard('departments')
   const isEdit = Boolean(initial)
   const [form, setForm] = useState<DepartmentPayload>({
     name: initial?.name ?? '',
@@ -73,6 +87,18 @@ export default function AddDepartmentModal({ onClose, onCreate, locations = [], 
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
     setCreateError(null)
   }
+
+  // SUBENTITY-IMPORT-1: a real run that landed at least one row means the department(s)
+  // already exist — close this modal (and let the parent refresh its list) so the
+  // untouched manual form below can never also fire a second, duplicate create.
+  useEffect(() => {
+    if (importWizard.run.status !== 'success') return
+    const { summary } = importWizard.run.result
+    if (summary.create + summary.update === 0) return
+    onImported?.()
+    onClose()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the run RESULT changing, not onClose/onImported identity
+  }, [importWizard.run])
 
   const submit = async () => {
     if (!form.name.trim() || !form.locationId) {
@@ -124,6 +150,14 @@ export default function AddDepartmentModal({ onClose, onCreate, locations = [], 
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* SUBENTITY-IMPORT-1: the file-import path, CREATE only — same top spot as
+              CvUploadCard/CustomerImportCard. Editing a single department has no batch
+              concept, so the card never renders there. */}
+          {!isEdit && (
+            <SubEntityImportCard entity="departments" wizard={importWizard} customerName={customerName}
+              canView={canViewImportTemplate} canImport={canRunImport} />
+          )}
+
           {/* Algemeen — name, locatie (searchable, hidden when locked), status.
               Location+status pair in one row when both show; status alone stays
               constrained to ~a third of the width (row3Even) rather than

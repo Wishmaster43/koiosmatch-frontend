@@ -20,6 +20,18 @@
  *
  * The trigger renders the exact box of the shared CreatableSelect — same padding, font and
  * muted chevron — so a filter standing beside those pickers is indistinguishable from them.
+ *
+ * TENANT-DEFAULT-1 (Danny 02-08): the "active only" guess above was always a heuristic on a
+ * TENANT-RENAMEABLE lookup — a tenant who calls their status "In bedrijf" or "Lopend" never
+ * matched `isActiveValue` and got no default at all, silently. Settings → Klanten → Tabelweergave
+ * now lets a tenant configure the REAL default per tab (`STATUS_FILTER_ALL` or one specific
+ * status id) via the optional `tenantDefault` param below. WHEN SET IT REPLACES THE GUESS
+ * ENTIRELY — it is not layered on top — because a tenant who explicitly chose "all" must never
+ * have the guess override that choice once rows/statuses resolve. The same guard principle
+ * applies: a configured status id that no longer exists in the CURRENT lookup (renamed/deleted
+ * since) is never applied — that would silently hide every row forever, the exact failure mode
+ * the guess-heuristic guard exists to prevent. Absent `tenantDefault` (undefined) reproduces the
+ * ORIGINAL guess behaviour byte-for-byte, so an existing tenant sees no change until it saves one.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -30,8 +42,19 @@ import type { LookupOption } from '@/types/common'
 // A row that carries a status — every sub-entity does, under the same two field names.
 interface HasStatus { statusId?: unknown; status?: unknown }
 
-/** The stable slugs a tenant's "still relevant" status carries, whatever they named it. */
-const isActiveValue = (v: unknown) => ['active', 'actief', 'open'].includes(String(v ?? '').toLowerCase())
+/**
+ * The stable slugs a tenant's "still relevant" status carries, whatever they named it.
+ * Exported so Settings' `DefaultStatusFilterPicker` can show the SAME guess it would
+ * fall back to today, instead of a second, drifting copy of this heuristic.
+ */
+export const isActiveValue = (v: unknown) => ['active', 'actief', 'open'].includes(String(v ?? '').toLowerCase())
+
+/**
+ * Sentinel tenant-default value meaning "all statuses, explicitly chosen" — distinct from
+ * an ABSENT setting (which still means "use the active-only guess", §TENANT-DEFAULT-1).
+ * Never a real status id, so it can never collide with one.
+ */
+export const STATUS_FILTER_ALL = 'all'
 
 /**
  * Owns the filter value and picks a sensible first one. Returns the value, its toggle and
@@ -40,11 +63,28 @@ const isActiveValue = (v: unknown) => ['active', 'actief', 'open'].includes(Stri
  * `keyOf` lets a caller say where the status lives on ITS row: most carry `statusId`, a
  * vacancy carries a `status` OBJECT. Without that the filter would compare a uuid to an
  * object and match nothing — silently, which is the whole failure mode this guards against.
+ *
+ * `tenantDefault` is the Settings-configured default for THIS tab (§TENANT-DEFAULT-1):
+ * `undefined` → fall back to the original active-only guess; `STATUS_FILTER_ALL` → explicit
+ * "all", propose nothing, ever; any other string → a status id, applied once IF it still
+ * exists in `statuses`, otherwise treated as "all" (never a phantom filter on a dead value).
+ *
+ * `settingsLoaded` guards a SECOND async race the tenant-default plumbing introduces: the
+ * `/settings` blob that carries `tenantDefault` resolves independently from — and often
+ * slower than — `statuses`/`rows`. Without this flag, a caller reading `tenantDefault` from
+ * a not-yet-loaded settings blob would see `undefined` (indistinguishable from "genuinely no
+ * setting saved"), the hook would immediately fall back to the guess, mark itself
+ * `proposed`, and then ignore the REAL tenant default entirely once `/settings` actually
+ * answers a moment later — a silent bug, caught by this feature's own test. Callers that
+ * never pass a `tenantDefault` at all default this to `true`, so their behaviour is exactly
+ * the original, unraced guess.
  */
 export function useStatusFilter<T extends HasStatus>(
   rows: T[],
   statuses: LookupOption[],
   keyOf: (row: T) => string = r => String(r.statusId ?? r.status ?? ''),
+  tenantDefault?: string | null,
+  settingsLoaded: boolean = true,
 ) {
   const [value, setValue] = useState<string[]>([])
   const [proposed, setProposed] = useState(false)
@@ -52,10 +92,24 @@ export function useStatusFilter<T extends HasStatus>(
   const active = statuses.find(s => isActiveValue(s.value))
   const activeKey = active ? String(active.id ?? active.value) : ''
 
-  // Propose "active only" ONCE, and only when it would actually show something.
-  if (!proposed && statuses.length > 0 && rows.length > 0) {
-    setProposed(true)
-    if (activeKey && rows.some(r => keyOf(r) === activeKey)) setValue([activeKey])
+  // Propose the initial value ONCE the lookup (AND, if relevant, the tenant-default
+  // settings blob) has resolved. A configured tenant default decides immediately (and
+  // bypasses the guess for good); without one, fall back to the original guess — which
+  // additionally waits for rows, so it never fires against an empty list before the real
+  // row data has arrived (the exact bug this docblock warns about).
+  if (!proposed && statuses.length > 0 && settingsLoaded) {
+    if (tenantDefault != null) {
+      setProposed(true)
+      if (tenantDefault !== STATUS_FILTER_ALL) {
+        // Only apply a specific tenant-chosen status if it still exists in the CURRENT
+        // lookup — a renamed/deleted status must never filter to a value nothing can match.
+        const stillExists = statuses.some(s => String(s.id ?? s.value) === tenantDefault)
+        if (stillExists) setValue([tenantDefault])
+      }
+    } else if (rows.length > 0) {
+      setProposed(true)
+      if (activeKey && rows.some(r => keyOf(r) === activeKey)) setValue([activeKey])
+    }
   }
 
   const toggle = (v: string) => setValue(p => (p.includes(v) ? p.filter(x => x !== v) : [...p, v]))

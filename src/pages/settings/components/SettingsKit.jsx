@@ -22,6 +22,12 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Check, RefreshCw, Save } from 'lucide-react'
 import { SettingsDirtyContext } from '../lib/settingsDirty'
 import ToggleUi from '@/components/ui/Toggle'
+// PRE-EXISTING BUG FIX (found while verifying this task, unrelated to SUB-TABS-1/
+// TENANT-DEFAULT-1 itself): ColorField's palette-swatch rebuild (Danny 02-08) called
+// <ColorSwatch> without ever importing it, so EVERY `type: 'color'` schema field threw
+// on mount — including the pre-existing customerDisplay chip-colour fields, which
+// broke this task's own verification run. One-line fix: import the sibling component.
+import { ColorSwatch } from './SettingsControls'
 
 const CARD = {
   background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
@@ -160,7 +166,7 @@ export function ColorField({ value, onChange, invalidLabel, ariaLabel }) {
   const [draft, setDraft] = useState(value ?? '')
   const [invalid, setInvalid] = useState(false)
 
-  // Re-sync the draft when the persisted value changes from outside (load / cancel).
+  // Re-sync the draft when the persisted value changes from outside (swatch, load, reset).
   useEffect(() => { setDraft(value ?? ''); setInvalid(false) }, [value])
 
   // Commit on blur/Enter only — never flag a still-typing keystroke as an error.
@@ -178,10 +184,12 @@ export function ColorField({ value, onChange, invalidLabel, ariaLabel }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span aria-hidden="true" style={{
-          width: 20, height: 20, borderRadius: 5, flexShrink: 0,
-          border: '1px solid var(--border)', background: draft.trim() || 'transparent',
-        }} />
+        {/* The swatch is the PICKER, not a preview. It was a dead square for a day: the
+            field had been rebuilt as free text to accept a design token, which made it
+            capable and unusable — you could see a colour and not choose one (Danny 02-08).
+            The palette is the same one every other lookup colour uses; the text box beside
+            it stays for the cases the palette cannot express (a token, a brand hex). */}
+        <ColorSwatch color={draft.trim() || 'var(--border)'} onChange={c => { setDraft(c); setInvalid(false); onChange(c) }} />
         <input type="text" value={draft} aria-label={ariaLabel} maxLength={32}
           placeholder="var(--color-secondary)"
           onChange={e => setDraft(e.target.value)}

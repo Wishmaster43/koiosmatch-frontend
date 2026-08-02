@@ -51,6 +51,7 @@ import ContactFunctionsSettings from './sections/ContactFunctionsSettings'
 import { VacancyStatusSettings, VacancyPhaseSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings, VacancyApplicationDefaultsSettings } from './sections/VacancySettings'
 import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
 import VacancyCandidateTabSettings from './sections/VacancyCandidateTabSettings'
+import CustomerDisplaySettings from './sections/CustomerDisplaySettings'
 import MatchTemplatesSettings from './sections/MatchTemplatesSettings'
 import MatchRatesSettings from './sections/MatchRatesSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
@@ -95,7 +96,6 @@ import {
   kpisDepartments, kpisContacts, kpisTasks, kpisCalllists, kpisMatches,
 } from './schemas/kpis'
 import candidateDisplay from './schemas/candidateDisplay'
-import customerDisplay from './schemas/customerDisplay'
 import customerVacancyDefaults from './schemas/customerVacancyDefaults'
 import taskDisplay from './schemas/taskDisplay'
 import applicationDisplay from './schemas/applicationDisplay'
@@ -217,7 +217,10 @@ export const NAV_GROUPS = [
       { id: 'cao', icon: Scale, component: CaoSettings },
       { id: 'location_statuses', icon: MapPin, component: LocationStatusesSettings },
       { id: 'department_statuses', icon: Building2, component: DepartmentStatusesSettings },
-      { id: 'customer_display', icon: Palette, schema: customerDisplay },
+      // SUB-TABS-1 (Danny 02-08): was a single flat schema; now a component so the
+      // customer-table settings and the three drill-down entity tables (+ Vacatures'
+      // default filter) each get their own sub-tab — see CustomerDisplaySettings.
+      { id: 'customer_display', icon: Palette, component: CustomerDisplaySettings },
       // Tenant-wide default for the customer's vacancy-visibility flags (Danny 27-07) —
       // VacancySettingsTab (customer drawer) reads these same keys for comparison.
       { id: 'customer_vacancy_defaults', icon: EyeOff, schema: customerVacancyDefaults },

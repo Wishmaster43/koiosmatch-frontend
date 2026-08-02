@@ -25,21 +25,36 @@ type NotePayload = { type: string; title: string; body: string }
 // CustomerRequest::sharedRules marks them sometimes|nullable) and only travels when
 // filled — the modal collects them since Danny 27-07 ("+ Klant mist heel veel
 // informatie"), so they must actually reach the API instead of being dropped here.
+// DEBITEURNUMMER-1 (Danny 02-08): `debtorNumber` is now OPTIONAL (was required) — the
+// create modal no longer collects it, but the property itself stays on the type so a
+// caller that still passes one (e.g. an existing test fixture) keeps compiling; it
+// simply never rides along in the POST body below.
 interface CreateForm {
-  name: string; debtorNumber: string; status: string; ownerId: string; industry: string; city: string
+  name: string; debtorNumber?: string; status: string; ownerId: string; industry: string; city: string
   // KLANT-FASE-1: lifecycle phase slug picked in the create modal (is_default preselected).
   phase?: string
   branchId?: string; website?: string; employeeCount?: string
   toneOfVoice?: string; costCenter?: string; billingEmail?: string
+  // KLANT-ADRES-1 (Danny 02-08): the customer's own visiting address, collected by
+  // the create modal's new AddressCard — same optional/nullable rules as the rest.
+  street?: string; houseNumber?: string; houseNumberSuffix?: string; postalCode?: string
+  province?: string; country?: string
 }
 
 // Optional create fields → their API keys (same mapping the PATCH path uses).
 // `phase` rides along here (not in the base body) because its rule is
 // `sometimes|exists:customer_phases,value` — an empty string would be a 422.
+// BEDRIJFSTEKST-1 (Danny 02-08): `toneOfVoice` now maps to `description` — the backend
+// column `tone_of_voice` was merged into `description` and dropped (StoreCustomerRequest
+// silently ignores it), so the OLD mapping here POSTed to a key CustomerRequest::
+// sharedRules validates but Customer::$fillable/the DB no longer has; this form field is
+// relabelled "Bedrijfstekst" (reuses overview.companyText) and now actually persists.
 const OPTIONAL_CREATE_FIELDS: Array<[keyof CreateForm, string]> = [
   ['phase', 'phase'],
   ['branchId', 'location_id'], ['website', 'website'], ['employeeCount', 'employee_count'],
-  ['toneOfVoice', 'tone_of_voice'], ['costCenter', 'cost_center'], ['billingEmail', 'billing_email'],
+  ['toneOfVoice', 'description'], ['costCenter', 'cost_center'], ['billingEmail', 'billing_email'],
+  ['street', 'street'], ['houseNumber', 'house_number'], ['houseNumberSuffix', 'house_number_suffix'],
+  ['postalCode', 'postcode'], ['province', 'province'], ['country', 'country'],
 ]
 
 interface Args {
@@ -159,8 +174,10 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
   const handleCreate = (form: CreateForm) => {
     const owner = users.find(u => String(u.id) === form.ownerId)
     const tmpId = `new-${Date.now()}`
+    // DEBITEURNUMMER-1 (Danny 02-08): no `debtor_number` here — the create form no
+    // longer collects it (the customer's own accounting number, decided later).
     const optimistic = mapCustomer({
-      id: tmpId, name: form.name, debtor_number: form.debtorNumber, status: form.status,
+      id: tmpId, name: form.name, status: form.status,
       // KLANT-FASE-1: carry the picked phase into the optimistic row so the new
       // table row shows its phase chip immediately, not only after the reconcile.
       phase: form.phase, city: form.city, industry: form.industry,
@@ -168,7 +185,7 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
     } as ApiCustomer)
     setCustomers(prev => [optimistic, ...prev]); setTotal(tt => tt + 1)
     const body: Record<string, unknown> = {
-      name: form.name, debtor_number: form.debtorNumber, status: form.status,
+      name: form.name, status: form.status,
       city: form.city, industry: form.industry, owner_id: form.ownerId,
     }
     // Only send an optional field once it carries a value — the rules are

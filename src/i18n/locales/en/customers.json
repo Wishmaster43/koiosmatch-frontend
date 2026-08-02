@@ -59,7 +59,8 @@
     "activeMatches": "Currently at work",
     "activeMatchesSub": "active matches",
     "noContact": "Without contact",
-    "noContactSub": "no contact linked"
+    "noContactSub": "no contact linked",
+    "noStatus": "No status"
   },
   "drawer": {
     "entityLabel": "Customer",
@@ -111,7 +112,6 @@
     "textsTitle": "Texts",
     "website": "Website",
     "employeeCount": "Employees",
-    "toneOfVoice": "Tone of voice",
     "industry": "Industry",
     "debtorNumber": "Debtor number",
     "city": "City",
@@ -221,7 +221,8 @@
       "setPrimaryContactUnavailable": "The server has not applied this yet. Try again once the database has been updated.",
       "primaryContactTitle": "Primary contact",
       "noPrimaryContact": "No primary contact for this location yet",
-      "pickPrimaryContact": "Choose a primary contact"
+      "pickPrimaryContact": "Choose a primary contact",
+      "description": "Description"
     },
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",
@@ -494,8 +495,6 @@
     "fields": {
       "name": "Name",
       "namePlaceholder": "E.g. Rivas Care Group",
-      "debtorNumber": "Debtor number",
-      "status": "Status",
       "accountManager": "Account manager",
       "selectOwner": "Choose account manager",
       "industry": "Industry",
@@ -504,8 +503,14 @@
       "cityPlaceholder": "E.g. Gorinchem",
       "cardCompany": "Company",
       "cardBranch": "Branch & city",
-      "cardOwnerStatus": "Owner & status",
-      "phase": "Phase"
+      "cardOwner": "Owner",
+      "phase": "Phase",
+      "branchAdd": "Add branch",
+      "branchAutoHint": "Empty = automatically the branches you are linked to."
+    },
+    "import": {
+      "title": "Customer from file",
+      "intro": "Importing a file creates this customer — with its locations, departments and contacts — directly. It does not fill in the form below; check the preview before confirming."
     }
   },
   "subModal": {
@@ -574,7 +579,18 @@
       "decline": "No, don't replace"
     },
     "middleName": "Middle name",
-    "gender": "Gender"
+    "gender": "Gender",
+    "import": {
+      "title": "{{entity}} from file",
+      "intro": "Importing a file creates {{entity}} directly — it does not fill in the form below. Check the preview before confirming.",
+      "parentWarning": "The customer name in the file decides which customer the rows land on — it does not have to be \"{{customerName}}\". Check the preview.",
+      "mismatchWarning": "{{count}} row(s) in this file belong to a different customer than this one ({{names}}) — those rows will land there, not here.",
+      "mismatchConfirm": "{{count}} row(s) of this file will be created or updated under a different customer ({{names}}), not the customer you have open now. Continue anyway?",
+      "mismatchTitle": "Different customer in file",
+      "mismatchProceed": "Import anyway"
+    },
+    "contactPersonHint": "Pick an existing contact of this customer, or type a new name.",
+    "contactCouplingFailed": "Location \"{{name}}\" was created, but linking the contact failed. Link it manually from the location later."
   },
   "changelog": {
     "empty": "No changes yet."

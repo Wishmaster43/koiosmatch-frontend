@@ -59,7 +59,8 @@
     "activeMatches": "Nu aan het werk",
     "activeMatchesSub": "actieve matches",
     "noContact": "Zonder contactpersoon",
-    "noContactSub": "geen contact gekoppeld"
+    "noContactSub": "geen contact gekoppeld",
+    "noStatus": "Geen status"
   },
   "drawer": {
     "entityLabel": "Klant",
@@ -111,7 +112,6 @@
     "textsTitle": "Teksten",
     "website": "Website",
     "employeeCount": "Werknemers",
-    "toneOfVoice": "Schrijfstijl",
     "industry": "Branche",
     "debtorNumber": "Debiteurnummer",
     "city": "Plaats",
@@ -221,7 +221,8 @@
       "setPrimaryContactUnavailable": "De server heeft dit nog niet doorgevoerd. Probeer het opnieuw nadat de database is bijgewerkt.",
       "primaryContactTitle": "Primaire contactpersoon",
       "noPrimaryContact": "Nog geen primaire contactpersoon voor deze locatie",
-      "pickPrimaryContact": "Kies een primaire contactpersoon"
+      "pickPrimaryContact": "Kies een primaire contactpersoon",
+      "description": "Omschrijving"
     },
     "saveFailed": "Opslaan is mislukt.",
     "deleteFailed": "Verwijderen is mislukt.",
@@ -494,8 +495,6 @@
     "fields": {
       "name": "Naam",
       "namePlaceholder": "Bijv. Stichting Rivas Zorggroep",
-      "debtorNumber": "Debiteurnummer",
-      "status": "Status",
       "accountManager": "Accountmanager",
       "selectOwner": "Kies accountmanager",
       "industry": "Branche",
@@ -504,8 +503,14 @@
       "cityPlaceholder": "Bijv. Gorinchem",
       "cardCompany": "Bedrijf",
       "cardBranch": "Vestiging & plaats",
-      "cardOwnerStatus": "Eigenaar & status",
-      "phase": "Fase"
+      "cardOwner": "Eigenaar",
+      "phase": "Fase",
+      "branchAdd": "Vestiging toevoegen",
+      "branchAutoHint": "Leeg = automatisch de vestigingen waar jij aan gekoppeld bent."
+    },
+    "import": {
+      "title": "Klant uit bestand",
+      "intro": "Een bestand importeren maakt deze klant — met vestigingen, afdelingen en contactpersonen — meteen aan. Het vult het formulier hieronder niet in; controleer eerst de voorbeeldweergave voordat je bevestigt."
     }
   },
   "subModal": {
@@ -574,7 +579,18 @@
       "decline": "Nee, niet vervangen"
     },
     "middleName": "Tussenvoegsel",
-    "gender": "Geslacht"
+    "gender": "Geslacht",
+    "import": {
+      "title": "{{entity}} uit bestand",
+      "intro": "Een bestand importeren maakt {{entity}} rechtstreeks aan — dit vult het formulier hieronder niet in. Controleer eerst de voorbeeldweergave voordat je bevestigt.",
+      "parentWarning": "De klantnaam in het bestand bepaalt welke klant de rijen krijgt — dat hoeft niet \"{{customerName}}\" te zijn. Controleer de voorbeeldweergave.",
+      "mismatchWarning": "{{count}} rij(en) in dit bestand horen bij een andere klant dan deze ({{names}}) — die rijen komen daar terecht, niet hier.",
+      "mismatchConfirm": "{{count}} rij(en) van dit bestand worden aangemaakt of bijgewerkt bij een andere klant ({{names}}), niet bij de klant die je nu open hebt. Wil je toch doorgaan?",
+      "mismatchTitle": "Andere klant in bestand",
+      "mismatchProceed": "Toch importeren"
+    },
+    "contactPersonHint": "Kies een bestaand contact van deze klant, of typ een nieuwe naam.",
+    "contactCouplingFailed": "Locatie \"{{name}}\" is aangemaakt, maar het koppelen van de contactpersoon is mislukt. Koppel deze later handmatig via de locatie."
   },
   "changelog": {
     "empty": "Nog geen wijzigingen."

@@ -21,6 +21,7 @@ import type { Column } from '@/components/ui/DataTable'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
 import StatusFilterSelect, { useStatusFilter } from './StatusFilterSelect'
+import { useAllSettings, useSettingsLoaded, getStringSetting } from '@/lib/settings/useAllSettings'
 import api, { unwrapList } from '@/lib/api'
 import { useCustomerVacancies } from '../hooks/useCustomerDrawerData'
 import type { VacancyRow } from '../hooks/useCustomerDrawerData'
@@ -67,6 +68,14 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
     }).catch(() => setResolved(true))
   }, [])
 
+  // Tenant-configured default status filter (TENANT-DEFAULT-1, Danny 02-08) — replaces
+  // the old "active only" guess when Settings → Klanten → Tabelweergave → Vacatures has
+  // one saved; absent (null) falls back to that original guess unchanged. `settingsLoaded`
+  // stops the hook from deciding before /settings has actually answered (see its own docblock).
+  const settings = useAllSettings()
+  const settingsLoaded = useSettingsLoaded()
+  const defaultStatusFilter = getStringSetting(settings, 'customer_vacancy_default_status_filter')
+
   // The SHARED status filter, same as every other sub-entity list (Danny 28-07:
   // "vacature status is niet hetzelfde als locatie status???"). Two things make it safe
   // here: it is handed the statuses ONLY once the real lookup resolved — otherwise it
@@ -75,7 +84,7 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
   // object matches nothing, silently.
   const { value: statusFilter, toggle: toggleStatus, filtered: statusRows } =
     useStatusFilter(rows, resolved ? statusOptions.map(o => ({ value: o.value, label: o.label })) : [],
-      v => String(v.status.value ?? ''))
+      v => String(v.status.value ?? ''), defaultStatusFilter, settingsLoaded)
 
 
   // Free-text search runs on top of the status filter's rows.

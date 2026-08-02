@@ -59,7 +59,8 @@
     "activeMatches": "Aktuell im Einsatz",
     "activeMatchesSub": "aktive Matches",
     "noContact": "Ohne Kontakt",
-    "noContactSub": "kein Kontakt verknüpft"
+    "noContactSub": "kein Kontakt verknüpft",
+    "noStatus": "Kein Status"
   },
   "drawer": {
     "entityLabel": "Kunde",
@@ -111,7 +112,6 @@
     "textsTitle": "Texte",
     "website": "Website",
     "employeeCount": "Mitarbeiter",
-    "toneOfVoice": "Tone of Voice",
     "industry": "Branche",
     "debtorNumber": "Debitorennummer",
     "city": "Ort",
@@ -221,7 +221,8 @@
       "setPrimaryContactUnavailable": "Der Server hat dies noch nicht übernommen. Versuchen Sie es erneut, sobald die Datenbank aktualisiert ist.",
       "primaryContactTitle": "Primärer Ansprechpartner",
       "noPrimaryContact": "Noch kein primärer Ansprechpartner für diesen Standort",
-      "pickPrimaryContact": "Primären Ansprechpartner wählen"
+      "pickPrimaryContact": "Primären Ansprechpartner wählen",
+      "description": "Beschreibung"
     },
     "saveFailed": "Speichern fehlgeschlagen.",
     "deleteFailed": "Löschen fehlgeschlagen.",
@@ -494,8 +495,6 @@
     "fields": {
       "name": "Name",
       "namePlaceholder": "z. B. Rivas Pflegegruppe",
-      "debtorNumber": "Debitorennummer",
-      "status": "Status",
       "accountManager": "Account-Manager",
       "selectOwner": "Account-Manager wählen",
       "industry": "Branche",
@@ -504,8 +503,14 @@
       "cityPlaceholder": "z. B. Gorinchem",
       "cardCompany": "Unternehmen",
       "cardBranch": "Niederlassung & Ort",
-      "cardOwnerStatus": "Eigentümer & Status",
-      "phase": "Phase"
+      "cardOwner": "Inhaber",
+      "phase": "Phase",
+      "branchAdd": "Niederlassung hinzufügen",
+      "branchAutoHint": "Leer = automatisch die Niederlassungen, mit denen Sie verknüpft sind."
+    },
+    "import": {
+      "title": "Kunde aus Datei",
+      "intro": "Der Import einer Datei legt diesen Kunden — mit Standorten, Abteilungen und Ansprechpartnern — sofort an. Das Formular unten wird dabei nicht ausgefüllt; prüfen Sie die Vorschau, bevor Sie bestätigen."
     }
   },
   "subModal": {
@@ -574,7 +579,18 @@
       "decline": "Nein, nicht ersetzen"
     },
     "middleName": "Namenszusatz",
-    "gender": "Geschlecht"
+    "gender": "Geschlecht",
+    "import": {
+      "title": "{{entity}} aus Datei",
+      "intro": "Beim Importieren einer Datei werden {{entity}} direkt angelegt — das Formular unten wird dabei nicht ausgefüllt. Prüfen Sie zuerst die Vorschau, bevor Sie bestätigen.",
+      "parentWarning": "Der Kundenname in der Datei bestimmt, welcher Kunde die Zeilen erhält — das muss nicht „{{customerName}}\" sein. Prüfen Sie die Vorschau.",
+      "mismatchWarning": "{{count}} Zeile(n) in dieser Datei gehören zu einem anderen Kunden als diesem ({{names}}) — diese Zeilen landen dort, nicht hier.",
+      "mismatchConfirm": "{{count}} Zeile(n) dieser Datei werden bei einem anderen Kunden ({{names}}) angelegt oder aktualisiert, nicht bei dem Kunden, den Sie gerade geöffnet haben. Trotzdem fortfahren?",
+      "mismatchTitle": "Anderer Kunde in Datei",
+      "mismatchProceed": "Trotzdem importieren"
+    },
+    "contactPersonHint": "Wählen Sie einen bestehenden Kontakt dieses Kunden oder geben Sie einen neuen Namen ein.",
+    "contactCouplingFailed": "Standort „{{name}}\" wurde angelegt, aber die Verknüpfung mit der Kontaktperson ist fehlgeschlagen. Verknüpfen Sie sie später manuell über den Standort."
   },
   "changelog": {
     "empty": "Noch keine Änderungen."

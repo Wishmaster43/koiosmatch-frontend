@@ -14,7 +14,9 @@ import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import ViewSwitch from '@/components/ui/ViewSwitch'
 import { useUsers } from '@/lib/queries'
 import { useCustomerLookups } from '@/lib/useCustomerLookups'
+import { useCustomerPhases } from '@/lib/useCustomerPhases'
 import { useBranchOptions } from '@/lib/useBranchOptions'
+import { pickCustomerStatusSegment, buildCustomerStatusOptions, NO_STATUS_KEY } from './data/customerInsights'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
@@ -63,6 +65,12 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const hasPermission = auth?.hasPermission ?? (() => false)
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { statuses, statusMeta, locationStatuses, departmentStatuses, contactStatuses } = useCustomerLookups()
+  // Danny 02-08: "Prospect heeft geen status" — the entry (default) phase, resolved
+  // via the is_default FLAG (never an array position). Feeds the status donut's
+  // '__none' bucket below (mirrors the candidate Lead-segment, PHASE-FILTER-1).
+  const { phases: customerPhases } = useCustomerPhases()
+  const entryPhase = customerPhases.find(p => p.isDefault)
+  const entryPhaseValue = entryPhase?.value
   // VESTIGING-2: the branch values this user may filter on — see useBranchOptions for
   // why an empty scope means unrestricted rather than none.
   const branchOptions = useBranchOptions()
@@ -89,6 +97,10 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   // ── Filter dimensions (server-side) ──
   const [globalSearch,     setGlobalSearch]     = usePageMemory('cust.search', '')
   const [selectedStatus,   setSelectedStatus]   = usePageMemory<string[]>('cust.status', [])
+  // Danny 02-08: the status donut's '__none' (no-status/entry-phase) segment
+  // filters THIS axis, never `selectedStatus` (mirrors the candidate Lead-segment
+  // click, PHASE-FILTER-1 — same forward-looking param, no confirmed BE filter yet).
+  const [selectedPhase,    setSelectedPhase]    = usePageMemory<string[]>('cust.phase', [])
   const [selectedOwner,    setSelectedOwner]    = usePageMemory<string[]>('cust.owner', [])
   const [selectedCity,     setSelectedCity]     = usePageMemory<string[]>('cust.city', [])
   const [selectedIndustry, setSelectedIndustry] = usePageMemory<string[]>('cust.industry', [])
@@ -106,6 +118,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
       else p.search = q
     }
     if (selectedStatus.length)   p.status   = selectedStatus
+    if (selectedPhase.length)    p.phase    = selectedPhase
     if (selectedOwner.length)    p.owner_id = selectedOwner
     if (selectedCity.length)     p.city     = selectedCity
     if (selectedIndustry.length) p.industry = selectedIndustry
@@ -118,7 +131,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
     if (view === 'map') { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
     else if (geoFilter) { p.lat = geoFilter.lat; p.lng = geoFilter.lng; p.radius = geoFilter.km }
     return p
-  }, [globalSearch, selectedStatus, selectedOwner, selectedCity, selectedIndustry, selectedBranch, showArchived, view, mapCenter, mapRadius, geoFilter])
+  }, [globalSearch, selectedStatus, selectedPhase, selectedOwner, selectedCity, selectedIndustry, selectedBranch, showArchived, view, mapCenter, mapRadius, geoFilter])
   const filterKey = JSON.stringify(filterParams)
 
   useEffect(() => { setPage(1) }, [filterKey])
@@ -129,7 +142,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   useEffect(() => () => { if (msgTimer.current) clearTimeout(msgTimer.current) }, [])
 
   // ── Data layer (§3): list/stats · record/drawer · bulk actions ──
-  const { customers, setCustomers, loading, error, total, setTotal, lastPage, stats } =
+  const { customers, setCustomers, loading, error, total, setTotal, lastPage, stats, refresh } =
     useCustomersData({ filterParams, page, pageSize, t })
   const {
     selected, detail, drawerExpanded, setDrawerExpanded, drawerTab,
@@ -156,14 +169,16 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
     values.forEach(v => { counts[v] = (counts[v] ?? 0) + 1 })
     return Object.keys(counts).map(v => ({ value: v, label: v, count: counts[v] }))
   }
-  // Use the stable `statuses` array for label/colour lookup (NOT statusMeta —
-  // that's a fresh function each render and would loop the filter registration).
-  const statusOf = (v: string) => statuses.find(s => s.value === v)
-  const statusOptions = useMemo<Opt[]>(() =>
-    stats?.by_status
-      ? stats.by_status.map(o => { const v = (o.value ?? o.status ?? '') as Id; return { value: v, label: statuses.find(s => s.value === v)?.label ?? String(v), count: o.count ?? 0 } })
-      : statuses.map(s => ({ value: s.value, label: s.label, count: customers.filter(c => c.status === s.value).length })).filter(o => o.count > 0)
-  , [stats, customers, statuses])
+  // Danny 02-08: the status donut must stop counting Prospect as a status — the
+  // '__none' bucket (buildCustomerStatusOptions, mirrors the candidate Lead
+  // bucket) keys on the PHASE, never the (retiring) customer_statuses 'prospect'
+  // value, so nothing here needs to change once the backend finishes removing it.
+  const statusOptions = useMemo(() =>
+    buildCustomerStatusOptions({
+      statsByStatus: stats?.by_status, customers, statuses, entryPhase, entryPhaseValue,
+      noStatusFallbackLabel: t('insights.noStatus'),
+    })
+  , [stats, customers, statuses, entryPhase, entryPhaseValue, t])
   const ownerOptions = useMemo<Opt[]>(() => {
     if (stats?.by_owner) return stats.by_owner.map(o => ({ value: (o.id ?? o.owner_id ?? '') as Id, label: o.name || '—', count: o.count ?? 0 })).filter(o => o.value !== '')
     const m: Record<string, Opt> = {}
@@ -189,7 +204,10 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const catOrg     = t('filters.categories.organisation')
 
   const filterGroups = useMemo(() => [
-    { key: 'status',   type: 'search-select', category: catGeneral, label: t('filters.status'),         selected: selectedStatus,   options: statusOptions,   onToggle: tog(setSelectedStatus) },
+    // The '__none' (no-status/entry-phase) bucket is donut-only (its click routes
+    // to the PHASE axis, not a plain toggle) — never offered in this sidebar list,
+    // which would otherwise reintroduce "Prospect" as a selectable status.
+    { key: 'status',   type: 'search-select', category: catGeneral, label: t('filters.status'),         selected: selectedStatus,   options: statusOptions.filter(o => o.value !== NO_STATUS_KEY), onToggle: tog(setSelectedStatus) },
     { key: 'industry', type: 'search-select', category: catGeneral, label: t('filters.industry'),       selected: selectedIndustry, options: industryOptions, onToggle: tog(setSelectedIndustry) },
     { key: 'city',     type: 'search-select', category: catGeneral, label: t('filters.city'),           selected: selectedCity,     options: cityOptions,     onToggle: tog(setSelectedCity) },
     { key: 'geo', type: 'geo-radius', category: catGeneral, label: t('common:filters.radius'),
@@ -207,7 +225,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // ── Insights: 2 donuts (status, account manager) + KPI cards ──
-  const statusData = useMemo(() => statusOptions.map(o => ({ name: o.label, value: o.count, key: String(o.value), color: statusOf(String(o.value))?.color })), [statusOptions, statuses]) // eslint-disable-line react-hooks/exhaustive-deps
+  const statusData = useMemo(() => statusOptions.map(o => ({ name: o.label, value: o.count, key: o.value, color: o.color })), [statusOptions])
   const ownerData  = useMemo(() => ownerOptions.map(o => ({ name: o.label, value: o.count, key: String(o.value) })), [ownerOptions])
 
 
@@ -217,11 +235,11 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const toggleKpi = (k: string) => setKpiFilter(p => (p === k ? null : k))
   // Shared clear-all (page memory keeps filters sticky).
   const anyFilterActive = Boolean(globalSearch.trim() || showArchived || kpiFilter || geoFilter
-    || selectedStatus.length || selectedOwner.length || selectedCity.length || selectedIndustry.length || selectedBranch.length)
+    || selectedStatus.length || selectedPhase.length || selectedOwner.length || selectedCity.length || selectedIndustry.length || selectedBranch.length)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setKpiFilter(null)
-    setSelectedStatus([]); setSelectedOwner([]); setSelectedCity([]); setSelectedIndustry([]); setSelectedBranch([])
+    setSelectedStatus([]); setSelectedPhase([]); setSelectedOwner([]); setSelectedCity([]); setSelectedIndustry([]); setSelectedBranch([])
     setGeoFilter(null); setGeoHint(null); setPage(1)
   }
 
@@ -239,8 +257,17 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const noContactCount   = stats?.without_contact ?? customers.filter(c => c.contactsCount === 0).length
 
   const insightDonuts: DonutSpec[] = [
-    { key: 'status', title: t('insights.statusTitle'), data: statusData, onPick: d => pickOne(setSelectedStatus)(pickKey(d)),
-      active: selectedStatus.length > 0, onClear: () => setSelectedStatus([]) },
+    // Danny 02-08: the '__none' segment is the entry-phase (Prospect) bucket — its
+    // click filters the PHASE axis, never the status axis (mirrors the candidate
+    // Lead-segment click, PHASE-FILTER-1).
+    { key: 'status', title: t('insights.statusTitle'), data: statusData,
+      onPick: d => {
+        const { axis, value } = pickCustomerStatusSegment(pickKey(d), entryPhaseValue)
+        if (axis === 'phase') pickOne(setSelectedPhase)(value)
+        else pickOne(setSelectedStatus)(value)
+      },
+      active: selectedStatus.length > 0 || selectedPhase.length > 0,
+      onClear: () => { setSelectedStatus([]); setSelectedPhase([]) } },
     { key: 'am', title: t('insights.amTitle'), data: ownerData, onPick: d => pickOne(setSelectedOwner)(pickKey(d)),
       active: selectedOwner.length > 0, onClear: () => setSelectedOwner([]) },
   ]
@@ -258,8 +285,11 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   return (
     <>
       {/* The modal now awaits handleCreate itself and only closes on success (C-18) —
-          it used to close immediately here, hiding a failed create entirely. */}
-      {addOpen && <AddCustomerModal onClose={() => setAddOpen(false)} onCreate={handleCreate} users={users} statuses={statuses} />}
+          it used to close immediately here, hiding a failed create entirely.
+          CUSTOMER-IMPORT-1: onImported refetches the list/stats after the modal's own
+          file-import card writes records directly — there is no single optimistic row
+          to prepend the way handleCreate does, so a real refetch is the honest option. */}
+      {addOpen && <AddCustomerModal onClose={() => setAddOpen(false)} onCreate={handleCreate} onImported={refresh} users={users} statuses={statuses} />}
       <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 

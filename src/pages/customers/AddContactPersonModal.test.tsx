@@ -17,13 +17,20 @@
  * (3) a client-side duplicate check on email/phone/mobile (scoped to the
  * customer's OTHER contacts via the new `existing` prop) blocks submit before
  * the server's 422 would.
+ *
+ * Danny 02-08 addition covered here: a CSV import card (mirrors AddLocationModal's
+ * own — same shared wizard/card, same parent-mismatch safety net, entity="contacts").
  */
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import AddContactPersonModal from './AddContactPersonModal'
 import type { Contact, Department } from '@/types/customer'
+// SUBENTITY-IMPORT-1: only the NETWORK calls are mocked — the real wizard/steps run,
+// so these tests prove the actual wiring (dry-run-before-real-run, xlsx rejection,
+// close-on-success, parent-mismatch), not a stub of it (mirrors AddLocationModal.test.tsx).
+import { dryRunImport, runImport, type ImportRunResult } from '@/pages/settings/sections/importeren/importApi'
 
 // Both hooks fired by useContactFunctions (contact-functions + tenant settings)
 // hit the module-scope cached-lookup path — a harmless empty response keeps
@@ -32,12 +39,32 @@ vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
   return { ...actual, default: { get: vi.fn().mockResolvedValue({ data: { data: [] } }), post: vi.fn(), patch: vi.fn(), delete: vi.fn() } }
 })
+vi.mock('@/pages/settings/sections/importeren/importApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/pages/settings/sections/importeren/importApi')>()
+  return { ...actual, dryRunImport: vi.fn(), runImport: vi.fn(), downloadImportTemplate: vi.fn() }
+})
+// hasPermission defaults to "allow everything" so the pre-existing tests above (none of
+// which touch the import card) keep behaving as before; the import describe block below
+// overrides it per test to exercise the gate itself.
+const { authState } = vi.hoisted(() => ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the default mock allows every permission; the param exists only to match hasPermission's real signature
+  authState: { hasPermission: ((_perm: string) => true) as (perm: string) => boolean },
+}))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: authState.hasPermission }) }))
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
+// The reused import-wizard steps (PreviewStep/ResultStep) are in the 'settings' bundle.
+const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
 const locations = [{ id: 'loc-1', name: 'Locatie Noord' }, { id: 'loc-2', name: 'Locatie Zuid' }]
 const statuses = [{ value: 'st-1', label: 'Actief' }]
+
+beforeEach(() => {
+  authState.hasPermission = () => true
+  vi.mocked(dryRunImport).mockReset()
+  vi.mocked(runImport).mockReset()
+})
 
 // Minimal-but-type-complete Department fixture — only the cascade-relevant fields
 // (id/name/locationId) vary per test; everything else is a harmless default.
@@ -390,5 +417,95 @@ describe('AddContactPersonModal · geslacht', () => {
       initial={contact({ gender: 'male' })} />)
     // The trigger shows the resolved LABEL for the stored slug.
     expect(screen.getByRole('button', { name: ct('subModal.gender') })).toHaveTextContent('Man')
+  })
+})
+
+describe('AddContactPersonModal · import card (Danny 02-08: "+ nieuwe contactpersoon ... moeten ook een CSV-upload hebben")', () => {
+  const csvFile = new File(['klant_naam,voornaam,achternaam\nZorggroep Middenland,Marieke,de Vries'], 'contacten.csv', { type: 'text/csv' })
+  const xlsxFile = new File(['binary'], 'contacten.xlsx', {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  })
+  const cleanResult: ImportRunResult = {
+    entity: 'contacts', dry_run: true,
+    summary: { rows: 1, create: 1, update: 0, skip: 0, error: 0 },
+    unknown_columns: [],
+    rows: [{ row: 1, action: 'create', reference: 'Zorggroep Middenland / Marieke de Vries', id: null, messages: [] }],
+  }
+  // Same shape, but the row resolved to a DIFFERENT real customer than the one open here.
+  const mismatchResult: ImportRunResult = {
+    ...cleanResult,
+    rows: [{ row: 1, action: 'create', reference: 'Thuiszorg De Brug / Marieke de Vries', id: null, messages: [] }],
+  }
+
+  it('refuses an .xlsx file client-side with the save-as-CSV instruction, and never calls the dry run', () => {
+    render(<AddContactPersonModal onClose={() => {}} locations={locations} statuses={statuses} customerName="Zorggroep Middenland" />)
+
+    const dropZone = screen.getByText(st('import.dropHere')).parentElement as HTMLElement
+    fireEvent.drop(dropZone, { dataTransfer: { files: [xlsxFile] } })
+
+    expect(screen.getByText(st('import.wrongFileType'))).toBeInTheDocument()
+    expect(dryRunImport).not.toHaveBeenCalled()
+  })
+
+  it('never reaches the real import before the mandatory dry run succeeds', async () => {
+    const user = userEvent.setup()
+    vi.mocked(dryRunImport).mockResolvedValue(cleanResult)
+    render(<AddContactPersonModal onClose={() => {}} locations={locations} statuses={statuses} customerName="Zorggroep Middenland" />)
+
+    expect(screen.queryByRole('button', { name: st('import.preview.confirm') })).not.toBeInTheDocument()
+
+    const input = screen.getByLabelText(st('import.selectCsv'))
+    await user.upload(input, csvFile)
+    await user.click(screen.getByRole('button', { name: st('import.runPreview') }))
+
+    expect(dryRunImport).toHaveBeenCalledTimes(1)
+    expect(runImport).not.toHaveBeenCalled()
+    expect(await screen.findByRole('button', { name: st('import.preview.confirm') })).toBeInTheDocument()
+  })
+
+  it('closes the modal and calls onImported once a real import lands something', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    const onImported = vi.fn()
+    vi.mocked(dryRunImport).mockResolvedValue(cleanResult)
+    vi.mocked(runImport).mockResolvedValue({ ...cleanResult, dry_run: false, rows: [{ ...cleanResult.rows[0], id: 'c-1' }] })
+
+    render(<AddContactPersonModal onClose={onClose} onImported={onImported} locations={locations} statuses={statuses} customerName="Zorggroep Middenland" />)
+
+    const input = screen.getByLabelText(st('import.selectCsv'))
+    await user.upload(input, csvFile)
+    await user.click(screen.getByRole('button', { name: st('import.runPreview') }))
+    await user.click(await screen.findByRole('button', { name: st('import.preview.confirm') }))
+
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+    expect(onImported).toHaveBeenCalledTimes(1)
+    expect(runImport).toHaveBeenCalledTimes(1)
+  })
+
+  it('gates the picker on customers.create: disabled, with the honest notice, not a button that would 403', () => {
+    authState.hasPermission = (perm: string) => perm !== 'customers.create'
+    render(<AddContactPersonModal onClose={() => {}} locations={locations} statuses={statuses} customerName="Zorggroep Middenland" />)
+
+    expect(screen.getByLabelText(st('import.selectCsv'))).toBeDisabled()
+    expect(screen.getByText(st('import.noImportPermission'))).toBeInTheDocument()
+  })
+
+  it('warns before the real import when a dry-run row resolves to a customer other than the one open here', async () => {
+    const user = userEvent.setup()
+    vi.mocked(dryRunImport).mockResolvedValue(mismatchResult)
+    vi.mocked(runImport).mockResolvedValue({ ...mismatchResult, dry_run: false })
+    render(<AddContactPersonModal onClose={() => {}} locations={locations} statuses={statuses} customerName="Zorggroep Middenland" />)
+
+    const input = screen.getByLabelText(st('import.selectCsv'))
+    await user.upload(input, csvFile)
+    await user.click(screen.getByRole('button', { name: st('import.runPreview') }))
+    await screen.findByRole('button', { name: st('import.preview.confirm') })
+
+    await user.click(screen.getByRole('button', { name: st('import.preview.confirm') }))
+    expect(runImport).not.toHaveBeenCalled()
+    expect(screen.getByText(ct('subModal.import.mismatchConfirm', { count: 1, names: 'Thuiszorg De Brug' }))).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: ct('subModal.import.mismatchProceed') }))
+    await waitFor(() => expect(runImport).toHaveBeenCalledTimes(1))
   })
 })

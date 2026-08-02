@@ -119,6 +119,9 @@ export interface Location {
   lng: number | null
   costCenter: string
   billingEmail: string
+  // LOCATIE-OMSCHRIJVING-1 (Danny 02-08): free company text about this site, same
+  // shape as the department's own `description`.
+  description: string
   address: string
   departments: Department[]
   contacts: Contact[]
@@ -275,6 +278,8 @@ export interface ApiLocation {
   postcode?: string; postal_code?: string; city?: string; state?: string; country?: string; coc_number?: string; vat_number?: string
   contact_name?: string; phone?: string; email?: string
   cost_center?: string; billing_email?: string
+  // LOCATIE-OMSCHRIJVING-1 (Danny 02-08): free company text, same shape as customers.description.
+  description?: string
   branch_ids?: Id[]; branches?: { id?: Id; name?: string }[]
   branch_inherited?: boolean; effective_branches?: { id?: Id; name?: string }[]
   departments?: ApiDepartment[]; contacts?: ApiContact[]

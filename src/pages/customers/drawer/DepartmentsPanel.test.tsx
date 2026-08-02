@@ -187,6 +187,51 @@ describe('DepartmentsPanel · colour on/off flags per column (CHIPKLEUR-INSTELBA
   })
 })
 
+// TENANT-DEFAULT-1 (Danny 02-08): the tenant-configured default status filter
+// replaces the frontend's own "active only" guess for this tab.
+describe('DepartmentsPanel · tenant-configured default status filter (TENANT-DEFAULT-1)', () => {
+  beforeEach(() => invalidateAllSettingsCache())
+
+  const statuses = [
+    { id: 'status-active', value: 'active', label: 'Actief' },
+    { id: 'status-inactive', value: 'inactive', label: 'Inactief' },
+  ]
+  const twoDepartments = [
+    department({ id: 'd-active', name: 'Actieve afdeling', statusId: 'status-active', statusLabel: 'Actief' }),
+    department({ id: 'd-inactive', name: 'Inactieve afdeling', statusId: 'status-inactive', statusLabel: 'Inactief' }),
+  ]
+
+  it('still guesses "active only" when no default is configured (today\'s behaviour)', async () => {
+    render(<DepartmentsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" departments={twoDepartments} statuses={statuses} />)
+    await waitFor(() => expect(screen.getByText('Actieve afdeling')).toBeInTheDocument())
+    expect(screen.queryByText('Inactieve afdeling')).toBeNull()
+  })
+
+  it('applies the configured default status when the tab opens', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/settings'
+        ? Promise.resolve({ data: { customer_department_default_status_filter: 'status-inactive' } })
+        : Promise.resolve({ data: { data: [] } }))
+
+    render(<DepartmentsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" departments={twoDepartments} statuses={statuses} />)
+    await waitFor(() => expect(screen.getByText('Inactieve afdeling')).toBeInTheDocument())
+    expect(screen.queryByText('Actieve afdeling')).toBeNull()
+  })
+
+  it('an explicit "all" default shows every row, ignoring the active-only guess', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/settings'
+        ? Promise.resolve({ data: { customer_department_default_status_filter: 'all' } })
+        : Promise.resolve({ data: { data: [] } }))
+
+    render(<DepartmentsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" departments={twoDepartments} statuses={statuses} />)
+    await waitFor(() => {
+      expect(screen.getByText('Actieve afdeling')).toBeInTheDocument()
+      expect(screen.getByText('Inactieve afdeling')).toBeInTheDocument()
+    })
+  })
+})
+
 describe('DepartmentsPanel · add trigger pre-selects the location it was opened from', () => {
   it('hides the location picker in the add modal when opened from a location', async () => {
     const user = userEvent.setup()

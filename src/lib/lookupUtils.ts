@@ -35,6 +35,11 @@ export function normalizeOptions(raw: unknown, fallback: LookupOption[] | null =
       // opportunity pipeline's won/lost stages); absent on lookups without them.
       ...(it.is_won != null ? { isWon: Boolean(it.is_won) } : {}),
       ...(it.is_lost != null ? { isLost: Boolean(it.is_lost) } : {}),
+      // DEBITEURNUMMER-1 (Danny 02-08): pass `is_default` through too (e.g. customer
+      // statuses) — LookupItemResource emits it on every lookup type, but this shared
+      // mapper used to drop it, so a consumer's "default" fallback silently degraded to
+      // "whatever sorts first" instead of the tenant's actually-flagged default.
+      ...(it.is_default != null ? { isDefault: Boolean(it.is_default) } : {}),
     }))
 }
 

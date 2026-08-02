@@ -15,18 +15,25 @@
  * "Nederland") with no lookup behind it — turning it into an ISO-2 picker would
  * silently change what gets submitted, out of scope for a layout-only pass.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '@/context/AuthContext'
 import { X, MapPin } from 'lucide-react'
 import { Field, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import RichTextEditor from '@/components/ui/RichTextEditor'
+import { useProvinces } from '@/hooks/useProvinces'
+import { notifyError } from '@/lib/notify'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox, row2, row3Even, row } from '@/components/ui/modalCards'
+import SubEntityImportCard from './SubEntityImportCard'
+import { useImportWizard } from '@/pages/settings/sections/importeren/useImportWizard'
+import { setLocationPrimaryContact } from './hooks/useCustomerContacts'
 import type { LocationPayload } from './hooks/useCustomerLocations'
-import type { Location } from '@/types/customer'
-import type { LookupOption } from '@/types/common'
+import type { Location, Contact } from '@/types/customer'
+import type { LookupOption, Id } from '@/types/common'
 
 // Weighted rows for the address block (mirrors the candidate AddressCard's own
 // street/postcode ratios — the same real-world field, same proportions) — a
@@ -43,19 +50,46 @@ const API_TO_FORM: Record<string, string> = {
   coc_number: 'cocNumber', vat_number: 'vatNumber', contact_name: 'contactName',
   phone: 'phone', email: 'email',
   cost_center: 'costCenter', status_id: 'statusId',
+  // LOCATIE-OMSCHRIJVING-1 (Danny 02-08): mirrors the department's own description field.
+  description: 'description',
 }
 
-export default function AddLocationModal({ onClose, onCreate, customerName, statuses = [], initial }: {
+export default function AddLocationModal({
+  onClose, onCreate, onImported, customerId, customerName, statuses = [], initial, existingContacts = [],
+}: {
   onClose: () => void
-  onCreate?: (v: LocationPayload) => void
+  onCreate?: (v: LocationPayload) => Promise<Location | void> | void
+  /** Called once a real CSV import lands at least one record — the parent refreshes its list. */
+  onImported?: () => void
+  // CONTACT-PRIMAIR-LOCATIE-1: needed to call the primary-contact coupling route
+  // AFTER the location exists (see submit() below) — the pivot hangs on a real location id.
+  customerId?: Id
   customerName?: string
   statuses?: LookupOption[]
   // Editing an existing location pre-fills the form and flips the copy/action to "save".
   initial?: Location | null
+  /** This customer's already-loaded contacts — feeds the "contact ter plaatse" picker. */
+  existingContacts?: Contact[]
 }) {
   const { t } = useTranslation(['customers', 'common'])
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
+  const authCtx = useAuth() as unknown as { hasPermission?: (permName: string) => boolean } | null
+  // SUBENTITY-IMPORT-1: falls back to "no permission" rather than crashing when the
+  // context is mid-boot OR genuinely absent (this modal is also mounted from screens
+  // with no AuthProvider ancestor in tests) — mirrors AddCustomerModal's own fallback.
+  const hasPermission = authCtx?.hasPermission ?? (() => false)
+  const canViewImportTemplate = hasPermission('customers.view')
+  const canRunImport = hasPermission('customers.create')
+  // The wizard state lives HERE (container), not in the card — mirrors AddCustomerModal.
+  const importWizard = useImportWizard('locations')
   const isEdit = Boolean(initial)
+  // CONTACT-PRIMAIR-LOCATIE-1: which existing contact (if any) was picked as "contact
+  // ter plaatse" — distinct from the free-text name, since only a REAL id can be
+  // coupled after the location is created (see submit()). Null = either nothing
+  // picked yet, or the user typed a brand-new name that matches no existing contact.
+  // CREATE ONLY (see the picker render below): editing already has the real thing —
+  // LocationDetail's own primary-contact SectionCard — so this state stays unused there.
+  const [pickedContactId, setPickedContactId] = useState<Id | null>(null)
   const [form, setForm] = useState<LocationPayload>({
     // LOCATIE-VESTIGING-1: a site starts with NO deviation, so it inherits the customer's
     // branches. Editing keeps whatever deviation it already had — the Vestiging block in
@@ -80,6 +114,9 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
     // an edit-save round trip never clears whatever the record already had stored.
     billingEmail: initial?.billingEmail ?? '',
     statusId: initial?.statusId ?? (statuses[0]?.id as string | undefined) ?? null,
+    // LOCATIE-OMSCHRIJVING-1 (Danny 02-08): free company text about this site,
+    // same shape/limit as the department's own (max 5000, CustomerLocationController::rules).
+    description: initial?.description ?? '',
     customFields: initial?.customFields ?? {},
   })
   const [errors, setErrors] = useState<Record<string, boolean>>({})
@@ -91,16 +128,53 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
     setCreateError(null)
   }
 
+  // PROVINCIE-1: province list cascades on the picked country (shared hook, same
+  // cascade-clear behaviour as AddCustomerModal's own AddressCard) — a province from
+  // the PREVIOUS country must never survive a country switch.
+  const { provinces } = useProvinces(form.country)
+  useEffect(() => {
+    if (form.state && !provinces.includes(form.state)) setForm(f => ({ ...f, state: '' }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved province list changing, not every form edit
+  }, [provinces])
+
+  // SUBENTITY-IMPORT-1: a real run that landed at least one row means the location(s)
+  // already exist — close this modal (and let the parent refresh its list) so the
+  // untouched manual form below can never also fire a second, duplicate create.
+  useEffect(() => {
+    if (importWizard.run.status !== 'success') return
+    const { summary } = importWizard.run.result
+    if (summary.create + summary.update === 0) return
+    onImported?.()
+    onClose()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the run RESULT changing, not onClose/onImported identity
+  }, [importWizard.run])
+
   const submit = async () => {
     if (!form.name.trim()) { setErrors({ name: true }); return }
     const payload = { ...form, name: form.name.trim() }
     // Edit path: update() keeps its existing toast-based error handling — unchanged,
-    // closes immediately.
+    // closes immediately. The contact picker above only renders on CREATE (see the
+    // render below), so there is no coupling to attempt here.
     if (isEdit) { onCreate?.(payload); onClose(); return }
     // Create path: add() rethrows on failure (C-18) so 422 field errors land under
     // their fields here instead of a generic toast while the modal closed regardless.
     try {
-      await onCreate?.(payload)
+      const created = await onCreate?.(payload)
+      // CONTACT-PRIMAIR-LOCATIE-1: the pivot needs a REAL location id, which only
+      // exists once the create above has actually landed — so the coupling is a
+      // deliberate SECOND call, never bundled into the location POST (the backend
+      // has no field for it, see this file's report). A location that was created
+      // successfully must close the modal either way; a coupling failure is
+      // reported honestly (toast) instead of silently pretending it worked or
+      // rolling back a location that may already hold other data.
+      if (pickedContactId && customerId && created?.id) {
+        try {
+          const applied = await setLocationPrimaryContact(customerId, pickedContactId, created.id)
+          if (!applied) notifyError(t('locations.detail.setPrimaryContactUnavailable'))
+        } catch {
+          notifyError(t('subModal.contactCouplingFailed', { name: created.name }))
+        }
+      }
       onClose()
     } catch (err) {
       const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
@@ -116,6 +190,10 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
   }
 
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
+  // CONTACT-PRIMAIR-LOCATIE-1: existing-contact options for the "contact ter plaatse"
+  // picker, CREATE only — typing a name that matches none of these is still allowed
+  // (allowCreate), it just cannot be coupled (no real contact id exists for it yet).
+  const contactOptions = existingContacts.map(c => ({ value: String(c.id), label: c.name }))
 
   return (
     <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
@@ -136,6 +214,14 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* SUBENTITY-IMPORT-1: the file-import path, CREATE only — same top spot as
+              CvUploadCard/CustomerImportCard. Editing a single location has no batch
+              concept, so the card never renders there. */}
+          {!isEdit && (
+            <SubEntityImportCard entity="locations" wizard={importWizard} customerName={customerName}
+              canView={canViewImportTemplate} canImport={canRunImport} />
+          )}
+
           {/* Algemeen — name + status. */}
           <div>
             <div style={cardHead}>{t('subModal.groups.general')}</div>
@@ -170,7 +256,18 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
                 <Field label={t('subModal.city')}><TextField value={form.city} onChange={v => set('city', v)} /></Field>
               </div>
               <div style={row2}>
-                <Field label={t('subModal.state')}><TextField value={form.state} onChange={v => set('state', v)} /></Field>
+                {/* PROVINCIE-1 (Danny 02-08: "provincie heeft geen zoekbare dropdown???"):
+                    a searchable picker fed by the same shared useProvinces hook the
+                    customer's own AddressCard uses — was a bare TextField, the one
+                    inconsistency in this modal against every other relational field
+                    here. Sends `state` (unchanged wire key): CustomerLocationController
+                    aliases `state` onto `province` server-side whenever `province`
+                    itself is absent (normaliseLegacyKeys) — verified in the controller
+                    source, so this is not a silently-dropped key, just the legacy name. */}
+                <Field label={t('subModal.state')}>
+                  <CreatableSelect value={form.state || null} onChange={v => set('state', v)} allowCreate={false}
+                    placeholder={t('common:select')} options={provinces} menuWidth={260} />
+                </Field>
                 {/* `country` stays free text on purpose — see file header comment. */}
                 <Field label={t('subModal.country')}><TextField value={form.country} onChange={v => set('country', v)} /></Field>
               </div>
@@ -195,11 +292,50 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
           <div>
             <div style={cardHead}>{t('subModal.groups.contact')}</div>
             <div style={cardBox}>
-              <Field label={t('subModal.contactName')}><TextField value={form.contactName} onChange={v => set('contactName', v)} /></Field>
+              {/* CONTACT-PRIMAIR-LOCATIE-1 (Danny: "je typt Joost de Boer in en Joost
+                  weet er niets van"): CREATE offers a real choice — pick one of this
+                  customer's existing contacts (a real coupling, made primary-for-this-
+                  site once the location exists, see submit()) or type a brand-new name
+                  (kept exactly as before: a free-text label only, no contact record).
+                  EDIT keeps the plain text field — the real per-site primary contact is
+                  already properly editable from LocationDetail's own SectionCard, so
+                  duplicating that mechanism here would be a second, conflicting UI for
+                  the same fact. `email`/`phone` are untouched free-text columns in both
+                  modes (see this file's report for why they stay). */}
+              {isEdit ? (
+                <Field label={t('subModal.contactName')}><TextField value={form.contactName} onChange={v => set('contactName', v)} /></Field>
+              ) : (
+                <div>
+                  <Field label={t('subModal.contactName')}>
+                    {/* Controlled on the ID when a real contact is picked (so the trigger's
+                        OWN label lookup resolves the name, and reopening the list still
+                        shows the checkmark on it) — falls back to the raw typed text once
+                        pickedContactId is null (a brand-new name, no option to match). */}
+                    <CreatableSelect value={pickedContactId ? String(pickedContactId) : (form.contactName || null)}
+                      onChange={v => {
+                        const existingMatch = existingContacts.find(c => String(c.id) === v)
+                        setPickedContactId(existingMatch ? (existingMatch.id as Id) : null)
+                        set('contactName', existingMatch ? existingMatch.name : v)
+                      }}
+                      placeholder={t('subModal.contactName')} options={contactOptions} menuWidth={280} />
+                  </Field>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{t('subModal.contactPersonHint')}</div>
+                </div>
+              )}
               <div style={row2}>
                 <Field label={t('subModal.email')}><TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder="naam@klant.nl" /></Field>
                 <Field label={t('subModal.phone')}><TextField value={form.phone} onChange={v => set('phone', v)} /></Field>
               </div>
+            </div>
+          </div>
+
+          {/* Omschrijving — its own card, same convention as AddDepartmentModal's
+              (Danny 02-08: "bij locatie en afdeling moeten we ook een beschrijving
+              hebben"). Rich-text prose (CLAUDE.md §3A house rule), not a textarea. */}
+          <div>
+            <div style={cardHead}>{t('subModal.description')}</div>
+            <div style={cardBox}>
+              <RichTextEditor value={form.description} onChange={v => set('description', v)} />
             </div>
           </div>
         </div>

@@ -46,6 +46,14 @@ vi.mock('@/context/AuthContext', () => ({
   useAuth: () => ({ hasPermission: () => true, hasModule: () => false }),
 }))
 vi.mock('@/lib/notify', () => ({ notifySuccess: vi.fn(), notifyError: vi.fn() }))
+// Tiptap needs a real browser to mount — stubbed with a plain controlled textarea,
+// mirrors EditableRichTextField.test.tsx's own convention (its pencil/save/cancel
+// dance is unit-tested there; this file only needs to prove LocationDetail's wiring).
+vi.mock('@/components/ui/RichTextEditor', () => ({
+  default: ({ value, onChange }: { value?: string; onChange: (v: string) => void }) => (
+    <textarea data-testid="rte" value={value ?? ''} onChange={e => onChange(e.target.value)} />
+  ),
+}))
 
 beforeEach(() => { vi.clearAllMocks(); mockPost.mockResolvedValue({ status: 202, data: {} }) })
 
@@ -65,7 +73,7 @@ const location = (overrides: Partial<Location> = {}): Location => ({
   id: 'loc-1', helloflexLink: null, shiftmanagerLink: null, name: 'Hoofdlocatie',
   street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', city: '', state: '', country: '',
   cocNumber: '', vatNumber: '', contactName: '', phone: '', email: '', isHeadquarter: false,
-  costCenter: '', billingEmail: '', address: '', departments: [], contacts: [],
+  costCenter: '', billingEmail: '', address: '', description: '', departments: [], contacts: [],
   // LOCATIE-VESTIGING-1 — no own couplings, so this site inherits the customer's.
   branchIds: [], branches: [], branchInherited: true, effectiveBranches: [],
   lat: null, lng: null,
@@ -275,5 +283,41 @@ describe('LocationDetail · primary contact of THIS site', () => {
     await user.click(screen.getByRole('button', { name: cm('save') }))
 
     expect(onSave).toHaveBeenCalledWith('loc-1', expect.objectContaining({ contactName: 'Marieke Jansen' }))
+  })
+})
+
+/**
+ * LOCATIE-OMSCHRIJVING-1 (Danny 02-08: "bij locatie en afdeling moeten we ook een
+ * beschrijving hebben") — the location never had a description surface at all
+ * (unlike the department, which already had EditableRichTextField). Placed FIRST
+ * on the Adres & gegevens sub-tab (identity-field-adjacent, not buried) — see the
+ * component's own comment for why it sits ahead of the field tables rather than after.
+ */
+describe('LocationDetail · description (LOCATIE-OMSCHRIJVING-1)', () => {
+  it('renders the stored description as sanitised HTML', () => {
+    render(<LocationDetail location={location({ description: '<p>Grootste vestiging</p>' })} onSave={vi.fn()} {...baseProps} />)
+    expect(screen.getByText('Grootste vestiging')).toBeInTheDocument()
+  })
+
+  it('shows the italic empty state when there is none yet', () => {
+    render(<LocationDetail location={location({ description: '' })} onSave={vi.fn()} {...baseProps} />)
+    expect(screen.getByText(ct('richText.empty'))).toBeInTheDocument()
+  })
+
+  it('pencil → edit → save PATCHes description only, through this location\'s own id', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<LocationDetail location={location({ description: '<p>Oud</p>' })} onSave={onSave} {...baseProps} />)
+
+    // The description block's OWN pencil (Edit2, title="edit") — it comes first in
+    // DOM order, ahead of the three field-table pencils.
+    const pencils = screen.getAllByRole('button', { name: cm('edit') })
+    await user.click(pencils[0])
+    const rte = screen.getByTestId('rte')
+    await user.clear(rte)
+    await user.type(rte, '<p>Nieuw</p>')
+    await user.click(screen.getByTitle(cm('save')))
+
+    expect(onSave).toHaveBeenCalledWith('loc-1', { description: '<p>Nieuw</p>' })
   })
 })

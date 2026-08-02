@@ -263,6 +263,51 @@ describe('ContactsPanel · colour on/off flags per column (CHIPKLEUR-INSTELBAAR-
   })
 })
 
+// TENANT-DEFAULT-1 (Danny 02-08): the tenant-configured default status filter
+// replaces the frontend's own "active only" guess for this tab.
+describe('ContactsPanel · tenant-configured default status filter (TENANT-DEFAULT-1)', () => {
+  beforeEach(() => invalidateAllSettingsCache())
+
+  const statuses = [
+    { id: 'status-active', value: 'active', label: 'Actief' },
+    { id: 'status-inactive', value: 'inactive', label: 'Inactief' },
+  ]
+  const twoContacts = [
+    contact({ id: 'c-active', name: 'Actieve contactpersoon', statusId: 'status-active', statusLabel: 'Actief' }),
+    contact({ id: 'c-inactive', name: 'Inactieve contactpersoon', statusId: 'status-inactive', statusLabel: 'Inactief' }),
+  ]
+
+  it('still guesses "active only" when no default is configured (today\'s behaviour)', async () => {
+    render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={twoContacts} statuses={statuses} />)
+    await waitFor(() => expect(screen.getByText('Actieve contactpersoon')).toBeInTheDocument())
+    expect(screen.queryByText('Inactieve contactpersoon')).toBeNull()
+  })
+
+  it('applies the configured default status when the tab opens', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/settings'
+        ? Promise.resolve({ data: { customer_contact_default_status_filter: 'status-inactive' } })
+        : Promise.resolve({ data: { data: [] } }))
+
+    render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={twoContacts} statuses={statuses} />)
+    await waitFor(() => expect(screen.getByText('Inactieve contactpersoon')).toBeInTheDocument())
+    expect(screen.queryByText('Actieve contactpersoon')).toBeNull()
+  })
+
+  it('an explicit "all" default shows every row, ignoring the active-only guess', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/settings'
+        ? Promise.resolve({ data: { customer_contact_default_status_filter: 'all' } })
+        : Promise.resolve({ data: { data: [] } }))
+
+    render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="customer" contacts={twoContacts} statuses={statuses} />)
+    await waitFor(() => {
+      expect(screen.getByText('Actieve contactpersoon')).toBeInTheDocument()
+      expect(screen.getByText('Inactieve contactpersoon')).toBeInTheDocument()
+    })
+  })
+})
+
 /**
  * CONTACT-LAATSTE-CONTACT-1 — Danny asked for "laatste contact datum en type" in the
  * contacts table weeks ago. The columns always existed; CustomerContactResource simply

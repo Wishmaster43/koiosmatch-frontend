@@ -31,6 +31,9 @@ export interface LocationPayload {
   costCenter: string
   billingEmail: string
   statusId: Id | null
+  // LOCATIE-OMSCHRIJVING-1 (Danny 02-08): free company text about this site, same
+  // shape/limit as the department's own `description` (max 5000, CustomerLocationController::rules).
+  description: string
   // Tenant custom-field values (§3B "Eigen velden" — the Extra sub-tab).
   customFields: Record<string, unknown>  /** LOCATIE-VESTIGING-1 — empty array = no deviation (inherit the customer's set). */
   branchIds: Id[]
@@ -57,6 +60,7 @@ const toApi = (p: Partial<LocationPayload>) => ({
   ...(p.costCenter !== undefined ? { cost_center: p.costCenter } : {}),
   ...(p.billingEmail !== undefined ? { billing_email: p.billingEmail } : {}),
   ...(p.statusId !== undefined ? { status_id: p.statusId || null } : {}),
+  ...(p.description !== undefined ? { description: p.description } : {}),
   ...(p.customFields !== undefined ? { custom_fields: p.customFields } : {}),
   // LOCATIE-VESTIGING-1: this site's OWN branch couplings. An ABSENT key leaves the
   // deviation untouched; an EMPTY ARRAY clears it, which is how a site goes back to

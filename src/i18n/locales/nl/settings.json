@@ -1929,11 +1929,11 @@
       },
       "customer_location_chip_color": {
         "label": "Kleur locatiechip",
-        "description": "De kleur van elke Locatie-chip bij een contactpersoon. Leeg = de standaardkleur."
+        "description": "De kleur van de Locatie-chip in de tabellen Afdelingen en Contactpersonen. Leeg = de standaardkleur."
       },
       "customer_department_chip_color": {
         "label": "Kleur afdelingschip",
-        "description": "De kleur van elke Afdeling-chip bij een contactpersoon. Leeg = de standaardkleur."
+        "description": "De kleur van de Afdeling-chip in de tabel Contactpersonen. Leeg = de standaardkleur."
       },
       "customer_contact_table_color_location": {
         "label": "Locatiekleur (contactpersonen)",
@@ -1959,6 +1959,34 @@
         "label": "Statuskleur (afdelingen)",
         "description": "Aan = de statuschip in de afdelingentabel krijgt kleur. Uit = platte tekst."
       }
+    },
+    "tabs": {
+      "customerTable": {
+        "title": "Klantenlijst",
+        "subtitle": "Bepaalt het uiterlijk van de klantentabel op de hoofdpagina Klanten."
+      },
+      "locations": {
+        "title": "Locaties",
+        "subtitle": "Bepaalt het uiterlijk en de standaardfilter van het tabblad Locaties wanneer je een klant opent."
+      },
+      "departments": {
+        "title": "Afdelingen",
+        "subtitle": "Bepaalt het uiterlijk en de standaardfilter van het tabblad Afdelingen wanneer je een klant opent."
+      },
+      "contacts": {
+        "title": "Contactpersonen",
+        "subtitle": "Bepaalt het uiterlijk en de standaardfilter van het tabblad Contactpersonen wanneer je een klant opent."
+      },
+      "vacancies": {
+        "title": "Vacatures",
+        "subtitle": "Bepaalt de standaardfilter van het tabblad Vacatures wanneer je een klant opent."
+      }
+    },
+    "defaultFilter": {
+      "title": "Standaard statusfilter",
+      "allOption": "Alle statussen",
+      "chosenHint": "Deze status is direct geselecteerd zodra dit tabblad opent.",
+      "autoHint": "Nog niet gekozen — dit is nu automatisch de status die op 'actief' lijkt (of Alle, als die niet bestaat)."
     }
   },
   "customerVacancyDefaults": {

@@ -65,3 +65,46 @@ describe('LocationsTab · status colour on/off flag (CHIPKLEUR-INSTELBAAR-1)', (
     await waitFor(() => expect(screen.getByText('Actief')).toHaveStyle({ color: 'var(--text)' }))
   })
 })
+
+// TENANT-DEFAULT-1 (Danny 02-08): the tenant-configured default status filter replaces
+// the frontend's own "active only" guess for this tab.
+describe('LocationsTab · tenant-configured default status filter (TENANT-DEFAULT-1)', () => {
+  const twoLocations = [
+    location({ id: 'loc-active', name: 'Actieve locatie', statusId: 'status-active', statusLabel: 'Actief' }),
+    location({ id: 'loc-inactive', name: 'Inactieve locatie', statusId: 'status-inactive', statusLabel: 'Inactief' }),
+  ]
+  const statuses = [
+    { id: 'status-active', value: 'active', label: 'Actief' },
+    { id: 'status-inactive', value: 'inactive', label: 'Inactief' },
+  ]
+
+  it('still guesses "active only" when no default is configured (today\'s behaviour)', async () => {
+    render(<LocationsTab {...base} locations={twoLocations} statuses={statuses} />)
+    await waitFor(() => expect(screen.getByText('Actieve locatie')).toBeInTheDocument())
+    expect(screen.queryByText('Inactieve locatie')).toBeNull()
+  })
+
+  it('applies the configured default status when the tab opens', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/settings'
+        ? Promise.resolve({ data: { customer_location_default_status_filter: 'status-inactive' } })
+        : Promise.resolve({ data: { data: [] } }))
+
+    render(<LocationsTab {...base} locations={twoLocations} statuses={statuses} />)
+    await waitFor(() => expect(screen.getByText('Inactieve locatie')).toBeInTheDocument())
+    expect(screen.queryByText('Actieve locatie')).toBeNull()
+  })
+
+  it('an explicit "all" default shows every row, ignoring the active-only guess', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/settings'
+        ? Promise.resolve({ data: { customer_location_default_status_filter: 'all' } })
+        : Promise.resolve({ data: { data: [] } }))
+
+    render(<LocationsTab {...base} locations={twoLocations} statuses={statuses} />)
+    await waitFor(() => {
+      expect(screen.getByText('Actieve locatie')).toBeInTheDocument()
+      expect(screen.getByText('Inactieve locatie')).toBeInTheDocument()
+    })
+  })
+})

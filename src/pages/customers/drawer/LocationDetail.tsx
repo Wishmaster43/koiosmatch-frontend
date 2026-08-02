@@ -32,6 +32,7 @@ import { emailValue, phoneValue, kvkValue, vatValue } from '@/components/drawer/
 import TitleBadge from '@/components/drawer/TitleBadge'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useConfirm } from '@/hooks/useConfirm'
+import EditableRichTextField from './EditableRichTextField'
 import DepartmentsPanel from './DepartmentsPanel'
 import ContactsPanel from './ContactsPanel'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
@@ -87,7 +88,14 @@ export default function LocationDetail({
   // SAVED on this location (the shared field table owns its own draft, so an in-edit
   // country switch is not observable here) — for a Dutch tenant that is the normal case,
   // and a wrong-country list would be worse than a stale one.
-  const countryOptions = getCountryOptions(i18n.language).map(o => ({ value: o.label, label: o.label }))
+  // Province/country pickers. The OPTION VALUE is the ISO-2 CODE, which is what the
+  // column actually stores: the backend normalises any country input through
+  // CountryCode::normalise (LAND-ISO-1) and the seeder writes 'NL'. This used to remap
+  // the options to value=NAME, on the belief that the column held a name — so read mode
+  // showed the raw "NL" (no option matched) while edit mode listed "Nederland", and the
+  // candidate screens showed the name correctly all along (Danny 02-08). The province
+  // list cascades off the same code, which is what useProvinces expects.
+  const countryOptions = getCountryOptions(i18n.language)
   const countryCode = getCountryOptions(i18n.language).find(o => o.label === (l.country ?? ''))?.value ?? 'NL'
   const { provinces } = useProvinces(countryCode)
   // The tenant's own establishments — the same GET /locations list the customer's
@@ -194,6 +202,10 @@ export default function LocationDetail({
   }
 
   const remove = () => confirm(t('locations.detail.confirmDelete'), () => { onDelete(l.id as Id); close() }, { danger: true })
+  // LOCATIE-OMSCHRIJVING-1 (Danny 02-08): its own rich-text block, same pattern the
+  // department detail already uses (EditableRichTextField — own pencil/save/cancel,
+  // RichTextEditor + SafeHtml) — a bare textarea is not the house pattern for prose.
+  const saveDescription = (html: string) => onSave(l.id as Id, { description: html })
 
   // JOB-STATUS-1: the title-row status badge's own inline edit — pencil toggles to
   // a searchable CreatableSelect + save/cancel (same in-place-edit convention as
@@ -290,6 +302,14 @@ export default function LocationDetail({
       {/* Adres & gegevens — no repeated title (it would duplicate the sub-tab label). */}
       {subTab === 'address' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* LOCATIE-OMSCHRIJVING-1 (Danny 02-08): with the record's own identity
+              fields, not buried at the bottom — placed FIRST (ahead of the field
+              tables) rather than after them, so it never shifts which pencil is
+              "last" for the Contact-ter-plaatse block below (its own test keys off
+              that). Same component DepartmentDetail already uses for its own
+              Omschrijving block (EditableRichTextField — own pencil/save/cancel). */}
+          <EditableRichTextField label={t('locations.detail.description')} value={l.description ?? ''} onSave={saveDescription} />
+
           {/* Same block order as the customer's Bedrijf tab (Danny 28-07: "zelfde format
               als klant"): Gegevens · Adres · Contact. Registratie is no longer its own
               card — KvK and BTW are plain facts about this site, so they sit in Gegevens

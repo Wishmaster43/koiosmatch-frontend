@@ -42,7 +42,10 @@ vi.mock('./drawer/OverviewTab', () => ({ default: () => <div>overview stub</div>
 
 const ct = (key: string) => i18n.t(key, { ns: 'customers' })
 
-const customer = { id: 1, name: 'Zorgpartners', initials: 'ZP', phase: 'interesse', status: 'active',
+// 'vaste_klant' (NOT the entry phase) — the entry-phase Status-hiding rule
+// (Danny 02-08) is covered by its own describe block below; this fixture keeps
+// testing the "normal" case where both pickers show.
+const customer = { id: 1, name: 'Zorgpartners', initials: 'ZP', phase: 'vaste_klant', status: 'active',
   tags: [], notes: [], created: '', referenceNumber: 'D-1', city: 'Utrecht', industry: 'Zorg' } as unknown as Customer
 
 const statuses = [{ value: 'active', label: 'Actief' }]
@@ -53,7 +56,7 @@ describe('CustomerDrawer · lifecycle phase picker (KLANT-FASE-1)', () => {
 
     expect(screen.getByText(ct('drawer.phase'))).toBeInTheDocument()
     expect(screen.getByText(ct('drawer.status'))).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Interesse' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Vaste klant' })).toBeInTheDocument()
   })
 
   it('picking another phase hands the SLUG to onUpdate (the PATCH path), not the label', async () => {
@@ -61,9 +64,26 @@ describe('CustomerDrawer · lifecycle phase picker (KLANT-FASE-1)', () => {
     const user = userEvent.setup()
     render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} onUpdate={onUpdate} />)
 
-    await user.click(screen.getByRole('button', { name: 'Interesse' }))
-    await user.click(await screen.findByRole('button', { name: 'Vaste klant' }))
+    await user.click(screen.getByRole('button', { name: 'Vaste klant' }))
+    await user.click(await screen.findByRole('button', { name: 'Interesse' }))
 
-    expect(onUpdate).toHaveBeenCalledWith(1, { phase: 'vaste_klant' })
+    expect(onUpdate).toHaveBeenCalledWith(1, { phase: 'interesse' })
+  })
+})
+
+describe('CustomerDrawer · Status picker hidden in the entry phase (Danny 02-08)', () => {
+  it('hides the Status meta picker for a customer still in the ENTRY phase — mirrors the candidate: not deployable yet', () => {
+    const entryCustomer = { ...customer, phase: 'interesse' } as Customer
+    render(<CustomerDrawer customer={entryCustomer} onClose={() => {}} statuses={statuses} />)
+
+    expect(screen.getByText(ct('drawer.phase'))).toBeInTheDocument()
+    expect(screen.queryByText(ct('drawer.status'))).toBeNull()
+  })
+
+  it('shows the Status meta picker again once past the entry phase', () => {
+    const pastEntry = { ...customer, phase: 'vaste_klant' } as Customer
+    render(<CustomerDrawer customer={pastEntry} onClose={() => {}} statuses={statuses} />)
+
+    expect(screen.getByText(ct('drawer.status'))).toBeInTheDocument()
   })
 })

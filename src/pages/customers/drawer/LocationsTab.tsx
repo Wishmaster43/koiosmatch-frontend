@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { MapPin } from 'lucide-react'
 import SubEntityTab from './SubEntityTab'
 import StatusFilterSelect, { useStatusFilter } from './StatusFilterSelect'
-import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings, useSettingsLoaded, getBoolSetting, getStringSetting } from '@/lib/settings/useAllSettings'
 import LocationDetail from './LocationDetail'
 import AddLocationModal from '../AddLocationModal'
 import type { Column } from '@/components/ui/DataTable'
@@ -57,13 +57,18 @@ export default function LocationsTab({
 }: Props) {
   const { t } = useTranslation('customers')
   const [adding, setAdding] = useState(false)
-  // Status filter (Danny 28-07). It defaults to "active only" — but only once that is
-  // provably a non-empty view; see the hook for why that guard exists.
-  const { value: statusFilter, toggle: toggleStatus, filtered: visibleLocations } = useStatusFilter(locations, statuses)
   // Colour-on/off flag for the status column (CHIPKLEUR-INSTELBAAR-1) — defaults ON,
   // so an absent setting keeps today's coloured-chip look.
   const settings = useAllSettings()
   const colorStatusCol = getBoolSetting(settings, 'customer_location_table_color_status', true)
+  // Tenant-configured default status filter (TENANT-DEFAULT-1, Danny 02-08) — replaces
+  // the old "active only" guess when Settings → Klanten → Tabelweergave → Locaties has
+  // one saved; absent (null) falls back to that original guess unchanged. `settingsLoaded`
+  // stops the hook from deciding before /settings has actually answered (see its own docblock).
+  const settingsLoaded = useSettingsLoaded()
+  const defaultStatusFilter = getStringSetting(settings, 'customer_location_default_status_filter')
+  const { value: statusFilter, toggle: toggleStatus, filtered: visibleLocations } =
+    useStatusFilter(locations, statuses, undefined, defaultStatusFilter, settingsLoaded)
 
   const columns: Column<Location>[] = [
     { key: 'name', header: t('locations.col.name'), sortable: true, sortValue: l => l.name,
@@ -115,7 +120,11 @@ export default function LocationsTab({
         renderDetail={renderDetail}
       />
       {adding && (
-        <AddLocationModal customerName={customerName} statuses={statuses}
+        // customerId + existingContacts (CONTACT-PRIMAIR-LOCATIE-1): both already live
+        // in this component's own props, just never reached the modal — needed so the
+        // "contact ter plaatse" picker can offer this customer's real contacts and, once
+        // one is picked, couple it as this new location's primary contact after create.
+        <AddLocationModal customerName={customerName} customerId={customerId} statuses={statuses} existingContacts={contacts}
           onCreate={onAddLocation} onClose={() => setAdding(false)} />
       )}
     </>

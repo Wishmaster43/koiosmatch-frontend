@@ -1911,11 +1911,11 @@
       },
       "customer_location_chip_color": {
         "label": "Couleur puce site",
-        "description": "La couleur de chaque puce Site sur un contact. Vide = la couleur par défaut."
+        "description": "La couleur de la puce Site affichée dans les tableaux Services et Contacts. Vide = la couleur par défaut."
       },
       "customer_department_chip_color": {
         "label": "Couleur puce service",
-        "description": "La couleur de chaque puce Service sur un contact. Vide = la couleur par défaut."
+        "description": "La couleur de la puce Service affichée dans le tableau Contacts. Vide = la couleur par défaut."
       },
       "customer_contact_table_color_location": {
         "label": "Couleur site (contacts)",
@@ -1941,6 +1941,34 @@
         "label": "Couleur statut (services)",
         "description": "Activé = la puce de statut dans le tableau des services est colorée. Désactivé = texte simple."
       }
+    },
+    "tabs": {
+      "customerTable": {
+        "title": "Liste des clients",
+        "subtitle": "Détermine l'apparence du tableau des clients sur la page principale Clients."
+      },
+      "locations": {
+        "title": "Sites",
+        "subtitle": "Détermine l'apparence et le filtre par défaut de l'onglet Sites à l'ouverture d'un client."
+      },
+      "departments": {
+        "title": "Services",
+        "subtitle": "Détermine l'apparence et le filtre par défaut de l'onglet Services à l'ouverture d'un client."
+      },
+      "contacts": {
+        "title": "Contacts",
+        "subtitle": "Détermine l'apparence et le filtre par défaut de l'onglet Contacts à l'ouverture d'un client."
+      },
+      "vacancies": {
+        "title": "Postes",
+        "subtitle": "Détermine le filtre par défaut de l'onglet Postes à l'ouverture d'un client."
+      }
+    },
+    "defaultFilter": {
+      "title": "Filtre de statut par défaut",
+      "allOption": "Tous les statuts",
+      "chosenHint": "Ce statut est présélectionné dès l'ouverture de cet onglet.",
+      "autoHint": "Pas encore choisi — c'est actuellement le statut qui ressemble à 'actif' (ou Tous, s'il n'en existe aucun)."
     }
   },
   "customerVacancyDefaults": {

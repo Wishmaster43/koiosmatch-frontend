@@ -134,6 +134,10 @@ export function mapLocation(l: ApiLocation = {}): Location {
     email: l.email ?? '',
     costCenter: l.cost_center ?? '',
     billingEmail: l.billing_email ?? '',
+    // LOCATIE-OMSCHRIJVING-1 (Danny 02-08): this was never mapped at all — the
+    // column round-trips fine (mirrors mapDepartment's identical read below), the
+    // read side simply had no field to land in.
+    description: l.description ?? '',
     address: addressLine(l),
     departments,
     contacts,

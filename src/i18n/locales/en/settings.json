@@ -1929,11 +1929,11 @@
       },
       "customer_location_chip_color": {
         "label": "Location chip colour",
-        "description": "The colour of every Locatie chip on a contact person. Empty = the default colour."
+        "description": "The colour of the Location chip shown in the Departments and Contacts tables. Empty = the default colour."
       },
       "customer_department_chip_color": {
         "label": "Department chip colour",
-        "description": "The colour of every Afdeling chip on a contact person. Empty = the default colour."
+        "description": "The colour of the Department chip shown in the Contacts table. Empty = the default colour."
       },
       "customer_contact_table_color_location": {
         "label": "Location colour (contacts)",
@@ -1959,6 +1959,34 @@
         "label": "Status colour (departments)",
         "description": "On = the status chip in the department table is coloured. Off = plain text."
       }
+    },
+    "tabs": {
+      "customerTable": {
+        "title": "Customer list",
+        "subtitle": "Determines the look of the customer table on the main Customers page."
+      },
+      "locations": {
+        "title": "Locations",
+        "subtitle": "Determines the look and default filter of the Locations tab when you open a customer."
+      },
+      "departments": {
+        "title": "Departments",
+        "subtitle": "Determines the look and default filter of the Departments tab when you open a customer."
+      },
+      "contacts": {
+        "title": "Contacts",
+        "subtitle": "Determines the look and default filter of the Contacts tab when you open a customer."
+      },
+      "vacancies": {
+        "title": "Vacancies",
+        "subtitle": "Determines the default filter of the Vacancies tab when you open a customer."
+      }
+    },
+    "defaultFilter": {
+      "title": "Default status filter",
+      "allOption": "All statuses",
+      "chosenHint": "This status is preselected as soon as this tab opens.",
+      "autoHint": "Not chosen yet — this is currently the status that looks like 'active' (or All, if none exists)."
     }
   },
   "customerVacancyDefaults": {

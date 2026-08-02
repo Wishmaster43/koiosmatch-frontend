@@ -19,11 +19,19 @@ import { unwrap } from '@/lib/api'
 // Seed defaults — the values shipped for new tenants and the fallback before the
 // backend is ready. Colours match the calm light/dark scheme used across lookups.
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
+/**
+ * Seed fallback, used ONLY while /customer-statuses is unreachable. The slugs must match
+ * the backend seeder or a real status silently fails to resolve once the API answers.
+ *
+ * Corrected 02-08 on two counts: the slugs were Dutch while the backend seeds English
+ * ones, and `prospect` was in here as a STATUS. Prospect is a PHASE now (Danny: "een klant
+ * kan een prospect zijn of een klant") — leaving it here would have kept the very value
+ * the split removes alive in every offline render.
+ */
 export const DEFAULT_CUSTOMER_STATUSES: LookupOption[] = [
-  { value: 'actief',      label: 'Actief',      color: '#16A34A' },
-  { value: 'prospect',    label: 'Prospect',    color: '#1B60A9' },
-  { value: 'inactief',    label: 'Inactief',    color: '#D97706' },
-  { value: 'geblokkeerd', label: 'Geblokkeerd', color: '#DC2626' },
+  { value: 'active',   label: 'Actief',      color: '#16A34A' },
+  { value: 'inactive', label: 'Inactief',    color: '#D97706' },
+  { value: 'blocked',  label: 'Geblokkeerd', color: '#DC2626' },
 ]
 /* eslint-enable no-restricted-syntax */
 

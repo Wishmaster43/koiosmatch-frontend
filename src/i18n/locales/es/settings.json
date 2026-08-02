@@ -1911,11 +1911,11 @@
       },
       "customer_location_chip_color": {
         "label": "Color chip ubicación",
-        "description": "El color de cada chip Ubicación en un contacto. Vacío = el color predeterminado."
+        "description": "El color del chip Ubicación mostrado en las tablas de Departamentos y Contactos. Vacío = el color predeterminado."
       },
       "customer_department_chip_color": {
         "label": "Color chip departamento",
-        "description": "El color de cada chip Departamento en un contacto. Vacío = el color predeterminado."
+        "description": "El color del chip Departamento mostrado en la tabla de Contactos. Vacío = el color predeterminado."
       },
       "customer_contact_table_color_location": {
         "label": "Color ubicación (contactos)",
@@ -1941,6 +1941,34 @@
         "label": "Color estado (departamentos)",
         "description": "Activado = el chip de estado en la tabla de departamentos tiene color. Desactivado = texto plano."
       }
+    },
+    "tabs": {
+      "customerTable": {
+        "title": "Lista de clientes",
+        "subtitle": "Determina el aspecto de la tabla de clientes en la página principal Clientes."
+      },
+      "locations": {
+        "title": "Ubicaciones",
+        "subtitle": "Determina el aspecto y el filtro predeterminado de la pestaña Ubicaciones al abrir un cliente."
+      },
+      "departments": {
+        "title": "Departamentos",
+        "subtitle": "Determina el aspecto y el filtro predeterminado de la pestaña Departamentos al abrir un cliente."
+      },
+      "contacts": {
+        "title": "Contactos",
+        "subtitle": "Determina el aspecto y el filtro predeterminado de la pestaña Contactos al abrir un cliente."
+      },
+      "vacancies": {
+        "title": "Vacantes",
+        "subtitle": "Determina el filtro predeterminado de la pestaña Vacantes al abrir un cliente."
+      }
+    },
+    "defaultFilter": {
+      "title": "Filtro de estado predeterminado",
+      "allOption": "Todos los estados",
+      "chosenHint": "Este estado queda preseleccionado en cuanto se abre esta pestaña.",
+      "autoHint": "Aún no elegido — actualmente es el estado que parece 'activo' (o Todos, si no existe ninguno)."
     }
   },
   "customerVacancyDefaults": {

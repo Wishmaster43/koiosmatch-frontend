@@ -32,7 +32,7 @@ import { emailValue, phoneValue } from '@/components/drawer/contactLinks'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import { useDateFormat } from '@/lib/datetime'
 import { useChipColors } from '@/lib/settings/useChipColors'
-import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings, useSettingsLoaded, getBoolSetting, getStringSetting } from '@/lib/settings/useAllSettings'
 import ContactDetail from './ContactDetail'
 import ContactLinkPicker from './ContactLinkPicker'
 import AddContactPersonModal from '../AddContactPersonModal'
@@ -107,6 +107,12 @@ export default function ContactsPanel({
   // SettingController validates this family by PATTERN (`str_contains(key,
   // '_table_color_')`), not against a fixed list, so the key is accepted as-is.
   const colorStatusCol = getBoolSetting(settings, 'customer_contact_table_color_status', true)
+  // Tenant-configured default status filter (TENANT-DEFAULT-1, Danny 02-08) — replaces
+  // the old "active only" guess when Settings → Klanten → Tabelweergave → Contactpersonen
+  // has one saved; absent (null) falls back to that original guess unchanged. `settingsLoaded`
+  // stops the hook from deciding before /settings has actually answered (see its own docblock).
+  const settingsLoaded = useSettingsLoaded()
+  const defaultStatusFilter = getStringSetting(settings, 'customer_contact_default_status_filter')
   const [search, setSearch] = useState('')
   const [modal, setModal] = useState<'add' | 'couple' | Contact | null>(null)
   // Which row's "make primary here" PUT is in flight (CONTACT-LOCATION-PRIMARY-1) — one
@@ -157,7 +163,8 @@ export default function ContactsPanel({
   }
   const scoped = contacts.filter(inScope)
   // Status filter (Danny 28-07) — same component and same defaulting rule on all three lists.
-  const { value: statusFilter, toggle: toggleStatus, filtered: rows } = useStatusFilter(scoped, statuses)
+  const { value: statusFilter, toggle: toggleStatus, filtered: rows } =
+    useStatusFilter(scoped, statuses, undefined, defaultStatusFilter, settingsLoaded)
   // Resolved against the CUSTOMER-WIDE list, never the scoped rows: editing a contact's
   // location moves it out of this scope, and the open detail must not vanish mid-edit.
   const selected = openId != null ? contacts.find(c => String(c.id) === String(openId)) ?? null : null

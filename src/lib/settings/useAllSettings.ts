@@ -35,6 +35,26 @@ export function useAllSettings(): SettingsBlob {
   return values
 }
 
+/**
+ * Has the shared `/settings` blob resolved at least once THIS session? Distinct from
+ * `useAllSettings()`'s own returned values, which start as `{}` before the fetch
+ * resolves — a caller that must tell "genuinely absent" apart from "not loaded yet"
+ * (e.g. a one-shot default it must never re-decide once already applied, see
+ * `useStatusFilter`'s `settingsLoaded` guard) reads this first.
+ */
+export function useSettingsLoaded(): boolean {
+  const [loaded, setLoaded] = useState(cache !== null)
+
+  useEffect(() => {
+    if (cache !== null) { setLoaded(true); return }
+    const notify = () => setLoaded(true)
+    listeners.add(notify)
+    return () => { listeners.delete(notify) }
+  }, [])
+
+  return loaded
+}
+
 /** Persist a partial set of keys (merge), update the cache and notify subscribers. */
 export async function saveSettingsKeys(partial: Record<string, unknown>): Promise<void> {
   const stringified: Record<string, string> = {}
@@ -87,4 +107,15 @@ export function getNumberSetting(values: SettingsBlob | null | undefined, key: s
   if (raw == null) return fallback
   const n = typeof raw === 'number' ? raw : Number(raw)
   return Number.isFinite(n) ? n : fallback
+}
+
+/**
+ * Read a plain string setting as-is (e.g. a tenant-picked lookup id/sentinel), falling back
+ * only when the key is truly absent — an empty string is a legitimate stored value and must
+ * not collapse to the fallback (mirrors getBoolSetting/getNumberSetting's absent-only rule).
+ */
+export function getStringSetting(values: SettingsBlob | null | undefined, key: string, fallback: string | null = null): string | null {
+  const raw = values?.[key]
+  if (raw == null) return fallback
+  return typeof raw === 'string' ? raw : String(raw)
 }

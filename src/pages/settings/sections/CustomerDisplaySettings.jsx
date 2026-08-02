@@ -1,0 +1,142 @@
+/**
+ * CustomerDisplaySettings — the customer table's display preferences, split into
+ * FIVE sub-tabs (Danny 02-08: "afdelingen, locaties en contactpersonen moeten
+ * sub-tabjes worden, en duidelijk dat het van de drill-down is"). Before this, all
+ * eleven settings sat in one flat list with no way to tell which ones affected the
+ * customer TABLE (the list you land on) versus the sub-entity tables you only see
+ * once a customer is open — mirrors VacancyCandidateTabSettings' shape (shared
+ * SubTabBar, one block per tab).
+ *
+ * Tab naming reuses the product's OWN vocabulary rather than inventing new jargon:
+ * "Klantenlijst"/"Customer list" extends the existing `nav.customers` label, and
+ * "Locaties"/"Afdelingen"/"Contactpersonen"/"Vacatures" are the EXACT drawer tab
+ * names (`customers:drawer.tabs.*`) a recruiter already recognises — never the
+ * internal word "drill-down". Each tab's subtitle says in one line where its
+ * settings take effect, so nobody has to open a customer to find out.
+ *
+ * The three sub-entity tabs mix TWO controls: the existing schema-driven display
+ * toggles (unchanged keys/defaults, only regrouped — see customerDisplay.js) with
+ * their own dirty-tracking Save button, and the NEW tenant default-status-filter
+ * picker below a divider (`DefaultStatusFilterPicker` — the shared `SelectMenu`
+ * dropdown, this product's own pattern for "pick one from a tenant lookup"),
+ * which persists immediately since it is not part of that form. Vacatures has no
+ * display-colour keys of its own (that lives on the vacancy entity's own settings
+ * screen) — only the default-filter picker.
+ *
+ * TENANT-DEFAULT-1 (Danny 02-08): "Kansen" was considered and DROPPED — its table
+ * has no StatusFilterSelect (OpportunitiesTab filters by pipeline stage, not
+ * status), so there is nothing for a default-filter setting to replace there.
+ */
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import SubTabBar from '@/components/drawer/SubTabBar'
+import { useAllSettings, getStringSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import { useCustomerLookups } from '@/lib/useCustomerLookups'
+import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
+import SchemaSection from '../components/SchemaSection'
+import DefaultStatusFilterPicker from '../components/DefaultStatusFilterPicker'
+import customerDisplay from '../schemas/customerDisplay'
+
+// Build one tab's schema variant: same field definitions (customerDisplay stays the
+// single source of truth for keys/defaults), filtered to this tab's `group`, with
+// its own title/subtitle so each tab reads as its own screen, not a shared one.
+const tabSchema = (group, tab) => ({
+  ...customerDisplay,
+  fields: customerDisplay.fields.filter(f => f.group === group),
+  titleI18n: `customerDisplay.tabs.${tab}.title`,
+  subtitleI18n: `customerDisplay.tabs.${tab}.subtitle`,
+})
+
+// Visual divider between the schema-driven toggle block (its own Save button) and
+// the immediate-persist default-filter picker below it — two different persistence
+// models on one tab, so the seam must read as a clear break, not one continuous form.
+const filterDivider = { marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--border)' }
+
+export default function CustomerDisplaySettings() {
+  // Vacancy statuses need their own provider here — VacancyLookupsProvider is only
+  // mounted around the Vacancies page elsewhere (mirrors VacancyCandidateTabSettings).
+  return (
+    <VacancyLookupsProvider>
+      <CustomerDisplaySettingsInner />
+    </VacancyLookupsProvider>
+  )
+}
+
+function CustomerDisplaySettingsInner() {
+  const { t } = useTranslation('settings')
+  const { locationStatuses, departmentStatuses, contactStatuses } = useCustomerLookups()
+  const { statuses: vacancyStatuses } = useVacancyLookups()
+  const settings = useAllSettings()
+
+  // Five sub-tabs, reusing the shared underline SubTabBar (VacancyCandidateTabSettings' shape).
+  const [activeTab, setActiveTab] = useState('customer_table')
+  const tabs = [
+    { id: 'customer_table', label: t('customerDisplay.tabs.customerTable.title') },
+    { id: 'locations', label: t('customerDisplay.tabs.locations.title') },
+    { id: 'departments', label: t('customerDisplay.tabs.departments.title') },
+    { id: 'contacts', label: t('customerDisplay.tabs.contacts.title') },
+    { id: 'vacancies', label: t('customerDisplay.tabs.vacancies.title') },
+  ]
+
+  // Immediate-persist setter for one tab's default-filter key — always the exact key,
+  // never a partial merge risk (mirrors VacancyCandidateTabSettings' persist()).
+  const setDefaultFilter = (key) => (val) => saveSettingsKeys({ [key]: val }).catch(() => {})
+
+  return (
+    <div style={{ maxWidth: 720 }}>
+      <SubTabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
+      <div style={{ marginTop: 14 }}>
+        {activeTab === 'customer_table' && (
+          <SchemaSection schema={tabSchema('customer_table', 'customerTable')} />
+        )}
+
+        {activeTab === 'locations' && (
+          <>
+            <SchemaSection schema={tabSchema('locations', 'locations')} />
+            <div style={filterDivider}>
+              <DefaultStatusFilterPicker statuses={locationStatuses}
+                value={getStringSetting(settings, 'customer_location_default_status_filter')}
+                onChange={setDefaultFilter('customer_location_default_status_filter')} />
+            </div>
+          </>
+        )}
+
+        {activeTab === 'departments' && (
+          <>
+            <SchemaSection schema={tabSchema('departments', 'departments')} />
+            <div style={filterDivider}>
+              <DefaultStatusFilterPicker statuses={departmentStatuses}
+                value={getStringSetting(settings, 'customer_department_default_status_filter')}
+                onChange={setDefaultFilter('customer_department_default_status_filter')} />
+            </div>
+          </>
+        )}
+
+        {activeTab === 'contacts' && (
+          <>
+            <SchemaSection schema={tabSchema('contacts', 'contacts')} />
+            <div style={filterDivider}>
+              <DefaultStatusFilterPicker statuses={contactStatuses}
+                value={getStringSetting(settings, 'customer_contact_default_status_filter')}
+                onChange={setDefaultFilter('customer_contact_default_status_filter')} />
+            </div>
+          </>
+        )}
+
+        {activeTab === 'vacancies' && (
+          <div>
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
+              {t('customerDisplay.tabs.vacancies.title')}
+            </h3>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
+              {t('customerDisplay.tabs.vacancies.subtitle')}
+            </p>
+            <DefaultStatusFilterPicker statuses={vacancyStatuses}
+              value={getStringSetting(settings, 'customer_vacancy_default_status_filter')}
+              onChange={setDefaultFilter('customer_vacancy_default_status_filter')} />
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
