@@ -40,15 +40,24 @@ const mapVacancyRow = (v: Record<string, unknown> = {}): VacancyRow => {
   }
 }
 
-// The customer's vacancies (GET /vacancies?client_id={id}); missing endpoint = empty.
-// NB: the filter param is `client_id` — since the BE refactor `customer_id` validates
-// as an ARRAY (bulk vocabulary) so a bare uuid 422s (seam catch 2026-07-04).
+/**
+ * The customer's vacancies (GET /vacancies?customer_id={id}); missing endpoint = empty.
+ *
+ * This sent `client_id` until 02-08, and the tab showed EVERY vacancy of the bureau. The
+ * workaround was honest when it was written — `customer_id` then validated as an array, so a
+ * bare uuid 422'd — but `client_id` is not a filter VacancyQuery knows, and an unknown filter
+ * is silently ignored rather than rejected. So the 422 stopped and the wrong data started,
+ * which is the worse of the two failures: a rejected request is visible, a filter that quietly
+ * matches everything is not.
+ *
+ * VacancyQuery now lists `customer_id` in SCALAR_OR_ARRAY_FILTERS, so the single value works.
+ */
 export function useCustomerVacancies(customerId?: Id, params?: Record<string, unknown>) {
   const { data = [], isLoading: loading } = useQuery({
     queryKey: ['customers', customerId, 'vacancies', params ?? {}],
     enabled: !!customerId,
     queryFn: async ({ signal }): Promise<VacancyRow[]> =>
-      unwrapList<Record<string, unknown>>(await api.get('/vacancies', { params: { client_id: customerId, ...params }, signal })).rows.map(mapVacancyRow),
+      unwrapList<Record<string, unknown>>(await api.get('/vacancies', { params: { customer_id: customerId, ...params }, signal })).rows.map(mapVacancyRow),
   })
   return { rows: data, loading }
 }

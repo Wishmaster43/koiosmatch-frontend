@@ -39,6 +39,16 @@ const toApi = (p: Partial<DepartmentPayload>) => ({
   ...(p.customFields !== undefined ? { custom_fields: p.customFields } : {}),
 })
 
+/**
+ * Broadcast channel for "departments changed behind your back". A CSV import creates any
+ * number of rows in one call, so there is no single record to splice in optimistically —
+ * the list simply has to reload. Mirrors CONTACTS_CHANGED_EVENT rather than threading a
+ * reload callback through DepartmentsPanel and the modal: those layers do not otherwise
+ * care that the list is refetchable, and prop-drilling it would be the third copy of a
+ * channel this codebase already has a convention for (§11).
+ */
+export const DEPARTMENTS_CHANGED_EVENT = 'km:departments-changed'
+
 export function useCustomerDepartments(customerId: Id | undefined) {
   const { t } = useTranslation('customers')
   const [departments, setDepartments] = useState<Department[]>([])
@@ -55,6 +65,13 @@ export function useCustomerDepartments(customerId: Id | undefined) {
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId])
   useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
+
+  // Refetch when something outside this hook created departments in bulk (import).
+  useEffect(() => {
+    const onChanged = () => load()
+    window.addEventListener(DEPARTMENTS_CHANGED_EVENT, onChanged)
+    return () => window.removeEventListener(DEPARTMENTS_CHANGED_EVENT, onChanged)
+  }, [load])
 
   // Create — optimistic row with a temp id + the picked location's name pre-filled
   // by the caller (via `locationName`), swapped for the server row on success.

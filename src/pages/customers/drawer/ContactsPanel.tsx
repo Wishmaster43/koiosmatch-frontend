@@ -39,7 +39,7 @@ import AddContactPersonModal from '../AddContactPersonModal'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import { notifyError, notifySuccess } from '@/lib/notify'
-import { isPrimaryForLocation, setLocationPrimaryContact } from '../hooks/useCustomerContacts'
+import { CONTACTS_CHANGED_EVENT, isPrimaryForLocation, setLocationPrimaryContact } from '../hooks/useCustomerContacts'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 
 type AnyProps = Record<string, unknown>
@@ -350,6 +350,9 @@ export default function ContactsPanel({
           lockDepartmentId={scope === 'department' ? scopeId : undefined}
           customerName={scopeName}
           onCreate={onAdd} onClose={() => setModal(null)}
+          // A CSV import creates rows in bulk, so there is no single record to splice in —
+          // announce it on the channel the owning hook already listens to and let it refetch.
+          onImported={() => window.dispatchEvent(new CustomEvent(CONTACTS_CHANGED_EVENT))}
         />
       )}
     </div>

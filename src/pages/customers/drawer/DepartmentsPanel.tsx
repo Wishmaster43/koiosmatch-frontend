@@ -34,6 +34,7 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import StatusFilterSelect, { useStatusFilter } from './StatusFilterSelect'
+import { DEPARTMENTS_CHANGED_EVENT } from '../hooks/useCustomerDepartments'
 import { useChipColors } from '@/lib/settings/useChipColors'
 import { useAllSettings, useSettingsLoaded, getBoolSetting, getStringSetting } from '@/lib/settings/useAllSettings'
 import type { Crumb } from '@/components/drawer/DrillBreadcrumb'
@@ -189,6 +190,10 @@ export default function DepartmentsPanel({
           lockLocationId={scope === 'location' ? scopeId : undefined}
           customerName={scope === 'location' ? scopeName : undefined}
           onCreate={payload => onAdd(payload, locations.find(l => String(l.id) === String(payload.locationId))?.name)}
+          // An import creates any number of rows at once, so there is nothing to prepend
+          // optimistically — the list simply reloads. Without this the modal closed over
+          // records that were already created and the table behind it stayed stale.
+          onImported={() => window.dispatchEvent(new CustomEvent(DEPARTMENTS_CHANGED_EVENT))}
           onClose={() => setAdding(false)}
         />
       )}

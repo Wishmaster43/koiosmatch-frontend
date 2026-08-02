@@ -1,6 +1,6 @@
 /**
  * VacanciesTab — the customer's vacancies (via useCustomerVacancies → GET
- * /vacancies?client_id={id}), with a multi-select STATUS filter above the table —
+ * /vacancies?customer_id={id}), with a multi-select STATUS filter above the table —
  * the same searchable checkbox-list pattern as the right filter panel's
  * Accountmanager filter (SearchSelectGroup), reused here rather than hand-rolled.
  * Defaults to only the 'open'-like status (Danny: "standaard alleen open tonen, je
