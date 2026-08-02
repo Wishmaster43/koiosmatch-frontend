@@ -12,6 +12,7 @@
   },
   "cols": {
     "title": "Kans",
+    "referenceNumber": "Referentienr.",
     "client": "Klant",
     "stage": "Fase",
     "value": "Waarde",

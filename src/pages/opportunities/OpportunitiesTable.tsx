@@ -65,6 +65,16 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
           <span style={{ fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 240 }} title={r.title}>{r.title}</span>
         </span>
       ) },
+    {
+      // Human-readable reference number (KA-00042) — an identifier, so it sits right
+      // after the title, exactly where candidates/customers/vacancies/matches put it.
+      // Plain mono text, not the interactive ReferenceNumberChip: a click-to-copy
+      // button nested inside this row's own click-to-open would double-fire; the
+      // drawer chip already copies.
+      key: 'referenceNumber', header: t('cols.referenceNumber'), nowrap: true,
+      cellStyle: { color: 'var(--text-muted)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', fontVariantNumeric: 'tabular-nums' },
+      sortable: true, sortValue: r => r.referenceNumber ?? '', render: r => r.referenceNumber || '—',
+    },
     // Klant — soft avatar + name (AVATAR-CHIP-1: same chip as the candidates identity
     // column), muted text keeps it reading as a secondary reference, not the row's own identity.
     { key: 'client', header: t('cols.client'), sortable: true, nowrap: true,

@@ -22,6 +22,7 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { act, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import OpportunitiesPage from './OpportunitiesPage'
 
@@ -85,7 +86,8 @@ describe('OpportunitiesPage · branch filter wiring (VESTIGING-2)', () => {
     render(<OpportunitiesPage />)
     // Default render: no branch picked yet — sent as an empty array, never
     // omitted (mirrors the hook's own default), so a later pick is a real change.
-    expect(useOpportunitiesDataMock).toHaveBeenCalledWith(false, [])
+    // Third argument = the NUMMER-1 reference query, null while the search box is empty.
+    expect(useOpportunitiesDataMock).toHaveBeenCalledWith(false, [], null)
     // Let OpportunityDrawer's own (unconditional) custom-fields fetch settle so its
     // state update never lands outside act() in a later test (mirrors OverviewTab.test.tsx).
     await waitFor(() => expect(apiGet).toHaveBeenCalled())
@@ -142,7 +144,7 @@ describe('OpportunitiesPage · picking a branch (VESTIGING-2)', () => {
     act(() => branchGroup!.onToggle('b1'))
 
     // The page re-rendered with the pick — the data hook is called again with it.
-    expect(useOpportunitiesDataMock).toHaveBeenLastCalledWith(false, ['b1'])
+    expect(useOpportunitiesDataMock).toHaveBeenLastCalledWith(false, ['b1'], null)
     // Zero rows + an explicit branch filter ⇒ the honesty notice, not silence.
     expect(screen.getByText(cm('filters.branchExcludesUnassigned'))).toBeInTheDocument()
 
@@ -161,5 +163,64 @@ describe('OpportunitiesPage · picking a branch (VESTIGING-2)', () => {
     expect(screen.queryByText(cm('filters.branchExcludesUnassigned'))).toBeNull()
 
     act(() => branchGroup.onToggle('b1')) // clean up, see note above
+  })
+})
+
+/**
+ * NUMMER-1 — typing KA-00042 must become an exact server-side `?ref=` lookup (third
+ * argument to the data hook), and the deal the server returns must SURVIVE the page's
+ * client-side pass: that filter reads only title/client, so without the ref branch it
+ * would drop the one hit the server just found. Free text keeps the old behaviour.
+ *
+ * The visible-row count is read off the PaginationBar ("Geen resultaten" vs a range),
+ * because the page renders its DataTable virtualized against a scroll container that
+ * has no height in jsdom — the pagination text is driven by the SAME `filteredAll`
+ * array, so it proves the filter outcome without depending on row rendering. The
+ * column itself is covered in OpportunitiesTable.test.tsx.
+ *
+ * The search box debounces 300ms, hence the generous waitFor timeouts. usePageMemory
+ * is module-level, so each test clears the box again in a finally — a failed
+ * assertion must not leak its search text into the next test.
+ */
+describe('OpportunitiesPage · reference-number search (NUMMER-1)', () => {
+  const searchLabel = () => i18n.t('page.searchPlaceholder', { ns: 'opportunities' })
+  // The one deal a ?ref= lookup returns — its number appears in no free-text field.
+  const refHit = { id: 'o1', title: 'Detachering ICU', client: 'Zorgpartners', referenceNumber: 'KA-00042' }
+
+  it('sends the typed reference number to the data hook and keeps the matched deal in the result set', async () => {
+    const user = userEvent.setup()
+    useOpportunitiesDataMock.mockReturnValue({ ...baseResult, rows: [refHit] })
+    render(<OpportunitiesPage />)
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+
+    try {
+      await user.type(screen.getByLabelText(searchLabel()), 'KA-00042')
+      await waitFor(
+        () => expect(useOpportunitiesDataMock).toHaveBeenLastCalledWith(false, [], 'KA-00042'),
+        { timeout: 2000 },
+      )
+      // The server-matched deal survives the client-side filter pass (1 row, not 0).
+      expect(screen.queryByText(cm('noResults'))).toBeNull()
+    } finally {
+      await user.clear(screen.getByLabelText(searchLabel()))
+      await waitFor(() => expect(useOpportunitiesDataMock).toHaveBeenLastCalledWith(false, [], null), { timeout: 2000 })
+    }
+  })
+
+  it('leaves ordinary free text as a client-side filter — no ref is sent', async () => {
+    const user = userEvent.setup()
+    useOpportunitiesDataMock.mockReturnValue({ ...baseResult, rows: [refHit] })
+    render(<OpportunitiesPage />)
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+
+    try {
+      await user.type(screen.getByLabelText(searchLabel()), 'nietbestaand')
+      // Free text still filters locally — the deal drops out, and nothing goes to ?ref=.
+      await waitFor(() => expect(screen.getByText(cm('noResults'))).toBeInTheDocument(), { timeout: 2000 })
+      expect(useOpportunitiesDataMock).toHaveBeenLastCalledWith(false, [], null)
+    } finally {
+      await user.clear(screen.getByLabelText(searchLabel()))
+      await waitFor(() => expect(screen.queryByText(cm('noResults'))).toBeNull(), { timeout: 2000 })
+    }
   })
 })

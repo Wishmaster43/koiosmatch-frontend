@@ -1,9 +1,14 @@
 /**
  * ImportOrderBanner — the "do this in order" explainer (customers → locations →
- * departments → contacts). A location/department/contact links to its parent BY
- * NAME (klant_naam/locatie_naam/afdeling_naam), so importing out of order produces
- * nothing but "not found" errors — this banner stays visible on every step, not
- * just the first, so the reminder survives a scroll or a step change.
+ * departments → contacts) for the four SEPARATE files. A location/department/contact
+ * links to its parent BY NAME (klant_naam/locatie_naam/afdeling_naam), so importing
+ * out of order produces nothing but "not found" errors — this banner stays visible on
+ * every step, not just the first, so the reminder survives a scroll or a step change.
+ *
+ * It never renders for the combined whole-customer file (WholeTreeBanner does), and
+ * it now names that alternative instead of leaving a user to discover it: these four
+ * are the right tool for EXTENDING a customer that already exists, the combined file
+ * for creating a new one in one go — never both for the same data.
  */
 import { useTranslation } from 'react-i18next'
 import { ArrowRight } from 'lucide-react'
@@ -14,9 +19,12 @@ const ORDER: readonly string[] = ['customers', 'locations', 'departments', 'cont
 
 interface ImportOrderBannerProps {
   entity: string
+  /** The combined whole-customer template, when the backend offers one; null hides the switch. */
+  wholeTreeEntity: string | null
+  onSelectEntity: (entity: string) => void
 }
 
-export default function ImportOrderBanner({ entity }: ImportOrderBannerProps) {
+export default function ImportOrderBanner({ entity, wholeTreeEntity, onSelectEntity }: ImportOrderBannerProps) {
   const { t } = useTranslation('settings')
   return (
     <div style={{ padding: '10px 14px',
@@ -39,6 +47,19 @@ export default function ImportOrderBanner({ entity }: ImportOrderBannerProps) {
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
         {t(`import.order.${entity}Hint`, { defaultValue: t('import.order.hint') })}
       </div>
+
+      {/* The one-file alternative, offered rather than hidden — a user creating a
+          brand-new customer should not have to run these four in sequence. */}
+      {wholeTreeEntity && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 8, fontSize: 12 }}>
+          <span style={{ color: 'var(--text-muted)' }}>{t('import.order.treeAlternative')}</span>
+          <button type="button" onClick={() => onSelectEntity(wholeTreeEntity)}
+            style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-primary)', background: 'none',
+                     border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>
+            {t('import.order.switchToTree')}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

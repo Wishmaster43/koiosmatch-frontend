@@ -173,3 +173,55 @@ describe('useCustomerRecord · invoice-address block on the fetched detail', () 
     expect(detail.billingStreet).toBe('')
   })
 })
+
+/**
+ * KLANT-FASE-1 — the lifecycle phase must reach the server. The drawer picker and the
+ * create modal both write `phase`; if FIELD_MAP/the create body drop it, the PATCH body
+ * comes out EMPTY and no request is sent at all (§3: exactly the fake-affordance class
+ * this repo has been bitten by). These assert the REQUEST — route + body.
+ */
+describe('useCustomerRecord · customer phase (KLANT-FASE-1)', () => {
+  it('PATCHes the phase slug to /customers/{id} — the drawer picker really persists', async () => {
+    mockedPatch.mockResolvedValue({})
+    const r = harness([customer({ id: 1, phase: 'prospect' } as Partial<Customer>)])
+    act(() => { r.result.current.record.updateCustomer(1, { phase: 'klant' }) })
+
+    expect(mockedPatch).toHaveBeenCalledWith('/customers/1', { phase: 'klant' })
+    await waitFor(() => expect((r.result.current.customers[0] as Customer).phase).toBe('klant'))
+    expect(notifyError).not.toHaveBeenCalled()
+  })
+
+  it('reverts the phase and reports the server message when the PATCH is refused', async () => {
+    mockedPatch.mockRejectedValue({ response: { status: 422, data: { message: 'Onbekende fase' } } })
+    const r = harness([customer({ id: 1, phase: 'prospect' } as Partial<Customer>)])
+    act(() => { r.result.current.record.updateCustomer(1, { phase: 'klant' }) })
+
+    await waitFor(() => expect((r.result.current.customers[0] as Customer).phase).toBe('prospect'))
+    expect(notifyError).toHaveBeenCalledWith('Onbekende fase')
+  })
+
+  it('POSTs the chosen phase on create', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { id: 9, name: 'Nieuw', phase: 'klant' } })
+    const r = harness([])
+    await act(async () => {
+      await r.result.current.record.handleCreate({
+        name: 'Nieuw', debtorNumber: '', status: 'active', ownerId: '', industry: '', city: '', phase: 'klant',
+      })
+    })
+
+    expect(vi.mocked(api.post)).toHaveBeenCalledWith('/customers', expect.objectContaining({ phase: 'klant' }))
+  })
+
+  it('omits phase from the create body when none was picked — an empty slug would be a 422', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { id: 10, name: 'Nieuw' } })
+    const r = harness([])
+    await act(async () => {
+      await r.result.current.record.handleCreate({
+        name: 'Nieuw', debtorNumber: '', status: 'active', ownerId: '', industry: '', city: '', phase: '',
+      })
+    })
+
+    const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
+    expect(body).not.toHaveProperty('phase')
+  })
+})

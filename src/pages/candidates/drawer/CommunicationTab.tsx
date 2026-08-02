@@ -2,10 +2,10 @@ import { useState } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
-import { useAuth } from '@/context/AuthContext'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import SectionCard from '@/components/ui/SectionCard'
+import RetentionConsentBlock from './RetentionConsentBlock'
 import CandidateTasks from './CandidateTasks'
 import ConversationsSection from './ConversationsSection'
 import { useNoteTypes, SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
@@ -51,10 +51,6 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   const { types: channels } = useLastContactTypes()
   // Notes persist via the API (G-1) — add/edit/delete hit /candidates/{id}/notes.
   const { notes, addNote, editNote } = useCandidateNotes(c.id)
-  // AVG-RET-2: the retention deadline exposes the erasure timeline, so gate it like
-  // the rest of the erasure-adjacent UI (mirrors CandidatesPage's archive/merge gate
-  // on candidates.delete) — hidden entirely without the permission, never blank.
-  const canViewRetention = useAuth()?.hasPermission('candidates.delete') ?? false
 
   // SYSTEM notes (status/phase changes, BE-written) are EVENTS, not notes (Danny
   // 2026-07-13): they render in the Tijdlijn, never in the Notities thread. Keep the
@@ -200,44 +196,14 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
           </div>
 
           {/* AVG-bewaartermijn — its OWN clearly bounded block (Danny 24-07: the
-              loose text line under the channel consents was unreadable). Titled
-              sub-block: the opt-in toggle + a soft-tint status card. */}
-          <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
-            <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 8 }}>
-              {t('communication.retentionTitle')}
-            </div>
-            {/* Retention opt-in (Block B, AVG-RET-2) — a REAL toggle (CMBE-RET-A). */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-              <input type="checkbox" checked={!!c.consent.retentionOptIn}
-                onChange={e => setRetentionOptIn(e.target.checked)}
-                aria-label={t('communication.consentRetentionOptIn')}
-                style={{ width: 16, height: 16, cursor: 'pointer', flexShrink: 0 }} />
-              <span style={{ fontSize: 13, color: 'var(--text)', flex: 1 }}>{t('communication.consentRetentionOptIn')}</span>
-              {c.consent.retentionOptIn && c.consent.retentionConsentAt && (
-                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                  {t('communication.consentGivenAt', { date: formatDate(c.consent.retentionConsentAt) })}
-                </span>
-              )}
-            </div>
-            {/* Read-only status card (Block A) — role-gated; soft-tint per state so
-                "Onbeperkt bewaren" reads as a clear block, never a loose sentence. */}
-            {canViewRetention && (() => {
-              const state = c.retentionExpiresAt ? 'until' : (c.consent.retentionOptIn ? 'unlimited' : 'unknown')
-              const tone = state === 'until' ? 'var(--color-info, var(--color-primary))' : state === 'unlimited' ? 'var(--color-success)' : 'var(--text-muted)'
-              const label = state === 'until'
-                ? t('communication.retentionUntil', { date: formatDate(c.retentionExpiresAt) })
-                : state === 'unlimited'
-                  ? t('communication.retentionUnlimited', { date: formatDate(c.consent.retentionConsentAt) })
-                  : t('communication.retentionUnknown')
-              return (
-                <div style={{ padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, color: tone,
-                  background: `color-mix(in srgb, ${tone} 10%, transparent)`,
-                  border: `1px solid color-mix(in srgb, ${tone} 35%, transparent)` }}>
-                  {label}
-                </div>
-              )
-            })()}
-          </div>
+              loose text line under the channel consents was unreadable). The consent's
+              own validity (it LAPSES, Danny 2026-08-02) lives in RetentionConsentBlock. */}
+          <RetentionConsentBlock
+            optIn={!!c.consent.retentionOptIn}
+            consentAt={c.consent.retentionConsentAt ?? null}
+            expiresAt={c.retentionExpiresAt ?? null}
+            onToggle={setRetentionOptIn}
+          />
         </SectionCard>
       )}
 

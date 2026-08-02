@@ -10,6 +10,14 @@
  * Danny wants multi eventually — the coupling UI renders as single-value soft chips
  * (see EditableFieldTable's `chip-select` type) so upgrading later is a prop change,
  * not a rebuild. Never silently drop a second value — there is nowhere to put it yet.
+ *
+ * TWO PRIMARY AXES LIVE HERE, AND THEY ARE NOT THE SAME THING:
+ *   · `isPrimary` (customer_contacts.is_primary) — the customer's ONE main contact.
+ *     Set through update(); the backend demotes the previous one customer-wide.
+ *   · `primaryLocationIds` (customer_contact_customer_location.is_primary) — the primary
+ *     contact PER SITE. Set through setLocationPrimaryContact(); the backend demotes the
+ *     previous primary of that ONE location and leaves the customer axis untouched.
+ * Anything that shows both on one screen must say which is which (ContactsPanel does).
  */
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -56,6 +64,83 @@ export interface ContactPayload {
  */
 export const CONTACTS_CHANGED_EVENT = 'km:contacts-changed'
 
+/**
+ * CONTACT-LOCATION-PRIMARY-1 — a contact row that also carries WHICH of its locations it
+ * is the primary contact OF. This is a property of the COUPLING
+ * (customer_contact_customer_location.is_primary), a different axis from
+ * `customer_contacts.is_primary` above: that one is the customer's ONE main contact,
+ * this one is the person you call at ONE site. Both exist side by side and never merge.
+ */
+export interface ContactWithPrimaryLocations extends Contact {
+  /** Ids of the locations where THIS contact is that location's primary contact. */
+  primaryLocationIds: Id[]
+}
+
+// The pivot flag as CustomerContactResource sends it — inside each `locations[]` entry as
+// `is_primary`. The shared ApiContact types that array as {id,name} only, so the extra
+// key is read through this one narrowing reader instead of casting at four call sites.
+const pivotIsPrimary = (entry: { id?: Id; name?: string }): boolean =>
+  (entry as { is_primary?: unknown }).is_primary === true
+
+/**
+ * Map a raw contact AND keep the per-location primary flags. The shared `mapContact`
+ * narrows every `locations[]` entry to {id,name}, which drops the pivot flag before any
+ * screen can see it; widening that shared mapper/type is a change to files this lane does
+ * not own, so the ids ride along on the row instead (read back via primaryLocationIdsOf).
+ */
+const mapContactRow = (raw: ApiContact = {}): ContactWithPrimaryLocations => ({
+  ...mapContact(raw),
+  primaryLocationIds: (raw.locations ?? [])
+    .filter(l => l?.id != null && pivotIsPrimary(l))
+    .map(l => l.id as Id),
+})
+
+/**
+ * Read the per-location primary ids off a contact row.
+ *
+ * Why a reader and not a typed prop: the rows reach a location's contact list through
+ * hops that type their `contacts` prop as the shared `Contact[]` (CustomerDrawer →
+ * LocationsTab → LocationDetail), which erases the extra field at the TYPE level even
+ * though it is present at runtime. This keeps the fact in one place and degrades to []
+ * for any row that did not come from this hook — never a crash, never a wrong star.
+ */
+export const primaryLocationIdsOf = (c: Contact): Id[] => {
+  const ids = (c as Partial<ContactWithPrimaryLocations>).primaryLocationIds
+  return Array.isArray(ids) ? ids : []
+}
+
+/** True when this contact is the primary contact OF THAT ONE location. */
+export const isPrimaryForLocation = (c: Contact, locationId: Id): boolean =>
+  primaryLocationIdsOf(c).some(id => String(id) === String(locationId))
+
+/**
+ * PUT /customers/{customerId}/contacts/{contactId}/locations/{locationId}/primary —
+ * make this contact the primary contact OF THAT LOCATION
+ * (CustomerContactController::primaryLocation). The backend demotes the previous primary
+ * of that SAME location only, and couples the contact to the site first when it is not
+ * linked yet; `customer_contacts.is_primary` (the customer's main contact) is a different
+ * column and is never touched by this route.
+ *
+ * Fired straight from the list rather than prop-drilled — the same convention
+ * MergeContactModal already uses for the same reason: the writer sits several hops away
+ * from the hook that owns the list, so the hook is told to refetch via
+ * CONTACTS_CHANGED_EVENT instead of threading a callback through components this lane
+ * does not own.
+ *
+ * Returns whether the flag ACTUALLY landed. The endpoint is a documented no-op while
+ * `customer_contact_customer_location.is_primary` is still missing on a tenant database
+ * (CustomerContactLocation::supportsPrimary) — it answers 200 with the flag unchanged.
+ * Reconciling on the response instead of assuming success is what stops the button
+ * reporting a write that never happened (§3, no fake affordances).
+ */
+export async function setLocationPrimaryContact(customerId: Id, contactId: Id, locationId: Id): Promise<boolean> {
+  const res = await api.put(`/customers/${customerId}/contacts/${contactId}/locations/${locationId}/primary`)
+  const applied = isPrimaryForLocation(mapContactRow(unwrap<ApiContact>(res)), locationId)
+  // Only a write that actually landed changed anything worth refetching.
+  if (applied) window.dispatchEvent(new CustomEvent(CONTACTS_CHANGED_EVENT))
+  return applied
+}
+
 const isTemp = (id: Id | undefined) => typeof id === 'string' && id.startsWith('tmp-')
 
 // Defensive id-dedupe (Danny 2026-07-14): two seeded contacts (same name+email)
@@ -66,7 +151,7 @@ const isTemp = (id: Id | undefined) => typeof id === 'string' && id.startsWith('
 // bug — reported separately. Regardless of root cause, a duplicate id must never
 // render as two rows: dedupe here once, at the single shared source (both the
 // Contactpersonen tab AND the location detail's nested list read this one list).
-const dedupeById = (rows: Contact[]): Contact[] => {
+const dedupeById = <T extends Contact>(rows: T[]): T[] => {
   const seen = new Set<string>()
   return rows.filter(c => { const k = String(c.id); return seen.has(k) ? false : (seen.add(k), true) })
 }
@@ -100,7 +185,9 @@ const toApi = (p: Partial<ContactPayload>) => ({
 
 export function useCustomerContacts(customerId: Id | undefined) {
   const { t } = useTranslation('customers')
-  const [contacts, setContacts] = useState<Contact[]>([])
+  // Rows carry the per-location primary flags (CONTACT-LOCATION-PRIMARY-1) alongside the
+  // shared Contact shape — see mapContactRow / primaryLocationIdsOf.
+  const [contacts, setContacts] = useState<ContactWithPrimaryLocations[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
@@ -110,7 +197,7 @@ export function useCustomerContacts(customerId: Id | undefined) {
     if (!customerId) { setContacts([]); setLoading(false); return }
     setLoading(true); setError(false)
     api.get(`/customers/${customerId}/contacts`, { signal })
-      .then(res => { if (!signal?.aborted) setContacts(dedupeById(unwrapList<ApiContact>(res).rows.map(mapContact))) })
+      .then(res => { if (!signal?.aborted) setContacts(dedupeById(unwrapList<ApiContact>(res).rows.map(mapContactRow))) })
       .catch(err => { if (err?.code !== 'ERR_CANCELED' && !signal?.aborted) setError(true) })
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId])
@@ -137,10 +224,10 @@ export function useCustomerContacts(customerId: Id | undefined) {
     // The optimistic row composes the name the SAME way the backend does (full_name):
     // first + tussenvoegsel + last, so it does not flicker into a different name.
     const optimisticName = [payload.firstName, payload.middleName, payload.lastName].filter(Boolean).join(' ').trim()
-    setContacts(cs => [{ ...mapContact({ id: tmpId } as ApiContact), name: optimisticName }, ...cs])
+    setContacts(cs => [{ ...mapContactRow({ id: tmpId } as ApiContact), name: optimisticName }, ...cs])
     return api.post(`/customers/${customerId}/contacts`, toApi(payload))
       .then(res => {
-        const saved = mapContact(unwrap<ApiContact>(res))
+        const saved = mapContactRow(unwrap<ApiContact>(res))
         // Same invariant as update(): a contact created AS primary demotes the previous
         // one server-side, so the local list must not keep showing two.
         setContacts(cs => cs.map(x => x.id === tmpId ? saved
@@ -163,7 +250,7 @@ export function useCustomerContacts(customerId: Id | undefined) {
       ? { ...x, ...(payload as Partial<Contact>) }
       : (demoteOthers && x.isPrimary ? { ...x, isPrimary: false } : x)))
     return api.patch(`/customers/${customerId}/contacts/${id}`, toApi(payload))
-      .then(res => { const saved = mapContact(unwrap<ApiContact>(res)); setContacts(cs => cs.map(x => x.id === id ? saved : x)); return saved })
+      .then(res => { const saved = mapContactRow(unwrap<ApiContact>(res)); setContacts(cs => cs.map(x => x.id === id ? saved : x)); return saved })
       .catch(() => { setContacts(snapshot); notifyError(t('contacts.saveFailed')); return null })
   }, [customerId, contacts, t])
 

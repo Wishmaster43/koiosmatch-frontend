@@ -111,6 +111,61 @@ describe('useOpportunitiesData · branch filter (VESTIGING-2)', () => {
   })
 })
 
+/**
+ * NUMMER-1 — typing a reference number (KA-00042) must reach the server as an exact
+ * `?ref=` lookup instead of staying a client-side text filter over the loaded page.
+ * These assert the REQUEST (route + params): OpportunityQuery returns early on `ref`,
+ * so a dropped param silently degrades to "search whatever happens to be loaded".
+ */
+describe('useOpportunitiesData · reference-number lookup (NUMMER-1)', () => {
+  it('sends no ref by default — the request shape is unchanged for a normal list', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [] } })
+    const { result } = renderHook(() => useOpportunitiesData(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const oppCall = mockedGet.mock.calls.find(c => c[0] === '/opportunities')
+    expect(oppCall?.[1]?.params).toBeUndefined()
+  })
+
+  it('sends ?ref= when the search box holds a reference number', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [] } })
+    const { result } = renderHook(() => useOpportunitiesData(false, [], 'KA-00042'), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const oppCall = mockedGet.mock.calls.find(c => c[0] === '/opportunities')
+    expect(oppCall?.[1]?.params).toEqual({ ref: 'KA-00042' })
+  })
+
+  it('combines ref with include_archived so an archived deal is findable by its number', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [] } })
+    const { result } = renderHook(() => useOpportunitiesData(true, [], 'KA-00042'), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const oppCall = mockedGet.mock.calls.find(c => c[0] === '/opportunities')
+    expect(oppCall?.[1]?.params).toEqual({ include_archived: 1, ref: 'KA-00042' })
+  })
+
+  it('refetches instead of reusing the cached page when the reference query changes', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [] } })
+    const { result, rerender } = renderHook(
+      ({ ref }: { ref: string | null }) => useOpportunitiesData(false, [], ref),
+      { wrapper, initialProps: { ref: null as string | null } },
+    )
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    rerender({ ref: 'KA-00042' })
+    await waitFor(() => expect(
+      mockedGet.mock.calls.some(c => (c[1] as { params?: Record<string, unknown> })?.params?.ref === 'KA-00042'),
+    ).toBe(true))
+  })
+
+  it('maps the reference number through so the table column can render it', async () => {
+    mockedGet.mockImplementation((url: string) => url === '/opportunities'
+      ? Promise.resolve({ data: { data: [{ id: 'o1', title: 'Deal A', reference_number: 'KA-00042' }] } })
+      : Promise.resolve({ data: { data: [] } }))
+    const { result } = renderHook(() => useOpportunitiesData(false, [], 'KA-00042'), { wrapper })
+    await waitFor(() => expect(result.current.rows).toHaveLength(1))
+    expect(result.current.rows[0].referenceNumber).toBe('KA-00042')
+  })
+})
+
 describe('useOpportunitiesData · tags PATCH (audit finding: tags never persisted)', () => {
   it('sends { tags } in the PATCH body when the drawer edits tags', async () => {
     mockedGet.mockResolvedValue({ data: { data: [{ id: 'o1', title: 'Deal A', tags: ['foo'] }] } })

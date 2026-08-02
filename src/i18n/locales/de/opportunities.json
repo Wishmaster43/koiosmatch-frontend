@@ -12,6 +12,7 @@
   },
   "cols": {
     "title": "Chance",
+    "referenceNumber": "Referenznr.",
     "client": "Kunde",
     "stage": "Phase",
     "value": "Wert",

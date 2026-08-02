@@ -119,6 +119,76 @@
     "functionTitle": "Function",
     "noFunction": "No function set yet"
   },
+  "cvProposal": {
+    "title": "Proposal from the CV",
+    "cardTitle": "Data read from the attached CV",
+    "error": "The CV proposal could not be loaded.",
+    "intro": "Koios AI read these values from the CV that came with this application. Nothing has been saved: check every value and decide yourself. Dates and employers are misread regularly.",
+    "readOn": "Read on {{date}}",
+    "modelLabel": "Model: {{model}}",
+    "badge": "cv",
+    "badgeTitle": "Read from the CV — check this value",
+    "tableCaption": "What the record holds now, what the CV proposes and what accepting would do.",
+    "status": {
+      "pending": "Not reviewed yet",
+      "accepted": "Accepted",
+      "rejected": "Not accepted"
+    },
+    "columns": {
+      "field": "Field",
+      "current": "Currently on record",
+      "proposed": "From the CV",
+      "result": "If accepted"
+    },
+    "fields": {
+      "first_name": "First name",
+      "last_name": "Last name",
+      "date_of_birth": "Date of birth",
+      "email": "Email",
+      "phone": "Phone",
+      "mobile": "Mobile",
+      "street": "Street",
+      "house_number": "House number",
+      "postcode": "Postcode",
+      "city": "City"
+    },
+    "currentEmpty": "still empty",
+    "willFill": "Will be filled",
+    "willKeep": "Stays unchanged",
+    "currentLoading": "Loading current data…",
+    "currentError": "The candidate's current data could not be loaded, so accepting is disabled.",
+    "noFields": "This CV produced no fields that we take over.",
+    "experiences": {
+      "title_one": "{{count}} work experience from the CV",
+      "title_other": "{{count}} work experiences from the CV"
+    },
+    "educations": {
+      "title_one": "{{count}} education from the CV",
+      "title_other": "{{count}} educations from the CV"
+    },
+    "ongoing": "present",
+    "fillOnlyNotice": "Accepting only fills empty fields. Fields that already hold a value stay unchanged.",
+    "nothingToFill": "Every field from this CV already holds a value on the record. Accepting changes nothing.",
+    "appendNotice": "Work experience and education are added, never overwritten.",
+    "dropped_one": "{{count}} field from the CV falls outside what we take over and was ignored.",
+    "dropped_other": "{{count}} fields from the CV fall outside what we take over and were ignored.",
+    "noFreeText": "Free text from the CV (summary, motivation, remarks) is deliberately never taken over.",
+    "accept": "Accept",
+    "reject": "Do not accept",
+    "acceptConfirm_one": "Fill {{count}} empty field with the data from the CV? Fields that already hold a value stay unchanged.",
+    "acceptConfirm_other": "Fill {{count}} empty fields with the data from the CV? Fields that already hold a value stay unchanged.",
+    "rejectConfirm": "Do not accept this CV proposal? Nothing will be filled; the proposal stays visible on this application.",
+    "accepted": "CV proposal accepted.",
+    "rejected": "CV proposal not accepted.",
+    "resultApplied_one": "{{count}} field filled.",
+    "resultApplied_other": "{{count}} fields filled.",
+    "resultSkipped_one": "{{count}} field skipped because it already held a value.",
+    "resultSkipped_other": "{{count}} fields skipped because they already held a value.",
+    "resultNothing": "Nothing was filled: every field already held a value.",
+    "readOnly": "You do not have permission to take over CV data.",
+    "reviewedBy": "Reviewed by {{name}} on {{date}}",
+    "reviewedOn": "Reviewed on {{date}}"
+  },
   "matchScore": {
     "title": "Match score",
     "overall": "Overall",

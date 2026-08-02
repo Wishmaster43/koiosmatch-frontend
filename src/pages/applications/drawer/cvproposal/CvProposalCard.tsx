@@ -1,0 +1,172 @@
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import { AlertTriangle, Check, X } from 'lucide-react'
+import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import SoftChip from '@/components/ui/SoftChip'
+import { useConfirm } from '@/hooks/useConfirm'
+import { useDateFormat } from '@/lib/datetime'
+import { BTN_H } from '@/config/buttonMetrics'
+import { buildCvProposalDiff } from '@/pages/applications/data/mapCvProposal'
+import CvProposalDiffTable from './CvProposalDiffTable'
+import CvProposalRepeatables from './CvProposalRepeatables'
+import type { CvProposal } from '@/pages/applications/data/mapCvProposal'
+import type { CvProposalDecision } from './useCvParseProposals'
+
+// Status → semantic token. Pending is a WARNING, not a neutral note: an unread
+// proposal means CV data is sitting on this application that nobody checked yet.
+const STATUS_COLOR: Record<CvProposal['status'], string> = {
+  pending: 'var(--color-warning)',
+  accepted: 'var(--color-success)',
+  rejected: 'var(--text-muted)',
+}
+
+const noticeStyle = { fontSize: 11, color: 'var(--text-muted)' }
+const btnBase = { display: 'inline-flex', alignItems: 'center', gap: 5, height: BTN_H, padding: '0 12px',
+  fontSize: 12, fontWeight: 500 as const, borderRadius: 8, cursor: 'pointer' }
+
+interface CvProposalCardProps {
+  proposal: CvProposal
+  /** The candidate's current record; null while it is still loading or failed. */
+  currentCandidate: Record<string, unknown> | null
+  currentLoading: boolean
+  currentError: boolean
+  canDecide: boolean
+  deciding: boolean
+  onDecide: (proposalId: CvProposal['id'], verb: CvProposalDecision) => void
+  /** The accept/reject RESPONSE for this proposal, when it was decided just now. */
+  decidedResult: CvProposal | null
+}
+
+/**
+ * CvProposalCard — one CV-parse proposal on an application.
+ *
+ * A careersite CV is parsed with NO human present, so nothing was written: this
+ * card shows a PROPOSAL and the recruiter decides. Everything here exists to make
+ * that decision informed rather than reflexive — the current dossier value next
+ * to the CV value, a per-field statement of what accepting would actually do, and
+ * a CV badge on every AI-read value because dates and employers are misread often.
+ *
+ * Accept is all-or-nothing on the API (there is no per-field accept route) and
+ * fill-blank-only in CvParseProposalApplier — so we never render a per-field
+ * toggle we cannot honour, and we say plainly that filled fields stay untouched.
+ */
+export default function CvProposalCard({
+  proposal, currentCandidate, currentLoading, currentError, canDecide, deciding, onDecide, decidedResult,
+}: CvProposalCardProps) {
+  const { t } = useTranslation(['applications', 'common'])
+  const { formatDateTime } = useDateFormat()
+  const { confirm, dialog } = useConfirm()
+
+  // The comparison only exists once the candidate's current values are loaded —
+  // without them every field would look empty and promise a fill that never lands.
+  const diff = useMemo(
+    () => (currentCandidate ? buildCvProposalDiff(proposal, currentCandidate) : null),
+    [proposal, currentCandidate],
+  )
+
+  const isPending = proposal.status === 'pending'
+  const extraRows = proposal.experiences.length + proposal.educations.length
+  const hasContent = Object.keys(proposal.scalars).length > 0 || extraRows > 0
+  // Accept needs a real comparison in front of the recruiter; without it the
+  // button would be a blind write, so it stays disabled (no fake affordance).
+  const canAccept = canDecide && !deciding && diff != null
+
+  // Accept/reject both go through the house confirm — the decision is a write on
+  // a candidate dossier, never a single stray click.
+  const askDecide = (verb: CvProposalDecision) => {
+    const message = verb === 'accept'
+      ? t('cvProposal.acceptConfirm', { count: diff?.fillCount ?? 0 })
+      : t('cvProposal.rejectConfirm')
+    confirm(message, () => onDecide(proposal.id, verb), {
+      danger: verb === 'reject',
+      confirmLabel: verb === 'accept' ? t('cvProposal.accept') : t('cvProposal.reject'),
+    })
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {/* Header — who produced this and when, plus the decision state. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <KoiosAiMark size={22} />
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('cvProposal.cardTitle')}</span>
+        <SoftChip label={t(`cvProposal.status.${proposal.status}`)} color={STATUS_COLOR[proposal.status]} />
+        {proposal.createdAt && (
+          <span style={noticeStyle}>{t('cvProposal.readOn', { date: formatDateTime(proposal.createdAt) })}</span>
+        )}
+        {proposal.model && <span style={noticeStyle}>{t('cvProposal.modelLabel', { model: proposal.model })}</span>}
+      </div>
+
+      {isPending ? (
+        <>
+          {/* The safety statement, first thing the recruiter reads. */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 12, color: 'var(--color-warning)' }}>
+            <AlertTriangle size={13} style={{ flexShrink: 0, marginTop: 1 }} />
+            <span>{t('cvProposal.intro')}</span>
+          </div>
+
+          {/* Four states for the current-values fetch that the diff depends on. */}
+          {currentLoading && <div style={noticeStyle}>{t('cvProposal.currentLoading')}</div>}
+          {currentError && (
+            <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('cvProposal.currentError')}</div>
+          )}
+          {!hasContent && <div style={{ ...noticeStyle, fontStyle: 'italic' }}>{t('cvProposal.noFields')}</div>}
+
+          {diff && diff.rows.length > 0 && <CvProposalDiffTable diff={diff} />}
+          <CvProposalRepeatables experiences={proposal.experiences} educations={proposal.educations} />
+
+          {/* What accepting does, in one sentence, before the button. */}
+          {diff && (
+            <div style={noticeStyle}>
+              {diff.fillCount === 0 && extraRows === 0 ? t('cvProposal.nothingToFill') : t('cvProposal.fillOnlyNotice')}
+            </div>
+          )}
+          {extraRows > 0 && <div style={noticeStyle}>{t('cvProposal.appendNotice')}</div>}
+          {/* Key names only — a dropped value is never held, let alone rendered. */}
+          {proposal.droppedFieldKeys.length > 0 && (
+            <div style={noticeStyle}>{t('cvProposal.dropped', { count: proposal.droppedFieldKeys.length })}</div>
+          )}
+          <div style={{ ...noticeStyle, fontStyle: 'italic' }}>{t('cvProposal.noFreeText')}</div>
+
+          {/* The decision. Read-only viewers get an honest line, not a dead button. */}
+          {canDecide ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <button type="button" onClick={() => askDecide('accept')} disabled={!canAccept}
+                style={{ ...btnBase, border: '1px solid var(--color-primary)',
+                  background: canAccept ? 'var(--color-primary-bg)' : 'none',
+                  color: 'var(--color-primary)', cursor: canAccept ? 'pointer' : 'not-allowed',
+                  opacity: canAccept ? 1 : 0.6 }}>
+                <Check size={13} /> {t('cvProposal.accept')}
+              </button>
+              <button type="button" onClick={() => askDecide('reject')} disabled={deciding}
+                style={{ ...btnBase, border: '1px solid var(--color-danger)', background: 'none',
+                  color: 'var(--color-danger)', cursor: deciding ? 'not-allowed' : 'pointer',
+                  opacity: deciding ? 0.6 : 1 }}>
+                <X size={13} /> {t('cvProposal.reject')}
+              </button>
+            </div>
+          ) : (
+            <div style={noticeStyle}>{t('cvProposal.readOnly')}</div>
+          )}
+        </>
+      ) : (
+        <>
+          {/* Decided — who and when, then what actually landed (accept only). */}
+          <div style={noticeStyle}>
+            {proposal.reviewedBy
+              ? t('cvProposal.reviewedBy', { name: proposal.reviewedBy, date: proposal.reviewedAt ? formatDateTime(proposal.reviewedAt) : '—' })
+              : t('cvProposal.reviewedOn', { date: proposal.reviewedAt ? formatDateTime(proposal.reviewedAt) : '—' })}
+          </div>
+          {proposal.status === 'accepted' && decidedResult && (
+            <div style={noticeStyle}>
+              {decidedResult.appliedFields.length === 0
+                ? t('cvProposal.resultNothing')
+                : t('cvProposal.resultApplied', { count: decidedResult.appliedFields.length })}
+              {decidedResult.skippedFields.length > 0 && ` · ${t('cvProposal.resultSkipped', { count: decidedResult.skippedFields.length })}`}
+            </div>
+          )}
+        </>
+      )}
+      {dialog}
+    </div>
+  )
+}

@@ -180,6 +180,10 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     status: statusValue,
     statusLabel: (status && typeof status === 'object') ? status.label : c.status_label,
     statusColor: (status && typeof status === 'object') ? status.color : c.status_color,
+    // KLANT-FASE-1: the lifecycle phase slug. Both resources send a bare string, but
+    // the column is null-safe backend-side, so an older payload may omit it entirely —
+    // '' then means "no phase yet" and the chip falls back to a dash.
+    phase: typeof c.phase === 'string' ? c.phase : '',
     owner: owner.name ?? c.account_manager ?? c.owner_name ?? '',
     ownerId: owner.id ?? c.owner_id ?? null,
     ownerInitials: initialsOf(owner.name ?? c.account_manager ?? c.owner_name ?? ''),

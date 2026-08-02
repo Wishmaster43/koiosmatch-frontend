@@ -15,6 +15,10 @@ import type { Task, ApiTask } from '@/types/task'
 
 interface UseTasksDataParams {
   showArchived: boolean
+  // NUMMER-1: an exact reference-number lookup (T-00042). When set, both fetches
+  // send `?ref=` and the server returns just that task (TaskQuery returns early on
+  // ref, so no other filter can hide it). Null = the normal free-text page.
+  refQuery?: string | null
   statuses: TaskLookupItem[]
   priorities: TaskLookupItem[]
   types: TaskLookupItem[]
@@ -25,7 +29,7 @@ interface UseTasksDataParams {
 }
 
 export function useTasksData({
-  showArchived, statuses, priorities, types, statusMeta, priorityMeta, typeMeta, doneStatusValues,
+  showArchived, refQuery = null, statuses, priorities, types, statusMeta, priorityMeta, typeMeta, doneStatusValues,
 }: UseTasksDataParams) {
   const [tasks,    setTasks]    = useState<Task[]>([])
   const [loading,  setLoading]  = useState(true)
@@ -51,7 +55,9 @@ export function useTasksData({
   useEffect(() => {
     const ctrl = new AbortController()
     setLoading(true); setError(false)
-    api.get('/tasks', { signal: ctrl.signal })
+    // NUMMER-1: `?ref=` narrows the fetch to the one task carrying that number;
+    // without it the request shape stays exactly as before (no params at all).
+    api.get('/tasks', { signal: ctrl.signal, params: refQuery ? { ref: refQuery } : undefined })
       .then(res => setTasks(unwrapList<ApiTask>(res).rows.map(mapTask)))
       .catch(err => {
         if (isAbortError(err)) return
@@ -59,7 +65,7 @@ export function useTasksData({
       })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
-  }, [])
+  }, [refQuery])
 
   // All tasks decorated with their lookup labels/colours — the basis for KPIs/donuts/view.
   // Archived (soft-deleted) tasks, fetched lazily while the archived toggle is on
@@ -71,7 +77,7 @@ export function useTasksData({
     if (!showArchived) return
     const ctrl = new AbortController()
     setArchivedError(false)
-    api.get('/tasks', { params: { archived: 1 }, signal: ctrl.signal })
+    api.get('/tasks', { params: refQuery ? { archived: 1, ref: refQuery } : { archived: 1 }, signal: ctrl.signal })
       .then(res => setArchivedTasks(unwrapList<ApiTask>(res).rows.map(mapTask).map(x => ({ ...x, archived: true }))))
       .catch(err => {
         if (isAbortError(err)) return
@@ -81,7 +87,7 @@ export function useTasksData({
         if (err?.response?.status !== 404) setArchivedError(true)
       })
     return () => ctrl.abort()
-  }, [showArchived])
+  }, [showArchived, refQuery])
 
   const all = useMemo(() => (showArchived ? archivedTasks : tasks).map(decorate), [tasks, archivedTasks, showArchived, statuses, priorities, types]) // eslint-disable-line react-hooks/exhaustive-deps
 

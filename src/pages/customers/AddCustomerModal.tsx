@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { X, Building2 } from 'lucide-react'
@@ -6,6 +6,7 @@ import { Field, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useIndustries } from '@/lib/useIndustries'
 import { useLocations } from '@/lib/useLocations'
+import { useCustomerPhases } from '@/lib/useCustomerPhases'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox, row2, row3Even, cardPair } from '@/components/ui/modalCards'
@@ -13,6 +14,9 @@ import type { Id, LookupOption } from '@/types/common'
 
 interface CustomerForm {
   name: string; debtorNumber: string; status: string; ownerId: string; industry: string; city: string
+  // KLANT-FASE-1: lifecycle phase slug (Prospect → Klant). Pre-selected from the
+  // lookup's is_default FLAG, never from a hardcoded "prospect" slug.
+  phase: string
   // BRANCH-1 (Danny 27-07): every customer hangs on one of the tenant's own
   // establishments — same /locations source as the drawer's OverviewTab picker,
   // so the create form and the drawer offer exactly one list.
@@ -28,7 +32,7 @@ interface ModalUser { id: Id; name: string }
 const API_TO_FORM: Record<string, string> = {
   name: 'name', debtor_number: 'debtorNumber', status: 'status', owner_id: 'ownerId', industry: 'industry', city: 'city',
   location_id: 'branchId', website: 'website', employee_count: 'employeeCount', tone_of_voice: 'toneOfVoice',
-  cost_center: 'costCenter', billing_email: 'billingEmail',
+  cost_center: 'costCenter', billing_email: 'billingEmail', phase: 'phase',
 }
 
 /**
@@ -53,6 +57,8 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
   const { t } = useTranslation(['customers', 'common'])
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { industries } = useIndustries()
+  // KLANT-FASE-1: the lifecycle-phase lookup + the is_default phase a new customer starts in.
+  const { phases, defaultPhase } = useCustomerPhases()
   // The tenant's own establishments (GET /locations) — same source as OverviewTab's Vestiging picker.
   const branchOptions = useLocations().map(l => ({ value: String(l.value), label: l.label }))
   const [errors, setErrors] = useState<Record<string, boolean>>({})
@@ -61,8 +67,15 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState<CustomerForm>({
     name: '', debtorNumber: '', status: statuses[0]?.value ?? '', ownerId: '', industry: '', city: '',
+    phase: defaultPhase,
     branchId: '', website: '', employeeCount: '', toneOfVoice: '', costCenter: '', billingEmail: '',
   })
+
+  // The lookup arrives async (one cached GET), so seed the default phase once it lands —
+  // but never overwrite a phase the user already picked.
+  useEffect(() => {
+    setForm(f => (f.phase ? f : { ...f, phase: defaultPhase }))
+  }, [defaultPhase])
 
   const set = (k: keyof CustomerForm, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -94,6 +107,7 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
   }
   const canSubmit = !!form.name.trim() && !saving
   const statusOptions = statuses.map(s => ({ value: s.value, label: s.label }))
+  const phaseOptions = phases.map(p => ({ value: p.value, label: p.label }))
   const userOptions = users.map(u => ({ value: String(u.id), label: u.name }))
 
   return (
@@ -172,10 +186,16 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
             <div>
               <div style={cardHead}>{t('modal.fields.cardOwnerStatus')}</div>
               <div style={cardBox}>
+                <Field label={t('modal.fields.accountManager')}>
+                  <CreatableSelect value={form.ownerId || null} onChange={v => set('ownerId', v)} allowCreate={false}
+                    placeholder={t('modal.fields.selectOwner')} options={userOptions} />
+                </Field>
                 <div style={row2}>
-                  <Field label={t('modal.fields.accountManager')}>
-                    <CreatableSelect value={form.ownerId || null} onChange={v => set('ownerId', v)} allowCreate={false}
-                      placeholder={t('modal.fields.selectOwner')} options={userOptions} />
+                  {/* KLANT-FASE-1: lifecycle phase beside the status — two axes, two
+                      pickers. Pre-selected on the lookup's is_default row. */}
+                  <Field label={t('modal.fields.phase')}>
+                    <CreatableSelect value={form.phase || null} onChange={v => set('phase', v)} allowCreate={false}
+                      placeholder={t('modal.fields.phase')} options={phaseOptions} />
                   </Field>
                   <Field label={t('modal.fields.status')}>
                     {/* Placeholder given even though a default is always selected — it

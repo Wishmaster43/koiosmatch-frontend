@@ -119,6 +119,76 @@
     "functionTitle": "Functie",
     "noFunction": "Nog geen functie ingevuld"
   },
+  "cvProposal": {
+    "title": "Voorstel uit het cv",
+    "cardTitle": "Gegevens uit het meegestuurde cv",
+    "error": "Het cv-voorstel kon niet geladen worden.",
+    "intro": "Deze gegevens zijn door Koios AI uit het meegestuurde cv gelezen. Er is niets opgeslagen: controleer elke waarde en beslis zelf. Datums en werkgevers worden regelmatig verkeerd gelezen.",
+    "readOn": "Gelezen op {{date}}",
+    "modelLabel": "Model: {{model}}",
+    "badge": "cv",
+    "badgeTitle": "Gelezen uit het cv — controleer deze waarde",
+    "tableCaption": "Wat er nu in het dossier staat, wat het cv voorstelt en wat overnemen ermee doet.",
+    "status": {
+      "pending": "Nog niet beoordeeld",
+      "accepted": "Overgenomen",
+      "rejected": "Niet overgenomen"
+    },
+    "columns": {
+      "field": "Veld",
+      "current": "Nu in het dossier",
+      "proposed": "Uit het cv",
+      "result": "Bij overnemen"
+    },
+    "fields": {
+      "first_name": "Voornaam",
+      "last_name": "Achternaam",
+      "date_of_birth": "Geboortedatum",
+      "email": "E-mail",
+      "phone": "Telefoon",
+      "mobile": "Mobiel",
+      "street": "Straat",
+      "house_number": "Huisnummer",
+      "postcode": "Postcode",
+      "city": "Plaats"
+    },
+    "currentEmpty": "nog leeg",
+    "willFill": "Wordt ingevuld",
+    "willKeep": "Blijft ongewijzigd",
+    "currentLoading": "Huidige gegevens laden…",
+    "currentError": "De huidige kandidaatgegevens konden niet geladen worden, daarom is overnemen uitgeschakeld.",
+    "noFields": "Uit dit cv kwamen geen velden die wij overnemen.",
+    "experiences": {
+      "title_one": "{{count}} werkervaring uit het cv",
+      "title_other": "{{count}} werkervaringen uit het cv"
+    },
+    "educations": {
+      "title_one": "{{count}} opleiding uit het cv",
+      "title_other": "{{count}} opleidingen uit het cv"
+    },
+    "ongoing": "heden",
+    "fillOnlyNotice": "Overnemen vult alleen lege velden. Velden die al een waarde hebben, blijven ongewijzigd.",
+    "nothingToFill": "Elk veld uit dit cv heeft in het dossier al een waarde. Overnemen verandert niets.",
+    "appendNotice": "Werkervaring en opleidingen worden toegevoegd, nooit overschreven.",
+    "dropped_one": "{{count}} veld uit het cv valt buiten wat wij overnemen en is genegeerd.",
+    "dropped_other": "{{count}} velden uit het cv vallen buiten wat wij overnemen en zijn genegeerd.",
+    "noFreeText": "Vrije tekst uit het cv (samenvatting, motivatie, toelichting) wordt bewust nooit overgenomen.",
+    "accept": "Overnemen",
+    "reject": "Niet overnemen",
+    "acceptConfirm_one": "{{count}} leeg veld invullen met de gegevens uit het cv? Velden die al een waarde hebben, blijven ongewijzigd.",
+    "acceptConfirm_other": "{{count}} lege velden invullen met de gegevens uit het cv? Velden die al een waarde hebben, blijven ongewijzigd.",
+    "rejectConfirm": "Dit cv-voorstel niet overnemen? Er wordt niets ingevuld; het voorstel blijft zichtbaar bij deze sollicitatie.",
+    "accepted": "Cv-voorstel overgenomen.",
+    "rejected": "Cv-voorstel niet overgenomen.",
+    "resultApplied_one": "{{count}} veld ingevuld.",
+    "resultApplied_other": "{{count}} velden ingevuld.",
+    "resultSkipped_one": "{{count}} veld overgeslagen omdat er al een waarde stond.",
+    "resultSkipped_other": "{{count}} velden overgeslagen omdat er al een waarde stond.",
+    "resultNothing": "Er is niets ingevuld: elk veld had al een waarde.",
+    "readOnly": "Je hebt geen rechten om cv-gegevens over te nemen.",
+    "reviewedBy": "Beoordeeld door {{name}} op {{date}}",
+    "reviewedOn": "Beoordeeld op {{date}}"
+  },
   "matchScore": {
     "title": "Match score",
     "overall": "Algemeen",

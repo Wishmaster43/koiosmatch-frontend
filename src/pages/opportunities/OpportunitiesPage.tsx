@@ -21,6 +21,7 @@ import { useOpportunitiesData } from './hooks/useOpportunitiesData'
 import { useOpportunityArchive } from './hooks/useOpportunityArchive'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
+import { isReferenceQuery } from '@/lib/referenceNumber'
 import { BTN_H } from '@/config/buttonMetrics'
 
 // Single-select donut pick: clicking the active segment clears it.
@@ -56,13 +57,20 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   const [selectedBranch, setSelectedBranch] = usePageMemory<string[]>('opps.branch', [])
   const branchOptions = useBranchOptions()
 
+  // Shared header search (free text stays client-side, R-5). Declared before the data
+  // hook because a reference-number query has to reach it. NUMMER-1: a typed number
+  // (KA-00042) flips the search to an exact server-side `?ref=` lookup — same shared
+  // detector as candidates/customers/vacancies/matches, never a second regex.
+  const [query, setQuery] = usePageMemory('opps.search', '')
+  const refQuery = isReferenceQuery(query.trim()) ? query.trim() : null
+
   // Data layer (§3): list + customers + selection + optimistic mutations.
   const {
     rows, loading, error, customers, users, stages,
     selected, drawerExpanded, setDrawerExpanded,
     selectedIds, toggleRow, toggleAll, clearSelection,
     selectOpportunity, closeDrawer, handleCreated, handleMove, updateOpportunity, reload,
-  } = useOpportunitiesData(showArchived, selectedBranch)
+  } = useOpportunitiesData(showArchived, selectedBranch, refQuery)
 
   // ARCHIVE-1: per-id archive/restore (routes pre-date this sweep; see the hook's
   // own comment). Gated on the SAME permission each route requires server-side —
@@ -81,7 +89,6 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   const [owner,    setOwner]    = usePageMemory<string[]>('opps.owner', []) // selected owner names (donut + panel)
   const [client,   setClient]   = usePageMemory<string[]>('opps.client', []) // selected client names (panel)
   const [addOpen,  setAddOpen]  = useState(false)
-  const [query,    setQuery]    = usePageMemory('opps.search', '')  // shared header search (client-side, R-5)
 
   // "Aflopend" quick-filter (dashboard KPI). Definition MIRRORS the backend's
   // expiring_opps exactly (DashboardService): close date TODAY t/m +14 dagen,
@@ -145,7 +152,9 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
       if (stage.length  && !stage.includes(r.stage))   return false
       if (owner.length  && !owner.includes(r.owner))   return false
       if (client.length && !client.includes(r.client)) return false
-      if (query.trim() && !`${r.title ?? ''} ${r.client ?? ''}`.toLowerCase().includes(query.trim().toLowerCase())) return false
+      // A reference-number query already narrowed `rows` server-side (exact `?ref=`) —
+      // skip the free-text re-filter so the single matched deal isn't filtered back out.
+      if (!refQuery && query.trim() && !`${r.title ?? ''} ${r.client ?? ''}`.toLowerCase().includes(query.trim().toLowerCase())) return false
       // Aflopend: close date within today..+14 days (same window as the KPI count).
       if (expiringOnly) {
         const d = r.expectedCloseAt ? new Date(r.expectedCloseAt).getTime() : null
@@ -153,7 +162,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
       }
       return true
     })
-  }, [rows, stage, owner, client, query, expiringOnly, dayStart, showArchived])
+  }, [rows, stage, owner, client, query, refQuery, expiringOnly, dayStart, showArchived])
 
   const totalRows = filteredAll.length
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))

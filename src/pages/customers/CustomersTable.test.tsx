@@ -21,6 +21,26 @@ vi.mock('@/lib/datetime', () => ({
 // Tenant app gate (JOB2 coupling column) — controlled per test, defaults to "off".
 const mockUseApps = vi.fn()
 vi.mock('@/context/AppsContext', () => ({ useApps: () => mockUseApps() }))
+// KLANT-FASE-1: the phase lookup is stubbed with TENANT-RENAMED rows, so the chip can
+// only show the right label by resolving the slug through the lookup.
+/* eslint-disable no-restricted-syntax -- DATA: fixture colours as the API returns them, not UI styling */
+vi.mock('@/lib/useCustomerPhases', () => ({
+  useCustomerPhases: () => ({
+    phases: [
+      { value: 'interesse', label: 'Interesse', color: '#1B60A9', isCustomer: false, isDefault: true },
+      { value: 'vaste_klant', label: 'Vaste klant', color: '#16A34A', isCustomer: true, isDefault: false },
+    ],
+    phaseMeta: (v?: string | null) => (
+      v === 'vaste_klant' ? { value: v, label: 'Vaste klant', color: '#16A34A', isCustomer: true, isDefault: false }
+        : v === 'interesse' ? { value: v, label: 'Interesse', color: '#1B60A9', isCustomer: false, isDefault: true }
+          : { value: v ?? '', label: v ?? '', color: '#9CA3AF', isCustomer: false, isDefault: false }
+    ),
+    defaultPhase: 'interesse',
+    isCustomerPhase: (v?: string | null) => v === 'vaste_klant',
+    loading: false,
+  }),
+}))
+/* eslint-enable no-restricted-syntax */
 beforeEach(() => { mockUseApps.mockReturnValue({ isAppEnabled: () => false }) })
 // Real (nl) translations, since mocking '@/lib/datetime' above removes the
 // transitive '@/i18n' side-effect import the production component relies on.
@@ -94,5 +114,41 @@ describe('CustomersTable · backoffice coupling indicator (JOB2)', () => {
     rerender(<CustomersTable rows={[row]} statusMeta={statusMeta} />)
     expect(screen.queryByRole('img', { name: /HelloFlex/ })).toBeNull()
     expect(screen.queryByRole('img', { name: /Shiftmanager/ })).toBeNull()
+  })
+})
+
+describe('CustomersTable · lifecycle phase chip (KLANT-FASE-1)', () => {
+  it('renders the phase LABEL from the tenant lookup, not the stored slug', () => {
+    const row = { ...baseCustomer, id: 50, phase: 'vaste_klant' } as Customer
+    render(<CustomersTable rows={[row]} statusMeta={statusMeta} />)
+
+    expect(screen.getByText('Vaste klant')).toBeInTheDocument()
+    expect(screen.queryByText('vaste_klant')).toBeNull()
+  })
+
+  it('puts the phase column directly NEXT TO the status column — two chips, two questions', () => {
+    const row = { ...baseCustomer, id: 51, phase: 'interesse' } as Customer
+    const { container } = render(<CustomersTable rows={[row]} statusMeta={statusMeta} />)
+
+    const headers = Array.from(container.querySelectorAll('thead th'))
+    const phaseIdx = headers.findIndex(h => h.textContent?.includes('Fase'))
+    const statusIdx = headers.findIndex(h => h.textContent?.includes('Status'))
+    expect(phaseIdx).toBeGreaterThan(-1)
+    expect(statusIdx).toBe(phaseIdx + 1)
+
+    // Both cells carry a chip in the same row — the phase one is not swallowed by status.
+    const cells = container.querySelectorAll('tbody tr td')
+    expect(cells[phaseIdx].textContent).toBe('Interesse')
+    expect(cells[statusIdx].textContent).toBe('Actief')
+  })
+
+  it('shows a dash for a customer without a phase — never an empty chip', () => {
+    const row = { ...baseCustomer, id: 52, phase: '' } as Customer
+    const { container } = render(<CustomersTable rows={[row]} statusMeta={statusMeta} />)
+
+    const headers = Array.from(container.querySelectorAll('thead th'))
+    const phaseIdx = headers.findIndex(h => h.textContent?.includes('Fase'))
+    const cells = container.querySelectorAll('tbody tr td')
+    expect(cells[phaseIdx].textContent).toBe('—')
   })
 })

@@ -10,6 +10,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { useApps } from '@/context/AppsContext'
 import { KoiosAdvicePill } from '@/lib/koiosAdviceMeta'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { useCustomerPhases } from '@/lib/useCustomerPhases'
 import type { Customer } from '@/types/customer'
 import type { Id } from '@/types/common'
 
@@ -65,6 +66,9 @@ export default function CustomersTable({
   const apps = useApps()
   const showHelloflex = apps?.isAppEnabled('hf') ?? false
   const showShiftmanager = apps?.isAppEnabled('shiftmanager') ?? false
+  // KLANT-FASE-1: the lifecycle-phase lookup (session-cached, one GET). Fetched here
+  // rather than passed in, so the phase chip needs no new page-level plumbing.
+  const { phaseMeta } = useCustomerPhases()
 
   // Column order mirrors the candidates blueprint (§3A): identity → qualification →
   // status → counts → Koios → dates → accountmanager LAST (Danny 2026-07-14 table
@@ -90,6 +94,19 @@ export default function CustomersTable({
       sortable: true, sortValue: c => c.referenceNumber ?? '', render: c => c.referenceNumber || '—',
     },
     { key: 'industry',    header: t('cols.industry'),    nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.industry, render: c => c.industry || '—' },
+    {
+      // KLANT-FASE-1: lifecycle phase (Prospect → Klant) — its own axis, so it sits
+      // NEXT TO the status chip: two chips, two questions. Label/colour come from the
+      // tenant lookup; empty phase renders a dash rather than an empty chip.
+      key: 'phase', header: t('cols.phase'), nowrap: true, sortable: true,
+      sortValue: c => phaseMeta(c.phase).label,
+      render: c => {
+        if (!c.phase) return <span style={mutedCell}>—</span>
+        const m = phaseMeta(c.phase)
+        // Lifecycle axis → round soft chip, identical treatment to the candidate phase.
+        return <SoftChip label={m.label} color={m.color} round />
+      },
+    },
     {
       key: 'status', header: t('cols.status'), sortable: true, sortValue: c => statusMeta(String(c.status)).label ?? String(c.status),
       render: c => {

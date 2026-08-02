@@ -119,6 +119,76 @@
     "functionTitle": "Funktion",
     "noFunction": "Noch keine Funktion angegeben"
   },
+  "cvProposal": {
+    "title": "Vorschlag aus dem Lebenslauf",
+    "cardTitle": "Daten aus dem beigefügten Lebenslauf",
+    "error": "Der Lebenslauf-Vorschlag konnte nicht geladen werden.",
+    "intro": "Koios AI hat diese Werte aus dem mitgeschickten Lebenslauf gelesen. Es wurde nichts gespeichert: Prüfen Sie jeden Wert und entscheiden Sie selbst. Daten und Arbeitgeber werden regelmäßig falsch gelesen.",
+    "readOn": "Gelesen am {{date}}",
+    "modelLabel": "Modell: {{model}}",
+    "badge": "cv",
+    "badgeTitle": "Aus dem Lebenslauf gelesen — bitte prüfen",
+    "tableCaption": "Was jetzt in der Akte steht, was der Lebenslauf vorschlägt und was die Übernahme bewirkt.",
+    "status": {
+      "pending": "Noch nicht geprüft",
+      "accepted": "Übernommen",
+      "rejected": "Nicht übernommen"
+    },
+    "columns": {
+      "field": "Feld",
+      "current": "Jetzt in der Akte",
+      "proposed": "Aus dem Lebenslauf",
+      "result": "Bei Übernahme"
+    },
+    "fields": {
+      "first_name": "Vorname",
+      "last_name": "Nachname",
+      "date_of_birth": "Geburtsdatum",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "mobile": "Mobil",
+      "street": "Straße",
+      "house_number": "Hausnummer",
+      "postcode": "Postleitzahl",
+      "city": "Ort"
+    },
+    "currentEmpty": "noch leer",
+    "willFill": "Wird ausgefüllt",
+    "willKeep": "Bleibt unverändert",
+    "currentLoading": "Aktuelle Daten werden geladen…",
+    "currentError": "Die aktuellen Kandidatendaten konnten nicht geladen werden, deshalb ist die Übernahme deaktiviert.",
+    "noFields": "Aus diesem Lebenslauf kamen keine Felder, die wir übernehmen.",
+    "experiences": {
+      "title_one": "{{count}} Berufserfahrung aus dem Lebenslauf",
+      "title_other": "{{count}} Berufserfahrungen aus dem Lebenslauf"
+    },
+    "educations": {
+      "title_one": "{{count}} Ausbildung aus dem Lebenslauf",
+      "title_other": "{{count}} Ausbildungen aus dem Lebenslauf"
+    },
+    "ongoing": "heute",
+    "fillOnlyNotice": "Die Übernahme füllt nur leere Felder. Felder mit vorhandenem Wert bleiben unverändert.",
+    "nothingToFill": "Jedes Feld aus diesem Lebenslauf hat in der Akte bereits einen Wert. Die Übernahme ändert nichts.",
+    "appendNotice": "Berufserfahrung und Ausbildungen werden hinzugefügt, nie überschrieben.",
+    "dropped_one": "{{count}} Feld aus dem Lebenslauf liegt außerhalb dessen, was wir übernehmen, und wurde ignoriert.",
+    "dropped_other": "{{count}} Felder aus dem Lebenslauf liegen außerhalb dessen, was wir übernehmen, und wurden ignoriert.",
+    "noFreeText": "Freitext aus dem Lebenslauf (Zusammenfassung, Motivation, Anmerkungen) wird bewusst nie übernommen.",
+    "accept": "Übernehmen",
+    "reject": "Nicht übernehmen",
+    "acceptConfirm_one": "{{count}} leeres Feld mit den Daten aus dem Lebenslauf füllen? Felder mit vorhandenem Wert bleiben unverändert.",
+    "acceptConfirm_other": "{{count}} leere Felder mit den Daten aus dem Lebenslauf füllen? Felder mit vorhandenem Wert bleiben unverändert.",
+    "rejectConfirm": "Diesen Lebenslauf-Vorschlag nicht übernehmen? Es wird nichts ausgefüllt; der Vorschlag bleibt bei dieser Bewerbung sichtbar.",
+    "accepted": "Lebenslauf-Vorschlag übernommen.",
+    "rejected": "Lebenslauf-Vorschlag nicht übernommen.",
+    "resultApplied_one": "{{count}} Feld ausgefüllt.",
+    "resultApplied_other": "{{count}} Felder ausgefüllt.",
+    "resultSkipped_one": "{{count}} Feld übersprungen, weil bereits ein Wert vorhanden war.",
+    "resultSkipped_other": "{{count}} Felder übersprungen, weil bereits ein Wert vorhanden war.",
+    "resultNothing": "Es wurde nichts ausgefüllt: Jedes Feld hatte bereits einen Wert.",
+    "readOnly": "Sie haben keine Berechtigung, Lebenslaufdaten zu übernehmen.",
+    "reviewedBy": "Geprüft von {{name}} am {{date}}",
+    "reviewedOn": "Geprüft am {{date}}"
+  },
   "matchScore": {
     "title": "Match-Score",
     "overall": "Gesamt",

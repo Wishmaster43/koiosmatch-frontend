@@ -9,8 +9,16 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CommunicationTab from './CommunicationTab'
+import { invalidateRetentionConsentMonths } from './useRetentionConsentMonths'
 import type { Candidate } from '@/types/candidate'
 
+// The retention block reads the tenant consent window from GET /settings; keep the
+// named exports real (other modules in this tree import unwrapList & co).
+const { apiGet } = vi.hoisted(() => ({ apiGet: vi.fn() }))
+vi.mock('@/lib/api', async importOriginal => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  default: { get: apiGet },
+}))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, locale: 'nl-NL' }) }))
 vi.mock('@/lib/useNoteTypes', () => ({ useNoteTypes: () => ({ types: [], writableTypes: [] }), SYSTEM_NOTE_TYPES: new Set() }))
 vi.mock('@/lib/useLastContactTypes', () => ({ useLastContactTypes: () => ({ types: [] }) }))
@@ -19,7 +27,12 @@ vi.mock('@/lib/useLastContactTypes', () => ({ useLastContactTypes: () => ({ type
 // permission-less behaviour; the retention describe block overrides per test.
 const mockUseAuth = vi.fn()
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
-beforeEach(() => { mockUseAuth.mockReturnValue({ hasPermission: () => false }) })
+beforeEach(() => {
+  mockUseAuth.mockReturnValue({ hasPermission: () => false })
+  invalidateRetentionConsentMonths()
+  apiGet.mockReset()
+  apiGet.mockResolvedValue({ data: { retention_consent_months: '24' } })
+})
 // Mutable per-test notes list (vi.hoisted so the mock factory below can read it) —
 // the status-change pencil tests need a system note in the list; every other test
 // keeps the original empty list.
@@ -232,6 +245,35 @@ describe('CommunicationTab · retention (AVG-RET-2, Danny 22-07 punt 8)', () => 
     await openConsent(user)
     await user.click(screen.getByLabelText('communication.consentRetentionOptIn'))
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ retentionOptIn: false, retentionConsentAt: null }))
+  })
+
+  // "Bewaartoestemming verloopt" (Danny 2026-08-02): the tab must wire the block that
+  // states the consent's OWN validity — a checked box next to a consent that lapsed
+  // months ago is exactly the lie this project forbids. Date is faked (Date only, so
+  // timers stay real for userEvent) to keep the lapse boundary deterministic.
+  const withFakeNow = async (run: () => Promise<void>) => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date('2026-08-02T12:00:00Z'))
+    try { await run() } finally { vi.useRealTimers() }
+  }
+
+  it('states plainly that a lapsed consent has lapsed, right next to the opt-in box', async () => {
+    await withFakeNow(async () => {
+      const user = userEvent.setup()
+      render(<CommunicationTab c={candidate({ retentionOptIn: true, retentionConsentAt: '2023-01-15T10:00:00.000Z' })} />)
+      await openConsent(user)
+      expect(await screen.findByText(/communication\.retentionConsentLapsed/)).toBeInTheDocument()
+      expect(screen.queryByText(/communication\.retentionConsentValidUntil/)).toBeNull()
+    })
+  })
+
+  it('shows until WHEN a still-valid consent holds', async () => {
+    await withFakeNow(async () => {
+      const user = userEvent.setup()
+      render(<CommunicationTab c={candidate({ retentionOptIn: true, retentionConsentAt: '2026-01-15T10:00:00.000Z' })} />)
+      await openConsent(user)
+      expect(await screen.findByText(/communication\.retentionConsentValidUntil/)).toBeInTheDocument()
+    })
   })
 })
 

@@ -20,6 +20,7 @@
     "coupling": "Verknüpfung",
     "debtorNumber": "Debitorennr.",
     "status": "Status",
+    "phase": "Phase",
     "accountManager": "Account-Manager",
     "locations": "Standorte",
     "departments": "Abteilungen",
@@ -93,7 +94,8 @@
     },
     "changelog": "Änderungen",
     "photoUpload": "Logo hochladen",
-    "photoRemove": "Logo entfernen"
+    "photoRemove": "Logo entfernen",
+    "phase": "Phase"
   },
   "overview": {
     "general": "Allgemein",
@@ -491,7 +493,8 @@
       "cityPlaceholder": "z. B. Gorinchem",
       "cardCompany": "Unternehmen",
       "cardBranch": "Niederlassung & Ort",
-      "cardOwnerStatus": "Eigentümer & Status"
+      "cardOwnerStatus": "Eigentümer & Status",
+      "phase": "Phase"
     }
   },
   "subModal": {

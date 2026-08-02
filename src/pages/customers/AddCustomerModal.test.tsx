@@ -20,6 +20,22 @@ vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: ['Zo
 vi.mock('@/lib/useLocations', () => ({
   useLocations: () => [{ value: 'loc-1', label: 'Vestiging Noord' }, { value: 'loc-2', label: 'Vestiging Zuid' }],
 }))
+// KLANT-FASE-1: TENANT-RENAMED phases — the is_default row is NOT first and is NOT
+// called 'prospect', so a slug/index-based default would pick the wrong one.
+/* eslint-disable no-restricted-syntax -- DATA: fixture colours as the API returns them, not UI styling */
+vi.mock('@/lib/useCustomerPhases', () => ({
+  useCustomerPhases: () => ({
+    phases: [
+      { value: 'vaste_klant', label: 'Vaste klant', color: '#16A34A', isCustomer: true, isDefault: false },
+      { value: 'interesse', label: 'Interesse', color: '#1B60A9', isCustomer: false, isDefault: true },
+    ],
+    phaseMeta: (v?: string | null) => ({ value: v ?? '', label: v ?? '', color: '#9CA3AF', isCustomer: false, isDefault: false }),
+    defaultPhase: 'interesse',
+    isCustomerPhase: (v?: string | null) => v === 'vaste_klant',
+    loading: false,
+  }),
+}))
+/* eslint-enable no-restricted-syntax */
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
@@ -96,5 +112,25 @@ describe('AddCustomerModal · new fields ride along in the whole form object (Da
       costCenter: 'CC-42',
       billingEmail: 'facturen@rivas.nl',
     }))
+  })
+})
+
+describe('AddCustomerModal · lifecycle phase (KLANT-FASE-1)', () => {
+  it('pre-selects the is_default phase — read off the flag, not the "prospect" slug', () => {
+    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
+    expect(screen.getByRole('button', { name: ct('modal.fields.phase') })).toHaveTextContent('Interesse')
+  })
+
+  it('hands the picked phase to onCreate in the same whole-form object', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(<AddCustomerModal onClose={() => {}} onCreate={onCreate} users={users} statuses={statuses} />)
+
+    await user.type(screen.getByLabelText(ct('modal.fields.name'), { exact: false }), 'Zorgpartners')
+    await user.click(screen.getByRole('button', { name: ct('modal.fields.phase') }))
+    await user.click(screen.getByRole('button', { name: 'Vaste klant' }))
+    await user.click(screen.getByRole('button', { name: ct('modal.create') }))
+
+    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ phase: 'vaste_klant' }))
   })
 })

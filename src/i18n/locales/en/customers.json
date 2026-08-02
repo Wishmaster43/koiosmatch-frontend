@@ -20,6 +20,7 @@
     "coupling": "Link",
     "debtorNumber": "Debtor no.",
     "status": "Status",
+    "phase": "Phase",
     "accountManager": "Account manager",
     "locations": "Locations",
     "departments": "Departments",
@@ -93,7 +94,8 @@
     },
     "changelog": "Changelog",
     "photoUpload": "Upload logo",
-    "photoRemove": "Remove logo"
+    "photoRemove": "Remove logo",
+    "phase": "Phase"
   },
   "overview": {
     "general": "General",
@@ -491,7 +493,8 @@
       "cityPlaceholder": "E.g. Gorinchem",
       "cardCompany": "Company",
       "cardBranch": "Branch & city",
-      "cardOwnerStatus": "Owner & status"
+      "cardOwnerStatus": "Owner & status",
+      "phase": "Phase"
     }
   },
   "subModal": {

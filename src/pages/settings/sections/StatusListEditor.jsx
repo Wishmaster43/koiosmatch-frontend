@@ -14,6 +14,15 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
 import { Toggle } from '../components/SettingsKit'
 
+// Typed label → the immutable backend slug ("Vaste klant" → "vaste_klant"). Diacritics
+// are folded first so "Café-klant" still yields a slug the ^[a-z0-9_]+$ rule accepts;
+// a label with no usable characters falls back to a unique, valid placeholder slug.
+const slugify = (s) => {
+  const base = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 64)
+  return base || `item_${Date.now().toString(36)}`
+}
+
 // extraField (optioneel): { key, label, options: [{value,label}], default } —
 // rendert een extra keuzeveld in de aanmaak-modal + een badge in de rij.
 // flagField (optioneel): { key, label, description } — boolean gedragsvlag (R-1b:
@@ -30,7 +39,11 @@ import { Toggle } from '../components/SettingsKit'
 // yet 404s on GET — pass a calm i18n message and the editor shows it instead of an
 // empty list + live CRUD buttons that would silently fail (§3 no fake affordances).
 // Omitted (default), a 404 stays silently swallowed like every other lookup here.
-export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null, flagField = null, numberField = null, defaultField = null, withIcon = false, iconPicker = null, allowAdd = true, showRank = false, entity = null, notFoundNotice = null }) {
+// withValueSlug (optioneel): the SLUG-shaped lookups (SlugLookupController /
+// CustomerLookupController) validate `value` as REQUIRED on create — this editor only
+// ever sent name/label, so their "+ toevoegen" 422'd. Opt in and the create POST
+// carries a slug derived from the typed name; name-shaped lookups stay untouched.
+export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null, flagField = null, numberField = null, defaultField = null, withIcon = false, iconPicker = null, allowAdd = true, showRank = false, entity = null, notFoundNotice = null, withValueSlug = false }) {
   const { t } = useTranslation('settings')
   // eslint-disable-next-line no-restricted-syntax -- DATA: default swatch colour pre-filled for a newly created lookup row, not UI chrome
   const emptyDraft = () => ({ name: '', color: '#3B8FD4', ...(withIcon ? { icon: '' } : {}), ...(extraField ? { [extraField.key]: extraField.default } : {}), ...(numberField ? { [numberField.key]: numberField.default } : {}), ...(flagField ? { [flagField.key]: false } : {}) })
@@ -92,7 +105,8 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
   }
 
   // One submit for both create (POST) and edit (PUT). Send name + label so both
-  // name-based and label/value-based lookups accept it.
+  // name-based and label/value-based lookups accept it; a slug lookup additionally
+  // needs the immutable `value` on create (withValueSlug).
   const submit = async () => {
     if (!draft.name.trim()) return
     setSaving(true)
@@ -103,7 +117,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
         const updated = unwrap(res) ?? { ...editing, ...body }
         setItems(p => p.map(x => x.id === editing.id ? { ...x, ...updated } : x))
       } else {
-        const res = await api.post(endpoint, body)
+        const res = await api.post(endpoint, withValueSlug ? { ...body, value: slugify(draft.name) } : body)
         setItems(p => [...p, unwrap(res)])
       }
       setShowModal(false); setDraft(emptyDraft()); setEditing(null)

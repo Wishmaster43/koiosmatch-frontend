@@ -6,30 +6,37 @@
  * upload -> mandatory dry-run preview -> confirm -> real result, never a shortcut.
  * Layout mirrors ExportSettings.jsx (left entity sub-nav + right content card) — the
  * two data-exchange screens share one master-detail format (Danny 21-07).
+ *
+ * IMPORT-TREE-1: the backend now also serves a COMBINED whole-customer template
+ * (CustomerTreeImporter) that builds klant + locatie + afdeling + contactpersoon from
+ * one flat file. It arrives through the same templates endpoint, so no plumbing was
+ * needed — what it needed is the EXPLANATION: which of the two paths a user is on,
+ * that the combined file replaces the four-step order rather than adding to it, and
+ * that the four separate files stay the right tool for extending a customer that
+ * already exists (ImportEntityNav + WholeTreeBanner/ImportOrderBanner).
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle, Building, Building2, FileSpreadsheet, Loader2, MapPin, Users } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useImportTemplates } from './importeren/useImportTemplates'
 import { useImportWizard } from './importeren/useImportWizard'
+import ImportEntityNav from './importeren/ImportEntityNav'
 import ImportOrderBanner from './importeren/ImportOrderBanner'
+import WholeTreeBanner from './importeren/WholeTreeBanner'
 import UploadStep from './importeren/UploadStep'
 import PreviewStep from './importeren/PreviewStep'
 import ResultStep from './importeren/ResultStep'
+import { groupTemplates, isWholeTreeTemplate, orderedTemplates } from './importeren/importTemplateShape'
+import { iconForTemplate } from './importeren/importEntityIcon'
 import type { ImportTemplateSummary } from './importeren/importApi'
-
-// UI-only icon per known entity. A future entity the backend adds falls back to a
-// generic icon — the ENTITY LIST ITSELF always comes from the API, never from here.
-const ENTITY_ICONS: Record<string, typeof Building2> = {
-  customers: Building2,
-  locations: MapPin,
-  departments: Building,
-  contacts: Users,
-}
 
 interface EntityWizardProps {
   entity: string
+  wholeTree: boolean
+  /** The template to offer as the OTHER path, or null when there is only one. */
+  otherPathEntity: string | null
+  onSelectEntity: (entity: string) => void
   canView: boolean
   canImport: boolean
 }
@@ -37,12 +44,16 @@ interface EntityWizardProps {
 // The wizard body for the currently selected entity. The parent renders this with
 // `key={entity}` so switching entities remounts fresh hook state instead of
 // carrying over a stale file or preview from the previous selection.
-function EntityWizard({ entity, canView, canImport }: EntityWizardProps) {
+function EntityWizard({ entity, wholeTree, otherPathEntity, onSelectEntity, canView, canImport }: EntityWizardProps) {
   const wizard = useImportWizard(entity)
 
   return (
     <>
-      <ImportOrderBanner entity={entity} />
+      {/* Two files, two rules: the combined file has no import order at all, the four
+          separate ones live or die by it. Showing the wrong banner would be a lie. */}
+      {wholeTree
+        ? <WholeTreeBanner separateEntity={otherPathEntity} onSelectEntity={onSelectEntity} />
+        : <ImportOrderBanner entity={entity} wholeTreeEntity={otherPathEntity} onSelectEntity={onSelectEntity} />}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 24 }}>
         {wizard.step === 'upload' && (
           <UploadStep
@@ -62,12 +73,13 @@ function EntityWizard({ entity, canView, canImport }: EntityWizardProps) {
             runStatus={wizard.run.status}
             runError={wizard.run.status === 'error' ? wizard.run.message : undefined}
             canImport={canImport}
+            wholeTree={wholeTree}
             onConfirm={wizard.confirmImport}
             onBack={wizard.backToUpload}
           />
         )}
         {wizard.step === 'result' && wizard.run.status === 'success' && (
-          <ResultStep result={wizard.run.result} onReset={wizard.reset} />
+          <ResultStep result={wizard.run.result} wholeTree={wholeTree} onReset={wizard.reset} />
         )}
       </div>
     </>
@@ -81,9 +93,13 @@ export default function ImporterenSettings() {
   const { templates, phase, reload } = useImportTemplates()
   const [selected, setSelected] = useState<string | null>(null)
 
-  // Land on the first template once the list arrives; never overrides a user pick.
+  // Land on the first template in DISPLAY order — the combined whole-customer file
+  // when the backend serves one, since that is the answer for a new customer; never
+  // overrides a user pick.
   useEffect(() => {
-    if (phase === 'ready' && templates.length > 0 && !selected) setSelected(templates[0].entity)
+    if (phase === 'ready' && templates.length > 0 && !selected) {
+      setSelected(orderedTemplates(templates)[0]?.entity ?? null)
+    }
   }, [phase, templates, selected])
 
   // Same permission pair for every entity here: locations/departments/contacts are
@@ -92,44 +108,15 @@ export default function ImporterenSettings() {
   const canImport = hasPermission('customers.create')
 
   const selectedTemplate: ImportTemplateSummary | undefined = templates.find((tpl) => tpl.entity === selected)
+  const wholeTree = selectedTemplate ? isWholeTreeTemplate(selectedTemplate.columns) : false
+  const groups = groupTemplates(templates)
+  // The OTHER path to offer from the banner: the combined file while on a separate
+  // one, and the first separate file while on the combined one.
+  const otherPathEntity = (wholeTree ? groups.perEntity[0]?.entity : groups.wholeTree[0]?.entity) ?? null
 
   return (
     <div style={{ display: 'flex', gap: 0, minHeight: 400 }}>
-      {/* Sub-nav — one entity per row, fetched from the API (never hardcoded). */}
-      <div style={{ width: 200, flexShrink: 0, borderRight: '1px solid var(--border)', paddingRight: 16, marginRight: 32 }}>
-        {phase === 'loading' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-muted)', padding: '8px 10px' }}>
-            <Loader2 size={13} className="animate-spin" aria-hidden="true" /> {t('import.loadingTemplates')}
-          </div>
-        )}
-        {phase === 'error' && (
-          <div style={{ padding: '8px 10px' }}>
-            <p style={{ fontSize: 12, color: 'var(--color-danger)', marginBottom: 8 }}>{t('import.loadTemplatesError')}</p>
-            <button type="button" onClick={reload}
-              style={{ fontSize: 12, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-              {t('common:error.retry')}
-            </button>
-          </div>
-        )}
-        {phase === 'ready' && templates.length === 0 && (
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', padding: '8px 10px' }}>{t('import.noTemplates')}</p>
-        )}
-        {phase === 'ready' && templates.map((tpl) => {
-          const Icon = ENTITY_ICONS[tpl.entity] ?? FileSpreadsheet
-          const active = tpl.entity === selected
-          return (
-            <button key={tpl.entity} onClick={() => setSelected(tpl.entity)}
-              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
-                       borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 13, textAlign: 'left',
-                       fontWeight: active ? 600 : 400, marginBottom: 2,
-                       background: active ? 'var(--color-primary-bg)' : 'transparent',
-                       color: active ? 'var(--color-primary)' : 'var(--text)' }}>
-              <Icon size={14} style={{ color: active ? 'var(--color-primary)' : 'var(--text-muted)' }} />
-              {t(`import.entities.${tpl.entity}.label`, { defaultValue: tpl.entity })}
-            </button>
-          )
-        })}
-      </div>
+      <ImportEntityNav templates={templates} phase={phase} selected={selected} onSelect={setSelected} onReload={reload} />
 
       {/* Content */}
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -152,7 +139,7 @@ export default function ImporterenSettings() {
                 icon + title + description row for the selected entity. */}
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
               {(() => {
-                const Icon = ENTITY_ICONS[selectedTemplate.entity] ?? FileSpreadsheet
+                const Icon = iconForTemplate(selectedTemplate)
                 return <Icon size={16} style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: 2 }} />
               })()}
               <div style={{ minWidth: 0 }}>
@@ -164,7 +151,9 @@ export default function ImporterenSettings() {
                 </div>
               </div>
             </div>
-            <EntityWizard key={selectedTemplate.entity} entity={selectedTemplate.entity} canView={canView} canImport={canImport} />
+            <EntityWizard key={selectedTemplate.entity} entity={selectedTemplate.entity} wholeTree={wholeTree}
+              otherPathEntity={otherPathEntity} onSelectEntity={setSelected}
+              canView={canView} canImport={canImport} />
           </>
         )}
       </div>

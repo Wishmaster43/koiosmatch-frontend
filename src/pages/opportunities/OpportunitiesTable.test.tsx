@@ -1,0 +1,61 @@
+/**
+ * OpportunitiesTable — the reference-number column (NUMMER-1). Mirrors
+ * MatchesTable.test.tsx: real (nl) i18n, mocked useAllSettings/useDateFormat.
+ * The column is what makes the number you just searched for scannable in the
+ * list; without it a ?ref= hit lands on a row that shows no number at all.
+ */
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import OpportunitiesTable from './OpportunitiesTable'
+import type { Opportunity } from '@/types/opportunity'
+
+vi.mock('@/lib/settings/useAllSettings', () => ({
+  useAllSettings: () => ({}),
+  getBoolSetting: (_s: unknown, _key: string, fallback: boolean) => fallback,
+}))
+// Identity date formatter + nl locale — this file doesn't cover date rendering itself.
+vi.mock('@/lib/datetime', () => ({
+  useLocale: () => 'nl-NL',
+  useDateFormat: () => ({ formatDate: (v: unknown) => (v == null ? '—' : String(v)), formatDateTime: (v: unknown) => String(v) }),
+}))
+// Real (nl) translations, since mocking '@/lib/datetime' above removes the
+// transitive '@/i18n' side-effect import the production component relies on.
+import '@/i18n'
+
+const baseRow = {
+  id: 'o1', title: 'Detachering ICU', initials: 'DI', client: 'Zorgpartners',
+  stage: 'Lead', stageValue: 'lead', stageColor: null, value: null, hours: null,
+  owner: '', date: '2026-01-01', expectedCloseAt: null, archived: false,
+} as unknown as Opportunity
+
+describe('OpportunitiesTable · reference number column (NUMMER-1)', () => {
+  it('renders the real referenceNumber value, and a plain dash when absent — never a blank cell', () => {
+    const withRef = { ...baseRow, id: 'o10', referenceNumber: 'KA-00042' }
+    const withoutRef = { ...baseRow, id: 'o11', referenceNumber: '' }
+    const { container } = render(<OpportunitiesTable rows={[withRef, withoutRef]} />)
+
+    const headerCell = screen.getByText('Referentienr.').closest('th') as HTMLElement
+    const col = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    const values = Array.from(container.querySelectorAll('tbody tr')).map(r => r.children[col].textContent)
+    expect(values).toContain('KA-00042')
+    expect(values).toContain('—')
+  })
+
+  it('sorts by reference number when the column header is clicked', async () => {
+    const user = userEvent.setup()
+    const rows = [
+      { ...baseRow, id: 'o20', referenceNumber: 'KA-00003' },
+      { ...baseRow, id: 'o21', referenceNumber: 'KA-00001' },
+      { ...baseRow, id: 'o22', referenceNumber: 'KA-00002' },
+    ]
+    const { container } = render(<OpportunitiesTable rows={rows} />)
+
+    const headerCell = screen.getByText('Referentienr.').closest('th') as HTMLElement
+    const col = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    await user.click(within(headerCell).getByRole('button'))
+
+    const values = Array.from(container.querySelectorAll('tbody tr')).map(r => r.children[col].textContent)
+    expect(values).toEqual(['KA-00001', 'KA-00002', 'KA-00003'])
+  })
+})

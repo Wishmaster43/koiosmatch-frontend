@@ -69,7 +69,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
   // ALL filter state + the row predicate live in one hook (§0.3 size split).
   const {
-    showArchived, setShowArchived, query, setQuery,
+    showArchived, setShowArchived, query, setQuery, refQuery,
     selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority,
     selectedType, setSelectedType, selectedAssignee, setSelectedAssignee,
     kpiFilter, setKpiFilter,
@@ -91,8 +91,10 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   const columns = useMemo<BoardColumn[]>(() => statuses.map(s => ({ key: s.value, label: s.label, color: s.color })), [statuses])
 
   // Data layer: load + decorate tasks/archived tasks (§0.3 split → hook).
+  // NUMMER-1: `refQuery` (T-00042) turns the header search into an exact server-side
+  // `?ref=` lookup; anything else stays the client-side free-text filter.
   const { setTasks, archivedTasks, setArchivedTasks, loading, error, all, decorate } = useTasksData({
-    showArchived, statuses, priorities, types, statusMeta, priorityMeta, typeMeta, doneStatusValues,
+    showArchived, refQuery, statuses, priorities, types, statusMeta, priorityMeta, typeMeta, doneStatusValues,
   })
 
   // Donut/filter/KPI derivations from the decorated list (§0.3 split → hook).

@@ -13,6 +13,7 @@
   },
   "cols": {
     "task": "Tarea",
+    "referenceNumber": "N.º ref.",
     "type": "Tipo",
     "status": "Estado",
     "priority": "Prioridad",

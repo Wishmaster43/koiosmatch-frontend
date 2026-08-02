@@ -20,6 +20,7 @@ import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
+import { useCustomerPhases } from '@/lib/useCustomerPhases'
 import { initialsOf } from '@/lib/initials'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ChangelogTab from './drawer/ChangelogTab'
@@ -107,6 +108,8 @@ export default function CustomerDrawer({
   const { formatDateTime } = useDateFormat()
   // The Extra tab only shows when the tenant has defined customer custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer')
+  // KLANT-FASE-1: the lifecycle-phase lookup behind the header picker (session-cached).
+  const { phases } = useCustomerPhases()
   // Fallback note-author avatar = the signed-in user (mirrors the candidate tab);
   // note-type lookups now live inside CustomerNotesTab itself.
   const authorInitials = initialsOf(auth?.user?.name ?? '')
@@ -121,6 +124,8 @@ export default function CustomerDrawer({
 
   // Header overrides — reset when a different customer is shown (during render).
   const [status, setStatus] = useState<string | null>(null)
+  // KLANT-FASE-1: local override for the phase picker, same pattern as `status`.
+  const [phase,  setPhase]  = useState<string | null>(null)
   const [owner,  setOwner]  = useState<DrawerUser | null>(null)
   const [tags,   setTags]   = useState<string[] | null>(null)
   // Header name edit + logo upload — independent from the Overview-tab fields (mirrors the candidate).
@@ -128,7 +133,7 @@ export default function CustomerDrawer({
   const [headerName,    setHeaderName]    = useState('')
   const [logoUrl,       setLogoUrl]       = useState<string | null>(null)
   const [prevId, setPrevId] = useState<Id | undefined>(c?.id)
-  if (c?.id !== prevId) { setPrevId(c?.id); setStatus(null); setOwner(null); setTags(null); setHeaderEditing(false); setLogoUrl(null) }
+  if (c?.id !== prevId) { setPrevId(c?.id); setStatus(null); setPhase(null); setOwner(null); setTags(null); setHeaderEditing(false); setLogoUrl(null) }
 
   // Keep the list/KPI counts in sync with the live sub-entity counts (a pure local
   // state bump — 'locationsCount' etc. aren't in useCustomerRecord's FIELD_MAP, so
@@ -159,6 +164,10 @@ export default function CustomerDrawer({
   const currentStatus = status ?? c.status
   const currentTags   = tags ?? (c.tags as string[]) ?? []
   const changeStatus  = (v: string) => { setStatus(v); onUpdate?.(c.id, { status: v }) }
+  // KLANT-FASE-1: phase is its own axis next to status — the picker writes the slug,
+  // which useCustomerRecord maps onto the `phase` column (PATCH /customers/{id}).
+  const currentPhase  = phase ?? c.phase
+  const changePhase   = (v: string) => { setPhase(v); onUpdate?.(c.id, { phase: v }) }
 
   // Owner (account manager) picker — a fallback entry ONLY when the current
   // owner is not in the selectable `users` list (always prepending it duplicated
@@ -310,6 +319,10 @@ export default function CustomerDrawer({
           </>}
           actions={headerActions}
           meta={[
+            // Fase sits FIRST, left of status: "prospect or customer" is the coarser
+            // question, and the order mirrors the table columns (phase → status).
+            { key: 'phase', label: t('drawer.phase'), value: currentPhase, width: 160,
+              options: phases.map(p => ({ value: p.value, label: p.label })), onChange: changePhase, menuWidth: 170 },
             { key: 'status', label: t('drawer.status'), value: currentStatus, width: 160,
               options: statuses.map(s => ({ value: s.value, label: s.label })), onChange: changeStatus, menuWidth: 170 },
             { key: 'owner', label: t('drawer.owner'), value: ownerValue, width: 200,

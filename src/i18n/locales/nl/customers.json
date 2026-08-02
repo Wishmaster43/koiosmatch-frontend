@@ -20,6 +20,7 @@
     "coupling": "Koppeling",
     "debtorNumber": "Debiteurnr.",
     "status": "Status",
+    "phase": "Fase",
     "accountManager": "Accountmanager",
     "locations": "Locaties",
     "departments": "Afdelingen",
@@ -93,7 +94,8 @@
     },
     "changelog": "Wijzigingen",
     "photoUpload": "Logo uploaden",
-    "photoRemove": "Logo verwijderen"
+    "photoRemove": "Logo verwijderen",
+    "phase": "Fase"
   },
   "overview": {
     "general": "Algemeen",
@@ -491,7 +493,8 @@
       "cityPlaceholder": "Bijv. Gorinchem",
       "cardCompany": "Bedrijf",
       "cardBranch": "Vestiging & plaats",
-      "cardOwnerStatus": "Eigenaar & status"
+      "cardOwnerStatus": "Eigenaar & status",
+      "phase": "Fase"
     }
   },
   "subModal": {

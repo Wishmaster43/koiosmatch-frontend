@@ -122,6 +122,7 @@
     "vacancy_statuses": "Status",
     "vacancy_phases": "Phasen",
     "vacancy_fields": "Benutzerdefinierte Felder",
+    "customer_phases": "Kundenphase",
     "customer_statuses": "Kundenstatus",
     "location_statuses": "Standortstatus",
     "department_statuses": "Abteilungsstatus",
@@ -1533,6 +1534,13 @@
     }
   },
   "customerLookups": {
+    "phases": {
+      "title": "Kundenphase",
+      "subtitle": "Beziehungsphase eines Kunden (Interessent → Kunde). Eine andere Frage als der Status.",
+      "add": "Phase hinzufügen",
+      "isCustomer": "Gilt als Kunde",
+      "isCustomerHint": "Markiert die Phase, in der die Beziehung ein echter Kunde ist (kein Interessent mehr). Höchstens eine Phase."
+    },
     "statuses": {
       "title": "Kundenstatus",
       "subtitle": "Verwalten Sie die möglichen Kundenstatus (Aktiv, Interessent, …).",

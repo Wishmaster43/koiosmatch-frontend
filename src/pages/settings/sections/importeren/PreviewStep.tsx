@@ -17,9 +17,11 @@ interface PreviewStepProps {
   canImport: boolean
   onConfirm: () => void
   onBack: () => void
+  /** True for the combined whole-customer file: one row can touch four records. */
+  wholeTree?: boolean
 }
 
-export default function PreviewStep({ result, runStatus, runError, canImport, onConfirm, onBack }: PreviewStepProps) {
+export default function PreviewStep({ result, runStatus, runError, canImport, onConfirm, onBack, wholeTree = false }: PreviewStepProps) {
   const { t } = useTranslation('settings')
   const [showAllRows, setShowAllRows] = useState(false)
   // The real import is pointless (and stays disabled) when nothing would land.
@@ -34,7 +36,8 @@ export default function PreviewStep({ result, runStatus, runError, canImport, on
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('import.preview.subtitle')}</div>
       </div>
 
-      <ImportResultPanel result={result} showAllRows={showAllRows} onToggleShowAll={() => setShowAllRows((v) => !v)} />
+      <ImportResultPanel result={result} wholeTree={wholeTree}
+        showAllRows={showAllRows} onToggleShowAll={() => setShowAllRows((v) => !v)} />
 
       {nothingToImport && (
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 16, padding: '10px 12px',

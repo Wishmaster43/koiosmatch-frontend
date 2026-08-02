@@ -13,6 +13,7 @@
   },
   "cols": {
     "task": "Taak",
+    "referenceNumber": "Referentienr.",
     "type": "Type",
     "status": "Status",
     "priority": "Prioriteit",

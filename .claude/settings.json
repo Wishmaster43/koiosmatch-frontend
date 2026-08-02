@@ -194,7 +194,18 @@
       "Bash(python3 /private/tmp/claude-501/-Users-danho.py candidates src/pages/candidates/addmodal/CvUploadCard.tsx src/pages/candidates/addmodal/fields.tsx src/pages/candidates/AddCandidateModal.tsx)",
       "Bash(python3 /private/tmp/claude-501/-Users-danho.py outreach src/pages/outreach/drawer/ChangelogTab.tsx src/pages/outreach/OutreachDrawer.tsx)",
       "Bash(python3 /private/tmp/claude-501/-Users-danho.py vacancies src/pages/vacancies/VacanciesBulkBar.tsx src/pages/vacancies/data/vacancyInsightsConfig.ts)",
-      "Bash(python3 /private/tmp/claude-501/-Users-danho.py applications src/pages/applications/drawer/InterviewStatusCard.tsx)"
+      "Bash(python3 /private/tmp/claude-501/-Users-danho.py applications src/pages/applications/drawer/InterviewStatusCard.tsx)",
+      "Bash(grep -rn \"nav\\\\.\\\\|t\\(\\\\`\" src/pages/settings/SettingsPage.jsx)",
+      "Bash(grep -rn \"status\\\\.\\\\${\\\\|'status\\\\.'\\\\|\\\\`status\\\\.\" src/pages/customers/ src/pages/settings/)",
+      "Bash(node -e \"console.log\\(require\\('/Users/danny/Herd/koiosmatch-frontend/node_modules/lucide-react/package.json'\\).version\\)\")",
+      "Bash(grep -n \"^import { .*Target\\\\|Target,\" src/pages/settings/registry.jsx)",
+      "Bash(python3 /private/tmp/claude-501/-Users-danny-Herd-koiosmatch-frontend/a59859c3-beb2-423b-9df0-a2cbfb51b2af/scratchpad/add_cv_proposal_i18n.py)",
+      "Bash(python3 /private/tmp/claude-501/-Users-danny-Herd-koiosmatch-frontend/a59859c3-beb2-423b-9df0-a2cbfb51b2af/scratchpad/ret_consent_keys.py)",
+      "Bash(zsh /private/tmp/claude-501/-Users-danny-Herd-koiosmatch-frontend/a59859c3-beb2-423b-9df0-a2cbfb51b2af/scratchpad/mutate.sh)",
+      "Bash(perl -0pi -e \"s{'\\\\.\\\\./\\\\.\\\\./data/mapCvProposal'}{'\\\\@/pages/applications/data/mapCvProposal'}g\" src/pages/applications/drawer/cvproposal/*.ts src/pages/applications/drawer/cvproposal/*.tsx)",
+      "Bash(python3 /private/tmp/claude-501/-Users-danny-Herd-koiosmatch-frontend/a59859c3-beb2-423b-9df0-a2cbfb51b2af/scratchpad/mutate_ret.py)",
+      "Bash(python3 /private/tmp/claude-501/-Users-danny-Herd-koiosmatch-frontend/a59859c3-beb2-423b-9df0-a2cbfb51b2af/scratchpad/mutate_ret2.py)",
+      "Bash(xargs -n1 basename)"
     ],
     "additionalDirectories": [
       "/Users/danny/Herd/koiosmatch-api/docs",

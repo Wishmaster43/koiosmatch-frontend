@@ -122,6 +122,7 @@
     "vacancy_statuses": "Estados",
     "vacancy_phases": "Fases",
     "vacancy_fields": "Campos personalizados",
+    "customer_phases": "Fase de cliente",
     "customer_statuses": "Estados de cliente",
     "location_statuses": "Estados de ubicación",
     "department_statuses": "Estados de departamento",
@@ -1533,6 +1534,13 @@
     }
   },
   "customerLookups": {
+    "phases": {
+      "title": "Fase de cliente",
+      "subtitle": "Fase de la relación con un cliente (Prospecto → Cliente). Una pregunta distinta del estado.",
+      "add": "Añadir fase",
+      "isCustomer": "Cuenta como cliente",
+      "isCustomerHint": "Marca la fase en la que la relación es un cliente real (ya no un prospecto). Como máximo una fase."
+    },
     "statuses": {
       "title": "Estados de cliente",
       "subtitle": "Gestiona los estados que puede tener un cliente (Activo, Prospecto, …).",

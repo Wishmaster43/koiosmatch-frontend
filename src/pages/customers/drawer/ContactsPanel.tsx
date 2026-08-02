@@ -19,7 +19,7 @@
  */
 import { useState, type ComponentType, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Users, Link2, Unlink } from 'lucide-react'
+import { Search, Users, Link2, Unlink, Star, Loader2 } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -38,6 +38,8 @@ import ContactLinkPicker from './ContactLinkPicker'
 import AddContactPersonModal from '../AddContactPersonModal'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
+import { notifyError, notifySuccess } from '@/lib/notify'
+import { isPrimaryForLocation, setLocationPrimaryContact } from '../hooks/useCustomerContacts'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 
 type AnyProps = Record<string, unknown>
@@ -107,6 +109,37 @@ export default function ContactsPanel({
   const colorStatusCol = getBoolSetting(settings, 'customer_contact_table_color_status', true)
   const [search, setSearch] = useState('')
   const [modal, setModal] = useState<'add' | 'couple' | Contact | null>(null)
+  // Which row's "make primary here" PUT is in flight (CONTACT-LOCATION-PRIMARY-1) — one
+  // at a time, so a double click cannot race two promotions at the same site.
+  const [promoting, setPromoting] = useState<Id | null>(null)
+
+  // The per-site primary only exists INSIDE a location. A department has no such flag on
+  // the backend and the customer axis is a different field entirely, so the whole control
+  // is absent elsewhere rather than disabled — there is nothing to write there.
+  const locationScope = scope === 'location' && scopeId != null
+
+  /**
+   * Promote this contact to the primary contact OF THIS LOCATION. It demotes the previous
+   * primary of THIS SITE only; the customer's own main contact (`isPrimary`) is a
+   * different field and is left alone. There is deliberately no "unset" — the backend has
+   * no route for it, so the flag moves by promoting someone else instead of by a toggle
+   * with nothing behind it. The owning hook refetches via CONTACTS_CHANGED_EVENT.
+   */
+  const promote = async (c: Contact) => {
+    if (!locationScope || c.id == null || c.customerId == null || promoting != null) return
+    setPromoting(c.id)
+    try {
+      const applied = await setLocationPrimaryContact(c.customerId, c.id, scopeId as Id)
+      // A 200 that did not move the flag is still a failure for the user (the pivot column
+      // is not on this tenant database yet) — say so instead of showing a silent no-op.
+      if (applied) notifySuccess(t('locations.detail.setPrimaryContactDone', { name: c.name }))
+      else notifyError(t('locations.detail.setPrimaryContactUnavailable'))
+    } catch {
+      notifyError(t('locations.detail.setPrimaryContactFailed'))
+    } finally {
+      setPromoting(null)
+    }
+  }
 
   // THE membership rule, in one place. A location/department scope reads the singular
   // link id, which is what the frontend actually writes (CONTACT-MULTI-1's arrays exist
@@ -157,7 +190,15 @@ export default function ContactsPanel({
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Users size={14} color="var(--color-primary)" style={{ flexShrink: 0 }} />
           <span style={{ color: 'var(--text)' }}>{p.name}</span>
-          {p.isPrimary && <SoftChip label={t('contacts.primaryChip')} color="var(--color-success)" round size={10} />}
+          {/* TWO different primaries can sit on the SAME row inside a location: the
+              customer's one main contact and this site's own. Where both can appear, each
+              chip names its scope — an unqualified "Primair" twice would be a lie about
+              what either means. Outside a location only the customer axis exists, so the
+              short label stays there. */}
+          {p.isPrimary && <SoftChip label={locationScope ? t('contacts.primaryCustomerChip') : t('contacts.primaryChip')}
+            color="var(--color-success)" round size={10} />}
+          {locationScope && isPrimaryForLocation(p, scopeId as Id) &&
+            <SoftChip label={t('contacts.primaryLocationChip')} color="var(--color-primary)" round size={10} />}
         </div>
       ) },
     { key: 'status', header: t('contacts.col.status'), sortable: true, sortValue: p => p.statusLabel,
@@ -189,6 +230,36 @@ export default function ContactsPanel({
           </span>
         )
       } },
+    // CONTACT-LOCATION-PRIMARY-1: who to call AT THIS SITE. Only inside a location — the
+    // flag lives on the contact↔location coupling and exists nowhere else.
+    ...(locationScope ? [{
+      key: 'locationPrimary', header: t('contacts.col.locationPrimary'), align: 'center' as const,
+      render: (p: Contact) => {
+        const isHere = isPrimaryForLocation(p, scopeId as Id)
+        const busy = String(promoting) === String(p.id)
+        // Already primary here: a state, not a switch. The backend has no "unset" route,
+        // so an off-toggle would be an affordance with nothing behind it (§3) — the flag
+        // moves when someone else is promoted.
+        if (isHere) return (
+          <span title={t('locations.detail.isPrimaryContact')} role="img" aria-label={t('locations.detail.isPrimaryContact')}
+            style={{ display: 'inline-flex', color: 'var(--color-primary)' }}>
+            <Star size={13} fill="currentColor" />
+          </span>
+        )
+        // Without the owning customer id there is no route to PUT to — render it disabled
+        // rather than firing /customers/undefined/… and calling that an action.
+        const blocked = p.customerId == null
+        return (
+          <button type="button" onClick={e => { e.stopPropagation(); void promote(p) }}
+            disabled={busy || blocked || promoting != null}
+            title={t('locations.detail.setPrimaryContact')} aria-label={t('locations.detail.setPrimaryContact')}
+            style={{ ...iconBtn, cursor: busy || blocked || promoting != null ? 'not-allowed' : 'pointer',
+              opacity: blocked ? 0.4 : 1 }}>
+            {busy ? <Loader2 size={12} className="animate-spin" /> : <Star size={12} />}
+          </button>
+        )
+      },
+    }] : []),
     // Uncouple only exists inside a scope — at customer level there is nothing to detach from.
     ...(scope === 'customer' ? [] : [{
       key: 'uncouple', header: '', align: 'right' as const,

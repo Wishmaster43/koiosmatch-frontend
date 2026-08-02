@@ -20,6 +20,7 @@
     "coupling": "Connexion",
     "debtorNumber": "N° débiteur",
     "status": "Statut",
+    "phase": "Phase",
     "accountManager": "Gestionnaire de compte",
     "locations": "Sites",
     "departments": "Services",
@@ -93,7 +94,8 @@
     },
     "changelog": "Historique",
     "photoUpload": "Téléverser le logo",
-    "photoRemove": "Supprimer le logo"
+    "photoRemove": "Supprimer le logo",
+    "phase": "Phase"
   },
   "overview": {
     "general": "Général",
@@ -491,7 +493,8 @@
       "cityPlaceholder": "P. ex. Gorinchem",
       "cardCompany": "Entreprise",
       "cardBranch": "Agence & ville",
-      "cardOwnerStatus": "Propriétaire & statut"
+      "cardOwnerStatus": "Propriétaire & statut",
+      "phase": "Phase"
     }
   },
   "subModal": {

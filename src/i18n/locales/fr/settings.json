@@ -122,6 +122,7 @@
     "vacancy_statuses": "Statuts",
     "vacancy_phases": "Phases",
     "vacancy_fields": "Champs personnalisés",
+    "customer_phases": "Phase client",
     "customer_statuses": "Statuts clients",
     "location_statuses": "Statuts de site",
     "department_statuses": "Statuts de département",
@@ -1533,6 +1534,13 @@
     }
   },
   "customerLookups": {
+    "phases": {
+      "title": "Phase client",
+      "subtitle": "Phase de la relation client (Prospect → Client). Une question différente du statut.",
+      "add": "Ajouter une phase",
+      "isCustomer": "Compte comme client",
+      "isCustomerHint": "Marque la phase où la relation est un vrai client (plus un prospect). Une phase au maximum."
+    },
     "statuses": {
       "title": "Statuts clients",
       "subtitle": "Gérez les statuts qu’un client peut avoir (Actif, Prospect, …).",

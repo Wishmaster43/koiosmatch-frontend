@@ -27,12 +27,17 @@ type NotePayload = { type: string; title: string; body: string }
 // informatie"), so they must actually reach the API instead of being dropped here.
 interface CreateForm {
   name: string; debtorNumber: string; status: string; ownerId: string; industry: string; city: string
+  // KLANT-FASE-1: lifecycle phase slug picked in the create modal (is_default preselected).
+  phase?: string
   branchId?: string; website?: string; employeeCount?: string
   toneOfVoice?: string; costCenter?: string; billingEmail?: string
 }
 
 // Optional create fields → their API keys (same mapping the PATCH path uses).
+// `phase` rides along here (not in the base body) because its rule is
+// `sometimes|exists:customer_phases,value` — an empty string would be a 422.
 const OPTIONAL_CREATE_FIELDS: Array<[keyof CreateForm, string]> = [
+  ['phase', 'phase'],
   ['branchId', 'location_id'], ['website', 'website'], ['employeeCount', 'employee_count'],
   ['toneOfVoice', 'tone_of_voice'], ['costCenter', 'cost_center'], ['billingEmail', 'billing_email'],
 ]
@@ -56,6 +61,10 @@ const FIELD_MAP: Record<string, string> = {
   cocNumber: 'coc_number', vatNumber: 'vat_number',
   // JOB-CONTACT-1 (Danny 28-07): the customer's own e-mail/phone Contact card.
   email: 'email', phone: 'phone',
+  // KLANT-FASE-1: the drawer's phase picker. Without this key the PATCH body would come
+  // out empty and the picker would be a fake affordance (§3) — CustomerRequest validates
+  // `phase` against customer_phases.value.
+  phase: 'phase',
   status: 'status', ownerId: 'owner_id', website: 'website', employeeCount: 'employee_count',
   toneOfVoice: 'tone_of_voice', description: 'description', recruitmentProblems: 'recruitment_problems',
   privacyPolicyUrl: 'privacy_policy_url', hideCompanyName: 'hide_company_name', hasCareerPage: 'has_career_page',
@@ -152,7 +161,9 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
     const tmpId = `new-${Date.now()}`
     const optimistic = mapCustomer({
       id: tmpId, name: form.name, debtor_number: form.debtorNumber, status: form.status,
-      city: form.city, industry: form.industry,
+      // KLANT-FASE-1: carry the picked phase into the optimistic row so the new
+      // table row shows its phase chip immediately, not only after the reconcile.
+      phase: form.phase, city: form.city, industry: form.industry,
       owner: owner ? { id: owner.id, name: owner.name } : undefined,
     } as ApiCustomer)
     setCustomers(prev => [optimistic, ...prev]); setTotal(tt => tt + 1)

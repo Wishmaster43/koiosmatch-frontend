@@ -9,6 +9,7 @@ import MatchScoreBlock from '@/components/match/MatchScoreBlock'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
 import RejectionSummary from './RejectionSummary'
 import CvBlock from './CvBlock'
+import CvProposalBlock from './cvproposal/CvProposalBlock'
 import ProposalsBlock from './propose/ProposalsBlock'
 import ApplicationDetailsCard from './ApplicationDetailsCard'
 import ApplicationStatusStrip from './ApplicationStatusStrip'
@@ -72,6 +73,12 @@ export default function ApplicationTab({ application: a, onAdjustScore, onLinkVa
 
       {/* S31: the linked candidate's CV at a glance — file name + upload date. */}
       <CvBlock candidateId={a.candidateId} />
+
+      {/* CV-PARSER-2 (entry b): the CV that came in WITH this application, parsed
+          into a PROPOSAL nobody wrote to the dossier — a recruiter reviews the
+          per-field comparison and accepts or rejects. Hidden entirely until such
+          a proposal exists (see the block's own note on its UI states). */}
+      <CvProposalBlock candidateId={a.candidateId} applicationId={a.id} />
 
       {/* PROPOSE-STORE-1: the recorded-proposal history (recipient, cv variant,
           sent/opened/revoked state) — hidden entirely until at least one exists. */}

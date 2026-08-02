@@ -20,6 +20,7 @@
     "coupling": "Vínculo",
     "debtorNumber": "N.º deudor",
     "status": "Estado",
+    "phase": "Fase",
     "accountManager": "Gestor de cuenta",
     "locations": "Ubicaciones",
     "departments": "Departamentos",
@@ -93,7 +94,8 @@
     },
     "changelog": "Cambios",
     "photoUpload": "Subir logo",
-    "photoRemove": "Quitar logo"
+    "photoRemove": "Quitar logo",
+    "phase": "Fase"
   },
   "overview": {
     "general": "General",
@@ -491,7 +493,8 @@
       "cityPlaceholder": "P. ej. Gorinchem",
       "cardCompany": "Empresa",
       "cardBranch": "Oficina & ciudad",
-      "cardOwnerStatus": "Propietario & estado"
+      "cardOwnerStatus": "Propietario & estado",
+      "phase": "Fase"
     }
   },
   "subModal": {

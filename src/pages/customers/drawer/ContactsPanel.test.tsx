@@ -14,6 +14,7 @@ import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
+import { notifyError, notifySuccess } from '@/lib/notify'
 import { invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import ContactsPanel from './ContactsPanel'
 import type { ComponentProps } from 'react'
@@ -35,12 +36,12 @@ function Host({ onOpen, ...props }: PanelProps & { onOpen?: (id: Id | null) => v
 }
 
 vi.mock('@/lib/api', () => ({
-  default: { get: vi.fn(() => Promise.resolve({ data: { data: [] } })), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
+  default: { get: vi.fn(() => Promise.resolve({ data: { data: [] } })), post: vi.fn(), patch: vi.fn(), put: vi.fn(), delete: vi.fn() },
   unwrap: (r: { data?: unknown }) => r?.data, unwrapList: () => ({ rows: [], total: 0 }),
 }))
 vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [] }) }))
 vi.mock('@/lib/useContactFunctions', () => ({ useContactFunctions: () => ({ contactFunctions: [], allowFreeEntry: false }) }))
-vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
 
@@ -293,5 +294,119 @@ describe('ContactsPanel · last contact column', () => {
       contacts={[contact({ lastContactAt: '2026-07-14T09:30:00+02:00', lastContactType: 'phone' })]} />)
     expect(screen.getByText(ct('contacts.col.lastContact'))).toBeInTheDocument()
     expect(screen.getByText('14-07-2026')).toBeInTheDocument()
+  })
+})
+
+/**
+ * CONTACT-LOCATION-PRIMARY-1 — the primary contact PER LOCATION, which Danny asked for
+ * weeks ago and the backend now carries on customer_contact_customer_location.is_primary.
+ *
+ * Two failure modes these guard, both of which have bitten this codebase before:
+ *  1. A control that fires the wrong request (or none). The route was measured off
+ *     routes/api/tenant/customers.php — PUT …/contacts/{id}/locations/{locationId}/primary
+ *     — so the REQUEST is asserted, not that a handler ran.
+ *  2. Blurring the two primaries. The customer's ONE main contact and this site's own are
+ *     different columns with different meanings; where both can show, each must say which.
+ */
+// A contact carrying the per-location primary flags exactly as useCustomerContacts
+// attaches them (see primaryLocationIdsOf — they ride along on the row).
+const primaryAt = (locationIds: string[], over: Partial<Contact> = {}): Contact =>
+  ({ ...contact(over), primaryLocationIds: locationIds } as Contact)
+
+const primaryStar = () => screen.queryByRole('button', { name: ct('locations.detail.setPrimaryContact') })
+
+describe('ContactsPanel · primary contact per location', () => {
+  it('PUTs the measured per-location route when the star is clicked', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.put).mockResolvedValue({ data: { id: 'c1', locations: [{ id: 'loc-1', name: 'Vestiging Noord', is_primary: true }] } })
+
+    render(<Host {...base} scope="location" scopeId="loc-1" scopeName="Vestiging Noord" contacts={[contact()]} />)
+    await user.click(primaryStar()!)
+
+    expect(api.put).toHaveBeenCalledTimes(1)
+    expect(api.put).toHaveBeenCalledWith('/customers/cust-1/contacts/c1/locations/loc-1/primary')
+    // The customer-level primary is a different column on a different route.
+    expect(api.patch).not.toHaveBeenCalled()
+  })
+
+  it('marks the location primary and offers no un-set — the backend has no route for it', () => {
+    render(<Host {...base} scope="location" scopeId="loc-1" scopeName="Vestiging Noord"
+      contacts={[primaryAt(['loc-1'])]} />)
+
+    expect(screen.getByText(ct('contacts.primaryLocationChip'))).toBeInTheDocument()
+    // The row that IS primary shows a state, never a toggle with nothing behind it.
+    expect(primaryStar()).toBeNull()
+    expect(screen.getByLabelText(ct('locations.detail.isPrimaryContact'))).toBeInTheDocument()
+  })
+
+  it('says WHICH primary each chip means when a contact is both', () => {
+    render(<Host {...base} scope="location" scopeId="loc-1" scopeName="Vestiging Noord"
+      contacts={[primaryAt(['loc-1'], { isPrimary: true })]} />)
+
+    // Both chips are on the same row, and neither reads as the other.
+    expect(screen.getByText(ct('contacts.primaryCustomerChip'))).toBeInTheDocument()
+    expect(screen.getByText(ct('contacts.primaryLocationChip'))).toBeInTheDocument()
+    expect(screen.queryByText(ct('contacts.primaryChip'))).toBeNull()
+  })
+
+  it('flags only the site you are IN — primary elsewhere is not primary here', () => {
+    render(<Host {...base} scope="location" scopeId="loc-1" scopeName="Vestiging Noord"
+      contacts={[primaryAt(['loc-2'])]} />)
+
+    expect(screen.queryByText(ct('contacts.primaryLocationChip'))).toBeNull()
+    // …and it can still be promoted here.
+    expect(primaryStar()).toBeInTheDocument()
+  })
+
+  it('does not exist at customer level — there is no per-site flag to write there', () => {
+    render(<Host {...base} scope="customer" contacts={[primaryAt(['loc-1'], { isPrimary: true })]} />)
+
+    expect(screen.queryByText(ct('contacts.col.locationPrimary'))).toBeNull()
+    expect(primaryStar()).toBeNull()
+    // The customer axis keeps its own unqualified chip where it is the only one shown.
+    expect(screen.getByText(ct('contacts.primaryChip'))).toBeInTheDocument()
+  })
+
+  it('does not exist inside a department either — the flag hangs on the location coupling', () => {
+    render(<Host {...base} scope="department" scopeId="dep-1" scopeName="Zorg" contacts={[primaryAt(['loc-1'])]} />)
+
+    expect(screen.queryByText(ct('contacts.col.locationPrimary'))).toBeNull()
+    expect(primaryStar()).toBeNull()
+  })
+
+  /**
+   * The endpoint is a documented no-op while the pivot column is missing on a tenant
+   * database (CustomerContactLocation::supportsPrimary): 200, flag unchanged. Silence
+   * there would be a button that reports a write which never happened.
+   */
+  it('says so when a 200 came back without the flag actually moving', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.put).mockResolvedValue({ data: { id: 'c1', locations: [{ id: 'loc-1', name: 'Vestiging Noord', is_primary: false }] } })
+
+    render(<Host {...base} scope="location" scopeId="loc-1" scopeName="Vestiging Noord" contacts={[contact()]} />)
+    await user.click(primaryStar()!)
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(ct('locations.detail.setPrimaryContactUnavailable')))
+    expect(notifySuccess).not.toHaveBeenCalled()
+  })
+
+  it('surfaces a rejected request instead of failing silently', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.put).mockRejectedValue({ response: { status: 403 } })
+
+    render(<Host {...base} scope="location" scopeId="loc-1" scopeName="Vestiging Noord" contacts={[contact()]} />)
+    await user.click(primaryStar()!)
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(ct('locations.detail.setPrimaryContactFailed')))
+  })
+
+  it('confirms the promotion once the server says it landed', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.put).mockResolvedValue({ data: { id: 'c1', locations: [{ id: 'loc-1', name: 'Vestiging Noord', is_primary: true }] } })
+
+    render(<Host {...base} scope="location" scopeId="loc-1" scopeName="Vestiging Noord" contacts={[contact()]} />)
+    await user.click(primaryStar()!)
+
+    await waitFor(() => expect(notifySuccess).toHaveBeenCalledWith(ct('locations.detail.setPrimaryContactDone', { name: 'Eva Bos' })))
   })
 })

@@ -160,6 +160,10 @@ export interface Customer {
   status: string | number
   statusLabel: string | undefined
   statusColor: string | undefined
+  // KLANT-FASE-1: the lifecycle phase SLUG (customer_phases.value) — "prospect or
+  // customer", a different axis than `status`. The API sends a bare slug; label and
+  // colour are resolved from the /customer-phases lookup (useCustomerPhases).
+  phase: string
   owner: string
   ownerId: Id | null
   ownerInitials: string
@@ -287,6 +291,9 @@ export interface ApiCustomer {
   branch?: { id?: Id; name?: string } | null; branch_id?: Id | null; branch_name?: string
   status?: { value?: string | number; label?: string; color?: string } | string | number
   status_id?: string | number; status_label?: string; status_color?: string
+  // KLANT-FASE-1: bare lifecycle-phase slug on both the list and detail resource.
+  // Null-safe on the backend, so it may legitimately arrive as null.
+  phase?: string | null
   owner?: { id?: Id; name?: string; avatar_color?: string | null }
   account_manager?: string; owner_name?: string; owner_id?: Id; owner_color?: string | null
   // KLANT-ADRES-1 / KLANT-KVK-1: the customer's own address + head registration

@@ -71,6 +71,16 @@ export default function TasksTable({
     // Title — primary cell, pinned during horizontal scroll.
     { key: 'title', header: t('cols.task'), sortable: true, sortValue: r => r.title, sticky: true, width: 300, nowrap: true,
       render: r => <span style={{ fontWeight: 500, color: 'var(--text)', ...titleEllipsis }} title={r.title}>{r.title}</span> },
+    {
+      // Human-readable reference number (T-00042) — an identifier, so it sits right
+      // after the title, exactly where candidates/customers/vacancies/matches put it.
+      // Plain mono text, not the interactive ReferenceNumberChip: a click-to-copy
+      // button nested inside this row's own click-to-open would double-fire; the
+      // drawer chip already copies.
+      key: 'referenceNumber', header: t('cols.referenceNumber'), nowrap: true,
+      cellStyle: { color: 'var(--text-muted)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', fontVariantNumeric: 'tabular-nums' },
+      sortable: true, sortValue: r => r.referenceNumber ?? '', render: r => r.referenceNumber || '—',
+    },
     // Activity type — soft chip (or plain text per tenant setting).
     { key: 'type', header: t('cols.type'), sortable: true, sortValue: r => r.typeLabel,
       render: r => chip(r.typeLabel, r.typeColor, colorType) },

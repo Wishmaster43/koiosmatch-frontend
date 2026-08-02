@@ -13,6 +13,7 @@
   },
   "cols": {
     "task": "Tâche",
+    "referenceNumber": "N° réf.",
     "type": "Type",
     "status": "Statut",
     "priority": "Priorité",

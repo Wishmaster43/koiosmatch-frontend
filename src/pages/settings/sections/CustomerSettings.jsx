@@ -20,6 +20,28 @@ export function CustomerStatusesSettings() {
   )
 }
 
+// KLANT-FASE-1 — customer LIFECYCLE PHASE (Prospect → Klant), the counterpart of the
+// candidate phase axis and a different question than the status above. CRUD + colour +
+// drag-reorder + in-use 409 against /customer-phases (SlugLookupController).
+// `is_customer` is the BEHAVIOUR FLAG the app binds on (the counterpart of the
+// candidate's is_applicant) so a tenant may rename "Klant" freely; `is_default` is the
+// backend-enforced singleton marking the phase a new customer starts in.
+// withValueSlug: this endpoint requires the immutable `value` slug on create.
+export function CustomerPhasesSettings() {
+  const { t } = useTranslation('settings')
+  return (
+    <StatusListEditor
+      title={t('customerLookups.phases.title')}
+      subtitle={t('customerLookups.phases.subtitle')}
+      endpoint="/customer-phases"
+      addLabel={t('customerLookups.phases.add')}
+      withValueSlug
+      flagField={{ key: 'is_customer', label: t('customerLookups.phases.isCustomer'), description: t('customerLookups.phases.isCustomerHint') }}
+      defaultField={{ key: 'is_default' }}
+    />
+  )
+}
+
 // Location status (single value per customer location).
 export function LocationStatusesSettings() {
   const { t } = useTranslation('settings')

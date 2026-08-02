@@ -2,10 +2,12 @@
  * useTaskFilters — all list-filter state for the tasks page (§0.3 size split,
  * mirrors useCandidateFilters/useApplicationFilters). Owns the panel dimensions
  * (status/priority/type/assignee), the KPI tile filter, the search text and the
- * archived toggle — plus the row predicate and clear-all. Client-side filtering.
+ * archived toggle — plus the row predicate and clear-all. Client-side filtering,
+ * except the reference-number lookup below, which is a real server-side query.
  */
 import { useState, useCallback } from 'react'
 import { usePageMemory } from '@/lib/usePageMemory'
+import { isReferenceQuery } from '@/lib/referenceNumber'
 import { isTaskOverdue } from '../data/mapTask'
 
 // Midnight today — the due-today boundary.
@@ -35,6 +37,12 @@ export function useTaskFilters() {
   // KPI tile filter (one at a time): null | 'open' | 'overdue' | 'dueToday' | 'completed'.
   const [kpiFilter, setKpiFilter] = useState<string | null>(null)
 
+  // NUMMER-1: a typed reference number (T-00042) flips the header search from the
+  // client-side free-text filter to an exact server-side `?ref=` lookup (TaskQuery
+  // returns early on `ref`, so it always finds that one task). Same shared detector
+  // as candidates/customers/vacancies/matches — never a second regex.
+  const refQuery = isReferenceQuery(query.trim()) ? query.trim() : null
+
   // Anything narrowing the default view → the shared clear-button shows.
   const anyFilterActive = Boolean(query.trim() || showArchived || kpiFilter
     || selectedStatus.length || selectedPriority.length || selectedType.length || selectedAssignee.length)
@@ -51,7 +59,10 @@ export function useTaskFilters() {
     if (selectedPriority.length && !selectedPriority.includes(String(x.priorityKey)))  return false
     if (selectedType.length     && !selectedType.includes(String(x.typeKey)))          return false
     if (selectedAssignee.length && !selectedAssignee.includes(x.assignee?.name ?? '')) return false
-    if (query.trim() && !`${x.title ?? ''} ${x.assignee?.name ?? ''} ${x.description ?? ''}`.toLowerCase().includes(query.trim().toLowerCase())) return false
+    // A reference-number query already narrowed the fetch server-side (exact `?ref=`),
+    // so skip the free-text re-filter — the matched task carries the number in a field
+    // this predicate doesn't read and would otherwise be filtered straight back out.
+    if (!refQuery && query.trim() && !`${x.title ?? ''} ${x.assignee?.name ?? ''} ${x.description ?? ''}`.toLowerCase().includes(query.trim().toLowerCase())) return false
     // KPI tile predicate (open/overdue/dueToday/completed). Overdue is time-aware
     // (TASK-DUE-TIME-1): a timed task counts from its due moment, not end of day.
     if (!kpiFilter) return true
@@ -61,10 +72,10 @@ export function useTaskFilters() {
     if (kpiFilter === 'overdue')   return isTaskOverdue(x)
     if (kpiFilter === 'dueToday')  return !!(due && !x.statusIsDone && due.toDateString() === todayStart().toDateString())
     return true
-  }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter, query])
+  }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter, query, refQuery])
 
   return {
-    showArchived, setShowArchived, query, setQuery,
+    showArchived, setShowArchived, query, setQuery, refQuery,
     selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority,
     selectedType, setSelectedType, selectedAssignee, setSelectedAssignee,
     kpiFilter, setKpiFilter,

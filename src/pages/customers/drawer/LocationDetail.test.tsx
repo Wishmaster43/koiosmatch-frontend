@@ -15,7 +15,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import LocationDetail from './LocationDetail'
-import type { Location } from '@/types/customer'
+import type { Contact, Location } from '@/types/customer'
 import type { LookupOption } from '@/types/common'
 
 // useCustomFields hits the API in an effect — stub it so the Extra sub-tab stays
@@ -189,5 +189,91 @@ describe('LocationDetail · PDOK card in Koppelingen', () => {
     render(<LocationDetail location={location({ city: 'Gorinchem' })} onSave={vi.fn()} {...baseProps} />)
     await openKoppelingen(user)
     expect(mockPost).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * CONTACT-LOCATION-PRIMARY-1 — THE original complaint. A location used to carry only free
+ * text ("Contact ter plaatse") and the screen GUESSED which contact record the typed name
+ * meant: it matched on the name, gave up when two people shared one, and when it did match
+ * it could open somebody who was never meant. Danny: "je typt Joost de Boer en Joost weet
+ * van niets."
+ *
+ * The real link now exists (customer_contact_customer_location.is_primary), so the site's
+ * primary contact is RESOLVED, not guessed. These assert both halves: the real link is
+ * there, and the guess is gone — including in the case the old code handled "successfully"
+ * (exactly one name match), which is the one that quietly opened the wrong person.
+ */
+const contactFixture = (over: Partial<Contact> = {}): Contact => ({
+  id: 'con-1', helloflexLink: null, shiftmanagerLink: null, customerId: 'cust-1',
+  firstName: 'Joost', middleName: 'de', lastName: 'Boer', name: 'Joost de Boer', role: 'Teamleider',
+  email: 'joost@klant.test', phone: '', mobile: '', gender: '', isPrimary: false,
+  locationId: 'loc-1', locationName: '', departmentId: null, departmentName: '',
+  locations: [], departments: [], statusId: null, status: '', statusLabel: '', statusColor: '',
+  lastContactAt: null, lastContactType: null, customFields: {},
+  ...over,
+} as Contact)
+
+// The per-location primary flags ride along on the row, exactly as useCustomerContacts
+// attaches them (see primaryLocationIdsOf).
+const primaryAt = (locationIds: string[], over: Partial<Contact> = {}): Contact =>
+  ({ ...contactFixture(over), primaryLocationIds: locationIds } as Contact)
+
+describe('LocationDetail · primary contact of THIS site', () => {
+  it('resolves the site\'s primary contact from the coupling flag and links to the real record', async () => {
+    const user = userEvent.setup()
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps}
+      contacts={[primaryAt(['loc-1'])]} />)
+
+    const link = screen.getByRole('button', { name: 'Joost de Boer' })
+    expect(link).toBeInTheDocument()
+    // It opens THAT contact's own screen, on the Contactpersonen sub-tab.
+    await user.click(link)
+    expect(screen.getByText(ct('contacts.detail.infoTitle'))).toBeInTheDocument()
+  })
+
+  it('ignores a primary flag for a DIFFERENT site — this one then has none', () => {
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps}
+      contacts={[primaryAt(['loc-2'])]} />)
+
+    expect(screen.getByText(ct('locations.detail.noPrimaryContact'))).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Joost de Boer' })).toBeNull()
+  })
+
+  it('states plainly that none is set and offers the one place that sets it', async () => {
+    const user = userEvent.setup()
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps}
+      contacts={[contactFixture()]} />)
+
+    expect(screen.getByText(ct('locations.detail.noPrimaryContact'))).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: ct('locations.detail.pickPrimaryContact') }))
+    // Lands on the contact list of this site, where the flag is actually set.
+    expect(screen.getByText(ct('contacts.col.locationPrimary'))).toBeInTheDocument()
+  })
+
+  it('no longer guesses a contact from the typed name — not even on a single exact match', () => {
+    render(<LocationDetail location={location({ contactName: 'Joost de Boer' })} onSave={vi.fn()} {...baseProps}
+      contacts={[contactFixture()]} />)
+
+    // The typed value is still shown — it is real data and is never dropped…
+    expect(screen.getByText('Joost de Boer')).toBeInTheDocument()
+    // …but it is text, not a link to a record it was only ASSUMED to mean.
+    expect(screen.queryByRole('button', { name: 'Joost de Boer' })).toBeNull()
+  })
+
+  it('keeps the free-text field editable, so no typed value is lost', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<LocationDetail location={location({ contactName: 'Joost de Boer' })} onSave={onSave} {...baseProps} />)
+
+    // The "Contact ter plaatse" card's own pencil — the third field group on this sub-tab.
+    const pencils = screen.getAllByRole('button', { name: cm('edit') })
+    await user.click(pencils[pencils.length - 1])
+    const input = screen.getByDisplayValue('Joost de Boer')
+    await user.clear(input)
+    await user.type(input, 'Marieke Jansen')
+    await user.click(screen.getByRole('button', { name: cm('save') }))
+
+    expect(onSave).toHaveBeenCalledWith('loc-1', expect.objectContaining({ contactName: 'Marieke Jansen' }))
   })
 })

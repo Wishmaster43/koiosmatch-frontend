@@ -43,7 +43,10 @@ const EMPTY_OPPORTUNITIES: Opportunity[] = []
 // includeArchived (ARCHIVE-1): reveal soft-deleted opportunities alongside the
 // active set (?include_archived=1) — off by default; the page owns the toggle state.
 // branchIds (VESTIGING-2): explicit branch filter, off (empty) by default.
-export function useOpportunitiesData(includeArchived: boolean = false, branchIds: string[] = []) {
+// ref (NUMMER-1): an exact reference-number lookup (KA-00042) — OpportunityQuery
+// returns early on `ref`, so pasting a number always finds that one deal. Null =
+// the normal list; the page's free-text search stays client-side.
+export function useOpportunitiesData(includeArchived: boolean = false, branchIds: string[] = [], ref: string | null = null) {
   const { t } = useTranslation()
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { stages, stageMeta } = useOpportunityStages()
@@ -56,7 +59,7 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
   // reload (useOpportunityArchive) so a just-archived row drops out of view and
   // a just-restored one comes back. The toggle rides in the query key so
   // flipping it triggers a real refetch instead of silently reusing the cache.
-  const queryKey = ['opportunities', includeArchived, branchIds] as const
+  const queryKey = ['opportunities', includeArchived, branchIds, ref] as const
   const { data, isLoading: loading, isError: error, refetch } = useQuery({
     queryKey,
     queryFn: async ({ signal }) => {
@@ -66,6 +69,8 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
         const params: Record<string, unknown> = {}
         if (includeArchived)  params.include_archived = 1
         if (branchIds.length) params.branch_id = branchIds
+        // NUMMER-1: exact reference-number lookup — takes precedence server-side.
+        if (ref)              params.ref = ref
         const r = await api.get('/opportunities', { signal, params: Object.keys(params).length ? params : undefined })
         return ((unwrapList(r).rows) as ApiOpportunity[]).map(mapOpportunity)
       } catch (e) {

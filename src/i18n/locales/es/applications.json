@@ -119,6 +119,76 @@
     "functionTitle": "Función",
     "noFunction": "Aún no se ha indicado ninguna función"
   },
+  "cvProposal": {
+    "title": "Propuesta del CV",
+    "cardTitle": "Datos extraídos del CV adjunto",
+    "error": "No se ha podido cargar la propuesta del CV.",
+    "intro": "Koios AI ha leído estos valores del CV que acompañaba a esta candidatura. No se ha guardado nada: revisa cada valor y decide tú. Las fechas y los empleadores se leen mal con frecuencia.",
+    "readOn": "Leído el {{date}}",
+    "modelLabel": "Modelo: {{model}}",
+    "badge": "cv",
+    "badgeTitle": "Leído del CV — revisa este valor",
+    "tableCaption": "Lo que hay ahora en el expediente, lo que propone el CV y qué haría aceptarlo.",
+    "status": {
+      "pending": "Aún sin revisar",
+      "accepted": "Aceptado",
+      "rejected": "No aceptado"
+    },
+    "columns": {
+      "field": "Campo",
+      "current": "Ahora en el expediente",
+      "proposed": "Del CV",
+      "result": "Si se acepta"
+    },
+    "fields": {
+      "first_name": "Nombre",
+      "last_name": "Apellidos",
+      "date_of_birth": "Fecha de nacimiento",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "mobile": "Móvil",
+      "street": "Calle",
+      "house_number": "Número",
+      "postcode": "Código postal",
+      "city": "Ciudad"
+    },
+    "currentEmpty": "todavía vacío",
+    "willFill": "Se rellenará",
+    "willKeep": "Queda sin cambios",
+    "currentLoading": "Cargando los datos actuales…",
+    "currentError": "No se han podido cargar los datos actuales del candidato, por eso aceptar está desactivado.",
+    "noFields": "De este CV no salieron campos que nosotros incorporemos.",
+    "experiences": {
+      "title_one": "{{count}} experiencia laboral del CV",
+      "title_other": "{{count}} experiencias laborales del CV"
+    },
+    "educations": {
+      "title_one": "{{count}} formación del CV",
+      "title_other": "{{count}} formaciones del CV"
+    },
+    "ongoing": "actualidad",
+    "fillOnlyNotice": "Aceptar solo rellena campos vacíos. Los campos que ya tienen un valor quedan sin cambios.",
+    "nothingToFill": "Cada campo de este CV ya tiene un valor en el expediente. Aceptar no cambia nada.",
+    "appendNotice": "La experiencia laboral y la formación se añaden, nunca se sobrescriben.",
+    "dropped_one": "{{count}} campo del CV queda fuera de lo que incorporamos y se ha ignorado.",
+    "dropped_other": "{{count}} campos del CV quedan fuera de lo que incorporamos y se han ignorado.",
+    "noFreeText": "El texto libre del CV (resumen, motivación, observaciones) nunca se incorpora, de forma deliberada.",
+    "accept": "Aceptar",
+    "reject": "No aceptar",
+    "acceptConfirm_one": "¿Rellenar {{count}} campo vacío con los datos del CV? Los campos que ya tienen valor quedan sin cambios.",
+    "acceptConfirm_other": "¿Rellenar {{count}} campos vacíos con los datos del CV? Los campos que ya tienen valor quedan sin cambios.",
+    "rejectConfirm": "¿No aceptar esta propuesta del CV? No se rellenará nada; la propuesta sigue visible en esta candidatura.",
+    "accepted": "Propuesta del CV aceptada.",
+    "rejected": "Propuesta del CV no aceptada.",
+    "resultApplied_one": "{{count}} campo rellenado.",
+    "resultApplied_other": "{{count}} campos rellenados.",
+    "resultSkipped_one": "{{count}} campo omitido porque ya tenía un valor.",
+    "resultSkipped_other": "{{count}} campos omitidos porque ya tenían un valor.",
+    "resultNothing": "No se ha rellenado nada: cada campo ya tenía un valor.",
+    "readOnly": "No tienes permisos para incorporar datos de un CV.",
+    "reviewedBy": "Revisado por {{name}} el {{date}}",
+    "reviewedOn": "Revisado el {{date}}"
+  },
   "matchScore": {
     "title": "Puntuación de match",
     "overall": "Global",

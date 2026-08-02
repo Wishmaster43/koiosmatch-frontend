@@ -12,6 +12,7 @@
   },
   "cols": {
     "title": "Oportunidad",
+    "referenceNumber": "N.º ref.",
     "client": "Cliente",
     "stage": "Fase",
     "value": "Valor",

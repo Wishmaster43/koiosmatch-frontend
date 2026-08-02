@@ -119,6 +119,76 @@
     "functionTitle": "Fonction",
     "noFunction": "Aucune fonction renseignée"
   },
+  "cvProposal": {
+    "title": "Proposition issue du CV",
+    "cardTitle": "Données extraites du CV joint",
+    "error": "La proposition issue du CV n'a pas pu être chargée.",
+    "intro": "Koios AI a extrait ces valeurs du CV joint à cette candidature. Rien n'a été enregistré : vérifiez chaque valeur et décidez vous-même. Les dates et les employeurs sont régulièrement mal lus.",
+    "readOn": "Lu le {{date}}",
+    "modelLabel": "Modèle : {{model}}",
+    "badge": "cv",
+    "badgeTitle": "Extrait du CV — vérifiez cette valeur",
+    "tableCaption": "Ce que contient le dossier aujourd'hui, ce que propose le CV et l'effet d'une acceptation.",
+    "status": {
+      "pending": "Pas encore examiné",
+      "accepted": "Repris",
+      "rejected": "Non repris"
+    },
+    "columns": {
+      "field": "Champ",
+      "current": "Actuellement au dossier",
+      "proposed": "Issu du CV",
+      "result": "Si accepté"
+    },
+    "fields": {
+      "first_name": "Prénom",
+      "last_name": "Nom",
+      "date_of_birth": "Date de naissance",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "mobile": "Mobile",
+      "street": "Rue",
+      "house_number": "Numéro",
+      "postcode": "Code postal",
+      "city": "Ville"
+    },
+    "currentEmpty": "encore vide",
+    "willFill": "Sera rempli",
+    "willKeep": "Reste inchangé",
+    "currentLoading": "Chargement des données actuelles…",
+    "currentError": "Les données actuelles du candidat n'ont pas pu être chargées ; l'acceptation est donc désactivée.",
+    "noFields": "Ce CV n'a produit aucun champ que nous reprenons.",
+    "experiences": {
+      "title_one": "{{count}} expérience professionnelle issue du CV",
+      "title_other": "{{count}} expériences professionnelles issues du CV"
+    },
+    "educations": {
+      "title_one": "{{count}} formation issue du CV",
+      "title_other": "{{count}} formations issues du CV"
+    },
+    "ongoing": "aujourd'hui",
+    "fillOnlyNotice": "L'acceptation ne remplit que les champs vides. Les champs déjà renseignés restent inchangés.",
+    "nothingToFill": "Chaque champ de ce CV possède déjà une valeur au dossier. L'acceptation ne change rien.",
+    "appendNotice": "L'expérience professionnelle et les formations sont ajoutées, jamais écrasées.",
+    "dropped_one": "{{count}} champ du CV sort de ce que nous reprenons et a été ignoré.",
+    "dropped_other": "{{count}} champs du CV sortent de ce que nous reprenons et ont été ignorés.",
+    "noFreeText": "Le texte libre du CV (résumé, motivation, remarques) n'est jamais repris, délibérément.",
+    "accept": "Reprendre",
+    "reject": "Ne pas reprendre",
+    "acceptConfirm_one": "Remplir {{count}} champ vide avec les données du CV ? Les champs déjà renseignés restent inchangés.",
+    "acceptConfirm_other": "Remplir {{count}} champs vides avec les données du CV ? Les champs déjà renseignés restent inchangés.",
+    "rejectConfirm": "Ne pas reprendre cette proposition ? Rien ne sera rempli ; la proposition reste visible sur cette candidature.",
+    "accepted": "Proposition issue du CV reprise.",
+    "rejected": "Proposition issue du CV non reprise.",
+    "resultApplied_one": "{{count}} champ rempli.",
+    "resultApplied_other": "{{count}} champs remplis.",
+    "resultSkipped_one": "{{count}} champ ignoré car il contenait déjà une valeur.",
+    "resultSkipped_other": "{{count}} champs ignorés car ils contenaient déjà une valeur.",
+    "resultNothing": "Rien n'a été rempli : chaque champ contenait déjà une valeur.",
+    "readOnly": "Vous n'avez pas les droits pour reprendre les données d'un CV.",
+    "reviewedBy": "Examiné par {{name}} le {{date}}",
+    "reviewedOn": "Examiné le {{date}}"
+  },
   "matchScore": {
     "title": "Score de match",
     "overall": "Global",

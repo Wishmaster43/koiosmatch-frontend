@@ -149,6 +149,7 @@
     "task_types": "Activity types",
     "task_priorities": "Priorities",
     "task_display": "Table display",
+    "customer_phases": "Customer phase",
     "customer_statuses": "Customer statuses",
     "location_statuses": "Location statuses",
     "department_statuses": "Department statuses",
@@ -1726,6 +1727,13 @@
     }
   },
   "customerLookups": {
+    "phases": {
+      "title": "Customer phase",
+      "subtitle": "Relationship phase of a customer (Prospect → Customer). A different question than the status.",
+      "add": "Add phase",
+      "isCustomer": "Counts as customer",
+      "isCustomerHint": "Marks the phase in which the relationship is a real customer (no longer a prospect). At most one phase."
+    },
     "statuses": {
       "title": "Customer statuses",
       "subtitle": "Manage the statuses a customer can have (Active, Prospect, …).",

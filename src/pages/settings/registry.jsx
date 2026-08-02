@@ -40,7 +40,7 @@ import NumberingSettings from './sections/NumberingSettings'
 import OrganisationPolicySettings from './sections/OrganisationPolicySettings'
 import CareerSiteSettings from './sections/CareerSiteSettings'
 import CaoSettings from './sections/CaoSettings'
-import { CustomerStatusesSettings, LocationStatusesSettings, DepartmentStatusesSettings, ContactStatusesSettings } from './sections/CustomerSettings'
+import { CustomerStatusesSettings, CustomerPhasesSettings, LocationStatusesSettings, DepartmentStatusesSettings, ContactStatusesSettings } from './sections/CustomerSettings'
 import PoolsSettings from './sections/PoolsSettings'
 import { LanguageListSettings, LanguageLevelSettings } from './sections/LanguageSettings'
 import GenderSettings from './sections/GenderSettings'
@@ -209,6 +209,9 @@ export const NAV_GROUPS = [
     // FUNCTIONS-SPLIT-1) so every contact-person setting lives together.
     key: 'customers', icon: Building2,
     items: [
+      // KLANT-FASE-1: lifecycle phase (Prospect → Klant) — same axis, same icon as the
+      // candidate phase editor, so both read as "the same thing on another entity".
+      { id: 'customer_phases', icon: Target, component: CustomerPhasesSettings },
       { id: 'customer_statuses', icon: Tags, component: CustomerStatusesSettings },
       // CAO lookup — feeds price agreements + the + Match popup (Danny 24-07).
       { id: 'cao', icon: Scale, component: CaoSettings },

@@ -48,6 +48,7 @@ import type { Contact, Department, Location } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { LocationPayload } from '../hooks/useCustomerLocations'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
+import { isPrimaryForLocation } from '../hooks/useCustomerContacts'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 
 interface Props {
@@ -115,6 +116,11 @@ export default function LocationDetail({
   const [subTab, setSubTab] = useState<'address' | 'departments' | 'contacts' | 'extra' | 'koppelingen'>('address')
 
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
+  // CONTACT-LOCATION-PRIMARY-1: THIS site's own primary contact — a real record resolved
+  // from the contact↔location coupling flag, not a name matched against free text. It is
+  // a DIFFERENT axis from the customer's one main contact (`isPrimary`), which is why the
+  // block below names the site it belongs to.
+  const primaryContact = contacts.find(c => isPrimaryForLocation(c, l.id as Id)) ?? null
   // Algemeen/Adres/Registratie/Contact ter plaatse — the "Adres & gegevens" sub-tab.
   // Street/no/suffix/postcode/city collapse into ONE composed line in read mode
   // (the 'address' composite, mirrors the candidate profile address row) and only
@@ -147,24 +153,19 @@ export default function LocationDetail({
     // the location picked on a match, so an editable one would be a misleading
     // affordance (§3) — see OverviewTab for the real billing email.
     { key: 'costCenter', label: t('locations.detail.costCenter'), type: 'text', group: t('overview.details') },
-    // "Contact ter plaatse" is FREE TEXT on the location (customer_locations.contact_name),
-    // not a reference to a contact record — so it can only become a link when the typed
-    // name resolves to EXACTLY ONE of this customer's contacts. Two people called "Jan
-    // de Vries" (or none) leave it as plain text: a link that opens the wrong person is
-    // worse than no link. Making this a real relation is CMBE ticket LOCATIE-PRIMAIR-1.
+    // "Contact ter plaatse" is FREE TEXT on the location (customer_locations.contact_name)
+    // and stays free text — the typed value is real data and is never silently dropped.
+    //
+    // It NO LONGER GUESSES which contact record the typed name means. That guess was the
+    // bug: it matched on the name, so two people called "Joost de Boer" made it give up,
+    // and one match made it open a person who may never have been meant. The real link now
+    // exists — customer_contact_customer_location.is_primary, rendered as its own resolved
+    // row below (CONTACT-LOCATION-PRIMARY-1) — so a name-matched link would only be a
+    // second, less trustworthy answer to a question that already has a correct one.
     { key: 'contactName', label: t('locations.detail.contactName'), type: 'text', group: t('locations.detail.contactTitle'),
       renderValue: v => {
         const typed = typeof v === 'string' ? v.trim() : ''
-        if (!typed) return <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>
-        const byName = (c: Contact) => c.name.trim().toLowerCase() === typed.toLowerCase()
-        // Look at THIS location's own contacts first. Measured on the demo data: the same
-        // person exists as a separate record per location ("Eva Bos" four times, one per
-        // site), so a customer-wide name match finds several and would refuse to link at
-        // all — while "contact ter plaatse" obviously means the one AT this location.
-        const here = contacts.filter(c => String(c.locationId) === String(l.id)).filter(byName)
-        const hits = here.length > 0 ? here : contacts.filter(byName)
-        return <ContactNameLink name={typed} id={hits.length === 1 ? hits[0].id : null}
-          onOpen={id => { setSubTab('contacts'); setOpenContactId(id) }} title={t('contacts.openContact')} />
+        return <span style={{ fontSize: 12, color: typed ? 'var(--text)' : 'var(--text-muted)' }}>{typed || '-'}</span>
       } },
     { key: 'email', label: t('locations.detail.email'), type: 'text', group: t('locations.detail.contactTitle'),
       renderValue: v => emailValue(v, t('overview.sendEmail')) },
@@ -297,6 +298,31 @@ export default function LocationDetail({
             <EditableFieldTable key={group} title={group} labelWidth={140} value={values} onSave={save}
               fields={generalFields.filter(f => f.group === group).map(f => ({ ...f, group: undefined }))} />
           ))}
+
+          {/* CONTACT-LOCATION-PRIMARY-1 — who you actually call at THIS site, as a link to
+              the real record. The title names the site on purpose: the customer's own main
+              contact is a separate thing and the two must never read as one. Setting it
+              lives where the people are, on the Contactpersonen sub-tab, so there is one
+              place that owns the change. */}
+          <SectionCard title={t('locations.detail.primaryContactTitle')}>
+            {primaryContact ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
+                <ContactNameLink name={primaryContact.name} id={primaryContact.id}
+                  onOpen={id => { setSubTab('contacts'); setOpenContactId(id) }} title={t('contacts.openContact')} />
+                {primaryContact.role && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{primaryContact.role}</span>}
+              </div>
+            ) : (
+              // Honest empty state + the one route to fix it, never a blank line.
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 12, fontStyle: 'italic', color: 'var(--text-muted)' }}>{t('locations.detail.noPrimaryContact')}</span>
+                <button type="button" onClick={() => setSubTab('contacts')}
+                  style={{ padding: 0, background: 'none', border: 'none', fontFamily: 'inherit', fontSize: 12,
+                    color: 'var(--color-info)', cursor: 'pointer' }}>
+                  {t('locations.detail.pickPrimaryContact')}
+                </button>
+              </div>
+            )}
+          </SectionCard>
 
           {/* Vestiging — which of OUR branches this site works under, and whether that is
               inherited from the customer or set here on purpose (LOCATIE-VESTIGING-1). */}

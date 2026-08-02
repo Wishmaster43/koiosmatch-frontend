@@ -149,6 +149,7 @@
     "task_types": "Activiteit-types",
     "task_priorities": "Prioriteiten",
     "task_display": "Tabelweergave",
+    "customer_phases": "Klantfase",
     "customer_statuses": "Klant statussen",
     "location_statuses": "Locatie statussen",
     "department_statuses": "Afdeling statussen",
@@ -1726,6 +1727,13 @@
     }
   },
   "customerLookups": {
+    "phases": {
+      "title": "Klantfase",
+      "subtitle": "Relatie-fase van een klant (Prospect → Klant). Een andere vraag dan de status.",
+      "add": "Fase toevoegen",
+      "isCustomer": "Telt als klant",
+      "isCustomerHint": "Markeer de fase waarin de relatie een echte klant is (niet langer een prospect). Maximaal één fase."
+    },
     "statuses": {
       "title": "Klant statussen",
       "subtitle": "Beheer de statussen die een klant kan hebben (Actief, Prospect, …).",
