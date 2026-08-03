@@ -9,11 +9,12 @@
 import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash2 } from 'lucide-react'
+import { Trash2, GitMerge } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomerHeaderActions from './drawer/CustomerHeaderActions'
+import MergeCustomerModal from './MergeCustomerModal'
 import PdokCard from '@/components/drawer/PdokCard'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
@@ -115,6 +116,10 @@ export default function CustomerDrawer({
   // DELETE-ICON-1 (Danny): the drawer's soft-delete trash icon, same permission the
   // page's own bulk-archive button already gates on.
   const canDelete = hasPermission('customers.delete')
+  // KLANT-SAMENVOEGEN-1: the merge icon gates on the SAME permission the route itself
+  // requires (customers.update — a merge is update-class, reversible: the absorbed
+  // record is soft-deleted, never hard) — the backend re-checks regardless (§7).
+  const canMerge = hasPermission('customers.update')
   const { formatDateTime } = useDateFormat()
   // The Extra tab only shows when the tenant has defined customer custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer')
@@ -168,6 +173,9 @@ export default function CustomerDrawer({
   // DELETE-ICON-1: the house confirm dialog (§0 restschuld) — same shared hook the
   // candidate drawer's own trash icon and OpportunitiesTab's delete already use.
   const { confirm, dialog: deleteDialog } = useConfirm()
+  // KLANT-SAMENVOEGEN-1: the merge overlay is its own two-step modal (mirrors the
+  // candidate's MergeCandidateModal), not the house confirm dialog above.
+  const [showMerge, setShowMerge] = useState(false)
 
   if (!c) return null
 
@@ -385,10 +393,18 @@ export default function CustomerDrawer({
                 cramped 360px dropdown with no focus trap; now the same 900px centred
                 panel as the candidate drawer. */}
             <ChangelogPopover><ChangelogTab customerId={c.id} /></ChangelogPopover>
+            {/* KLANT-SAMENVOEGEN-1: merge a duplicate into this record — same slot/style
+                as the candidate drawer's own merge icon (klok · samenvoegen · prullenbak),
+                permission-gated, hidden once already archived. */}
+            {canMerge && !c.archived && (
+              <button onClick={() => setShowMerge(true)}
+                title={t('merge.title')} aria-label={t('merge.title')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--text-muted)', opacity: 0.8 }}>
+                <GitMerge size={14} />
+              </button>
+            )}
             {/* DELETE-ICON-1: soft-delete (§3B), same position/style as the candidate
-                drawer's own trash icon — permission-gated, hidden once already archived.
-                No merge icon here: customers have no merge endpoint yet (candidates do),
-                so rendering one would be a fake affordance (§3). */}
+                drawer's own trash icon — permission-gated, hidden once already archived. */}
             {canDelete && !c.archived && (
               <button onClick={requestDelete}
                 title={t('drawer.delete')} aria-label={t('drawer.delete')}
@@ -419,6 +435,25 @@ export default function CustomerDrawer({
     />
     {/* DELETE-ICON-1: the shared confirm dialog, mounted once per drawer. */}
     {deleteDialog}
+    {/* KLANT-SAMENVOEGEN-1: the open record is always the SURVIVOR (see the modal's own
+        docblock for the measured route direction), so its id never changes here — no
+        reselect needed, only a refresh of the sub-entity data that may have just moved
+        in from the absorbed duplicate. The list/stats query cache is invalidated inside
+        the modal itself. Known gap: the survivor's OWN top-level fields backfilled from
+        the duplicate (email/phone/tags/custom fields, …) only show after the drawer is
+        reopened — CustomersPage's detail refetch is outside this file's scope. */}
+    {showMerge && (
+      <MergeCustomerModal
+        current={{ id: c.id as Id, name: c.name, code: c.referenceNumber, city: c.city }}
+        onClose={() => setShowMerge(false)}
+        onMerged={() => {
+          setShowMerge(false)
+          locationsApi.reload()
+          departmentsApi.reload()
+          contactsApi.reload()
+        }}
+      />
+    )}
     </>
   )
 }

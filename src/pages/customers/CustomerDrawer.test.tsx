@@ -221,15 +221,6 @@ describe('CustomerDrawer · delete icon (DELETE-ICON-1)', () => {
     expect(screen.queryByTitle(ct('drawer.delete'))).toBeNull()
   })
 
-  // No merge endpoint exists for customers yet (unlike candidates) — rendering
-  // one would be a fake affordance (§3), so this must hold even when every
-  // permission is granted.
-  it('never renders a merge icon — customers have no merge endpoint yet', () => {
-    mockUseAuth.mockReturnValue({ user: { name: 'Test User' }, hasModule: () => false, hasPermission: () => true })
-    render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} />)
-    expect(screen.queryByTitle(/merge/i)).toBeNull()
-  })
-
   it('does NOT call DELETE until the confirm dialog is accepted — cancel leaves it untouched', async () => {
     grantDelete()
     const user = userEvent.setup()
@@ -276,6 +267,33 @@ describe('CustomerDrawer · delete icon (DELETE-ICON-1)', () => {
     await waitFor(() => expect(api.delete).toHaveBeenCalled())
     expect(screen.queryByText(/SQLSTATE/)).toBeNull()
     expect(onClose).not.toHaveBeenCalled()
+  })
+})
+
+// KLANT-SAMENVOEGEN-1: the merge icon gates on customers.update (the route's own
+// permission — CustomerController::merge), same slot/style convention as the trash
+// icon above but a DIFFERENT permission, so it is tested on its own rather than folded
+// into the delete-icon block. Clicking is not exercised here (that renders
+// MergeCustomerModal, which needs a QueryClientProvider — covered by its own test file).
+describe('CustomerDrawer · merge icon (KLANT-SAMENVOEGEN-1)', () => {
+  const grantMerge = () => mockUseAuth.mockReturnValue({ user: { name: 'Test User' }, hasModule: () => false, hasPermission: (p: string) => p === 'customers.update' })
+
+  it('renders NO merge icon without the customers.update permission', () => {
+    mockUseAuth.mockReturnValue({ user: { name: 'Test User' }, hasModule: () => false, hasPermission: () => false })
+    render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} />)
+    expect(screen.queryByTitle(ct('merge.title'))).toBeNull()
+  })
+
+  it('renders the merge icon in the title row once customers.update is granted', () => {
+    grantMerge()
+    render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} />)
+    expect(screen.getByTitle(ct('merge.title'))).toBeInTheDocument()
+  })
+
+  it('hides the merge icon once the customer is already archived', () => {
+    grantMerge()
+    render(<CustomerDrawer customer={{ ...customer, archived: true } as Customer} onClose={() => {}} statuses={statuses} />)
+    expect(screen.queryByTitle(ct('merge.title'))).toBeNull()
   })
 })
 
