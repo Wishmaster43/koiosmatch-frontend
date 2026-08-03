@@ -68,6 +68,12 @@ export function mapMatch(m: RawMatch): MatchRow {
     // MATCH-ARCHIVED-LIST-1: real list-level archive state (MatchListResource).
     archived:   Boolean(m.archived ?? m.deleted_at),
     archivedAt: m.deleted_at ?? null,
+    // MATCH-CARD-INFO-1 (Danny points 4/5): contract window + function/branch —
+    // MatchListResource.php:35,43-46 already ships all four on every list row.
+    functionTitle: m.function_title ?? null,
+    branchName:    m.branch?.name ?? null,
+    startDate:     m.start_date ?? null,
+    endDate:       m.end_date ?? null,
   }
 }
 

@@ -86,3 +86,35 @@ describe('AddVacancyModal · submit body unchanged by the card regroup', () => {
     })
   })
 })
+
+/** Point 1 (Danny's ten-point round): opened from a location/department
+ *  drill-down's own "+ Vacature" — additive-only, StoreVacancyRequest.php:79-80. */
+describe('AddVacancyModal · scoped create (point 1)', () => {
+  it('rides the location/department id on the POST body silently when given', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers}
+      initialCustomerLocationId="loc-1" initialCustomerDepartmentId="dep-1" />)
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Verpleegkundige')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({
+      customer_location_id: 'loc-1', customer_department_id: 'dep-1',
+    }))
+  })
+
+  it('shows a read-only info line naming the scope, never a silent create', () => {
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers}
+      initialCustomerLocationId="loc-1" initialCustomerLocationName="Locatie Noord" />)
+    expect(screen.getByText('modal.fields.scopedUnder')).toBeInTheDocument()
+  })
+
+  it('renders no info line and no extra body keys when no scope is given (default byte-identical)', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    expect(screen.queryByText('modal.fields.scopedUnder')).toBeNull()
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Verpleegkundige')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+    const [, body] = mockPost.mock.calls[0]
+    expect(body).not.toHaveProperty('customer_location_id')
+    expect(body).not.toHaveProperty('customer_department_id')
+  })
+})

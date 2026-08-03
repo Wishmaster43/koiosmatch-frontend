@@ -72,6 +72,11 @@ interface Props {
   /** The location we are inside, for the scope filter and the add-modal pre-select. */
   scopeId?: Id
   scopeName?: string
+  // Point 1 (Danny's ten-point round): threaded down to DepartmentDetail's own
+  // ScopedVacanciesTab/ScopedMatchesTab "+" wiring — this panel doesn't use them
+  // itself, only passes them through to the opened department.
+  customerId?: Id
+  customerName?: string
   locations: { id: Id; name: string }[]
   /** Customer-wide contacts — powers the contact-count column and DepartmentDetail's own Contactpersonen sub-tab. */
   contacts: Contact[]
@@ -95,7 +100,7 @@ interface Props {
 }
 
 export default function DepartmentsPanel({
-  departments, scope, scopeId, scopeName, locations, contacts, statuses,
+  departments, scope, scopeId, scopeName, customerId, customerName, locations, contacts, statuses,
   contactStatuses = [], canLinkBackoffice = false, openId, onOpenChange, trail = [],
   onAdd, onUpdate, onRemove, onAddContact, onUpdateContact, onRemoveContact,
 }: Props) {
@@ -176,6 +181,7 @@ export default function DepartmentsPanel({
     return (
       <DepartmentDetail key={String(selected.id)} department={selected} locations={locations} statuses={statuses}
         contacts={contacts.filter(c => String(c.departmentId) === String(selected.id))}
+        customerId={customerId} customerName={customerName}
         canLinkBackoffice={canLinkBackoffice} departments={departments} contactStatuses={contactStatuses}
         trail={detailTrail} pager={pager}
         onAddContact={onAddContact} onUpdateContact={onUpdateContact} onRemoveContact={onRemoveContact}

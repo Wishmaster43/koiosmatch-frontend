@@ -38,13 +38,24 @@ interface ModalCustomer { id: Id; name: string }
  * exist on this create form yet, so Plaatsing stays a single-field card for now;
  * see the delivery report).
  */
-export default function AddVacancyModal({ onClose, onCreated, users = [], customers = [], lockCustomerId, lockCustomerName }: {
+export default function AddVacancyModal({
+  onClose, onCreated, users = [], customers = [], lockCustomerId, lockCustomerName,
+  initialCustomerLocationId, initialCustomerDepartmentId, initialCustomerLocationName, initialCustomerDepartmentName,
+}: {
   onClose: () => void; onCreated?: (v: Vacancy) => void; users?: ModalUser[]; customers?: ModalCustomer[]
   // Opened from a customer drawer (Danny 28-07: "+ nieuwe vacature vanuit de klanten
   // drill down"): the client is already known, so it is pre-filled and shown read-only
   // instead of asking the recruiter to pick the customer they are already looking at.
   // Mirrors AddDepartmentModal's lockLocationId.
   lockCustomerId?: string; lockCustomerName?: string
+  // Point 1 (Danny's ten-point round): opened from a location/department drill-
+  // down's own "+ Vacature" — StoreVacancyRequest.php:79-80 accepts both FKs.
+  // This form has no location/department PICKER (unlike MatchModal's live
+  // cascade), so the id rides the POST body silently and the NAME renders as a
+  // small read-only info line (§3: honest about what will be created) instead
+  // of building a whole new cascade UI for one create form.
+  initialCustomerLocationId?: string; initialCustomerDepartmentId?: string
+  initialCustomerLocationName?: string; initialCustomerDepartmentName?: string
 }) {
   const { t } = useTranslation(['vacancies', 'common'])
   const { statuses } = useVacancyLookups()
@@ -82,6 +93,11 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
         industry: form.industry || null,
         category: form.category || null,
         location: form.location || null,
+        // Point 1: additive-only — absent unless opened from a location/department
+        // drill-down's own "+ Vacature" (never sent as an explicit null, so the
+        // exact body other callers already assert stays byte-identical).
+        ...(initialCustomerLocationId ? { customer_location_id: initialCustomerLocationId } : {}),
+        ...(initialCustomerDepartmentId ? { customer_department_id: initialCustomerDepartmentId } : {}),
       }
       const r = await api.post('/vacancies', body)
       onCreated?.(mapVacancy(unwrap<ApiVacancy>(r)))
@@ -160,6 +176,14 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
                     placeholder={t('common:select')} options={functions} />
                 </Field>
               </div>
+              {/* Point 1: honest about the scope this vacancy will be created under
+                  — this form has no location/department picker, so the id rides the
+                  POST body silently (see handleSubmit) and only the NAME shows here. */}
+              {(initialCustomerLocationName || initialCustomerDepartmentName) && (
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                  {t('modal.fields.scopedUnder', { name: initialCustomerDepartmentName || initialCustomerLocationName })}
+                </div>
+              )}
             </div>
           </div>
 

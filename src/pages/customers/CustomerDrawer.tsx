@@ -279,7 +279,7 @@ export default function CustomerDrawer({
       )
       case 'departments':   return (
         <DepartmentsTab
-          customerId={c.id} departments={departmentsApi.departments} contacts={contactsApi.contacts} locations={locationOptions} statuses={departmentStatuses}
+          customerId={c.id} customerName={c.name} departments={departmentsApi.departments} contacts={contactsApi.contacts} locations={locationOptions} statuses={departmentStatuses}
           canLinkBackoffice={canLinkBackoffice}
           onAdd={departmentsApi.add} onUpdate={departmentsApi.update} onRemove={departmentsApi.remove}
           contactStatuses={contactStatuses}

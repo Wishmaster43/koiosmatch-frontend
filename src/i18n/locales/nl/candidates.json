@@ -856,6 +856,12 @@
     "contractType": "Contractvorm",
     "stage": "Fase",
     "contract": "Contract",
+    "functionTitle": "Functietitel",
+    "branch": "Vestiging",
+    "period": "Periode",
+    "expiresOn": "Loopt af op {{date}}",
+    "expiredOn": "Afgelopen op {{date}}",
+    "owner": "Eigenaar",
     "backofficeLinked": "Gekoppeld met backoffice (HelloFlex)",
     "contractStatus": {
       "none": "Geen contract",

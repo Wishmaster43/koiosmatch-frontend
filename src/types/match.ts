@@ -35,6 +35,13 @@ export interface RawMatch {
   owner_name?: string
   created_at?: string
   matched_at?: string
+  // VESTIGING-1: the bureau branch the match runs from (MatchListResource.php:35).
+  branch?: { id?: string | number; name?: string } | null
+  // MATCH-CARD-INFO-1 (Danny points 4/5): the contract window + function title —
+  // MatchListResource.php:43-46 already ships all three on every list row.
+  function_title?: string | null
+  start_date?: string | null
+  end_date?: string | null
   // MATCH-ARCHIVED-LIST-1: soft-delete state (both list + detail rows now carry it —
   // see MatchListResource.php).
   archived?: boolean
@@ -92,5 +99,11 @@ export interface MatchRow {
   // list-level state, not just a delete/restore this session performed.
   archived?: boolean
   archivedAt?: string | null
+  // MATCH-CARD-INFO-1 (Danny points 4/5): contract window + function/branch, shown
+  // as extra rows on the read-only match card (customer/candidate/scoped views).
+  functionTitle?: string | null
+  branchName?: string | null
+  startDate?: string | null
+  endDate?: string | null
   [k: string]: unknown
 }

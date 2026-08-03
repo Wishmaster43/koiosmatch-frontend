@@ -856,6 +856,12 @@
     "contractType": "Contract type",
     "stage": "Stage",
     "contract": "Contract",
+    "functionTitle": "Job title",
+    "branch": "Branch",
+    "period": "Period",
+    "expiresOn": "Expires on {{date}}",
+    "expiredOn": "Expired on {{date}}",
+    "owner": "Owner",
     "backofficeLinked": "Linked to backoffice (HelloFlex)",
     "contractStatus": {
       "none": "No contract",

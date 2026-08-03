@@ -137,7 +137,7 @@ export default function LocationsTab({
     return (
       <LocationDetail
         key={String(selected.id)}
-        location={selected} customerId={customerId}
+        location={selected} customerId={customerId} customerName={customerName}
         locations={locations.map(x => ({ id: x.id as Id, name: x.name }))}
         departments={departments} contacts={contacts}
         statuses={statuses} departmentStatuses={departmentStatuses} contactStatuses={contactStatuses}

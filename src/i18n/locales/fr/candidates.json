@@ -834,6 +834,12 @@
     "contractType": "Type de contrat",
     "stage": "Étape",
     "contract": "Contrat",
+    "functionTitle": "Intitulé du poste",
+    "branch": "Agence",
+    "period": "Période",
+    "expiresOn": "Expire le {{date}}",
+    "expiredOn": "Expiré le {{date}}",
+    "owner": "Responsable",
     "backofficeLinked": "Lié au backoffice (HelloFlex)",
     "contractStatus": {
       "none": "Aucun contrat",

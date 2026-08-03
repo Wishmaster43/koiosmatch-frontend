@@ -333,7 +333,8 @@
       "location": "Ubicación",
       "cardGeneral": "General",
       "cardPlacement": "Asignación",
-      "cardPublication": "Publicación"
+      "cardPublication": "Publicación",
+      "scopedUnder": "Se creará bajo: {{name}}"
     },
     "titlePlaceholder": "p. ej. Enfermero | La Haya",
     "create": "Crear vacante",

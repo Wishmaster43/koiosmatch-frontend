@@ -2,8 +2,15 @@
  * MatchesTab (customer drawer) — mirrors candidates/drawer/MatchesTab.test.tsx's
  * own coverage: empty state, the real-anchor "Open match" affordance, and the
  * four explicit UI states (§3). The one behavioural difference from the
- * candidate tab is proven here too: this tab is READ-ONLY — no pencil/onEdit,
- * ever (a match is opened/edited in its own drawer, never from this list).
+ * candidate tab is proven here too: this tab's CARD is read-only — no pencil,
+ * ever (a match's fields are opened/edited in its own drawer, never from this
+ * list) — but point 1 (Danny's ten-point round) now adds a "+ Match" trigger
+ * to the toolbar itself, opening MatchModal already scoped to this customer.
+ *
+ * The card BODY moved into the shared `MatchCard` (point 2/4/5/6) — its own
+ * test file (MatchCard.test.tsx) covers the title-merge/Periode/Functie/
+ * Vestiging/Eigenaar/expiry-chip behaviour in isolation; this file only proves
+ * this tab wires the right DATA into that shared card.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -17,8 +24,8 @@ import type { CustomerMatchRow } from '../hooks/useCustomerDrawerData'
 
 // The lookup's own fetch/resolution is out of scope here (mirrors the candidate
 // test) — a controlled meta resolver proves the card prefers it over the raw row.
-// STATUSES (this task, MATCHES-TOOLBAR-1): a real (non-empty) list so the new
-// StatusFilterSelect toolbar has real options to filter/pick from.
+// STATUSES (MATCHES-TOOLBAR-1): a real (non-empty) list so the StatusFilterSelect
+// toolbar has real options to filter/pick from.
 // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
 const metaOf = vi.fn((v?: string) => (v === 'open' ? { value: 'open', label: 'Open (lookup)', color: '#123456', is_closed: false } : undefined))
 // Deliberately NOT 'open'/'active'/'actief' — useStatusFilter's shared guess
@@ -32,12 +39,23 @@ const statuses = [
   { value: 'confirmed', label: 'Bevestigd', color: '#789ABC', is_closed: true },
 ]
 vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => ({ statuses, metaOf }) }))
+// Neither backoffice system enabled by default — BackofficeCouplingIndicator
+// stays out of the header (mirrors a tenant running neither connector).
+vi.mock('@/context/AppsContext', () => ({ useApps: () => ({ isAppEnabled: () => false }) }))
 
 // The hook that fires GET /matches?customer_id= is proven separately
 // (useCustomerMatches.test.ts, request-shape) — this file stubs it so the
 // component test stays about rendering, not the network seam.
 const mockUseCustomerMatches = vi.fn()
 vi.mock('../hooks/useCustomerDrawerData', () => ({ useCustomerMatches: () => mockUseCustomerMatches() }))
+
+// Point 1: MatchModal itself is the most-watched screen in the app and has its
+// own exhaustive test file — stubbed here so this test only proves the TRIGGER
+// wires the right initial props, not the modal's internals.
+const matchModalProps = vi.fn()
+vi.mock('@/pages/candidates/drawer/MatchModal', () => ({
+  default: (props: Record<string, unknown>) => { matchModalProps(props); return <div data-testid="match-modal" /> },
+}))
 
 const row = (over: Partial<CustomerMatchRow> = {}): CustomerMatchRow => ({
   id: 'm-1', referenceNumber: 'M-1', candidate: 'Jane Doe', initials: 'JD',
@@ -50,26 +68,27 @@ const row = (over: Partial<CustomerMatchRow> = {}): CustomerMatchRow => ({
 })
 
 const ct = (key: string) => i18n.t(key, { ns: 'candidates' })
+const cust = (key: string) => i18n.t(key, { ns: 'customers' })
 
 describe('CustomerDrawer · MatchesTab', () => {
   it('shows loading, then the empty state with no matches', () => {
-    mockUseCustomerMatches.mockReturnValue({ rows: [], loading: true, error: false })
+    mockUseCustomerMatches.mockReturnValue({ rows: [], loading: true, error: false, reload: vi.fn() })
     const { rerender } = render(<MatchesTab customerId="cust-1" />)
     expect(screen.getByText(i18n.t('page.loading', { ns: 'customers' }))).toBeInTheDocument()
 
-    mockUseCustomerMatches.mockReturnValue({ rows: [], loading: false, error: false })
+    mockUseCustomerMatches.mockReturnValue({ rows: [], loading: false, error: false, reload: vi.fn() })
     rerender(<MatchesTab customerId="cust-1" />)
     expect(screen.getByText(ct('matchesView.empty'))).toBeInTheDocument()
   })
 
   it('shows the error state on a failed fetch', () => {
-    mockUseCustomerMatches.mockReturnValue({ rows: [], loading: false, error: true })
+    mockUseCustomerMatches.mockReturnValue({ rows: [], loading: false, error: true, reload: vi.fn() })
     render(<MatchesTab customerId="cust-1" />)
     expect(screen.getByText(i18n.t('matches.loadError', { ns: 'customers' }))).toBeInTheDocument()
   })
 
   it('renders the candidate (swapped from the candidate card\'s "Client" row), vacancy, contract form and contract status', () => {
-    mockUseCustomerMatches.mockReturnValue({ rows: [row({ contractType: 'Fase 1-2 z.u.b.', contractStatus: 'active' })], loading: false, error: false })
+    mockUseCustomerMatches.mockReturnValue({ rows: [row({ contractType: 'Fase 1-2 z.u.b.', contractStatus: 'active' })], loading: false, error: false, reload: vi.fn() })
     render(<MatchesTab customerId="cust-1" />)
 
     expect(screen.getByText('Jane Doe')).toBeInTheDocument()
@@ -78,9 +97,11 @@ describe('CustomerDrawer · MatchesTab', () => {
     expect(screen.getByText(ct('matchesView.contractStatus.active'))).toBeInTheDocument()
   })
 
-  it('resolves the stage from useMatchStatuses — the slug wins over the raw stage label', () => {
+  // Point 2: the fase merges into the title now — no separate row, and the
+  // stage's own colour rides the title's second half.
+  it('resolves the fase from useMatchStatuses INTO THE TITLE — the slug wins over the raw stage label', () => {
     // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
-    mockUseCustomerMatches.mockReturnValue({ rows: [row({ status: 'open', stage: 'Fallback stage', stageColor: '#999999' })], loading: false, error: false })
+    mockUseCustomerMatches.mockReturnValue({ rows: [row({ status: 'open', stage: 'Fallback stage', stageColor: '#999999' })], loading: false, error: false, reload: vi.fn() })
     render(<MatchesTab customerId="cust-1" />)
     expect(metaOf).toHaveBeenCalledWith('open')
     expect(screen.getByText('Open (lookup)')).toBeInTheDocument()
@@ -88,7 +109,7 @@ describe('CustomerDrawer · MatchesTab', () => {
   })
 
   it('renders "Open match" as a real new-tab anchor, never an in-app-only button', () => {
-    mockUseCustomerMatches.mockReturnValue({ rows: [row()], loading: false, error: false })
+    mockUseCustomerMatches.mockReturnValue({ rows: [row()], loading: false, error: false, reload: vi.fn() })
     render(<MatchesTab customerId="cust-1" />)
     const openLink = screen.getByTitle(ct('matchesView.openMatch'))
     expect(openLink.tagName).toBe('A')
@@ -97,14 +118,40 @@ describe('CustomerDrawer · MatchesTab', () => {
     expect(openLink.getAttribute('rel')).toBe('noopener noreferrer')
   })
 
-  // Read-only per §3B: a match is opened/edited in its own drawer, never here —
-  // unlike the candidate's own MatchesTab, this component never accepts an onEdit
-  // prop at all, so no pencil/edit control can ever render.
-  it('never renders a pencil/edit control — this tab has no onEdit prop at all', () => {
-    mockUseCustomerMatches.mockReturnValue({ rows: [row()], loading: false, error: false })
+  // Read-only per §3B: a match's fields are opened/edited in its own drawer,
+  // never here — the card itself never gets an onEdit, so no pencil renders.
+  it('never renders a pencil/edit control on the card', () => {
+    mockUseCustomerMatches.mockReturnValue({ rows: [row()], loading: false, error: false, reload: vi.fn() })
     render(<MatchesTab customerId="cust-1" />)
-    expect(screen.queryByRole('button', { name: 'common:edit' })).toBeNull()
     expect(screen.queryByTitle(i18n.t('common:edit'))).toBeNull()
+  })
+})
+
+/** Point 1 (Danny's ten-point round): "+ Match" opens MatchModal already
+ *  scoped to this customer — a PREFILL (initialCustomerId), never a lock. */
+describe('MatchesTab · "+ Match" (point 1)', () => {
+  it('renders the add trigger and opens MatchModal with this customer prefilled on click', async () => {
+    const user = userEvent.setup()
+    mockUseCustomerMatches.mockReturnValue({ rows: [], loading: false, error: false, reload: vi.fn() })
+    render(<MatchesTab customerId="cust-42" />)
+    expect(screen.queryByTestId('match-modal')).toBeNull()
+
+    await user.click(screen.getByRole('button', { name: cust('matches.add') }))
+    expect(screen.getByTestId('match-modal')).toBeInTheDocument()
+    expect(matchModalProps).toHaveBeenCalledWith(expect.objectContaining({ initialCustomerId: 'cust-42' }))
+    // No candidate/location/department lock — only the customer is prefilled.
+    expect(matchModalProps).not.toHaveBeenCalledWith(expect.objectContaining({ candidateId: expect.anything() }))
+  })
+
+  it('refetches the list once the modal reports a created match', async () => {
+    const user = userEvent.setup()
+    const reload = vi.fn()
+    mockUseCustomerMatches.mockReturnValue({ rows: [], loading: false, error: false, reload })
+    render(<MatchesTab customerId="cust-42" />)
+    await user.click(screen.getByRole('button', { name: cust('matches.add') }))
+    const { onCreated } = matchModalProps.mock.calls.at(-1)?.[0] as { onCreated: () => void }
+    onCreated()
+    expect(reload).toHaveBeenCalled()
   })
 })
 
@@ -118,7 +165,7 @@ describe('MatchesTab · toolbar search + status filter', () => {
   ]
 
   it('shows every match until a status is picked (nothing selected = all)', () => {
-    mockUseCustomerMatches.mockReturnValue({ rows, loading: false, error: false })
+    mockUseCustomerMatches.mockReturnValue({ rows, loading: false, error: false, reload: vi.fn() })
     render(<MatchesTab customerId="cust-1" />)
     expect(screen.getByText('Jane Doe')).toBeInTheDocument()
     expect(screen.getByText('John Roe')).toBeInTheDocument()
@@ -126,7 +173,7 @@ describe('MatchesTab · toolbar search + status filter', () => {
 
   it('search narrows on vacancy title + candidate name', async () => {
     const user = userEvent.setup()
-    mockUseCustomerMatches.mockReturnValue({ rows, loading: false, error: false })
+    mockUseCustomerMatches.mockReturnValue({ rows, loading: false, error: false, reload: vi.fn() })
     render(<MatchesTab customerId="cust-1" />)
     await user.type(screen.getByRole('textbox'), 'jane')
     expect(screen.getByText('Jane Doe')).toBeInTheDocument()
@@ -135,7 +182,7 @@ describe('MatchesTab · toolbar search + status filter', () => {
 
   it('the status filter narrows to the picked status only', async () => {
     const user = userEvent.setup()
-    mockUseCustomerMatches.mockReturnValue({ rows, loading: false, error: false })
+    mockUseCustomerMatches.mockReturnValue({ rows, loading: false, error: false, reload: vi.fn() })
     render(<MatchesTab customerId="cust-1" />)
     // Real i18n is loaded in this file (see the side-effect import above), so the
     // trigger's own text is the REAL translated "all statuses" copy, not the raw key.
@@ -152,7 +199,7 @@ describe('MatchesTab · toolbar search + status filter', () => {
  *  match" ⧉ stays the ONE open-in-new icon in the card header. */
 describe('MatchesTab · exactly one open-in-new icon per card header', () => {
   it('renders a single ExternalLink glyph in the HEADER row, not two', () => {
-    mockUseCustomerMatches.mockReturnValue({ rows: [row({ vacancy: 'Verzorgende IG / EVV' })], loading: false, error: false })
+    mockUseCustomerMatches.mockReturnValue({ rows: [row({ vacancy: 'Verzorgende IG / EVV' })], loading: false, error: false, reload: vi.fn() })
     render(<MatchesTab customerId="cust-1" />)
     // Scoped to the header row itself — the SEPARATE "Candidate" field row below
     // legitimately carries its own EntityLink icon and must not be counted here.

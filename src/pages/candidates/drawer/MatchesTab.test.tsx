@@ -1,8 +1,20 @@
+/**
+ * MatchesTab (candidate drawer) — mirrors customers/drawer/MatchesTab.test.tsx's
+ * own coverage now that both share the `MatchCard` body (Danny's ten-point
+ * round). Real i18n is loaded (side-effect import): MatchCard uses
+ * `useDateFormat` (lib/datetime), which itself imports `@/i18n` for its locale
+ * map, so a raw-key stub would assert against text that never actually renders
+ * — real copy is the only assertion that can't quietly rot.
+ */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import i18n from '@/i18n'
 import MatchesTab from './MatchesTab'
 import type { Candidate } from '@/types/candidate'
+
+const ct = (key: string) => i18n.t(key, { ns: 'candidates' })
+const cm = (key: string) => i18n.t(key, { ns: 'common' })
 
 // Spy on the cross-entity navigation (candidate → Match) instead of a real page switch.
 const openEntity = vi.fn()
@@ -12,8 +24,8 @@ vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEnti
 // lets the test assert the card prefers it over the raw backend-resolved stage.
 // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
 const metaOf = vi.fn((v?: string) => (v === 'open' ? { value: 'open', label: 'Open (lookup)', color: '#123456', is_closed: false } : undefined))
-// MATCHES-TOOLBAR-1 (this task): a real (non-empty, neutral-slug) status list so
-// the new StatusFilterSelect toolbar has real options. Deliberately NOT
+// MATCHES-TOOLBAR-1: a real (non-empty, neutral-slug) status list so the
+// StatusFilterSelect toolbar has real options. Deliberately NOT
 // 'open'/'active'/'actief' — useStatusFilter's shared guess heuristic
 // (isActiveValue) would otherwise auto-propose one of those as the DEFAULT
 // filter (same behaviour as Locations/Departments/Vacancies today), which would
@@ -36,7 +48,7 @@ const candidate = (matches: unknown[]): Candidate => ({ id: 42, matches } as unk
 describe('MatchesTab', () => {
   it('shows the empty state with no matches', () => {
     render(<MatchesTab c={candidate([])} />)
-    expect(screen.getByText('matchesView.empty')).toBeInTheDocument()
+    expect(screen.getByText(ct('matchesView.empty'))).toBeInTheDocument()
   })
 
   it('renders Klant + Contractvorm rows, dash when Contractvorm is absent', () => {
@@ -54,7 +66,9 @@ describe('MatchesTab', () => {
     expect(screen.getByText('Fase 1-2 z.u.b. (Works)')).toBeInTheDocument()
   })
 
-  it('resolves Fase from useMatchStatuses — the slug wins over the raw backend-resolved stage label', () => {
+  // Point 2: the fase merges into the title now — no separate row, and the
+  // stage's own colour rides the title's second half.
+  it('resolves the fase from useMatchStatuses INTO THE TITLE — the slug wins over the raw stage label', () => {
     render(<MatchesTab c={candidate([
       // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
       { id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway', status: 'open', stage: 'Fallback stage', stageColor: '#999999' },
@@ -77,7 +91,7 @@ describe('MatchesTab', () => {
   it('renders "Open match" as a real new-tab anchor and stashes the return tab on click', async () => {
     const user = userEvent.setup()
     render(<MatchesTab c={candidate([{ id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway' }])} />)
-    const openLink = screen.getByTitle('matchesView.openMatch')
+    const openLink = screen.getByTitle(ct('matchesView.openMatch'))
     expect(openLink.tagName).toBe('A')
     expect(openLink.getAttribute('href')).toContain('?open=m1')
     expect(openLink.getAttribute('target')).toBe('_blank')
@@ -92,13 +106,13 @@ describe('MatchesTab', () => {
     const onEdit = vi.fn()
     const user = userEvent.setup()
     render(<MatchesTab c={candidate([{ id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway' }])} onEdit={onEdit} />)
-    await user.click(screen.getByRole('button', { name: 'common:edit' }))
+    await user.click(screen.getByTitle(cm('edit')))
     expect(onEdit).toHaveBeenCalledWith('m1')
   })
 
   it('renders no pencil when the host omits onEdit (no behaviour change)', () => {
     render(<MatchesTab c={candidate([{ id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway' }])} />)
-    expect(screen.queryByRole('button', { name: 'common:edit' })).toBeNull()
+    expect(screen.queryByTitle(cm('edit'))).toBeNull()
   })
 })
 
@@ -127,9 +141,7 @@ describe('MatchesTab · toolbar search + status filter', () => {
   it('the status filter narrows to the picked status only', async () => {
     const user = userEvent.setup()
     render(<MatchesTab c={candidate(matches)} />)
-    // i18n is unmocked in this file (no real instance loaded), so t() echoes the
-    // raw key — same convention the rest of this file already relies on.
-    await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
+    await user.click(screen.getByRole('button', { name: i18n.t('filters.allStatuses', { ns: 'customers' }) }))
     await user.click(await screen.findByRole('button', { name: 'Bevestigd' }))
     expect(screen.getByText('Acme')).toBeInTheDocument()
     expect(screen.queryByText('Yesway')).toBeNull()
@@ -146,7 +158,7 @@ describe('MatchesTab · exactly one open-in-new icon per card header', () => {
     // Scoped to the header row itself — a "Read-only link out to the vacancy"
     // icon can ALSO render there (when vacancyUrl is set), which is unrelated to
     // this fix and absent from this fixture (no vacancyUrl).
-    const header = screen.getByTitle('matchesView.openMatch').parentElement as HTMLElement
+    const header = screen.getByTitle(ct('matchesView.openMatch')).parentElement as HTMLElement
     expect(header.querySelectorAll('svg.lucide-external-link')).toHaveLength(1)
   })
 })

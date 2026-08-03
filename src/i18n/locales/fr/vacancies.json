@@ -333,7 +333,8 @@
       "location": "Site",
       "cardGeneral": "Général",
       "cardPlacement": "Affectation",
-      "cardPublication": "Publication"
+      "cardPublication": "Publication",
+      "scopedUnder": "Sera créé sous : {{name}}"
     },
     "titlePlaceholder": "ex. Infirmier | La Haye",
     "create": "Créer le poste",

@@ -19,6 +19,9 @@ import type { ContactPayload } from '../hooks/useCustomerContacts'
 
 interface Props {
   customerId?: Id
+  // Point 1 (Danny's ten-point round): threaded down to each department's own
+  // ScopedVacanciesTab "+" lock (mirrors the customer-level VacanciesTab's own).
+  customerName?: string
   departments?: Department[]
   contacts?: Contact[]
   locations?: { id: Id; name: string }[]
@@ -37,7 +40,7 @@ interface Props {
 }
 
 export default function DepartmentsTab({
-  departments = [], contacts = [], locations = [], statuses = [], canLinkBackoffice = false,
+  customerId, customerName, departments = [], contacts = [], locations = [], statuses = [], canLinkBackoffice = false,
   contactStatuses = [], onAdd, onUpdate, onRemove, onAddContact, onUpdateContact, onRemoveContact,
 }: Props) {
   // The host owns "which department is open" — the panel is controlled (see its docblock).
@@ -45,6 +48,7 @@ export default function DepartmentsTab({
   return (
     <DepartmentsPanel
       scope="customer" openId={openId} onOpenChange={setOpenId}
+      customerId={customerId} customerName={customerName}
       departments={departments} contacts={contacts} locations={locations} statuses={statuses}
       contactStatuses={contactStatuses} canLinkBackoffice={canLinkBackoffice}
       onAdd={onAdd} onUpdate={onUpdate} onRemove={onRemove}

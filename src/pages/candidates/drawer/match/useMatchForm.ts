@@ -81,7 +81,10 @@ interface MatchEditDetail {
   cost_center?: string | null; billing_emails?: string[] | null; remarks?: string | null
 }
 
-export function useMatchForm({ candidateId: fixedCandidateId, editMatchId, onClose, onCreated }: {
+export function useMatchForm({
+  candidateId: fixedCandidateId, editMatchId, onClose, onCreated,
+  initialCustomerId, initialCustomerLocationId, initialCustomerDepartmentId,
+}: {
   // Fixed when opened from a candidate's Match tab; absent on the Matches page —
   // then a candidate picker appears at the top of RELATIES (Danny 2026-07-13).
   candidateId?: Id
@@ -90,6 +93,12 @@ export function useMatchForm({ candidateId: fixedCandidateId, editMatchId, onClo
   editMatchId?: Id
   onClose: () => void
   onCreated: () => void
+  // Point 1 (Danny's ten-point round): opened from a customer/location/department
+  // drill-down's own "+ Match" — seeds the Relaties cascade's INITIAL state, never
+  // a lock (setCustomerId/setLocationId/setDepartmentId stay fully usable below).
+  initialCustomerId?: Id
+  initialCustomerLocationId?: Id
+  initialCustomerDepartmentId?: Id
 }) {
   const editing = Boolean(editMatchId)
   const { t } = useTranslation(['candidates', 'common'])
@@ -129,16 +138,19 @@ export function useMatchForm({ candidateId: fixedCandidateId, editMatchId, onClo
   // ── Relaties ── customer drives the location/department/contact cascade —
   // ONE shared implementation (audit R1 item 2; used to be its own inline
   // GET /customers/{id} effect here, duplicated in opportunities/vacancies).
-  const [customerId, setCustomerId] = useState('')
+  const [customerId, setCustomerId] = useState(initialCustomerId != null ? String(initialCustomerId) : '')
   const { detail, locations, contacts, refetch: refetchCustomer } = useCustomerCascade(customerId)
-  const [locationId, setLocationId] = useState('')
-  const [departmentId, setDepartmentId] = useState('')
+  const [locationId, setLocationId] = useState(initialCustomerLocationId != null ? String(initialCustomerLocationId) : '')
+  const [departmentId, setDepartmentId] = useState(initialCustomerDepartmentId != null ? String(initialCustomerDepartmentId) : '')
   const [contactId, setContactId] = useState('')
   // EDIT-MATCH-1: guards the reset below during the one-shot prefill (see the
   // prefill effect further down) — picking a NEW customer still clears location/
   // department/contact, but loading an existing match's own combination must not
-  // be wiped the instant customerId itself is set from the fetched record.
-  const skipCascadeResetRef = useRef(false)
+  // be wiped the instant customerId itself is set from the fetched record. Point 1
+  // (Danny's ten-point round) reuses the SAME guard for its own one-shot seed: the
+  // mount-time run of the reset effect below must not immediately wipe the
+  // initialCustomerLocationId/initialCustomerDepartmentId prefill either.
+  const skipCascadeResetRef = useRef(initialCustomerId != null)
   // Picking a (new) customer resets the dependent picks — cascade integrity.
   useEffect(() => {
     if (!customerId) return

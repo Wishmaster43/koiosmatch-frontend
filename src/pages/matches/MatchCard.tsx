@@ -1,0 +1,172 @@
+import { ExternalLink, Link2, Pencil } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import type { ReactNode } from 'react'
+import SoftChip from '@/components/ui/SoftChip'
+import EntityLink, { buildEntityDeepLink } from '@/components/ui/EntityLink'
+import BackofficeCouplingIndicator from '@/components/ui/BackofficeCouplingIndicator'
+import ScorePill from './ScorePill'
+import { computeMatchExpiry } from './matchExpiry'
+import { useDateFormat } from '@/lib/datetime'
+import { isSafeUrl } from '@/lib/safeUrl'
+import type { BackofficeLink } from '@/lib/backofficeLink'
+import type { Id } from '@/types/common'
+
+export interface MatchCardProps {
+  id?: Id | null
+  vacancyId?: Id | null
+  vacancyTitle: string
+  // Read-only link-out to the vacancy's OWN source URL (candidate card only —
+  // distinct from the in-app vacancy link/deep-link above).
+  vacancyUrl?: string | null
+  // Fired on any "leave this card" click (name, open-in-new, external link-out)
+  // BEFORE navigation — the candidate card uses this to stash the return sub-tab.
+  onBeforeOpen?: () => void
+  stageLabel?: string | null
+  stageColor?: string | null
+  score?: number | null
+  // Candidate card: a single GUID → a simple "linked" glyph, no per-system detail.
+  helloflexGuid?: string | null
+  // Customer/scoped card: the full per-system indicator, gated on the tenant's own
+  // enabled apps (never rendered for a tenant that runs neither backoffice).
+  helloflexLink?: BackofficeLink | null
+  shiftmanagerLink?: BackofficeLink | null
+  showHelloflex?: boolean
+  showShiftmanager?: boolean
+  // Candidate card only: reopens MatchModal as an edit (point 2, Danny live P1).
+  onEdit?: () => void
+  // The "other side" of the match — Client on the candidate card, Candidate on
+  // the customer/scoped card (the one swap between the two variants, §3A).
+  otherPartyLabel: ReactNode
+  otherPartyValue: ReactNode
+  contractType?: string | null
+  contractStatus?: string | null
+  functionTitle?: string | null
+  branchName?: string | null
+  ownerName?: string | null
+  startDate?: string | null
+  endDate?: string | null
+  // Gates the expiry chip (point 6) — a finished match never needs the nag.
+  isClosed?: boolean
+  archived?: boolean
+}
+
+/**
+ * MatchCard — the ONE read-only match card body, shared by the candidate
+ * drawer's MatchesTab, the customer drawer's MatchesTab and (in spirit —
+ * ScopedMatchesTab stays a DataTable per SCOPED-LIST-TAB-1, see that file's own
+ * comment) the scoped location/department Matches sub-tab. Extracted so the
+ * three call sites can never again drift into three different card bodies
+ * (CLAUDE.md §11 — "extract, don't edit three copies in parallel").
+ *
+ * Danny's ten-point round, points 2/4/5/6:
+ * (2) the header reads "{vacature} — {fase}" on one line, the stage's own
+ *     colour on the stage half — the separate "Fase" row is gone.
+ * (4) a "Periode" row (start – end, DD-MM-YYYY, em-dash when absent).
+ * (5) Functie / Vestiging / Eigenaar rows off fields the list API already
+ *     returns (MatchListResource.php:35,43-46) — see matchExpiry.ts's sibling
+ *     mapMatch update. NOTE: the candidate-embedded resource (MatchResource,
+ *     "no owner here — that needs a central lookup the candidate detail does
+ *     not perform") never carries branch/owner, so those two rows read "—" on
+ *     every candidate card — a real backend gap, not a frontend omission.
+ * (6) an expiry chip (soft warning <30 days, danger once past) — pure FE, off
+ *     the already-loaded row; never rendered for a closed/archived match.
+ */
+export default function MatchCard({
+  id, vacancyId, vacancyTitle, vacancyUrl, onBeforeOpen,
+  stageLabel, stageColor, score,
+  helloflexGuid, helloflexLink, shiftmanagerLink, showHelloflex = false, showShiftmanager = false,
+  onEdit,
+  otherPartyLabel, otherPartyValue,
+  contractType, contractStatus, functionTitle, branchName, ownerName, startDate, endDate,
+  isClosed = false, archived = false,
+}: MatchCardProps) {
+  const { t } = useTranslation(['candidates', 'common'])
+  const { formatDate } = useDateFormat()
+
+  // Period row value — a single em-dash when NEITHER date is known, otherwise
+  // formatDate's own '—' fallback covers a one-sided range (mirrors CommunicationTab).
+  const periodValue = !startDate && !endDate ? '—' : `${formatDate(startDate)} – ${formatDate(endDate)}`
+  // Point 6: never nag on a closed or archived match.
+  const expiry = computeMatchExpiry(endDate, { closed: isClosed || archived })
+
+  const rows: Array<{ key: string; label: ReactNode; value: ReactNode }> = [
+    { key: 'otherParty', label: otherPartyLabel, value: otherPartyValue },
+    { key: 'functionTitle', label: t('matchesView.functionTitle'), value: functionTitle || '—' },
+    { key: 'contractType', label: t('matchesView.contractType'), value: contractType || '—' },
+    { key: 'period', label: t('matchesView.period'), value: (
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        {periodValue}
+        {expiry && (
+          <SoftChip
+            color={expiry.kind === 'expired' ? 'var(--color-danger)' : 'var(--color-warning)'}
+            label={expiry.kind === 'expired'
+              ? t('matchesView.expiredOn', { date: formatDate(endDate) })
+              : t('matchesView.expiresOn', { date: formatDate(endDate) })}
+          />
+        )}
+      </span>
+    ) },
+    { key: 'branch', label: t('matchesView.branch'), value: branchName || '—' },
+    { key: 'owner', label: t('matchesView.owner'), value: ownerName || '—' },
+    { key: 'contractStatus', label: t('matchesView.contract'), value: t(`matchesView.contractStatus.${contractStatus ?? 'none'}`, { defaultValue: contractStatus || t('matchesView.contractStatus.none') }) },
+  ]
+
+  return (
+    <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', marginBottom: 8 }}>
+      {/* Header: "{vacature} — {fase}" one-liner (point 2) + score + coupling glyphs. */}
+      <div style={{ padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 600, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 4, overflow: 'hidden' }}>
+          <span onClickCapture={onBeforeOpen} style={{ minWidth: 0, overflow: 'hidden' }}>
+            {/* hideIcon: the explicit "Open match" ⧉ right after this is the ONE
+                open-in-new icon for this row (Danny: "twee keer een icoon met
+                open-in-nieuw-venster"). */}
+            <EntityLink page="vacancies" id={vacancyId} title={vacancyTitle || '—'} hideIcon>{vacancyTitle || '—'}</EntityLink>
+          </span>
+          {stageLabel && (
+            <>
+              {/* Decorative separator, own element: keeps the fase label itself as a
+                  clean text match (getByText) and out of the screen-reader run. */}
+              <span aria-hidden="true" style={{ color: 'var(--text-muted)', flexShrink: 0 }}> — </span>
+              <span style={{ color: stageColor || 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                {stageLabel}
+              </span>
+            </>
+          )}
+        </span>
+        {id != null && (
+          <a href={buildEntityDeepLink('matches', id)} target="_blank" rel="noopener noreferrer" onClick={onBeforeOpen}
+            title={t('matchesView.openMatch')} aria-label={t('matchesView.openMatch')}
+            style={{ display: 'flex', color: 'var(--color-primary)', padding: 2 }}>
+            <ExternalLink size={12} />
+          </a>
+        )}
+        {/* Point 2 (Danny live P1): edit this match's contract fields — candidate card only. */}
+        {onEdit && id != null && (
+          <button type="button" onClick={onEdit} title={t('common:edit')} aria-label={t('common:edit')}
+            style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2 }}>
+            <Pencil size={12} />
+          </button>
+        )}
+        {helloflexGuid ? (
+          <span title={t('matchesView.backofficeLinked')} style={{ display: 'flex', color: 'var(--color-primary)' }}><Link2 size={13} /></span>
+        ) : null}
+        {(showHelloflex || showShiftmanager) && (
+          <BackofficeCouplingIndicator helloflexLink={helloflexLink} shiftmanagerLink={shiftmanagerLink}
+            showHelloflex={showHelloflex} showShiftmanager={showShiftmanager} />
+        )}
+        {isSafeUrl(vacancyUrl) ? (
+          <a href={vacancyUrl ?? undefined} target="_blank" rel="noopener noreferrer" title={t('work.openVacancy')}
+            style={{ display: 'flex', color: 'var(--text-muted)' }}><ExternalLink size={12} /></a>
+        ) : null}
+        <ScorePill value={score ?? null} />
+      </div>
+
+      {rows.map(({ key, label, value }) => (
+        <div key={key} style={{ display: 'flex', padding: '7px 12px', borderBottom: '1px solid var(--border)', gap: 16, background: 'var(--surface)', alignItems: 'center' }}>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{label}</span>
+          <span style={{ fontSize: 12, color: 'var(--text)' }}>{value}</span>
+        </div>
+      ))}
+    </div>
+  )
+}

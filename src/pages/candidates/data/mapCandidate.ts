@@ -242,7 +242,8 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     })),
     applications:    c.applications ?? [],
     // Matches = own entity (read-only on the candidate). The contract lives in
-    // HelloFlex — we only surface its status + the link GUID. No matches/contract fields.
+    // HelloFlex — we only surface its status + the link GUID, plus (MATCH-CARD-
+    // INFO-1) the function title + contract window MatchResource already ships.
     matches:         (c.matches ?? []).map((m): CandidateMatch => ({
       ...m,
       vacancyId:      m.vacancy?.id ?? m.vacancy_id ?? null,
@@ -259,6 +260,12 @@ export function mapCandidate(c: ApiCandidate): Candidate {
       // Contractvorm — a free-text tenant value, distinct from contractStatus.
       contractType:   m.contract_type ?? m.contractType ?? null,
       createdAt:      m.created_at ?? m.createdAt ?? null,
+      // MATCH-CARD-INFO-1 (Danny points 4/5): normalised camelCase, mirrors the
+      // pattern above — the raw snake_case rides along via `...m` too, but the
+      // shared MatchCard reads the camelCase form like every other field here.
+      functionTitle:  m.function_title ?? m.functionTitle ?? null,
+      startDate:      m.start_date ?? m.startDate ?? null,
+      endDate:        m.end_date ?? m.endDate ?? null,
     })),
     notes:           c.notes ?? [],
     timeline:        (c.timeline ?? []).map(ev => ({

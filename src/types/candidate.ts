@@ -107,6 +107,16 @@ export interface CandidateMatch {
   // pending/ended, the match's lifecycle on the candidate side).
   contractType: string | null
   createdAt: string | null
+  // MATCH-CARD-INFO-1 (Danny points 4/5): contract window + function title — the
+  // candidate-embedded MatchResource ships all three (function_title/start_date/
+  // end_date), but NEVER branch/owner (no central lookup on that resource) — the
+  // shared MatchCard renders those two rows as "—" for this variant, a real
+  // backend gap, not dropped here.
+  functionTitle?: string | null
+  startDate?: string | null
+  endDate?: string | null
+  // The backoffice link GUID — the candidate card's simple "linked" glyph (MatchCard).
+  helloflex_contract_guid?: string | null
   [k: string]: unknown
 }
 
@@ -259,15 +269,21 @@ export interface ApiCandidateMatch {
   contract_status?: string | null
   contractStatus?: string | null
   // MATCH-EMBED-1: contract form (Contractvorm), function title, and the match
-  // period — the card renders Contractvorm; the rest is not shown here yet.
+  // period — MATCH-CARD-INFO-1 (Danny points 4/5) now renders function title +
+  // period too (mapCandidate normalises them onto CandidateMatch's own fields).
   contract_type?: string | null
   contractType?: string | null
   function_title?: string | null
+  functionTitle?: string | null
   start_date?: string | null
+  startDate?: string | null
   end_date?: string | null
+  endDate?: string | null
   hours_per_week?: number | null
   created_at?: string | null
   createdAt?: string | null
+  // The backoffice link GUID (candidate card's simple "linked" glyph, MatchCard).
+  helloflex_contract_guid?: string | null
   [k: string]: unknown
 }
 

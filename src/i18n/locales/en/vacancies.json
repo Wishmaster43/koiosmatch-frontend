@@ -333,7 +333,8 @@
       "location": "Location",
       "cardGeneral": "General",
       "cardPlacement": "Assignment",
-      "cardPublication": "Publication"
+      "cardPublication": "Publication",
+      "scopedUnder": "Will be created under: {{name}}"
     },
     "titlePlaceholder": "e.g. Nurse | The Hague",
     "create": "Create vacancy",

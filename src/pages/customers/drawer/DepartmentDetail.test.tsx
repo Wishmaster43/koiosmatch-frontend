@@ -42,10 +42,12 @@ vi.mock('@/components/ui/RichTextEditor', () => ({
 // this file only proves DepartmentDetail's OWN wiring: the right scope/id reaches
 // the right child when its sub-tab is picked.
 vi.mock('./ScopedVacanciesTab', () => ({
-  default: ({ scope, id }: { scope: string; id?: string }) => <div data-testid="scoped-vacancies">{scope}:{id}</div>,
+  default: ({ scope, id, customerId, customerName, scopeName }: { scope: string; id?: string; customerId?: string; customerName?: string; scopeName?: string }) =>
+    <div data-testid="scoped-vacancies">{scope}:{id}:{customerId}:{customerName}:{scopeName}</div>,
 }))
 vi.mock('./ScopedMatchesTab', () => ({
-  default: ({ scope, id }: { scope: string; id?: string }) => <div data-testid="scoped-matches">{scope}:{id}</div>,
+  default: ({ scope, id, customerId }: { scope: string; id?: string; customerId?: string }) =>
+    <div data-testid="scoped-matches">{scope}:{id}:{customerId}</div>,
 }))
 vi.mock('@/components/drawer/tabs/EntityTasksTab', () => ({
   default: ({ linkType, id }: { linkType: string; id?: string }) => <div data-testid="entity-tasks">{linkType}:{id}</div>,
@@ -75,6 +77,7 @@ const statuses: LookupOption[] = [
 
 // Every required prop the component reads — kept minimal, only onSave is asserted.
 const baseProps = {
+  customerId: 'cust-1', customerName: 'Zorggroep A',
   locations: [{ id: 'loc-1', name: 'Vestiging Noord' }], departments: [], contacts: [],
   statuses, onAddContact: vi.fn(), onUpdateContact: vi.fn(), onRemoveContact: vi.fn(),
   onDelete: vi.fn(), close: vi.fn(),
@@ -198,11 +201,29 @@ describe('DepartmentDetail · Vacatures/Matches/Taken sub-tabs', () => {
     expect(screen.getByTestId('scoped-vacancies')).toHaveTextContent('department:d1')
   })
 
+  // Point 1 (Danny's ten-point round): "+ Vacature" needs the customer LOCK +
+  // this department's own name (ScopedVacanciesTab's AddVacancyModal has no
+  // cascade picker of its own — see that file's docblock).
+  it('also threads customerId/customerName/scopeName into ScopedVacanciesTab (point 1)', async () => {
+    const user = userEvent.setup()
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.vacancies') }))
+    expect(screen.getByTestId('scoped-vacancies')).toHaveTextContent('department:d1:cust-1:Zorggroep A:Zorg')
+  })
+
   it('wires the department scope + id into ScopedMatchesTab', async () => {
     const user = userEvent.setup()
     render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
     await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.matches') }))
     expect(screen.getByTestId('scoped-matches')).toHaveTextContent('department:d1')
+  })
+
+  // Point 1: "+ Match" needs the customer id to prefill MatchModal's cascade.
+  it('also threads customerId into ScopedMatchesTab (point 1)', async () => {
+    const user = userEvent.setup()
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.matches') }))
+    expect(screen.getByTestId('scoped-matches')).toHaveTextContent('department:d1:cust-1')
   })
 
   it('wires linkType="department" + this department\'s id into EntityTasksTab', async () => {

@@ -333,7 +333,8 @@
       "location": "Standort",
       "cardGeneral": "Allgemein",
       "cardPlacement": "Einsatz",
-      "cardPublication": "Veröffentlichung"
+      "cardPublication": "Veröffentlichung",
+      "scopedUnder": "Wird erstellt unter: {{name}}"
     },
     "titlePlaceholder": "z. B. Pflegekraft | Den Haag",
     "create": "Stelle erstellen",

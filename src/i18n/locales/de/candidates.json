@@ -834,6 +834,12 @@
     "contractType": "Vertragsart",
     "stage": "Phase",
     "contract": "Vertrag",
+    "functionTitle": "Funktionstitel",
+    "branch": "Niederlassung",
+    "period": "Zeitraum",
+    "expiresOn": "Läuft ab am {{date}}",
+    "expiredOn": "Abgelaufen am {{date}}",
+    "owner": "Inhaber",
     "backofficeLinked": "Mit Backoffice verknüpft (HelloFlex)",
     "contractStatus": {
       "none": "Kein Vertrag",

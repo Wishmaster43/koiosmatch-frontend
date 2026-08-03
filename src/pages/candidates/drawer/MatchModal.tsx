@@ -54,7 +54,10 @@ import { overlay, panel, twoColSections } from './match/styles'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import type { Id } from '@/types/common'
 
-export default function MatchModal({ candidateId: fixedCandidateId, editMatchId, onClose, onCreated }: {
+export default function MatchModal({
+  candidateId: fixedCandidateId, editMatchId, onClose, onCreated,
+  initialCustomerId, initialCustomerLocationId, initialCustomerDepartmentId,
+}: {
   // Fixed when opened from a candidate's Match tab; absent on the Matches page —
   // then a candidate picker appears at the top of RELATIES (Danny 2026-07-13).
   candidateId?: Id
@@ -63,10 +66,19 @@ export default function MatchModal({ candidateId: fixedCandidateId, editMatchId,
   editMatchId?: Id
   onClose: () => void
   onCreated: () => void
+  // Point 1 (Danny's ten-point round): opened from a customer/location/department
+  // drill-down's own "+ Match" — a PREFILL of the Relaties cascade, never a lock
+  // (the recruiter can still change customer/location/department by hand).
+  initialCustomerId?: Id
+  initialCustomerLocationId?: Id
+  initialCustomerDepartmentId?: Id
 }) {
   // All state, effects, submit + 422-mapping live in the hook — this component
   // only wires it to the shared chrome and the three section components below.
-  const form = useMatchForm({ candidateId: fixedCandidateId, editMatchId, onClose, onCreated })
+  const form = useMatchForm({
+    candidateId: fixedCandidateId, editMatchId, onClose, onCreated,
+    initialCustomerId, initialCustomerLocationId, initialCustomerDepartmentId,
+  })
   const { t, editing } = form
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const title = t(editing ? 'placement.editTitle' : 'placement.title')

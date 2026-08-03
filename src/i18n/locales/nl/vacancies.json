@@ -333,7 +333,8 @@
       "location": "Locatie",
       "cardGeneral": "Algemeen",
       "cardPlacement": "Inzet",
-      "cardPublication": "Publicatie"
+      "cardPublication": "Publicatie",
+      "scopedUnder": "Wordt aangemaakt onder: {{name}}"
     },
     "titlePlaceholder": "bijv. Verpleegkundige | Den Haag",
     "create": "Vacature aanmaken",

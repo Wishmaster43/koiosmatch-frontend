@@ -122,7 +122,7 @@ export interface CustomerMatchRow extends MatchRow {
 // Matches tab mirrors the candidate drawer's — a match is opened/edited in its own
 // drawer, never here). MatchController validates a plain `customer_id` scalar filter.
 export function useCustomerMatches(customerId?: Id) {
-  const { data = [], isLoading: loading, isError: error } = useQuery({
+  const { data = [], isLoading: loading, isError: error, refetch } = useQuery({
     queryKey: ['customers', customerId, 'matches'],
     enabled: !!customerId,
     queryFn: async ({ signal }): Promise<CustomerMatchRow[]> => {
@@ -134,5 +134,8 @@ export function useCustomerMatches(customerId?: Id) {
       }))
     },
   })
-  return { rows: data, loading, error }
+  // Point 1: a "+ Match" create refetches this list (mirrors useCustomerOpportunities'
+  // own reload: refetch) instead of leaving the just-created match invisible until a
+  // full drawer reopen.
+  return { rows: data, loading, error, reload: refetch }
 }

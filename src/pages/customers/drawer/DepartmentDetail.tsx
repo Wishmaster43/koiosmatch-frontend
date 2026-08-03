@@ -95,10 +95,15 @@ function buildDepartmentAdviceInsights(d: Department, t: Tx): KoiosAdviceInsight
   ]
 }
 
-export default function DepartmentDetail({ department, locations, statuses, contactStatuses = [], departments = [], contacts = [], canLinkBackoffice = false, trail = [], pager, onAddContact, onUpdateContact, onRemoveContact, onSave, onDelete, close }: {
+export default function DepartmentDetail({ department, locations, statuses, contactStatuses = [], departments = [], contacts = [], canLinkBackoffice = false, trail = [], pager, onAddContact, onUpdateContact, onRemoveContact, onSave, onDelete, close, customerId, customerName }: {
   department: Department
   locations: { id: Id; name: string }[]
   statuses: LookupOption[]
+  // Point 1 (Danny's ten-point round): threaded down from DepartmentsPanel so
+  // this department's own ScopedVacanciesTab/ScopedMatchesTab "+" can prefill —
+  // this file itself never queries the customer, only passes the id/name on.
+  customerId?: Id
+  customerName?: string
   // The customer's contacts filtered to this department by the caller (the resource
   // itself doesn't embed contacts — CustomerDepartmentResource has no `contacts` field).
   contacts?: Contact[]
@@ -270,8 +275,11 @@ export default function DepartmentDetail({ department, locations, statuses, cont
       )}
 
       {/* SCOPED-LIST-TAB-1: read-only, opens the real vacancy/match on row-click. */}
-      {subTab === 'vacancies' && <ScopedVacanciesTab scope="department" id={department.id as Id} />}
-      {subTab === 'matches' && <ScopedMatchesTab scope="department" id={department.id as Id} />}
+      {subTab === 'vacancies' && (
+        <ScopedVacanciesTab scope="department" id={department.id as Id}
+          customerId={customerId} customerName={customerName} scopeName={department.name} />
+      )}
+      {subTab === 'matches' && <ScopedMatchesTab scope="department" id={department.id as Id} customerId={customerId} />}
       {/* TAKEN-OP-AFDELING-1: own scoped label block (mirrors contacts.tasks.*) —
           the shared tab's CURRENT labels interface (newTask/searchPlaceholder/empty/
           loading/error/openTask); re-check this call site if EntityTasksTab's

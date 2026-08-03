@@ -834,6 +834,12 @@
     "contractType": "Tipo de contrato",
     "stage": "Fase",
     "contract": "Contrato",
+    "functionTitle": "Título de la función",
+    "branch": "Sucursal",
+    "period": "Periodo",
+    "expiresOn": "Vence el {{date}}",
+    "expiredOn": "Venció el {{date}}",
+    "owner": "Responsable",
     "backofficeLinked": "Vinculado al backoffice (HelloFlex)",
     "contractStatus": {
       "none": "Sin contrato",
