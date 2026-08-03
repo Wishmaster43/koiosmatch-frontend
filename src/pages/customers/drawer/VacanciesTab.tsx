@@ -1,13 +1,21 @@
 /**
- * VacanciesTab — the customer's vacancies (via useCustomerVacancies → GET
- * /vacancies?customer_id={id}), with a multi-select STATUS filter above the table —
- * the same searchable checkbox-list pattern as the right filter panel's
- * Accountmanager filter (SearchSelectGroup), reused here rather than hand-rolled.
- * Defaults to only the 'open'-like status (Danny: "standaard alleen open tonen, je
- * moet meerdere kunnen kiezen") and filters client-side over the rows already
+ * VacanciesTab — a thin two-sub-tab host (Danny, asked three times: "Tabblad
+ * Vacatures moet 2 subtabbladen hebben: Vacatures en Sollicitaties"): Vacatures
+ * (this customer's vacancies — unchanged below) and Sollicitaties (the
+ * application RECORDS on those vacancies, `CustomerApplicationsList`). The
+ * Vacatures sub-tab is via useCustomerVacancies → GET /vacancies?customer_id=
+ * {id}), with a multi-select STATUS filter above the table — the same
+ * searchable checkbox-list pattern as the right filter panel's Accountmanager
+ * filter (SearchSelectGroup), reused here rather than hand-rolled. Defaults to
+ * only the 'open'-like status (Danny: "standaard alleen open tonen, je moet
+ * meerdere kunnen kiezen") and filters client-side over the rows already
  * fetched. Statuses come from the tenant vacancy-status lookup (GET
  * /vacancy-statuses) — VacancyLookupsProvider is only mounted around the Vacancies
  * page, not the customer drawer, so this fetches the same endpoint directly.
+ *
+ * Sollicitaties is LAZY: `CustomerApplicationsList` only mounts (and only then
+ * fires its own query) once that sub-tab is opened — it isn't rendered at all
+ * while Vacatures is active, mirroring CustomerNotesTab's own lazy sub-tabs.
  */
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -21,6 +29,8 @@ import type { Column } from '@/components/ui/DataTable'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
+import SubTabBar from '@/components/drawer/SubTabBar'
+import CustomerApplicationsList from './CustomerApplicationsList'
 import { useAllSettings, useSettingsLoaded, getStringSetting } from '@/lib/settings/useAllSettings'
 import api, { unwrapList } from '@/lib/api'
 import { useCustomerVacancies } from '../hooks/useCustomerDrawerData'
@@ -37,7 +47,10 @@ const SEED_STATUSES: StatusOpt[] = [
 ]
 
 export default function VacanciesTab({ customerId, customerName, params }: { customerId?: Id; customerName?: string; params?: Record<string, unknown> }) {
-  const { t } = useTranslation('customers')
+  const { t } = useTranslation(['customers', 'applications'])
+  // Two sub-tabs (SubTabBar) — Vacatures stays the default so this tab's behaviour
+  // is unchanged for anyone who never opens Sollicitaties.
+  const [subTab, setSubTab] = useState<'vacancies' | 'applications'>('vacancies')
   const { rows, loading } = useCustomerVacancies(customerId, params)
   // Create a vacancy straight from the customer (Danny 28-07) — the client is fixed to
   // this customer, so the modal shows it read-only instead of asking again.
@@ -102,22 +115,41 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {/* Toolbar in the house order (Danny 28-07): search left, status filter right,
-          add trigger last — the same left-to-right reading as every other sub-entity
-          list. The filter renders `plain` so it is white like the pickers beside it. */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 120, padding: '6px 10px',
-          background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
-          <Search size={13} color="var(--text-muted)" />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={t('vacancies.searchPlaceholder')} aria-label={t('vacancies.searchPlaceholder')}
-            style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
-        </div>
-        <StatusFilterSelect value={statusFilter} onToggle={toggleStatus}
-          statuses={statusOptions.map(o => ({ value: o.value, label: o.label }))} />
-        <DrawerAddButton onClick={() => setAdding(true)} label={t('vacancies.add')} />
-      </div>
-      <DataTable columns={columns} rows={filteredRows} loading={loading} loadingText={t('page.loading')} emptyText={t('vacancies.empty')} />
+      {/* Sub-tab labels reuse existing keys (grepped before minting): "Vacatures" is
+          the same drawer.tabs.vacancies used elsewhere on this same customer drawer;
+          "Sollicitaties" is the applications page's own top-level title — both already
+          carry full nl/en/de/fr/es parity, so no new i18n key is needed for either. */}
+      <SubTabBar
+        tabs={[
+          { id: 'vacancies', label: t('drawer.tabs.vacancies') },
+          { id: 'applications', label: t('applications:title') },
+        ]}
+        active={subTab}
+        onChange={id => setSubTab(id as 'vacancies' | 'applications')}
+      />
+      {subTab === 'vacancies' && (
+        <>
+          {/* Toolbar in the house order (Danny 28-07): search left, status filter right,
+              add trigger last — the same left-to-right reading as every other sub-entity
+              list. The filter renders `plain` so it is white like the pickers beside it. */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 120, padding: '6px 10px',
+              background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
+              <Search size={13} color="var(--text-muted)" />
+              <input value={search} onChange={e => setSearch(e.target.value)}
+                placeholder={t('vacancies.searchPlaceholder')} aria-label={t('vacancies.searchPlaceholder')}
+                style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
+            </div>
+            <StatusFilterSelect value={statusFilter} onToggle={toggleStatus}
+              statuses={statusOptions.map(o => ({ value: o.value, label: o.label }))} />
+            <DrawerAddButton onClick={() => setAdding(true)} label={t('vacancies.add')} />
+          </div>
+          <DataTable columns={columns} rows={filteredRows} loading={loading} loadingText={t('page.loading')} emptyText={t('vacancies.empty')} />
+        </>
+      )}
+      {/* Sollicitaties — lazy: not rendered (so no fetch fires) until this sub-tab
+          is actually opened. */}
+      {subTab === 'applications' && <CustomerApplicationsList customerId={customerId} />}
 
       {/* Refetch this customer's vacancy list on create, so the new row appears here. */}
       {/* The modal reads useVacancyLookups, whose provider is only mounted around the

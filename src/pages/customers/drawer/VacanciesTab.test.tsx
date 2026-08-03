@@ -16,7 +16,17 @@ import { invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import VacanciesTab from './VacanciesTab'
 import type { VacancyRow } from '../hooks/useCustomerDrawerData'
 
-vi.mock('@tanstack/react-query', () => ({ useQueryClient: () => ({ invalidateQueries: vi.fn() }) }))
+// PRE-EXISTING FIX (found while adding the Sollicitaties sub-tab, unrelated to it —
+// proven by reproducing this same crash against the untouched file/component on
+// HEAD before any edit here): a bare replacement drops the real `QueryClient`
+// class, which `src/lib/queryClient.ts` (imported transitively via AuthContext)
+// instantiates at module scope — any test importing that chain now crashes at
+// import time. `importOriginal` keeps the real exports and only overrides the
+// one hook this file actually needs stubbed.
+vi.mock('@tanstack/react-query', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@tanstack/react-query')>()
+  return { ...actual, useQueryClient: () => ({ invalidateQueries: vi.fn() }) }
+})
 vi.mock('../hooks/useCustomerDrawerData', () => ({
   useCustomerVacancies: () => ({
     rows: [

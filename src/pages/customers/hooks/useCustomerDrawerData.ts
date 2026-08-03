@@ -8,7 +8,12 @@ import { useQuery } from '@tanstack/react-query'
 import api, { unwrap, unwrapList } from '@/lib/api'
 // MATCHES-TAB-1: reuse the matches PAGE's own mapper rather than a third one.
 import { mapMatch } from '@/pages/matches/hooks/useMatches'
+// SOLLICITATIES-TAB-1: same reuse call as MATCHES-TAB-1 above — the applications
+// PAGE's own mapper, not a forked copy (mirrors ScopedMatchesTab's mapMatch reuse).
+import { mapApplication } from '@/pages/applications/data/mapApplication'
 import type { RawMatch, MatchRow } from '@/types/match'
+import type { ApiApplication, Application } from '@/types/application'
+import type { LookupItem } from '@/context/LookupsContext'
 import type { Id } from '@/types/common'
 
 export interface CustomerStats { matches_total?: number; active_matches?: number; open_vacancies?: number; fill_rate?: number }
@@ -138,4 +143,23 @@ export function useCustomerMatches(customerId?: Id) {
   // own reload: refetch) instead of leaving the just-created match invisible until a
   // full drawer reopen.
   return { rows: data, loading, error, reload: refetch }
+}
+
+// The customer's applications (Sollicitaties sub-tab, GET /applications?customer_id[]=
+// {id}) — ApplicationQuery validates `customer_id` as an ARRAY of uuids (measured in
+// ApplicationQuery.php:82-83), unlike the scoped vacancy/match filters' bare uuid above,
+// so it is array-wrapped here (mirrors useCustomerOpportunities's own array form).
+// `funnelTypes` comes from the caller's useLookups() (global LookupsContext, already
+// mounted app-wide) so this hook needs no lookup fetch of its own. `enabled` is only
+// ever `!!customerId` — laziness (no request before the sub-tab opens) comes from the
+// caller not mounting the component that calls this hook until then.
+export function useCustomerApplications(customerId?: Id, funnelTypes: LookupItem[] = []) {
+  const { data = [], isLoading: loading, isError: error } = useQuery({
+    queryKey: ['customers', customerId, 'applications'],
+    enabled: !!customerId,
+    queryFn: async ({ signal }): Promise<Application[]> =>
+      unwrapList<ApiApplication>(await api.get('/applications', { params: { customer_id: [customerId], per_page: 100 }, signal }))
+        .rows.map(a => mapApplication(a, funnelTypes)),
+  })
+  return { rows: data, loading, error }
 }
