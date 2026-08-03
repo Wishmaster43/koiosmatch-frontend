@@ -4,6 +4,12 @@
  * stays under the ~400-line split trigger (CLAUDE.md §3) once the CSV import
  * card (SUBENTITY-IMPORT-1) pushed it past that mark — pure presentational,
  * every value and callback comes from the parent's own form state.
+ *
+ * STATUS-HIDDEN-1 (Danny 02-08, second round: "+ nieuwe contactpersoon ... status
+ * moet weg in de popup"): the parent decides `showStatusPicker` (tenant setting
+ * gate, mirrors AddLocationModal/AddDepartmentModal's own) and this card only
+ * renders the field when true — an empty filler keeps the toggle's own row
+ * layout unchanged when the picker is absent.
  */
 import { useTranslation } from 'react-i18next'
 import { Field } from '@/components/forms/fields'
@@ -31,6 +37,8 @@ interface ContactLinkCardProps {
   // department") hide ONLY the locked field — the other still renders and cascades.
   showLocationPicker: boolean
   showDepartmentPicker: boolean
+  // STATUS-HIDDEN-1: hidden unless the tenant marked status_id required.
+  showStatusPicker: boolean
   onLocationChange: (v: string) => void
   onDepartmentChange: (v: string) => void
   onStatusChange: (v: string) => void
@@ -39,7 +47,7 @@ interface ContactLinkCardProps {
 
 export default function ContactLinkCard({
   locationId, departmentId, statusId, isPrimary, locationOptions, departmentOptions, departmentPlaceholder, statusOptions,
-  showLocationPicker, showDepartmentPicker, onLocationChange, onDepartmentChange, onStatusChange, onPrimaryToggle,
+  showLocationPicker, showDepartmentPicker, showStatusPicker, onLocationChange, onDepartmentChange, onStatusChange, onPrimaryToggle,
 }: ContactLinkCardProps) {
   const { t } = useTranslation(['customers', 'common'])
   const statusSelectOptions = statusOptions.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
@@ -77,11 +85,17 @@ export default function ContactLinkCard({
           </div>
         )}
         <div style={{ ...row2, alignItems: 'end' }}>
-          <Field label={t('subModal.status')}>
-            <CreatableSelect value={statusId ? String(statusId) : null} allowCreate={false}
-              onChange={onStatusChange} placeholder={t('subModal.selectStatus')} options={statusSelectOptions}
-              style={CREATABLE_STYLE} />
-          </Field>
+          {/* STATUS-HIDDEN-1: hidden unless the tenant marked it required — an
+              empty filler keeps the toggle at its half-width column instead of
+              stretching across the row (mirrors the location/department filler
+              convention above). */}
+          {showStatusPicker ? (
+            <Field label={t('subModal.status')}>
+              <CreatableSelect value={statusId ? String(statusId) : null} allowCreate={false}
+                onChange={onStatusChange} placeholder={t('subModal.selectStatus')} options={statusSelectOptions}
+                style={CREATABLE_STYLE} />
+            </Field>
+          ) : <div />}
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, paddingBottom: 8 }}>
             <Toggle checked={isPrimary} onChange={onPrimaryToggle} ariaLabel={t('subModal.isPrimary')} />
             <span style={{ fontSize: 12, color: 'var(--text)' }}>{t('subModal.isPrimary')}</span>

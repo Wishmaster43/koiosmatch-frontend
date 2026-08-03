@@ -156,6 +156,7 @@
     "document_types": "Dokumenttypen",
     "candidate_phases": "Phase",
     "candidate_required_fields": "Pflichtfelder",
+    "customer_required_fields": "Pflichtfelder",
     "candidate_retention": "Aufbewahrungsfrist",
     "application_display": "Tabellenansicht",
     "functions": "Funktionen",
@@ -1047,6 +1048,32 @@
       "noAttention": "Keine Zeilen erfordern Aufmerksamkeit.",
       "remark": "Hinweis:",
       "row": "Zeile {{row}}"
+    },
+    "wizard": {
+      "next": "Weiter",
+      "linkFromSettings": "Bevorzugen Sie einen geführten, schrittweisen Import mit Spaltenzuordnung und einer bearbeitbaren Vorschau?",
+      "linkFromSettingsCta": "Import-Assistent öffnen",
+      "fields": {
+        "customerName": "Kundenname",
+        "whatsappConsent": "WhatsApp-Einwilligung",
+        "emailConsent": "E-Mail-Einwilligung"
+      },
+      "mapping": {
+        "title": "Spalten zuordnen",
+        "subtitle": "Wir haben zugeordnet, was wir erkannt haben — prüfen Sie den Rest und passen Sie ihn bei Bedarf an.",
+        "noColumns": "Diese Datei enthält keine Spalten zum Zuordnen.",
+        "sourceColumn": "Spalte in Ihrer Datei",
+        "targetField": "Zugeordnet zu",
+        "skipOption": "— Nicht importieren —",
+        "skippedNotice": "Diese Spalte wird übersprungen.",
+        "missingRequired": "Noch erforderlich: {{fields}}"
+      },
+      "preview": {
+        "title": "Überprüfen Sie Ihre Daten",
+        "subtitle": "Dies ist genau das, was gesendet wird. Klicken Sie auf eine Zelle, um sie zu ändern, und führen Sie die Vorschau danach erneut aus.",
+        "noRows": "Keine Zeilen zur Vorschau — überprüfen Sie Ihre Datei.",
+        "validateHint": "Führen Sie die Vorschau aus, um zu sehen, was passieren würde, und bestätigen Sie dann."
+      }
     }
   },
   "facebookLeads": {
@@ -1940,6 +1967,14 @@
       "customer_department_table_color_status": {
         "label": "Statusfarbe (Abteilungen)",
         "description": "An = der Status-Chip in der Abteilungstabelle wird eingefärbt. Aus = einfacher Text."
+      },
+      "customer_task_table_color_status": {
+        "label": "Statusfarbe (Aufgaben)",
+        "description": "An = der Status-Chip in der Aufgabentabelle wird eingefärbt. Aus = einfacher Text."
+      },
+      "customer_opportunity_table_color_stage": {
+        "label": "Phasenfarbe (Chancen)",
+        "description": "An = der Phasen-Chip in der Chancentabelle wird eingefärbt. Aus = einfacher Text."
       }
     },
     "tabs": {
@@ -1962,6 +1997,12 @@
       "vacancies": {
         "title": "Stellen",
         "subtitle": "Bestimmt den Standardfilter des Tabs Stellen beim Öffnen eines Kunden."
+      },
+      "tasks": {
+        "title": "Aufgaben"
+      },
+      "opportunities": {
+        "title": "Chancen"
       }
     },
     "defaultFilter": {
@@ -2471,5 +2512,17 @@
     "subtitle": "Verwalten Sie die Tarifvertragsliste für Preisvereinbarungen und Matches.",
     "add": "Tarifvertrag hinzufügen"
   },
-  "dashboardsItem": "Element"
+  "dashboardsItem": "Element",
+  "customerRequiredFields": {
+    "title": "Pflichtfelder",
+    "subtitle": "Pflichtfelder für den Kunden (pro Kundenphase) sowie für Standort, Abteilung und Ansprechpartner. Das Backend prüft dies bereits beim Anlegen und beim Bearbeiten — siehe Hinweis unter jedem Tab.",
+    "tabs": {
+      "customer": "Kunde",
+      "location": "Standort",
+      "department": "Abteilung",
+      "contact": "Ansprechpartner"
+    },
+    "phaseHint": "Dies wird beim Anlegen und bei einem echten Phasenwechsel geprüft. Eine normale Bearbeitung, die die Phase nicht ändert, wird nie blockiert — unabhängig davon, welche anderen Felder noch fehlen.",
+    "flatHint": "Dies wird beim Anlegen vollständig geprüft. Beim Bearbeiten werden nur die Felder geprüft, die die Änderung selbst betrifft — ein bereits unvollständiger Datensatz bleibt bei den anderen Feldern frei bearbeitbar."
+  }
 }

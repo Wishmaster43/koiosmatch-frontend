@@ -31,6 +31,13 @@
  * style override so they render at the exact same height/width as the TextField
  * siblings sharing their grid row — mirrors the identical fix already applied in
  * `pages/candidates/addmodal/fields.tsx` for the same trigger-vs-input mismatch.
+ *
+ * STATUS-HIDDEN-1 (Danny 02-08, second round: "+ nieuwe contactpersoon ... status
+ * moet weg in de popup"): the status picker (inside ContactLinkCard) is hidden by
+ * default — ContactsPanel's own status editor already covers create AND edit —
+ * reappearing only when the tenant marked status_id required
+ * (customer_contact_required_fields, FlatRequiredFieldsGuard catalog), mirrors
+ * AddLocationModal/AddDepartmentModal's own gate.
  */
 import { useState, useEffect } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
@@ -42,6 +49,7 @@ import { Field, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useGenders } from '@/lib/useGenders'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
@@ -122,6 +130,10 @@ export default function AddContactPersonModal({
   // CONTACT-GESLACHT-1: the SAME tenant /genders lookup a candidate uses — the field
   // stores the value SLUG (male|female|other), never a hardcoded three-option list.
   const { genders } = useGenders()
+  // STATUS-HIDDEN-1: hidden unless the tenant marked it required — mirrors
+  // AddLocationModal/AddDepartmentModal's own gate, same flat-array setting shape.
+  const settings = useAllSettings()
+  const showStatusPicker = getJsonSetting<string[]>(settings, 'customer_contact_required_fields', []).includes('status_id')
   const [form, setForm] = useState<ContactPayload>({
     firstName: initial?.firstName ?? '',
     middleName: initial?.middleName ?? '',
@@ -374,6 +386,7 @@ export default function AddContactPersonModal({
             statusOptions={statuses}
             showLocationPicker={showLocationPicker}
             showDepartmentPicker={showDepartmentPicker}
+            showStatusPicker={showStatusPicker}
             onLocationChange={v => { set('locationId', v || null); set('departmentId', null) }}
             onDepartmentChange={v => set('departmentId', v || null)}
             onStatusChange={v => set('statusId', v || null)}

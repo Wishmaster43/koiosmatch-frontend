@@ -38,6 +38,7 @@ import PersonalCard from './addmodal/PersonalCard'
 import ContactCard from './addmodal/ContactCard'
 import WorkCard from './addmodal/WorkCard'
 import AddressCard from './addmodal/AddressCard'
+import ProfileTextCard from './addmodal/ProfileTextCard'
 import BranchesCard from './addmodal/BranchesCard'
 import CvUploadCard from './addmodal/CvUploadCard'
 import { CvFilledContext } from './addmodal/cvFilledContext'
@@ -66,6 +67,10 @@ export interface FormState {
   // COUNTRY-1: home-address country (ISO-2 code, empty until picked).
   country: string
   ownerId: string | number
+  // PROFILE-TEXT-1 (Danny 02-08): the profile text, same field the drawer's
+  // ProfileTab edits later — collected here via the shared collapsed-ghost block
+  // (addmodal/ProfileTextCard) so it can already ride along on create.
+  summary: string
 }
 
 interface AddCandidateModalProps {
@@ -122,6 +127,7 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
     street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', city: '', province: '', country: '',
     // Owner defaults to the logged-in user; recruiter can change it.
     ownerId: me?.id ?? '',
+    summary: '',
   })
 
   // Once the real statuses arrive from the API, default to Lead if nothing chosen.
@@ -214,6 +220,9 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
         // COUNTRY-1: only rides along when actually picked (mirrors every other optional field).
         country:             form.country || null,
         owner_id:            form.ownerId || null,
+        // PROFILE-TEXT-1: CandidateProfileRequest accepts `summary` (sometimes|nullable|
+        // string) on create — verified against the backend request class.
+        summary:             form.summary || null,
         phase:               status || 'lead',
         status:              'available',
         candidate_types:     [],
@@ -318,6 +327,7 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
                   <ContactCard form={form} errors={errors} set={set} isReq={isReq} />
                   <WorkCard form={form} set={set} isReq={isReq} allowFreeEntry={allowFreeEntry} functions={functions} ownerOptions={ownerOptions} />
                   <AddressCard form={form} errors={errors} set={set} isReq={isReq} provinces={provinces} />
+                  <ProfileTextCard form={form} set={set} />
                   <BranchesCard branchIds={branchIds} setBranchIds={setBranchIds} locations={locations} />
                 </div>
               </CvFilledContext.Provider>

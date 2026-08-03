@@ -96,7 +96,8 @@
     "changelog": "Änderungen",
     "photoUpload": "Logo hochladen",
     "photoRemove": "Logo entfernen",
-    "phase": "Phase"
+    "phase": "Phase",
+    "convertTo": "Zu {{phase}} umwandeln"
   },
   "overview": {
     "general": "Allgemein",
@@ -222,7 +223,8 @@
       "primaryContactTitle": "Primärer Ansprechpartner",
       "noPrimaryContact": "Noch kein primärer Ansprechpartner für diesen Standort",
       "pickPrimaryContact": "Primären Ansprechpartner wählen",
-      "description": "Beschreibung"
+      "description": "Beschreibung",
+      "contactNotLinked": "Nur Text — noch nicht mit einem Ansprechpartner verknüpft"
     },
     "saveFailed": "Speichern fehlgeschlagen.",
     "deleteFailed": "Löschen fehlgeschlagen.",
@@ -610,7 +612,9 @@
     "relationshipActive": "{{vacancies}} offene Stelle(n) · {{matches}} aktive(s) Match(es).",
     "relationshipNone": "Keine offenen Stellen oder aktiven Matches erfasst.",
     "locationComplete": "Dieser Standort ist gut gefüllt — Adresse, Registrierung und Kontakt sind bekannt.",
-    "locationPartial": "Dieser Standort ist zu {{pct}}% vollständig. Ergänze Adresse, Neben-Handelsregisternr., USt-IdNr. und Kontaktdaten."
+    "locationPartial": "Dieser Standort ist zu {{pct}}% vollständig. Ergänze Adresse, Neben-Handelsregisternr., USt-IdNr. und Kontaktdaten.",
+    "departmentComplete": "Diese Abteilung ist gut gefüllt — Beschreibung, Status und Kostenstelle sind bekannt.",
+    "departmentPartial": "Diese Abteilung ist zu {{pct}}% vollständig. Ergänze Beschreibung, Status und Kostenstelle."
   },
   "tasks": {
     "newTask": "Neue Aufgabe",

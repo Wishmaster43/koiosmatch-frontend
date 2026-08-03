@@ -96,7 +96,8 @@
     "changelog": "Wijzigingen",
     "photoUpload": "Logo uploaden",
     "photoRemove": "Logo verwijderen",
-    "phase": "Fase"
+    "phase": "Fase",
+    "convertTo": "Converteer naar {{phase}}"
   },
   "overview": {
     "general": "Algemeen",
@@ -222,7 +223,8 @@
       "primaryContactTitle": "Primaire contactpersoon",
       "noPrimaryContact": "Nog geen primaire contactpersoon voor deze locatie",
       "pickPrimaryContact": "Kies een primaire contactpersoon",
-      "description": "Omschrijving"
+      "description": "Omschrijving",
+      "contactNotLinked": "Alleen tekst — nog niet gekoppeld aan een contactpersoon"
     },
     "saveFailed": "Opslaan is mislukt.",
     "deleteFailed": "Verwijderen is mislukt.",
@@ -610,7 +612,9 @@
     "relationshipActive": "{{vacancies}} open vacature(s) · {{matches}} actieve match(es).",
     "relationshipNone": "Geen open vacatures of actieve matches geregistreerd.",
     "locationComplete": "Deze locatie is goed gevuld — adres, registratie en contact zijn bekend.",
-    "locationPartial": "Deze locatie is {{pct}}% compleet. Vul adres, Sub-KvK, BTW-nummer en contactgegevens aan."
+    "locationPartial": "Deze locatie is {{pct}}% compleet. Vul adres, Sub-KvK, BTW-nummer en contactgegevens aan.",
+    "departmentComplete": "Deze afdeling is goed gevuld — omschrijving, status en kostenplaats zijn bekend.",
+    "departmentPartial": "Deze afdeling is {{pct}}% compleet. Vul omschrijving, status en kostenplaats aan."
   },
   "tasks": {
     "newTask": "Nieuwe taak",

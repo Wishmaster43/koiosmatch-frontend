@@ -47,5 +47,6 @@
   "workflows": "Workflows",
   "whatsapp": "WhatsApp",
   "details.runs": "Détails IA — Exécutions",
-  "details.messages": "Détails IA — Messages"
+  "details.messages": "Détails IA — Messages",
+  "import-wizard": "Assistant d'importation"
 }

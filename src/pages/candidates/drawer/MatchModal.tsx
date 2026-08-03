@@ -46,7 +46,10 @@ import { useMatchForm } from './match/useMatchForm'
 import RelationsSection from './match/RelationsSection'
 import ContractSection from './match/ContractSection'
 import FinancialSection from './match/FinancialSection'
-import RemarksSection from './match/RemarksSection'
+// COLLAPSIBLE-TEXT-1 (Danny 02-08): RemarksSection moved to a shared, entity-
+// agnostic component (components/ui) so candidate/customer/location/department
+// create modals get the same collapsed-ghost prose block — see its own docblock.
+import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
 import { overlay, panel, twoColSections } from './match/styles'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import type { Id } from '@/types/common'
@@ -132,10 +135,11 @@ export default function MatchModal({ candidateId: fixedCandidateId, editMatchId,
               <div>
                 <div style={cardHead}>{t('placement.remarks')}</div>
                 <div style={cardBox}>
-                  <RemarksSection
-                    t={t} remarks={form.remarks} setRemarks={form.setRemarks}
-                    remarksExpanded={form.remarksExpanded} setRemarksExpanded={form.setRemarksExpanded}
-                    remarksEditing={form.remarksEditing} setRemarksEditing={form.setRemarksEditing}
+                  <CollapsibleRichText
+                    t={t} value={form.remarks} onChange={form.setRemarks}
+                    expanded={form.remarksExpanded} setExpanded={form.setRemarksExpanded}
+                    editing={form.remarksEditing} setEditing={form.setRemarksEditing}
+                    placeholder={t('placement.remarksAdd')}
                   />
                 </div>
               </div>

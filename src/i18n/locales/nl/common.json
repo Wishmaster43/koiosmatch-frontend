@@ -279,5 +279,11 @@
   "branchSection": {
     "widenTitle": "Laatste vestiging loskoppelen?",
     "widenMessage": "Dit is de enige gekoppelde vestiging. Loskoppelen maakt dit record weer zichtbaar voor alle vestigingen."
+  },
+  "drillPager": {
+    "prev": "Vorige",
+    "next": "Volgende",
+    "prevAt": "Vorige ({{index}} van {{total}})",
+    "nextAt": "Volgende ({{index}} van {{total}})"
   }
 }

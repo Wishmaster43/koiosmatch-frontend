@@ -279,5 +279,11 @@
   "branchSection": {
     "widenTitle": "Letzte Niederlassung entfernen?",
     "widenMessage": "Dies ist die einzige verknüpfte Niederlassung. Beim Entfernen wird dieser Datensatz wieder für alle Niederlassungen sichtbar."
+  },
+  "drillPager": {
+    "prev": "Zurück",
+    "next": "Weiter",
+    "prevAt": "Zurück ({{index}} von {{total}})",
+    "nextAt": "Weiter ({{index}} von {{total}})"
   }
 }

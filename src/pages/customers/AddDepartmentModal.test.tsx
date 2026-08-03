@@ -7,7 +7,9 @@
  * incomplete submit.
  *
  * Danny 02-08 addition covered here: a CSV import card (mirrors AddLocationModal's
- * own — same shared wizard/card, same parent-mismatch safety net, entity="departments").
+ * own — same shared wizard/card, same parent-mismatch safety net, entity="departments"),
+ * the Omschrijving field becoming the shared collapsed-ghost block (COLLAPSIBLE-TEXT-1),
+ * and the status picker hiding by default (STATUS-HIDDEN-1).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
@@ -23,14 +25,30 @@ vi.mock('@/pages/settings/sections/importeren/importApi', async (importOriginal)
   const actual = await importOriginal<typeof import('@/pages/settings/sections/importeren/importApi')>()
   return { ...actual, dryRunImport: vi.fn(), runImport: vi.fn(), downloadImportTemplate: vi.fn() }
 })
+// Tiptap needs a real browser to mount — stubbed with a plain controlled textarea,
+// mirrors the house convention (AddLocationModal.test.tsx / MatchModal.test.tsx).
+vi.mock('@/components/ui/RichTextEditor', () => ({
+  default: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+    <textarea aria-label="rich-text-editor" value={value} onChange={e => onChange(e.target.value)} />
+  ),
+}))
 // hasPermission defaults to "allow everything" so the pre-existing tests above (none of
 // which touch the import card) keep behaving as before; the import describe block below
 // overrides it per test to exercise the gate itself.
-const { authState } = vi.hoisted(() => ({
+const { authState, settingsState } = vi.hoisted(() => ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the default mock allows every permission; the param exists only to match hasPermission's real signature
   authState: { hasPermission: ((_perm: string) => true) as (perm: string) => boolean },
+  // STATUS-HIDDEN-1: the settings blob a test can flip per-case (e.g. tenant marks
+  // status_id required) — defaults to empty (nothing required).
+  settingsState: { settings: {} as Record<string, unknown> },
 }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: authState.hasPermission }) }))
+// Keep the REAL getJsonSetting (the component parses the required-fields config
+// through it); only the settings blob itself is test-controlled.
+vi.mock('@/lib/settings/useAllSettings', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/lib/settings/useAllSettings')>()
+  return { ...actual, useAllSettings: () => settingsState.settings }
+})
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
@@ -46,6 +64,7 @@ const statuses = [{ value: 'st-1', label: 'Actief' }]
 
 beforeEach(() => {
   authState.hasPermission = () => true
+  settingsState.settings = {}
   vi.mocked(dryRunImport).mockReset()
   vi.mocked(runImport).mockReset()
 })
@@ -132,6 +151,50 @@ describe('AddDepartmentModal', () => {
   })
 })
 
+// COLLAPSIBLE-TEXT-1 (Danny 02-08, second round): Omschrijving gets the exact same
+// collapsed-ghost affordance as +Match's Opmerkingen — always present, near-zero
+// height until clicked, never auto-opens (mirrors AddLocationModal's own pass).
+describe('AddDepartmentModal · description (COLLAPSIBLE-TEXT-1)', () => {
+  it('starts collapsed — no rich-text editor before the recruiter opens it', () => {
+    render(<AddDepartmentModal onClose={() => {}} locations={locations} statuses={statuses} />)
+    expect(screen.queryByLabelText('rich-text-editor')).toBeNull()
+    // ARIA-LABEL-1: this modal's own footer submit button is ALSO labelled
+    // "Toevoegen"/"Add" (subModal.create), so the ghost button's accessible
+    // name is its own card heading instead of the generic common:add text.
+    expect(screen.getByRole('button', { name: ct('subModal.description') })).toBeInTheDocument()
+  })
+
+  it('reveals the shared RichTextEditor on click and its value reaches onCreate', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(<AddDepartmentModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.departmentName'), { exact: false }), 'Thuiszorg')
+    await user.click(screen.getByRole('button', { name: ct('subModal.description') }))
+    fireEvent.change(screen.getByLabelText('rich-text-editor'), { target: { value: '<p>Grootste afdeling</p>' } })
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+
+    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ description: '<p>Grootste afdeling</p>' }))
+  })
+})
+
+// STATUS-HIDDEN-1 (Danny 02-08, second round): the status picker is hidden by
+// default in the create popup — DepartmentDetail's own title-row editor is where
+// status is actually set — and only reappears when the tenant marked status_id
+// required (customer_department_required_fields).
+describe('AddDepartmentModal · status picker hidden by default (STATUS-HIDDEN-1)', () => {
+  it('does not render a status picker when the tenant has not required it', () => {
+    render(<AddDepartmentModal onClose={() => {}} locations={locations} statuses={statuses} />)
+    expect(screen.queryByText(ct('subModal.status'))).toBeNull()
+  })
+
+  it('renders the status picker when the tenant marked status_id required', () => {
+    settingsState.settings = { customer_department_required_fields: JSON.stringify(['status_id']) }
+    render(<AddDepartmentModal onClose={() => {}} locations={locations} statuses={statuses} />)
+    expect(screen.getByText(ct('subModal.status'))).toBeInTheDocument()
+  })
+})
+
 describe('AddDepartmentModal · import card (Danny 02-08: "+ nieuwe afdeling ... moeten ook een CSV-upload hebben")', () => {
   const csvFile = new File(['klant_naam,locatie_naam,naam\nZorggroep Middenland,Locatie Noord,Somatiek'], 'afdelingen.csv', { type: 'text/csv' })
   const xlsxFile = new File(['binary'], 'afdelingen.xlsx', {
@@ -152,7 +215,10 @@ describe('AddDepartmentModal · import card (Danny 02-08: "+ nieuwe afdeling ...
   it('refuses an .xlsx file client-side with the save-as-CSV instruction, and never calls the dry run', () => {
     render(<AddDepartmentModal onClose={() => {}} locations={locations} statuses={statuses} customerName="Zorggroep Middenland" />)
 
-    const dropZone = screen.getByText(st('import.dropHere')).parentElement as HTMLElement
+    // COMPACT-IMPORT-1: the compact card has no dedicated dropzone element — the
+    // whole card body accepts a drop, so its own intro line (a direct child of the
+    // onDrop-bearing div) is the stable anchor to its parent.
+    const dropZone = screen.getByText(ct('subModal.import.intro', { entity: st('import.entities.departments.label') })).parentElement as HTMLElement
     fireEvent.drop(dropZone, { dataTransfer: { files: [xlsxFile] } })
 
     expect(screen.getByText(st('import.wrongFileType'))).toBeInTheDocument()

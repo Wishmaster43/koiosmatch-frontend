@@ -158,6 +158,7 @@
     "document_types": "Document types",
     "candidate_phases": "Phase",
     "candidate_required_fields": "Required fields",
+    "customer_required_fields": "Required fields",
     "candidate_retention": "Data retention",
     "functions": "Functions",
     "contact_functions": "Functions",
@@ -1261,6 +1262,32 @@
       "noAttention": "No rows need attention.",
       "remark": "Note:",
       "row": "Row {{row}}"
+    },
+    "wizard": {
+      "next": "Next",
+      "linkFromSettings": "Prefer a guided, step-by-step import with column matching and an editable preview?",
+      "linkFromSettingsCta": "Open the import wizard",
+      "fields": {
+        "customerName": "Customer name",
+        "whatsappConsent": "WhatsApp consent",
+        "emailConsent": "Email consent"
+      },
+      "mapping": {
+        "title": "Match your columns",
+        "subtitle": "We matched what we recognised — check the rest and adjust where needed.",
+        "noColumns": "This file has no columns to map.",
+        "sourceColumn": "Column in your file",
+        "targetField": "Maps to",
+        "skipOption": "— Do not import —",
+        "skippedNotice": "This column will be skipped.",
+        "missingRequired": "Still required: {{fields}}"
+      },
+      "preview": {
+        "title": "Check your data",
+        "subtitle": "This is exactly what will be sent. Click a cell to change it, then run the preview again.",
+        "noRows": "No rows to preview — check your file.",
+        "validateHint": "Run the preview to see what would happen, then confirm."
+      }
     }
   },
   "facebookLeads": {
@@ -1958,6 +1985,14 @@
       "customer_department_table_color_status": {
         "label": "Status colour (departments)",
         "description": "On = the status chip in the department table is coloured. Off = plain text."
+      },
+      "customer_task_table_color_status": {
+        "label": "Status colour (tasks)",
+        "description": "On = the status chip in the tasks table is coloured. Off = plain text."
+      },
+      "customer_opportunity_table_color_stage": {
+        "label": "Stage colour (opportunities)",
+        "description": "On = the stage chip in the opportunities table is coloured. Off = plain text."
       }
     },
     "tabs": {
@@ -1980,6 +2015,12 @@
       "vacancies": {
         "title": "Vacancies",
         "subtitle": "Determines the default filter of the Vacancies tab when you open a customer."
+      },
+      "tasks": {
+        "title": "Tasks"
+      },
+      "opportunities": {
+        "title": "Opportunities"
       }
     },
     "defaultFilter": {
@@ -2471,5 +2512,17 @@
     "subtitle": "Manage the CLA list (VVT, hospitals, …) for price agreements and matches.",
     "add": "Add CLA"
   },
-  "dashboardsItem": "Item"
+  "dashboardsItem": "Item",
+  "customerRequiredFields": {
+    "title": "Required fields",
+    "subtitle": "Required fields for the customer (per customer phase) and for Location, Department and Contact person. The backend already checks this on both create and edit — see the note under each tab.",
+    "tabs": {
+      "customer": "Customer",
+      "location": "Location",
+      "department": "Department",
+      "contact": "Contact person"
+    },
+    "phaseHint": "This is checked on create and on a genuine phase transition. An ordinary edit that doesn't change the phase is never blocked — however incomplete the record already is on other fields.",
+    "flatHint": "This is checked in full on create. On edit, only the fields the change itself touches are checked — an already-incomplete record stays freely editable on its other fields."
+  }
 }

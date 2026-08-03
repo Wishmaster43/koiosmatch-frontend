@@ -9,7 +9,7 @@
  * raw keys — assertions query those keys (same pattern as MatchModal.test).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { NavigationProvider } from '@/context/NavigationContext'
 import AddCandidateModal from './AddCandidateModal'
@@ -54,6 +54,15 @@ vi.mock('./hooks/useCandidateMutations', () => ({ useCreateCandidate: () => ({ c
 vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [{ value: 'Verzorgende IG', label: 'Verzorgende IG' }], allowFreeEntry: true }) }))
 vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: [{ value: 'Utrecht', label: 'Utrecht' }] }) }))
 vi.mock('@/lib/useLocations', () => ({ useLocations: () => [{ value: 'b1', label: 'Vestiging Noord' }, { value: 'b2', label: 'Vestiging Zuid' }] }))
+// PROFILE-TEXT-1: Tiptap needs a real browser to mount — stubbed with a plain
+// controlled textarea, mirrors the house convention (AddLocationModal.test.tsx /
+// MatchModal.test.tsx). CollapsibleRichText itself runs for REAL, so the test
+// below proves the actual collapsed-ghost -> reveal -> submit wiring.
+vi.mock('@/components/ui/RichTextEditor', () => ({
+  default: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+    <textarea aria-label="rich-text-editor" value={value} onChange={e => onChange(e.target.value)} />
+  ),
+}))
 
 const noop = () => {}
 
@@ -126,6 +135,10 @@ describe('AddCandidateModal · submit body unchanged by the layout rework', () =
       email: null, phone: null, mobile: null, date_of_birth: null, gender: null,
       street: null, house_number: null, house_number_suffix: null, postal_code: null,
       city: null, province: null, country: null, owner_id: 'u1',
+      // PROFILE-TEXT-1 (Danny 02-08): the profile-text card rides along on create;
+      // untouched here, so it POSTs as null (never omitted, mirrors every other
+      // optional field on this same body).
+      summary: null,
       phase: 'lead', status: 'available', candidate_types: [],
       location_ids: ['b1'],
     })
@@ -141,6 +154,33 @@ describe('AddCandidateModal · submit body unchanged by the layout rework', () =
     await user.click(screen.getByRole('button', { name: 'modal.create' }))
     expect(createCandidate).toHaveBeenCalledTimes(1)
     expect(createCandidate.mock.calls[0][0]).not.toHaveProperty('location_ids')
+  })
+})
+
+// PROFILE-TEXT-1 (Danny 02-08: "bij popup Nieuwe kandidaat ... moet altijd een
+// tekstveld aanwezig zijn zoals we hebben bij + match"): the profile-text card
+// (addmodal/ProfileTextCard) starts collapsed and its value rides along under
+// `summary` in the create body once opened and filled in.
+describe('AddCandidateModal · profile text card (PROFILE-TEXT-1)', () => {
+  it('starts collapsed — no rich-text editor before the recruiter opens it', () => {
+    render(<AddCandidateModal onClose={noop} onCreated={noop} />)
+    expect(screen.queryByLabelText('rich-text-editor')).toBeNull()
+    expect(screen.getByRole('button', { name: 'common:add' })).toBeInTheDocument()
+  })
+
+  it('POSTs the typed prose under `summary`', async () => {
+    const user = userEvent.setup()
+    render(<AddCandidateModal onClose={noop} onCreated={noop} />)
+    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
+    // The collapsed ghost has no distinct aria-label here (no collision with this
+    // modal's own submit button, unlike Location/Department's ARIA-LABEL-1 fix) —
+    // its accessible name is the generic common:add placeholder text.
+    await user.click(screen.getByRole('button', { name: 'common:add' }))
+    fireEvent.change(screen.getByLabelText('rich-text-editor'), { target: { value: '<p>Ervaren verzorgende</p>' } })
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+
+    expect(createCandidate).toHaveBeenCalledWith(expect.objectContaining({ summary: '<p>Ervaren verzorgende</p>' }))
   })
 })
 

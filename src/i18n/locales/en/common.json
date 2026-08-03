@@ -279,5 +279,11 @@
   "branchSection": {
     "widenTitle": "Remove the last branch?",
     "widenMessage": "This is the only branch linked. Removing it makes this record visible to every branch again."
+  },
+  "drillPager": {
+    "prev": "Previous",
+    "next": "Next",
+    "prevAt": "Previous ({{index}} of {{total}})",
+    "nextAt": "Next ({{index}} of {{total}})"
   }
 }

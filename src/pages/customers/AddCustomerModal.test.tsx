@@ -52,6 +52,15 @@ vi.mock('@/lib/useCustomerPhases', () => ({
 /* eslint-enable no-restricted-syntax */
 // COUNTRY/PROVINCE cascade — mirrors the candidate modal's own province mock.
 vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: ['Utrecht', 'Zuid-Holland'] }) }))
+// COLLAPSIBLE-TEXT-1: Tiptap needs a real browser to mount — stubbed with a plain
+// controlled textarea, mirrors the house convention (AddLocationModal.test.tsx /
+// MatchModal.test.tsx). CollapsibleRichText itself runs for REAL, so these tests
+// prove the actual collapsed-ghost -> reveal -> submit wiring, not a stub of it.
+vi.mock('@/components/ui/RichTextEditor', () => ({
+  default: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+    <textarea aria-label="rich-text-editor" value={value} onChange={e => onChange(e.target.value)} />
+  ),
+}))
 // ACCOUNTMANAGER-DEFAULT-1: `authState.user` is mutable per-test (vi.hoisted so the
 // hoisted vi.mock factory below can read the CURRENT value, not a snapshot).
 // CUSTOMER-IMPORT-1: hasPermission defaults to "allow everything" so the pre-existing
@@ -177,9 +186,12 @@ describe('AddCustomerModal · new fields ride along in the whole form object (Da
     await user.type(screen.getByLabelText(ct('modal.fields.name'), { exact: false }), 'Stichting Rivas Zorggroep')
     await user.type(screen.getByLabelText(ct('overview.website'), { exact: false }), 'https://rivas.nl')
     await user.type(screen.getByLabelText(ct('overview.employeeCount'), { exact: false }), '250')
-    // BEDRIJFSTEKST-1 (Danny 02-08): the field's LABEL is now "Bedrijfstekst"
-    // (overview.companyText) — "Schrijfstijl" (overview.toneOfVoice) is gone.
-    await user.type(screen.getByLabelText(ct('overview.companyText'), { exact: false }), 'Formeel')
+    // BEDRIJFSTEKST-1 (Danny 02-08): the field's card is now "Bedrijfstekst"
+    // (overview.companyText) — "Schrijfstijl" (overview.toneOfVoice) is gone —
+    // and COLLAPSIBLE-TEXT-1 (02-08 round 2) makes it a collapsed ghost, same
+    // shape as +Match's Opmerkingen: click to reveal, then type.
+    await user.click(screen.getByRole('button', { name: cm('add') }))
+    await user.type(screen.getByLabelText('rich-text-editor'), 'Formeel')
     await user.type(screen.getByLabelText(ct('overview.costCenter'), { exact: false }), 'CC-42')
     await user.type(screen.getByLabelText(ct('overview.billingEmail'), { exact: false }), 'facturen@rivas.nl')
 
@@ -199,6 +211,24 @@ describe('AddCustomerModal · new fields ride along in the whole form object (Da
       costCenter: 'CC-42',
       billingEmail: 'facturen@rivas.nl',
     }))
+  })
+})
+
+// COLLAPSIBLE-TEXT-1 (Danny 02-08): "Bedrijfstekst" gets the exact same collapsed
+// ghost affordance as +Match's Opmerkingen — always present, near-zero height
+// until clicked, never auto-opens.
+describe('AddCustomerModal · Bedrijfstekst starts collapsed (COLLAPSIBLE-TEXT-1)', () => {
+  it('does not render the rich-text editor before the recruiter opens it', () => {
+    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
+    expect(screen.queryByLabelText('rich-text-editor')).toBeNull()
+    expect(screen.getByRole('button', { name: cm('add') })).toBeInTheDocument()
+  })
+
+  it('reveals the shared RichTextEditor (never a bare textarea) on an explicit click', async () => {
+    const user = userEvent.setup()
+    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
+    await user.click(screen.getByRole('button', { name: cm('add') }))
+    expect(screen.getByLabelText('rich-text-editor')).toBeInTheDocument()
   })
 })
 

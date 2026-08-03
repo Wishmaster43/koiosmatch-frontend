@@ -96,7 +96,8 @@
     "changelog": "Changelog",
     "photoUpload": "Upload logo",
     "photoRemove": "Remove logo",
-    "phase": "Phase"
+    "phase": "Phase",
+    "convertTo": "Convert to {{phase}}"
   },
   "overview": {
     "general": "General",
@@ -222,7 +223,8 @@
       "primaryContactTitle": "Primary contact",
       "noPrimaryContact": "No primary contact for this location yet",
       "pickPrimaryContact": "Choose a primary contact",
-      "description": "Description"
+      "description": "Description",
+      "contactNotLinked": "Text only — not yet linked to a contact person"
     },
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",
@@ -610,7 +612,9 @@
     "relationshipActive": "{{vacancies}} open vacancy(ies) · {{matches}} active match(es).",
     "relationshipNone": "No open vacancies or active matches recorded.",
     "locationComplete": "This location is well filled in — address, registration and contact are known.",
-    "locationPartial": "This location is {{pct}}% complete. Add the address, sub CoC number, VAT number and contact details."
+    "locationPartial": "This location is {{pct}}% complete. Add the address, sub CoC number, VAT number and contact details.",
+    "departmentComplete": "This department is well filled in — description, status and cost centre are known.",
+    "departmentPartial": "This department is {{pct}}% complete. Add the description, status and cost centre."
   },
   "tasks": {
     "newTask": "New task",

@@ -156,6 +156,7 @@
     "document_types": "Tipos de documento",
     "candidate_phases": "Fase",
     "candidate_required_fields": "Campos obligatorios",
+    "customer_required_fields": "Campos obligatorios",
     "candidate_retention": "Periodo de conservación",
     "application_display": "Vista de tabla",
     "functions": "Funciones",
@@ -1047,6 +1048,32 @@
       "noAttention": "Ninguna fila necesita atención.",
       "remark": "Nota:",
       "row": "Fila {{row}}"
+    },
+    "wizard": {
+      "next": "Siguiente",
+      "linkFromSettings": "¿Prefieres una importación guiada, paso a paso, con asignación de columnas y una vista previa editable?",
+      "linkFromSettingsCta": "Abrir el asistente de importación",
+      "fields": {
+        "customerName": "Nombre del cliente",
+        "whatsappConsent": "Consentimiento de WhatsApp",
+        "emailConsent": "Consentimiento de correo electrónico"
+      },
+      "mapping": {
+        "title": "Haz coincidir tus columnas",
+        "subtitle": "Hicimos coincidir lo que reconocimos — revisa el resto y ajústalo si es necesario.",
+        "noColumns": "Este archivo no tiene columnas para asignar.",
+        "sourceColumn": "Columna en tu archivo",
+        "targetField": "Se asigna a",
+        "skipOption": "— No importar —",
+        "skippedNotice": "Esta columna se omitirá.",
+        "missingRequired": "Aún requerido: {{fields}}"
+      },
+      "preview": {
+        "title": "Revisa tus datos",
+        "subtitle": "Esto es exactamente lo que se enviará. Haz clic en una celda para cambiarla y vuelve a ejecutar la vista previa.",
+        "noRows": "No hay filas para previsualizar — revisa tu archivo.",
+        "validateHint": "Ejecuta la vista previa para ver qué ocurriría y luego confirma."
+      }
     }
   },
   "facebookLeads": {
@@ -1940,6 +1967,14 @@
       "customer_department_table_color_status": {
         "label": "Color estado (departamentos)",
         "description": "Activado = el chip de estado en la tabla de departamentos tiene color. Desactivado = texto plano."
+      },
+      "customer_task_table_color_status": {
+        "label": "Color estado (tareas)",
+        "description": "Activado = el chip de estado en la tabla de tareas tiene color. Desactivado = texto plano."
+      },
+      "customer_opportunity_table_color_stage": {
+        "label": "Color de fase (oportunidades)",
+        "description": "Activado = el chip de fase en la tabla de oportunidades tiene color. Desactivado = texto plano."
       }
     },
     "tabs": {
@@ -1962,6 +1997,12 @@
       "vacancies": {
         "title": "Vacantes",
         "subtitle": "Determina el filtro predeterminado de la pestaña Vacantes al abrir un cliente."
+      },
+      "tasks": {
+        "title": "Tareas"
+      },
+      "opportunities": {
+        "title": "Oportunidades"
       }
     },
     "defaultFilter": {
@@ -2471,5 +2512,17 @@
     "subtitle": "Gestiona la lista de convenios para acuerdos de precios y matches.",
     "add": "Añadir convenio"
   },
-  "dashboardsItem": "Elemento"
+  "dashboardsItem": "Elemento",
+  "customerRequiredFields": {
+    "title": "Campos obligatorios",
+    "subtitle": "Campos obligatorios para el cliente (por fase de cliente) y para Ubicación, Departamento y Contacto. El backend ya lo comprueba al crear y al editar — vea la nota debajo de cada pestaña.",
+    "tabs": {
+      "customer": "Cliente",
+      "location": "Ubicación",
+      "department": "Departamento",
+      "contact": "Contacto"
+    },
+    "phaseHint": "Esto se comprueba al crear y en una transición de fase real. Una edición normal que no cambia la fase nunca se bloquea, sin importar qué otros campos falten todavía.",
+    "flatHint": "Esto se comprueba por completo al crear. Al editar, solo se comprueban los campos que la propia modificación toca — un registro ya incompleto sigue siendo editable libremente en sus otros campos."
+  }
 }

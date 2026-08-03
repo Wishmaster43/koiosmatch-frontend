@@ -18,6 +18,13 @@
  * {false} — real relational ids, never a free-text create). This entity
  * genuinely has fewer fields than Location (5 vs 13), so its cards stay
  * lighter — see report re: not padding the layout with empty space.
+ *
+ * COLLAPSIBLE-TEXT-1 / STATUS-HIDDEN-1 (Danny 02-08, second round): Omschrijving
+ * became the shared collapsed-ghost block (same shape as +Match's Opmerkingen,
+ * mirrors AddLocationModal's own pass), and the status picker is hidden by
+ * default — DepartmentDetail's own title-row editor is where status is actually
+ * set — reappearing only when the tenant marked status_id required
+ * (customer_department_required_fields, FlatRequiredFieldsGuard catalog).
  */
 import { useState, useEffect } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
@@ -26,7 +33,8 @@ import { useAuth } from '@/context/AuthContext'
 import { X, Building } from 'lucide-react'
 import { Field, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import RichTextEditor from '@/components/ui/RichTextEditor'
+import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
@@ -82,6 +90,14 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   // Non-field 422/generic failure — only reachable on the CREATE path (see submit()).
   const [createError, setCreateError] = useState<string | null>(null)
+  // COLLAPSIBLE-TEXT-1: Omschrijving's own collapsed/editing state.
+  const [descExpanded, setDescExpanded] = useState(false)
+  const [descEditing, setDescEditing] = useState(false)
+  // STATUS-HIDDEN-1 (Danny 02-08, second round: "+ nieuwe afdeling ... status moet
+  // weg in de popup"): hidden unless the tenant marked it required — mirrors
+  // AddLocationModal's own gate, same flat-array setting shape.
+  const settings = useAllSettings()
+  const showStatusPicker = getJsonSetting<string[]>(settings, 'customer_department_required_fields', []).includes('status_id')
   const set = <K extends keyof DepartmentPayload>(k: K, v: DepartmentPayload[K]) => {
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
@@ -192,12 +208,18 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
                     </Field>
                     {errors.locationId && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('subModal.required')}</div>}
                   </div>
-                  <Field label={t('subModal.status')}>
-                    <CreatableSelect value={form.statusId ? String(form.statusId) : null} onChange={v => set('statusId', v || null)} allowCreate={false}
-                      placeholder={t('subModal.selectStatus')} options={statusOptions} />
-                  </Field>
+                  {/* STATUS-HIDDEN-1: hidden unless the tenant marked it required — an
+                      empty filler keeps the location field at its half-width column
+                      instead of stretching across the row (mirrors ContactLinkCard's
+                      own showLocationPicker/showDepartmentPicker filler convention). */}
+                  {showStatusPicker ? (
+                    <Field label={t('subModal.status')}>
+                      <CreatableSelect value={form.statusId ? String(form.statusId) : null} onChange={v => set('statusId', v || null)} allowCreate={false}
+                        placeholder={t('subModal.selectStatus')} options={statusOptions} />
+                    </Field>
+                  ) : <div />}
                 </div>
-              ) : (
+              ) : showStatusPicker && (
                 <div style={row3Even}>
                   <Field label={t('subModal.status')}>
                     <CreatableSelect value={form.statusId ? String(form.statusId) : null} onChange={v => set('statusId', v || null)} allowCreate={false}
@@ -221,16 +243,22 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
             </div>
           </div>
 
-          {/* Omschrijving — its own card so the rich-text editor (house rule,
-              CLAUDE.md §3A) gets the room a wide panel affords; no separate Field
-              label (the card heading already carries it, mirrors RemarksSection). */}
+          {/* Omschrijving — its own card, same convention as AddLocationModal's
+              (COLLAPSIBLE-TEXT-1, 02-08 round 2): the always-open editor became the
+              shared collapsed-ghost block (same shape as +Match's Opmerkingen) so
+              every create modal behaves identically; read mode still renders the
+              stored HTML via SafeHtml (DepartmentDetail's Omschrijving block).
+              ARIA-LABEL-1: this modal's own footer button is ALSO labelled
+              subModal.create ("Toevoegen"/"Add", same word as the generic
+              common:add placeholder) — a distinct aria-label (the card's own
+              heading) prevents two buttons sharing one accessible name. */}
           <div>
             <div style={cardHead}>{t('subModal.description')}</div>
             <div style={cardBox}>
-              {/* Rich-text prose (Danny 2026-07-14 house rule) — the editor replaces the
-                  textarea here (form context, no separate pencil); read mode renders it
-                  via SafeHtml (DepartmentDetail's Omschrijving block). */}
-              <RichTextEditor value={form.description} onChange={v => set('description', v)} />
+              <CollapsibleRichText t={t} value={form.description} onChange={v => set('description', v)}
+                expanded={descExpanded} setExpanded={setDescExpanded}
+                editing={descEditing} setEditing={setDescEditing}
+                placeholder={t('common:add')} ariaLabel={t('subModal.description')} />
             </div>
           </div>
         </div>

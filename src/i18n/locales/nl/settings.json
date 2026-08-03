@@ -158,6 +158,7 @@
     "document_types": "Documenttypes",
     "candidate_phases": "Fase",
     "candidate_required_fields": "Verplichte velden",
+    "customer_required_fields": "Verplichte velden",
     "candidate_retention": "Bewaartermijn",
     "functions": "Functies",
     "contact_functions": "Functies",
@@ -1261,6 +1262,32 @@
       "noAttention": "Geen rijen die aandacht nodig hebben.",
       "remark": "Opmerking:",
       "row": "Rij {{row}}"
+    },
+    "wizard": {
+      "next": "Volgende",
+      "linkFromSettings": "Liever een begeleide, stapsgewijze import met kolomkoppeling en een bewerkbare preview?",
+      "linkFromSettingsCta": "Open de import-wizard",
+      "fields": {
+        "customerName": "Klantnaam",
+        "whatsappConsent": "WhatsApp-toestemming",
+        "emailConsent": "E-mailtoestemming"
+      },
+      "mapping": {
+        "title": "Koppel je kolommen",
+        "subtitle": "We hebben gekoppeld wat we herkenden — controleer de rest en pas aan waar nodig.",
+        "noColumns": "Dit bestand heeft geen kolommen om te koppelen.",
+        "sourceColumn": "Kolom in je bestand",
+        "targetField": "Wordt gekoppeld aan",
+        "skipOption": "— Niet importeren —",
+        "skippedNotice": "Deze kolom wordt overgeslagen.",
+        "missingRequired": "Nog verplicht: {{fields}}"
+      },
+      "preview": {
+        "title": "Controleer je gegevens",
+        "subtitle": "Dit is precies wat verstuurd wordt. Klik op een cel om deze te wijzigen en voer de preview daarna opnieuw uit.",
+        "noRows": "Geen rijen om te bekijken — controleer je bestand.",
+        "validateHint": "Voer de preview uit om te zien wat er zou gebeuren, en bevestig daarna."
+      }
     }
   },
   "facebookLeads": {
@@ -1958,6 +1985,14 @@
       "customer_department_table_color_status": {
         "label": "Statuskleur (afdelingen)",
         "description": "Aan = de statuschip in de afdelingentabel krijgt kleur. Uit = platte tekst."
+      },
+      "customer_task_table_color_status": {
+        "label": "Statuskleur (taken)",
+        "description": "Aan = de statuschip in de takentabel krijgt kleur. Uit = platte tekst."
+      },
+      "customer_opportunity_table_color_stage": {
+        "label": "Fasekleur (kansen)",
+        "description": "Aan = de fasechip in de kansentabel krijgt kleur. Uit = platte tekst."
       }
     },
     "tabs": {
@@ -1980,6 +2015,12 @@
       "vacancies": {
         "title": "Vacatures",
         "subtitle": "Bepaalt de standaardfilter van het tabblad Vacatures wanneer je een klant opent."
+      },
+      "tasks": {
+        "title": "Taken"
+      },
+      "opportunities": {
+        "title": "Kansen"
       }
     },
     "defaultFilter": {
@@ -2471,5 +2512,17 @@
     "subtitle": "Beheer de CAO-lijst (VVT, Ziekenhuizen, GGZ, …) voor prijsafspraken en matches.",
     "add": "CAO toevoegen"
   },
-  "dashboardsItem": "Onderdeel"
+  "dashboardsItem": "Onderdeel",
+  "customerRequiredFields": {
+    "title": "Verplichte velden",
+    "subtitle": "Verplichte velden voor de klant (per klantfase) en voor Locatie, Afdeling en Contactpersoon. De backend controleert dit al bij aanmaken én bewerken — zie de toelichting per tabblad.",
+    "tabs": {
+      "customer": "Klant",
+      "location": "Locatie",
+      "department": "Afdeling",
+      "contact": "Contactpersoon"
+    },
+    "phaseHint": "Dit wordt gecontroleerd bij het aanmaken en bij een echte fase-overgang. Een gewone wijziging die de fase niet aanpast, wordt nooit geblokkeerd — ongeacht welke andere velden nog ontbreken.",
+    "flatHint": "Dit wordt volledig gecontroleerd bij het aanmaken. Bij bewerken wordt alleen gekeken naar de velden die de wijziging zelf aanraakt — een al onvolledig record blijft op de andere velden gewoon bewerkbaar."
+  }
 }

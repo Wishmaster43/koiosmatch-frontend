@@ -207,7 +207,11 @@ describe('CV upload · prefill', () => {
     const body = JSON.stringify(createCandidate.mock.calls[0][0])
     expect(body).not.toContain('burn-out')
     expect(body).not.toContain('Chronische')
-    expect(body).not.toContain('summary')
+    // PROFILE-TEXT-1: `summary` is now a real field key (the recruiter's OWN typed
+    // profile text, addmodal/ProfileTextCard) — assert its VALUE never carries the
+    // CV's free text instead of a blanket key-name check, which would now trivially
+    // fail on the key itself even though nothing leaked into it.
+    expect(createCandidate.mock.calls[0][0].summary).toBeNull()
     expect(body).not.toContain('remarks')
     expect(createCandidate.mock.calls[0][0]).toMatchObject({ first_name: 'Anna', last_name: 'de Vries' })
   })

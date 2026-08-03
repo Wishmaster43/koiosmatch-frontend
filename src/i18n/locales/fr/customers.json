@@ -96,7 +96,8 @@
     "changelog": "Historique",
     "photoUpload": "Téléverser le logo",
     "photoRemove": "Supprimer le logo",
-    "phase": "Phase"
+    "phase": "Phase",
+    "convertTo": "Convertir en {{phase}}"
   },
   "overview": {
     "general": "Général",
@@ -222,7 +223,8 @@
       "primaryContactTitle": "Contact principal",
       "noPrimaryContact": "Pas encore de contact principal pour ce site",
       "pickPrimaryContact": "Choisir un contact principal",
-      "description": "Description"
+      "description": "Description",
+      "contactNotLinked": "Texte seul — pas encore lié à un contact"
     },
     "saveFailed": "L'enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
@@ -610,7 +612,9 @@
     "relationshipActive": "{{vacancies}} poste(s) ouvert(s) · {{matches}} match(es) actif(s).",
     "relationshipNone": "Aucun poste ouvert ni match actif enregistré.",
     "locationComplete": "Ce site est bien renseigné — adresse, immatriculation et contact sont connus.",
-    "locationPartial": "Ce site est complété à {{pct}}%. Ajoutez l’adresse, le sous-numéro RCS, le n° TVA et les coordonnées."
+    "locationPartial": "Ce site est complété à {{pct}}%. Ajoutez l’adresse, le sous-numéro RCS, le n° TVA et les coordonnées.",
+    "departmentComplete": "Ce service est bien renseigné — description, statut et centre de coût sont connus.",
+    "departmentPartial": "Ce service est complété à {{pct}}%. Ajoutez la description, le statut et le centre de coût."
   },
   "tasks": {
     "newTask": "Nouvelle tâche",

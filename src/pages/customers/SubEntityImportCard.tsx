@@ -2,10 +2,22 @@
  * SubEntityImportCard — the "create these FROM A FILE" entry at the top of the
  * location/department/contact create modals (Danny 02-08: "+ Nieuwe afdeling, +
  * nieuwe locatie, + nieuwe contactpersoon ... moeten ook een CSV-upload hebben").
- * Reuses the Settings import wizard wholesale (upload -> mandatory dry-run ->
- * confirm -> result) — the exact same step components and client CustomerImportCard
+ * Reuses the Settings import wizard's dry-run/confirm/result machinery wholesale —
+ * the exact same client + PreviewStep/ResultStep components CustomerImportCard
  * uses for the combined customer_tree file, never a second import client or a
  * second result renderer (CLAUDE.md §11).
+ *
+ * COMPACT-IMPORT-1 (Danny 02-08 live review, second round: "bij nieuwe locatie is
+ * ook het download en upload csv-file veel te groot ... zorg dat + locatie net zo
+ * groot is als + nieuwe klant"): the upload STEP used to render Settings' own
+ * `UploadStep` — a full-page dashed dropzone (160px min-height) right for a
+ * standalone Settings screen, wrong stacked above a create form the user came here
+ * to fill in. This now hand-rolls the SAME compact one-line affordance
+ * CustomerImportCard already had to build for the identical complaint (intro line +
+ * one button row: select/download/accepted-types), so every "create from file"
+ * card in the customers area — combined tree, location, department, contact —
+ * shares one footprint. Fixed HERE (this file is the ONE shared card behind all
+ * three sub-entity modals), not per-modal, so there is still one implementation.
  *
  * THE PARENT-MISMATCH RISK (measured against the backend — EntityImporter's
  * ResolvesCustomerTree trait): every one of these three importers matches its
@@ -24,14 +36,16 @@
  * row count, so nobody imports hundreds of rows into the wrong client while
  * believing the open drawer scoped it.
  */
-import { useMemo } from 'react'
+import { useMemo, useRef, useState } from 'react'
+import type { ChangeEvent, DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, FileUp, FileText, Loader2 } from 'lucide-react'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
+import { BTN_H } from '@/config/buttonMetrics'
 import { useConfirm } from '@/hooks/useConfirm'
-import UploadStep from '@/pages/settings/sections/importeren/UploadStep'
 import PreviewStep from '@/pages/settings/sections/importeren/PreviewStep'
 import ResultStep from '@/pages/settings/sections/importeren/ResultStep'
+import { downloadImportTemplate } from '@/pages/settings/sections/importeren/importApi'
 import type { useImportWizard } from '@/pages/settings/sections/importeren/useImportWizard'
 import type { ImportRowResult } from '@/pages/settings/sections/importeren/importApi'
 
@@ -52,6 +66,10 @@ interface SubEntityImportCardProps {
   canImport: boolean
 }
 
+// Mirrors ImportUploadRequest::rules (mimes:csv,txt) — an .xlsx must be refused
+// client-side with the one instruction that helps, never accepted only to 422 later.
+const ACCEPTED_EXTENSIONS = ['.csv', '.txt']
+
 // A row that resolved a customer always carries a `reference` shaped
 // "CustomerName / …" (every EntityImporter built on ResolvesCustomerTree composes
 // it that way — see CustomerLocationImporter/CustomerDepartmentImporter/
@@ -67,6 +85,13 @@ function rowParentName(row: ImportRowResult): string | null {
 // dry run and the real run stay the actual authority on what resolves).
 const normalize = (v: string) => v.trim().toLowerCase()
 
+// Ghost button — one style, several labels; mirrors CustomerImportCard's own local constant.
+const ghostBtn = {
+  height: BTN_H, padding: '0 12px', fontSize: 12, borderRadius: 8, cursor: 'pointer',
+  border: '1px solid var(--border)', background: 'none', color: 'var(--text)',
+  display: 'inline-flex', alignItems: 'center', gap: 6,
+} as const
+
 export default function SubEntityImportCard({ entity, customerName, wizard, canView, canImport }: SubEntityImportCardProps) {
   const { t } = useTranslation(['customers', 'settings'])
   const { confirm, dialog } = useConfirm()
@@ -74,6 +99,10 @@ export default function SubEntityImportCard({ entity, customerName, wizard, canV
   // Reuses the settings screen's own entity labels (settings:import.entities.*) —
   // one source instead of a second "Locaties/Afdelingen/Contactpersonen" copy.
   const entityLabel = t(`settings:import.entities.${entity}.label`)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [dragOver, setDragOver] = useState(false)
+  const [typeError, setTypeError] = useState<string | null>(null)
+  const checking = preview.status === 'loading'
 
   // Rows whose resolved customer differs from the one this modal is scoped to —
   // computed once per successful preview; null while there is nothing to compare
@@ -105,17 +134,53 @@ export default function SubEntityImportCard({ entity, customerName, wizard, canV
     wizard.confirmImport()
   }
 
+  // Reject anything that isn't .csv/.txt with an honest, actionable message — an
+  // .xlsx must never be silently dropped, nor accepted only to fail server-side.
+  const acceptFile = (candidate: File) => {
+    const lower = candidate.name.toLowerCase()
+    if (!ACCEPTED_EXTENSIONS.some(ext => lower.endsWith(ext))) {
+      setTypeError(t('import.wrongFileType', { ns: 'settings' }))
+      return
+    }
+    setTypeError(null)
+    wizard.selectFile(candidate)
+  }
+
+  // Clear the input after reading so picking the SAME file again still fires change.
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const picked = event.target.files?.[0]
+    event.target.value = ''
+    if (picked) acceptFile(picked)
+  }
+
+  // The whole compact card accepts a drop — no dedicated dashed drop zone (COMPACT-
+  // IMPORT-1: keep the drop target without the vertical space a big box costs).
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    setDragOver(false)
+    if (!canImport) return
+    const dropped = event.dataTransfer.files?.[0]
+    if (dropped) acceptFile(dropped)
+  }
+
+  // GET /imports/{entity}/template.csv — this entity's own example, not the combined tree's.
+  const handleDownloadTemplate = () => { void downloadImportTemplate(entity) }
+
   return (
     <div>
       <div style={cardHead}>{t('subModal.import.title', { entity: entityLabel })}</div>
-      <div style={{ ...cardBox, gap: 10 }}>
+      <div
+        onDragOver={event => { event.preventDefault(); if (canImport) setDragOver(true) }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={handleDrop}
+        style={{ ...cardBox, gap: 8,
+          border: dragOver ? '1px solid var(--color-primary)' : cardBox.border,
+          background: dragOver ? 'color-mix(in srgb, var(--color-primary) 6%, transparent)' : cardBox.background }}>
 
-        {/* Idle: the honest pitch — this WRITES, it does not prefill the form below —
-            plus the exact matching rule (reused verbatim from the settings wizard's
-            own per-entity order hint, one source, CLAUDE.md §11) and an explicit
-            warning that a different customer name in the file lands elsewhere. */}
-        {step === 'upload' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {/* Step 1, no file yet: the matching-rule copy + parent warning, then ONE
+            compact action row — select, download example, accepted-types hint. */}
+        {step === 'upload' && !file && (
+          <>
             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('subModal.import.intro', { entity: entityLabel })}</div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t(`settings:import.order.${entity}Hint`)}</div>
             {customerName && (
@@ -123,22 +188,68 @@ export default function SubEntityImportCard({ entity, customerName, wizard, canV
                 {t('subModal.import.parentWarning', { customerName })}
               </div>
             )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <button type="button" onClick={() => inputRef.current?.click()} disabled={!canImport}
+                title={canImport ? undefined : t('import.noImportPermission', { ns: 'settings' })}
+                style={{ ...ghostBtn, borderColor: 'color-mix(in srgb, var(--color-primary) 45%, transparent)',
+                  background: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
+                  color: 'var(--color-primary)', fontWeight: 600, opacity: canImport ? 1 : 0.5,
+                  cursor: canImport ? 'pointer' : 'not-allowed' }}>
+                <FileUp size={14} /> {t('import.selectCsv', { ns: 'settings' })}
+              </button>
+              <button type="button" onClick={handleDownloadTemplate} disabled={!canView}
+                title={canView ? undefined : t('import.noViewPermission', { ns: 'settings' })}
+                style={{ fontSize: 12, color: 'var(--color-primary)', background: 'none', border: 'none',
+                  padding: 0, cursor: canView ? 'pointer' : 'not-allowed', opacity: canView ? 1 : 0.5 }}>
+                {t('import.downloadTemplate', { ns: 'settings' })}
+              </button>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>
+                {t('import.acceptedTypes', { ns: 'settings' })}
+              </span>
+            </div>
+            {typeError && (
+              <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--color-danger)' }}>
+                <AlertTriangle size={12} /> {typeError}
+              </div>
+            )}
+            {!canImport && (
+              <div style={{ fontSize: 11, color: 'var(--color-warning)' }}>{t('import.noImportPermission', { ns: 'settings' })}</div>
+            )}
+          </>
+        )}
+
+        {/* Step 1, file picked: one row — filename, a "different file" link, and the
+            mandatory-dry-run trigger. Never a shortcut straight to the real import. */}
+        {step === 'upload' && file && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <FileText size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+              <span style={{ fontSize: 12, color: 'var(--text)', minWidth: 0, overflowWrap: 'anywhere' }}>
+                {t('import.fileSelected', { ns: 'settings', name: file.name })}
+              </span>
+              <button type="button" onClick={() => inputRef.current?.click()} disabled={checking}
+                style={{ fontSize: 12, color: 'var(--color-primary)', background: 'none', border: 'none',
+                  padding: 0, cursor: checking ? 'not-allowed' : 'pointer' }}>
+                {t('import.replaceFile', { ns: 'settings' })}
+              </button>
+              <button type="button" onClick={wizard.runPreview} disabled={!canImport || checking}
+                style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
+                  fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 8,
+                  background: 'var(--color-primary)', color: 'white',
+                  cursor: !canImport || checking ? 'not-allowed' : 'pointer', opacity: !canImport ? 0.5 : 1 }}>
+                {checking && <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />}
+                {checking ? t('import.runningPreview', { ns: 'settings' }) : t('import.runPreview', { ns: 'settings' })}
+              </button>
+            </div>
+            {preview.status === 'error' && (
+              <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--color-danger)' }}>
+                <AlertTriangle size={12} /> {preview.message || t('import.previewErrorFallback', { ns: 'settings' })}
+              </div>
+            )}
           </div>
         )}
 
-        {step === 'upload' && (
-          <UploadStep
-            entity={entity}
-            file={file}
-            onSelectFile={wizard.selectFile}
-            onRunPreview={wizard.runPreview}
-            previewStatus={preview.status}
-            previewError={preview.status === 'error' ? preview.message : undefined}
-            canView={canView}
-            canImport={canImport}
-          />
-        )}
-
+        {/* Step 2: the mandatory dry-run report — reused verbatim from Settings. */}
         {step === 'preview' && preview.status === 'success' && (
           <>
             {/* The concrete, measured warning — not a hypothetical: these EXACT rows
@@ -171,6 +282,12 @@ export default function SubEntityImportCard({ entity, customerName, wizard, canV
         {step === 'result' && run.status === 'success' && (
           <ResultStep result={run.result} onReset={wizard.reset} />
         )}
+
+        {/* The real input: labelled for assistive tech, kept out of the tab order and
+            out of sight — the visible button is what drives it (§6). */}
+        <input ref={inputRef} type="file" accept=".csv,.txt" onChange={handleChange}
+          aria-label={t('import.selectCsv', { ns: 'settings' })} tabIndex={-1} disabled={!canImport}
+          style={{ position: 'absolute', width: 0, height: 0, opacity: 0, border: 0, padding: 0 }} />
       </div>
       {dialog}
     </div>

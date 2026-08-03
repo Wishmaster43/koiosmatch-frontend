@@ -47,5 +47,6 @@
   "workflows": "Workflows",
   "whatsapp": "WhatsApp",
   "details.runs": "KI-Details — Ausführungen",
-  "details.messages": "KI-Details — Nachrichten"
+  "details.messages": "KI-Details — Nachrichten",
+  "import-wizard": "Import-Assistent"
 }

@@ -50,11 +50,20 @@ vi.mock('@/components/ui/RichTextEditor', () => ({
 // hasPermission defaults to "allow everything" so the pre-existing tests above (none of
 // which touch the import card) keep behaving as before; the import describe block below
 // overrides it per test to exercise the gate itself.
-const { authState } = vi.hoisted(() => ({
+const { authState, settingsState } = vi.hoisted(() => ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the default mock allows every permission; the param exists only to match hasPermission's real signature
   authState: { hasPermission: ((_perm: string) => true) as (perm: string) => boolean },
+  // STATUS-HIDDEN-1: the settings blob a test can flip per-case (e.g. tenant marks
+  // status_id required) — defaults to empty (nothing required).
+  settingsState: { settings: {} as Record<string, unknown> },
 }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: authState.hasPermission }) }))
+// Keep the REAL getJsonSetting (the component parses the required-fields config
+// through it); only the settings blob itself is test-controlled.
+vi.mock('@/lib/settings/useAllSettings', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/lib/settings/useAllSettings')>()
+  return { ...actual, useAllSettings: () => settingsState.settings }
+})
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
@@ -73,6 +82,7 @@ const contact = (overrides: Partial<Contact>): Contact => ({
 
 beforeEach(() => {
   authState.hasPermission = () => true
+  settingsState.settings = {}
   vi.mocked(dryRunImport).mockReset()
   vi.mocked(runImport).mockReset()
   vi.mocked(notifyError).mockReset()
@@ -95,6 +105,10 @@ describe('AddLocationModal', () => {
   it('the status picker is searchable — typing narrows the option list, then picking updates the trigger', async () => {
     const onCreate = vi.fn()
     const user = userEvent.setup()
+    // STATUS-HIDDEN-1: this picker only renders once the tenant marked it required —
+    // opt in here so its search behaviour (the thing this test actually covers) is
+    // still exercised.
+    settingsState.settings = { customer_location_required_fields: JSON.stringify(['status_id']) }
     render(<AddLocationModal onClose={() => {}} onCreate={onCreate} statuses={statuses} />)
 
     // Status starts on its placeholder (no default picked) — open it via the trigger.
@@ -161,10 +175,40 @@ describe('AddLocationModal · description (Danny 02-08: "bij locatie en afdeling
 
     expect(screen.getByText(ct('subModal.description'))).toBeInTheDocument()
     await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
+    // COLLAPSIBLE-TEXT-1: the block starts collapsed — reveal it first.
+    // ARIA-LABEL-1: this modal's own footer submit button is ALSO labelled
+    // "Toevoegen"/"Add" (subModal.create), so the ghost button's accessible
+    // name is its own card heading instead of the generic common:add text.
+    await user.click(screen.getByRole('button', { name: ct('subModal.description') }))
     fireEvent.change(screen.getByLabelText('rich-text-editor'), { target: { value: '<p>Grootste vestiging</p>' } })
 
     await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
     expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ description: '<p>Grootste vestiging</p>' }))
+  })
+
+  it('starts collapsed — no rich-text editor before the recruiter opens it', () => {
+    render(<AddLocationModal onClose={() => {}} statuses={statuses} />)
+    expect(screen.queryByLabelText('rich-text-editor')).toBeNull()
+    // ARIA-LABEL-1: the ghost's accessible name is its card heading, not the
+    // generic common:add text (which collides with this modal's own footer button).
+    expect(screen.getByRole('button', { name: ct('subModal.description') })).toBeInTheDocument()
+  })
+})
+
+// STATUS-HIDDEN-1 (Danny 02-08, second round): the status picker is hidden by
+// default in the create/edit popup — LocationDetail's own title-row editor is
+// where status is actually set — and only reappears when the tenant marked
+// status_id required (customer_location_required_fields).
+describe('AddLocationModal · status picker hidden by default (STATUS-HIDDEN-1)', () => {
+  it('does not render a status picker when the tenant has not required it', () => {
+    render(<AddLocationModal onClose={() => {}} statuses={statuses} />)
+    expect(screen.queryByText(ct('subModal.status'))).toBeNull()
+  })
+
+  it('renders the status picker when the tenant marked status_id required', () => {
+    settingsState.settings = { customer_location_required_fields: JSON.stringify(['status_id']) }
+    render(<AddLocationModal onClose={() => {}} statuses={statuses} />)
+    expect(screen.getByText(ct('subModal.status'))).toBeInTheDocument()
   })
 })
 
@@ -186,6 +230,15 @@ describe('AddLocationModal · contact ter plaatse (Danny: "je typt Joost de Boer
     await waitFor(() => expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ contactName: 'Joost de Boer' })))
     // …AND the real coupling fires against the just-created location's id.
     await waitFor(() => expect(setLocationPrimaryContact).toHaveBeenCalledWith('cust-1', 'c-1', 'loc-99'))
+  })
+
+  it('shows "name — function" for an existing contact that has one (CONTACT-LABEL-1)', async () => {
+    const withRole = [contact({ id: 'c-3', name: 'Sanne Bakker', role: 'Teamleider' })]
+    const user = userEvent.setup()
+    render(<AddLocationModal onClose={() => {}} statuses={statuses} existingContacts={withRole} />)
+
+    await user.click(screen.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
+    expect(await screen.findByRole('button', { name: 'Sanne Bakker — Teamleider' })).toBeInTheDocument()
   })
 
   it('typing a brand-new name still works — no coupling is attempted for a name that matches nobody', async () => {
@@ -246,10 +299,10 @@ describe('AddLocationModal · import card (Danny 02-08: "+ nieuwe locatie ... mo
   it('refuses an .xlsx file client-side with the save-as-CSV instruction, and never calls the dry run', () => {
     render(<AddLocationModal onClose={() => {}} statuses={statuses} customerName="Zorggroep Middenland" />)
 
-    // The dropzone's own recognisable content — a direct child of the actual
-    // onDrop-bearing div, unlike the intro/order-hint text which sits in a
-    // separate sibling block in this card's layout.
-    const dropZone = screen.getByText(st('import.dropHere')).parentElement as HTMLElement
+    // COMPACT-IMPORT-1: the compact card has no dedicated dropzone element — the
+    // whole card body accepts a drop, so its own intro line (a direct child of the
+    // onDrop-bearing div) is the stable anchor to its parent.
+    const dropZone = screen.getByText(ct('subModal.import.intro', { entity: st('import.entities.locations.label') })).parentElement as HTMLElement
     fireEvent.drop(dropZone, { dataTransfer: { files: [xlsxFile] } })
 
     expect(screen.getByText(st('import.wrongFileType'))).toBeInTheDocument()

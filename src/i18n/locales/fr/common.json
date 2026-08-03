@@ -279,5 +279,11 @@
   "branchSection": {
     "widenTitle": "Supprimer la dernière filiale ?",
     "widenMessage": "C'est la seule filiale liée. La supprimer rend cet enregistrement à nouveau visible pour toutes les filiales."
+  },
+  "drillPager": {
+    "prev": "Précédent",
+    "next": "Suivant",
+    "prevAt": "Précédent ({{index}} sur {{total}})",
+    "nextAt": "Suivant ({{index}} sur {{total}})"
   }
 }

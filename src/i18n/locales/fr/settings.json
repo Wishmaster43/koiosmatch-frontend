@@ -156,6 +156,7 @@
     "document_types": "Types de document",
     "candidate_phases": "Phase",
     "candidate_required_fields": "Champs requis",
+    "customer_required_fields": "Champs requis",
     "candidate_retention": "Durée de conservation",
     "application_display": "Affichage du tableau",
     "functions": "Fonctions",
@@ -1047,6 +1048,32 @@
       "noAttention": "Aucune ligne ne nécessite d'attention.",
       "remark": "Remarque :",
       "row": "Ligne {{row}}"
+    },
+    "wizard": {
+      "next": "Suivant",
+      "linkFromSettings": "Vous préférez un import guidé, étape par étape, avec correspondance des colonnes et un aperçu modifiable ?",
+      "linkFromSettingsCta": "Ouvrir l'assistant d'importation",
+      "fields": {
+        "customerName": "Nom du client",
+        "whatsappConsent": "Consentement WhatsApp",
+        "emailConsent": "Consentement e-mail"
+      },
+      "mapping": {
+        "title": "Faites correspondre vos colonnes",
+        "subtitle": "Nous avons fait correspondre ce que nous avons reconnu — vérifiez le reste et ajustez si nécessaire.",
+        "noColumns": "Ce fichier ne contient aucune colonne à faire correspondre.",
+        "sourceColumn": "Colonne dans votre fichier",
+        "targetField": "Correspond à",
+        "skipOption": "— Ne pas importer —",
+        "skippedNotice": "Cette colonne sera ignorée.",
+        "missingRequired": "Encore requis : {{fields}}"
+      },
+      "preview": {
+        "title": "Vérifiez vos données",
+        "subtitle": "Voici exactement ce qui sera envoyé. Cliquez sur une cellule pour la modifier, puis relancez l'aperçu.",
+        "noRows": "Aucune ligne à prévisualiser — vérifiez votre fichier.",
+        "validateHint": "Lancez l'aperçu pour voir ce qui se passerait, puis confirmez."
+      }
     }
   },
   "facebookLeads": {
@@ -1940,6 +1967,14 @@
       "customer_department_table_color_status": {
         "label": "Couleur statut (services)",
         "description": "Activé = la puce de statut dans le tableau des services est colorée. Désactivé = texte simple."
+      },
+      "customer_task_table_color_status": {
+        "label": "Couleur statut (tâches)",
+        "description": "Activé = la puce de statut dans le tableau des tâches est colorée. Désactivé = texte simple."
+      },
+      "customer_opportunity_table_color_stage": {
+        "label": "Couleur étape (opportunités)",
+        "description": "Activé = la puce d'étape dans le tableau des opportunités est colorée. Désactivé = texte simple."
       }
     },
     "tabs": {
@@ -1962,6 +1997,12 @@
       "vacancies": {
         "title": "Postes",
         "subtitle": "Détermine le filtre par défaut de l'onglet Postes à l'ouverture d'un client."
+      },
+      "tasks": {
+        "title": "Tâches"
+      },
+      "opportunities": {
+        "title": "Opportunités"
       }
     },
     "defaultFilter": {
@@ -2471,5 +2512,17 @@
     "subtitle": "Gérez la liste des conventions pour les accords tarifaires et les matchs.",
     "add": "Ajouter une convention"
   },
-  "dashboardsItem": "Élément"
+  "dashboardsItem": "Élément",
+  "customerRequiredFields": {
+    "title": "Champs requis",
+    "subtitle": "Champs requis pour le client (par phase client) ainsi que pour Lieu, Département et Contact. Le backend le vérifie déjà à la création et à la modification — voir la remarque sous chaque onglet.",
+    "tabs": {
+      "customer": "Client",
+      "location": "Lieu",
+      "department": "Département",
+      "contact": "Contact"
+    },
+    "phaseHint": "Ceci est vérifié à la création et lors d'une véritable transition de phase. Une modification ordinaire qui ne change pas la phase n'est jamais bloquée — quels que soient les autres champs encore manquants.",
+    "flatHint": "Ceci est entièrement vérifié à la création. Lors d'une modification, seuls les champs que la modification touche réellement sont vérifiés — un enregistrement déjà incomplet reste librement modifiable sur ses autres champs."
+  }
 }

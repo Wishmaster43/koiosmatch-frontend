@@ -22,9 +22,11 @@ import { useAuth } from '@/context/AuthContext'
 import { X, MapPin } from 'lucide-react'
 import { Field, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import RichTextEditor from '@/components/ui/RichTextEditor'
+import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
 import { useProvinces } from '@/hooks/useProvinces'
 import { notifyError } from '@/lib/notify'
+import { contactOptionLabel } from '@/lib/contactLabel'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox, row2, row3Even, row } from '@/components/ui/modalCards'
@@ -34,6 +36,14 @@ import { setLocationPrimaryContact } from './hooks/useCustomerContacts'
 import type { LocationPayload } from './hooks/useCustomerLocations'
 import type { Location, Contact } from '@/types/customer'
 import type { LookupOption, Id } from '@/types/common'
+
+// FIELD-HEIGHT-1 (Danny 02-08: "provincie niet dezelfde hoogte als de rest van de
+// velden"): CreatableSelect's own default trigger (padding '6px 10px', fontSize 12)
+// is shorter than TextField's inputStyle (padding '8px 11px', fontSize 13), so any
+// picker sitting next to a plain text input visibly steps. Same literal values
+// already adopted for this exact reason in candidates/addmodal/fields.tsx's own
+// CreatableSelect wrapper — reused here rather than a fresh magic number (§4).
+const pickerStyle = { padding: '8px 11px', borderRadius: 8, fontSize: 13 } as const
 
 // Weighted rows for the address block (mirrors the candidate AddressCard's own
 // street/postcode ratios — the same real-world field, same proportions) — a
@@ -122,6 +132,17 @@ export default function AddLocationModal({
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   // Non-field 422/generic failure — only reachable on the CREATE path (see submit()).
   const [createError, setCreateError] = useState<string | null>(null)
+  // COLLAPSIBLE-TEXT-1: Omschrijving's own collapsed/editing state.
+  const [descExpanded, setDescExpanded] = useState(false)
+  const [descEditing, setDescEditing] = useState(false)
+  // STATUS-HIDDEN-1 (Danny 02-08, second round: "+ nieuwe locatie ... status moet
+  // weg in de popup"): the picker is hidden by default — LocationDetail's own
+  // title-row status editor already covers create AND edit — and only reappears
+  // when the tenant marked status_id required (FlatRequiredFieldsGuard catalog),
+  // so a tenant that requires it never hits an un-actionable 422 with no visible
+  // cause. Same flat-array setting shape the Settings screen already writes.
+  const settings = useAllSettings()
+  const showStatusPicker = getJsonSetting<string[]>(settings, 'customer_location_required_fields', []).includes('status_id')
   const set = <K extends keyof LocationPayload>(k: K, v: LocationPayload[K]) => {
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
@@ -193,7 +214,10 @@ export default function AddLocationModal({
   // CONTACT-PRIMAIR-LOCATIE-1: existing-contact options for the "contact ter plaatse"
   // picker, CREATE only — typing a name that matches none of these is still allowed
   // (allowCreate), it just cannot be coupled (no real contact id exists for it yet).
-  const contactOptions = existingContacts.map(c => ({ value: String(c.id), label: c.name }))
+  // CONTACT-LABEL-1 (Danny 02-08): "naam — functie" via the one shared label builder
+  // (mirrors RelationsSection/AddOpportunityModal/KlantTab/useCascadePickers) — never
+  // a bare name, so two "Joost"s at the same customer read apart in the list.
+  const contactOptions = existingContacts.map(c => ({ value: String(c.id), label: contactOptionLabel(c) }))
 
   return (
     <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
@@ -232,13 +256,17 @@ export default function AddLocationModal({
                 </Field>
                 {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('subModal.required')}</div>}
               </div>
-              <div style={{ ...row2, alignItems: 'end' }}>
-                <Field label={t('subModal.status')}>
-                  <CreatableSelect value={form.statusId ? String(form.statusId) : null} onChange={v => set('statusId', v || null)} allowCreate={false}
-                    placeholder={t('subModal.selectStatus')} options={statusOptions} />
-                </Field>
-                <div />
-              </div>
+              {/* STATUS-HIDDEN-1: hidden unless the tenant marked it required —
+                  LocationDetail's own title-row picker is where status is set. */}
+              {showStatusPicker && (
+                <div style={{ ...row2, alignItems: 'end' }}>
+                  <Field label={t('subModal.status')}>
+                    <CreatableSelect value={form.statusId ? String(form.statusId) : null} onChange={v => set('statusId', v || null)} allowCreate={false}
+                      placeholder={t('subModal.selectStatus')} options={statusOptions} style={pickerStyle} />
+                  </Field>
+                  <div />
+                </div>
+              )}
             </div>
           </div>
 
@@ -266,7 +294,7 @@ export default function AddLocationModal({
                     source, so this is not a silently-dropped key, just the legacy name. */}
                 <Field label={t('subModal.state')}>
                   <CreatableSelect value={form.state || null} onChange={v => set('state', v)} allowCreate={false}
-                    placeholder={t('common:select')} options={provinces} menuWidth={260} />
+                    placeholder={t('common:select')} options={provinces} menuWidth={260} style={pickerStyle} />
                 </Field>
                 {/* `country` stays free text on purpose — see file header comment. */}
                 <Field label={t('subModal.country')}><TextField value={form.country} onChange={v => set('country', v)} /></Field>
@@ -317,7 +345,7 @@ export default function AddLocationModal({
                         setPickedContactId(existingMatch ? (existingMatch.id as Id) : null)
                         set('contactName', existingMatch ? existingMatch.name : v)
                       }}
-                      placeholder={t('subModal.contactName')} options={contactOptions} menuWidth={280} />
+                      placeholder={t('subModal.contactName')} options={contactOptions} menuWidth={280} style={pickerStyle} />
                   </Field>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{t('subModal.contactPersonHint')}</div>
                 </div>
@@ -331,11 +359,20 @@ export default function AddLocationModal({
 
           {/* Omschrijving — its own card, same convention as AddDepartmentModal's
               (Danny 02-08: "bij locatie en afdeling moeten we ook een beschrijving
-              hebben"). Rich-text prose (CLAUDE.md §3A house rule), not a textarea. */}
+              hebben"). COLLAPSIBLE-TEXT-1 (02-08 round 2): the always-open editor
+              became the shared collapsed-ghost block (same shape as +Match's
+              Opmerkingen) so every create modal behaves identically. */}
           <div>
             <div style={cardHead}>{t('subModal.description')}</div>
             <div style={cardBox}>
-              <RichTextEditor value={form.description} onChange={v => set('description', v)} />
+              {/* ARIA-LABEL-1: this modal's own footer button is ALSO labelled
+                  subModal.create ("Toevoegen"/"Add", same word as the generic
+                  common:add placeholder) — a distinct aria-label (the card's own
+                  heading) prevents two buttons sharing one accessible name. */}
+              <CollapsibleRichText t={t} value={form.description} onChange={v => set('description', v)}
+                expanded={descExpanded} setExpanded={setDescExpanded}
+                editing={descEditing} setEditing={setDescEditing}
+                placeholder={t('common:add')} ariaLabel={t('subModal.description')} />
             </div>
           </div>
         </div>

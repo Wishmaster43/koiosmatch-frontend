@@ -96,7 +96,8 @@
     "changelog": "Cambios",
     "photoUpload": "Subir logo",
     "photoRemove": "Quitar logo",
-    "phase": "Fase"
+    "phase": "Fase",
+    "convertTo": "Convertir a {{phase}}"
   },
   "overview": {
     "general": "General",
@@ -222,7 +223,8 @@
       "primaryContactTitle": "Contacto principal",
       "noPrimaryContact": "Aún no hay contacto principal para esta ubicación",
       "pickPrimaryContact": "Elige un contacto principal",
-      "description": "Descripción"
+      "description": "Descripción",
+      "contactNotLinked": "Solo texto — aún no vinculado a un contacto"
     },
     "saveFailed": "Error al guardar.",
     "deleteFailed": "Error al eliminar.",
@@ -610,7 +612,9 @@
     "relationshipActive": "{{vacancies}} vacante(s) abierta(s) · {{matches}} match(es) activo(s).",
     "relationshipNone": "No hay vacantes abiertas ni matches activos registrados.",
     "locationComplete": "Esta ubicación está bien completada — dirección, registro y contacto son conocidos.",
-    "locationPartial": "Esta ubicación está al {{pct}}%. Añade la dirección, el sub-número CIF, el n.º IVA y los datos de contacto."
+    "locationPartial": "Esta ubicación está al {{pct}}%. Añade la dirección, el sub-número CIF, el n.º IVA y los datos de contacto.",
+    "departmentComplete": "Este departamento está bien completado — descripción, estado y centro de coste son conocidos.",
+    "departmentPartial": "Este departamento está al {{pct}}% completo. Añade la descripción, el estado y el centro de coste."
   },
   "tasks": {
     "newTask": "Nueva tarea",

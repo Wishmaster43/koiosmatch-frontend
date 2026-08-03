@@ -279,5 +279,11 @@
   "branchSection": {
     "widenTitle": "¿Quitar la última sucursal?",
     "widenMessage": "Esta es la única sucursal vinculada. Quitarla hará que este registro vuelva a ser visible para todas las sucursales."
+  },
+  "drillPager": {
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "prevAt": "Anterior ({{index}} de {{total}})",
+    "nextAt": "Siguiente ({{index}} de {{total}})"
   }
 }

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { X, Building2 } from 'lucide-react'
 import { Field, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
 import { useIndustries } from '@/lib/useIndustries'
 import { useLocations } from '@/lib/useLocations'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
@@ -43,9 +44,13 @@ interface ModalUser { id: Id; name: string }
 // 422 field-error keys are snake_case; map them back to this form's field names.
 // No `debtor_number` entry (DEBITEURNUMMER-1, Danny 02-08): the field is no longer
 // collected at creation, so a 422 on it can never occur from this form.
+// STALE-KEY-FIX (COLLAPSIBLE-TEXT-1): this used to list `tone_of_voice`, but the
+// create POST has sent this field under `description` since BEDRIJFSTEKST-1 (see
+// useCustomerRecord's OPTIONAL_CREATE_FIELDS) — a 422 on `description` was falling
+// through unmapped, so the Bedrijfstekst card would silently show no error at all.
 const API_TO_FORM: Record<string, string> = {
   name: 'name', status: 'status', owner_id: 'ownerId', industry: 'industry', city: 'city',
-  location_id: 'branchId', website: 'website', employee_count: 'employeeCount', tone_of_voice: 'toneOfVoice',
+  location_id: 'branchId', website: 'website', employee_count: 'employeeCount', description: 'toneOfVoice',
   cost_center: 'costCenter', billing_email: 'billingEmail', phase: 'phase',
   street: 'street', house_number: 'houseNumber', house_number_suffix: 'houseNumberSuffix',
   postcode: 'postalCode', province: 'province', country: 'country',
@@ -129,6 +134,11 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
   // Non-field 422/generic failure.
   const [createError, setCreateError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  // COLLAPSIBLE-TEXT-1: Bedrijfstekst's own collapsed/editing state (mirrors
+  // useMatchForm's remarksExpanded/remarksEditing — this modal has no equivalent
+  // shared form hook to own it).
+  const [toneOfVoiceExpanded, setToneOfVoiceExpanded] = useState(false)
+  const [toneOfVoiceEditing, setToneOfVoiceEditing] = useState(false)
   const [form, setForm] = useState<CustomerForm>({
     name: '', status: defaultStatusValue, ownerId: '', industry: '', city: '',
     phase: defaultPhase,
@@ -303,23 +313,13 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
           <div style={cardPair}>
             <div>
               {/* Reuses the drawer OverviewTab's own "Online" card heading (one
-                  translation source for the same grouping). */}
+                  translation source for the same grouping). Website only now —
+                  Bedrijfstekst moved to its own collapsed-ghost card below. */}
               <div style={cardHead}>{t('overview.online')}</div>
               <div style={cardBox}>
-                <div style={row2}>
-                  <Field label={t('overview.website')}>
-                    <TextField value={form.website} onChange={v => set('website', v)} placeholder="https://" />
-                  </Field>
-                  {/* BEDRIJFSTEKST-1 (Danny 02-08): "Schrijfstijl" is renamed "Bedrijfstekst" —
-                      reuses the SAME overview.companyText key the drawer's merged company-text
-                      field already uses (one label, not a second "Bedrijfstekst" copy). The
-                      internal `toneOfVoice` form/API-mapping key is unchanged (see
-                      useCustomerRecord's OPTIONAL_CREATE_FIELDS, now pointed at `description` —
-                      the backend column `tone_of_voice` was dropped and merged into it). */}
-                  <Field label={t('overview.companyText')}>
-                    <TextField value={form.toneOfVoice} onChange={v => set('toneOfVoice', v)} />
-                  </Field>
-                </div>
+                <Field label={t('overview.website')}>
+                  <TextField value={form.website} onChange={v => set('website', v)} placeholder="https://" />
+                </Field>
               </div>
             </div>
             <div>
@@ -335,6 +335,25 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
                   </Field>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* BEDRIJFSTEKST-1 (Danny 02-08): "Schrijfstijl" was a single-line TextField —
+              the exact defect this pass fixes (prose in a one-line input). Now the shared
+              collapsed-ghost block (COLLAPSIBLE-TEXT-1, same shape as +Match's Opmerkingen),
+              own full-width card, reusing the SAME overview.companyText key the drawer's
+              merged company-text field already uses (one label, not a second copy). The
+              internal `toneOfVoice` form key is unchanged — it POSTs under `description`
+              (useCustomerRecord's OPTIONAL_CREATE_FIELDS; the backend column `tone_of_voice`
+              was dropped and merged into `description` — verified against CustomerRequest::
+              sharedRules, which accepts `description` but no longer has a `tone_of_voice` rule). */}
+          <div>
+            <div style={cardHead}>{t('overview.companyText')}</div>
+            <div style={cardBox}>
+              <CollapsibleRichText t={t} value={form.toneOfVoice} onChange={v => set('toneOfVoice', v)}
+                expanded={toneOfVoiceExpanded} setExpanded={setToneOfVoiceExpanded}
+                editing={toneOfVoiceEditing} setEditing={setToneOfVoiceEditing}
+                placeholder={t('common:add')} />
             </div>
           </div>
 
