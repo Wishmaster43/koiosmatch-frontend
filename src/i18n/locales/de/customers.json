@@ -231,7 +231,8 @@
       "pickPrimaryContact": "Primären Ansprechpartner wählen",
       "linkNamed": "{{name}} verknüpfen",
       "description": "Standorttext",
-      "contactNotLinked": "Nur Text — noch nicht mit einem Ansprechpartner verknüpft"
+      "contactNotLinked": "Nur Text — noch nicht mit einem Ansprechpartner verknüpft",
+      "changePrimaryContact": "Ansprechpartner ändern"
     },
     "saveFailed": "Speichern fehlgeschlagen.",
     "deleteFailed": "Löschen fehlgeschlagen.",

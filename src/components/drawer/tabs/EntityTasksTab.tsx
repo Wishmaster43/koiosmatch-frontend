@@ -108,7 +108,7 @@ function EntityTasksTabBody({ linkType, id, labels, extraLinks = [] }: Props) {
           filter middle, add right. The search markup copies DepartmentsPanel's
           verbatim (§11 debt noted there). */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, padding: '6px 10px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, padding: '6px 10px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
           <Search size={13} color="var(--text-muted)" />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder={labels.searchPlaceholder} aria-label={labels.searchPlaceholder}

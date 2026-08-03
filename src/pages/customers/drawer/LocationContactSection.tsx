@@ -137,14 +137,16 @@ export default function LocationContactSection({
         // The real coupling — full identity, rendered as a link (mirrors Contactpersonen).
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <Row label={t('locations.detail.contactName')}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <ContactNameLink name={primaryContact.name} id={primaryContact.id} onOpen={onOpenContact} title={t('contacts.openContact')} />
-              {primaryContact.role && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{primaryContact.role}</span>}
-            </span>
+            <ContactNameLink name={primaryContact.name} id={primaryContact.id} onOpen={onOpenContact} title={t('contacts.openContact')} />
           </Row>
+          {/* Function on its own labelled row (Danny 03-08), mirroring the field-table
+              rows around it — never a floating annex beside the name. */}
+          {primaryContact.role && <Row label={t('contacts.detail.role')}><span style={{ fontSize: 12, color: 'var(--text)' }}>{primaryContact.role}</span></Row>}
           <Row label={t('locations.detail.email')}>{emailValue(primaryContact.email, t('overview.sendEmail'))}</Row>
           <Row label={t('locations.detail.phone')}>{phoneValue(primaryContact.phone || primaryContact.mobile, t('overview.callPhone'))}</Row>
-          <div style={{ marginTop: 4 }}><PickButton label={pickLabel} onClick={onPickContact} /></div>
+          {/* Coupled = the action reads as CHANGE; "kies een…" here implied nothing was
+              coupled yet and read as still-broken (Danny 03-08). */}
+          <div style={{ marginTop: 4 }}><PickButton label={t('locations.detail.changePrimaryContact')} onClick={onPickContact} /></div>
         </div>
       ) : hasLegacy ? (
         // No coupling yet, but the location still carries typed contact text — show it

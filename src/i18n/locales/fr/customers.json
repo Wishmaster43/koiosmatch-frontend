@@ -231,7 +231,8 @@
       "pickPrimaryContact": "Choisir un contact principal",
       "linkNamed": "Lier {{name}}",
       "description": "Texte du site",
-      "contactNotLinked": "Texte seul — pas encore lié à un contact"
+      "contactNotLinked": "Texte seul — pas encore lié à un contact",
+      "changePrimaryContact": "Modifier le contact"
     },
     "saveFailed": "L'enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",

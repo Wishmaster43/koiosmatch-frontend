@@ -24,6 +24,7 @@ export default function ContactNameLink({ name, id, onOpen, title }: {
   return (
     <button type="button" title={title} onClick={e => { e.stopPropagation(); onOpen(id) }}
       style={{ padding: 0, background: 'none', border: 'none', textAlign: 'left',
+        display: 'inline-flex', alignItems: 'center', gap: 5,
         // Explicit type, never `font: inherit` (Danny 28-07: "lettertype is onjuist").
         // Inside EditableFieldTable a button inherits the browser's own font stack and
         // size, so the name rendered in a different face and weight than the e-mail and
@@ -38,7 +39,7 @@ export default function ContactNameLink({ name, id, onOpen, title }: {
       {name}
       {/* Explicit open-affordance (Danny 03-08) — same signal the KvK/BTW link rows carry,
           so a linked name is visibly distinct from plain text at a glance. */}
-      <SquareArrowOutUpRight size={11} style={{ flexShrink: 0, verticalAlign: '-1px', marginLeft: 5 }} />
+      <SquareArrowOutUpRight size={11} style={{ flexShrink: 0 }} />
     </button>
   )
 }

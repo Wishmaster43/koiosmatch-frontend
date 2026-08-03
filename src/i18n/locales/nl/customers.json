@@ -231,7 +231,8 @@
       "pickPrimaryContact": "Kies een primaire contactpersoon",
       "linkNamed": "Koppel {{name}}",
       "description": "Locatietekst",
-      "contactNotLinked": "Alleen tekst — nog niet gekoppeld aan een contactpersoon"
+      "contactNotLinked": "Alleen tekst — nog niet gekoppeld aan een contactpersoon",
+      "changePrimaryContact": "Wijzig contactpersoon"
     },
     "saveFailed": "Opslaan is mislukt.",
     "deleteFailed": "Verwijderen is mislukt.",

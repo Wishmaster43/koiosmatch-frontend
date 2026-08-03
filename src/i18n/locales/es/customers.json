@@ -231,7 +231,8 @@
       "pickPrimaryContact": "Elige un contacto principal",
       "linkNamed": "Vincular a {{name}}",
       "description": "Texto de la ubicación",
-      "contactNotLinked": "Solo texto — aún no vinculado a un contacto"
+      "contactNotLinked": "Solo texto — aún no vinculado a un contacto",
+      "changePrimaryContact": "Cambiar contacto"
     },
     "saveFailed": "Error al guardar.",
     "deleteFailed": "Error al eliminar.",

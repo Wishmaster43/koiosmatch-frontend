@@ -231,7 +231,8 @@
       "pickPrimaryContact": "Choose a primary contact",
       "linkNamed": "Link {{name}}",
       "description": "Location text",
-      "contactNotLinked": "Text only — not yet linked to a contact person"
+      "contactNotLinked": "Text only — not yet linked to a contact person",
+      "changePrimaryContact": "Change contact person"
     },
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",

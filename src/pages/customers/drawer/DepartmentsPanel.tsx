@@ -55,7 +55,10 @@ const muted = { color: 'var(--text-muted)', fontSize: 12 }
 const plainCell = { color: 'var(--text)', fontSize: 12 }
 
 const searchWrap = {
-  display: 'flex', alignItems: 'center', gap: 8, flex: 1, padding: '6px 10px',
+  // minWidth 0: a flex child's implicit min-width:auto would keep the input's ~170px
+  // intrinsic width and push the add button off the 548px panel (Danny 03-08:
+  // "+ nieuwe contactpersoon valt nog steeds een beetje weg") — search yields instead.
+  display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, padding: '6px 10px',
   background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8,
 } as const
 const searchInput = { flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' } as const
