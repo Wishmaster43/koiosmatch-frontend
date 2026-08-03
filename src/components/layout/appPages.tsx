@@ -42,6 +42,9 @@ const MatchesPage            = lazy(() => import('@/pages/matches/MatchesPage'))
 const OpportunitiesPage      = lazy(() => import('@/pages/opportunities/OpportunitiesPage'))
 const TasksPage              = lazy(() => import('@/pages/tasks/TasksPage'))
 const OutreachPage           = lazy(() => import('@/pages/outreach/OutreachPage'))
+// IMPORT-WIZARD-1: the full-screen "upload -> match columns -> editable preview ->
+// confirm -> result" wizard (Danny: "een nieuw scherm... soort wizard").
+const ImportWizardPage       = lazy(() => import('@/pages/import/ImportWizardPage'))
 
 // Route key → breadcrumb label.
 export const PAGE_TITLES: Record<string, string> = {
@@ -60,6 +63,7 @@ export const PAGE_TITLES: Record<string, string> = {
   tasks:                        'Tasks',
   outreach:                     'Call lists',
   customers:                    'Customers',
+  'import-wizard':              'Import wizard',
 
   // Reports hub (analytical)
   reports:                      'Reports',
@@ -143,6 +147,7 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     case 'tasks':                  return <TasksPage intent={navIntent} />
     case 'outreach':               return <OutreachPage />
     case 'customers':              return <CustomersPage intent={navIntent} />
+    case 'import-wizard':          return <ImportWizardPage />
     case 'planning':               return <PlanningPage />
 
     // ── Reports hub (analytical) ──────────────────────────────────────────

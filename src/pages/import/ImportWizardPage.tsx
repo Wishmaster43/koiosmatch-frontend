@@ -1,0 +1,77 @@
+/**
+ * ImportWizardPage — the full-screen import wizard Danny asked for ("een nieuw
+ * scherm... soort wizard: dat je data ziet, velden worden gekoppeld en je kan
+ * eventueel nog wat aanpassen"): upload -> match columns -> editable preview ->
+ * confirm -> result. Reachable at #import-wizard (see appPages.tsx).
+ *
+ * Thin route page: entity list + permission checks live here; the actual per-step
+ * flow is EntityImportWizard, remounted (key={entity}) on every entity switch so a
+ * stale file/mapping never survives a switch. The entity nav, banners and result
+ * panel are the SAME components the settings "importeren" screen already uses
+ * (§3A reuse) — this screen adds the column-mapping + editable-preview steps that
+ * screen does not have; it does not reinvent what already works.
+ */
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { AlertTriangle } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
+import ImportEntityNav from '@/pages/settings/sections/importeren/ImportEntityNav'
+import { useImportTemplates } from '@/pages/settings/sections/importeren/useImportTemplates'
+import { groupTemplates, orderedTemplates } from '@/pages/settings/sections/importeren/importTemplateShape'
+import type { ImportTemplateSummary } from './api'
+import EntityImportWizard from './EntityImportWizard'
+
+export default function ImportWizardPage() {
+  const { t } = useTranslation('settings')
+  // Auth context can be null pre-boot — an honest fallback, mirrors ImporterenSettings.tsx.
+  const hasPermission = useAuth()?.hasPermission ?? (() => false)
+  const { templates, phase, reload } = useImportTemplates()
+  const [selected, setSelected] = useState<string | null>(null)
+
+  // Land on the first template in display order (the combined file first when the
+  // backend serves one); never overrides a user's own pick.
+  useEffect(() => {
+    if (phase === 'ready' && templates.length > 0 && !selected) {
+      setSelected(orderedTemplates(templates)[0]?.entity ?? null)
+    }
+  }, [phase, templates, selected])
+
+  // Locations/departments/contacts are sub-entities of the customer tree and share
+  // its rights, exactly like routes/api/tenant/exports.php gates every import route.
+  const canView = hasPermission('customers.view')
+  const canImport = hasPermission('customers.create')
+
+  const selectedTemplate: ImportTemplateSummary | undefined = templates.find((tpl) => tpl.entity === selected)
+  const groups = groupTemplates(templates)
+  const wholeTree = groups.wholeTree.some((tpl) => tpl.entity === selected)
+  const otherPathEntity = (wholeTree ? groups.perEntity[0]?.entity : groups.wholeTree[0]?.entity) ?? null
+
+  return (
+    <div style={{ padding: 24, height: '100%', overflowY: 'auto' }}>
+      <div style={{ marginBottom: 20 }}>
+        <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{t('import.title')}</h1>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>{t('import.subtitle')}</p>
+      </div>
+
+      <div style={{ display: 'flex', gap: 0, minHeight: 400 }}>
+        <ImportEntityNav templates={templates} phase={phase} selected={selected} onSelect={setSelected} onReload={reload} />
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {phase === 'error' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-danger)', fontSize: 13 }}>
+              <AlertTriangle size={14} /> {t('import.loadTemplatesError')}
+            </div>
+          )}
+          {phase === 'ready' && !selectedTemplate && (
+            <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('import.noTemplates')}</p>
+          )}
+          {phase === 'ready' && selectedTemplate && (
+            <EntityImportWizard key={selectedTemplate.entity} template={selectedTemplate}
+              otherPathEntity={otherPathEntity} onSelectEntity={setSelected}
+              canView={canView} canImport={canImport} />
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

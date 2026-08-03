@@ -14,11 +14,19 @@
  * that the combined file replaces the four-step order rather than adding to it, and
  * that the four separate files stay the right tool for extending a customer that
  * already exists (ImportEntityNav + WholeTreeBanner/ImportOrderBanner).
+ *
+ * IMPORT-WIZARD-1: this screen's own flow has no column-mapping or editable-preview
+ * step — it expects the file's headers to already match the template exactly. For a
+ * file that needs its columns matched or a cell adjusted before sending, this screen
+ * now links to the full-screen wizard (src/pages/import/, #import-wizard) that adds
+ * exactly that on top, reusing this screen's own ImportEntityNav/banners/ResultStep
+ * rather than duplicating them. Both stay: neither is a mockup of the other.
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, ArrowRight } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useNavigation } from '@/context/NavigationContext'
 import { useImportTemplates } from './importeren/useImportTemplates'
 import { useImportWizard } from './importeren/useImportWizard'
 import ImportEntityNav from './importeren/ImportEntityNav'
@@ -90,6 +98,9 @@ export default function ImporterenSettings() {
   const { t } = useTranslation('settings')
   // Auth context can be null pre-boot (mirrors CustomersBulkBar's own fallback).
   const hasPermission = useAuth()?.hasPermission ?? (() => false)
+  // IMPORT-WIZARD-1: jumps to the full-screen wizard (#import-wizard) that adds
+  // column mapping + an editable preview on top of this screen's own dry-run flow.
+  const { navigate } = useNavigation()
   const { templates, phase, reload } = useImportTemplates()
   const [selected, setSelected] = useState<string | null>(null)
 
@@ -124,6 +135,28 @@ export default function ImporterenSettings() {
           <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('import.title')}</h2>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('import.subtitle')}</p>
         </div>
+
+        {/* IMPORT-WIZARD-1: a real link (never a fake affordance) to the full-screen
+            wizard — column mapping + an editable preview, which this quicker screen
+            does not offer. Both stay: this one for a client whose file already uses
+            the exact column names, the wizard for one that needs mapping/adjusting. */}
+        <button type="button" onClick={() => navigate('import-wizard')}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, padding: '10px 14px',
+                   background: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
+                   border: '1px solid color-mix(in srgb, var(--color-primary) 25%, transparent)',
+                   borderRadius: 8, fontSize: 12, color: 'var(--color-primary)', cursor: 'pointer', width: '100%',
+                   textAlign: 'left' }}>
+          <span style={{ flex: 1, color: 'var(--text)' }}>
+            {t('import.wizard.linkFromSettings', {
+              ns: 'settings',
+              defaultValue: 'Prefer a guided, step-by-step import with column matching and an editable preview?',
+            })}
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600, flexShrink: 0 }}>
+            {t('import.wizard.linkFromSettingsCta', { ns: 'settings', defaultValue: 'Open the import wizard' })}
+            <ArrowRight size={13} aria-hidden="true" />
+          </span>
+        </button>
 
         {phase === 'error' && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-danger)', fontSize: 13 }}>
