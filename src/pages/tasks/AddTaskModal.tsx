@@ -10,9 +10,12 @@ import { notifyError } from '@/lib/notify'
 import { mapTaskDetail } from './data/mapTask'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { cardPair } from '@/components/ui/modalCards'
 import TaskCard from './addmodal/TaskCard'
 import PlanningCard from './addmodal/PlanningCard'
 import LinkCard from './addmodal/LinkCard'
+import AssignmentCard from './addmodal/AssignmentCard'
+import { todayISO, nextRoundHour } from './addmodal/defaults'
 import type { Id } from '@/types/common'
 import type { ApiTask } from '@/types/task'
 
@@ -59,23 +62,39 @@ const idMapOf = (rows: unknown): Record<string, string> =>
  * Popup redesign (Danny 27-07 #tasks): the entity is a TAAK — "Activiteit" only
  * names its TYPE field now (the naming fix lives in tasks.json's values, not here).
  * The form itself moved onto the shared WIDE_MODAL frame (same footprint as +Match/
- * +Kandidaat): a thin container composing three titled bordered cards — Taak
- * (title/type/description), Planning (due/priority/status) and Koppeling (linked
- * record + assignee), each split into `addmodal/` (§3A: container wires data, one
- * component per card). Every dropdown is now a searchable CreatableSelect
- * (allowCreate={false}: type/status/priority/assignee/candidate/customer/contact
- * are all real tenant/relational values, never a free-text create).
+ * +Kandidaat): a thin container composing titled bordered cards, each split into
+ * `addmodal/` (§3A: container wires data, one component per card). Every dropdown
+ * is now a searchable CreatableSelect (allowCreate={false}: type/status/priority/
+ * assignee/candidate/customer/contact are all real tenant/relational values, never
+ * a free-text create).
+ *
+ * TASK-SMART-DEFAULTS-1 (Danny: "+ Nieuwe taak is minder mooi en intelligent dan +
+ * match — de datum is netjes gevuld etc."): brought up to +Match's two-axis
+ * standard. LOOK — a fourth card split off the old combined "Koppeling": Taak ·
+ * Planning · Koppelingen (linked record) · Toewijzing (assignee + creator), laid
+ * out full-width-then-paired exactly like +Match's Relaties-then-Contract/
+ * Financieel (`cardPair`, shared with every other wide modal). INTELLIGENCE
+ * (create only — never overwrites a loaded edit record): the due date/time propose
+ * today + the next round hour (`addmodal/defaults`, since +Match's own todayISO
+ * start-date proposal has no time-of-day field to mirror and lives in another
+ * entity's folder, §2); the assignee proposes the logged-in user via the SAME
+ * assignable-tenant-user guard as AddApplicationModal/AddCustomerModal
+ * (`meIsAssignable`); Soort activiteit now reads the lookup's `is_default` flag
+ * (mirrors `defaultPriority`) instead of guessing array position 0 (§3B lesson) —
+ * inert today (no tenant sends `is_default` for task_types yet) but honest and
+ * future-proof, exactly like useEndDateProposal's stance on an unshipped column.
  *
  * Create POSTs the task with its polymorphic `links[]` and hands the created row
- * back via `onCreated` — UNCHANGED from before (verified byte-for-byte: same body
- * shape, same keys). Edit mode (`editId` set) additionally GETs the full task (the
- * row list doesn't carry description/links), prefills the form, and PATCHes on
- * submit via `onSaved`. The PATCH uses the REAL update-request keys — `type_id`/
- * `status_id`/`priority_id` are uuid FKs, while the tenant lookup's `value` (what
- * this form's selects use) is a slug — so `lookupIds` (fetched alongside the task)
- * resolves slug → FK id. Pre-existing links this form doesn't manage (e.g. an
- * opportunity link) are carried over so the update's full-replace `links` never
- * silently drops them.
+ * back via `onCreated` — same body SHAPE/keys as before; only the VALUES of
+ * due_date/due_time/assignee_id/type may now carry a proposed default instead of
+ * always being empty (see TASK-SMART-DEFAULTS-1 above). Edit mode (`editId` set)
+ * additionally GETs the full task (the row list doesn't carry description/links),
+ * prefills the form, and PATCHes on submit via `onSaved`. The PATCH uses the REAL
+ * update-request keys — `type_id`/`status_id`/`priority_id` are uuid FKs, while the
+ * tenant lookup's `value` (what this form's selects use) is a slug — so `lookupIds`
+ * (fetched alongside the task) resolves slug → FK id. Pre-existing links this form
+ * doesn't manage (e.g. an opportunity link) are carried over so the update's
+ * full-replace `links` never silently drops them.
  *
  * `lockCustomerId`/`lockCustomerName` (Danny 28-07, "+ Nieuwe taak" from the
  * customer drawer) mirror AddVacancyModal's `lockCustomerId` pattern: the
@@ -102,14 +121,27 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   const auth = useAuth()
   const ownerName = auth?.user ? userName(auth.user as UserLike) : ''
   const isEdit = editId != null
+  // TASK-ASSIGNEE-DEFAULT-1: the assignee proposal below may only fire for a
+  // logged-in user who is actually an assignable tenant user (present in the SAME
+  // /users list the picker itself offers) — mirrors AddApplicationModal/
+  // AddCustomerModal's identical owner-default guard, never a super-admin/
+  // non-tenant id the backend's assigneeRule() would 422 on.
+  const meId = auth?.user?.id
+  const meIsAssignable = meId != null && users.some(u => String(u.id) === String(meId))
 
   // `initial` pre-fills fields/links when opened from an entity drawer (e.g. the
   // candidate); `lockCustomerId` (the customer-drawer trigger) seeds customerId the
-  // same way but additionally makes LinkCard render it read-only, see below.
-  const [form, setForm] = useState<TaskForm>({
-    type: '', title: '', assigneeId: '', status: '', due: '', dueTime: '', priority: '', description: '',
+  // same way but additionally makes LinkCard render it read-only, see below. The
+  // due date/time PROPOSE today + the next round hour (TASK-SMART-DEFAULTS-1) —
+  // CREATE ONLY: in edit mode the loaded record's own value (`due: ''` here) is
+  // what the prefill effect below fills in, and must never be pre-empted by a
+  // "today" flash. Lazy initializer so `new Date()` is read once, at mount.
+  const [form, setForm] = useState<TaskForm>(() => ({
+    type: '', title: '', assigneeId: '', status: '',
+    due: isEdit ? '' : todayISO(), dueTime: isEdit ? '' : nextRoundHour(),
+    priority: '', description: '',
     candidateId: '', customerId: lockCustomerId ?? '', contactId: '', ...initial,
-  })
+  }))
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [saving, setSaving] = useState(false)
   // AUDIT-1 pattern (mirrors AddApplicationModal): a failed create/save keeps the
@@ -126,14 +158,28 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   const [otherLinks, setOtherLinks] = useState<LinkPair[]>([])
   const [lookupIds, setLookupIds] = useState<{ type: Record<string, string>; status: Record<string, string>; priority: Record<string, string> }>({ type: {}, status: {}, priority: {} })
 
-  // Seed sensible defaults once the lookups arrive (first status + default priority).
-  // Guarded by `|| ` so a value the edit-mode load below already set is never overwritten.
+  // Seed sensible defaults once the lookups arrive. Guarded by `|| ` so a value the
+  // edit-mode load below already set is never overwritten. Type (like priority via
+  // `defaultPriority`) reads the lookup's own `is_default` FLAG first — never array
+  // position 0 (§3B lesson: task_types carries no such column yet, so this is an
+  // honest no-op today, but it stops guessing the instant a tenant gets one).
   useEffect(() => {
     setForm(f => ({ ...f,
       status:   f.status   || statuses[0]?.value || '',
       priority: f.priority || defaultPriority || '',
-      type:     f.type     || types[0]?.value || '' }))
+      type:     f.type     || types.find(x => x.is_default)?.value || types[0]?.value || '' }))
   }, [statuses, priorities, types, defaultPriority])
+
+  // TASK-ASSIGNEE-DEFAULT-1: propose the logged-in user as assignee ONCE they are
+  // known to be assignable — CREATE ONLY (isEdit guard), so the loaded record's own
+  // assignee (set by the prefill effect below) is never raced/overwritten. The
+  // functional update only fires while assigneeId is still empty, mirroring
+  // AddApplicationModal/AddCustomerModal's identical owner-default effect.
+  useEffect(() => {
+    if (isEdit || !meIsAssignable) return
+    setForm(f => (f.assigneeId ? f : { ...f, assigneeId: String(meId) }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to assignability/edit-mode resolving, mirrors AddApplicationModal's owner-default effect
+  }, [isEdit, meIsAssignable])
 
   // Load the link pickers; each is independent and tolerates a missing endpoint.
   useEffect(() => {
@@ -282,19 +328,24 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
           </button>
         </div>
 
-        {/* Body: titled cards (Taak full-width, Planning + Koppeling paired below —
-            mirrors +Match's Relaties-then-Contract/Financieel layout), or a loading
-            placeholder while the edit-mode GET is in flight. */}
+        {/* Body: titled cards — Taak full-width, then Planning+Toewijzing (left,
+            stacked) paired against Koppelingen (right) — mirrors +Match's
+            Relaties-then-Contract/Financieel layout (`cardPair`, shared with every
+            other wide modal) — or a loading placeholder while the edit-mode GET is
+            in flight. */}
         {loadingTask ? (
           <div style={{ flex: 1, padding: 40, textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>{t('modal.loadingTask')}</div>
         ) : (
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <TaskCard t={t} form={form} errors={errors} set={set} types={types} />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' }}>
-            <PlanningCard t={t} form={form} set={set} priorities={priorities} statuses={statuses} />
-            <LinkCard t={t} form={form} set={set} ownerName={ownerName}
+          <div style={cardPair}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <PlanningCard t={t} form={form} set={set} priorities={priorities} statuses={statuses} />
+              <AssignmentCard t={t} form={form} set={set} ownerName={ownerName} assigneeOpts={assigneeOpts} />
+            </div>
+            <LinkCard t={t} form={form} set={set}
               candidates={toOptions(candidates)} customers={toOptions(customers)} contacts={toOptions(contacts)}
-              assigneeOpts={assigneeOpts} lockCustomerId={lockCustomerId} lockCustomerName={lockCustomerName} />
+              lockCustomerId={lockCustomerId} lockCustomerName={lockCustomerName} />
           </div>
         </div>
         )}

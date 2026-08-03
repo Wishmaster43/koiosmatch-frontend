@@ -1,6 +1,6 @@
 /**
  * AddTaskModal — EDIT mode (Danny 20-07: pencil on a candidate task row). Create
- * mode must stay byte-for-byte unchanged (verified below); edit mode GETs the
+ * mode's body SHAPE/keys stay unchanged (verified below); edit mode GETs the
  * full task, prefills the form, and PATCHes the update-request's REAL keys —
  * `type_id`/`status_id`/`priority_id` (uuid FKs), not the create form's slug
  * `type`/`status`/`priority` — with a pre-existing link this form doesn't manage
@@ -12,8 +12,17 @@
  * became button/portal-menu assertions (mirrors MatchModal.test.tsx's
  * established pattern), plus new coverage for the required-field guard and the
  * searchable-filter behaviour the redesign adds.
+ *
+ * TASK-SMART-DEFAULTS-1: covers the create-mode smart defaults (due date/time,
+ * assignee, type) added to bring "+ Nieuwe taak" up to "+ Match"'s standard —
+ * see AddTaskModal.tsx's own header comment. `lk.types` and `authState.user`
+ * are mutable (vi.hoisted) so individual tests can prove the is_default-flag
+ * and assignable-user guards without disturbing every other test's fixture;
+ * both default back to the ORIGINAL stable values other tests already rely on
+ * (a fresh array reference per render would infinite-loop the "seed defaults"
+ * effect, whose deps compare `types`/`statuses`/`priorities` by reference).
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AddTaskModal from './AddTaskModal'
@@ -58,16 +67,35 @@ const CANDIDATE_ROWS = [
 // values, unchanged across renders). Fresh array literals per call would make the
 // "seed defaults" effect's [statuses,types,priorities] deps change every render →
 // infinite render loop → the worker OOMs and the whole file reports as errored.
-// eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
-const LK_STATUSES = [{ value: 'todo', label: 'Te doen', color: '#D98A8A' }]
-// eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
-const LK_TYPES = [{ value: 'call', label: 'Belafspraak', color: '#5FB0AC' }]
-// eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
-const LK_PRIORITIES = [{ value: 'normal', label: 'Normaal', color: '#DDA071' }]
-const LK_VALUE = { statuses: LK_STATUSES, types: LK_TYPES, priorities: LK_PRIORITIES, defaultPriority: 'normal' }
-vi.mock('@/context/TaskLookupsContext', () => ({ useTaskLookups: () => LK_VALUE }))
+// `lk` is vi.hoisted + mutable so ONE test (the is_default-flag describe block
+// below) can swap `lk.types` for a fixture with a non-first default, then restore
+// the ORIGINAL reference afterwards — every other test keeps seeing the same
+// stable array it always has.
+const { lk } = vi.hoisted(() => ({
+  lk: {
+    // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
+    statuses: [{ value: 'todo', label: 'Te doen', color: '#D98A8A' }],
+    // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
+    types: [{ value: 'call', label: 'Belafspraak', color: '#5FB0AC' }] as Array<{ value: string; label: string; color: string; is_default?: boolean }>,
+    // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
+    priorities: [{ value: 'normal', label: 'Normaal', color: '#DDA071' }],
+    defaultPriority: 'normal',
+  },
+}))
+const ORIGINAL_TYPES = lk.types
+vi.mock('@/context/TaskLookupsContext', () => ({
+  useTaskLookups: () => ({ statuses: lk.statuses, types: lk.types, priorities: lk.priorities, defaultPriority: lk.defaultPriority }),
+}))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [{ id: 'user-9', name: 'Danny' }] }) }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+// TASK-ASSIGNEE-DEFAULT-1: `authState.user` is mutable (vi.hoisted, mirrors
+// AddCustomerModal.test.tsx's identical ACCOUNTMANAGER-DEFAULT-1 pattern) so the
+// assignee-default describe block below can prove both the assignable-user and
+// non-assignable-user paths; `null` by default (no logged-in user) so every
+// pre-existing test below keeps seeing NO owner proposal, exactly as before this
+// guard was added.
+const { authState } = vi.hoisted(() => ({ authState: { user: null as { id: string; name: string } | null } }))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: authState.user }) }))
 // URL-dispatching mock: the candidate link picker gets two rows (filter coverage
 // below); customers/contacts pickers stay empty; the edit-mode GETs (task detail +
 // raw lookup lists) resolve their own fixtures; FAIL_ID exercises the load-error path.
@@ -90,7 +118,13 @@ vi.mock('@/lib/api', async (importOriginal) => {
 // The api.post/patch spies are module-level (created once by vi.mock above) — clear
 // their call history between tests so an earlier test's POST never leaks into a
 // later test's "not called" assertion (found by the validation test below).
-beforeEach(() => { vi.clearAllMocks() })
+// authState/lk.types are reset too, so a test that overrides either never leaks
+// into the next one regardless of run order.
+beforeEach(() => { vi.clearAllMocks(); authState.user = null; lk.types = ORIGINAL_TYPES })
+// Blanket safety net for the fixed-clock tests below: if one of them fails/throws
+// BEFORE its own vi.useRealTimers() call runs, fake timers would otherwise stay on
+// and hang every later test's userEvent/findBy/waitFor (they poll via setTimeout).
+afterEach(() => { vi.useRealTimers() })
 
 const noop = () => {}
 
@@ -147,10 +181,16 @@ describe('AddTaskModal · edit mode prefill + PATCH (Danny 20-07)', () => {
   })
 })
 
-describe('AddTaskModal · create mode is unchanged by the edit-mode refactor', () => {
-  it('still POSTs the original body shape/keys (no editId)', async () => {
+describe('AddTaskModal · create mode body SHAPE/keys are unchanged by the edit-mode refactor', () => {
+  it('POSTs the same keys as before — only due_date/due_time now carry the TASK-SMART-DEFAULTS-1 proposal (fixed clock: no logged-in user here, so assignee_id stays null)', async () => {
+    // Fixed clock ONLY around mount, where the date/time default is read once —
+    // switched back to real timers before any userEvent interaction (fake timers +
+    // userEvent's internal delays don't mix, house convention: CvUpload.test.tsx).
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-08-03T10:15:00'))
     const user = userEvent.setup()
     render(<AddTaskModal onClose={noop} onCreated={noop} />)
+    vi.useRealTimers()
 
     await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Nieuwe taak')
     await user.click(screen.getByRole('button', { name: 'modal.create' }))
@@ -158,8 +198,80 @@ describe('AddTaskModal · create mode is unchanged by the edit-mode refactor', (
     const api = (await import('@/lib/api')).default
     expect(api.post).toHaveBeenCalledWith('/tasks', {
       title: 'Nieuwe taak', type: 'call', status: 'todo', priority: 'normal',
-      assignee_id: null, due_date: null, due_time: null, description: null, links: [],
+      assignee_id: null, due_date: '2026-08-03', due_time: '11:00', description: null, links: [],
     })
+  })
+})
+
+describe('AddTaskModal · due date/time smart default (TASK-SMART-DEFAULTS-1, Danny: "+ Nieuwe taak mist de nette datum die + match wel heeft")', () => {
+  it('defaults the due date to today and the time to the next round hour', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-08-03T10:15:00'))
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+    vi.useRealTimers()
+
+    // DateField renders DD-MM-YYYY (dd-mm-yyyy dateFormat); the time field is a
+    // plain native input[type=time] via TextField.
+    expect(screen.getByDisplayValue('03-08-2026')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('11:00')).toBeInTheDocument()
+  })
+
+  it('never proposes a default in edit mode — the loaded task\'s own due date/time (or its absence) wins', async () => {
+    // No fixed clock needed: the `isEdit` branch never calls todayISO()/
+    // nextRoundHour() at all (see AddTaskModal's lazy form initializer) — this
+    // proves the loaded record's own values are what actually renders.
+    render(<AddTaskModal editId={EDIT_ID} onClose={noop} onSaved={noop} />)
+    await screen.findByDisplayValue('Bel kandidaat terug')
+
+    // TASK_DETAIL_RAW's own due_date/due_time (25-07-2026 / 14:00) — never a "today" proposal.
+    expect(screen.getByDisplayValue('25-07-2026')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('14:00')).toBeInTheDocument()
+  })
+})
+
+describe('AddTaskModal · assignee defaults to the logged-in user (TASK-ASSIGNEE-DEFAULT-1, mirrors AddApplicationModal/AddCustomerModal)', () => {
+  it('proposes me as assignee when I am an assignable tenant user (present in the /users list)', async () => {
+    authState.user = { id: 'user-9', name: 'Danny' } // matches the useUsers() mock fixture
+    const user = userEvent.setup()
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+    expect(screen.getByRole('button', { name: /modal\.assignee/ })).toHaveTextContent('Danny')
+
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Nieuwe taak')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+    const api = (await import('@/lib/api')).default
+    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({ assignee_id: 'user-9' }))
+  })
+
+  it('leaves the assignee unassigned (bureau) when the current user is NOT an assignable tenant user', () => {
+    authState.user = { id: 'super-admin-1', name: 'Super Admin' } // absent from the useUsers() mock fixture
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+    // The picker still renders — just unfilled, showing its own placeholder option
+    // (note: "Super Admin" DOES appear elsewhere, on the read-only "Aangemaakt
+    // door" creator line — that always shows the logged-in user regardless of
+    // assignability, a separate concern from the assignee proposal under test).
+    expect(screen.getByRole('button', { name: /modal\.assignee/ })).toHaveTextContent('modal.assigneePlaceholder')
+    expect(screen.getByRole('button', { name: /modal\.assignee/ })).not.toHaveTextContent('Super Admin')
+  })
+})
+
+describe('AddTaskModal · Soort activiteit defaults from the lookup\'s is_default flag, never array position (§3B lesson)', () => {
+  it('defaults type to the FLAGGED option even though it is not first in the list', async () => {
+    // 'call' registers first but 'email' carries is_default — proves the fix reads
+    // the flag instead of guessing index 0.
+    lk.types = [
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
+      { value: 'call', label: 'Belafspraak', color: '#5FB0AC', is_default: false },
+      // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
+      { value: 'email', label: 'E-mail', color: '#A98AD1', is_default: true },
+    ]
+    const user = userEvent.setup()
+    render(<AddTaskModal onClose={noop} onCreated={noop} />)
+    expect(screen.getByRole('button', { name: /modal\.type/ })).toHaveTextContent('E-mail')
+
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Nieuwe taak')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+    const api = (await import('@/lib/api')).default
+    expect(api.post).toHaveBeenCalledWith('/tasks', expect.objectContaining({ type: 'email' }))
   })
 })
 
