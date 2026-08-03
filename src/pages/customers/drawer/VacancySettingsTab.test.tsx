@@ -4,6 +4,12 @@
  * OverviewTab used to send), the tenant-default comparison (follows/deviates),
  * and the "reset to default" action. §13: asserts the onSave PATCH payload, not
  * just that a callback fired.
+ *
+ * TOGGLE-STYLE-1 (this task, Danny: "moeten toggles worden"): the three flags
+ * used to render as raw <input type="checkbox"> (CheckboxField); they are now
+ * the shared `components/ui/Toggle` pill switch (role="switch"), so the queries
+ * below assert `getAllByRole('switch')` — a query that only matches the NEW
+ * control, proving the swap actually happened rather than merely compiling.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -55,13 +61,13 @@ describe('VacancySettingsTab', () => {
     expect(screen.queryByRole('button', { name: /resetToDefault/ })).not.toBeInTheDocument()
   })
 
-  it('toggling a checkbox calls onSave with exactly that key (same PATCH shape OverviewTab used)', async () => {
+  it('toggling a switch calls onSave with exactly that key (same PATCH shape OverviewTab used)', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn()
     render(<VacancySettingsTab c={customer()} onSave={onSave} />)
-    const checkboxes = screen.getAllByRole('checkbox')
-    expect(checkboxes).toHaveLength(3)
-    await user.click(checkboxes[0])
+    const toggles = screen.getAllByRole('switch')
+    expect(toggles).toHaveLength(3)
+    await user.click(toggles[0])
     expect(onSave).toHaveBeenCalledWith({ hideCompanyName: true })
   })
 

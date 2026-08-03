@@ -5,20 +5,47 @@
  * same onClick (opens AddOpportunityModal, prefilled with this customer). The
  * modal itself is a different file's scope (its own lookup/cascade hooks) —
  * stood in with a marker, mirroring WorkTab.test.tsx's MatchModal stub.
+ *
+ * STAGE-FILTER-1 (this task, Danny: "bij Kansen mis ik ook nog de statussen"):
+ * two more describe blocks below cover the stage filter (shared StatusFilterSelect/
+ * useStatusFilter, mirrors DepartmentsPanel) and the `customer_opportunity_table_
+ * color_stage` colour-on/off toggle for the stage chip.
  */
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import OpportunitiesTab from './OpportunitiesTab'
+import api from '@/lib/api'
+import { invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
+import type { ApiOpportunity } from '@/types/opportunity'
+
+// A controllable stand-in for the customer's opportunities so each test can hand it
+// a different fixture (mirrors EntityTasksTab.test.tsx's `mockTasks` pattern) — the
+// pre-existing "+ Nieuwe kans" tests below need an empty list, the new stage-filter
+// tests need real rows with different stages.
+const { useCustomerOpportunitiesMock } = vi.hoisted(() => ({ useCustomerOpportunitiesMock: vi.fn() }))
+const mockOpportunities = (rows: ApiOpportunity[]) =>
+  useCustomerOpportunitiesMock.mockReturnValue({ rows, loading: false, error: false, reload: vi.fn() })
 
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasModule: () => false }) }))
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: vi.fn() }) }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => `d(${v})` }) }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 vi.mock('../hooks/useCustomerDrawerData', () => ({
-  useCustomerOpportunities: () => ({ rows: [], loading: false, error: false, reload: vi.fn() }),
+  useCustomerOpportunities: () => useCustomerOpportunitiesMock(),
   useCustomerOpenShifts: () => ({ rows: [], loading: false }),
 }))
+// The customer drawer's own tenant-settings blob — only the colour toggle below
+// needs to control it; every other test relies on the default (colour ON, fallback true).
+vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => Promise.resolve({ data: {} })), delete: vi.fn(() => Promise.resolve({})) } }))
+/* eslint-disable no-restricted-syntax -- fixture DATA mirroring the seed stage colours, not UI styling */
+vi.mock('@/lib/useOpportunityStages', () => ({
+  useOpportunityStages: () => ({ stages: [
+    { id: 'stage-1', value: 'lead', label: 'Lead', color: '#94A3B8' },
+    { id: 'stage-2', value: 'won', label: 'Gewonnen', color: '#79B58E' },
+  ] }),
+}))
+/* eslint-enable no-restricted-syntax */
 // AddOpportunityModal is a different file's scope (lookup/cascade hooks) — a
 // marker exposing `defaultCustomerId` proves the "+" trigger's dialog-opens
 // wiring without mounting the real form.
@@ -27,6 +54,11 @@ vi.mock('@/pages/opportunities/AddOpportunityModal', () => ({
     <div data-testid="add-opportunity-modal" data-default-customer-id={defaultCustomerId ?? ''} />
   ),
 }))
+
+// `useAllSettings` keeps a module-level cache shared across tests in this file —
+// reset it too (mirrors LocationsTab.test.tsx), otherwise the second colour-toggle
+// test below would silently reuse the FIRST test's already-resolved settings blob.
+beforeEach(() => { vi.clearAllMocks(); mockOpportunities([]); invalidateAllSettingsCache() })
 
 describe('OpportunitiesTab · "+ Nieuwe kans" trigger (Danny 27-07: house button, not a bare text link)', () => {
   it('does not render the modal until the trigger is clicked', () => {
@@ -39,5 +71,57 @@ describe('OpportunitiesTab · "+ Nieuwe kans" trigger (Danny 27-07: house button
     render(<OpportunitiesTab customerId="cust-1" customerName="Acme" />)
     await user.click(screen.getByRole('button', { name: 'opportunities.newOpportunity' }))
     expect(screen.getByTestId('add-opportunity-modal')).toHaveAttribute('data-default-customer-id', 'cust-1')
+  })
+})
+
+describe('OpportunitiesTab · stage filter narrows the rows (Danny: "bij Kansen mis ik ook nog de statussen")', () => {
+  const rows: ApiOpportunity[] = [
+    { id: 'opp-lead', title: 'Nieuwe zorgvraag', stage: { value: 'lead', label: 'Lead', color: '#94A3B8' } },
+    { id: 'opp-won', title: 'Contract getekend', stage: { value: 'won', label: 'Gewonnen', color: '#79B58E' } },
+  ]
+
+  it('shows every opportunity until a stage is picked (nothing selected = all)', () => {
+    mockOpportunities(rows)
+    render(<OpportunitiesTab customerId="cust-1" customerName="Acme" />)
+    expect(screen.getByText('Nieuwe zorgvraag')).toBeInTheDocument()
+    expect(screen.getByText('Contract getekend')).toBeInTheDocument()
+  })
+
+  it('narrows the table to the picked stage only', async () => {
+    const user = userEvent.setup()
+    mockOpportunities(rows)
+    render(<OpportunitiesTab customerId="cust-1" customerName="Acme" />)
+    // Nothing picked yet, so the trigger's own text is the "all statuses" label
+    // (StatusFilterSelect.tsx) — i18n is unmocked here, so t() echoes the raw key,
+    // same convention the pre-existing tests above already rely on.
+    await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
+    // The dropdown OPTION is a <button>; the table's own stage chip for "Gewonnen"
+    // is a <span> (SoftChip) — querying by button role picks the option, never the chip.
+    await user.click(await screen.findByRole('button', { name: 'Gewonnen' }))
+    expect(screen.getByText('Contract getekend')).toBeInTheDocument()
+    expect(screen.queryByText('Nieuwe zorgvraag')).toBeNull()
+  })
+})
+
+describe('OpportunitiesTab · stage colour toggle (customer_opportunity_table_color_stage)', () => {
+  const oneRow: ApiOpportunity[] = [
+    { id: 'opp-lead', title: 'Nieuwe zorgvraag', stage: { value: 'lead', label: 'Lead', color: '#94A3B8' } },
+  ]
+
+  it('colours the stage chip by default (today\'s behaviour)', async () => {
+    mockOpportunities(oneRow)
+    render(<OpportunitiesTab customerId="cust-1" customerName="Acme" />)
+    // eslint-disable-next-line no-restricted-syntax -- DATA: asserts the fixture's own stage colour, not a UI choice
+    await waitFor(() => expect(screen.getByText('Lead')).toHaveStyle({ color: '#94A3B8' }))
+  })
+
+  it('renders the stage chip as plain text once the tenant setting is off', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/settings'
+        ? Promise.resolve({ data: { customer_opportunity_table_color_stage: 'false' } })
+        : Promise.resolve({ data: {} }))
+    mockOpportunities(oneRow)
+    render(<OpportunitiesTab customerId="cust-1" customerName="Acme" />)
+    await waitFor(() => expect(screen.getByText('Lead')).toHaveStyle({ color: 'var(--text)' }))
   })
 })

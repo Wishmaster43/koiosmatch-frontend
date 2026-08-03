@@ -16,7 +16,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import { RotateCcw } from 'lucide-react'
-import { CheckboxField } from '@/components/forms/fields'
+import Toggle from '@/components/ui/Toggle'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import type { Customer } from '@/types/customer'
@@ -63,7 +63,7 @@ export default function VacancySettingsTab({ c, onSave }: Props) {
           return (
             <div key={f.key} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px',
               borderBottom: i < FIELDS.length - 1 ? '1px solid var(--border)' : 'none', background: 'var(--surface)' }}>
-              <CheckboxField checked={current} onChange={v => onSave?.({ [f.key]: v })} />
+              <Toggle checked={current} onChange={v => onSave?.({ [f.key]: v })} ariaLabel={t(`vacancySettings.fields.${f.key}`)} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, color: 'var(--text)' }}>{t(`vacancySettings.fields.${f.key}`)}</div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>

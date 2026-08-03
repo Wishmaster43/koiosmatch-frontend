@@ -3,11 +3,18 @@
  * 02-08). Named `.tabs.test.jsx`, separate from `CustomerDisplaySettings.test.jsx`
  * (which exercises the generic `SchemaSection` mechanics directly against the flat
  * `customerDisplay` schema and is untouched by this split). This file is the
- * regression guard for the split itself: every one of the eleven existing keys
+ * regression guard for the split itself: every one of the schema's keys
  * must still be reachable from SOME tab (a key that quietly disappeared from the
  * UI is the exact failure mode this task warns about), sub-tabs must actually
- * switch content, and the NEW per-tab default-status-filter picker must show up
+ * switch content, and the per-tab default-status-filter picker must show up
  * only where a drill-down tab really has a status filter (not on Klantenlijst).
+ *
+ * TASKS/OPPORTUNITIES-1 (this task): two more tabs, "Taken" and "Kansen" — the
+ * old "never offers a Kansen tab" test below is GONE (Danny explicitly asked the
+ * Kansen stage filter back: "bij Kansen mis ik ook nog de statussen"); replaced
+ * with tests proving Kansen/Taken now show their own colour toggle and, unlike
+ * the three original drill-down tabs, no default-filter picker (not built this
+ * round — see CustomerDisplaySettings.jsx's own docblock for why).
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -34,11 +41,11 @@ afterEach(() => vi.clearAllMocks())
 
 const tabLabel = (id) => t(`customerDisplay.tabs.${id}.title`)
 
-describe('CustomerDisplaySettings · five sub-tabs, correctly named', () => {
+describe('CustomerDisplaySettings · sub-tabs, correctly named', () => {
   it('renders one tab per group, using the drawer/nav vocabulary (never "drill-down")', () => {
     render(<CustomerDisplaySettings />)
     const tablist = screen.getByRole('tablist')
-    ;['customerTable', 'locations', 'departments', 'contacts', 'vacancies'].forEach(id => {
+    ;['customerTable', 'locations', 'departments', 'contacts', 'vacancies', 'tasks', 'opportunities'].forEach(id => {
       expect(screen.getByRole('tab', { name: tabLabel(id) })).toBeInTheDocument()
     })
     expect(tablist.textContent?.toLowerCase()).not.toContain('drill-down')
@@ -114,8 +121,22 @@ describe('CustomerDisplaySettings · the default-status-filter picker only where
     }
   })
 
-  it('never offers a Kansen tab — OpportunitiesTab has no status filter to replace', () => {
+  // TASKS/OPPORTUNITIES-1: Kansen now HAS a stage filter (OpportunitiesTab), so this
+  // used to assert the tab did not even exist — that guard is gone on purpose. Kansen
+  // and Taken get only the colour toggle this round, no tenant-default-filter picker.
+  it('shows the Kansen tab with its stage-colour toggle, and no default-filter picker', async () => {
+    const user = userEvent.setup()
     render(<CustomerDisplaySettings />)
-    expect(screen.queryByRole('tab', { name: /Kansen|Opportunities|Chancen|Opportunités|Oportunidades/i })).toBeNull()
+    await user.click(screen.getByRole('tab', { name: tabLabel('opportunities') }))
+    await waitFor(() => expect(screen.getByText(t('customerDisplay.fields.customer_opportunity_table_color_stage.label'))).toBeInTheDocument())
+    expect(screen.queryByText(t('customerDisplay.defaultFilter.title'))).toBeNull()
+  })
+
+  it('shows the Taken tab with its status-colour toggle, and no default-filter picker', async () => {
+    const user = userEvent.setup()
+    render(<CustomerDisplaySettings />)
+    await user.click(screen.getByRole('tab', { name: tabLabel('tasks') }))
+    await waitFor(() => expect(screen.getByText(t('customerDisplay.fields.customer_task_table_color_status.label'))).toBeInTheDocument())
+    expect(screen.queryByText(t('customerDisplay.defaultFilter.title'))).toBeNull()
   })
 })

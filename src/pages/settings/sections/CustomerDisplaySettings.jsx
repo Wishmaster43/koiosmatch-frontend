@@ -1,6 +1,6 @@
 /**
  * CustomerDisplaySettings — the customer table's display preferences, split into
- * FIVE sub-tabs (Danny 02-08: "afdelingen, locaties en contactpersonen moeten
+ * per-entity sub-tabs (Danny 02-08: "afdelingen, locaties en contactpersonen moeten
  * sub-tabjes worden, en duidelijk dat het van de drill-down is"). Before this, all
  * eleven settings sat in one flat list with no way to tell which ones affected the
  * customer TABLE (the list you land on) versus the sub-entity tables you only see
@@ -23,9 +23,19 @@
  * display-colour keys of its own (that lives on the vacancy entity's own settings
  * screen) — only the default-filter picker.
  *
- * TENANT-DEFAULT-1 (Danny 02-08): "Kansen" was considered and DROPPED — its table
- * has no StatusFilterSelect (OpportunitiesTab filters by pipeline stage, not
- * status), so there is nothing for a default-filter setting to replace there.
+ * TASKS/OPPORTUNITIES-1 (this task): two more sub-tabs, "Taken" and "Kansen",
+ * following the same shape as the three above — a single colour-on/off toggle
+ * each (`customer_task_table_color_status` / `customer_opportunity_table_color_stage`),
+ * no `DefaultStatusFilterPicker`. Unlike locations/departments/contacts/vacancies,
+ * neither of these two got a tenant-default-filter setting: that was not part of
+ * this change's brief, so it stays a documented gap rather than invented scope —
+ * a natural follow-up if Danny wants full parity with the other three tabs.
+ *
+ * TENANT-DEFAULT-1 (Danny 02-08) update: "Kansen" was originally DROPPED here
+ * because OpportunitiesTab filtered by pipeline stage with no StatusFilterSelect
+ * at all — Danny later asked for that filter back ("bij Kansen mis ik ook nog de
+ * statussen"), so OpportunitiesTab now has one, keyed on `stage`. See
+ * TASKS/OPPORTUNITIES-1 above for what landed instead of the default-filter picker.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -68,7 +78,7 @@ function CustomerDisplaySettingsInner() {
   const { statuses: vacancyStatuses } = useVacancyLookups()
   const settings = useAllSettings()
 
-  // Five sub-tabs, reusing the shared underline SubTabBar (VacancyCandidateTabSettings' shape).
+  // Seven sub-tabs, reusing the shared underline SubTabBar (VacancyCandidateTabSettings' shape).
   const [activeTab, setActiveTab] = useState('customer_table')
   const tabs = [
     { id: 'customer_table', label: t('customerDisplay.tabs.customerTable.title') },
@@ -76,6 +86,8 @@ function CustomerDisplaySettingsInner() {
     { id: 'departments', label: t('customerDisplay.tabs.departments.title') },
     { id: 'contacts', label: t('customerDisplay.tabs.contacts.title') },
     { id: 'vacancies', label: t('customerDisplay.tabs.vacancies.title') },
+    { id: 'tasks', label: t('customerDisplay.tabs.tasks.title') },
+    { id: 'opportunities', label: t('customerDisplay.tabs.opportunities.title') },
   ]
 
   // Immediate-persist setter for one tab's default-filter key — always the exact key,
@@ -135,6 +147,17 @@ function CustomerDisplaySettingsInner() {
               value={getStringSetting(settings, 'customer_vacancy_default_status_filter')}
               onChange={setDefaultFilter('customer_vacancy_default_status_filter')} />
           </div>
+        )}
+
+        {/* Taken — a single colour toggle, no default-filter picker (TASKS/OPPORTUNITIES-1). */}
+        {activeTab === 'tasks' && (
+          <SchemaSection schema={tabSchema('tasks', 'tasks')} />
+        )}
+
+        {/* Kansen — a single colour toggle; the stage filter itself has no tenant-default
+            setting yet (TASKS/OPPORTUNITIES-1). */}
+        {activeTab === 'opportunities' && (
+          <SchemaSection schema={tabSchema('opportunities', 'opportunities')} />
         )}
       </div>
     </div>

@@ -7,6 +7,13 @@
  * ?open=<id> deep link, mirrors EntityLink); delete asks for confirmation and
  * calls DELETE /opportunities/{id}. The open-flex-shifts section (Planning module)
  * is unrelated to Kansen and stays as its own section below.
+ *
+ * Same drill-down treatment as Locaties/Afdelingen/Contactpersonen (Danny: "bij
+ * Kansen mis ik ook nog de statussen"): a stage filter via the shared
+ * StatusFilterSelect/useStatusFilter (an opportunity has no separate status axis,
+ * only `stage` — the vocabulary this filter narrows on, never a status field the
+ * API does not return) and a colour-on/off toggle for the stage chip, mirroring
+ * `customer_department_table_color_status`.
  */
 import type { ReactNode } from 'react'
 import { useState } from 'react'
@@ -28,12 +35,18 @@ import { useConfirm } from '@/hooks/useConfirm'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import AddOpportunityModal from '@/pages/opportunities/AddOpportunityModal'
 import { mapOpportunity } from '@/pages/opportunities/data/mapOpportunity'
+import { useOpportunityStages } from '@/lib/useOpportunityStages'
+import StatusFilterSelect, { useStatusFilter } from './StatusFilterSelect'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import type { Opportunity } from '@/types/opportunity'
 import { useCustomerOpenShifts, useCustomerOpportunities } from '../hooks/useCustomerDrawerData'
 import type { Id } from '@/types/common'
 
 const Muted = ({ text }: { text: ReactNode }) => <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{text}</div>
 const money = new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
+// Plain-text fallback style for the stage chip toggled off (CHIPKLEUR-INSTELBAAR-1) —
+// mirrors the `plainCell` convention in DepartmentsPanel/LocationsTab.
+const plainCell = { color: 'var(--text)', fontSize: 12 }
 
 // Section — open flex shifts (planning), only when the tenant has the module.
 // Unrelated to the Kansen pipeline; kept here since there is no other tab for it.
@@ -75,7 +88,19 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
   // mode (mirrors AddLocationModal doubling as create+edit) — no separate form.
   const [editingOpp, setEditingOpp] = useState<Opportunity | null>(null)
   const { confirm, dialog } = useConfirm()
-  const rows = raw.map(mapOpportunity)
+  const allRows = raw.map(mapOpportunity)
+
+  // Stage filter — same shared component/hook as Locaties/Afdelingen/Contactpersonen
+  // (StatusFilterSelect.tsx), keyed off `stageValue` since an opportunity has no
+  // separate status axis, only a pipeline stage.
+  const { stages } = useOpportunityStages()
+  const { value: stageFilter, toggle: toggleStage, filtered: rows } =
+    useStatusFilter(allRows, stages, o => String(o.stageValue ?? ''))
+
+  // Colour-on/off flag for the stage column (CHIPKLEUR-INSTELBAAR-1) — defaults ON,
+  // so an absent setting keeps today's coloured-chip look.
+  const settings = useAllSettings()
+  const colorStage = getBoolSetting(settings, 'customer_opportunity_table_color_stage', true)
 
   const remove = (o: Opportunity) => {
     confirm(t('opportunities.deleteConfirm'), () => {
@@ -87,7 +112,9 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
     { key: 'title', header: t('opportunities.col.title'), sortable: true, sortValue: o => o.title,
       render: o => <button onClick={() => openEntity('opportunities', o.id)} style={{ padding: 0, background: 'none', border: 'none', font: 'inherit', color: 'var(--color-primary)', cursor: 'pointer', textAlign: 'left' }}>{o.title}</button> },
     { key: 'stage', header: t('opportunities.col.stage'), sortable: true, sortValue: o => o.stage,
-      render: o => o.stage ? <SoftChip label={o.stage} color={o.stageColor} /> : '—' },
+      render: o => !o.stage ? '—' : colorStage
+        ? <SoftChip label={o.stage} color={o.stageColor} />
+        : <span style={plainCell}>{o.stage}</span> },
     { key: 'value', header: t('opportunities.col.value'), align: 'right', cellStyle: { color: 'var(--text)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace' }, sortable: true,
       sortValue: o => o.value ?? -1, render: o => o.value != null ? money.format(o.value) : '—' },
     { key: 'expectedClose', header: t('opportunities.col.expectedClose'), cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, sortable: true,
@@ -109,7 +136,13 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <SectionCard title={t('opportunities.title')} action={
-        <DrawerAddButton onClick={() => setAdding(true)} label={t('opportunities.newOpportunity')} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Options key on the stage VALUE slug (not the lookup's id) — an opportunity
+              row only ever carries `stageValue`, never a stage id (§3B, no invented axis). */}
+          <StatusFilterSelect value={stageFilter} onToggle={toggleStage} statuses={stages}
+            optionKey={s => String(s.value ?? s.id ?? '')} />
+          <DrawerAddButton onClick={() => setAdding(true)} label={t('opportunities.newOpportunity')} />
+        </div>
       }>
         {error && <Muted text={t('opportunities.loadError')} />}
         {!error && (

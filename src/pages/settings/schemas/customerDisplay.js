@@ -39,5 +39,11 @@ export default {
     { key: 'customer_department_table_color_location', type: 'toggle', default: true, group: 'departments' },
     { key: 'customer_location_table_color_status',     type: 'toggle', default: true, group: 'locations' },
     { key: 'customer_department_table_color_status',   type: 'toggle', default: true, group: 'departments' },
+    // TAKEN/KANSEN-STYLE-1 (Danny, this task): the Taken and Kansen sub-tabs picked up
+    // the same colour-on/off convention as the other drill-down tables — Taken colours
+    // its status chip, Kansen its stage chip. Both default ON so an absent setting
+    // keeps today's always-coloured look unchanged.
+    { key: 'customer_task_table_color_status',        type: 'toggle', default: true, group: 'tasks' },
+    { key: 'customer_opportunity_table_color_stage',  type: 'toggle', default: true, group: 'opportunities' },
   ],
 }

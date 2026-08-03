@@ -78,11 +78,19 @@ export const STATUS_FILTER_ALL = 'all'
  * answers a moment later — a silent bug, caught by this feature's own test. Callers that
  * never pass a `tenantDefault` at all default this to `true`, so their behaviour is exactly
  * the original, unraced guess.
+ *
+ * `T` is deliberately UNCONSTRAINED (not `T extends HasStatus`). A row type that has no
+ * `statusId`/`status` field at all — an Opportunity, which only carries a pipeline `stage` —
+ * still needs this hook with its OWN `keyOf`. Constraining `T` to the all-optional `HasStatus`
+ * made TS's weak-type check reject `Opportunity[]` outright ("no properties in common"), and
+ * then fall back to inferring `T = HasStatus`, breaking a caller's own `keyOf` callback too.
+ * The default `keyOf` below casts internally instead, so callers that DO carry `statusId`/
+ * `status` (locations/departments/contacts) keep working unchanged via the same default.
  */
-export function useStatusFilter<T extends HasStatus>(
+export function useStatusFilter<T>(
   rows: T[],
   statuses: LookupOption[],
-  keyOf: (row: T) => string = r => String(r.statusId ?? r.status ?? ''),
+  keyOf: (row: T) => string = r => String((r as HasStatus).statusId ?? (r as HasStatus).status ?? ''),
   tenantDefault?: string | null,
   settingsLoaded: boolean = true,
 ) {
@@ -119,13 +127,19 @@ export function useStatusFilter<T extends HasStatus>(
   return { value, setValue, toggle, filtered }
 }
 
-export default function StatusFilterSelect({ value, onToggle, statuses }: {
+export default function StatusFilterSelect({ value, onToggle, statuses, optionKey = s => String(s.id ?? s.value) }: {
   value: string[]
   onToggle: (v: string) => void
   statuses: LookupOption[]
+  // How an option's own filter identity is derived from the lookup row (default: the
+  // real backend id, falling back to its value slug) — Location/Department/Contact rows
+  // carry a matching `statusId`, so the default keeps working unchanged. Opportunity rows
+  // carry no stage id at all (§3B: stage/stageValue/stageColor only), so OpportunitiesTab
+  // overrides this to key on `value` instead, matching its own row-side `stageValue`.
+  optionKey?: (s: LookupOption) => string
 }) {
   const { t } = useTranslation('customers')
-  const options = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
+  const options = statuses.map(s => ({ value: optionKey(s), label: s.label }))
   // One selected reads as that status; several read as a count — never a truncated list.
   const label = value.length === 0
     ? t('filters.allStatuses')
