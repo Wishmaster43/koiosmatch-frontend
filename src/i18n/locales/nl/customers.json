@@ -282,7 +282,7 @@
       "status": "Status",
       "mobile": "Mobiel",
       "lastContact": "Laatste contact",
-      "locationPrimary": "Hoofdcontact"
+      "locationPrimary": "Primair contact"
     },
     "detail": {
       "infoTitle": "Contactpersoon",
@@ -294,7 +294,7 @@
       "numbersTitle": "Telefoonnummers",
       "whatsapp": "Open in WhatsApp",
       "callPhone": "Bellen",
-      "primary": "Primair contact",
+      "primary": "Hoofdcontact klant",
       "location": "Locatie",
       "department": "Afdeling",
       "none": "Niet opgegeven",

@@ -282,7 +282,7 @@
       "status": "Status",
       "mobile": "Mobile",
       "lastContact": "Last contact",
-      "locationPrimary": "Main contact"
+      "locationPrimary": "Primary contact"
     },
     "detail": {
       "infoTitle": "Contact",
@@ -294,7 +294,7 @@
       "numbersTitle": "Phone numbers",
       "whatsapp": "Open in WhatsApp",
       "callPhone": "Call",
-      "primary": "Primary contact",
+      "primary": "Customer main contact",
       "location": "Location",
       "department": "Department",
       "none": "Not provided",
