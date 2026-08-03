@@ -1,0 +1,60 @@
+/**
+ * ContactDetailsCard — the "Contact" card of AddContactPersonModal: e-mail/
+ * telefoon/mobiel (Danny 27-07: exact card the request named). Extracted
+ * (§0.3 — the ~400-line split trigger, 2026-08-03); pure presentational — the
+ * duplicate/422 CHECK stays in the container (it needs the customer's other
+ * contacts + the server response), this card only renders the already-computed
+ * error flag and message string per field.
+ */
+import { Field, TextField } from '@/components/forms/fields'
+import { cardHead, cardBox, row3Even } from '@/components/ui/modalCards'
+
+// Duplicate/server message line under email·phone·mobile — the client-side
+// duplicate message wins over the server's own message when both exist (same collision).
+function FieldError({ text }: { text?: string }) {
+  if (!text) return null
+  return <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger)' }}>{text}</div>
+}
+
+interface ContactDetailsCardProps {
+  cardLabel: string
+  emailLabel: string; phoneLabel: string; mobileLabel: string
+  email: string; onEmailChange: (v: string) => void; emailError?: boolean; emailMessage?: string
+  phone: string; onPhoneChange: (v: string) => void; phoneError?: boolean; phoneMessage?: string
+  mobile: string; onMobileChange: (v: string) => void; mobileError?: boolean; mobileMessage?: string
+}
+
+export default function ContactDetailsCard({
+  cardLabel, emailLabel, phoneLabel, mobileLabel,
+  email, onEmailChange, emailError, emailMessage,
+  phone, onPhoneChange, phoneError, phoneMessage,
+  mobile, onMobileChange, mobileError, mobileMessage,
+}: ContactDetailsCardProps) {
+  return (
+    <div>
+      <div style={cardHead}>{cardLabel}</div>
+      <div style={cardBox}>
+        <div style={row3Even}>
+          <div>
+            <Field label={emailLabel}>
+              <TextField type="email" value={email} onChange={onEmailChange} placeholder="naam@klant.nl" error={emailError} />
+            </Field>
+            <FieldError text={emailMessage} />
+          </div>
+          <div>
+            <Field label={phoneLabel}>
+              <TextField value={phone} onChange={onPhoneChange} error={phoneError} />
+            </Field>
+            <FieldError text={phoneMessage} />
+          </div>
+          <div>
+            <Field label={mobileLabel}>
+              <TextField value={mobile} onChange={onMobileChange} error={mobileError} />
+            </Field>
+            <FieldError text={mobileMessage} />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

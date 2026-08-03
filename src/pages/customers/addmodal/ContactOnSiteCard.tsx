@@ -7,6 +7,12 @@
  * the parent's own form state, no local state of its own besides derived
  * display options.
  *
+ * Moved from the sibling `locationmodal/` folder into `addmodal/` (housekeeping,
+ * 2026-08-03): the two-sub-folder split (customers/addmodal/ + customers/
+ * locationmodal/) for what is really ONE modal-card family was an inconsistency —
+ * every customers create-modal card now lives in this one folder. No behaviour
+ * change, import path only.
+ *
  * The SUBMIT CHAIN (location → contact → coupling, `splitContactName`) stays in
  * AddLocationModal — it orchestrates across this card AND the just-created
  * location/contact records, so it is container logic (§3: containers wire,

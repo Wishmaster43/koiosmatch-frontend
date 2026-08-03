@@ -1,13 +1,18 @@
 /**
- * AddressCard — the customer's own visiting address (KLANT-ADRES-1), added so the
- * "+ Klant" create form mirrors "+ Kandidaat" 1:1 (Danny 02-08: "de + nieuwe klant
- * popup moet lijken op + nieuwe kandidaat"). Full-width, three rows — street/no/
- * suffix, postcode/city, province/country — exactly like AddCandidateModal's own
+ * CustomerAddressCard — the customer's own visiting address (KLANT-ADRES-1), added
+ * so the "+ Klant" create form mirrors "+ Kandidaat" 1:1 (Danny 02-08: "de + nieuwe
+ * klant popup moet lijken op + nieuwe kandidaat"). Full-width, three rows — street/
+ * no/suffix, postcode/city, province/country — exactly like AddCandidateModal's own
  * AddressCard; the country/province cascade is the same shared useProvinces hook.
  * Labels reuse the customers namespace's existing `locations.detail.*` keys (the
  * SAME labels the drawer's OverviewTab already uses for this customer's address),
  * so this is one label per field, not a second translated copy. Pure
  * presentational: form values in, `set()` callback out.
+ *
+ * Renamed from `AddressCard.tsx` (housekeeping, 2026-08-03 addmodal/locationmodal
+ * consolidation): a second address card was about to land for AddLocationModal
+ * (`LocationAddressCard`) in this same folder — a bare `AddressCard` next to it
+ * would read as ambiguous. No behaviour change, import path only.
  */
 import { useTranslation } from 'react-i18next'
 import type { CustomerForm } from '../AddCustomerModal'

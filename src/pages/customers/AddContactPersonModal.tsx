@@ -38,6 +38,14 @@
  * reappearing only when the tenant marked status_id required
  * (customer_contact_required_fields, FlatRequiredFieldsGuard catalog), mirrors
  * AddLocationModal/AddDepartmentModal's own gate.
+ *
+ * CARD SPLIT (§0.3 — the ~400-line split trigger, 2026-08-03): every card's JSX
+ * moved to its own component in `addmodal/` (ContactIdentityCard,
+ * ContactDetailsCard) or `./` (ContactLinkCard, already extracted) — pure
+ * extraction, zero behaviour change. This container keeps everything that
+ * orchestrates ACROSS cards: all form/error state, the primary-replace confirm,
+ * the client-side duplicate check (+ its derived error/message strings), the
+ * location→department cascade, and the submit chain + 422 field-error mapping.
  */
 import { useState, useEffect } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
@@ -45,16 +53,15 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
 import { X, Users } from 'lucide-react'
-import { Field, TextField } from '@/components/forms/fields'
-import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useGenders } from '@/lib/useGenders'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
-import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
 import CollapsedCard from '@/components/ui/CollapsedCard'
 import SubEntityImportCard, { subEntityImportTitle } from './SubEntityImportCard'
+import ContactIdentityCard from './addmodal/ContactIdentityCard'
+import ContactDetailsCard from './addmodal/ContactDetailsCard'
 import ContactLinkCard from './ContactLinkCard'
 import { useImportWizard } from '@/pages/settings/sections/importeren/useImportWizard'
 import type { ContactPayload } from './hooks/useCustomerContacts'
@@ -62,11 +69,6 @@ import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 
 interface OptionRow { id: Id; name: string }
-
-// Matches the TextField input footprint exactly (padding/font-size/radius) — the
-// CreatableSelect trigger otherwise renders smaller (6px/12px vs 8px/13px), the
-// same mismatch already fixed once in `pages/candidates/addmodal/fields.tsx`.
-const CREATABLE_STYLE = { padding: '8px 11px', borderRadius: 8, fontSize: 13 }
 
 // Normalize an email for duplicate comparison — trimmed, case-insensitive; empty never matches.
 const normalizeEmail = (v: string) => v.trim().toLowerCase()
@@ -83,13 +85,6 @@ const API_TO_FORM: Record<string, string> = {
   first_name: 'firstName', middle_name: 'middleName', last_name: 'lastName', email: 'email', phone: 'phone', mobile: 'mobile', gender: 'gender',
   function: 'role', customer_location_id: 'locationId', customer_department_id: 'departmentId',
   status_id: 'statusId', is_primary: 'isPrimary',
-}
-
-// Duplicate/server message line under email·phone·mobile — the client-side
-// duplicate message wins over the server's own message when both exist (same collision).
-function FieldError({ text }: { text?: string }) {
-  if (!text) return null
-  return <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger)' }}>{text}</div>
 }
 
 export default function AddContactPersonModal({
@@ -279,6 +274,13 @@ export default function AddContactPersonModal({
   // Symmetric to showLocationPicker — hides the department field when adding
   // "in this department" from a department's own nested contact list.
   const showDepartmentPicker = !lockDepartmentId
+  // ContactDetailsCard is pure presentational — the duplicate object stays here
+  // (it needs `existing`), only the already-formatted message string goes down.
+  const emailMessage = emailDup ? t('subModal.duplicate.email', { name: emailDup.name }) : fieldMessages.email
+  const phoneMessage = phoneDup ? t('subModal.duplicate.phone', { name: phoneDup.name }) : fieldMessages.phone
+  const mobileMessage = mobileDup ? t('subModal.duplicate.mobile', { name: mobileDup.name }) : fieldMessages.mobile
+  // Contact-function/gender option rows for ContactIdentityCard.
+  const genderOptions = genders.map(g => ({ value: g.value, label: g.label }))
 
   return (
     <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
@@ -299,71 +301,22 @@ export default function AddContactPersonModal({
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Persoon — name + function (Danny 27-07 card split: name/lastname/functie). */}
-          <div>
-            <div style={cardHead}>{t('subModal.groups.person')}</div>
-            <div style={cardBox}>
-              <div style={row3Even}>
-                <Field label={t('subModal.firstName')} required>
-                  <TextField value={form.firstName} onChange={v => set('firstName', v)} error={errors.firstName} />
-                </Field>
-                {/* CONTACT-TUSSENVOEGSEL-1: without this the backend stores "Jan Vries"
-                    for "Jan de Vries" — and an edit of an existing contact wiped it. */}
-                <Field label={t('subModal.middleName')}>
-                  <TextField value={form.middleName} onChange={v => set('middleName', v)} placeholder="van" />
-                </Field>
-                <Field label={t('subModal.lastName')} required>
-                  <TextField value={form.lastName} onChange={v => set('lastName', v)} error={errors.lastName} />
-                </Field>
-              </div>
-              {(errors.firstName || errors.lastName) && <div style={{ fontSize: 11, color: 'var(--color-danger)' }}>{t('subModal.required')}</div>}
-              {/* Function is a searchable/creatable tenant lookup (contact-function
-                  vocabulary, honours the tenant's free-entry setting). It sits in the same
-                  two-column grid as the names so it lines up under Voornaam instead of
-                  stretching the full 1060px — a lone full-width picker read as a banner
-                  (Danny 27-07: "functie is lelijk groot zo"). */}
-              <div style={row2}>
-                <Field label={t('subModal.role')}>
-                  <CreatableSelect value={form.role} onChange={v => set('role', v)} options={contactFunctions}
-                    allowCreate={allowFreeEntry} placeholder={t('common:select')} style={CREATABLE_STYLE} />
-                </Field>
-                {/* Geslacht (Danny's original request, unblocked now the column exists):
-                    options come from the tenant /genders lookup and the field stores the
-                    VALUE SLUG the backend validates with exists:candidate_genders,value. */}
-                <Field label={t('subModal.gender')}>
-                  <CreatableSelect value={form.gender || null} onChange={v => set('gender', v)} allowCreate={false}
-                    placeholder={t('subModal.noneOption')} style={CREATABLE_STYLE}
-                    options={genders.map(g => ({ value: g.value, label: g.label }))} />
-                </Field>
-              </div>
-            </div>
-          </div>
+          <ContactIdentityCard
+            firstName={form.firstName} onFirstNameChange={v => set('firstName', v)} firstNameError={errors.firstName}
+            middleName={form.middleName} onMiddleNameChange={v => set('middleName', v)}
+            lastName={form.lastName} onLastNameChange={v => set('lastName', v)} lastNameError={errors.lastName}
+            role={form.role} onRoleChange={v => set('role', v)} contactFunctions={contactFunctions} allowFreeEntry={allowFreeEntry}
+            gender={form.gender} onGenderChange={v => set('gender', v)} genders={genderOptions}
+          />
 
           {/* Contact — e-mail/telefoon/mobiel (Danny 27-07: exact card the request named). */}
-          <div>
-            <div style={cardHead}>{t('subModal.groups.contactInfo')}</div>
-            <div style={cardBox}>
-              <div style={row3Even}>
-                <div>
-                  <Field label={t('subModal.email')}>
-                    <TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder="naam@klant.nl" error={!!emailDup || errors.email} />
-                  </Field>
-                  <FieldError text={emailDup ? t('subModal.duplicate.email', { name: emailDup.name }) : fieldMessages.email} />
-                </div>
-                <div>
-                  <Field label={t('subModal.phone')}>
-                    <TextField value={form.phone} onChange={v => set('phone', v)} error={!!phoneDup || errors.phone} />
-                  </Field>
-                  <FieldError text={phoneDup ? t('subModal.duplicate.phone', { name: phoneDup.name }) : fieldMessages.phone} />
-                </div>
-                <div>
-                  <Field label={t('subModal.mobile')}>
-                    <TextField value={form.mobile} onChange={v => set('mobile', v)} error={!!mobileDup || errors.mobile} />
-                  </Field>
-                  <FieldError text={mobileDup ? t('subModal.duplicate.mobile', { name: mobileDup.name }) : fieldMessages.mobile} />
-                </div>
-              </div>
-            </div>
-          </div>
+          <ContactDetailsCard
+            cardLabel={t('subModal.groups.contactInfo')}
+            emailLabel={t('subModal.email')} phoneLabel={t('subModal.phone')} mobileLabel={t('subModal.mobile')}
+            email={form.email} onEmailChange={v => set('email', v)} emailError={!!emailDup || errors.email} emailMessage={emailMessage}
+            phone={form.phone} onPhoneChange={v => set('phone', v)} phoneError={!!phoneDup || errors.phone} phoneMessage={phoneMessage}
+            mobile={form.mobile} onMobileChange={v => set('mobile', v)} mobileError={!!mobileDup || errors.mobile} mobileMessage={mobileMessage}
+          />
 
           {/* Koppeling — locatie/afdeling (searchable, allowCreate=false: real relational
               ids) + status/primair-vlag for that link. Extracted into its own component
