@@ -7,12 +7,13 @@
  * Planning tab); the Opportunities tab's flex-shift section is gated inside it.
  */
 import { useState, useEffect } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
-import { Edit2, Save, X } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Trash2 } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
+import CustomerHeaderActions from './drawer/CustomerHeaderActions'
 import PdokCard from '@/components/drawer/PdokCard'
 import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
@@ -22,6 +23,9 @@ import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
 import { initialsOf } from '@/lib/initials'
+import api from '@/lib/api'
+import { notifyError, notifySuccess } from '@/lib/notify'
+import { useConfirm } from '@/hooks/useConfirm'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ChangelogTab from './drawer/ChangelogTab'
 import OverviewTab from './drawer/OverviewTab'
@@ -29,6 +33,7 @@ import LocationsTab from './drawer/LocationsTab'
 import DepartmentsTab from './drawer/DepartmentsTab'
 import ContactsTab from './drawer/ContactsTab'
 import VacanciesTab from './drawer/VacanciesTab'
+import MatchesTab from './drawer/MatchesTab'
 import OpportunitiesTab from './drawer/OpportunitiesTab'
 import PlanningTab from './drawer/PlanningTab'
 import StatisticsTab from './drawer/StatisticsTab'
@@ -47,6 +52,9 @@ const TABS = [
   { id: 'departments',   tKey: 'departments' },
   { id: 'contacts',      tKey: 'contacts' },
   { id: 'vacancies',     tKey: 'vacancies' },
+  // MATCHES-TAB-1 (Danny): mirrors the candidate drawer's own Matches tab (§3A/§3B)
+  // — read-only, GET /matches?customer_id={id}.
+  { id: 'matches',       tKey: 'matches' },
   { id: 'opportunities', tKey: 'opportunities' },
   { id: 'planning',      tKey: 'planning' },
   // Danny 28-07: "Prijsafspraken hernoemen naar Financieel, met 2 subtabjes". The tab id
@@ -105,11 +113,14 @@ export default function CustomerDrawer({
   // (BackofficeEntityRegistry) — the UI check; the backend re-checks regardless (§7).
   const hasPermission = auth?.hasPermission ?? (() => false)
   const canLinkBackoffice = hasPermission('customers.update')
+  // DELETE-ICON-1 (Danny): the drawer's soft-delete trash icon, same permission the
+  // page's own bulk-archive button already gates on.
+  const canDelete = hasPermission('customers.delete')
   const { formatDateTime } = useDateFormat()
   // The Extra tab only shows when the tenant has defined customer custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer')
-  // KLANT-FASE-1: the lifecycle-phase lookup behind the header picker (session-cached).
-  const { phases } = useCustomerPhases()
+  // KLANT-FASE-1: the lifecycle-phase lookup behind the header badge (session-cached).
+  const { phases, phaseMeta } = useCustomerPhases()
   // Fallback note-author avatar = the signed-in user (mirrors the candidate tab);
   // note-type lookups now live inside CustomerNotesTab itself.
   const authorInitials = initialsOf(auth?.user?.name ?? '')
@@ -151,11 +162,34 @@ export default function CustomerDrawer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contactsApi.contacts.length])
 
+  // DELETE-ICON-1: the house confirm dialog (§0 restschuld) — same shared hook the
+  // candidate drawer's own trash icon and OpportunitiesTab's delete already use.
+  const { confirm, dialog: deleteDialog } = useConfirm()
+
   if (!c) return null
 
   // Enter/save the header name edit; save flows through the optimistic onUpdate.
   const startHeaderEdit = () => { setHeaderName(c.name ?? ''); setHeaderEditing(true) }
   const saveHeader = () => { if (headerName.trim()) onUpdate?.(c.id, { name: headerName.trim() }); setHeaderEditing(false) }
+
+  // DELETE-ICON-1: soft-delete this customer (DELETE /customers/{id}, the entity-wide
+  // per-record convention, §10) — the backend re-checks live links (§3B) and answers
+  // 409 when any still hang on it, mapped to i18n rather than shown as raw server text.
+  // Flags `archived` locally (never a stray PATCH — 'archived' isn't in
+  // useCustomerRecord's FIELD_MAP, mirrors the locationsCount bumps above) so the
+  // page's existing archived-view filter hides the row immediately, then closes.
+  const requestDelete = () => {
+    confirm(t('drawer.deleteConfirm', { name: c.name }), () => {
+      api.delete(`/customers/${c.id}`).then(() => {
+        notifySuccess(t('drawer.deletedNamed', { name: c.name }))
+        onUpdate?.(c.id, { archived: true })
+        onClose()
+      }).catch(err => {
+        const status = (err as { response?: { status?: number } })?.response?.status
+        notifyError(t(status === 409 ? 'drawer.deleteBlocked' : 'drawer.deleteFailed', { name: c.name }))
+      })
+    }, { danger: true })
+  }
 
   // Planning tab only for tenants with the Planning module (same gate as sidebar);
   // Extra tab only when ≥1 active custom field is defined (§3A(f)).
@@ -164,10 +198,10 @@ export default function CustomerDrawer({
   const currentStatus = status ?? c.status
   const currentTags   = tags ?? (c.tags as string[]) ?? []
   const changeStatus  = (v: string) => { setStatus(v); onUpdate?.(c.id, { status: v }) }
-  // KLANT-FASE-1: phase is its own axis next to status — the picker writes the slug,
-  // which useCustomerRecord maps onto the `phase` column (PATCH /customers/{id}).
+  // KLANT-FASE-1: phase is its own axis next to status — shown as a read-only badge
+  // (KLANT-FASE-CONVERT-1 below), backed by the `phase` column (PATCH /customers/{id}).
   const currentPhase  = phase ?? c.phase
-  const changePhase   = (v: string) => { setPhase(v); onUpdate?.(c.id, { phase: v }) }
+  const phaseInfo     = phaseMeta(currentPhase)
   // Danny 02-08: "Prospect heeft geen status" — mirrors the candidate drawer's
   // showStatus gate (useCandidateStatus.ts): a customer still in the ENTRY phase
   // isn't deployable yet, so the Status picker doesn't show at all. Resolved via
@@ -175,6 +209,20 @@ export default function CustomerDrawer({
   // why that matters), so reordering the phase lookup in Settings never misfires.
   const entryPhaseValue = phases.find(p => p.isDefault)?.value
   const showStatus = !!currentPhase && currentPhase !== entryPhaseValue
+  // KLANT-FASE-CONVERT-1 (Danny 02-08): "convert prospect to customer" mirrors the
+  // candidate's Lead → Candidate convert (§3A(c)) — a read-only phase badge next to
+  // the name (see renderTitle below) plus a one-click convert button in the header,
+  // no picker, no confirm. Target = the phase flagged `isCustomer`, NEVER an array
+  // position: the customer phase lookup carries real behaviour flags (§3B), unlike
+  // the candidate hook's index-based `phases[phaseIdx + 1]`. No isCustomer option
+  // configured on the tenant's lookup → render no convert button at all (a convert
+  // into an unknown phase is worse than none).
+  const targetPhase = phases.find(p => p.isCustomer)
+  const isEntryPhase = !!entryPhaseValue && currentPhase === entryPhaseValue
+  const doConvertPhase = () => {
+    if (!targetPhase || !c) return
+    setPhase(targetPhase.value); onUpdate?.(c.id, { phase: targetPhase.value })
+  }
 
   // Owner (account manager) picker — a fallback entry ONLY when the current
   // owner is not in the selectable `users` list (always prepending it duplicated
@@ -229,6 +277,7 @@ export default function CustomerDrawer({
         />
       )
       case 'vacancies':     return <VacanciesTab customerId={c.id} customerName={c.name} />
+      case 'matches':       return <MatchesTab customerId={c.id} />
       case 'opportunities': return <OpportunitiesTab customerId={c.id} customerName={c.name} />
       case 'planning':      return <PlanningTab customerId={c.id ?? ''} />
       case 'statistics':    return <StatisticsTab c={c} onGoToVacancies={() => setActiveTab?.('vacancies')} />
@@ -278,6 +327,13 @@ export default function CustomerDrawer({
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{c.name}</div>
+        {/* KLANT-FASE-CONVERT-1: Fase = colour-coded read-only badge next to the name
+            (mirrors the candidate's CandidateTitle, §3A(c)) — convert lives in the
+            header actions below, never a picker. */}
+        {currentPhase && (
+          <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 9px', borderRadius: 999,
+            background: phaseInfo.color + '1A', color: phaseInfo.color, border: `1px solid ${phaseInfo.color}55` }}>{phaseInfo.label}</span>
+        )}
         {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
         <ReferenceNumberChip value={c.referenceNumber} />
       </div>
@@ -285,18 +341,17 @@ export default function CustomerDrawer({
     </>
   )
 
-  // Edit-pencil that toggles to save/cancel (same pattern as the candidate header).
-  const iconBtn: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 }
-  const headerActions = headerEditing ? (
-    <>
-      <button onClick={saveHeader} title={t('drawer.save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={14} /></button>
-      <button onClick={() => setHeaderEditing(false)} title={t('drawer.cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={14} /></button>
-    </>
-  ) : (
-    <button onClick={startHeaderEdit} title={t('drawer.edit')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
+  // Header actions: convert (entry phase) plus the edit/save/cancel toggles — split
+  // into its own component (mirrors the candidate's CandidateHeaderActions, §3A).
+  const headerActions = (
+    <CustomerHeaderActions
+      isEntryPhase={isEntryPhase} targetPhase={targetPhase} onConvert={doConvertPhase}
+      headerEditing={headerEditing} onStartEdit={startHeaderEdit} onSaveEdit={saveHeader} onCancelEdit={() => setHeaderEditing(false)}
+    />
   )
 
   return (
+    <>
     <EntityDrawer
       entity={c}
       initialTab={initialTab}
@@ -323,17 +378,26 @@ export default function CustomerDrawer({
                 cramped 360px dropdown with no focus trap; now the same 900px centred
                 panel as the candidate drawer. */}
             <ChangelogPopover><ChangelogTab customerId={c.id} /></ChangelogPopover>
+            {/* DELETE-ICON-1: soft-delete (§3B), same position/style as the candidate
+                drawer's own trash icon — permission-gated, hidden once already archived.
+                No merge icon here: customers have no merge endpoint yet (candidates do),
+                so rendering one would be a fake affordance (§3). */}
+            {canDelete && !c.archived && (
+              <button onClick={requestDelete}
+                title={t('drawer.delete')} aria-label={t('drawer.delete')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger)', opacity: 0.7 }}>
+                <Trash2 size={14} />
+              </button>
+            )}
           </>}
           actions={headerActions}
           meta={[
-            // Fase sits FIRST, left of status: "prospect or customer" is the coarser
-            // question, and the order mirrors the table columns (phase → status).
-            { key: 'phase', label: t('drawer.phase'), value: currentPhase, width: 160,
-              options: phases.map(p => ({ value: p.value, label: p.label })), onChange: changePhase, menuWidth: 170 },
             // Danny 02-08: no Status picker at all while in the entry phase — a
             // Prospect has no deployability status yet (mirrors the candidate
             // drawer's showStatus gate; see CustomerStatusChip for the read-only
-            // display-side counterpart of this same rule).
+            // display-side counterpart of this same rule). KLANT-FASE-CONVERT-1:
+            // Fase moved OUT of this picker list into the read-only header badge
+            // (mirrors the candidate header, §3A(c)) — see renderTitle above.
             ...(showStatus ? [{ key: 'status', label: t('drawer.status'), value: currentStatus, width: 160,
               options: statuses.map(s => ({ value: s.value, label: s.label })), onChange: changeStatus, menuWidth: 170 }] : []),
             { key: 'owner', label: t('drawer.owner'), value: ownerValue, width: 200,
@@ -346,5 +410,8 @@ export default function CustomerDrawer({
         />
       )}
     />
+    {/* DELETE-ICON-1: the shared confirm dialog, mounted once per drawer. */}
+    {deleteDialog}
+    </>
   )
 }

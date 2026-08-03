@@ -81,6 +81,7 @@
       "departments": "Services",
       "contacts": "Contacts",
       "vacancies": "Postes",
+      "matches": "Matchs",
       "opportunities": "Opportunités",
       "planning": "Planning",
       "statistics": "Statistiques",
@@ -97,7 +98,12 @@
     "photoUpload": "Téléverser le logo",
     "photoRemove": "Supprimer le logo",
     "phase": "Phase",
-    "convertTo": "Convertir en {{phase}}"
+    "convertTo": "Convertir en {{phase}}",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer {{name}} ? Le client passe dans Archivés et peut être restauré.",
+    "deletedNamed": "{{name}} supprimé",
+    "deleteFailed": "Échec de la suppression (liens actifs possibles).",
+    "deleteBlocked": "Impossible de supprimer {{name}} : des liens actifs existent encore."
   },
   "overview": {
     "general": "Général",
@@ -624,5 +630,8 @@
     "loading": "Chargement des tâches…",
     "error": "Impossible de charger les tâches",
     "openTask": "Ouvrir la tâche"
+  },
+  "matches": {
+    "loadError": "Impossible de charger les matchs."
   }
 }

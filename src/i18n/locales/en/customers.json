@@ -81,6 +81,7 @@
       "departments": "Departments",
       "contacts": "Contacts",
       "vacancies": "Vacancies",
+      "matches": "Matches",
       "opportunities": "Opportunities",
       "planning": "Planning",
       "statistics": "Statistics",
@@ -97,7 +98,12 @@
     "photoUpload": "Upload logo",
     "photoRemove": "Remove logo",
     "phase": "Phase",
-    "convertTo": "Convert to {{phase}}"
+    "convertTo": "Convert to {{phase}}",
+    "delete": "Delete",
+    "deleteConfirm": "Delete {{name}}? The customer moves to Archived and can be restored.",
+    "deletedNamed": "{{name}} deleted",
+    "deleteFailed": "Deleting failed (possibly active links).",
+    "deleteBlocked": "Cannot delete {{name}}: active links still exist."
   },
   "overview": {
     "general": "General",
@@ -624,5 +630,8 @@
     "loading": "Loading tasks…",
     "error": "Tasks could not be loaded",
     "openTask": "Open task"
+  },
+  "matches": {
+    "loadError": "Could not load matches."
   }
 }

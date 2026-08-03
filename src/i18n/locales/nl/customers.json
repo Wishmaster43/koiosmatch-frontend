@@ -81,6 +81,7 @@
       "departments": "Afdelingen",
       "contacts": "Contactpersonen",
       "vacancies": "Vacatures",
+      "matches": "Matches",
       "opportunities": "Kansen",
       "planning": "Planning",
       "statistics": "Statistieken",
@@ -97,7 +98,12 @@
     "photoUpload": "Logo uploaden",
     "photoRemove": "Logo verwijderen",
     "phase": "Fase",
-    "convertTo": "Converteer naar {{phase}}"
+    "convertTo": "Converteer naar {{phase}}",
+    "delete": "Verwijderen",
+    "deleteConfirm": "{{name}} verwijderen? De klant verhuist naar Gearchiveerd en kan teruggehaald worden.",
+    "deletedNamed": "{{name}} verwijderd",
+    "deleteFailed": "Verwijderen is mislukt (mogelijk actieve koppelingen).",
+    "deleteBlocked": "{{name}} kan niet verwijderd worden: er zijn nog actieve koppelingen."
   },
   "overview": {
     "general": "Algemeen",
@@ -624,5 +630,8 @@
     "loading": "Taken laden…",
     "error": "Taken konden niet worden geladen",
     "openTask": "Open taak"
+  },
+  "matches": {
+    "loadError": "Matches konden niet worden geladen."
   }
 }

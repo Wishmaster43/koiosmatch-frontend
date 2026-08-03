@@ -1,37 +1,61 @@
 /**
- * CustomerDrawer — KLANT-FASE-1 header phase picker.
+ * CustomerDrawer — KLANT-FASE-1 header lifecycle phase.
  *
- * "Done = clicked" (§13): the picker must really be in the header, offer the TENANT's
- * phase labels, and hand the picked SLUG to onUpdate — which useCustomerRecord then
- * maps onto PATCH /customers/{id} (covered by its own request-level test). The tab
- * bodies are stubbed; this file is about the header, not the tabs.
+ * "Done = clicked" (§13): the header shows the TENANT's phase label as a
+ * read-only badge (never a picker, §3A(c) — mirrors the candidate drawer's
+ * CandidateTitle) and, while the customer sits in the entry phase, a single
+ * "convert" button that hands the isCustomer-flagged phase SLUG to onUpdate —
+ * which useCustomerRecord then maps onto PATCH /customers/{id} (covered by its
+ * own request-level test). The tab bodies are stubbed; this file is about the
+ * header, not the tabs.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
+import api from '@/lib/api'
 import CustomerDrawer from './CustomerDrawer'
 import type { Customer } from '@/types/customer'
 
-// Tenant-renamed phases — the picker can only show these by reading the lookup.
+// DELETE-ICON-1: api.delete is the trash icon's real persistence path (§3 — no
+// fake affordance); api.get is only here so any accidental stray call resolves.
+vi.mock('@/lib/api', () => ({
+  default: { get: vi.fn(() => Promise.resolve({ data: {} })), delete: vi.fn(() => Promise.resolve({})) },
+}))
+// MatchesTab fires its own GET (proven in its own test file) — stubbed here so
+// this file stays about the drawer shell (header icons + tab wiring), not the
+// tab's internals.
+vi.mock('./drawer/MatchesTab', () => ({ default: () => <div>matches stub</div> }))
+
+// Tenant-renamed phases — the badge/convert button can only read these from the lookup.
 /* eslint-disable no-restricted-syntax -- DATA: fixture colours as the API returns them, not UI styling */
+const phasesWithCustomer = [
+  { value: 'interesse', label: 'Interesse', color: '#1B60A9', isCustomer: false, isDefault: true },
+  { value: 'vaste_klant', label: 'Vaste klant', color: '#16A34A', isCustomer: true, isDefault: false },
+]
+const mockUseCustomerPhases = vi.fn(() => ({
+  phases: phasesWithCustomer,
+  phaseMeta: (v?: string | null) => phasesWithCustomer.find(p => p.value === v)
+    ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF', isCustomer: false, isDefault: false },
+  defaultPhase: 'interesse',
+  // Explicit `: boolean` return type — without it TS 5.5+ infers a narrowing type
+  // predicate from the `=== 'vaste_klant'` check, which then rejects the plain
+  // `() => false` passed to mockReturnValueOnce below (not a type predicate).
+  isCustomerPhase: (v?: string | null): boolean => v === 'vaste_klant',
+  loading: false,
+}))
 vi.mock('@/lib/useCustomerPhases', () => ({
-  useCustomerPhases: () => ({
-    phases: [
-      { value: 'interesse', label: 'Interesse', color: '#1B60A9', isCustomer: false, isDefault: true },
-      { value: 'vaste_klant', label: 'Vaste klant', color: '#16A34A', isCustomer: true, isDefault: false },
-    ],
-    phaseMeta: (v?: string | null) => ({ value: v ?? '', label: v ?? '', color: '#9CA3AF', isCustomer: false, isDefault: false }),
-    defaultPhase: 'interesse',
-    isCustomerPhase: (v?: string | null) => v === 'vaste_klant',
-    loading: false,
-  }),
+  useCustomerPhases: () => mockUseCustomerPhases(),
 }))
 /* eslint-enable no-restricted-syntax */
-// Session + tenant plumbing the shell reads; no module/permission is needed here.
-vi.mock('@/context/AuthContext', () => ({
-  useAuth: () => ({ user: { name: 'Test User' }, hasModule: () => false, hasPermission: () => false }),
-}))
+// Session + tenant plumbing the shell reads; no module/permission is needed by
+// default. Wrapped in vi.fn() (mirrors mockUseCustomerPhases below) so the
+// DELETE-ICON-1 tests can override hasPermission per case. Explicit return type
+// (mirrors mockUseCustomerPhases' own `: boolean` note above it) — without it TS
+// narrows `hasPermission` to the literal `() => false` from this first call site.
+interface MockAuthValue { user: { name: string }; hasModule: () => boolean; hasPermission: (p: string) => boolean }
+const mockUseAuth = vi.fn((): MockAuthValue => ({ user: { name: 'Test User' }, hasModule: () => false, hasPermission: () => false }))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [] }) }))
 // Sub-entity CRUD hooks fire their own GETs — stub them to empty, static results.
 vi.mock('./hooks/useCustomerLocations', () => ({ useCustomerLocations: () => ({ locations: [] }) }))
@@ -41,33 +65,26 @@ vi.mock('./hooks/useCustomerContacts', () => ({ useCustomerContacts: () => ({ co
 vi.mock('./drawer/OverviewTab', () => ({ default: () => <div>overview stub</div> }))
 
 const ct = (key: string) => i18n.t(key, { ns: 'customers' })
+// The convert button's label is an interpolated key — build the expected text
+// the same way the component does, rather than guessing at placeholder syntax.
+const convertLabel = (phase: string) => i18n.t('drawer.convertTo', { phase, ns: 'customers' })
 
 // 'vaste_klant' (NOT the entry phase) — the entry-phase Status-hiding rule
 // (Danny 02-08) is covered by its own describe block below; this fixture keeps
-// testing the "normal" case where both pickers show.
+// testing the "normal" case where the Status picker shows.
 const customer = { id: 1, name: 'Zorgpartners', initials: 'ZP', phase: 'vaste_klant', status: 'active',
   tags: [], notes: [], created: '', referenceNumber: 'D-1', city: 'Utrecht', industry: 'Zorg' } as unknown as Customer
 
 const statuses = [{ value: 'active', label: 'Actief' }]
 
-describe('CustomerDrawer · lifecycle phase picker (KLANT-FASE-1)', () => {
-  it('shows a Fase picker in the header, next to Status, holding the current phase label', () => {
+describe('CustomerDrawer · lifecycle phase badge (KLANT-FASE-1)', () => {
+  it('shows the phase as a READ-ONLY badge in the header, next to the name — no picker', () => {
     render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} />)
 
-    expect(screen.getByText(ct('drawer.phase'))).toBeInTheDocument()
+    expect(screen.getByText('Vaste klant')).toBeInTheDocument()
+    // Never a dropdown button for phase — the picker is gone (§3A(c): calm header).
+    expect(screen.queryByRole('button', { name: 'Vaste klant' })).toBeNull()
     expect(screen.getByText(ct('drawer.status'))).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Vaste klant' })).toBeInTheDocument()
-  })
-
-  it('picking another phase hands the SLUG to onUpdate (the PATCH path), not the label', async () => {
-    const onUpdate = vi.fn()
-    const user = userEvent.setup()
-    render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} onUpdate={onUpdate} />)
-
-    await user.click(screen.getByRole('button', { name: 'Vaste klant' }))
-    await user.click(await screen.findByRole('button', { name: 'Interesse' }))
-
-    expect(onUpdate).toHaveBeenCalledWith(1, { phase: 'interesse' })
   })
 })
 
@@ -76,7 +93,7 @@ describe('CustomerDrawer · Status picker hidden in the entry phase (Danny 02-08
     const entryCustomer = { ...customer, phase: 'interesse' } as Customer
     render(<CustomerDrawer customer={entryCustomer} onClose={() => {}} statuses={statuses} />)
 
-    expect(screen.getByText(ct('drawer.phase'))).toBeInTheDocument()
+    expect(screen.getByText('Interesse')).toBeInTheDocument()
     expect(screen.queryByText(ct('drawer.status'))).toBeNull()
   })
 
@@ -85,5 +102,140 @@ describe('CustomerDrawer · Status picker hidden in the entry phase (Danny 02-08
     render(<CustomerDrawer customer={pastEntry} onClose={() => {}} statuses={statuses} />)
 
     expect(screen.getByText(ct('drawer.status'))).toBeInTheDocument()
+  })
+})
+
+describe('CustomerDrawer · convert-to-customer button (KLANT-FASE-CONVERT-1)', () => {
+  it('renders the convert button ONLY while the customer is in the entry (Prospect) phase', () => {
+    const entryCustomer = { ...customer, phase: 'interesse' } as Customer
+    render(<CustomerDrawer customer={entryCustomer} onClose={() => {}} statuses={statuses} />)
+
+    expect(screen.getByRole('button', { name: convertLabel('Vaste klant') })).toBeInTheDocument()
+  })
+
+  it('does NOT render the convert button once past the entry phase', () => {
+    const pastEntry = { ...customer, phase: 'vaste_klant' } as Customer
+    render(<CustomerDrawer customer={pastEntry} onClose={() => {}} statuses={statuses} />)
+
+    expect(screen.queryByRole('button', { name: /Vaste klant/ })).toBeNull()
+  })
+
+  it('clicking it PATCHes onUpdate with the isCustomer-flagged phase value, not an array index guess', async () => {
+    const onUpdate = vi.fn()
+    const user = userEvent.setup()
+    const entryCustomer = { ...customer, phase: 'interesse' } as Customer
+    render(<CustomerDrawer customer={entryCustomer} onClose={() => {}} statuses={statuses} onUpdate={onUpdate} />)
+
+    await user.click(screen.getByRole('button', { name: convertLabel('Vaste klant') }))
+
+    expect(onUpdate).toHaveBeenCalledWith(1, { phase: 'vaste_klant' })
+  })
+
+  it('renders NO button at all when the tenant lookup has no isCustomer option', () => {
+    /* eslint-disable no-restricted-syntax -- DATA: fixture colours, not UI styling */
+    mockUseCustomerPhases.mockReturnValueOnce({
+      phases: [{ value: 'interesse', label: 'Interesse', color: '#1B60A9', isCustomer: false, isDefault: true }],
+      phaseMeta: (v?: string | null) => ({ value: v ?? '', label: v ?? '', color: '#9CA3AF', isCustomer: false, isDefault: false }),
+      defaultPhase: 'interesse',
+      isCustomerPhase: () => false,
+      loading: false,
+    })
+    /* eslint-enable no-restricted-syntax */
+    const entryCustomer = { ...customer, phase: 'interesse' } as Customer
+    render(<CustomerDrawer customer={entryCustomer} onClose={() => {}} statuses={statuses} />)
+
+    // Only the edit-pencil action remains — no button carries a phase label at all
+    // (a convert button is the only header action that would ever render one).
+    expect(screen.getByTitle(ct('drawer.edit'))).toBeInTheDocument()
+    expect(screen.queryAllByRole('button').some(b => b.textContent?.includes('Interesse'))).toBe(false)
+  })
+})
+
+describe('CustomerDrawer · delete icon (DELETE-ICON-1)', () => {
+  const grantDelete = () => mockUseAuth.mockReturnValue({ user: { name: 'Test User' }, hasModule: () => false, hasPermission: (p: string) => p === 'customers.delete' })
+
+  it('renders NO delete icon without the customers.delete permission', () => {
+    mockUseAuth.mockReturnValue({ user: { name: 'Test User' }, hasModule: () => false, hasPermission: () => false })
+    render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} />)
+    expect(screen.queryByTitle(ct('drawer.delete'))).toBeNull()
+  })
+
+  it('renders the delete icon in the title row once customers.delete is granted', () => {
+    grantDelete()
+    render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} />)
+    expect(screen.getByTitle(ct('drawer.delete'))).toBeInTheDocument()
+  })
+
+  it('hides the delete icon once the customer is already archived', () => {
+    grantDelete()
+    render(<CustomerDrawer customer={{ ...customer, archived: true } as Customer} onClose={() => {}} statuses={statuses} />)
+    expect(screen.queryByTitle(ct('drawer.delete'))).toBeNull()
+  })
+
+  // No merge endpoint exists for customers yet (unlike candidates) — rendering
+  // one would be a fake affordance (§3), so this must hold even when every
+  // permission is granted.
+  it('never renders a merge icon — customers have no merge endpoint yet', () => {
+    mockUseAuth.mockReturnValue({ user: { name: 'Test User' }, hasModule: () => false, hasPermission: () => true })
+    render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} />)
+    expect(screen.queryByTitle(/merge/i)).toBeNull()
+  })
+
+  it('does NOT call DELETE until the confirm dialog is accepted — cancel leaves it untouched', async () => {
+    grantDelete()
+    const user = userEvent.setup()
+    render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} />)
+
+    await user.click(screen.getByTitle(ct('drawer.delete')))
+    expect(api.delete).not.toHaveBeenCalled()
+
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: i18n.t('cancel', { ns: 'common' }) }))
+    expect(api.delete).not.toHaveBeenCalled()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('calls DELETE /customers/{id} after confirming, flags it archived and closes the drawer', async () => {
+    grantDelete()
+    const onClose = vi.fn()
+    const onUpdate = vi.fn()
+    const user = userEvent.setup()
+    render(<CustomerDrawer customer={customer} onClose={onClose} onUpdate={onUpdate} statuses={statuses} />)
+
+    await user.click(screen.getByTitle(ct('drawer.delete')))
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: i18n.t('confirm', { ns: 'common' }) }))
+
+    await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/customers/1'))
+    // 'archived' isn't in useCustomerRecord's FIELD_MAP — this is a pure local
+    // flag, never a second PATCH riding on top of the DELETE that already ran.
+    expect(onUpdate).toHaveBeenCalledWith(1, { archived: true })
+    expect(onClose).toHaveBeenCalled()
+  })
+
+  it('maps a 409 conflict to an i18n message, never the raw server text, and keeps the drawer open', async () => {
+    grantDelete()
+    vi.mocked(api.delete).mockRejectedValueOnce({ response: { status: 409, data: { message: 'SQLSTATE[23000]: raw server text' } } })
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    render(<CustomerDrawer customer={customer} onClose={onClose} statuses={statuses} />)
+
+    await user.click(screen.getByTitle(ct('drawer.delete')))
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: i18n.t('confirm', { ns: 'common' }) }))
+
+    await waitFor(() => expect(api.delete).toHaveBeenCalled())
+    expect(screen.queryByText(/SQLSTATE/)).toBeNull()
+    expect(onClose).not.toHaveBeenCalled()
+  })
+})
+
+describe('CustomerDrawer · Matches tab (MATCHES-TAB-1)', () => {
+  it('renders a Matches tab, wired to the customer-scoped MatchesTab component', async () => {
+    const user = userEvent.setup()
+    render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} />)
+
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.matches') }))
+    expect(screen.getByText('matches stub')).toBeInTheDocument()
   })
 })

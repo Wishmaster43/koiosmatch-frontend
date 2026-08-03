@@ -81,6 +81,7 @@
       "departments": "Abteilungen",
       "contacts": "Kontakte",
       "vacancies": "Stellen",
+      "matches": "Matches",
       "opportunities": "Chancen",
       "planning": "Planung",
       "statistics": "Statistiken",
@@ -97,7 +98,12 @@
     "photoUpload": "Logo hochladen",
     "photoRemove": "Logo entfernen",
     "phase": "Phase",
-    "convertTo": "Zu {{phase}} umwandeln"
+    "convertTo": "Zu {{phase}} umwandeln",
+    "delete": "Löschen",
+    "deleteConfirm": "{{name}} löschen? Der Kunde wandert nach Archiviert und kann wiederhergestellt werden.",
+    "deletedNamed": "{{name}} gelöscht",
+    "deleteFailed": "Löschen fehlgeschlagen (möglicherweise aktive Verknüpfungen).",
+    "deleteBlocked": "{{name}} kann nicht gelöscht werden: es bestehen noch aktive Verknüpfungen."
   },
   "overview": {
     "general": "Allgemein",
@@ -624,5 +630,8 @@
     "loading": "Aufgaben werden geladen…",
     "error": "Aufgaben konnten nicht geladen werden",
     "openTask": "Aufgabe öffnen"
+  },
+  "matches": {
+    "loadError": "Matches konnten nicht geladen werden."
   }
 }

@@ -6,6 +6,9 @@
  */
 import { useQuery } from '@tanstack/react-query'
 import api, { unwrap, unwrapList } from '@/lib/api'
+// MATCHES-TAB-1: reuse the matches PAGE's own mapper rather than a third one.
+import { mapMatch } from '@/pages/matches/hooks/useMatches'
+import type { RawMatch, MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 
 export interface CustomerStats { matches_total?: number; active_matches?: number; open_vacancies?: number; fill_rate?: number }
@@ -101,4 +104,33 @@ export function useCustomerPlanning(customerId: Id | undefined, enabled: boolean
     },
   })
   return { data, loading }
+}
+
+// A customer's match row = the shared MatchRow (mapMatch, matches/hooks/useMatches)
+// plus contract_type/contract_status — MatchListResource returns both, but MatchRow
+// doesn't carry them (the matches PAGE table has no such columns), so they're read
+// straight off the raw row alongside the shared mapper's output rather than forking
+// a second mapper for two extra fields.
+export interface CustomerMatchRow extends MatchRow {
+  contractType: string | null
+  contractStatus: string | null
+}
+
+// The customer's matches (GET /matches?customer_id={id}), read-only (§3B: the
+// Matches tab mirrors the candidate drawer's — a match is opened/edited in its own
+// drawer, never here). MatchController validates a plain `customer_id` scalar filter.
+export function useCustomerMatches(customerId?: Id) {
+  const { data = [], isLoading: loading, isError: error } = useQuery({
+    queryKey: ['customers', customerId, 'matches'],
+    enabled: !!customerId,
+    queryFn: async ({ signal }): Promise<CustomerMatchRow[]> => {
+      const raw = unwrapList<RawMatch>(await api.get('/matches', { params: { customer_id: customerId, per_page: 100 }, signal })).rows
+      return raw.map(r => ({
+        ...mapMatch(r),
+        contractType: (r as RawMatch & { contract_type?: string | null }).contract_type ?? null,
+        contractStatus: (r as RawMatch & { contract_status?: string | null }).contract_status ?? null,
+      }))
+    },
+  })
+  return { rows: data, loading, error }
 }
