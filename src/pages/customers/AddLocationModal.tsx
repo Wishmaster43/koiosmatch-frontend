@@ -363,7 +363,7 @@ export default function AddLocationModal({
               became the shared collapsed-ghost block (same shape as +Match's
               Opmerkingen) so every create modal behaves identically. */}
           <div>
-            <div style={cardHead}>{t('subModal.description')}</div>
+            <div style={cardHead}>{t('locations.detail.description')}</div>
             <div style={cardBox}>
               {/* ARIA-LABEL-1: this modal's own footer button is ALSO labelled
                   subModal.create ("Toevoegen"/"Add", same word as the generic
@@ -372,7 +372,7 @@ export default function AddLocationModal({
               <CollapsibleRichText t={t} value={form.description} onChange={v => set('description', v)}
                 expanded={descExpanded} setExpanded={setDescExpanded}
                 editing={descEditing} setEditing={setDescEditing}
-                placeholder={t('common:add')} ariaLabel={t('subModal.description')} />
+                placeholder={t('common:add')} ariaLabel={t('locations.detail.description')} />
             </div>
           </div>
         </div>

@@ -161,7 +161,7 @@ describe('AddDepartmentModal · description (COLLAPSIBLE-TEXT-1)', () => {
     // ARIA-LABEL-1: this modal's own footer submit button is ALSO labelled
     // "Toevoegen"/"Add" (subModal.create), so the ghost button's accessible
     // name is its own card heading instead of the generic common:add text.
-    expect(screen.getByRole('button', { name: ct('subModal.description') })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: ct('departments.detail.description') })).toBeInTheDocument()
   })
 
   it('reveals the shared RichTextEditor on click and its value reaches onCreate', async () => {
@@ -170,7 +170,7 @@ describe('AddDepartmentModal · description (COLLAPSIBLE-TEXT-1)', () => {
     render(<AddDepartmentModal onClose={() => {}} onCreate={onCreate} locations={locations} statuses={statuses} />)
 
     await user.type(screen.getByLabelText(ct('subModal.departmentName'), { exact: false }), 'Thuiszorg')
-    await user.click(screen.getByRole('button', { name: ct('subModal.description') }))
+    await user.click(screen.getByRole('button', { name: ct('departments.detail.description') }))
     fireEvent.change(screen.getByLabelText('rich-text-editor'), { target: { value: '<p>Grootste afdeling</p>' } })
     await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
 

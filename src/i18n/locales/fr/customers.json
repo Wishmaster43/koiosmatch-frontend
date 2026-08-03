@@ -229,7 +229,7 @@
       "primaryContactTitle": "Contact principal",
       "noPrimaryContact": "Pas encore de contact principal pour ce site",
       "pickPrimaryContact": "Choisir un contact principal",
-      "description": "Description",
+      "description": "Texte du site",
       "contactNotLinked": "Texte seul — pas encore lié à un contact"
     },
     "saveFailed": "L'enregistrement a échoué.",
@@ -251,7 +251,7 @@
       "name": "Nom",
       "location": "Site",
       "costCenter": "Centre de coût",
-      "description": "Description",
+      "description": "Texte du service",
       "contactsHere": "Contacts dans ce service",
       "none": "Rien de lié pour le moment",
       "subtabs": {

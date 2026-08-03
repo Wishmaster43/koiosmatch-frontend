@@ -36,7 +36,7 @@ const DEFAULT_LABELS: Record<string, FieldLabelRef> = {
   postcode: { ns: 'customers', key: 'subModal.postalCode' },
   land: { ns: 'customers', key: 'subModal.country' },
   kostenplaats: { ns: 'customers', key: 'subModal.costCenter' },
-  omschrijving: { ns: 'customers', key: 'subModal.description' },
+  omschrijving: { ns: 'customers', key: 'locations.detail.description' },
   voornaam: { ns: 'customers', key: 'subModal.firstName' },
   tussenvoegsel: { ns: 'customers', key: 'subModal.middleName' },
   achternaam: { ns: 'customers', key: 'subModal.lastName' },

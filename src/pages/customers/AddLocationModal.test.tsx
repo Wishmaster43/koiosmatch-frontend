@@ -173,13 +173,13 @@ describe('AddLocationModal · description (Danny 02-08: "bij locatie en afdeling
     const user = userEvent.setup()
     render(<AddLocationModal onClose={() => {}} onCreate={onCreate} statuses={statuses} />)
 
-    expect(screen.getByText(ct('subModal.description'))).toBeInTheDocument()
+    expect(screen.getByText(ct('locations.detail.description'))).toBeInTheDocument()
     await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
     // COLLAPSIBLE-TEXT-1: the block starts collapsed — reveal it first.
     // ARIA-LABEL-1: this modal's own footer submit button is ALSO labelled
     // "Toevoegen"/"Add" (subModal.create), so the ghost button's accessible
     // name is its own card heading instead of the generic common:add text.
-    await user.click(screen.getByRole('button', { name: ct('subModal.description') }))
+    await user.click(screen.getByRole('button', { name: ct('locations.detail.description') }))
     fireEvent.change(screen.getByLabelText('rich-text-editor'), { target: { value: '<p>Grootste vestiging</p>' } })
 
     await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
@@ -191,7 +191,7 @@ describe('AddLocationModal · description (Danny 02-08: "bij locatie en afdeling
     expect(screen.queryByLabelText('rich-text-editor')).toBeNull()
     // ARIA-LABEL-1: the ghost's accessible name is its card heading, not the
     // generic common:add text (which collides with this modal's own footer button).
-    expect(screen.getByRole('button', { name: ct('subModal.description') })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: ct('locations.detail.description') })).toBeInTheDocument()
   })
 })
 

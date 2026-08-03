@@ -229,7 +229,7 @@
       "primaryContactTitle": "Primaire contactpersoon",
       "noPrimaryContact": "Nog geen primaire contactpersoon voor deze locatie",
       "pickPrimaryContact": "Kies een primaire contactpersoon",
-      "description": "Omschrijving",
+      "description": "Locatietekst",
       "contactNotLinked": "Alleen tekst — nog niet gekoppeld aan een contactpersoon"
     },
     "saveFailed": "Opslaan is mislukt.",
@@ -251,7 +251,7 @@
       "name": "Naam",
       "location": "Locatie",
       "costCenter": "Kostenplaats",
-      "description": "Omschrijving",
+      "description": "Afdelingtekst",
       "contactsHere": "Contactpersonen op deze afdeling",
       "none": "Nog niets gekoppeld",
       "subtabs": {

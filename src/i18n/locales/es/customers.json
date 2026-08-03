@@ -229,7 +229,7 @@
       "primaryContactTitle": "Contacto principal",
       "noPrimaryContact": "Aún no hay contacto principal para esta ubicación",
       "pickPrimaryContact": "Elige un contacto principal",
-      "description": "Descripción",
+      "description": "Texto de la ubicación",
       "contactNotLinked": "Solo texto — aún no vinculado a un contacto"
     },
     "saveFailed": "Error al guardar.",
@@ -251,7 +251,7 @@
       "name": "Nombre",
       "location": "Ubicación",
       "costCenter": "Centro de coste",
-      "description": "Descripción",
+      "description": "Texto del departamento",
       "contactsHere": "Contactos en este departamento",
       "none": "Nada vinculado aún",
       "subtabs": {

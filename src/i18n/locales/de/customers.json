@@ -229,7 +229,7 @@
       "primaryContactTitle": "Primärer Ansprechpartner",
       "noPrimaryContact": "Noch kein primärer Ansprechpartner für diesen Standort",
       "pickPrimaryContact": "Primären Ansprechpartner wählen",
-      "description": "Beschreibung",
+      "description": "Standorttext",
       "contactNotLinked": "Nur Text — noch nicht mit einem Ansprechpartner verknüpft"
     },
     "saveFailed": "Speichern fehlgeschlagen.",
@@ -251,7 +251,7 @@
       "name": "Name",
       "location": "Standort",
       "costCenter": "Kostenstelle",
-      "description": "Beschreibung",
+      "description": "Abteilungstext",
       "contactsHere": "Kontakte in dieser Abteilung",
       "none": "Noch nichts verknüpft",
       "subtabs": {

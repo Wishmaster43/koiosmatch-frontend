@@ -229,7 +229,7 @@
       "primaryContactTitle": "Primary contact",
       "noPrimaryContact": "No primary contact for this location yet",
       "pickPrimaryContact": "Choose a primary contact",
-      "description": "Description",
+      "description": "Location text",
       "contactNotLinked": "Text only — not yet linked to a contact person"
     },
     "saveFailed": "Saving failed.",
@@ -251,7 +251,7 @@
       "name": "Name",
       "location": "Location",
       "costCenter": "Cost center",
-      "description": "Description",
+      "description": "Department text",
       "contactsHere": "Contacts in this department",
       "none": "Nothing linked yet",
       "subtabs": {

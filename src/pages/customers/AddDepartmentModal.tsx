@@ -253,12 +253,12 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
               common:add placeholder) — a distinct aria-label (the card's own
               heading) prevents two buttons sharing one accessible name. */}
           <div>
-            <div style={cardHead}>{t('subModal.description')}</div>
+            <div style={cardHead}>{t('departments.detail.description')}</div>
             <div style={cardBox}>
               <CollapsibleRichText t={t} value={form.description} onChange={v => set('description', v)}
                 expanded={descExpanded} setExpanded={setDescExpanded}
                 editing={descEditing} setEditing={setDescEditing}
-                placeholder={t('common:add')} ariaLabel={t('subModal.description')} />
+                placeholder={t('common:add')} ariaLabel={t('departments.detail.description')} />
             </div>
           </div>
         </div>
