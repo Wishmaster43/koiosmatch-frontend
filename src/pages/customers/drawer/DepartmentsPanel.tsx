@@ -29,12 +29,17 @@
  */
 import { useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Building } from 'lucide-react'
+import { Search, Building, Archive } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { DEPARTMENTS_CHANGED_EVENT } from '../hooks/useCustomerDepartments'
+// ARCHIVE-SUBENTITY-1: the archived-only sub-fetch behind the "Gearchiveerd"
+// quick-view — a SEPARATE fetch so every OTHER consumer of the live `departments`
+// prop (add-modal pickers etc.) keeps seeing today's archived-excluded set.
+import { useArchivedCustomerDepartments } from '../hooks/useCustomerDepartments'
 import { useChipColors } from '@/lib/settings/useChipColors'
 import { useAllSettings, useSettingsLoaded, getBoolSetting, getStringSetting } from '@/lib/settings/useAllSettings'
 import type { Crumb } from '@/components/drawer/DrillBreadcrumb'
@@ -107,10 +112,16 @@ export default function DepartmentsPanel({
   const { t } = useTranslation('customers')
   const [search, setSearch] = useState('')
   const [adding, setAdding] = useState(false)
+  // ARCHIVE-SUBENTITY-1: "Gearchiveerd" quick-view — REPLACES the live rows with the
+  // archived-only sub-fetch (mutually exclusive lens); `active` gates the fetch
+  // entirely, so toggling it off costs nothing.
+  const [showArchived, setShowArchived] = useState(false)
+  const { departments: archivedDepartments } = useArchivedCustomerDepartments(customerId, showArchived)
+  const baseDepartments = showArchived ? archivedDepartments : departments
 
   // THE membership rule, in one place. A department always carries a single locationId.
   const inScope = (d: Department) => scope === 'location' ? String(d.locationId) === String(scopeId) : true
-  const scoped = departments.filter(inScope)
+  const scoped = baseDepartments.filter(inScope)
   const chipColors = useChipColors()
   // Colour-on/off flags per column (CHIPKLEUR-INSTELBAAR-1) — both default ON, so an
   // absent setting keeps today's coloured-chip look.
@@ -126,9 +137,10 @@ export default function DepartmentsPanel({
   // Status filter (Danny 28-07) — same component and same defaulting rule on all three lists.
   const { value: statusFilter, toggle: toggleStatus, filtered: rows } =
     useStatusFilter(scoped, statuses, undefined, defaultStatusFilter, settingsLoaded)
-  // Resolved against the CUSTOMER-WIDE list, never the scoped rows: moving a department to
-  // another location must not make its open detail vanish mid-edit.
-  const selected = openId != null ? departments.find(d => String(d.id) === String(openId)) ?? null : null
+  // Resolved against `baseDepartments` (live OR archived, whichever view is active),
+  // never the scoped rows: moving a department to another location must not make its
+  // open detail vanish mid-edit.
+  const selected = openId != null ? baseDepartments.find(d => String(d.id) === String(openId)) ?? null : null
 
   // Columns are IDENTICAL to the customer tab's, minus the Locatie column inside a
   // location — it would repeat on every row there (mirrors ContactsPanel's own rule).
@@ -184,6 +196,9 @@ export default function DepartmentsPanel({
         customerId={customerId} customerName={customerName}
         canLinkBackoffice={canLinkBackoffice} departments={departments} contactStatuses={contactStatuses}
         trail={detailTrail} pager={pager}
+        // AFDELING-SAMENVOEGEN-1: after a merge the open record switches to the SURVIVOR
+        // (this panel already owns `openId`, mirrors ContactsPanel's identical contact-merge wiring).
+        onMerged={survivorId => onOpenChange(survivorId)}
         onAddContact={onAddContact} onUpdateContact={onUpdateContact} onRemoveContact={onRemoveContact}
         onSave={onUpdate} onDelete={onRemove} close={() => onOpenChange(null)} />
     )
@@ -200,6 +215,9 @@ export default function DepartmentsPanel({
             placeholder={t('departments.searchPlaceholder')} aria-label={t('departments.searchPlaceholder')} style={searchInput} />
         </div>
         <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
+        {/* ARCHIVE-SUBENTITY-1: the shared quick-view toggle (§4) — never hand-rolled. */}
+        <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+          label={t('departments.archivedView')} color="var(--color-archive)" icon={Archive} />
         <DrawerAddButton onClick={() => setAdding(true)} label={t('departments.add')} />
       </div>
 

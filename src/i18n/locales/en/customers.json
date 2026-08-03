@@ -169,6 +169,7 @@
     "empty": "No locations yet",
     "add": "New location",
     "searchPlaceholder": "Search location…",
+    "archivedView": "Archived",
     "col": {
       "name": "Name",
       "city": "City",
@@ -234,16 +235,52 @@
       "createAndLink": "Create contact and link",
       "description": "Location text",
       "contactNotLinked": "Text only — not yet linked to a contact person",
-      "changePrimaryContact": "Change contact person"
+      "changePrimaryContact": "Change contact person",
+      "mergeLocation": "Merge location",
+      "archiveLocation": "Archive location",
+      "confirmArchive": "Archive {{name}}? You can restore it later via 'Archived'.",
+      "archiveFailed": "Archiving failed.",
+      "restoreFailed": "Restoring failed.",
+      "tasks": {
+        "newTask": "New task",
+        "empty": "No tasks for this location yet",
+        "loading": "Loading tasks…",
+        "error": "Tasks could not be loaded",
+        "openTask": "Open task",
+        "searchPlaceholder": "Search task…"
+      }
     },
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",
-    "deleteInUse": "Can't delete — this location is still in use."
+    "deleteInUse": "Can't delete — this location is still in use.",
+    "archivedBanner": {
+      "since": "Archived on {{date}}",
+      "flag": "Archived",
+      "restore": "Restore"
+    },
+    "merge": {
+      "title": "Merge location",
+      "intro": "Pick the duplicate location at this customer, then decide which record stays. {{name}} is the open record.",
+      "searchPlaceholder": "Search by name or reference number…",
+      "noResults": "No locations found.",
+      "noOthers": "This customer has no other location to merge with.",
+      "stays": "This record stays",
+      "thisRecord": "Open record",
+      "otherRecord": "Found record",
+      "warning": "{{source}}'s data is absorbed into {{target}}; {{source}} then disappears. This cannot be undone.",
+      "back": "Back",
+      "cancel": "Cancel",
+      "confirm": "Merge",
+      "done": "Locations merged.",
+      "errForbidden": "You are not allowed to merge locations.",
+      "errFailed": "Merge failed. Please try again."
+    }
   },
   "departments": {
     "empty": "No departments yet",
     "add": "New department",
     "searchPlaceholder": "Search department…",
+    "archivedView": "Archived",
     "col": {
       "name": "Name",
       "location": "Location",
@@ -272,17 +309,45 @@
         "error": "Tasks could not be loaded",
         "openTask": "Open task",
         "searchPlaceholder": "Search task…"
-      }
+      },
+      "mergeDepartment": "Merge department",
+      "archiveDepartment": "Archive department",
+      "confirmArchive": "Archive {{name}}? You can restore it later via 'Archived'.",
+      "archiveFailed": "Archiving failed.",
+      "restoreFailed": "Restoring failed."
     },
     "deleteConfirm": "Delete this department?",
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",
-    "deleteInUse": "Can't delete — this department is still in use."
+    "deleteInUse": "Can't delete — this department is still in use.",
+    "archivedBanner": {
+      "since": "Archived on {{date}}",
+      "flag": "Archived",
+      "restore": "Restore"
+    },
+    "merge": {
+      "title": "Merge department",
+      "intro": "Pick the duplicate department at this customer, then decide which record stays. {{name}} is the open record.",
+      "searchPlaceholder": "Search by name or reference number…",
+      "noResults": "No departments found.",
+      "noOthers": "This customer has no other department to merge with.",
+      "stays": "This record stays",
+      "thisRecord": "Open record",
+      "otherRecord": "Found record",
+      "warning": "{{source}}'s data is absorbed into {{target}}; {{source}} then disappears. This cannot be undone.",
+      "back": "Back",
+      "cancel": "Cancel",
+      "confirm": "Merge",
+      "done": "Departments merged.",
+      "errForbidden": "You are not allowed to merge departments.",
+      "errFailed": "Merge failed. Please try again."
+    }
   },
   "contacts": {
     "empty": "No contacts yet",
     "add": "New contact",
     "searchPlaceholder": "Search contact…",
+    "archivedView": "Archived",
     "col": {
       "name": "Name",
       "location": "Location",
@@ -316,12 +381,21 @@
       "linkLocation": "Link location",
       "linkDepartment": "Link department",
       "middleName": "Middle name",
-      "gender": "Gender"
+      "gender": "Gender",
+      "archiveContact": "Archive contact",
+      "confirmArchive": "Archive {{name}}? You can restore it later via 'Archived'.",
+      "archiveFailed": "Archiving failed.",
+      "restoreFailed": "Restoring failed."
     },
     "deleteConfirm": "Delete this contact?",
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",
     "deleteInUse": "Can't delete — this contact is still in use.",
+    "archivedBanner": {
+      "since": "Archived on {{date}}",
+      "flag": "Archived",
+      "restore": "Restore"
+    },
     "primaryChip": "Primary",
     "tasks": {
       "newTask": "New task",
@@ -664,7 +738,24 @@
   "inUse": {
     "title": "Still in use",
     "close": "Close",
+    "archive": "Archive instead",
     "planningOrders": "Planning orders",
     "planningShifts": "Planning shifts"
+  },
+  "merge": {
+    "title": "Merge customer",
+    "intro": "Pick the duplicate customer to merge into {{name}}.",
+    "searchPlaceholder": "Search by name, number or city…",
+    "searching": "Searching…",
+    "noResults": "No customers found.",
+    "staysLabel": "Stays (this record)",
+    "duplicateLabel": "Merged away",
+    "warning": "{{source}}'s locations, departments, contacts, vacancies, matches and other data move to {{target}}. {{source}} is then deleted. This cannot be undone.",
+    "back": "Back",
+    "cancel": "Cancel",
+    "confirm": "Merge",
+    "done": "Customer merged.",
+    "errForbidden": "You are not allowed to merge customers.",
+    "errFailed": "Merge failed. Please try again."
   }
 }

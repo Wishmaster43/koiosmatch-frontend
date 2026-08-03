@@ -46,6 +46,10 @@ export function mapDepartment(d: ApiDepartment = {}): Department {
     customFields: d.custom_fields ?? {},
     // SUBENTITEIT-DELETE-1: false when absent (a write response never sets it).
     inUse: Boolean(d.in_use),
+    // ARCHIVE-SUBENTITY-1: same convention as mapVacancy.ts — derived from the
+    // explicit flag, falling back to the raw timestamp for an older payload shape.
+    archived: Boolean(d.archived ?? (d.deleted_at != null)),
+    archivedAt: d.deleted_at ?? null,
   }
 }
 
@@ -96,6 +100,9 @@ export function mapContact(p: ApiContact = {}): Contact {
     lastContactAt: p.last_contact_at ?? null,
     lastContactType: p.last_contact_type ?? null,
     customFields: p.custom_fields ?? {},
+    // ARCHIVE-SUBENTITY-1: same convention as mapVacancy.ts.
+    archived: Boolean(p.archived ?? (p.deleted_at != null)),
+    archivedAt: p.deleted_at ?? null,
   }
 }
 
@@ -148,6 +155,9 @@ export function mapLocation(l: ApiLocation = {}): Location {
     customFields: l.custom_fields ?? {},
     // SUBENTITEIT-DELETE-1: false when absent (a write response never sets it).
     inUse: Boolean(l.in_use),
+    // ARCHIVE-SUBENTITY-1: same convention as mapVacancy.ts.
+    archived: Boolean(l.archived ?? (l.deleted_at != null)),
+    archivedAt: l.deleted_at ?? null,
   }
 }
 

@@ -31,13 +31,19 @@ vi.mock('@/lib/useCustomFields', () => ({
   useCustomFields: () => ({ fields: [], allFields: [], loading: false, invalidate: () => {} }),
 }))
 vi.mock('@/lib/notify', () => ({ notifySuccess: vi.fn(), notifyError: vi.fn() }))
+// ARCHIVE-SUBENTITY-1/AFDELING-SAMENVOEGEN-1: both are gated on customers.update —
+// granted here so the new tests below can reach the archive/merge buttons.
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({ hasPermission: () => true, hasModule: () => false }),
+}))
 // SOLLICITATIES-SCOPE-1: DepartmentDetail now calls a REAL react-query hook
 // (useScopedVacancyIds, step 1 of the Sollicitaties chain) — this file previously
 // needed no api mock at all (every other query-touching child was stubbed).
 // Default GET resolves empty for any URL not overridden per-test.
+const mockPost = vi.fn().mockResolvedValue({ data: {} })
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn().mockResolvedValue({ data: [] }), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() } }
+  return { ...actual, default: { get: vi.fn().mockResolvedValue({ data: [] }), post: (...args: unknown[]) => mockPost(...args), put: vi.fn(), patch: vi.fn(), delete: vi.fn() } }
 })
 // Tiptap needs a real browser to mount — stubbed with a plain controlled textarea,
 // mirrors LocationDetail.test.tsx's own convention (RichTextEditor's own pencil/
@@ -79,7 +85,7 @@ vi.mock('@/context/LookupsContext', () => ({
   useLookups: () => ({ funnelTypes: [{ value: 'applied', label: 'Aangemeld', color: 'var(--color-info)' }], funnelMeta: () => ({ label: '', color: 'var(--text-muted)' }) }),
 }))
 
-beforeEach(() => { vi.clearAllMocks(); queryClient.clear() })
+beforeEach(() => { vi.clearAllMocks(); mockPost.mockResolvedValue({ data: {} }); queryClient.clear() })
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
@@ -376,5 +382,99 @@ describe('DepartmentDetail · honest delete (SUBENTITEIT-DELETE-1)', () => {
 
     await user.click(within(dialog).getByRole('button', { name: ct('inUse.close') }))
     expect(screen.queryByRole('dialog', { name: ct('inUse.title') })).not.toBeInTheDocument()
+  })
+
+  /**
+   * ARCHIVE-SUBENTITY-1: the dead end now has a way out — the 409-race dialog
+   * offers "Archiveren" beside Close, no second confirm.
+   */
+  it('offers Archiveren inside the 409 dialog, and clicking it archives without a second confirm', async () => {
+    const user = userEvent.setup()
+    const close = vi.fn()
+    const onDelete = vi.fn().mockResolvedValue({ ok: false, blocked: { counts: { contacts: 1 } } })
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} onDelete={onDelete} close={close} />)
+
+    await user.click(screen.getByTitle(cm('delete')))
+    await user.click(screen.getByRole('button', { name: cm('confirm') }))
+    const dialog = await screen.findByRole('dialog', { name: ct('inUse.title') })
+
+    await user.click(within(dialog).getByRole('button', { name: ct('inUse.archive') }))
+
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/departments/d1/archive')
+    await waitFor(() => expect(close).toHaveBeenCalled())
+  })
+})
+
+/**
+ * ARCHIVE-SUBENTITY-1 — mirrors LocationDetail's identical wiring: own action
+ * button + the in-body ArchivedBanner + restore. Assert the REQUEST (§13).
+ */
+describe('DepartmentDetail · archive/restore (ARCHIVE-SUBENTITY-1)', () => {
+  it('confirms, then POSTs the archive route and closes the panel on success', async () => {
+    const user = userEvent.setup()
+    const close = vi.fn()
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} close={close} />)
+
+    await user.click(screen.getByTitle(ct('departments.detail.archiveDepartment')))
+    await user.click(screen.getByRole('button', { name: cm('confirm') }))
+
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/departments/d1/archive')
+    await waitFor(() => expect(close).toHaveBeenCalled())
+  })
+
+  it('renders no archive button once the department is already archived — the ArchivedBanner offers restore instead', () => {
+    render(<DepartmentDetail department={department({ archived: true })} onSave={vi.fn()} {...baseProps} />)
+    expect(screen.queryByTitle(ct('departments.detail.archiveDepartment'))).toBeNull()
+    expect(screen.getByText(ct('departments.archivedBanner.flag'))).toBeInTheDocument()
+  })
+
+  it('restore round-trip: the banner\'s restore button POSTs the restore route and closes the panel', async () => {
+    const user = userEvent.setup()
+    const close = vi.fn()
+    render(<DepartmentDetail department={department({ archived: true })} onSave={vi.fn()} {...baseProps} close={close} />)
+
+    await user.click(screen.getByRole('button', { name: ct('departments.archivedBanner.restore') }))
+
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/departments/d1/restore')
+    await waitFor(() => expect(close).toHaveBeenCalled())
+  })
+})
+
+/** LOC-DEPT-CHANGELOG-1 — mirrors LocationDetail: proves the actual GET. */
+describe('DepartmentDetail · changelog (LOC-DEPT-CHANGELOG-1)', () => {
+  it('fetches this department\'s own activity endpoint once the popover opens', async () => {
+    const user = userEvent.setup()
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+
+    await user.click(screen.getByRole('button', { name: cm('changelog') }))
+    await waitFor(() => expect(vi.mocked(api.get)).toHaveBeenCalledWith('/customers/cust-1/departments/d1/activity', expect.anything()))
+  })
+})
+
+/**
+ * AFDELING-SAMENVOEGEN-1 — mirrors LocationDetail's merge contract: DUPLICATE
+ * in the path, SURVIVOR as `target_id` in the body.
+ */
+describe('DepartmentDetail · merge (AFDELING-SAMENVOEGEN-1)', () => {
+  const others: Department[] = [department(), department({ id: 'd2', name: 'Dagbesteding' })]
+
+  it('hides the merge icon with only one department at this customer', () => {
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} departments={[department()]} />)
+    expect(screen.queryByTitle(ct('departments.detail.mergeDepartment'))).toBeNull()
+  })
+
+  it('posts target_id with the SURVIVOR and calls onMerged with it (keeping the open record)', async () => {
+    const user = userEvent.setup()
+    const onMerged = vi.fn()
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} departments={others} onMerged={onMerged} />)
+
+    await user.click(screen.getByTitle(ct('departments.detail.mergeDepartment')))
+    await user.type(screen.getByPlaceholderText(ct('departments.merge.searchPlaceholder')), 'Dagbesteding')
+    await user.click(screen.getByRole('button', { name: /Dagbesteding/ }))
+    // Default survivor = the currently open record ('d1') — confirm the merge as-is.
+    await user.click(screen.getByRole('button', { name: ct('departments.merge.confirm') }))
+
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/departments/d2/merge', { target_id: 'd1' })
+    await waitFor(() => expect(onMerged).toHaveBeenCalledWith('d1'))
   })
 })

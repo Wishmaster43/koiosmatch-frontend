@@ -19,10 +19,11 @@
  */
 import { useState, type ComponentType, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Users, Link2, Unlink, Star, Loader2 } from 'lucide-react'
+import { Search, Users, Link2, Unlink, Star, Loader2, Archive } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import DrillBreadcrumb from '@/components/drawer/DrillBreadcrumb'
 import type { Crumb } from '@/components/drawer/DrillBreadcrumb'
@@ -40,6 +41,10 @@ import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { CONTACTS_CHANGED_EVENT, isPrimaryForLocation, setLocationPrimaryContact } from '../hooks/useCustomerContacts'
+// ARCHIVE-SUBENTITY-1: the archived-only sub-fetch behind the "Gearchiveerd"
+// quick-view — a SEPARATE fetch so every OTHER consumer of the live `contacts`
+// prop (couple pickers etc.) keeps seeing today's archived-excluded set.
+import { useArchivedCustomerContacts } from '../hooks/useCustomerContacts'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 import type { DrillPagerProps } from '@/components/drawer/DrillPager'
 
@@ -72,6 +77,10 @@ interface Props {
   /** The record we are inside, for the scope filter, the back label and the couple action. */
   scopeId?: Id
   scopeName?: string
+  /** ARCHIVE-SUBENTITY-1: the owning customer, for the "Gearchiveerd" quick-view's own
+   * fetch. Optional (not every host threads it yet) — falls back to a live contact's
+   * own `customerId` when absent, which covers every host today. */
+  customerId?: Id
   locations: { id: Id; name: string }[]
   departments: Department[]
   statuses: LookupOption[]
@@ -92,10 +101,18 @@ interface Props {
 }
 
 export default function ContactsPanel({
-  contacts, scope, scopeId, scopeName, locations, departments, statuses,
+  contacts, scope, scopeId, scopeName, customerId, locations, departments, statuses,
   canLinkBackoffice = false, openId, onOpenChange, trail = [], onAdd, onUpdate, onRemove,
 }: Props) {
   const { t } = useTranslation('customers')
+  // ARCHIVE-SUBENTITY-1: the fetch needs a real customerId; fall back to a live row's
+  // own `customerId` when the host has not threaded the prop explicitly yet.
+  const effectiveCustomerId = customerId ?? contacts.find(c => c.customerId != null)?.customerId ?? undefined
+  // "Gearchiveerd" quick-view — REPLACES the live rows with the archived-only
+  // sub-fetch (mutually exclusive lens); `active` gates the fetch entirely.
+  const [showArchived, setShowArchived] = useState(false)
+  const { contacts: archivedContacts } = useArchivedCustomerContacts(effectiveCustomerId, showArchived)
+  const baseContacts = showArchived ? archivedContacts : contacts
   const { labelOf: lastContactLabel, iconOf: lastContactIcon } = useLastContactTypes()
   const { formatDate } = useDateFormat()
   // Tenant-configurable chip colours (CHIPKLEUR-INSTELBAAR-1) — falls back to today's
@@ -165,13 +182,14 @@ export default function ContactsPanel({
     const single = scope === 'location' ? c.locationId : c.departmentId
     return list.some(x => String(x.id) === String(scopeId)) || String(single) === String(scopeId)
   }
-  const scoped = contacts.filter(inScope)
+  const scoped = baseContacts.filter(inScope)
   // Status filter (Danny 28-07) — same component and same defaulting rule on all three lists.
   const { value: statusFilter, toggle: toggleStatus, filtered: rows } =
     useStatusFilter(scoped, statuses, undefined, defaultStatusFilter, settingsLoaded)
-  // Resolved against the CUSTOMER-WIDE list, never the scoped rows: editing a contact's
-  // location moves it out of this scope, and the open detail must not vanish mid-edit.
-  const selected = openId != null ? contacts.find(c => String(c.id) === String(openId)) ?? null : null
+  // Resolved against `baseContacts` (live OR archived, whichever view is active), never
+  // the scoped rows: editing a contact's location moves it out of this scope, and the
+  // open detail must not vanish mid-edit.
+  const selected = openId != null ? baseContacts.find(c => String(c.id) === String(openId)) ?? null : null
 
   // Client-side search — same rows the table below actually renders. Computed here
   // (ahead of the detail branch) so the pager below can step through EXACTLY what the
@@ -341,6 +359,9 @@ export default function ContactsPanel({
             placeholder={t('contacts.searchHere')} aria-label={t('contacts.searchHere')} style={searchInput} />
         </div>
         <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
+        {/* ARCHIVE-SUBENTITY-1: the shared quick-view toggle (§4) — never hand-rolled. */}
+        <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+          label={t('contacts.archivedView')} color="var(--color-archive)" icon={Archive} />
         {/* Coupling only exists inside a scope; at customer level a contact is already "here".
             Icon-only (Danny 03-08): with search + filter + two buttons the scoped row
             overflowed and clipped the primary add button — the SECONDARY action gives up

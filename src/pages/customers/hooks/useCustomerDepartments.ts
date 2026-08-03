@@ -122,3 +122,51 @@ export function useCustomerDepartments(customerId: Id | undefined) {
 
   return { departments, loading, error, reload: load, add, update, remove }
 }
+
+/**
+ * archiveDepartment / restoreDepartment — ARCHIVE-SUBENTITY-1's reversible
+ * soft-delete pair. Standalone functions (not hook-returned callbacks) so they can
+ * fire from deep inside DepartmentDetail without prop-drilling a reload callback
+ * through every intermediate component — mirrors archiveLocation/restoreLocation
+ * in useCustomerLocations.ts, reusing the SAME DEPARTMENTS_CHANGED_EVENT the
+ * import-refetch path already dispatches.
+ */
+export async function archiveDepartment(customerId: Id, id: Id): Promise<void> {
+  await api.post(`/customers/${customerId}/departments/${id}/archive`)
+  window.dispatchEvent(new CustomEvent(DEPARTMENTS_CHANGED_EVENT))
+}
+export async function restoreDepartment(customerId: Id, id: Id): Promise<Department> {
+  const res = await api.post(`/customers/${customerId}/departments/${id}/restore`)
+  window.dispatchEvent(new CustomEvent(DEPARTMENTS_CHANGED_EVENT))
+  return mapDepartment(unwrap<ApiDepartment>(res))
+}
+
+/**
+ * useArchivedCustomerDepartments — the ARCHIVED-ONLY sub-list behind the panel's
+ * "Gearchiveerd" quick-view (mirrors useArchivedCustomerLocations — see its own
+ * doc for why this is a SEPARATE fetch rather than merged into the live list).
+ * `active` gates the fetch entirely; refetches on DEPARTMENTS_CHANGED_EVENT.
+ */
+export function useArchivedCustomerDepartments(customerId: Id | undefined, active: boolean) {
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const load = useCallback((signal?: AbortSignal) => {
+    if (!active || !customerId) { setDepartments([]); return }
+    setLoading(true)
+    api.get(`/customers/${customerId}/departments`, { params: { include_archived: 1 }, signal })
+      .then(res => { if (!signal?.aborted) setDepartments(unwrapList<ApiDepartment>(res).rows.map(mapDepartment).filter(d => d.archived)) })
+      .catch(() => { /* the toggle simply shows nothing rather than crashing (§3) */ })
+      .finally(() => { if (!signal?.aborted) setLoading(false) })
+  }, [customerId, active])
+  useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
+
+  useEffect(() => {
+    const ctrl = new AbortController()
+    const onChanged = () => load(ctrl.signal)
+    window.addEventListener(DEPARTMENTS_CHANGED_EVENT, onChanged)
+    return () => { window.removeEventListener(DEPARTMENTS_CHANGED_EVENT, onChanged); ctrl.abort() }
+  }, [load])
+
+  return { departments, loading }
+}

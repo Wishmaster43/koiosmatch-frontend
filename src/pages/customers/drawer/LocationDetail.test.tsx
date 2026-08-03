@@ -76,6 +76,12 @@ vi.mock('./ScopedMatchesTab', () => ({
   default: ({ scope, id, customerId }: { scope: string; id?: string; customerId?: string }) =>
     <div data-testid="scoped-matches">{scope}:{id}:{customerId}</div>,
 }))
+// TAKEN-OP-LOCATIE-1: same stub convention as DepartmentDetail.test.tsx — this
+// file only proves LocationDetail's OWN wiring (right linkType/id), not the
+// shared tab's own fetch/columns (covered elsewhere).
+vi.mock('@/components/drawer/tabs/EntityTasksTab', () => ({
+  default: ({ linkType, id }: { linkType: string; id?: string }) => <div data-testid="entity-tasks">{linkType}:{id}</div>,
+}))
 
 // SOLLICITATIES-SCOPE-1: opening the new Sollicitaties sub-tab mounts
 // LocationSollicitatiesTab, which calls a REAL react-query hook
@@ -811,5 +817,119 @@ describe('LocationDetail · honest delete (SUBENTITEIT-DELETE-1)', () => {
 
     await user.click(within(dialog).getByRole('button', { name: ct('inUse.close') }))
     expect(screen.queryByRole('dialog', { name: ct('inUse.title') })).not.toBeInTheDocument()
+  })
+
+  /**
+   * ARCHIVE-SUBENTITY-1: the dead end now has a way out — the 409-race dialog
+   * offers "Archiveren" beside Close, and clicking it archives WITHOUT a second
+   * confirm (the user already explicitly chose this path).
+   */
+  it('offers Archiveren inside the 409 dialog, and clicking it archives without a second confirm', async () => {
+    const user = userEvent.setup()
+    const close = vi.fn()
+    const onDelete = vi.fn().mockResolvedValue({ ok: false, blocked: { counts: { departments: 1 } } })
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} onDelete={onDelete} close={close} />)
+
+    await user.click(screen.getByTitle(ct('locations.detail.deleteLocation')))
+    await user.click(screen.getByRole('button', { name: cm('confirm') }))
+    const dialog = await screen.findByRole('dialog', { name: ct('inUse.title') })
+
+    await user.click(within(dialog).getByRole('button', { name: ct('inUse.archive') }))
+
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/locations/loc-1/archive')
+    await waitFor(() => expect(close).toHaveBeenCalled())
+  })
+})
+
+/**
+ * ARCHIVE-SUBENTITY-1 — the reversible soft-delete pair, own action button
+ * (beside the disabled/enabled trash) + the in-body ArchivedBanner + restore.
+ * Assert the REQUEST (§13), never only that a callback fired.
+ */
+describe('LocationDetail · archive/restore (ARCHIVE-SUBENTITY-1)', () => {
+  it('confirms, then POSTs the archive route and closes the panel on success', async () => {
+    const user = userEvent.setup()
+    const close = vi.fn()
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} close={close} />)
+
+    await user.click(screen.getByTitle(ct('locations.detail.archiveLocation')))
+    await user.click(screen.getByRole('button', { name: cm('confirm') }))
+
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/locations/loc-1/archive')
+    await waitFor(() => expect(close).toHaveBeenCalled())
+  })
+
+  it('renders no archive button once the location is already archived — the ArchivedBanner offers restore instead', () => {
+    render(<LocationDetail location={location({ archived: true })} onSave={vi.fn()} {...baseProps} />)
+    expect(screen.queryByTitle(ct('locations.detail.archiveLocation'))).toBeNull()
+    expect(screen.getByText(ct('locations.archivedBanner.flag'))).toBeInTheDocument()
+  })
+
+  it('restore round-trip: the banner\'s restore button POSTs the restore route and closes the panel', async () => {
+    const user = userEvent.setup()
+    const close = vi.fn()
+    render(<LocationDetail location={location({ archived: true })} onSave={vi.fn()} {...baseProps} close={close} />)
+
+    await user.click(screen.getByRole('button', { name: ct('locations.archivedBanner.restore') }))
+
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/locations/loc-1/restore')
+    await waitFor(() => expect(close).toHaveBeenCalled())
+  })
+})
+
+/**
+ * LOC-DEPT-CHANGELOG-1 — record history is an icon-popover in the title row
+ * (§3A(d)), reusing the shared customer ChangelogTab content with its own
+ * one-level-deeper endpoint. Proves the actual GET, not just that a popover opened.
+ */
+describe('LocationDetail · changelog (LOC-DEPT-CHANGELOG-1)', () => {
+  it('fetches this location\'s own activity endpoint once the popover opens', async () => {
+    const user = userEvent.setup()
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
+
+    expect(vi.mocked(api.get).mock.calls.some(([url]) => url === '/customers/cust-1/locations/loc-1/activity')).toBe(false)
+    await user.click(screen.getByRole('button', { name: cm('changelog') }))
+    await waitFor(() => expect(vi.mocked(api.get)).toHaveBeenCalledWith('/customers/cust-1/locations/loc-1/activity', expect.anything()))
+  })
+})
+
+/** TAKEN-OP-LOCATIE-1 — the Taken sub-tab mounts the shared EntityTasksTab with
+ *  this location's own token/id (TaskLinkResolver::MODELS['customer_location']). */
+describe('LocationDetail · Taken sub-tab (TAKEN-OP-LOCATIE-1)', () => {
+  it('wires linkType="customer_location" + this location\'s own id into EntityTasksTab', async () => {
+    const user = userEvent.setup()
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.tasks') }))
+    expect(screen.getByTestId('entity-tasks')).toHaveTextContent('customer_location:loc-1')
+  })
+})
+
+/**
+ * LOCATIE-SAMENVOEGEN-1 — mirrors MergeContactModal's contract: the DUPLICATE
+ * sits in the path, the SURVIVOR travels as `target_id` in the body. Proves the
+ * request, the refetch dispatch and the survivor-switch callback.
+ */
+describe('LocationDetail · merge (LOCATIE-SAMENVOEGEN-1)', () => {
+  const others = [{ id: 'loc-1', name: 'Hoofdlocatie' }, { id: 'loc-2', name: 'Filiaal Zuid' }]
+
+  it('hides the merge icon with only one location at this customer', () => {
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} locations={[{ id: 'loc-1', name: 'Hoofdlocatie' }]} />)
+    expect(screen.queryByTitle(ct('locations.detail.mergeLocation'))).toBeNull()
+  })
+
+  it('posts target_id with the SURVIVOR and calls onMerged with it (keeping the open record)', async () => {
+    const user = userEvent.setup()
+    const onMerged = vi.fn()
+    mockPost.mockResolvedValueOnce({ data: { data: {} } }) // the merge POST itself
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} locations={others} onMerged={onMerged} />)
+
+    await user.click(screen.getByTitle(ct('locations.detail.mergeLocation')))
+    await user.type(screen.getByPlaceholderText(ct('locations.merge.searchPlaceholder')), 'Zuid')
+    await user.click(screen.getByRole('button', { name: /Filiaal Zuid/ }))
+    // Default survivor = the currently open record ('loc-1') — confirm the merge as-is.
+    await user.click(screen.getByRole('button', { name: ct('locations.merge.confirm') }))
+
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/locations/loc-2/merge', { target_id: 'loc-1' })
+    await waitFor(() => expect(onMerged).toHaveBeenCalledWith('loc-1'))
   })
 })

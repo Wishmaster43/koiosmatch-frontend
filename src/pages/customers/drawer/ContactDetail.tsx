@@ -30,7 +30,7 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash2, Edit2, Save, X, GitMerge } from 'lucide-react'
+import { Trash2, Edit2, Save, X, GitMerge, Archive } from 'lucide-react'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import CreatableSelect from '@/components/ui/CreatableSelect'
@@ -42,6 +42,9 @@ import { emailValue, phoneValue } from '@/components/drawer/contactLinks'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
+import ArchivedBanner from '@/components/drawer/ArchivedBanner'
+import ChangelogPopover from '@/components/drawer/ChangelogPopover'
+import ChangelogTab from './ChangelogTab'
 import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import MergeContactModal from './MergeContactModal'
 import { useCustomFields } from '@/lib/useCustomFields'
@@ -49,6 +52,9 @@ import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useGenders } from '@/lib/useGenders'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useAuth } from '@/context/AuthContext'
+import { useDateFormat } from '@/lib/datetime'
+import { archiveContact, restoreContact } from '../hooks/useCustomerContacts'
+import { useSubEntityArchive } from '../hooks/useSubEntityArchive'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
@@ -74,6 +80,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
   onMerged?: (survivorId: Id) => void
 }) {
   const { t } = useTranslation('customers')
+  const { formatDate } = useDateFormat()
   const { confirm, dialog } = useConfirm()
   const [editing, setEditing] = useState(false)
   // Bumped to REMOUNT the field table when what we store differs from what was typed.
@@ -183,6 +190,17 @@ export default function ContactDetail({ contact, locations, departments, statuse
 
   const remove = () => confirm(t('contacts.deleteConfirm'), () => { onDelete(contact.id as Id); close() }, { danger: true })
 
+  // ARCHIVE-SUBENTITY-1: the shared mutation hook (§11 — mirrors Location/
+  // DepartmentDetail's identical wiring). No InUseCountsDialog wiring here — a
+  // contact delete has no honest disabled-trash/409-race dialog built yet, so
+  // there is no dead end to offer an escape from (measured: `remove` above
+  // fires unconditionally, unlike the location/department trash button).
+  const { archiving, archiveNow, doRestore } = useSubEntityArchive({
+    customerId: contact.customerId ?? undefined, id: contact.id as Id, archiveFn: archiveContact, restoreFn: restoreContact, onDone: close,
+    archiveFailedMessage: t('contacts.detail.archiveFailed'), restoreFailedMessage: t('contacts.detail.restoreFailed'),
+  })
+  const doArchive = () => confirm(t('contacts.detail.confirmArchive', { name: contact.name }), archiveNow)
+
   // Location/department coupling — own self-contained edit block (pencil →
   // save/cancel), cascading exactly like AddContactPersonModal (file header
   // BUG FIX 28-07): empty-until-a-location-is-picked, and picking a new
@@ -237,6 +255,12 @@ export default function ContactDetail({ contact, locations, departments, statuse
           {/* Prev/next through the list this contact was opened from (DRILL-PAGER-1) —
               before the merge/delete actions, same corner as every other detail pager. */}
           {pager && <DrillPager {...pager} />}
+          {/* LOC-DEPT-CHANGELOG-1: record history is an icon-popover in the title row,
+              never a tab (§3A(d)) — reuses the shared customer ChangelogTab content
+              with its own one-level-deeper endpoint. */}
+          {contact.customerId != null && (
+            <ChangelogPopover><ChangelogTab endpoint={`/customers/${contact.customerId}/contacts/${contact.id}/activity`} /></ChangelogPopover>
+          )}
           {/* Merge — title-row action, exactly like the candidate drawer (§3A). Hidden
               without customers.update and when this customer has no second contact to
               merge with: a button that can only ever fail is a fake affordance. */}
@@ -246,12 +270,30 @@ export default function ContactDetail({ contact, locations, departments, statuse
               <GitMerge size={13} />
             </button>
           )}
+          {/* ARCHIVE-SUBENTITY-1: the reversible escape — same customers.update gate
+              `canMerge` already computes (Archive is update-class too, §5). */}
+          {canMerge && !contact.archived && (
+            <button onClick={doArchive} disabled={archiving}
+              title={t('contacts.detail.archiveContact')} aria-label={t('contacts.detail.archiveContact')}
+              style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7,
+                cursor: archiving ? 'not-allowed' : 'pointer', border: '1px solid var(--border)', background: 'var(--bg)',
+                color: 'var(--color-archive)', opacity: archiving ? 0.6 : 1 }}>
+              <Archive size={13} />
+            </button>
+          )}
           <button onClick={remove} title={t('common:delete')} aria-label={t('common:delete')}
             style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--color-danger)' }}>
             <Trash2 size={13} />
           </button>
         </div>
       </div>
+
+      {/* ARCHIVE-SUBENTITY-1: the in-body archived state, right under the title row. */}
+      {contact.archived && (
+        <ArchivedBanner id={contact.id} onRestore={doRestore}
+          message={contact.archivedAt ? t('contacts.archivedBanner.since', { date: formatDate(contact.archivedAt) }) : t('contacts.archivedBanner.flag')}
+          restoreLabel={t('contacts.archivedBanner.restore')} />
+      )}
 
       {/* Sub-tab strip — EXTRACT-1 made it unconditional (the Koppelingen sub-tab
           always shows now); Extra still only appears with ≥1 active custom field. */}

@@ -169,6 +169,7 @@
     "empty": "Noch keine Standorte",
     "add": "Neuer Standort",
     "searchPlaceholder": "Standort suchen…",
+    "archivedView": "Archiviert",
     "col": {
       "name": "Name",
       "city": "Ort",
@@ -234,16 +235,52 @@
       "createAndLink": "Kontakt erstellen und verknüpfen",
       "description": "Standorttext",
       "contactNotLinked": "Nur Text — noch nicht mit einem Ansprechpartner verknüpft",
-      "changePrimaryContact": "Ansprechpartner ändern"
+      "changePrimaryContact": "Ansprechpartner ändern",
+      "mergeLocation": "Standort zusammenführen",
+      "archiveLocation": "Standort archivieren",
+      "confirmArchive": "{{name}} archivieren? Sie können dies später über 'Archiviert' rückgängig machen.",
+      "archiveFailed": "Archivieren fehlgeschlagen.",
+      "restoreFailed": "Wiederherstellen fehlgeschlagen.",
+      "tasks": {
+        "newTask": "Neue Aufgabe",
+        "empty": "Noch keine Aufgaben für diesen Standort",
+        "loading": "Aufgaben werden geladen…",
+        "error": "Aufgaben konnten nicht geladen werden",
+        "openTask": "Aufgabe öffnen",
+        "searchPlaceholder": "Aufgabe suchen…"
+      }
     },
     "saveFailed": "Speichern fehlgeschlagen.",
     "deleteFailed": "Löschen fehlgeschlagen.",
-    "deleteInUse": "Löschen nicht möglich — dieser Standort wird noch verwendet."
+    "deleteInUse": "Löschen nicht möglich — dieser Standort wird noch verwendet.",
+    "archivedBanner": {
+      "since": "Archiviert am {{date}}",
+      "flag": "Archiviert",
+      "restore": "Wiederherstellen"
+    },
+    "merge": {
+      "title": "Standort zusammenführen",
+      "intro": "Wählen Sie den doppelten Standort bei diesem Kunden und entscheiden Sie dann, welcher Datensatz bleibt. {{name}} ist der geöffnete Datensatz.",
+      "searchPlaceholder": "Suche nach Name oder Referenznummer…",
+      "noResults": "Keine Standorte gefunden.",
+      "noOthers": "Dieser Kunde hat keinen anderen Standort zum Zusammenführen.",
+      "stays": "Dieser Datensatz bleibt",
+      "thisRecord": "Geöffneter Datensatz",
+      "otherRecord": "Gefundener Datensatz",
+      "warning": "Die Daten von {{source}} werden in {{target}} übernommen; {{source}} verschwindet danach. Dies kann nicht rückgängig gemacht werden.",
+      "back": "Zurück",
+      "cancel": "Abbrechen",
+      "confirm": "Zusammenführen",
+      "done": "Standorte zusammengeführt.",
+      "errForbidden": "Sie sind nicht berechtigt, Standorte zusammenzuführen.",
+      "errFailed": "Zusammenführen fehlgeschlagen. Bitte erneut versuchen."
+    }
   },
   "departments": {
     "empty": "Noch keine Abteilungen",
     "add": "Neue Abteilung",
     "searchPlaceholder": "Abteilung suchen…",
+    "archivedView": "Archiviert",
     "col": {
       "name": "Name",
       "location": "Standort",
@@ -272,17 +309,45 @@
         "error": "Aufgaben konnten nicht geladen werden",
         "openTask": "Aufgabe öffnen",
         "searchPlaceholder": "Aufgabe suchen…"
-      }
+      },
+      "mergeDepartment": "Abteilung zusammenführen",
+      "archiveDepartment": "Abteilung archivieren",
+      "confirmArchive": "{{name}} archivieren? Sie können dies später über 'Archiviert' rückgängig machen.",
+      "archiveFailed": "Archivieren fehlgeschlagen.",
+      "restoreFailed": "Wiederherstellen fehlgeschlagen."
     },
     "deleteConfirm": "Diese Abteilung löschen?",
     "saveFailed": "Speichern fehlgeschlagen.",
     "deleteFailed": "Löschen fehlgeschlagen.",
-    "deleteInUse": "Löschen nicht möglich — diese Abteilung wird noch verwendet."
+    "deleteInUse": "Löschen nicht möglich — diese Abteilung wird noch verwendet.",
+    "archivedBanner": {
+      "since": "Archiviert am {{date}}",
+      "flag": "Archiviert",
+      "restore": "Wiederherstellen"
+    },
+    "merge": {
+      "title": "Abteilung zusammenführen",
+      "intro": "Wählen Sie die doppelte Abteilung bei diesem Kunden und entscheiden Sie dann, welcher Datensatz bleibt. {{name}} ist der geöffnete Datensatz.",
+      "searchPlaceholder": "Suche nach Name oder Referenznummer…",
+      "noResults": "Keine Abteilungen gefunden.",
+      "noOthers": "Dieser Kunde hat keine andere Abteilung zum Zusammenführen.",
+      "stays": "Dieser Datensatz bleibt",
+      "thisRecord": "Geöffneter Datensatz",
+      "otherRecord": "Gefundener Datensatz",
+      "warning": "Die Daten von {{source}} werden in {{target}} übernommen; {{source}} verschwindet danach. Dies kann nicht rückgängig gemacht werden.",
+      "back": "Zurück",
+      "cancel": "Abbrechen",
+      "confirm": "Zusammenführen",
+      "done": "Abteilungen zusammengeführt.",
+      "errForbidden": "Sie sind nicht berechtigt, Abteilungen zusammenzuführen.",
+      "errFailed": "Zusammenführen fehlgeschlagen. Bitte erneut versuchen."
+    }
   },
   "contacts": {
     "empty": "Noch keine Kontakte",
     "add": "Neuer Kontakt",
     "searchPlaceholder": "Kontakt suchen…",
+    "archivedView": "Archiviert",
     "col": {
       "name": "Name",
       "location": "Standort",
@@ -316,12 +381,21 @@
       "linkLocation": "Standort verknüpfen",
       "linkDepartment": "Abteilung verknüpfen",
       "middleName": "Namenszusatz",
-      "gender": "Geschlecht"
+      "gender": "Geschlecht",
+      "archiveContact": "Kontakt archivieren",
+      "confirmArchive": "{{name}} archivieren? Sie können dies später über 'Archiviert' rückgängig machen.",
+      "archiveFailed": "Archivieren fehlgeschlagen.",
+      "restoreFailed": "Wiederherstellen fehlgeschlagen."
     },
     "deleteConfirm": "Diesen Kontakt löschen?",
     "saveFailed": "Speichern fehlgeschlagen.",
     "deleteFailed": "Löschen fehlgeschlagen.",
     "deleteInUse": "Löschen nicht möglich — dieser Kontakt wird noch verwendet.",
+    "archivedBanner": {
+      "since": "Archiviert am {{date}}",
+      "flag": "Archiviert",
+      "restore": "Wiederherstellen"
+    },
     "primaryChip": "Hauptkontakt",
     "tasks": {
       "newTask": "Neue Aufgabe",
@@ -664,7 +738,24 @@
   "inUse": {
     "title": "Noch in Verwendung",
     "close": "Schließen",
+    "archive": "Stattdessen archivieren",
     "planningOrders": "Planungsaufträge",
     "planningShifts": "Planungsdienste"
+  },
+  "merge": {
+    "title": "Kunde zusammenführen",
+    "intro": "Wählen Sie den doppelten Kunden, der mit {{name}} zusammengeführt werden soll.",
+    "searchPlaceholder": "Suche nach Name, Nummer oder Ort…",
+    "searching": "Suche läuft…",
+    "noResults": "Keine Kunden gefunden.",
+    "staysLabel": "Bleibt (dieser Datensatz)",
+    "duplicateLabel": "Wird zusammengeführt",
+    "warning": "Die Standorte, Abteilungen, Kontakte, Vakanzen, Matches und weiteren Daten von {{source}} werden zu {{target}} verschoben. {{source}} wird anschließend gelöscht. Dies kann nicht rückgängig gemacht werden.",
+    "back": "Zurück",
+    "cancel": "Abbrechen",
+    "confirm": "Zusammenführen",
+    "done": "Kunde zusammengeführt.",
+    "errForbidden": "Sie sind nicht berechtigt, Kunden zusammenzuführen.",
+    "errFailed": "Zusammenführen fehlgeschlagen. Bitte erneut versuchen."
   }
 }

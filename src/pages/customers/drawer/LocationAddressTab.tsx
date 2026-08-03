@@ -1,0 +1,126 @@
+/**
+ * LocationAddressTab — the "Adres & gegevens" sub-tab body of LocationDetail
+ * (§0.3 split, this task — LocationDetail passed ~450 lines once
+ * ARCHIVE-SUBENTITY-1/LOCATIE-SAMENVOEGEN-1/TAKEN-OP-LOCATIE-1 landed). Same
+ * block order as the customer's Bedrijf tab (Danny 28-07: "zelfde format als
+ * klant"): Gegevens · Adres · Contact · Omschrijving · Koios advies · Vestiging.
+ * Pure presentational — LocationDetail still owns all state/handlers and hands
+ * them down as props (§3A: details stay thin containers).
+ */
+import type { TFunction } from 'i18next'
+import EditableFieldTable from '@/components/forms/EditableFieldTable'
+import type { FieldRow } from '@/components/forms/EditableFieldTable'
+import EditableRichTextField from './EditableRichTextField'
+import LocationContactSection from './LocationContactSection'
+import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+import LocationBranchSection from './LocationBranchSection'
+import { kvkValue, vatValue } from '@/components/drawer/contactLinks'
+import { buildLocationAdviceInsights } from './locationAiInsights'
+import { isPrimaryForLocation } from '../hooks/useCustomerContacts'
+import type { Contact, Location } from '@/types/customer'
+import type { Id } from '@/types/common'
+import type { ContactPayload } from '../hooks/useCustomerContacts'
+import type { LocationPayload } from '../hooks/useCustomerLocations'
+
+interface Props {
+  location: Location
+  customerId?: Id
+  contacts: Contact[]
+  t: TFunction
+  provinceOptions: { value: string; label: string }[]
+  countryOptions: { value: string; label: string }[]
+  branchOptions: { value: string; label: string }[]
+  onSave: (id: Id, payload: Partial<LocationPayload>) => void
+  onAddContact: (payload: ContactPayload) => Promise<Contact | void> | void
+  /** Jump to the Contactpersonen sub-tab, optionally opening one contact directly. */
+  onGoToContacts: (openId?: Id) => void
+}
+
+export default function LocationAddressTab({
+  location: l, customerId, contacts, t, provinceOptions, countryOptions, branchOptions, onSave, onAddContact, onGoToContacts,
+}: Props) {
+  // CONTACT-LOCATION-PRIMARY-1: THIS site's own primary contact — a real record resolved
+  // from the contact↔location coupling flag, not a name matched against free text.
+  const primaryContact = contacts.find(c => isPrimaryForLocation(c, l.id as Id)) ?? null
+
+  // Algemeen/Adres/Registratie — street/no/suffix/postcode/city collapse into ONE
+  // composed line in read mode (the 'address' composite) and only expand to loose
+  // fields while editing; state/country stay their own rows.
+  const generalFields: FieldRow[] = [
+    { key: 'name', label: t('locations.detail.name'), type: 'text', group: t('overview.details') },
+    { key: 'address', label: t('subModal.groups.address'), type: 'address', group: t('subModal.groups.address'),
+      addressFields: [
+        { key: 'street', label: t('locations.detail.street'), type: 'text' },
+        { key: 'houseNumber', label: t('locations.detail.houseNumber'), type: 'text' },
+        { key: 'houseNumberSuffix', label: t('locations.detail.houseNumberSuffix'), type: 'text' },
+        { key: 'postalCode', label: t('locations.detail.postalCode'), type: 'text' },
+        { key: 'city', label: t('locations.detail.city'), type: 'text' },
+      ] },
+    // Searchable pickers, not free text (Danny 28-07). NOTE the value format: unlike the
+    // candidate, a location stores the country NAME ("Nederland"), not an ISO-2 code.
+    { key: 'state', label: t('locations.detail.state'), type: 'select', options: provinceOptions, group: t('subModal.groups.address') },
+    { key: 'country', label: t('locations.detail.country'), type: 'select', options: countryOptions, group: t('subModal.groups.address') },
+    { key: 'cocNumber', label: t('locations.detail.coc'), type: 'text', group: t('overview.details'),
+      renderValue: v => kvkValue(v, t('locations.detail.openKvk')) },
+    { key: 'vatNumber', label: t('locations.detail.vat'), type: 'text', group: t('overview.details'),
+      renderValue: v => vatValue(v, t('locations.detail.openVies')) },
+    // Kostenplaats sits in Gegevens (Danny 28-07) — no billing-email input here:
+    // invoicing always comes from the customer (see OverviewTab).
+    { key: 'costCenter', label: t('locations.detail.costCenter'), type: 'text', group: t('overview.details') },
+  ]
+
+  const values = {
+    name: l.name,
+    street: l.street, houseNumber: l.houseNumber, houseNumberSuffix: l.houseNumberSuffix,
+    postalCode: l.postalCode, city: l.city, state: l.state, country: l.country,
+    cocNumber: l.cocNumber, vatNumber: l.vatNumber,
+    costCenter: l.costCenter,
+  }
+
+  const save = (v: Record<string, unknown>) => {
+    onSave(l.id as Id, {
+      name: v.name as string,
+      street: v.street as string, houseNumber: v.houseNumber as string, houseNumberSuffix: v.houseNumberSuffix as string,
+      postalCode: v.postalCode as string, city: v.city as string, state: v.state as string, country: v.country as string,
+      cocNumber: v.cocNumber as string, vatNumber: v.vatNumber as string,
+      costCenter: v.costCenter as string,
+    })
+  }
+
+  // LOCATIE-OMSCHRIJVING-1 (Danny 02-08): its own rich-text block, same pattern the
+  // department detail uses — a bare textarea is not the house pattern for prose.
+  const saveDescription = (html: string) => onSave(l.id as Id, { description: html })
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {[t('overview.details'), t('subModal.groups.address')].map(group => (
+        <EditableFieldTable key={group} title={group} labelWidth={140} value={values} onSave={save}
+          fields={generalFields.filter(f => f.group === group).map(f => ({ ...f, group: undefined }))} />
+      ))}
+
+      {/* CONTACT-LOCATION-PRIMARY-1, round two (Danny 02-08) — ONE contact block, and the
+          coupling is the only truth it shows as a link. Setting/changing it lives on the
+          Contactpersonen sub-tab (the "make primary" star). */}
+      <LocationContactSection
+        primaryContact={primaryContact}
+        legacyName={l.contactName ?? ''} legacyEmail={l.email ?? ''} legacyPhone={l.phone ?? ''}
+        onOpenContact={id => onGoToContacts(id)}
+        onPickContact={() => onGoToContacts()}
+        contacts={contacts} customerId={customerId} locationId={l.id as Id} onAddContact={onAddContact} />
+
+      {/* Mirrors the Bedrijf tab exactly — description right after the contact block. */}
+      <EditableRichTextField label={t('locations.detail.description')} value={l.description ?? ''} onSave={saveDescription} />
+
+      {/* Koios advice — pure FE heuristics over this location's OWN completeness. */}
+      <KoiosAdviceBlock namespace="customers" insights={buildLocationAdviceInsights(l, t)} />
+
+      {/* Vestiging — which of OUR branches this site works under, and whether that is
+          inherited from the customer or set here on purpose (LOCATIE-VESTIGING-1). */}
+      <LocationBranchSection
+        branchIds={l.branchIds} branches={l.branches}
+        inherited={l.branchInherited} effectiveBranches={l.effectiveBranches}
+        options={branchOptions}
+        onChange={ids => onSave(l.id as Id, { branchIds: ids })} />
+    </div>
+  )
+}

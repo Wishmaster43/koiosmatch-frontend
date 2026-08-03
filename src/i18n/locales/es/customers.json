@@ -169,6 +169,7 @@
     "empty": "Aún no hay ubicaciones",
     "add": "Nueva ubicación",
     "searchPlaceholder": "Buscar ubicación…",
+    "archivedView": "Archivado",
     "col": {
       "name": "Nombre",
       "city": "Ciudad",
@@ -234,16 +235,52 @@
       "createAndLink": "Crear contacto y vincular",
       "description": "Texto de la ubicación",
       "contactNotLinked": "Solo texto — aún no vinculado a un contacto",
-      "changePrimaryContact": "Cambiar contacto"
+      "changePrimaryContact": "Cambiar contacto",
+      "mergeLocation": "Combinar ubicación",
+      "archiveLocation": "Archivar ubicación",
+      "confirmArchive": "¿Archivar {{name}}? Podrás restaurarlo más tarde mediante «Archivado».",
+      "archiveFailed": "Error al archivar.",
+      "restoreFailed": "Error al restaurar.",
+      "tasks": {
+        "newTask": "Nueva tarea",
+        "empty": "Aún no hay tareas para esta ubicación",
+        "loading": "Cargando tareas…",
+        "error": "No se pudieron cargar las tareas",
+        "openTask": "Abrir tarea",
+        "searchPlaceholder": "Buscar tarea…"
+      }
     },
     "saveFailed": "Error al guardar.",
     "deleteFailed": "Error al eliminar.",
-    "deleteInUse": "No se puede eliminar — esta ubicación todavía está en uso."
+    "deleteInUse": "No se puede eliminar — esta ubicación todavía está en uso.",
+    "archivedBanner": {
+      "since": "Archivado el {{date}}",
+      "flag": "Archivado",
+      "restore": "Restaurar"
+    },
+    "merge": {
+      "title": "Combinar ubicación",
+      "intro": "Elige la ubicación duplicada de este cliente y luego decide qué registro se mantiene. {{name}} es el registro abierto.",
+      "searchPlaceholder": "Buscar por nombre o número de referencia…",
+      "noResults": "No se encontraron ubicaciones.",
+      "noOthers": "Este cliente no tiene otra ubicación con la que combinar.",
+      "stays": "Este registro se mantiene",
+      "thisRecord": "Registro abierto",
+      "otherRecord": "Registro encontrado",
+      "warning": "Los datos de {{source}} se incorporarán a {{target}}; {{source}} desaparecerá después. Esta acción no se puede deshacer.",
+      "back": "Atrás",
+      "cancel": "Cancelar",
+      "confirm": "Combinar",
+      "done": "Ubicaciones combinadas.",
+      "errForbidden": "No tienes permiso para combinar ubicaciones.",
+      "errFailed": "Error al combinar. Inténtalo de nuevo."
+    }
   },
   "departments": {
     "empty": "Aún no hay departamentos",
     "add": "Nuevo departamento",
     "searchPlaceholder": "Buscar departamento…",
+    "archivedView": "Archivado",
     "col": {
       "name": "Nombre",
       "location": "Ubicación",
@@ -272,17 +309,45 @@
         "error": "No se pudieron cargar las tareas",
         "openTask": "Abrir tarea",
         "searchPlaceholder": "Buscar tarea…"
-      }
+      },
+      "mergeDepartment": "Combinar departamento",
+      "archiveDepartment": "Archivar departamento",
+      "confirmArchive": "¿Archivar {{name}}? Podrás restaurarlo más tarde mediante «Archivado».",
+      "archiveFailed": "Error al archivar.",
+      "restoreFailed": "Error al restaurar."
     },
     "deleteConfirm": "¿Eliminar este departamento?",
     "saveFailed": "Error al guardar.",
     "deleteFailed": "Error al eliminar.",
-    "deleteInUse": "No se puede eliminar — este departamento todavía está en uso."
+    "deleteInUse": "No se puede eliminar — este departamento todavía está en uso.",
+    "archivedBanner": {
+      "since": "Archivado el {{date}}",
+      "flag": "Archivado",
+      "restore": "Restaurar"
+    },
+    "merge": {
+      "title": "Combinar departamento",
+      "intro": "Elige el departamento duplicado de este cliente y luego decide qué registro se mantiene. {{name}} es el registro abierto.",
+      "searchPlaceholder": "Buscar por nombre o número de referencia…",
+      "noResults": "No se encontraron departamentos.",
+      "noOthers": "Este cliente no tiene otro departamento con el que combinar.",
+      "stays": "Este registro se mantiene",
+      "thisRecord": "Registro abierto",
+      "otherRecord": "Registro encontrado",
+      "warning": "Los datos de {{source}} se incorporarán a {{target}}; {{source}} desaparecerá después. Esta acción no se puede deshacer.",
+      "back": "Atrás",
+      "cancel": "Cancelar",
+      "confirm": "Combinar",
+      "done": "Departamentos combinados.",
+      "errForbidden": "No tienes permiso para combinar departamentos.",
+      "errFailed": "Error al combinar. Inténtalo de nuevo."
+    }
   },
   "contacts": {
     "empty": "Aún no hay contactos",
     "add": "Nuevo contacto",
     "searchPlaceholder": "Buscar contacto…",
+    "archivedView": "Archivado",
     "col": {
       "name": "Nombre",
       "location": "Ubicación",
@@ -316,12 +381,21 @@
       "linkLocation": "Vincular ubicación",
       "linkDepartment": "Vincular departamento",
       "middleName": "Partícula",
-      "gender": "Género"
+      "gender": "Género",
+      "archiveContact": "Archivar contacto",
+      "confirmArchive": "¿Archivar {{name}}? Podrás restaurarlo más tarde mediante «Archivado».",
+      "archiveFailed": "Error al archivar.",
+      "restoreFailed": "Error al restaurar."
     },
     "deleteConfirm": "¿Eliminar este contacto?",
     "saveFailed": "Error al guardar.",
     "deleteFailed": "Error al eliminar.",
     "deleteInUse": "No se puede eliminar — este contacto todavía está en uso.",
+    "archivedBanner": {
+      "since": "Archivado el {{date}}",
+      "flag": "Archivado",
+      "restore": "Restaurar"
+    },
     "primaryChip": "Principal",
     "tasks": {
       "newTask": "Nueva tarea",
@@ -664,7 +738,24 @@
   "inUse": {
     "title": "Todavía en uso",
     "close": "Cerrar",
+    "archive": "Archivar en su lugar",
     "planningOrders": "Órdenes de planificación",
     "planningShifts": "Turnos de planificación"
+  },
+  "merge": {
+    "title": "Fusionar cliente",
+    "intro": "Elige el cliente duplicado para fusionarlo con {{name}}.",
+    "searchPlaceholder": "Buscar por nombre, número o ciudad…",
+    "searching": "Buscando…",
+    "noResults": "No se encontraron clientes.",
+    "staysLabel": "Permanece (este registro)",
+    "duplicateLabel": "Se fusiona y elimina",
+    "warning": "Las ubicaciones, departamentos, contactos, vacantes, matches y demás datos de {{source}} pasan a {{target}}. Luego se elimina {{source}}. Esta acción no se puede deshacer.",
+    "back": "Atrás",
+    "cancel": "Cancelar",
+    "confirm": "Fusionar",
+    "done": "Cliente fusionado.",
+    "errForbidden": "No tienes permiso para fusionar clientes.",
+    "errFailed": "Error al fusionar. Inténtalo de nuevo."
   }
 }

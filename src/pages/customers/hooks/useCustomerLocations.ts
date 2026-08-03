@@ -40,6 +40,16 @@ export interface LocationPayload {
   branchIds: Id[]
 }
 
+/**
+ * Broadcast channel for "this customer's location list changed underneath you"
+ * (mirrors DEPARTMENTS_CHANGED_EVENT/CONTACTS_CHANGED_EVENT). ARCHIVE-SUBENTITY-1's
+ * archive/restore/merge actions fire from the drill-down, several hops away from
+ * the hook instance CustomerDrawer owns — rather than prop-drilling a reload
+ * callback through LocationsTab/LocationDetail, they dispatch this and the one
+ * hook that OWNS the live list refetches (same `km:` CustomEvent convention).
+ */
+export const LOCATIONS_CHANGED_EVENT = 'km:locations-changed'
+
 const isTemp = (id: Id | undefined) => typeof id === 'string' && id.startsWith('tmp-')
 
 // Build the API body from the payload — empty strings go through as '' (the BE
@@ -89,6 +99,16 @@ export function useCustomerLocations(customerId: Id | undefined) {
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId])
   useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
+
+  // ARCHIVE-SUBENTITY-1: refetch when an out-of-tree writer (archive/restore/merge,
+  // fired from deep inside LocationDetail) changed this list. Registered in the
+  // effect SETUP so StrictMode's setup→cleanup→setup re-arms it (§9).
+  useEffect(() => {
+    const ctrl = new AbortController()
+    const onChanged = () => load(ctrl.signal)
+    window.addEventListener(LOCATIONS_CHANGED_EVENT, onChanged)
+    return () => { window.removeEventListener(LOCATIONS_CHANGED_EVENT, onChanged); ctrl.abort() }
+  }, [load])
 
   // Create — optimistic row with a temp id, swapped for the server row on success.
   // Only the Add-modal's create path calls this (inline edits go through `update`
@@ -145,4 +165,57 @@ export function useCustomerLocations(customerId: Id | undefined) {
   }, [customerId, locations, t])
 
   return { locations, loading, error, reload: load, add, update, remove }
+}
+
+/**
+ * archiveLocation / restoreLocation — ARCHIVE-SUBENTITY-1's reversible soft-delete
+ * pair (POST …/archive, POST …/restore). Standalone functions rather than
+ * hook-returned callbacks: they are fired from deep inside LocationDetail, several
+ * hops away from the hook instance CustomerDrawer owns (mirrors
+ * setLocationPrimaryContact in useCustomerContacts.ts, the exact same class of
+ * problem). Dispatching LOCATIONS_CHANGED_EVENT lets that owning instance refetch
+ * without prop-drilling a reload callback through every intermediate component.
+ */
+export async function archiveLocation(customerId: Id, id: Id): Promise<void> {
+  await api.post(`/customers/${customerId}/locations/${id}/archive`)
+  window.dispatchEvent(new CustomEvent(LOCATIONS_CHANGED_EVENT))
+}
+export async function restoreLocation(customerId: Id, id: Id): Promise<Location> {
+  const res = await api.post(`/customers/${customerId}/locations/${id}/restore`)
+  window.dispatchEvent(new CustomEvent(LOCATIONS_CHANGED_EVENT))
+  return mapLocation(unwrap<ApiLocation>(res))
+}
+
+/**
+ * useArchivedCustomerLocations — the ARCHIVED-ONLY sub-list behind the panel's
+ * "Gearchiveerd" quick-view. A separate, independent fetch (never merged into the
+ * live `useCustomerLocations` state above) so every OTHER consumer of the live
+ * list — add-modal location pickers, the branch/contact couplers — keeps seeing
+ * exactly today's archived-excluded set; only this toggle opts in. `active` gates
+ * the fetch entirely (false = no request, zero cost while the toggle is off) and
+ * refetches on LOCATIONS_CHANGED_EVENT so an archive/restore/merge fired from
+ * anywhere keeps this list in sync with the live one.
+ */
+export function useArchivedCustomerLocations(customerId: Id | undefined, active: boolean) {
+  const [locations, setLocations] = useState<Location[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const load = useCallback((signal?: AbortSignal) => {
+    if (!active || !customerId) { setLocations([]); return }
+    setLoading(true)
+    api.get(`/customers/${customerId}/locations`, { params: { include_archived: 1 }, signal })
+      .then(res => { if (!signal?.aborted) setLocations(unwrapList<ApiLocation>(res).rows.map(mapLocation).filter(l => l.archived)) })
+      .catch(() => { /* the toggle simply shows nothing rather than crashing (§3) */ })
+      .finally(() => { if (!signal?.aborted) setLoading(false) })
+  }, [customerId, active])
+  useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
+
+  useEffect(() => {
+    const ctrl = new AbortController()
+    const onChanged = () => load(ctrl.signal)
+    window.addEventListener(LOCATIONS_CHANGED_EVENT, onChanged)
+    return () => { window.removeEventListener(LOCATIONS_CHANGED_EVENT, onChanged); ctrl.abort() }
+  }, [load])
+
+  return { locations, loading }
 }

@@ -3,10 +3,16 @@
  * location/department delete that lost the 409 RACE (something got linked after
  * the row's own `in_use` flag was last read — SUBENTITEIT-DELETE-1). Lists every
  * blocking relation with its count, translated, mirroring ConfirmDialog's panel
- * shell but with only a Close action — there is nothing to confirm here, only
- * to explain why the delete did not go through.
+ * shell.
+ *
+ * ARCHIVE-SUBENTITY-1: the dead end now has a way out — an optional `onArchive`
+ * renders an "Archiveer" action beside Close (archiving carries none of the
+ * in-use guard, so it always succeeds here even though the hard delete just
+ * failed). Absent `onArchive` keeps the original Close-only shell (e.g. a caller
+ * that has not wired archiving yet).
  */
 import { useTranslation } from 'react-i18next'
+import { Archive, Loader2 } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 
 // Relation keys the backend's usageCounts() may send (location: 7 keys incl.
@@ -34,9 +40,13 @@ export interface InUseCountsDialogProps {
   open: boolean
   counts: Record<string, number>
   onClose: () => void
+  // ARCHIVE-SUBENTITY-1: the escape from this dead end — absent = no button (a
+  // caller that has not wired archiving, or an entity without it, e.g. contacts).
+  onArchive?: () => void
+  archiving?: boolean
 }
 
-export default function InUseCountsDialog({ open, counts, onClose }: InUseCountsDialogProps) {
+export default function InUseCountsDialog({ open, counts, onClose, onArchive, archiving = false }: InUseCountsDialogProps) {
   const { t } = useTranslation('customers')
   const relationLabel = useRelationLabel()
   // useFocusTrap must run every render (hooks can't be conditional) — it no-ops
@@ -63,7 +73,19 @@ export default function InUseCountsDialog({ open, counts, onClose }: InUseCounts
             </div>
           ))}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+          {/* ARCHIVE-SUBENTITY-1: "kan niet verwijderen, wél archiveren" — archiving
+              carries none of the in-use guard, so it is always a real way out here. */}
+          {onArchive ? (
+            <button onClick={onArchive} disabled={archiving}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 14px', borderRadius: 8,
+                border: '1px solid color-mix(in srgb, var(--color-archive) 40%, transparent)',
+                background: 'color-mix(in srgb, var(--color-archive) 10%, transparent)', color: 'var(--color-archive)',
+                cursor: archiving ? 'not-allowed' : 'pointer', fontSize: 13, opacity: archiving ? 0.6 : 1 }}>
+              {archiving ? <Loader2 size={13} className="animate-spin" /> : <Archive size={13} />}
+              {t('inUse.archive')}
+            </button>
+          ) : <span />}
           <button onClick={onClose}
             style={{ height: 32, padding: '0 16px', borderRadius: 8, border: '1px solid var(--border)',
               background: 'none', color: 'var(--text)', cursor: 'pointer', fontSize: 13 }}>

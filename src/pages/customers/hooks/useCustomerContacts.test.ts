@@ -10,7 +10,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import {
   useCustomerContacts, CONTACTS_CHANGED_EVENT, setLocationPrimaryContact,
-  primaryLocationIdsOf, isPrimaryForLocation, type ContactPayload,
+  primaryLocationIdsOf, isPrimaryForLocation, archiveContact, restoreContact,
+  useArchivedCustomerContacts, type ContactPayload,
 } from './useCustomerContacts'
 import type { Contact } from '@/types/customer'
 
@@ -373,5 +374,61 @@ describe('useCustomerContacts · per-location primary (CONTACT-LOCATION-PRIMARY-
     // The flags ride ALONG the row; a Contact built elsewhere simply has none.
     expect(primaryLocationIdsOf({ id: 'x' } as Contact)).toEqual([])
     expect(isPrimaryForLocation({ id: 'x' } as Contact, 'loc-1')).toBe(false)
+  })
+})
+
+/**
+ * ARCHIVE-SUBENTITY-1 — the reversible soft-delete pair. Standalone functions
+ * (not hook-returned callbacks), mirroring setLocationPrimaryContact above —
+ * fired from deep inside ContactDetail, several hops from this hook's owner.
+ */
+describe('useCustomerContacts · archiveContact / restoreContact (ARCHIVE-SUBENTITY-1)', () => {
+  it('archiveContact POSTs the archive route and dispatches CONTACTS_CHANGED_EVENT', async () => {
+    mockPost.mockResolvedValue({ data: {} })
+    const onChanged = vi.fn()
+    window.addEventListener(CONTACTS_CHANGED_EVENT, onChanged)
+
+    await archiveContact('cust1', 'c1')
+
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust1/contacts/c1/archive')
+    expect(onChanged).toHaveBeenCalledTimes(1)
+    window.removeEventListener(CONTACTS_CHANGED_EVENT, onChanged)
+  })
+
+  it('restoreContact POSTs the restore route, dispatches the event and returns the mapped contact', async () => {
+    mockPost.mockResolvedValue({ data: { data: { id: 'c1', first_name: 'Jill', last_name: 'A', archived: false } } })
+    const onChanged = vi.fn()
+    window.addEventListener(CONTACTS_CHANGED_EVENT, onChanged)
+
+    const restored = await restoreContact('cust1', 'c1')
+
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust1/contacts/c1/restore')
+    expect(restored.id).toBe('c1')
+    expect(onChanged).toHaveBeenCalledTimes(1)
+    window.removeEventListener(CONTACTS_CHANGED_EVENT, onChanged)
+  })
+})
+
+/**
+ * ARCHIVE-SUBENTITY-1 — the archived-only sub-fetch behind the panel's
+ * "Gearchiveerd" quick-view. A SEPARATE fetch from the live list above, so the
+ * live list's own consumers (couple pickers etc.) never see archived rows leak in.
+ */
+describe('useCustomerContacts · useArchivedCustomerContacts (ARCHIVE-SUBENTITY-1)', () => {
+  it('fires no request while inactive', () => {
+    renderHook(() => useArchivedCustomerContacts('cust1', false))
+    expect(mockGet).not.toHaveBeenCalled()
+  })
+
+  it('requests include_archived=1 and keeps only the archived rows once active', async () => {
+    mockGet.mockResolvedValue({ data: { data: [
+      { id: 'c1', first_name: 'Live', last_name: 'One', archived: false },
+      { id: 'c2', first_name: 'Gone', last_name: 'Two', archived: true },
+    ] } })
+    const { result } = renderHook(() => useArchivedCustomerContacts('cust1', true))
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(mockGet).toHaveBeenCalledWith('/customers/cust1/contacts', expect.objectContaining({ params: { include_archived: 1 } }))
+    expect(result.current.contacts.map(c => c.id)).toEqual(['c2'])
   })
 })

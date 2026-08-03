@@ -169,6 +169,7 @@
     "empty": "Aucun site pour le moment",
     "add": "Nouveau site",
     "searchPlaceholder": "Rechercher un site…",
+    "archivedView": "Archivé",
     "col": {
       "name": "Nom",
       "city": "Ville",
@@ -234,16 +235,52 @@
       "createAndLink": "Créer le contact et le lier",
       "description": "Texte du site",
       "contactNotLinked": "Texte seul — pas encore lié à un contact",
-      "changePrimaryContact": "Modifier le contact"
+      "changePrimaryContact": "Modifier le contact",
+      "mergeLocation": "Fusionner le site",
+      "archiveLocation": "Archiver le site",
+      "confirmArchive": "Archiver {{name}} ? Vous pourrez le restaurer plus tard via « Archivé ».",
+      "archiveFailed": "L'archivage a échoué.",
+      "restoreFailed": "La restauration a échoué.",
+      "tasks": {
+        "newTask": "Nouvelle tâche",
+        "empty": "Aucune tâche pour ce site pour le moment",
+        "loading": "Chargement des tâches…",
+        "error": "Impossible de charger les tâches",
+        "openTask": "Ouvrir la tâche",
+        "searchPlaceholder": "Rechercher une tâche…"
+      }
     },
     "saveFailed": "L'enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
-    "deleteInUse": "Suppression impossible — ce site est encore utilisé."
+    "deleteInUse": "Suppression impossible — ce site est encore utilisé.",
+    "archivedBanner": {
+      "since": "Archivé le {{date}}",
+      "flag": "Archivé",
+      "restore": "Restaurer"
+    },
+    "merge": {
+      "title": "Fusionner le site",
+      "intro": "Choisissez le site en double chez ce client, puis décidez quelle fiche est conservée. {{name}} est la fiche ouverte.",
+      "searchPlaceholder": "Rechercher par nom ou numéro de référence…",
+      "noResults": "Aucun site trouvé.",
+      "noOthers": "Ce client n'a pas d'autre site avec lequel fusionner.",
+      "stays": "Cette fiche est conservée",
+      "thisRecord": "Fiche ouverte",
+      "otherRecord": "Fiche trouvée",
+      "warning": "Les données de {{source}} seront intégrées à {{target}} ; {{source}} disparaîtra ensuite. Cette action est irréversible.",
+      "back": "Retour",
+      "cancel": "Annuler",
+      "confirm": "Fusionner",
+      "done": "Sites fusionnés.",
+      "errForbidden": "Vous n'êtes pas autorisé à fusionner des sites.",
+      "errFailed": "Échec de la fusion. Veuillez réessayer."
+    }
   },
   "departments": {
     "empty": "Aucun service pour le moment",
     "add": "Nouveau service",
     "searchPlaceholder": "Rechercher un service…",
+    "archivedView": "Archivé",
     "col": {
       "name": "Nom",
       "location": "Site",
@@ -272,17 +309,45 @@
         "error": "Impossible de charger les tâches",
         "openTask": "Ouvrir la tâche",
         "searchPlaceholder": "Rechercher une tâche…"
-      }
+      },
+      "mergeDepartment": "Fusionner le service",
+      "archiveDepartment": "Archiver le service",
+      "confirmArchive": "Archiver {{name}} ? Vous pourrez le restaurer plus tard via « Archivé ».",
+      "archiveFailed": "L'archivage a échoué.",
+      "restoreFailed": "La restauration a échoué."
     },
     "deleteConfirm": "Supprimer ce service ?",
     "saveFailed": "L'enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
-    "deleteInUse": "Suppression impossible — ce service est encore utilisé."
+    "deleteInUse": "Suppression impossible — ce service est encore utilisé.",
+    "archivedBanner": {
+      "since": "Archivé le {{date}}",
+      "flag": "Archivé",
+      "restore": "Restaurer"
+    },
+    "merge": {
+      "title": "Fusionner le service",
+      "intro": "Choisissez le service en double chez ce client, puis décidez quelle fiche est conservée. {{name}} est la fiche ouverte.",
+      "searchPlaceholder": "Rechercher par nom ou numéro de référence…",
+      "noResults": "Aucun service trouvé.",
+      "noOthers": "Ce client n'a pas d'autre service avec lequel fusionner.",
+      "stays": "Cette fiche est conservée",
+      "thisRecord": "Fiche ouverte",
+      "otherRecord": "Fiche trouvée",
+      "warning": "Les données de {{source}} seront intégrées à {{target}} ; {{source}} disparaîtra ensuite. Cette action est irréversible.",
+      "back": "Retour",
+      "cancel": "Annuler",
+      "confirm": "Fusionner",
+      "done": "Services fusionnés.",
+      "errForbidden": "Vous n'êtes pas autorisé à fusionner des services.",
+      "errFailed": "Échec de la fusion. Veuillez réessayer."
+    }
   },
   "contacts": {
     "empty": "Aucun contact pour le moment",
     "add": "Nouveau contact",
     "searchPlaceholder": "Rechercher un contact…",
+    "archivedView": "Archivé",
     "col": {
       "name": "Nom",
       "location": "Site",
@@ -316,12 +381,21 @@
       "linkLocation": "Lier un site",
       "linkDepartment": "Lier un service",
       "middleName": "Particule",
-      "gender": "Genre"
+      "gender": "Genre",
+      "archiveContact": "Archiver le contact",
+      "confirmArchive": "Archiver {{name}} ? Vous pourrez le restaurer plus tard via « Archivé ».",
+      "archiveFailed": "L'archivage a échoué.",
+      "restoreFailed": "La restauration a échoué."
     },
     "deleteConfirm": "Supprimer ce contact ?",
     "saveFailed": "L'enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
     "deleteInUse": "Suppression impossible — ce contact est encore utilisé.",
+    "archivedBanner": {
+      "since": "Archivé le {{date}}",
+      "flag": "Archivé",
+      "restore": "Restaurer"
+    },
     "primaryChip": "Principal",
     "tasks": {
       "newTask": "Nouvelle tâche",
@@ -664,7 +738,24 @@
   "inUse": {
     "title": "Encore utilisé",
     "close": "Fermer",
+    "archive": "Archiver à la place",
     "planningOrders": "Ordres de planning",
     "planningShifts": "Services de planning"
+  },
+  "merge": {
+    "title": "Fusionner le client",
+    "intro": "Choisissez le client en double à fusionner avec {{name}}.",
+    "searchPlaceholder": "Rechercher par nom, numéro ou ville…",
+    "searching": "Recherche…",
+    "noResults": "Aucun client trouvé.",
+    "staysLabel": "Reste (cette fiche)",
+    "duplicateLabel": "Fusionné et supprimé",
+    "warning": "Les sites, départements, contacts, offres d'emploi, matches et autres données de {{source}} sont transférés vers {{target}}. {{source}} est ensuite supprimé. Cette action est irréversible.",
+    "back": "Retour",
+    "cancel": "Annuler",
+    "confirm": "Fusionner",
+    "done": "Client fusionné.",
+    "errForbidden": "Vous n'êtes pas autorisé à fusionner des clients.",
+    "errFailed": "Échec de la fusion. Veuillez réessayer."
   }
 }

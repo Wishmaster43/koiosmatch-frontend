@@ -510,3 +510,26 @@ describe('ContactsPanel · primary contact per location', () => {
     await waitFor(() => expect(notifySuccess).toHaveBeenCalledWith(ct('locations.detail.setPrimaryContactDone', { name: 'Eva Bos' })))
   })
 })
+
+/**
+ * ARCHIVE-SUBENTITY-1 — the "Gearchiveerd" quick-view is a SEPARATE fetch (never
+ * merged into the live list), gated entirely on the toggle. Assert the REQUEST
+ * (§13). No explicit `customerId` prop here on purpose: it proves the fallback
+ * derivation off a live contact's own `customerId` (contact() already carries
+ * 'cust-1') — the path today's top-level ContactsTab actually exercises.
+ */
+describe('ContactsPanel · Gearchiveerd quick-view (ARCHIVE-SUBENTITY-1)', () => {
+  it('fires no archived-list request until the toggle is switched on', () => {
+    render(<Host {...base} scope="customer" contacts={[contact()]} />)
+    expect(vi.mocked(api.get).mock.calls.some(([, cfg]) => (cfg as { params?: { include_archived?: number } } | undefined)?.params?.include_archived === 1)).toBe(false)
+  })
+
+  it('requests include_archived=1 for this customer\'s own contacts once toggled on', async () => {
+    const user = userEvent.setup()
+    render(<Host {...base} scope="customer" contacts={[contact()]} />)
+
+    await user.click(screen.getByRole('button', { name: ct('contacts.archivedView') }))
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customers/cust-1/contacts', expect.objectContaining({ params: { include_archived: 1 } })))
+  })
+})

@@ -287,3 +287,23 @@ describe('DepartmentsPanel · pager steps through the filtered rows (DRILL-PAGER
     expect(screen.getByTitle(cm('drillPager.nextAt', { index: 2, total: 2 }))).toBeDisabled()
   })
 })
+
+/**
+ * ARCHIVE-SUBENTITY-1 — the "Gearchiveerd" quick-view is a SEPARATE fetch (never
+ * merged into the live list), gated entirely on the toggle. Assert the REQUEST (§13).
+ */
+describe('DepartmentsPanel · Gearchiveerd quick-view (ARCHIVE-SUBENTITY-1)', () => {
+  it('fires no archived-list request until the toggle is switched on', () => {
+    render(<Host {...base} scope="customer" customerId="cust-1" departments={[department()]} />)
+    expect(vi.mocked(api.get).mock.calls.some(([, cfg]) => (cfg as { params?: { include_archived?: number } } | undefined)?.params?.include_archived === 1)).toBe(false)
+  })
+
+  it('requests include_archived=1 for this customer\'s own departments once toggled on', async () => {
+    const user = userEvent.setup()
+    render(<Host {...base} scope="customer" customerId="cust-1" departments={[department()]} />)
+
+    await user.click(screen.getByRole('button', { name: ct('departments.archivedView') }))
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customers/cust-1/departments', expect.objectContaining({ params: { include_archived: 1 } })))
+  })
+})

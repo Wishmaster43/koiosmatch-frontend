@@ -21,6 +21,10 @@ interface Props {
   locations?: { id: Id; name: string }[]
   departments?: Department[]
   statuses?: LookupOption[]
+  // ARCHIVE-SUBENTITY-1: threaded down for the "Gearchiveerd" quick-view's own
+  // fetch. Optional — ContactsPanel falls back to a live contact's own customerId
+  // when absent, so an as-yet-unthreaded caller still works for a non-empty list.
+  customerId?: Id
   // EXTRACT-1: the caller's own customers.update permission check, threaded down
   // to the Koppelingen sub-tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
   canLinkBackoffice?: boolean
@@ -30,7 +34,7 @@ interface Props {
 }
 
 export default function ContactsTab({
-  contacts = [], locations = [], departments = [], statuses = [], canLinkBackoffice = false,
+  contacts = [], locations = [], departments = [], statuses = [], customerId, canLinkBackoffice = false,
   onAdd, onUpdate, onRemove,
 }: Props) {
   // The host owns "which contact is open" — the panel is controlled (see its docblock).
@@ -38,7 +42,7 @@ export default function ContactsTab({
   return (
     <ContactsPanel
       scope="customer" openId={openContactId} onOpenChange={setOpenContactId}
-      contacts={contacts} locations={locations} departments={departments} statuses={statuses}
+      contacts={contacts} locations={locations} departments={departments} statuses={statuses} customerId={customerId}
       canLinkBackoffice={canLinkBackoffice}
       onAdd={onAdd} onUpdate={onUpdate} onRemove={onRemove}
     />

@@ -291,3 +291,50 @@ export function useCustomerContacts(customerId: Id | undefined) {
 
   return { contacts, loading, error, reload: load, add, update, remove }
 }
+
+/**
+ * archiveContact / restoreContact — ARCHIVE-SUBENTITY-1's reversible soft-delete
+ * pair. Standalone functions (not hook-returned callbacks) so they can fire from
+ * deep inside ContactDetail without prop-drilling a reload callback through every
+ * intermediate component — mirrors setLocationPrimaryContact above, reusing the
+ * SAME CONTACTS_CHANGED_EVENT the merge path already dispatches.
+ */
+export async function archiveContact(customerId: Id, id: Id): Promise<void> {
+  await api.post(`/customers/${customerId}/contacts/${id}/archive`)
+  window.dispatchEvent(new CustomEvent(CONTACTS_CHANGED_EVENT))
+}
+export async function restoreContact(customerId: Id, id: Id): Promise<Contact> {
+  const res = await api.post(`/customers/${customerId}/contacts/${id}/restore`)
+  window.dispatchEvent(new CustomEvent(CONTACTS_CHANGED_EVENT))
+  return mapContactRow(unwrap<ApiContact>(res))
+}
+
+/**
+ * useArchivedCustomerContacts — the ARCHIVED-ONLY sub-list behind the panel's
+ * "Gearchiveerd" quick-view (mirrors useArchivedCustomerLocations — see its own
+ * doc for why this is a SEPARATE fetch rather than merged into the live list).
+ * `active` gates the fetch entirely; refetches on CONTACTS_CHANGED_EVENT.
+ */
+export function useArchivedCustomerContacts(customerId: Id | undefined, active: boolean) {
+  const [contacts, setContacts] = useState<ContactWithPrimaryLocations[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const load = useCallback((signal?: AbortSignal) => {
+    if (!active || !customerId) { setContacts([]); return }
+    setLoading(true)
+    api.get(`/customers/${customerId}/contacts`, { params: { include_archived: 1 }, signal })
+      .then(res => { if (!signal?.aborted) setContacts(dedupeById(unwrapList<ApiContact>(res).rows.map(mapContactRow)).filter(c => c.archived)) })
+      .catch(() => { /* the toggle simply shows nothing rather than crashing (§3) */ })
+      .finally(() => { if (!signal?.aborted) setLoading(false) })
+  }, [customerId, active])
+  useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
+
+  useEffect(() => {
+    const ctrl = new AbortController()
+    const onChanged = () => load(ctrl.signal)
+    window.addEventListener(CONTACTS_CHANGED_EVENT, onChanged)
+    return () => { window.removeEventListener(CONTACTS_CHANGED_EVENT, onChanged); ctrl.abort() }
+  }, [load])
+
+  return { contacts, loading }
+}

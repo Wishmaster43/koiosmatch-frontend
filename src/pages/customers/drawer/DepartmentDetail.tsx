@@ -38,21 +38,24 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash2 } from 'lucide-react'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
+import ArchivedBanner from '@/components/drawer/ArchivedBanner'
+import MergeSubEntityModal from './MergeSubEntityModal'
 // JOB-STATUS-1: name + reference chip + status badge/picker, now the shared
 // SubEntityStatusTitleRow (§0.3 split, LocationDetail.tsx 2026-08-03 — this file
 // carried a near-verbatim copy of the same block, adopted here in the same pass).
 import SubEntityStatusTitleRow from './SubEntityStatusTitleRow'
+// §0.3 split (this task): the pager/changelog/merge/archive/delete cluster,
+// shared with LocationDetail — see that component's own docblock.
+import SubEntityTitleActions from './SubEntityTitleActions'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
 import ContactsPanel from './ContactsPanel'
 import DrillBreadcrumb from '@/components/drawer/DrillBreadcrumb'
-import DrillPager from '@/components/drawer/DrillPager'
 import type { DrillPagerProps } from '@/components/drawer/DrillPager'
 import type { Crumb } from '@/components/drawer/DrillBreadcrumb'
 import EditableRichTextField from './EditableRichTextField'
@@ -70,7 +73,11 @@ import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import InUseCountsDialog from './InUseCountsDialog'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useConfirm } from '@/hooks/useConfirm'
+import { useAuth } from '@/context/AuthContext'
+import { useDateFormat } from '@/lib/datetime'
 import ScopedSollicitatiesTab from './ScopedSollicitatiesTab'
+import { archiveDepartment, restoreDepartment } from '../hooks/useCustomerDepartments'
+import { useSubEntityArchive } from '../hooks/useSubEntityArchive'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
@@ -99,7 +106,7 @@ function buildDepartmentAdviceInsights(d: Department, t: Tx): KoiosAdviceInsight
   ]
 }
 
-export default function DepartmentDetail({ department, locations, statuses, contactStatuses = [], departments = [], contacts = [], canLinkBackoffice = false, trail = [], pager, onAddContact, onUpdateContact, onRemoveContact, onSave, onDelete, close, customerId, customerName }: {
+export default function DepartmentDetail({ department, locations, statuses, contactStatuses = [], departments = [], contacts = [], canLinkBackoffice = false, trail = [], pager, onMerged, onAddContact, onUpdateContact, onRemoveContact, onSave, onDelete, close, customerId, customerName }: {
   department: Department
   locations: { id: Id; name: string }[]
   statuses: LookupOption[]
@@ -126,6 +133,9 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   trail?: Crumb[]
   /** Prev/next stepper through the panel's own filtered rows (DRILL-PAGER-1). */
   pager?: DrillPagerProps
+  /** ARCHIVE-SUBENTITY-1/AFDELING-SAMENVOEGEN-1: called with the SURVIVOR's id
+   * after a merge, so the host (DepartmentsPanel) can switch to it. */
+  onMerged?: (survivorId: Id) => void
   onAddContact: (payload: ContactPayload) => void
   onUpdateContact: (id: Id, payload: Partial<ContactPayload>) => void
   onRemoveContact: (id: Id) => void
@@ -141,6 +151,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   // SOLLICITATIES-SCOPE-1: 'applications' is also declared here so the new sub-tab's
   // `t('applications:title')` resolves without relying on cross-namespace fallback.
   const { t } = useTranslation(['customers', 'applications'])
+  const { formatDate } = useDateFormat()
   // A contact opened from this department's own list takes over the body (see LocationDetail).
   const [openContactId, setOpenContactId] = useState<Id | null>(null)
   const contactOpen = openContactId != null
@@ -149,6 +160,11 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   // SUBENTITEIT-DELETE-1: a 409 RACE (something got linked after `inUse` was last
   // read) surfaces the server's own per-relation counts here instead of a blanket toast.
   const [blockedCounts, setBlockedCounts] = useState<Record<string, number> | null>(null)
+  const auth = useAuth()
+  // ARCHIVE-SUBENTITY-1/AFDELING-SAMENVOEGEN-1: both are permission-gated in the UI
+  // (customers.update — the routes' own middleware; the backend re-checks, §7).
+  const canUpdate = (auth?.hasPermission ?? (() => false))('customers.update')
+  const [merging, setMerging] = useState(false)
   // The Extra sub-tab only shows when the tenant has defined customer_department custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer_department')
   // Sub-tabs (short labels, Danny 2026-07-14) — default Gegevens. SCOPED-LIST-TAB-1/
@@ -196,6 +212,16 @@ export default function DepartmentDetail({ department, locations, statuses, cont
     })
   }, { danger: true })
 
+  // ARCHIVE-SUBENTITY-1: the shared mutation hook (§11 — mirrors LocationDetail/
+  // ContactDetail's identical wiring). No confirm from the 409-race dialog's own
+  // "Archiveer" escape (the user already explicitly chose that path); the
+  // title-row button confirms first via doArchive below.
+  const { archiving, archiveNow, doRestore } = useSubEntityArchive({
+    customerId, id: department.id as Id, archiveFn: archiveDepartment, restoreFn: restoreDepartment, onDone: close,
+    archiveFailedMessage: t('departments.detail.archiveFailed'), restoreFailedMessage: t('departments.detail.restoreFailed'),
+  })
+  const doArchive = () => confirm(t('departments.detail.confirmArchive', { name: department.name }), archiveNow)
+
   // A contact opened from this department's list brings its own full trail, so the
   // department steps aside — one title, one delete button, one way back.
   if (contactOpen) {
@@ -204,7 +230,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
         {/* `trail` carries only the ANCESTORS: ContactsPanel appends this department itself
             as its own list crumb (its scopeName IS department.name), so passing it here too
             printed "Dagbesteding › Dagbesteding" — measured live 28-07. */}
-        <ContactsPanel scope="department" scopeId={department.id as Id} scopeName={department.name}
+        <ContactsPanel scope="department" scopeId={department.id as Id} scopeName={department.name} customerId={customerId}
           contacts={contacts} locations={locations} departments={departments} statuses={contactStatuses}
           trail={trail}
           openId={openContactId} onOpenChange={setOpenContactId}
@@ -224,23 +250,30 @@ export default function DepartmentDetail({ department, locations, statuses, cont
         <SubEntityStatusTitleRow id={department.id as Id} name={department.name} referenceNumber={department.referenceNumber}
           statusId={department.statusId} statusLabel={department.statusLabel} statusColor={department.statusColor}
           statusOptions={statusOptions} onSave={onSave} />
-        {/* ONE right-aligned action cluster (Danny 03-08: "de bladerpijlen moeten rechts
-            uitgelijnd zijn") — pager + delete as a single flex child, otherwise the row's
-            space-between parks the arrows in the middle of the title row. */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          {pager && <DrillPager {...pager} />}
-          {/* SUBENTITEIT-DELETE-1: still visible but honestly disabled while a live
-              coupling exists (§3 — no fake affordance) — the title explains why,
-              same message the old blanket 409 toast used. */}
-          <button onClick={remove} disabled={department.inUse}
-            title={department.inUse ? t('departments.deleteInUse') : t('common:delete')}
-            style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7,
-              cursor: department.inUse ? 'not-allowed' : 'pointer', border: '1px solid var(--border)', background: 'var(--bg)',
-              color: department.inUse ? 'var(--text-muted)' : 'var(--color-danger)', opacity: department.inUse ? 0.6 : 1, flexShrink: 0 }}>
-            <Trash2 size={13} />
-          </button>
-        </div>
+        {/* §0.3 split: the pager/changelog/merge/archive/delete cluster is the shared
+            SubEntityTitleActions (mirrors LocationDetail verbatim). Merge/archive are
+            hidden without customers.update; merge also needs a second department to
+            merge with (§3 — no fake affordance). */}
+        <SubEntityTitleActions
+          pager={pager}
+          changelogEndpoint={customerId != null ? `/customers/${customerId}/departments/${department.id}/activity` : undefined}
+          onMerge={canUpdate && departments.length > 1 ? () => setMerging(true) : undefined}
+          mergeTitle={t('departments.detail.mergeDepartment')}
+          onArchive={canUpdate && !department.archived ? doArchive : undefined}
+          archiveTitle={t('departments.detail.archiveDepartment')}
+          archiving={archiving}
+          onDelete={remove}
+          deleteDisabled={department.inUse}
+          deleteTitle={department.inUse ? t('departments.deleteInUse') : t('common:delete')}
+        />
       </div>
+
+      {/* ARCHIVE-SUBENTITY-1: the in-body archived state, right under the title row. */}
+      {department.archived && (
+        <ArchivedBanner id={department.id} onRestore={doRestore}
+          message={department.archivedAt ? t('departments.archivedBanner.since', { date: formatDate(department.archivedAt) }) : t('departments.archivedBanner.flag')}
+          restoreLabel={t('departments.archivedBanner.restore')} />
+      )}
 
       {/* Sub-tab strip — same shared bar as LocationDetail / the candidate Communicatie tab. */}
       <SubTabBar
@@ -323,14 +356,27 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           `trail` carries only the ANCESTORS: the panel appends this department itself as its
           own list crumb (its scopeName IS department.name). */}
       {subTab === 'contacts' && (
-        <ContactsPanel scope="department" scopeId={department.id as Id} scopeName={department.name}
+        <ContactsPanel scope="department" scopeId={department.id as Id} scopeName={department.name} customerId={customerId}
           contacts={contacts} locations={locations} departments={departments} statuses={contactStatuses}
           trail={trail}
           openId={openContactId} onOpenChange={setOpenContactId}
           onAdd={onAddContact} onUpdate={onUpdateContact} onRemove={onRemoveContact} />
       )}
+      {/* AFDELING-SAMENVOEGEN-1 — `others` is the customer-wide department list
+          (already available as a prop), never a fresh search endpoint (see the
+          modal's own doc). */}
+      {merging && customerId != null && (
+        <MergeSubEntityModal scope="department" customerId={customerId}
+          current={{ id: department.id as Id, name: department.name }}
+          others={departments.map(d => ({ id: d.id as Id, name: d.name, code: d.referenceNumber }))}
+          onClose={() => setMerging(false)}
+          onMerged={survivorId => { setMerging(false); onMerged?.(survivorId) }} />
+      )}
       {dialog}
-      <InUseCountsDialog open={blockedCounts != null} counts={blockedCounts ?? {}} onClose={() => setBlockedCounts(null)} />
+      {/* ARCHIVE-SUBENTITY-1: "kan niet verwijderen, wél archiveren" — the 409-race
+          offers archiving as the way out; no second confirm (see archiveNow's doc). */}
+      <InUseCountsDialog open={blockedCounts != null} counts={blockedCounts ?? {}} onClose={() => setBlockedCounts(null)}
+        onArchive={() => { setBlockedCounts(null); void archiveNow() }} archiving={archiving} />
     </div>
   )
 }

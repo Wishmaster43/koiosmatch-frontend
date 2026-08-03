@@ -9,21 +9,26 @@
  * resets an invalid department, and the saved payload always carries a matching
  * pair (assert the REQUEST — CLAUDE.md §13, not just that onSave fired).
  */
-import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
+import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
+import api from '@/lib/api'
 import ContactDetail from './ContactDetail'
 import type { Contact, Department } from '@/types/customer'
 
 // useContactFunctions + useCustomFields both hit @/lib/api under the hood (the
 // contact-function lookup + tenant settings, and the custom-field defs) — a
 // harmless empty response keeps each on its own seed fallback, same mock as
-// AddContactPersonModal.test.tsx for the same hooks.
+// AddContactPersonModal.test.tsx for the same hooks. ARCHIVE-SUBENTITY-1: `post`
+// is now a named capture too, so the archive/restore tests below can assert the
+// exact route (§13), never only that a callback fired.
+const mockPost = vi.fn().mockResolvedValue({ data: {} })
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
-  return { ...actual, default: { get: vi.fn().mockResolvedValue({ data: { data: [] } }), post: vi.fn(), patch: vi.fn(), delete: vi.fn() } }
+  return { ...actual, default: { get: vi.fn().mockResolvedValue({ data: { data: [] } }), post: (...args: unknown[]) => mockPost(...args), patch: vi.fn(), delete: vi.fn() } }
 })
+beforeEach(() => { mockPost.mockClear(); mockPost.mockResolvedValue({ data: {} }) })
 
 // Merge is permission-gated (customers.update). Default null = no auth context at all,
 // which is what every pre-existing test in this file renders under.
@@ -301,5 +306,71 @@ describe('ContactDetail · pager wiring', () => {
     await user.click(nextBtn)
     expect(onNext).toHaveBeenCalledTimes(1)
     expect(onPrev).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * ARCHIVE-SUBENTITY-1 — same reversible soft-delete pair as Location/Department,
+ * gated on the same customers.update permission the merge action already uses.
+ * No InUseCountsDialog wiring here (contacts have no honest disabled-trash/409
+ * dialog built — `remove` fires unconditionally, unlike the location/department
+ * trash button — so there is no dead end to offer an escape from).
+ */
+describe('ContactDetail · archive/restore (ARCHIVE-SUBENTITY-1)', () => {
+  const allowed = { hasPermission: (p: string) => p === 'customers.update' }
+  afterEach(() => { mockAuth.current = null })
+
+  it('HIDES the archive action without customers.update', () => {
+    mockAuth.current = { hasPermission: () => false }
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    expect(screen.queryByTitle(ct('contacts.detail.archiveContact'))).toBeNull()
+  })
+
+  it('confirms, then POSTs the archive route and closes the panel on success', async () => {
+    mockAuth.current = allowed
+    const user = userEvent.setup()
+    const close = vi.fn()
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={close} />)
+
+    await user.click(screen.getByTitle(ct('contacts.detail.archiveContact')))
+    await user.click(screen.getByRole('button', { name: cm('confirm') }))
+
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/contacts/c1/archive')
+    await waitFor(() => expect(close).toHaveBeenCalled())
+  })
+
+  it('renders no archive button once the contact is already archived — the ArchivedBanner offers restore instead', () => {
+    mockAuth.current = allowed
+    render(<ContactDetail contact={baseContact({ archived: true })} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    expect(screen.queryByTitle(ct('contacts.detail.archiveContact'))).toBeNull()
+    expect(screen.getByText(ct('contacts.archivedBanner.flag'))).toBeInTheDocument()
+  })
+
+  it('restore round-trip: the banner\'s restore button POSTs the restore route and closes the panel', async () => {
+    mockAuth.current = allowed
+    const user = userEvent.setup()
+    const close = vi.fn()
+    render(<ContactDetail contact={baseContact({ archived: true })} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={close} />)
+
+    await user.click(screen.getByRole('button', { name: ct('contacts.archivedBanner.restore') }))
+
+    expect(mockPost).toHaveBeenCalledWith('/customers/cust-1/contacts/c1/restore')
+    await waitFor(() => expect(close).toHaveBeenCalled())
+  })
+})
+
+/** LOC-DEPT-CHANGELOG-1 — mirrors Location/DepartmentDetail: proves the actual GET. */
+describe('ContactDetail · changelog (LOC-DEPT-CHANGELOG-1)', () => {
+  it('fetches this contact\'s own activity endpoint once the popover opens', async () => {
+    const user = userEvent.setup()
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+
+    await user.click(screen.getByRole('button', { name: cm('changelog') }))
+    await waitFor(() => expect(vi.mocked(api.get)).toHaveBeenCalledWith('/customers/cust-1/contacts/c1/activity', expect.anything()))
   })
 })

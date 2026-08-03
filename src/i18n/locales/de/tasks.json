@@ -86,6 +86,7 @@
     "match": "Match",
     "customer": "Kunde",
     "location": "Standort",
+    "customer_location": "Kundenstandort",
     "department": "Abteilung",
     "contact": "Kontakt",
     "workflow": "Workflow",

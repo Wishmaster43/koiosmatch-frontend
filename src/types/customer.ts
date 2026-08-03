@@ -59,6 +59,11 @@ export interface Contact {
   // The channel slug (a last_contact_types lookup value); label/icon resolve via useLastContactTypes.
   lastContactType: string | null
   customFields: Record<string, unknown>
+  // ARCHIVE-SUBENTITY-1: soft-delete state (derived from deleted_at) — off by
+  // default in every list, restorable from the archived quick-view. Optional
+  // (not every existing test fixture sets it) — read defensively as `?? false`.
+  archived?: boolean
+  archivedAt?: string | null
 }
 
 /** A department nested under a location (flat UI shape). SUB-STATUS-1: lifecycle status. */
@@ -86,6 +91,11 @@ export interface Department {
   // write response, where the controller never sets it) — drives the honest
   // disabled-trash affordance (§3: no fake delete button).
   inUse: boolean
+  // ARCHIVE-SUBENTITY-1: soft-delete state (derived from deleted_at) — off by
+  // default in every list, restorable from the archived quick-view. Optional
+  // (not every existing test fixture sets it) — read defensively as `?? false`.
+  archived?: boolean
+  archivedAt?: string | null
 }
 
 /** A customer location with C-6 address fields (flat UI shape). SUB-STATUS-1: lifecycle status. */
@@ -136,6 +146,11 @@ export interface Location {
   customFields: Record<string, unknown>
   // SUBENTITEIT-DELETE-1: same honest-delete flag as Department.
   inUse: boolean
+  // ARCHIVE-SUBENTITY-1: soft-delete state (derived from deleted_at) — off by
+  // default in every list, restorable from the archived quick-view. Optional
+  // (not every existing test fixture sets it) — read defensively as `?? false`.
+  archived?: boolean
+  archivedAt?: string | null
 }
 
 /** A customer note (flat UI shape). */
@@ -265,6 +280,8 @@ export interface ApiContact {
   custom_fields?: Record<string, unknown>
   // EXTRACT-1: the shared raw shape (src/lib/backofficeLink).
   backoffice_links?: ApiBackofficeLink[]
+  // ARCHIVE-SUBENTITY-1: derived boolean + the raw timestamp (CustomerContactResource).
+  archived?: boolean; deleted_at?: string | null
   [k: string]: unknown
 }
 
@@ -281,6 +298,8 @@ export interface ApiDepartment {
   backoffice_links?: ApiBackofficeLink[]
   // SUBENTITEIT-DELETE-1: index-only flag (CustomerDepartmentResource.php:35).
   in_use?: boolean
+  // ARCHIVE-SUBENTITY-1: derived boolean + the raw timestamp (CustomerDepartmentResource).
+  archived?: boolean; deleted_at?: string | null
   [k: string]: unknown
 }
 
@@ -301,6 +320,8 @@ export interface ApiLocation {
   backoffice_links?: ApiBackofficeLink[]
   // SUBENTITEIT-DELETE-1: index-only flag (CustomerLocationResource.php:66).
   in_use?: boolean
+  // ARCHIVE-SUBENTITY-1: derived boolean + the raw timestamp (CustomerLocationResource).
+  archived?: boolean; deleted_at?: string | null
   [k: string]: unknown
 }
 

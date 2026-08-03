@@ -169,6 +169,7 @@
     "empty": "Nog geen locaties",
     "add": "Nieuwe locatie",
     "searchPlaceholder": "Zoek locatie…",
+    "archivedView": "Gearchiveerd",
     "col": {
       "name": "Naam",
       "city": "Plaats",
@@ -234,16 +235,52 @@
       "createAndLink": "Maak contactpersoon en koppel",
       "description": "Locatietekst",
       "contactNotLinked": "Alleen tekst — nog niet gekoppeld aan een contactpersoon",
-      "changePrimaryContact": "Wijzig contactpersoon"
+      "changePrimaryContact": "Wijzig contactpersoon",
+      "mergeLocation": "Locatie samenvoegen",
+      "archiveLocation": "Locatie archiveren",
+      "confirmArchive": "{{name}} archiveren? Je kunt dit later terugzetten via 'Gearchiveerd'.",
+      "archiveFailed": "Archiveren is mislukt.",
+      "restoreFailed": "Herstellen is mislukt.",
+      "tasks": {
+        "newTask": "Nieuwe taak",
+        "empty": "Nog geen taken voor deze locatie",
+        "loading": "Taken laden…",
+        "error": "Taken konden niet worden geladen",
+        "openTask": "Open taak",
+        "searchPlaceholder": "Zoek taak…"
+      }
     },
     "saveFailed": "Opslaan is mislukt.",
     "deleteFailed": "Verwijderen is mislukt.",
-    "deleteInUse": "Verwijderen is niet mogelijk — deze locatie wordt nog gebruikt."
+    "deleteInUse": "Verwijderen is niet mogelijk — deze locatie wordt nog gebruikt.",
+    "archivedBanner": {
+      "since": "Gearchiveerd op {{date}}",
+      "flag": "Gearchiveerd",
+      "restore": "Herstellen"
+    },
+    "merge": {
+      "title": "Locatie samenvoegen",
+      "intro": "Kies de dubbele locatie bij deze klant en bepaal daarna welk record blijft. {{name}} is het geopende record.",
+      "searchPlaceholder": "Zoek op naam of referentienummer…",
+      "noResults": "Geen locaties gevonden.",
+      "noOthers": "Deze klant heeft geen andere locatie om mee samen te voegen.",
+      "stays": "Dit record blijft",
+      "thisRecord": "Geopend record",
+      "otherRecord": "Gevonden record",
+      "warning": "De gegevens van {{source}} worden opgenomen in {{target}}; {{source}} verdwijnt daarna. Dit is niet ongedaan te maken.",
+      "back": "Terug",
+      "cancel": "Annuleren",
+      "confirm": "Samenvoegen",
+      "done": "Locaties samengevoegd.",
+      "errForbidden": "Je hebt geen rechten om locaties samen te voegen.",
+      "errFailed": "Samenvoegen mislukt. Probeer het opnieuw."
+    }
   },
   "departments": {
     "empty": "Nog geen afdelingen",
     "add": "Nieuwe afdeling",
     "searchPlaceholder": "Zoek afdeling…",
+    "archivedView": "Gearchiveerd",
     "col": {
       "name": "Naam",
       "location": "Locatie",
@@ -272,17 +309,45 @@
         "error": "Taken konden niet worden geladen",
         "openTask": "Open taak",
         "searchPlaceholder": "Zoek taak…"
-      }
+      },
+      "mergeDepartment": "Afdeling samenvoegen",
+      "archiveDepartment": "Afdeling archiveren",
+      "confirmArchive": "{{name}} archiveren? Je kunt dit later terugzetten via 'Gearchiveerd'.",
+      "archiveFailed": "Archiveren is mislukt.",
+      "restoreFailed": "Herstellen is mislukt."
     },
     "deleteConfirm": "Deze afdeling verwijderen?",
     "saveFailed": "Opslaan is mislukt.",
     "deleteFailed": "Verwijderen is mislukt.",
-    "deleteInUse": "Verwijderen is niet mogelijk — deze afdeling wordt nog gebruikt."
+    "deleteInUse": "Verwijderen is niet mogelijk — deze afdeling wordt nog gebruikt.",
+    "archivedBanner": {
+      "since": "Gearchiveerd op {{date}}",
+      "flag": "Gearchiveerd",
+      "restore": "Herstellen"
+    },
+    "merge": {
+      "title": "Afdeling samenvoegen",
+      "intro": "Kies de dubbele afdeling bij deze klant en bepaal daarna welk record blijft. {{name}} is het geopende record.",
+      "searchPlaceholder": "Zoek op naam of referentienummer…",
+      "noResults": "Geen afdelingen gevonden.",
+      "noOthers": "Deze klant heeft geen andere afdeling om mee samen te voegen.",
+      "stays": "Dit record blijft",
+      "thisRecord": "Geopend record",
+      "otherRecord": "Gevonden record",
+      "warning": "De gegevens van {{source}} worden opgenomen in {{target}}; {{source}} verdwijnt daarna. Dit is niet ongedaan te maken.",
+      "back": "Terug",
+      "cancel": "Annuleren",
+      "confirm": "Samenvoegen",
+      "done": "Afdelingen samengevoegd.",
+      "errForbidden": "Je hebt geen rechten om afdelingen samen te voegen.",
+      "errFailed": "Samenvoegen mislukt. Probeer het opnieuw."
+    }
   },
   "contacts": {
     "empty": "Nog geen contactpersonen",
     "add": "Nieuwe contactpersoon",
     "searchPlaceholder": "Zoek contactpersoon…",
+    "archivedView": "Gearchiveerd",
     "col": {
       "name": "Naam",
       "location": "Locatie",
@@ -316,12 +381,21 @@
       "linkLocation": "Locatie koppelen",
       "linkDepartment": "Afdeling koppelen",
       "middleName": "Tussenvoegsel",
-      "gender": "Geslacht"
+      "gender": "Geslacht",
+      "archiveContact": "Contactpersoon archiveren",
+      "confirmArchive": "{{name}} archiveren? Je kunt dit later terugzetten via 'Gearchiveerd'.",
+      "archiveFailed": "Archiveren is mislukt.",
+      "restoreFailed": "Herstellen is mislukt."
     },
     "deleteConfirm": "Deze contactpersoon verwijderen?",
     "saveFailed": "Opslaan is mislukt.",
     "deleteFailed": "Verwijderen is mislukt.",
     "deleteInUse": "Verwijderen is niet mogelijk — deze contactpersoon wordt nog gebruikt.",
+    "archivedBanner": {
+      "since": "Gearchiveerd op {{date}}",
+      "flag": "Gearchiveerd",
+      "restore": "Herstellen"
+    },
     "primaryChip": "Primair",
     "tasks": {
       "newTask": "Nieuwe taak",
@@ -664,7 +738,24 @@
   "inUse": {
     "title": "Nog in gebruik",
     "close": "Sluiten",
+    "archive": "Archiveren",
     "planningOrders": "Planningopdrachten",
     "planningShifts": "Planningdiensten"
+  },
+  "merge": {
+    "title": "Klant samenvoegen",
+    "intro": "Kies de dubbele klant om samen te voegen met {{name}}.",
+    "searchPlaceholder": "Zoek op naam, nummer of plaats…",
+    "searching": "Zoeken…",
+    "noResults": "Geen klanten gevonden.",
+    "staysLabel": "Blijft (dit dossier)",
+    "duplicateLabel": "Wordt samengevoegd",
+    "warning": "De vestigingen, afdelingen, contactpersonen, vacatures, matches en overige gegevens van {{source}} gaan over naar {{target}}. {{source}} wordt daarna verwijderd. Dit kan niet ongedaan worden gemaakt.",
+    "back": "Terug",
+    "cancel": "Annuleren",
+    "confirm": "Samenvoegen",
+    "done": "Klant samengevoegd.",
+    "errForbidden": "Je hebt geen rechten om klanten samen te voegen.",
+    "errFailed": "Samenvoegen mislukt. Probeer het opnieuw."
   }
 }

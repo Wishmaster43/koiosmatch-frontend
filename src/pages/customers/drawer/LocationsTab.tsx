@@ -12,10 +12,11 @@
  */
 import { useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MapPin, Search } from 'lucide-react'
+import { MapPin, Search, Archive } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { useAllSettings, useSettingsLoaded, getBoolSetting, getStringSetting } from '@/lib/settings/useAllSettings'
 import LocationDetail from './LocationDetail'
@@ -25,6 +26,10 @@ import SoftChipJs from '@/components/ui/SoftChip'
 import type { Contact, Department, Location } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { LocationPayload } from '../hooks/useCustomerLocations'
+// ARCHIVE-SUBENTITY-1: the archived-only sub-fetch behind the "Gearchiveerd"
+// quick-view — a SEPARATE fetch so every OTHER consumer of the live `locations`
+// prop (add-modal pickers etc.) keeps seeing today's archived-excluded set.
+import { useArchivedCustomerLocations } from '../hooks/useCustomerLocations'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 
@@ -79,6 +84,13 @@ export default function LocationsTab({
   // The host owns which location is open (DRILL-PAGER-1, mirrors ContactsTab) — the
   // pager below sets this id directly, so paging never round-trips through the list.
   const [openId, setOpenId] = useState<Id | null>(null)
+  // ARCHIVE-SUBENTITY-1: "Gearchiveerd" quick-view — REPLACES the live rows with the
+  // archived-only sub-fetch (mutually exclusive lens, same as Blacklist/Archived on
+  // candidates), never merged with them. `active` gates the fetch entirely, so
+  // toggling it off costs nothing.
+  const [showArchived, setShowArchived] = useState(false)
+  const { locations: archivedLocations } = useArchivedCustomerLocations(customerId, showArchived)
+  const baseRows = showArchived ? archivedLocations : locations
   // Colour-on/off flag for the status column (CHIPKLEUR-INSTELBAAR-1) — defaults ON,
   // so an absent setting keeps today's coloured-chip look.
   const settings = useAllSettings()
@@ -90,16 +102,17 @@ export default function LocationsTab({
   const settingsLoaded = useSettingsLoaded()
   const defaultStatusFilter = getStringSetting(settings, 'customer_location_default_status_filter')
   const { value: statusFilter, toggle: toggleStatus, filtered: rows } =
-    useStatusFilter(locations, statuses, undefined, defaultStatusFilter, settingsLoaded)
+    useStatusFilter(baseRows, statuses, undefined, defaultStatusFilter, settingsLoaded)
 
   // Client-side search over name/city, same behaviour SubEntityTab used to run — the
   // pager below must page through EXACTLY this list, the one the table actually shows.
   const q = search.trim().toLowerCase()
   const visible = q ? rows.filter(l => [l.name, l.city].some(v => String(v ?? '').toLowerCase().includes(q))) : rows
 
-  // Resolved against the CUSTOMER-WIDE list, never `visible`: editing a location's
-  // status can move it out of the active filter, and the open detail must not vanish.
-  const selected = openId != null ? locations.find(l => String(l.id) === String(openId)) ?? null : null
+  // Resolved against `baseRows` (live OR archived, whichever view is active), never
+  // `visible`: editing a location's status can move it out of the active filter, and
+  // the open detail must not vanish.
+  const selected = openId != null ? baseRows.find(l => String(l.id) === String(openId)) ?? null : null
   // Pager: 1-based position of the OPEN location within `visible`. No pager at all when
   // the open location fell out of `visible` — nothing sane to page to in that case.
   const openIndex = selected ? visible.findIndex(l => String(l.id) === String(selected.id)) : -1
@@ -146,6 +159,9 @@ export default function LocationsTab({
         onAddDepartment={onAddDepartment} onUpdateDepartment={onUpdateDepartment} onRemoveDepartment={onRemoveDepartment}
         onAddContact={onAddContact} onUpdateContact={onUpdateContact} onRemoveContact={onRemoveContact}
         backLabel={t('drawer.tabs.locations')}
+        // LOCATIE-SAMENVOEGEN-1: after a merge the open record switches to the SURVIVOR
+        // (this tab already owns `openId`, so no extra prop threading is needed).
+        onMerged={survivorId => setOpenId(survivorId)}
         close={() => setOpenId(null)}
       />
     )
@@ -162,6 +178,9 @@ export default function LocationsTab({
               placeholder={t('locations.searchPlaceholder')} aria-label={t('locations.searchPlaceholder')} style={searchInput} />
           </div>
           <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
+          {/* ARCHIVE-SUBENTITY-1: the shared quick-view toggle (§4) — never hand-rolled. */}
+          <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+            label={t('locations.archivedView')} color="var(--color-archive)" icon={Archive} />
           <DrawerAddButton onClick={() => setAdding(true)} label={t('locations.add')} />
         </div>
         <DataTable columns={columns} rows={visible} onRowClick={l => setOpenId(l.id as Id)} emptyText={t('locations.empty')} />

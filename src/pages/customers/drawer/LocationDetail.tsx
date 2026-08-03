@@ -15,31 +15,35 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash2 } from 'lucide-react'
-import EditableFieldTable from '@/components/forms/EditableFieldTable'
-import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SectionCard from '@/components/ui/SectionCard'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
+import ArchivedBanner from '@/components/drawer/ArchivedBanner'
+import MergeSubEntityModal from './MergeSubEntityModal'
+// TAKEN-OP-LOCATIE-1: TaskLinkResolver already knows 'customer_location' (task_links),
+// so this is one more <EntityTasksTab linkType="…"> line, mirroring DepartmentDetail.
+import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import { getCountryOptions } from '@/lib/countries'
 import { useProvinces } from '@/hooks/useProvinces'
-import { kvkValue, vatValue } from '@/components/drawer/contactLinks'
+import { useDateFormat } from '@/lib/datetime'
 // JOB-STATUS-1 (Danny 28-07: "Status van locatie moet hier!!") — the read-only
 // title-row badge (§3A(c)) + its own inline picker, extracted into a shared
 // component (§0.3 split, 2026-08-03 — see that file's own docblock).
 import SubEntityStatusTitleRow from './SubEntityStatusTitleRow'
-import DrillPager, { type DrillPagerProps } from '@/components/drawer/DrillPager'
+// §0.3 split (this task): the pager/changelog/merge/archive/delete cluster, shared
+// with DepartmentDetail — see that component's own docblock.
+import SubEntityTitleActions from './SubEntityTitleActions'
+import type { DrillPagerProps } from '@/components/drawer/DrillPager'
 import { useConfirm } from '@/hooks/useConfirm'
-import EditableRichTextField from './EditableRichTextField'
 import DepartmentsPanel from './DepartmentsPanel'
 import ContactsPanel from './ContactsPanel'
-import LocationContactSection from './LocationContactSection'
-import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+// §0.3 split (this task): the "Adres & gegevens" sub-tab body, extracted so this
+// file stays under the ~450-line trigger (§3) once the four ARCHIVE-SUBENTITY-1/
+// LOCATIE-SAMENVOEGEN-1/TAKEN-OP-LOCATIE-1/LOC-DEPT-CHANGELOG-1 features landed.
+import LocationAddressTab from './LocationAddressTab'
 import PdokCard from '@/components/drawer/PdokCard'
-import LocationBranchSection from './LocationBranchSection'
 import { useLocations } from '@/lib/useLocations'
-import { buildLocationAdviceInsights } from './locationAiInsights'
 import DrillBreadcrumb from '@/components/drawer/DrillBreadcrumb'
 import PlanningSummary from './PlanningSummary'
 import { useAuth } from '@/context/AuthContext'
@@ -55,10 +59,11 @@ import ScopedMatchesTab from './ScopedMatchesTab'
 import InUseCountsDialog from './InUseCountsDialog'
 import type { Contact, Department, Location } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
+import { archiveLocation, restoreLocation } from '../hooks/useCustomerLocations'
+import { useSubEntityArchive } from '../hooks/useSubEntityArchive'
 import type { LocationPayload } from '../hooks/useCustomerLocations'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
 import ScopedSollicitatiesTab from './ScopedSollicitatiesTab'
-import { isPrimaryForLocation } from '../hooks/useCustomerContacts'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 import type { DeleteResult } from '../hooks/subEntityDelete'
 
@@ -96,17 +101,21 @@ interface Props {
   /** Prev/next through the caller's OWN filtered rows (DRILL-PAGER-1) — absent when
    * the open location fell out of that filtered set (nothing sane to page to). */
   pager?: DrillPagerProps
+  /** ARCHIVE-SUBENTITY-1/LOCATIE-SAMENVOEGEN-1: called with the SURVIVOR's id after
+   * a merge, so the host (LocationsTab) can switch the open record to it. */
+  onMerged?: (survivorId: Id) => void
   close: () => void
 }
 
 export default function LocationDetail({
   location: l, customerId, customerName, locations, departments, contacts, statuses, departmentStatuses, contactStatuses, canLinkBackoffice = false,
   onSave, onDelete, onAddDepartment, onUpdateDepartment, onRemoveDepartment, onAddContact, onUpdateContact, onRemoveContact,
-  backLabel, pager, close,
+  backLabel, pager, onMerged, close,
 }: Props) {
   // SOLLICITATIES-SCOPE-1: 'applications' is also declared here so the new sub-tab's
   // `t('applications:title')` resolves without relying on cross-namespace fallback.
   const { t, i18n } = useTranslation(['customers', 'applications'])
+  const { formatDate } = useDateFormat()
 
   // Country/province option lists. The province list cascades on the country ALREADY
   // SAVED on this location (the shared field table owns its own draft, so an in-edit
@@ -143,79 +152,21 @@ export default function LocationDetail({
   const [blockedCounts, setBlockedCounts] = useState<Record<string, number> | null>(null)
   const auth = useAuth()
   const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
+  // ARCHIVE-SUBENTITY-1/LOCATIE-SAMENVOEGEN-1: both are permission-gated in the UI
+  // (customers.update — the routes' own middleware; the backend re-checks, §7).
+  const canUpdate = (auth?.hasPermission ?? (() => false))('customers.update')
+  const [merging, setMerging] = useState(false)
   // The Extra sub-tab only shows when the tenant has defined customer_location custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer_location')
   // Sub-tabs (short labels, Danny 2026-07-14) — default Adres & gegevens. Each
   // EditableFieldTable below manages its own uncontrolled edit toggle (they no
   // longer share one global pencil now that they live on separate sub-tabs).
-  // SCOPED-LIST-TAB-1 added vacancies/matches (no location Taken tab — see WORKLIST).
-  // SOLLICITATIES-SCOPE-1 added 'applications'.
-  const [subTab, setSubTab] = useState<'address' | 'departments' | 'contacts' | 'vacancies' | 'applications' | 'matches' | 'extra' | 'koppelingen'>('address')
+  // SCOPED-LIST-TAB-1 added vacancies/matches. SOLLICITATIES-SCOPE-1 added
+  // 'applications'. TAKEN-OP-LOCATIE-1 added 'tasks' (KLANTLOCATIE-TAAK-1 — the
+  // WORKLIST note about "no location Taken tab" is now superseded by that ticket).
+  const [subTab, setSubTab] = useState<'address' | 'departments' | 'contacts' | 'vacancies' | 'applications' | 'matches' | 'tasks' | 'extra' | 'koppelingen'>('address')
 
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
-  // CONTACT-LOCATION-PRIMARY-1: THIS site's own primary contact — a real record resolved
-  // from the contact↔location coupling flag, not a name matched against free text. It is
-  // a DIFFERENT axis from the customer's one main contact (`isPrimary`), which is why the
-  // block below names the site it belongs to.
-  const primaryContact = contacts.find(c => isPrimaryForLocation(c, l.id as Id)) ?? null
-  // Algemeen/Adres/Registratie/Contact ter plaatse — the "Adres & gegevens" sub-tab.
-  // Street/no/suffix/postcode/city collapse into ONE composed line in read mode
-  // (the 'address' composite, mirrors the candidate profile address row) and only
-  // expand to loose fields while editing; state/country stay their own rows.
-  const generalFields: FieldRow[] = [
-    { key: 'name', label: t('locations.detail.name'), type: 'text', group: t('overview.details') },
-    // JOB-STATUS-1: status moved OUT of this field table into the title-row badge
-    // (see the render below) — no longer a row here, Danny 28-07: "moet HIER".
-    { key: 'address', label: t('subModal.groups.address'), type: 'address', group: t('subModal.groups.address'),
-      addressFields: [
-        { key: 'street', label: t('locations.detail.street'), type: 'text' },
-        { key: 'houseNumber', label: t('locations.detail.houseNumber'), type: 'text' },
-        { key: 'houseNumberSuffix', label: t('locations.detail.houseNumberSuffix'), type: 'text' },
-        { key: 'postalCode', label: t('locations.detail.postalCode'), type: 'text' },
-        { key: 'city', label: t('locations.detail.city'), type: 'text' },
-      ] },
-    // Searchable pickers, not free text (Danny 28-07). NOTE the value format: unlike the
-    // candidate, a location stores the country NAME ("Nederland"), not an ISO-2 code — so
-    // the options carry names as values. Switching to codes here would silently rewrite
-    // every stored country on the next save.
-    { key: 'state', label: t('locations.detail.state'), type: 'select', options: provinceOptions, group: t('subModal.groups.address') },
-    { key: 'country', label: t('locations.detail.country'), type: 'select', options: countryOptions, group: t('subModal.groups.address') },
-    { key: 'cocNumber', label: t('locations.detail.coc'), type: 'text', group: t('overview.details'),
-      renderValue: v => kvkValue(v, t('locations.detail.openKvk')) },
-    { key: 'vatNumber', label: t('locations.detail.vat'), type: 'text', group: t('overview.details'),
-      renderValue: v => vatValue(v, t('locations.detail.openVies')) },
-    // Kostenplaats sits in Gegevens (Danny 28-07) — it is one field, and a whole
-    // Facturatie sub-tab for one field was more chrome than content. There is still no
-    // billing-email input here: invoicing ALWAYS comes from the customer regardless of
-    // the location picked on a match, so an editable one would be a misleading
-    // affordance (§3) — see OverviewTab for the real billing email.
-    { key: 'costCenter', label: t('locations.detail.costCenter'), type: 'text', group: t('overview.details') },
-    // "Contact ter plaatse" / "Primaire contactpersoon" no longer live here as editable free
-    // text — CONTACT-LOCATION-PRIMARY-1 round two (Danny 02-08) merged them into ONE
-    // read-only section (LocationContactSection, rendered below) so the two can never again
-    // tell a contradicting story about the same person. See that component's own comment.
-  ]
-
-  // contactName/email/phone are deliberately NOT here any more (CONTACT-LOCATION-PRIMARY-1
-  // round two) — they are no longer editable through a field table, only shown read-only
-  // (as a legacy fallback) by LocationContactSection below, straight off `l`.
-  const values = {
-    name: l.name,
-    street: l.street, houseNumber: l.houseNumber, houseNumberSuffix: l.houseNumberSuffix,
-    postalCode: l.postalCode, city: l.city, state: l.state, country: l.country,
-    cocNumber: l.cocNumber, vatNumber: l.vatNumber,
-    costCenter: l.costCenter,
-  }
-
-  const save = (v: Record<string, unknown>) => {
-    onSave(l.id as Id, {
-      name: v.name as string,
-      street: v.street as string, houseNumber: v.houseNumber as string, houseNumberSuffix: v.houseNumberSuffix as string,
-      postalCode: v.postalCode as string, city: v.city as string, state: v.state as string, country: v.country as string,
-      cocNumber: v.cocNumber as string, vatNumber: v.vatNumber as string,
-      costCenter: v.costCenter as string,
-    })
-  }
 
   // SUBENTITEIT-DELETE-1: awaits the hook's DeleteResult — only close on a real
   // success; a 409 race opens the counts dialog instead of closing over nothing.
@@ -226,10 +177,16 @@ export default function LocationDetail({
       if (result.blocked) setBlockedCounts(result.blocked.counts)
     })
   }, { danger: true })
-  // LOCATIE-OMSCHRIJVING-1 (Danny 02-08): its own rich-text block, same pattern the
-  // department detail already uses (EditableRichTextField — own pencil/save/cancel,
-  // RichTextEditor + SafeHtml) — a bare textarea is not the house pattern for prose.
-  const saveDescription = (html: string) => onSave(l.id as Id, { description: html })
+
+  // ARCHIVE-SUBENTITY-1: the shared mutation hook (§11 — mirrors DepartmentDetail/
+  // ContactDetail's identical wiring). No confirm from the 409-race dialog's own
+  // "Archiveer" escape (the user already explicitly chose that path); the
+  // title-row button confirms first via doArchive below.
+  const { archiving, archiveNow, doRestore } = useSubEntityArchive({
+    customerId, id: l.id as Id, archiveFn: archiveLocation, restoreFn: restoreLocation, onDone: close,
+    archiveFailedMessage: t('locations.detail.archiveFailed'), restoreFailedMessage: t('locations.detail.restoreFailed'),
+  })
+  const doArchive = () => confirm(t('locations.detail.confirmArchive', { name: l.name }), archiveNow)
 
   // A contact opened from this location's own list takes over the whole body: it brings
   // its own breadcrumb (Locaties › deze vestiging › de persoon), so showing the location's
@@ -253,7 +210,7 @@ export default function LocationDetail({
   if (contactOpen) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <ContactsPanel scope="location" scopeId={l.id as Id} scopeName={l.name} contacts={contacts} locations={locations}
+        <ContactsPanel scope="location" scopeId={l.id as Id} scopeName={l.name} customerId={customerId} contacts={contacts} locations={locations}
           openId={openContactId} onOpenChange={setOpenContactId} trail={[{ label: backLabel ?? '', onClick: close }]}
           onRemove={onRemoveContact}
           departments={departments} statuses={contactStatuses} onAdd={onAddContact} onUpdate={onUpdateContact} />
@@ -272,22 +229,31 @@ export default function LocationDetail({
         <SubEntityStatusTitleRow id={l.id as Id} name={l.name} referenceNumber={l.referenceNumber}
           statusId={l.statusId} statusLabel={l.statusLabel} statusColor={l.statusColor}
           statusOptions={statusOptions} onSave={onSave} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-          {/* Prev/next through the list this location was opened from (DRILL-PAGER-1) —
-              before the delete action, same corner as every other detail pager. */}
-          {pager && <DrillPager {...pager} />}
-          {/* SUBENTITEIT-DELETE-1: still visible but honestly disabled while a live
-              coupling exists (§3 — no fake affordance) — the title explains why,
-              same message the old blanket 409 toast used. */}
-          <button onClick={remove} disabled={l.inUse}
-            title={l.inUse ? t('locations.deleteInUse') : t('locations.detail.deleteLocation')}
-            style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7,
-              cursor: l.inUse ? 'not-allowed' : 'pointer', border: '1px solid var(--border)', background: 'var(--bg)',
-              color: l.inUse ? 'var(--text-muted)' : 'var(--color-danger)', opacity: l.inUse ? 0.6 : 1, flexShrink: 0 }}>
-            <Trash2 size={13} />
-          </button>
-        </div>
+        {/* §0.3 split: the pager/changelog/merge/archive/delete cluster is the shared
+            SubEntityTitleActions (mirrors DepartmentDetail verbatim). Merge/archive are
+            hidden without customers.update; merge also needs a second location to merge
+            with (§3 — no fake affordance). */}
+        <SubEntityTitleActions
+          pager={pager}
+          changelogEndpoint={customerId != null ? `/customers/${customerId}/locations/${l.id}/activity` : undefined}
+          onMerge={canUpdate && locations.length > 1 ? () => setMerging(true) : undefined}
+          mergeTitle={t('locations.detail.mergeLocation')}
+          onArchive={canUpdate && !l.archived ? doArchive : undefined}
+          archiveTitle={t('locations.detail.archiveLocation')}
+          archiving={archiving}
+          onDelete={remove}
+          deleteDisabled={l.inUse}
+          deleteTitle={l.inUse ? t('locations.deleteInUse') : t('locations.detail.deleteLocation')}
+        />
       </div>
+
+      {/* ARCHIVE-SUBENTITY-1: the in-body archived state (§3A — mirrors the vacancy/
+          candidate drawer's ArchivedBanner verbatim), right under the title row. */}
+      {l.archived && (
+        <ArchivedBanner id={l.id} onRestore={doRestore}
+          message={l.archivedAt ? t('locations.archivedBanner.since', { date: formatDate(l.archivedAt) }) : t('locations.archivedBanner.flag')}
+          restoreLabel={t('locations.archivedBanner.restore')} />
+      )}
 
       {/* Sub-tab strip — same shared bar as the candidate Communicatie tab; short labels. */}
       <SubTabBar
@@ -301,6 +267,8 @@ export default function LocationDetail({
           // already carries full five-locale parity, verified in c0e0d900.
           { id: 'applications', label: t('applications:title') },
           { id: 'matches',     label: t('drawer.tabs.matches') },
+          // TAKEN-OP-LOCATIE-1: TaskLinkResolver already knows 'customer_location' → task_links.
+          { id: 'tasks',       label: t('drawer.tabs.tasks') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
           // EXTRACT-1: the shared Koppelingen sub-tab, always last (§3A/§11) — the
           // shared common:backofficeLinks.tabLabel key, not this file's own labels.
@@ -310,57 +278,13 @@ export default function LocationDetail({
         onChange={id => setSubTab(id as typeof subTab)}
       />
 
-      {/* Adres & gegevens — no repeated title (it would duplicate the sub-tab label). */}
+      {/* Adres & gegevens — no repeated title (it would duplicate the sub-tab label).
+          §0.3 split: the whole sub-tab body now lives in LocationAddressTab. */}
       {subTab === 'address' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {/* Same block order as the customer's Bedrijf tab (Danny 28-07: "zelfde format
-              als klant"): Gegevens · Adres · Contact. Registratie is no longer its own
-              card — KvK and BTW are plain facts about this site, so they sit in Gegevens
-              next to the name instead of behind their own heading. */}
-          {[t('overview.details'), t('subModal.groups.address')].map(group => (
-            <EditableFieldTable key={group} title={group} labelWidth={140} value={values} onSave={save}
-              fields={generalFields.filter(f => f.group === group).map(f => ({ ...f, group: undefined }))} />
-          ))}
-
-          {/* CONTACT-LOCATION-PRIMARY-1, round two (Danny 02-08) — ONE contact block, and the
-              coupling is the only truth it shows as a link. Setting/changing it lives where
-              the people are, on the Contactpersonen sub-tab (the "make primary" star), so
-              there is one place that owns the change. See LocationContactSection's own
-              comment for why the legacy free text is shown but no longer editable here. */}
-          <LocationContactSection
-            primaryContact={primaryContact}
-            legacyName={l.contactName ?? ''} legacyEmail={l.email ?? ''} legacyPhone={l.phone ?? ''}
-            onOpenContact={id => { setSubTab('contacts'); setOpenContactId(id) }}
-            onPickContact={() => setSubTab('contacts')}
-            // ONE-CLICK-COUPLE-1: the customer's full contact list (already available here)
-            // plus the ids the section needs to write the coupling itself.
-            // ONE-CLICK-COUPLE-2: onAddContact closes the no-match dead end (create the
-            // missing contact, then couple it) — same prop this component already receives.
-            contacts={contacts} customerId={customerId} locationId={l.id as Id} onAddContact={onAddContact} />
-
-          {/* LOCATIE-OMSCHRIJVING-1 (Danny 02-08, order overruled same day): mirrors the
-              Bedrijf tab exactly — OverviewTab puts its own description directly under
-              Contact (OverviewTab.tsx:162), so this moved from FIRST (this morning's
-              placement, ahead of the field tables) to right here, after
-              LocationContactSection, same as Bedrijf's Gegevens → Adres → Contact →
-              Bedrijfstekst sequence. */}
-          <EditableRichTextField label={t('locations.detail.description')} value={l.description ?? ''} onSave={saveDescription} />
-
-          {/* Koios advice, in the same slot the customer's Bedrijf tab puts it: right after
-              the fields/contact/description block and BEFORE Vestiging (Danny 02-08: "Koios
-              adviseert staat opeens onder vestiging??" — it had drifted below
-              LocationBranchSection). Pure FE heuristics over this location's OWN
-              completeness — no API call. */}
-          <KoiosAdviceBlock namespace="customers" insights={buildLocationAdviceInsights(l, t)} />
-
-          {/* Vestiging — which of OUR branches this site works under, and whether that is
-              inherited from the customer or set here on purpose (LOCATIE-VESTIGING-1). */}
-          <LocationBranchSection
-            branchIds={l.branchIds} branches={l.branches}
-            inherited={l.branchInherited} effectiveBranches={l.effectiveBranches}
-            options={branchOptions}
-            onChange={ids => onSave(l.id as Id, { branchIds: ids })} />
-        </div>
+        <LocationAddressTab location={l} customerId={customerId} contacts={contacts} t={t}
+          provinceOptions={provinceOptions} countryOptions={countryOptions} branchOptions={branchOptions}
+          onSave={onSave} onAddContact={onAddContact}
+          onGoToContacts={id => { setSubTab('contacts'); if (id != null) setOpenContactId(id) }} />
       )}
 
       {/* The SAME panel the customer's Afdelingen tab renders — one department surface. */}
@@ -376,7 +300,7 @@ export default function LocationDetail({
       )}
 
       {subTab === 'contacts' && (
-        <ContactsPanel scope="location" scopeId={l.id as Id} scopeName={l.name} contacts={contacts} locations={locations}
+        <ContactsPanel scope="location" scopeId={l.id as Id} scopeName={l.name} customerId={customerId} contacts={contacts} locations={locations}
           openId={openContactId} onOpenChange={setOpenContactId} trail={[{ label: backLabel ?? '', onClick: close }]}
           onRemove={onRemoveContact}
           departments={departments} statuses={contactStatuses} onAdd={onAddContact} onUpdate={onUpdateContact} />
@@ -392,6 +316,18 @@ export default function LocationDetail({
           that never opens this one (no QueryClientProvider needed for those). */}
       {subTab === 'applications' && <ScopedSollicitatiesTab scope="location" id={l.id as Id} />}
       {subTab === 'matches' && <ScopedMatchesTab scope="location" id={l.id as Id} customerId={customerId} />}
+      {/* TAKEN-OP-LOCATIE-1: own scoped label block (mirrors DepartmentDetail's
+          identical wiring) — the shared tab's CURRENT labels interface. */}
+      {subTab === 'tasks' && (
+        <EntityTasksTab linkType="customer_location" id={l.id as Id} labels={{
+          newTask: t('locations.detail.tasks.newTask'),
+          searchPlaceholder: t('locations.detail.tasks.searchPlaceholder'),
+          empty: t('locations.detail.tasks.empty'),
+          loading: t('locations.detail.tasks.loading'),
+          error: t('locations.detail.tasks.error'),
+          openTask: t('locations.detail.tasks.openTask'),
+        }} />
+      )}
 
       {subTab === 'extra' && (
         <CustomFieldsTab entityType="customer_location" values={l.customFields ?? {}}
@@ -421,8 +357,20 @@ export default function LocationDetail({
           <PlanningSummary customerId={customerId ?? ''} params={{ location_id: l.id }} />
         </SectionCard>
       )}
+      {/* LOCATIE-SAMENVOEGEN-1 — `others` is the customer-wide location list (already
+          available as a prop), never a fresh search endpoint (see the modal's own doc). */}
+      {merging && customerId != null && (
+        <MergeSubEntityModal scope="location" customerId={customerId}
+          current={{ id: l.id as Id, name: l.name }}
+          others={locations.map(x => ({ id: x.id, name: x.name }))}
+          onClose={() => setMerging(false)}
+          onMerged={survivorId => { setMerging(false); onMerged?.(survivorId) }} />
+      )}
       {dialog}
-      <InUseCountsDialog open={blockedCounts != null} counts={blockedCounts ?? {}} onClose={() => setBlockedCounts(null)} />
+      {/* ARCHIVE-SUBENTITY-1: "kan niet verwijderen, wél archiveren" — the 409-race
+          offers archiving as the way out; no second confirm (see archiveNow's doc). */}
+      <InUseCountsDialog open={blockedCounts != null} counts={blockedCounts ?? {}} onClose={() => setBlockedCounts(null)}
+        onArchive={() => { setBlockedCounts(null); void archiveNow() }} archiving={archiving} />
     </div>
   )
 }

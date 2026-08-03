@@ -199,3 +199,25 @@ describe('LocationsTab · threads the real onAddContact into AddLocationModal (C
     await waitFor(() => expect(onAddContact).toHaveBeenCalledWith(expect.objectContaining({ firstName: 'Nieuwe', lastName: 'Persoon' })))
   })
 })
+
+/**
+ * ARCHIVE-SUBENTITY-1 — the "Gearchiveerd" quick-view is a SEPARATE fetch (never
+ * merged into the live list), gated entirely on the toggle (no request while off).
+ * Assert the REQUEST (§13): the exact `include_archived=1` param, not just that
+ * some state flipped.
+ */
+describe('LocationsTab · Gearchiveerd quick-view (ARCHIVE-SUBENTITY-1)', () => {
+  it('fires no archived-list request until the toggle is switched on', () => {
+    render(<LocationsTab {...base} />)
+    expect(vi.mocked(api.get).mock.calls.some(([, cfg]) => (cfg as { params?: { include_archived?: number } } | undefined)?.params?.include_archived === 1)).toBe(false)
+  })
+
+  it('requests include_archived=1 for this customer\'s own locations once toggled on', async () => {
+    const user = userEvent.setup()
+    render(<LocationsTab {...base} />)
+
+    await user.click(screen.getByRole('button', { name: ct('locations.archivedView') }))
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customers/cust-1/locations', expect.objectContaining({ params: { include_archived: 1 } })))
+  })
+})
