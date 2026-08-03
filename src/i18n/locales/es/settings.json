@@ -197,7 +197,9 @@
     "nt_candidate": "Candidatos",
     "nt_application": "Candidaturas",
     "nt_customer": "Clientes",
+    "nt_contact": "Contactos",
     "nt_opportunity": "Oportunidades",
+    "nt_vacancy": "Vacantes",
     "action_rules": "Reglas de acción",
     "vacancy_generation": "Generación de vacantes",
     "org_policy": "Política de organización",
@@ -213,7 +215,8 @@
     "dt_task": "Tareas",
     "dt_call_list": "Listas de llamadas",
     "dt_match": "Coincidencias",
-    "dt_vacancy": "Vacantes"
+    "dt_vacancy": "Vacantes",
+    "vacancy_default_status": "Estado predeterminado"
   },
   "kpis": {
     "title": "Configuración de KPI",

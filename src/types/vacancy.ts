@@ -167,7 +167,9 @@ export interface VacancyDetail extends Vacancy {
   customFieldValues: Record<string, unknown>
   documents: Array<{ id: Id | undefined; name: string; size: unknown }>
   timeline: VacancyTimelineEvent[]
-  notes: Array<{ id: Id | undefined; author: string; text: string; time: string }>
+  // `type` carries the note-category slug (NOTE-TYPES-2, VACANCY-NOTE-TYPE-1) —
+  // optional so an older/untyped note (created before the column landed) still renders.
+  notes: Array<{ id: Id | undefined; author: string; text: string; time: string; type?: string }>
 }
 
 /** Raw API vacancy record (read defensively). */
@@ -288,7 +290,7 @@ export interface ApiVacancy {
   documents?: Array<{ id?: Id; name?: string; size?: unknown }>
   // V21-23: `type` is the event kind the aggregator sends alongside the composite id.
   timeline?: Array<{ id?: Id; type?: string; author?: string; author_initials?: string; description?: string; ai?: unknown; created_at?: string; time?: string }>
-  notes?: Array<{ id?: Id; author?: string; text?: string; created_at?: string }>
+  notes?: Array<{ id?: Id; author?: string; text?: string; body?: string; type?: string; created_at?: string }>
   // VAC-CASCADE-1: klant → locatie → afdeling → contactpersoon — ids + resolved {id,name}.
   customer_location_id?: Id
   customer_location?: { id?: Id; name?: string } | null

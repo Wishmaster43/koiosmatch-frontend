@@ -8,6 +8,7 @@ import StatusListEditor from './StatusListEditor'
 const ENTITY_NAV_ID = {
   candidate: 'cf_candidate', application: 'cf_application', match: 'cf_match', task: 'cf_task',
   customer: 'cf_customer', contact: 'cf_customer_contact', opportunity: 'cf_opportunity',
+  vacancy: 'cf_vacancy',
 }
 
 /** Note types — categorisation of notes, scoped per entity (NOTE-TYPES-2/3; backend

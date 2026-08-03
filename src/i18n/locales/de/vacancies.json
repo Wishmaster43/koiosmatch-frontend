@@ -111,6 +111,16 @@
     "agentLinked": "KI-Agent „{{name}}“ mit {{count}} Stellen verknüpft.",
     "agentUnlinked": "KI-Agent von {{count}} Stellen getrennt."
   },
+  "notes": {
+    "title": "Notizen",
+    "type": "Typ",
+    "new": "Neue Notiz",
+    "empty": "Noch keine Notizen.",
+    "placeholder": "Notiz schreiben…",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "searchPlaceholder": "Notizen suchen…"
+  },
   "drawer": {
     "entityLabel": "Stelle",
     "createdAt": "Erstellt am {{date}}",

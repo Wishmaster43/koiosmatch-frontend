@@ -111,6 +111,16 @@
     "agentLinked": "Agente IA «{{name}}» vinculado a {{count}} vacantes.",
     "agentUnlinked": "Agente IA desvinculado de {{count}} vacantes."
   },
+  "notes": {
+    "title": "Notas",
+    "type": "Tipo",
+    "new": "Nueva nota",
+    "empty": "Aún no hay notas.",
+    "placeholder": "Escribe una nota…",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "searchPlaceholder": "Buscar notas…"
+  },
   "drawer": {
     "entityLabel": "Vacante",
     "createdAt": "Creada el {{date}}",

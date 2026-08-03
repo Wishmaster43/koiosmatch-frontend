@@ -278,6 +278,8 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
     // (the DB column is `text`, but the API contract mirrors the shared notes shape,
     // { id, author, body, type, created_at }) — reading `n.text` left every note
     // blank after a real fetch/reload (only the just-added optimistic row showed).
-    notes: (raw.notes ?? []).map(n => ({ id: n.id, author: n.author ?? '', text: String((n as Loose).body ?? n.text ?? ''), time: n.created_at ?? '' })),
+    // VACANCY-NOTE-TYPE-1: `type` now carries through too, so the shared NotesTab can
+    // render the same type chip candidates/applications/opportunities already show.
+    notes: (raw.notes ?? []).map(n => ({ id: n.id, author: n.author ?? '', text: String(n.body ?? n.text ?? ''), time: n.created_at ?? '', type: n.type })),
   }
 }

@@ -197,7 +197,9 @@
     "nt_candidate": "Kandidaten",
     "nt_application": "Sollicitaties",
     "nt_customer": "Klanten",
+    "nt_contact": "Contactpersonen",
     "nt_opportunity": "Kansen",
+    "nt_vacancy": "Vacatures",
     "action_rules": "Actieregels",
     "vacancy_generation": "Vacaturegeneratie",
     "org_policy": "Organisatiebeleid",
@@ -213,7 +215,8 @@
     "dt_task": "Taken",
     "dt_call_list": "Bellijsten",
     "dt_match": "Matches",
-    "dt_vacancy": "Vacatures"
+    "dt_vacancy": "Vacatures",
+    "vacancy_default_status": "Standaardstatus"
   },
   "kpis": {
     "title": "KPI-instellingen",

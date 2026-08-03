@@ -342,24 +342,54 @@ export const NAV_GROUPS = [
     // lived under personalisation.
     //
     // ONLY entities with a real reader get a tab (§3 no fake affordances, 2026-07-31).
-    // A sub-tab here is offered iff some screen calls useNoteTypes(<entity>): today that
-    // is candidate (CommunicationTab), application + opportunity (drawer NotesTab) and
-    // customer (CustomerNotesTab). The backend's NoteType::ENTITIES also allows
-    // 'match', 'task' and 'contact', but nothing consumes those:
-    //   • match   — there is no /matches/{id}/notes route, so MatchDrawer deliberately
-    //               ships no Notities tab (see its header comment).
-    //   • task    — the Reacties tab was removed on purpose (TaskDrawer TAB_IDS).
-    //   • contact — the contact drawer/panel has no notes surface at all.
-    // Their tabs were configurable screens whose values were read nowhere, so they are
-    // NOT offered. No tenant data is deleted: the rows stay in note_types and the
-    // endpoint keeps serving them, so re-adding one line here restores the editor the
-    // day that entity grows a notes surface.
+    // A sub-tab here is offered iff some screen calls useNoteTypes(<entity>). Re-measured
+    // 2026-08-04 against Danny's full wish list (klant/locatie/afdeling/contactpersoon/
+    // taken/vacatures/sollicitaties/bellijsten/matches) — per-entity result:
+    //   • candidate, application, customer, opportunity — unchanged, offered since wave 2.
+    //   • contact   — NOW offered. CustomerNotesTab already called useNoteTypes('contact')
+    //                 (the composer switches scope the moment a note is linked to a
+    //                 contactpersoon, CONTACT-NOTITIES-1) — only the settings tab was
+    //                 missing; the reader was real all along.
+    //   • vacancy   — NOW offered. VacancyNoteController validates `type` against the
+    //                 entity-scoped lookup since VACANCY-NOTE-TYPE-1 (2026-08-02), and the
+    //                 vacancy drawer's Notes tab (pages/vacancies/drawer/NotesTab.tsx) was
+    //                 rewritten onto the shared SharedNotesTab + useNoteTypes('vacancy') —
+    //                 same picker/chip treatment as applications/opportunities.
+    //   • match     — STILL withheld. MatchNoteController + /matches/{id}/notes now exist
+    //                 and validate `type` scoped to entity=match (MATCH-NOTES-1), but no FE
+    //                 screen calls useNoteTypes('match') — MatchDrawer ships no Notities tab
+    //                 at all (see its own header comment). Needs a MatchNotesTab + fetch
+    //                 hook (mirror opportunities/drawer/NotesTab.tsx + useOpportunityNotes)
+    //                 wired into MatchDrawer's tab list before this tab can turn on.
+    //   • task      — STILL withheld. TaskCommentController + /tasks/{id}/notes validate
+    //                 `type` scoped to entity=task the same way, but the Reacties tab was
+    //                 deliberately removed (Danny 2026-07-14, TaskDrawer TAB_IDS = ['details',
+    //                 'links']) — "task comments live on in the record notes API but get no
+    //                 tab until asked for". Needs that tab reinstated (with a type picker)
+    //                 before this turns on.
+    //   • call_list (bellijsten) — STILL withheld, one step earlier than match/task: no
+    //                 'call_list' token in the backend's NoteType::ENTITIES, no notes route
+    //                 on outreach-campaigns, and no FE notes surface on OutreachDrawer either.
+    //                 This is a backend-first gap (schema + controller + route), not just a
+    //                 missing FE tab — see the worklist row.
+    //   • location / department — deliberately NEVER get their own tab. Their notes are
+    //                 CustomerNote rows (CustomerLocationController::notes / Customer
+    //                 DepartmentController::notes just filter by location/department id) and
+    //                 CustomerController::addNote validates `type` against entity=customer
+    //                 (or entity=contact when customer_contact_id is filled) regardless of
+    //                 which level the note is linked to — there is no separate location/
+    //                 department scope to configure. nt_customer already covers them.
+    // No tenant data is deleted for a withheld entity: the rows stay in note_types and the
+    // endpoint keeps serving them, so re-adding one line here restores the editor the day
+    // that entity grows a real FE reader.
     key: 'note_types', icon: MessageSquare,
     items: [
       { id: 'nt_candidate', icon: Users, render: () => <NoteTypesSettings entity="candidate" /> },
       { id: 'nt_application', icon: ClipboardList, render: () => <NoteTypesSettings entity="application" /> },
       { id: 'nt_customer', icon: Building2, render: () => <NoteTypesSettings entity="customer" /> },
+      { id: 'nt_contact', icon: Users, render: () => <NoteTypesSettings entity="contact" /> },
       { id: 'nt_opportunity', icon: Target, render: () => <NoteTypesSettings entity="opportunity" /> },
+      { id: 'nt_vacancy', icon: Briefcase, render: () => <NoteTypesSettings entity="vacancy" /> },
     ],
   },
   {

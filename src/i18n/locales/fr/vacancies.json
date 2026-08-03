@@ -111,6 +111,16 @@
     "agentLinked": "Agent IA « {{name}} » lié à {{count}} offres.",
     "agentUnlinked": "Agent IA dissocié de {{count}} offres."
   },
+  "notes": {
+    "title": "Notes",
+    "type": "Type",
+    "new": "Nouvelle note",
+    "empty": "Aucune note pour le moment.",
+    "placeholder": "Écrire une note…",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "searchPlaceholder": "Rechercher des notes…"
+  },
   "drawer": {
     "entityLabel": "Poste",
     "createdAt": "Créé le {{date}}",

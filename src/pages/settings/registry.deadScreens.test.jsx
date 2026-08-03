@@ -12,6 +12,16 @@
  * tree: a tab is legitimate iff some non-test file actually reads it. So it fails
  * the day a dead tab is re-added, and it goes green by itself the day the missing
  * reader lands — no test edit needed.
+ *
+ * 2026-08-04 re-measure (Danny's full note-type wish list): nt_contact and
+ * nt_vacancy both grew real readers — CustomerNotesTab always called
+ * useNoteTypes('contact') (only the tab was missing) and the vacancy drawer's
+ * NotesTab now calls useNoteTypes('vacancy') (VACANCY-NOTE-TYPE-1 gave it a real
+ * backend-validated `type`). Both moved off the "stays gone" list below.
+ * nt_match / nt_task stay withheld: the backend now validates `type` on both
+ * (MatchNoteController / TaskCommentController), but neither has an FE notes
+ * surface yet (MatchDrawer ships no Notities tab; TaskDrawer's Reacties tab was
+ * deliberately removed) — see registry.jsx's note_types comment for what each needs.
  */
 import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
@@ -67,11 +77,11 @@ describe('settings registry offers no screen without a consumer', () => {
     expect(withoutRenderer).toEqual([])
   })
 
-  it('the five screens removed on 2026-07-31 stay gone until their consumer lands', () => {
+  it('the screens still missing a consumer stay gone until one lands', () => {
     const all = NAV_GROUPS.flatMap(g => g.items.map(i => i.id))
+    // nt_contact and nt_vacancy graduated off this list 2026-08-04 (real readers, see above).
     expect(all).not.toContain('nt_match')
     expect(all).not.toContain('nt_task')
-    expect(all).not.toContain('nt_contact')
     expect(all).not.toContain('view_planning')
     expect(all).not.toContain('view_sales')
     expect(all).not.toContain('view_candidates')

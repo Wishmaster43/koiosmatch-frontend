@@ -111,6 +111,16 @@
     "agentLinked": "AI-agent “{{name}}” gekoppeld aan {{count}} vacatures.",
     "agentUnlinked": "AI-agent ontkoppeld van {{count}} vacatures."
   },
+  "notes": {
+    "title": "Notities",
+    "type": "Type",
+    "new": "Nieuwe notitie",
+    "empty": "Nog geen notities.",
+    "placeholder": "Schrijf een notitie…",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "searchPlaceholder": "Zoek notities…"
+  },
   "drawer": {
     "entityLabel": "Vacature",
     "createdAt": "Aangemaakt op {{date}}",
