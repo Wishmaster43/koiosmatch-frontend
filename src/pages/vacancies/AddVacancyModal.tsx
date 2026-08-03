@@ -14,6 +14,8 @@
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { BTN_H } from '@/config/buttonMetrics'
+import { modalColumns } from '@/components/ui/modalCards'
+import CollapsedCard from '@/components/ui/CollapsedCard'
 import { useAddVacancyForm } from './addmodal/useAddVacancyForm'
 import { usePostCreateAttachments } from './addmodal/usePostCreateAttachments'
 import ModalHeader from './addmodal/ModalHeader'
@@ -94,57 +96,87 @@ export default function AddVacancyModal({
         <ModalHeader status={f.form.status} statusOptions={f.statusOptions}
           onSelectStatus={v => f.set('status', v)} onClose={onClose} />
 
-        {/* Form — titled bordered cards, stacked full-width (mirrors AddCandidateModal/
-            AddCustomerModal): Algemeen / Klant / Inzet / Functie-eisen / Voorwaarden /
-            Beschrijving / Recruiter. */}
+        {/* Form — A+D layout (Danny 03-08 decision, shared primitives from
+            components/ui/modalCards + CollapsedCard, commit 4845a6ee): required-core
+            cards (Algemeen/Klant/Inzet/Recruiter) sit LEFT, content cards
+            (Functie-eisen/Voorwaarden/Vacaturetekst) sit RIGHT via the shared
+            modalColumns two-column grid (falls back to one column at narrow widths,
+            mirrors AddLocationModal's exact idiom); the four secondary/optional
+            cards (Matchprofiel/AI-agent/Publicatie/Documenten+notitie) collapse
+            full-width below — never a required field inside a CollapsedCard. */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <GeneralCard
-            title={f.form.title} onTitleChange={v => f.set('title', v)} titleError={f.errors.title}
-            category={f.form.category} onCategoryChange={v => f.set('category', v)} functions={f.functions}
-            industry={f.form.industry} onIndustryChange={v => f.set('industry', v)} industries={f.industries}
-          />
-          <ClientCascadeCard
-            lockCustomerId={lockCustomerId} lockCustomerName={lockCustomerName}
-            clientId={f.form.clientId} onClientChange={f.handleClientChange} customerOptions={f.customerOptions}
-            locationPicker={f.locationPicker} departmentPicker={f.departmentPicker} contactPicker={f.contactPicker}
-          />
-          <PlacementCard
-            contractTypes={f.form.contractTypes} candidateTypes={f.candidateTypes} onToggleType={f.toggleContractType}
-            startDate={f.form.startDate} endDate={f.form.endDate}
-            onStartDateChange={v => f.set('startDate', v)} onEndDateChange={v => f.set('endDate', v)}
-            street={f.form.street} houseNumber={f.form.houseNumber} houseNumberSuffix={f.form.houseNumberSuffix}
-            postalCode={f.form.postalCode} city={f.form.city} province={f.form.province} country={f.form.country}
-            onFieldChange={f.onAddressChange} provinces={f.provinces}
-            branchId={f.form.branchId} onBranchChange={v => f.set('branchId', v)} branchOptions={f.branchOptions}
-          />
-          <RequirementsCard
-            seniority={f.form.seniority} onSeniorityChange={v => f.set('seniority', v)} seniorityLevels={f.seniorityLevels}
-            education={f.form.education} onEducationChange={v => f.set('education', v)} educationLevels={f.educationLevels}
-            skills={f.skills} newSkill={f.newSkill} onNewSkillChange={f.setNewSkill} onAddSkill={f.addSkill} onRemoveSkill={f.removeSkill}
-          />
-          <ConditionsCard
-            salaryMin={f.form.salaryMin} salaryMax={f.form.salaryMax} salaryPeriod={f.form.salaryPeriod}
-            hoursMin={f.form.hoursMin} hoursMax={f.form.hoursMax}
-            onChange={f.onConditionsChange}
-          />
-          <DescriptionCard value={f.form.description} onChange={v => f.set('description', v)}
-            expanded={f.descExpanded} setExpanded={f.setDescExpanded} editing={f.descEditing} setEditing={f.setDescEditing}
-            genFields={f.genFields} />
-          <MatchProfileCard templateId={f.matchWeightTemplateId} onTemplateChange={f.setMatchWeightTemplateId}
-            onWeightsChange={f.setMatchWeights} />
+          <div style={modalColumns('repeat(auto-fit, minmax(340px, 1fr))')}>
+            {/* LEFT — required core: what/who/where/whom this vacancy is for. */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <GeneralCard
+                title={f.form.title} onTitleChange={v => f.set('title', v)} titleError={f.errors.title}
+                category={f.form.category} onCategoryChange={v => f.set('category', v)} functions={f.functions}
+                industry={f.form.industry} onIndustryChange={v => f.set('industry', v)} industries={f.industries}
+              />
+              <ClientCascadeCard
+                lockCustomerId={lockCustomerId} lockCustomerName={lockCustomerName}
+                clientId={f.form.clientId} onClientChange={f.handleClientChange} customerOptions={f.customerOptions}
+                locationPicker={f.locationPicker} departmentPicker={f.departmentPicker} contactPicker={f.contactPicker}
+              />
+              <PlacementCard
+                contractTypes={f.form.contractTypes} candidateTypes={f.candidateTypes} onToggleType={f.toggleContractType}
+                startDate={f.form.startDate} endDate={f.form.endDate}
+                onStartDateChange={v => f.set('startDate', v)} onEndDateChange={v => f.set('endDate', v)}
+                street={f.form.street} houseNumber={f.form.houseNumber} houseNumberSuffix={f.form.houseNumberSuffix}
+                postalCode={f.form.postalCode} city={f.form.city} province={f.form.province} country={f.form.country}
+                onFieldChange={f.onAddressChange} provinces={f.provinces}
+                branchId={f.form.branchId} onBranchChange={v => f.set('branchId', v)} branchOptions={f.branchOptions}
+              />
+              <RecruiterCard ownerId={f.form.ownerId} onOwnerChange={v => f.set('ownerId', v)} userOptions={f.userOptions} />
+            </div>
+
+            {/* RIGHT — content: what the job requires, offers, and reads like. */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <RequirementsCard
+                seniority={f.form.seniority} onSeniorityChange={v => f.set('seniority', v)} seniorityLevels={f.seniorityLevels}
+                education={f.form.education} onEducationChange={v => f.set('education', v)} educationLevels={f.educationLevels}
+                skills={f.skills} newSkill={f.newSkill} onNewSkillChange={f.setNewSkill} onAddSkill={f.addSkill} onRemoveSkill={f.removeSkill}
+              />
+              <ConditionsCard
+                salaryMin={f.form.salaryMin} salaryMax={f.form.salaryMax} salaryPeriod={f.form.salaryPeriod}
+                hoursMin={f.form.hoursMin} hoursMax={f.form.hoursMax}
+                onChange={f.onConditionsChange}
+              />
+              <DescriptionCard value={f.form.description} onChange={v => f.set('description', v)}
+                expanded={f.descExpanded} setExpanded={f.setDescExpanded} editing={f.descEditing} setEditing={f.setDescEditing}
+                genFields={f.genFields} />
+            </div>
+          </div>
+
+          {/* Secondary/optional — collapsed by default (A+D decision): each card's
+              `filled` dot lights up once it holds a real value, so a recruiter can
+              tell at a glance what still needs a look without expanding everything. */}
+          <CollapsedCard title={f.t('modal.fields.cardMatching')} filled={!!f.matchWeightTemplateId || !!f.matchWeights}>
+            <MatchProfileCard templateId={f.matchWeightTemplateId} onTemplateChange={f.setMatchWeightTemplateId}
+              onWeightsChange={f.setMatchWeights} />
+          </CollapsedCard>
           {/* Punt 19: rendered as NOTHING without module `aiagents` + settings.view —
-              GET /ai/agents is gated on both, never a disabled tease (§3). */}
-          {f.showAiAgentCard && <AiAgentCard agentId={f.aiAgentId} onAgentChange={f.setAiAgentId} />}
-          <PublicationCard published={f.published} onPublishedChange={f.setPublished}
-            channels={f.channels} onToggleChannel={f.toggleChannel}
-            applicationSettings={f.applicationSettings} onSettingChange={f.setApplicationSetting} />
+              GET /ai/agents is gated on both, never a disabled tease (§3) — the
+              CollapsedCard itself must not exist without access, not just its body. */}
+          {f.showAiAgentCard && (
+            <CollapsedCard title={f.t('modal.fields.cardAiAgent')} filled={!!f.aiAgentId}>
+              <AiAgentCard agentId={f.aiAgentId} onAgentChange={f.setAiAgentId} />
+            </CollapsedCard>
+          )}
+          <CollapsedCard title={f.t('modal.fields.cardPublication')}
+            filled={f.published || f.channels.some(c => c.published) || f.applicationSettingsTouched}>
+            <PublicationCard published={f.published} onPublishedChange={f.setPublished}
+              channels={f.channels} onToggleChannel={f.toggleChannel}
+              applicationSettings={f.applicationSettings} onSettingChange={f.setApplicationSetting} />
+          </CollapsedCard>
           {/* Punten 21+22: both POST .../documents and .../notes need vacancies.update
               next to vacancies.create (measured) — hidden entirely without it. */}
           {f.showAttachmentCards && (
-            <AttachmentsCard files={attachments.files} onAddFile={attachments.addFile} onRemoveFile={attachments.removeFile}
-              noteText={attachments.noteText} onNoteChange={attachments.setNoteText} />
+            <CollapsedCard title={f.t('modal.attachments.cardTitle')} filled={attachments.hasPending}>
+              <AttachmentsCard files={attachments.files} onAddFile={attachments.addFile} onRemoveFile={attachments.removeFile}
+                noteText={attachments.noteText} onNoteChange={attachments.setNoteText} />
+            </CollapsedCard>
           )}
-          <RecruiterCard ownerId={f.form.ownerId} onOwnerChange={v => f.set('ownerId', v)} userOptions={f.userOptions} />
         </div>
 
         {/* Server-side rejection (validation / matrix-guard) — shown in place, modal stays open. */}

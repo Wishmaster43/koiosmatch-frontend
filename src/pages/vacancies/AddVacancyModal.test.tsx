@@ -171,6 +171,44 @@ describe('AddVacancyModal · seven titled cards (SLICE 1)', () => {
   })
 })
 
+describe('AddVacancyModal · A+D layout (Danny 03-08 — two columns + collapsed secondaries)', () => {
+  it('keeps the required title field OUTSIDE any CollapsedCard — visible without opening a section', () => {
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    // GeneralCard (required-core, LEFT column) is never behind a collapsed toggle —
+    // no prior click was needed to find its required field (CollapsedCard's own
+    // docblock rule: a required field must never live inside one).
+    expect(screen.getByPlaceholderText('modal.titlePlaceholder')).toBeInTheDocument()
+  })
+
+  it('Matchprofiel starts collapsed', () => {
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    expect(screen.queryByRole('button', { name: 'matching.custom' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'modal.fields.cardMatching' })).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('AI-agent card starts collapsed (when rendered)', () => {
+    authState.hasModule = k => k === 'aiagents'
+    authState.hasPermission = p => p === 'settings.view'
+    aiAgentsState.options = [{ value: 'a1', label: 'Interview Bot' }]
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    expect(screen.queryByRole('button', { name: 'aiagent.placeholder' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'modal.fields.cardAiAgent' })).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('Publicatie starts collapsed', () => {
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    expect(screen.queryByRole('switch', { name: 'columns.published' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'modal.fields.cardPublication' })).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('Documenten+notitie starts collapsed (when rendered)', () => {
+    authState.hasPermission = p => p === 'vacancies.update'
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    expect(screen.queryByLabelText('drawer.tabs.documents')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'modal.attachments.cardTitle' })).toHaveAttribute('aria-expanded', 'false')
+  })
+})
+
 describe('AddVacancyModal · validation', () => {
   it('blocks submit while the title is empty', async () => {
     const user = userEvent.setup()
@@ -350,6 +388,8 @@ describe('AddVacancyModal · Matchprofiel (punt 18)', () => {
     matchTemplatesState.templates = [template]
     const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    // A+D layout (03-08): Matchprofiel is a CollapsedCard, closed by default — open it first.
+    await user.click(screen.getByRole('button', { name: 'modal.fields.cardMatching' }))
     await user.click(screen.getByRole('button', { name: 'matching.custom' }))
     await user.click(screen.getByRole('button', { name: 'IC-team' }))
     await fillTitleAndSubmit(user)
@@ -363,6 +403,7 @@ describe('AddVacancyModal · Matchprofiel (punt 18)', () => {
     matchTemplatesState.templates = [template]
     const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await user.click(screen.getByRole('button', { name: 'modal.fields.cardMatching' }))
     await user.click(screen.getByRole('button', { name: 'matching.custom' }))
     await user.click(screen.getByRole('button', { name: 'IC-team' }))
     await user.click(screen.getByRole('button', { name: 'matching.adjust' }))
@@ -391,6 +432,8 @@ describe('AddVacancyModal · AI-agent card gating (punt 19)', () => {
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
     expect(screen.getByText('modal.fields.cardAiAgent')).toBeInTheDocument()
 
+    // A+D layout (03-08): AI-agent is a CollapsedCard, closed by default — open it first.
+    await user.click(screen.getByRole('button', { name: 'modal.fields.cardAiAgent' }))
     await user.click(screen.getByRole('button', { name: 'aiagent.placeholder' }))
     await user.click(screen.getByRole('button', { name: 'Interview Bot' }))
     await fillTitleAndSubmit(user)
@@ -414,6 +457,8 @@ describe('AddVacancyModal · Publicatie (punt 20)', () => {
     const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
 
+    // A+D layout (03-08): Publicatie is a CollapsedCard, closed by default — open it first.
+    await user.click(screen.getByRole('button', { name: 'modal.fields.cardPublication' }))
     // Master published toggle (the table/insights "Gepubliceerd" bucket).
     await user.click(screen.getByRole('switch', { name: 'columns.published' }))
     // One job-board channel toggle.

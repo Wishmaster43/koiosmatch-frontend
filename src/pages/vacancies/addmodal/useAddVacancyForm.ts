@@ -378,8 +378,10 @@ export function useAddVacancyForm({
     matchWeightTemplateId, setMatchWeightTemplateId, matchWeights, setMatchWeights,
     // Punt 19
     showAiAgentCard, aiAgentId, setAiAgentId,
-    // Punt 20
-    published, setPublished, channels, toggleChannel, applicationSettings, setApplicationSetting,
+    // Punt 20 — applicationSettingsTouched is exposed so the assembler's
+    // CollapsedCard `filled` indicator (A+D layout, Danny 03-08) can tell a
+    // touched-but-unpublished settings edit apart from the untouched default.
+    published, setPublished, channels, toggleChannel, applicationSettings, setApplicationSetting, applicationSettingsTouched,
     // Punten 21+22
     showAttachmentCards, postCreatePhase,
   }

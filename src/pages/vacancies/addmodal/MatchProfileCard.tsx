@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Slider from '@/components/ui/Slider'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { cardHead, cardBox } from '@/components/ui/modalCards'
+import { cardBox } from '@/components/ui/modalCards'
 import { useMatchWeightTemplates } from '../hooks/useMatchWeightTemplates'
 import { MATCH_DIMENSIONS, buildMatchWeights } from '../data/matchWeights'
 
@@ -51,44 +51,43 @@ export default function MatchProfileCard({ templateId, onTemplateChange, onWeigh
     onWeightsChange(next)
   }
 
+  // A+D layout (Danny 03-08): the heading now lives in the caller's CollapsedCard
+  // title prop — this card renders only its own boxed body, no wrapper div.
   return (
-    <div>
-      <div style={cardHead}>{t('modal.fields.cardMatching')}</div>
-      <div style={cardBox}>
-        {/* Template picker — four explicit states, mirrors the drawer's MatchingTab. */}
-        {loading ? (
-          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</div>
-        ) : error ? (
-          <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('matching.templatesError')}</div>
-        ) : (
-          <CreatableSelect value={templateId} onChange={pickTemplate} allowCreate={false}
-            placeholder={t('matching.custom')}
-            options={[{ value: '', label: t('matching.custom') }, ...templates.map(tpl => ({ value: String(tpl.id), label: tpl.name }))]} />
-        )}
-        {!loading && !error && templates.length === 0 && (
-          <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{t('matching.noTemplates')}</p>
-        )}
+    <div style={cardBox}>
+      {/* Template picker — four explicit states, mirrors the drawer's MatchingTab. */}
+      {loading ? (
+        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</div>
+      ) : error ? (
+        <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('matching.templatesError')}</div>
+      ) : (
+        <CreatableSelect value={templateId} onChange={pickTemplate} allowCreate={false}
+          placeholder={t('matching.custom')}
+          options={[{ value: '', label: t('matching.custom') }, ...templates.map(tpl => ({ value: String(tpl.id), label: tpl.name }))]} />
+      )}
+      {!loading && !error && templates.length === 0 && (
+        <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{t('matching.noTemplates')}</p>
+      )}
 
-        <button type="button" onClick={() => setAdjusting(a => !a)}
-          style={{ alignSelf: 'flex-start', fontSize: 11, fontWeight: 500, color: 'var(--color-primary)',
-            background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-          {adjusting ? t('matching.hideAdjust') : t('matching.adjust')}
-        </button>
+      <button type="button" onClick={() => setAdjusting(a => !a)}
+        style={{ alignSelf: 'flex-start', fontSize: 11, fontWeight: 500, color: 'var(--color-primary)',
+          background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+        {adjusting ? t('matching.hideAdjust') : t('matching.adjust')}
+      </button>
 
-        {adjusting && MATCH_DIMENSIONS.map(d => (
-          <div key={d}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-              <span style={{ fontSize: 12, color: 'var(--text)' }}>{t(`matching.dim.${d}`)}</span>
-              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>
-                {weights[d] ?? 3}/5
-              </span>
-            </div>
-            {/* Slider is 0-based (0..4); stored weight is 1..5 (mirrors MatchingTab). */}
-            <Slider value={(weights[d] ?? 3) - 1} max={4} step={1} onChange={(i: number) => setWeight(d, i + 1)}
-              labels={[t('matching.less'), t('matching.balanced'), t('matching.very')]} ariaLabel={t(`matching.dim.${d}`)} />
+      {adjusting && MATCH_DIMENSIONS.map(d => (
+        <div key={d}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+            <span style={{ fontSize: 12, color: 'var(--text)' }}>{t(`matching.dim.${d}`)}</span>
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>
+              {weights[d] ?? 3}/5
+            </span>
           </div>
-        ))}
-      </div>
+          {/* Slider is 0-based (0..4); stored weight is 1..5 (mirrors MatchingTab). */}
+          <Slider value={(weights[d] ?? 3) - 1} max={4} step={1} onChange={(i: number) => setWeight(d, i + 1)}
+            labels={[t('matching.less'), t('matching.balanced'), t('matching.very')]} ariaLabel={t(`matching.dim.${d}`)} />
+        </div>
+      ))}
     </div>
   )
 }

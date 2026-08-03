@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { cardHead, cardBox } from '@/components/ui/modalCards'
+import { cardBox } from '@/components/ui/modalCards'
 import { useAiAgents } from '../hooks/useAiAgents'
 
 interface Props {
@@ -23,23 +23,22 @@ export default function AiAgentCard({ agentId, onAgentChange }: Props) {
 
   const selectOptions = [{ value: '', label: t('aiagent.none') }, ...options.map(o => ({ value: String(o.value), label: o.label }))]
 
+  // A+D layout (Danny 03-08): the heading now lives in the caller's CollapsedCard
+  // title prop — this card renders only its own boxed body, no wrapper div.
   return (
-    <div>
-      <div style={cardHead}>{t('modal.fields.cardAiAgent')}</div>
-      <div style={cardBox}>
-        {error ? (
-          <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('aiagent.loadError')}</div>
-        ) : (
-          <>
-            <CreatableSelect value={agentId || null} onChange={onAgentChange} allowCreate={false}
-              placeholder={loading ? t('common:loading') : t('aiagent.placeholder')} options={selectOptions} />
-            {!loading && options.length === 0 && (
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{t('aiagent.empty')}</p>
-            )}
-          </>
-        )}
-        <p style={{ margin: 0, fontSize: 11, color: 'var(--text-muted)' }}>{t('aiagent.explanation')}</p>
-      </div>
+    <div style={cardBox}>
+      {error ? (
+        <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('aiagent.loadError')}</div>
+      ) : (
+        <>
+          <CreatableSelect value={agentId || null} onChange={onAgentChange} allowCreate={false}
+            placeholder={loading ? t('common:loading') : t('aiagent.placeholder')} options={selectOptions} />
+          {!loading && options.length === 0 && (
+            <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{t('aiagent.empty')}</p>
+          )}
+        </>
+      )}
+      <p style={{ margin: 0, fontSize: 11, color: 'var(--text-muted)' }}>{t('aiagent.explanation')}</p>
     </div>
   )
 }
