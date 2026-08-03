@@ -91,14 +91,20 @@ export default function LocationContactSection({
   const hasLegacy = Boolean(typedName || legacyEmail.trim() || legacyPhone.trim())
   const pickLabel = t('locations.detail.pickPrimaryContact')
 
-  // ONE-CLICK-COUPLE-1: email is the ONLY match key, never the name — two people can
-  // share a name (that guess is exactly what round one of this section replaced, see
-  // the docblock above), while an email uniquely identifies one contact. A wrong
-  // auto-couple would be worse than the friction it removes, so anything short of
-  // exactly one hit falls back to today's manual "pick a contact" flow untouched.
+  // ONE-CLICK-COUPLE-1: email is the PRIMARY match key — it uniquely identifies a
+  // person. When the email yields nothing (seeded locations carry a location-mailbox
+  // like locatie2@…, not the person's own address — Danny 03-08 kept hitting this),
+  // a unique EXACT full-name hit is offered as a fallback. That is still never an
+  // auto-couple: the user confirms by clicking a button carrying the person's name,
+  // and two same-named contacts (the classic collision) mean no button at all —
+  // anything short of exactly one hit falls back to the manual pick flow untouched.
   const typedEmail = legacyEmail.trim().toLowerCase()
   const emailMatches = typedEmail ? contacts.filter(c => (c.email ?? '').trim().toLowerCase() === typedEmail) : []
-  const uniqueMatch = emailMatches.length === 1 ? emailMatches[0] : null
+  const nameLower = typedName.toLowerCase()
+  const nameMatches = emailMatches.length === 0 && nameLower
+    ? contacts.filter(c => (c.name ?? '').trim().toLowerCase() === nameLower) : []
+  const candidates = emailMatches.length > 0 ? emailMatches : nameMatches
+  const uniqueMatch = candidates.length === 1 ? candidates[0] : null
   // Without a customer id there is no route to PUT to (mirrors PdokCard/ContactsPanel's
   // own `blocked` guard) — the section then falls back to the honest generic CTA instead
   // of offering a button that would 404 on /customers/undefined/….

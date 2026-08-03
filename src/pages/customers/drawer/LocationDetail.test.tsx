@@ -349,9 +349,28 @@ describe('LocationDetail · one-click couple on a unique email match (ONE-CLICK-
     expect(mockPut).toHaveBeenCalledWith('/customers/cust-1/contacts/con-1/locations/loc-1/primary')
   })
 
-  it('offers only the generic CTA when the typed email matches no contact', () => {
-    render(<LocationDetail location={location({ contactName: 'Joost de Boer', email: 'unknown@example.test' })} onSave={vi.fn()} {...baseProps}
+  it('offers only the generic CTA when neither the email nor the name matches any contact', () => {
+    // Both keys must miss: the email is unknown AND the typed name is nobody's — with
+    // the name-fallback (Danny 03-08) an unknown email alone no longer means "no button".
+    render(<LocationDetail location={location({ contactName: 'Piet Onbekend', email: 'unknown@example.test' })} onSave={vi.fn()} {...baseProps}
       contacts={[contactFixture()]} />)
+
+    expect(screen.queryByRole('button', { name: ct('locations.detail.linkNamed', { name: 'Piet Onbekend' }) })).toBeNull()
+    expect(screen.getByRole('button', { name: ct('locations.detail.pickPrimaryContact') })).toBeInTheDocument()
+  })
+
+  it('falls back to a unique exact NAME match when the email misses (seeded locations carry a location mailbox)', () => {
+    render(<LocationDetail location={location({ contactName: 'Joost de Boer', email: 'locatie2@example.test' })} onSave={vi.fn()} {...baseProps}
+      contacts={[contactFixture()]} />)
+
+    // The location's mailbox matches no contact email, but exactly one contact carries
+    // the typed name — the named one-click button appears.
+    expect(screen.getByRole('button', { name: ct('locations.detail.linkNamed', { name: 'Joost de Boer' }) })).toBeInTheDocument()
+  })
+
+  it('two same-named contacts mean NO button — the classic name collision stays a manual pick', () => {
+    render(<LocationDetail location={location({ contactName: 'Joost de Boer', email: 'locatie2@example.test' })} onSave={vi.fn()} {...baseProps}
+      contacts={[contactFixture(), contactFixture({ id: 'con-9', email: 'joost.b@klant.test' })]} />)
 
     expect(screen.queryByRole('button', { name: ct('locations.detail.linkNamed', { name: 'Joost de Boer' }) })).toBeNull()
     expect(screen.getByRole('button', { name: ct('locations.detail.pickPrimaryContact') })).toBeInTheDocument()

@@ -11,6 +11,7 @@
  * Degrades to plain text when there is nothing to open (no id, or no handler), so a
  * caller can hand it an unresolved free-text name without producing a dead link.
  */
+import { SquareArrowOutUpRight } from 'lucide-react'
 import type { Id } from '@/types/common'
 
 export default function ContactNameLink({ name, id, onOpen, title }: {
@@ -35,6 +36,9 @@ export default function ContactNameLink({ name, id, onOpen, title }: {
       onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
       onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
       {name}
+      {/* Explicit open-affordance (Danny 03-08) — same signal the KvK/BTW link rows carry,
+          so a linked name is visibly distinct from plain text at a glance. */}
+      <SquareArrowOutUpRight size={11} style={{ flexShrink: 0, verticalAlign: '-1px', marginLeft: 5 }} />
     </button>
   )
 }
