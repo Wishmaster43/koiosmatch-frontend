@@ -154,6 +154,8 @@
     "very": "Très important",
     "save": "Enregistrer",
     "saved": "Enregistré",
+    "adjust": "Ajuster",
+    "hideAdjust": "Masquer",
     "templatesError": "Impossible de charger les profils de matching.",
     "noTemplates": "Aucun profil de matching pour le moment — créez-en un dans les paramètres.",
     "snapshotHint": "Les pondérations sont copiées une seule fois depuis le profil vers ce poste ; les modifications ultérieures du profil ne mettent pas ce poste à jour automatiquement.",
@@ -253,7 +255,8 @@
     "error": "La génération a échoué. Veuillez réessayer.",
     "previewLabel": "Proposition (concept) — pas encore enregistrée",
     "apply": "Appliquer",
-    "discard": "Rejeter"
+    "discard": "Rejeter",
+    "needsTitleFirst": "Renseignez d'abord un titre pour générer un texte."
   },
   "publishing": {
     "channels": "Sites d'emploi",
@@ -334,11 +337,20 @@
       "cardGeneral": "Général",
       "cardPlacement": "Affectation",
       "cardPublication": "Publication",
+      "cardMatching": "Profil de correspondance",
+      "cardAiAgent": "Agent IA",
       "scopedUnder": "Sera créé sous : {{name}}",
       "cardClient": "Client",
       "branch": "Établissement",
       "cardOwner": "Recruteur",
       "salaryPeriodPlaceholder": "p. ex. par mois"
+    },
+    "attachments": {
+      "cardTitle": "Documents et note",
+      "noteLabel": "Note",
+      "notePlaceholder": "Ajouter une note interne…",
+      "resultsTitle": "Poste créé",
+      "resultsHint": "Les pièces jointes et la note sont traitées ci-dessous. Les éléments en échec peuvent être réessayés."
     },
     "titlePlaceholder": "ex. Infirmier | La Haye",
     "create": "Créer le poste",

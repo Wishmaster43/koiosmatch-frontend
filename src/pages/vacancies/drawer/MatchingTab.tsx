@@ -5,18 +5,12 @@ import { Save, Check, Info } from 'lucide-react'
 import SliderJs from '@/components/ui/Slider'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useMatchWeightTemplates } from '../hooks/useMatchWeightTemplates'
+import { MATCH_DIMENSIONS as DIMENSIONS, buildMatchWeights as buildWeights } from '../data/matchWeights'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
 type AnyProps = Record<string, unknown>
 const Slider = SliderJs as unknown as ComponentType<AnyProps>
-
-// The six scoring dimensions (= the backend match_weights keys), each int 1..5.
-const DIMENSIONS = ['qualifications', 'technical_fit', 'soft_skills', 'cultural_alignment', 'career_aspirations', 'location']
-
-// Merge a stored weight set over the neutral default (3 = balanced) for a complete set.
-const buildWeights = (w: Record<string, unknown> | undefined): Record<string, number> =>
-  Object.fromEntries(DIMENSIONS.map(d => [d, Number((w ?? {})[d]) || 3]))
 
 /**
  * MatchingTab — the vacancy's per-dimension importance for the AI matcher: an

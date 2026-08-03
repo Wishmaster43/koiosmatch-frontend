@@ -156,6 +156,8 @@
     "very": "Very important",
     "save": "Save",
     "saved": "Saved",
+    "adjust": "Adjust",
+    "hideAdjust": "Hide",
     "templatesError": "Couldn't load match profiles.",
     "noTemplates": "No match profiles yet — create one in Settings.",
     "snapshotHint": "Weights are copied from the profile onto this vacancy once; later changes to the profile do not update this vacancy automatically.",
@@ -253,7 +255,8 @@
     "error": "Generating failed. Please try again.",
     "previewLabel": "Proposal (concept) — not saved yet",
     "apply": "Apply",
-    "discard": "Discard"
+    "discard": "Discard",
+    "needsTitleFirst": "Fill in a title first to generate a concept."
   },
   "publishing": {
     "channels": "Job boards",
@@ -334,11 +337,20 @@
       "cardGeneral": "General",
       "cardPlacement": "Assignment",
       "cardPublication": "Publication",
+      "cardMatching": "Match profile",
+      "cardAiAgent": "AI agent",
       "scopedUnder": "Will be created under: {{name}}",
       "cardClient": "Client",
       "branch": "Branch",
       "cardOwner": "Recruiter",
       "salaryPeriodPlaceholder": "e.g. per month"
+    },
+    "attachments": {
+      "cardTitle": "Documents & note",
+      "noteLabel": "Note",
+      "notePlaceholder": "Add an internal note…",
+      "resultsTitle": "Vacancy created",
+      "resultsHint": "The attachments and note are being processed below. Failed items can be retried."
     },
     "titlePlaceholder": "e.g. Nurse | The Hague",
     "create": "Create vacancy",

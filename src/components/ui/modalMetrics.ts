@@ -6,7 +6,8 @@
  * future resize only ever touches this file. Adopted by AddCandidateModal.tsx
  * and match/styles.ts.
  */
-// minHeight (Danny 03-08): short forms used to shrink to their content, making
-// +Taak/+Kans/+Match read as "smaller" than +Kandidaat even at the same maxWidth —
-// the frame is now pinned on both axes, so every wide create modal is ONE footprint.
-export const WIDE_MODAL = { maxWidth: 1060, maxHeight: '94vh', minHeight: '94vh' } as const
+// NO minHeight (Danny 03-08, second round): pinning it made SHORT forms (afdeling,
+// contactpersoon, kans) balloon to full height with dead space — eleven surfaces use
+// this constant, not just the tall six. Modals size to content up to the cap; the
+// perceived-size parity comes from the shared two-column layout system instead.
+export const WIDE_MODAL = { maxWidth: 1060, maxHeight: '94vh' } as const

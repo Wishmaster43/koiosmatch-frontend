@@ -1,18 +1,20 @@
 /**
- * AddVacancyModal — SLICE 1 (Danny's 22-point spec): the popup rebuild that
+ * AddVacancyModal — SLICE 1+2 (Danny's 22-point spec): the popup rebuild that
  * splits the form into `addmodal/` cards (Algemeen/Klant/Inzet/Functie-eisen/
- * Voorwaarden/Beschrijving/Recruiter), moves status into a header pill row,
- * replaces the old silent location/department id-passthrough with a REAL
- * cascade, and adds every field the backend already accepts (measured against
- * StoreVacancyRequest/VacancyWriter). Every new field rides the POST body
- * CONDITIONALLY (absent when empty) so the pre-SLICE-1 exact-body contract
- * (title-only create) stays byte-identical — asserted below.
+ * Voorwaarden/Beschrijving/Matchprofiel/AI-agent/Publicatie/Recruiter), moves
+ * status into a header pill row, replaces the old silent location/department
+ * id-passthrough with a REAL cascade, and adds every field the backend already
+ * accepts (measured against StoreVacancyRequest/VacancyWriter). Every new field
+ * rides the POST body CONDITIONALLY (absent when empty) so the pre-SLICE-1
+ * exact-body contract (title-only create) stays byte-identical — asserted below.
+ * SLICE 2 adds the Matchprofiel/AI-agent/Publicatie bodies and the AI-agent/
+ * attachments module+permission gating (own describe blocks near the bottom).
  *
  * Network-backed hooks are mocked directly (no QueryClient needed, mirrors
  * AddCandidateModal.test.tsx); i18next is uninitialised so t() returns raw keys.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AddVacancyModal from './AddVacancyModal'
 
@@ -33,6 +35,9 @@ const { lookupState } = vi.hoisted(() => ({
       { value: 'open', label: 'Open', color: '#79B58E' },
       { value: 'closed', label: 'Closed', color: '#8A94A6' },
     ] as Array<{ value: string; label: string; color?: string }>,
+    // SLICE 2: PublicationCard's channel list — empty by default so the
+    // base-body tests never see a `published_channels` key (nothing to toggle).
+    channels: [] as Array<{ value: string; label: string }>,
   },
 }))
 vi.mock('@/context/VacancyLookupsContext', () => ({
@@ -41,6 +46,7 @@ vi.mock('@/context/VacancyLookupsContext', () => ({
     seniorityLevels: [{ value: 'senior', label: 'Senior' }, { value: 'medior', label: 'Medior' }],
     educationLevels: [{ value: 'hbo', label: 'HBO' }],
     defaultSeniority: '', defaultEducation: '',
+    channels: lookupState.channels,
   }),
 }))
 vi.mock('@/context/LookupsContext', () => ({
@@ -55,7 +61,62 @@ vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: ['Zui
 vi.mock('@/hooks/useCustomerCascade', () => ({
   useCustomerCascade: () => ({ detail: null, locations: [], contacts: [], refetch: vi.fn() }),
 }))
-vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1', name: 'Piet Recruiter' } }) }))
+// Hoisted, mutable auth state — defaults to no module/no permission (both
+// SLICE-2 gates stay closed), so the SLICE-1 base-body tests never see
+// AiAgentCard/AttachmentsCard. Individual SLICE-2 tests flip these on.
+const { authState } = vi.hoisted(() => ({
+  authState: {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the default mock grants neither; the param exists only to match hasModule's real signature
+    hasModule: (_k: string): boolean => false,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the default mock grants neither; the param exists only to match hasPermission's real signature
+    hasPermission: (_p: string): boolean => false,
+  },
+}))
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({ user: { id: 'u1', name: 'Piet Recruiter' }, hasModule: authState.hasModule, hasPermission: authState.hasPermission }),
+}))
+// SLICE 2's new query-backed hooks — mocked directly (no QueryClient in this
+// tree, mirrors the file's own convention above) so the base-body/SLICE-1
+// tests never touch the network.
+// Hoisted, mutable template list — the Matchprofiel test needs one real
+// template to prove picking it (vs. editing a slider) sends different bodies.
+const { matchTemplatesState } = vi.hoisted(() => ({
+  matchTemplatesState: { templates: [] as Array<{ id: string; name: string; weights: Record<string, number>; linkedVacanciesCount: number }> },
+}))
+vi.mock('./hooks/useMatchWeightTemplates', () => ({ useMatchWeightTemplates: () => ({ templates: matchTemplatesState.templates, loading: false, error: false }) }))
+// Hoisted, mutable agent list — the gating test flips authState on and needs
+// at least one real option to prove ai_agent_id rides the create body.
+const { aiAgentsState } = vi.hoisted(() => ({
+  aiAgentsState: { options: [] as Array<{ value: string; label: string }> },
+}))
+vi.mock('./hooks/useAiAgents', () => ({ useAiAgents: () => ({ options: aiAgentsState.options, agents: [], loading: false, error: false }) }))
+// PublicationCard's tenant-default lookup — mocked so it never depends on the
+// module-level useAllSettings cache/real `api.get('/settings')` round-trip
+// (that hook's own cache is shared across test files by design, §9).
+vi.mock('@/lib/settings/useAllSettings', () => ({
+  useAllSettings: () => ({}),
+  getJsonSetting: (_values: unknown, _key: string, fallback: unknown) => fallback,
+}))
+vi.mock('./addmodal/useGenerateDescription', () => ({
+  useGenerateDescription: () => ({
+    open: false, openFlow: vi.fn(), closeFlow: vi.fn(), profile: null, resolving: false, resolveFailed: false,
+    noProfileConfigured: false, status: 'idle', concept: '', generate: vi.fn(), discard: vi.fn(),
+  }),
+}))
+// Hoisted, mutable post-create-attachments state — the sequencing-gate test
+// flips `hasPending` on to prove the submit path decides whether to run it.
+const { attachmentsState } = vi.hoisted(() => ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the default no-op mock ignores it; the param exists only to match runSequence's real signature
+  attachmentsState: { hasPending: false, runSequence: (async (_id: unknown) => {}) as (id: unknown) => Promise<void> },
+}))
+vi.mock('./addmodal/usePostCreateAttachments', () => ({
+  usePostCreateAttachments: () => ({
+    files: [], addFile: vi.fn(), removeFile: vi.fn(),
+    noteText: '', setNoteText: vi.fn(), noteStatus: 'idle', noteError: '',
+    running: false, hasPending: attachmentsState.hasPending, runSequence: attachmentsState.runSequence,
+    retryFile: vi.fn(), retryNote: vi.fn(),
+  }),
+}))
 // Tiptap needs a real browser to mount — stubbed with a plain controlled
 // textarea (mirrors AddCandidateModal.test.tsx / AddLocationModal.test.tsx);
 // CollapsibleRichText itself runs for real around it.
@@ -80,6 +141,13 @@ beforeEach(() => {
     { value: 'open', label: 'Open', color: '#79B58E' },
     { value: 'closed', label: 'Closed', color: '#8A94A6' },
   ]
+  lookupState.channels = []
+  authState.hasModule = () => false
+  authState.hasPermission = () => false
+  aiAgentsState.options = []
+  matchTemplatesState.templates = []
+  attachmentsState.hasPending = false
+  attachmentsState.runSequence = async () => {}
   mockPost.mockReset()
   mockPost.mockResolvedValue({ data: { data: { id: 'v-new', title: 'Verpleegkundige' } } })
 })
@@ -272,5 +340,132 @@ describe('AddVacancyModal · Beschrijving (punt 9)', () => {
     await user.type(screen.getByLabelText('rich-text-editor'), 'Dienst op de IC-afdeling.')
     await fillTitleAndSubmit(user)
     expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ description: 'Dienst op de IC-afdeling.' }))
+  })
+})
+
+describe('AddVacancyModal · Matchprofiel (punt 18)', () => {
+  const template = { id: 't1', name: 'IC-team', weights: { qualifications: 5, technical_fit: 4, soft_skills: 3, cultural_alignment: 3, career_aspirations: 2, location: 4 }, linkedVacanciesCount: 0 }
+
+  it('picking a template alone sends only match_weight_template_id (server snapshots the weights)', async () => {
+    matchTemplatesState.templates = [template]
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await user.click(screen.getByRole('button', { name: 'matching.custom' }))
+    await user.click(screen.getByRole('button', { name: 'IC-team' }))
+    await fillTitleAndSubmit(user)
+
+    const [, body] = mockPost.mock.calls[0]
+    expect(body).toMatchObject({ match_weight_template_id: 't1' })
+    expect(body).not.toHaveProperty('match_weights')
+  })
+
+  it('editing a slider after picking a template sends match_weights alongside the template id', async () => {
+    matchTemplatesState.templates = [template]
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await user.click(screen.getByRole('button', { name: 'matching.custom' }))
+    await user.click(screen.getByRole('button', { name: 'IC-team' }))
+    await user.click(screen.getByRole('button', { name: 'matching.adjust' }))
+    const slider = screen.getByRole('slider', { name: 'matching.dim.qualifications' })
+    slider.focus()
+    await user.keyboard('{ArrowLeft}')
+    await fillTitleAndSubmit(user)
+
+    const [, body] = mockPost.mock.calls[0] as [string, Record<string, unknown>]
+    expect(body.match_weight_template_id).toBe('t1')
+    expect(body.match_weights).toMatchObject({ qualifications: 4 })
+  })
+})
+
+describe('AddVacancyModal · AI-agent card gating (punt 19)', () => {
+  it('renders NOTHING without module aiagents + settings.view — never a disabled tease', () => {
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    expect(screen.queryByText('modal.fields.cardAiAgent')).not.toBeInTheDocument()
+  })
+
+  it('renders the picker and sends ai_agent_id once both module + permission are present', async () => {
+    authState.hasModule = k => k === 'aiagents'
+    authState.hasPermission = p => p === 'settings.view'
+    aiAgentsState.options = [{ value: 'a1', label: 'Interview Bot' }]
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    expect(screen.getByText('modal.fields.cardAiAgent')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'aiagent.placeholder' }))
+    await user.click(screen.getByRole('button', { name: 'Interview Bot' }))
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ ai_agent_id: 'a1' }))
+  })
+})
+
+describe('AddVacancyModal · Publicatie (punt 20)', () => {
+  it('omits published/published_channels/application_settings entirely when untouched (base body stays byte-identical)', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await fillTitleAndSubmit(user)
+    const [, body] = mockPost.mock.calls[0]
+    expect(body).not.toHaveProperty('published')
+    expect(body).not.toHaveProperty('published_channels')
+    expect(body).not.toHaveProperty('application_settings')
+  })
+
+  it('carries published, published_channels and application_settings once touched', async () => {
+    lookupState.channels = [{ value: 'indeed', label: 'Indeed' }]
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+
+    // Master published toggle (the table/insights "Gepubliceerd" bucket).
+    await user.click(screen.getByRole('switch', { name: 'columns.published' }))
+    // One job-board channel toggle.
+    await user.click(screen.getByRole('switch', { name: 'Indeed' }))
+    // One application-setting change — scoped to the CV row so it never
+    // collides with the other fields' own (identically-labelled) triggers/options.
+    const cvRow = screen.getByText('publishing.fields.cv').parentElement as HTMLElement
+    await user.click(within(cvRow).getByRole('button'))
+    await user.click(within(cvRow).getByRole('button', { name: 'publishing.values.optional' }))
+
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({
+      published: true,
+      published_channels: [{ value: 'indeed', published: true }],
+      application_settings: expect.objectContaining({ cv: 'optional' }),
+    }))
+  })
+})
+
+describe('AddVacancyModal · post-create attachments sequencing gate (punten 21+22)', () => {
+  it('closes immediately when nothing is pending (the common case, pre-SLICE-2 behaviour)', async () => {
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={onClose} users={users} customers={customers} />)
+    await fillTitleAndSubmit(user)
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('does NOT run the post-create sequence without vacancies.update, even with pending attachments', async () => {
+    attachmentsState.hasPending = true
+    const runSequence = vi.fn(async () => {})
+    attachmentsState.runSequence = runSequence
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={onClose} users={users} customers={customers} />)
+    await fillTitleAndSubmit(user)
+    expect(runSequence).not.toHaveBeenCalled()
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('runs the post-create sequence with the new id and shows the results panel instead of closing', async () => {
+    authState.hasPermission = p => p === 'vacancies.update'
+    attachmentsState.hasPending = true
+    const runSequence = vi.fn(async () => {})
+    attachmentsState.runSequence = runSequence
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={onClose} users={users} customers={customers} />)
+    await fillTitleAndSubmit(user)
+
+    expect(runSequence).toHaveBeenCalledWith('v-new')
+    expect(onClose).not.toHaveBeenCalled()
+    expect(screen.getByText('modal.attachments.resultsTitle')).toBeInTheDocument()
   })
 })

@@ -1,9 +1,10 @@
 /**
  * PriceAgreementsTab — the customer's price agreements (MATCH-PLC, 2026-07-09):
  * the purchase/sale rates a match should use for a given function/CAO/schaal/
- * trede combination (each optional = wildcard). Add via an inline form (soft
- * primary-tinted panel, mirrors DocumentsTab's pending-upload panel); each row is
- * a PriceAgreementRow with in-place edit + delete. Handles all four UI states.
+ * trede combination (each optional = wildcard). Add via AddPriceAgreementModal
+ * (Danny 03-08: was an inline expanding form, now the house "+" popup like every
+ * other entity); each row is a PriceAgreementRow with in-place edit + delete.
+ * Handles all four UI states.
  *
  * FACTUURADRES-1 (Danny 2026-08-01): the Facturatie sub-tab also carries the customer's
  * OWN invoice address, next to the billing e-mail and the billing vestiging it belongs
@@ -18,7 +19,8 @@ import { RefreshCw, AlertTriangle } from 'lucide-react'
 // knopje zijn!!! zoals in kandidaat drill down") — replaces the bare text button below.
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { usePriceAgreements } from '../hooks/usePriceAgreements'
-import PriceAgreementForm, { emptyDraft, draftToPayload } from './PriceAgreementForm'
+import AddPriceAgreementModal from '../AddPriceAgreementModal'
+import { emptyDraft, draftToPayload } from './PriceAgreementForm'
 import type { PriceAgreementDraft } from './PriceAgreementForm'
 import PriceAgreementRow from './PriceAgreementRow'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
@@ -152,11 +154,11 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
         )}
       </div>
 
+      {/* House "+" popup (Danny 03-08) — was an inline expanding panel; the form
+          and its saveNew() submit logic are unchanged, only the container is. */}
       {adding && (
-        <div style={{ border: '1px solid var(--color-primary)', borderRadius: 10, padding: 12, marginBottom: 10, background: 'var(--color-primary-bg)' }}>
-          <PriceAgreementForm draft={draft} onChange={patch => setDraft(d => ({ ...d, ...patch }))}
-            onSave={saveNew} onCancel={() => setAdding(false)} saveLabel={t('priceAgreements.add')} />
-        </div>
+        <AddPriceAgreementModal draft={draft} onChange={patch => setDraft(d => ({ ...d, ...patch }))}
+          onSave={saveNew} onCancel={() => setAdding(false)} saveLabel={t('priceAgreements.add')} />
       )}
 
       {/* Loading state. */}

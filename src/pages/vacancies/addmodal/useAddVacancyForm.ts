@@ -1,13 +1,17 @@
 /**
  * useAddVacancyForm — all state/lookups/cascade/submit logic for the "+
- * Vacature" create form (SLICE 1, Danny's 22-point spec). Extracted out of the
+ * Vacature" create form (SLICE 1+2, Danny's 22-point spec). Extracted out of the
  * assembler (unlike the smaller AddCandidateModal, which keeps its state
- * inline) because this form spans seven cards and 20+ fields — keeping that
+ * inline) because this form spans many cards and 30+ fields — keeping that
  * volume of state in the component would blow AddVacancyModal.tsx past the
  * ~400-line split trigger (§3). Mirrors useVacancyDetailsForm's role for the
- * drawer: components stay dumb, this hook owns the logic.
+ * drawer: components stay dumb, this hook owns the logic. SLICE 2 (punten
+ * 17-22) adds: Koios-AI generate fields, an optional match-weight template +
+ * override, an AI-agent link (module+permission gated), publication state, and
+ * the post-create documents/note orchestration (via the caller-owned
+ * usePostCreateAttachments controller, kept a SEPARATE hook on purpose).
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { extractApiError } from '@/lib/extractApiError'
 import api, { unwrap } from '@/lib/api'
@@ -18,9 +22,12 @@ import { useFunctions } from '@/lib/useFunctions'
 import { useLocations } from '@/lib/useLocations'
 import { useProvinces } from '@/hooks/useProvinces'
 import { useAuth } from '@/context/AuthContext'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS } from '../data/applicationSettingsDefaults'
 import { useCascadePickers } from '../hooks/useCascadePickers'
 import { composeAddress } from '../hooks/useVacancyDetailsForm'
 import { mapVacancy } from '../data/mapVacancy'
+import type { PublicationChannel } from './PublicationCard'
 import type { ApiVacancy, Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -36,6 +43,9 @@ const API_TO_FORM: Record<string, string> = {
   location_id: 'branchId', seniority: 'seniority', education: 'education', skills: 'skills',
   salary_min: 'salaryMin', salary_max: 'salaryMax', salary_period: 'salaryPeriod',
   hours_min: 'hoursMin', hours_max: 'hoursMax', description: 'description',
+  match_weight_template_id: 'matchWeightTemplateId', match_weights: 'matchWeights',
+  ai_agent_id: 'aiAgentId', published: 'published', published_channels: 'publishedChannels',
+  application_settings: 'applicationSettings',
 }
 
 export interface VacancyCreateForm {
@@ -58,6 +68,10 @@ type ConditionsKey = 'salaryMin' | 'salaryMax' | 'salaryPeriod' | 'hoursMin' | '
 interface ModalUser { id: Id; name: string }
 interface ModalCustomer { id: Id; name: string }
 
+// The minimal shape this hook needs from usePostCreateAttachments (interface
+// segregation — this file never needs to know its full internal state).
+interface AttachmentsController { hasPending: boolean; runSequence: (id: Id) => Promise<void> }
+
 interface Args {
   onClose: () => void
   onCreated?: (v: Vacancy) => void
@@ -67,28 +81,48 @@ interface Args {
   initialCustomerLocationId?: string; initialCustomerDepartmentId?: string
   initialCustomerLocationName?: string; initialCustomerDepartmentName?: string
   initialIndustry?: string
+  // SLICE 2 (punten 21+22): the post-create documents/note controller — a
+  // SEPARATE hook the assembler owns, handed in so submit can sequence it.
+  attachments?: AttachmentsController
 }
+
+const NOOP_ATTACHMENTS: AttachmentsController = { hasPending: false, runSequence: async () => {} }
 
 export function useAddVacancyForm({
   onClose, onCreated, users, customers, lockCustomerId,
   initialCustomerLocationId, initialCustomerDepartmentId, initialCustomerLocationName, initialCustomerDepartmentName,
-  initialIndustry,
+  initialIndustry, attachments = NOOP_ATTACHMENTS,
 }: Args) {
   const { t } = useTranslation(['vacancies', 'common'])
-  const { statuses, seniorityLevels, educationLevels, defaultSeniority, defaultEducation } = useVacancyLookups()
+  const { statuses, seniorityLevels, educationLevels, defaultSeniority, defaultEducation, channels: channelLookup } = useVacancyLookups()
   // Contract types are a CANDIDATE-axis lookup (Contractvorm), shared with the
   // drawer's DetailsGeneralTab — same source, never a second copy.
   const { candidateTypes } = useLookups() as unknown as { candidateTypes: Array<{ value: string; label: string; color?: string }> }
   const { industries } = useIndustries()
   const { functions } = useFunctions()
   const branchOptions = useLocations().map(l => ({ value: String(l.value), label: l.label }))
-  const authCtx = useAuth() as unknown as { user: { id?: Id; name?: string } | null }
-  const { user: me } = authCtx
+  const authCtx = useAuth() as unknown as {
+    user: { id?: Id; name?: string } | null
+    hasModule?: (key: string) => boolean
+    hasPermission?: (perm: string) => boolean
+  }
+  const { user: me, hasModule, hasPermission } = authCtx
   const meIsAssignable = me?.id != null && users.some(u => String(u.id) === String(me.id))
+
+  // Punt 19: the AI-agent card only exists for a tenant with the module AND a
+  // caller with settings.view (GET /ai/agents is gated on both, measured) —
+  // rendered as NOTHING when either is missing, never a disabled tease (§3).
+  const showAiAgentCard = (hasModule?.('aiagents') ?? false) && (hasPermission?.('settings.view') ?? false)
+  // Punten 21+22: both POST .../documents and POST .../notes need vacancies.update
+  // next to vacancies.create (measured) — the attachment cards gate on that.
+  const showAttachmentCards = hasPermission?.('vacancies.update') ?? false
 
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [saving, setSaving] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
+  // Punten 21+22: once Create succeeds AND there is a pending file/note, the
+  // modal switches to the results panel instead of closing immediately.
+  const [postCreatePhase, setPostCreatePhase] = useState(false)
 
   // Status pill default (punt 7) — never a hardcoded slug, only the tenant's
   // flagged default or the lookup's first entry; a genuinely empty lookup
@@ -183,9 +217,61 @@ export function useAddVacancyForm({
   const removeSkill = (s: string) => setSkills(list => list.filter(x => x !== s))
 
   // Description — the collapsed-ghost rich-text block's own open/edit state
-  // (punt 9). The Koios-AI generate flow is SLICE 2, left untouched here.
+  // (punt 9). Punt 17: the Koios-AI generate flow reads a narrow projection of
+  // `form` (never the whole object, so the generate flow's dependency stays cheap).
   const [descExpanded, setDescExpanded] = useState(false)
   const [descEditing, setDescEditing] = useState(false)
+  const customerName = customers.find(c => String(c.id) === form.clientId)?.name ?? ''
+  const genFields = {
+    title: form.title, category: form.category, industry: form.industry, contractTypes: form.contractTypes,
+    city: form.city, hoursMin: form.hoursMin, hoursMax: form.hoursMax, customerName,
+  }
+
+  // Punt 18: Matchprofiel — an optional template id + an optional explicit
+  // override. Picking a template alone sends only the id (server snapshots its
+  // weights); touching a slider marks an override, sent alongside it.
+  const [matchWeightTemplateId, setMatchWeightTemplateId] = useState('')
+  const [matchWeights, setMatchWeights] = useState<Record<string, number> | null>(null)
+
+  // Punt 19: AI-agent — a single optional link (card only rendered when
+  // showAiAgentCard is true, but the field itself is harmless either way).
+  const [aiAgentId, setAiAgentId] = useState('')
+
+  // Punt 20: Publicatie — published flag, per-channel publish state and the
+  // application-form settings (cv/cover_letter/photo/remarks/interview_consent).
+  const allSettings = useAllSettings()
+  // Memoized on the RAW stored value (a stable string/undefined), not recomputed every
+  // render: getJsonSetting JSON.parses a configured setting into a NEW object each call,
+  // which would otherwise hand the effect below an unstable dependency and loop forever
+  // (measured — an unstable mock reference reproduced this exact hang in tests).
+  const rawAppDefaults = (allSettings as Record<string, unknown>)[VACANCY_APP_DEFAULTS_KEY]
+  const tenantAppDefaults = useMemo(
+    () => getJsonSetting<Record<string, unknown>>(allSettings, VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS),
+    [rawAppDefaults], // eslint-disable-line react-hooks/exhaustive-deps -- allSettings is a stable cache object; only this one key's raw value should force a re-parse
+  )
+  const [published, setPublished] = useState(false)
+  const [channels, setChannels] = useState<PublicationChannel[]>([])
+  useEffect(() => {
+    // Seed the channel list once the tenant lookup resolves — never clobber a
+    // recruiter's own toggles on a later re-render of the (rarely changing) lookup.
+    if (channels.length === 0 && channelLookup.length) {
+      setChannels(channelLookup.map(c => ({ value: c.value, label: c.label, published: false })))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the lookup resolving
+  }, [channelLookup])
+  const toggleChannel = (value: string, next: boolean) => setChannels(cs => cs.map(c => (c.value === value ? { ...c, published: next } : c)))
+  const [applicationSettings, setApplicationSettingsState] = useState<Record<string, unknown>>(() => ({ ...FALLBACK_APP_SETTINGS }))
+  const [applicationSettingsTouched, setApplicationSettingsTouched] = useState(false)
+  useEffect(() => {
+    // Backfill the tenant's own defaults once resolved — same one-shot-if-
+    // untouched guard as the seniority/education defaults above.
+    if (!applicationSettingsTouched) setApplicationSettingsState(tenantAppDefaults)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the tenant defaults resolving
+  }, [tenantAppDefaults])
+  const setApplicationSetting = (field: string, value: unknown) => {
+    setApplicationSettingsTouched(true)
+    setApplicationSettingsState(s => ({ ...s, [field]: value }))
+  }
 
   const handleSubmit = async () => {
     if (!form.title.trim()) { setErrors({ title: true }); return }
@@ -195,6 +281,7 @@ export function useAddVacancyForm({
     // address (mirrors the drawer's saveLocation) — never a second, manually
     // typed source of truth for the same displayed place.
     const composedLocation = composeAddress(form.street, form.houseNumber, form.houseNumberSuffix, form.postalCode, form.city)
+    const publishedOnChannels = channels.filter(c => c.published)
     try {
       const body = {
         title: form.title.trim(),
@@ -229,10 +316,31 @@ export function useAddVacancyForm({
         ...(form.hoursMin ? { hours_min: form.hoursMin } : {}),
         ...(form.hoursMax ? { hours_max: form.hoursMax } : {}),
         ...(form.description ? { description: form.description } : {}),
+        // Punt 18: explicit template/weights — explicit match_weights always
+        // wins server-side even when a template id also rides along.
+        ...(matchWeightTemplateId ? { match_weight_template_id: matchWeightTemplateId } : {}),
+        ...(matchWeights ? { match_weights: matchWeights } : {}),
+        // Punt 19: AI-agent link.
+        ...(aiAgentId ? { ai_agent_id: aiAgentId } : {}),
+        // Punt 20: publication — only sent when touched away from "nothing yet".
+        ...(published ? { published: true } : {}),
+        ...(publishedOnChannels.length
+          ? { published_channels: publishedOnChannels.map(c => ({ value: c.value, published: true })) }
+          : {}),
+        ...(applicationSettingsTouched ? { application_settings: applicationSettings } : {}),
       }
       const r = await api.post('/vacancies', body)
-      onCreated?.(mapVacancy(unwrap<ApiVacancy>(r)))
-      onClose()
+      const created = mapVacancy(unwrap<ApiVacancy>(r))
+      onCreated?.(created)
+      // Punten 21+22: the vacancy exists now — run pending documents/note (in
+      // order) and show their per-item outcome instead of closing immediately.
+      // Nothing pending (the common case) keeps the exact pre-SLICE-2 behaviour.
+      if (showAttachmentCards && attachments.hasPending && created.id != null) {
+        setPostCreatePhase(true)
+        await attachments.runSequence(created.id)
+      } else {
+        onClose()
+      }
     } catch (err) {
       const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
       const apiErrors = e?.response?.data?.errors
@@ -265,6 +373,14 @@ export function useAddVacancyForm({
     userOptions,
     handleClientChange, locationPicker, departmentPicker, contactPicker,
     skills, newSkill, setNewSkill, addSkill, removeSkill,
-    descExpanded, setDescExpanded, descEditing, setDescEditing,
+    descExpanded, setDescExpanded, descEditing, setDescEditing, genFields,
+    // Punt 18
+    matchWeightTemplateId, setMatchWeightTemplateId, matchWeights, setMatchWeights,
+    // Punt 19
+    showAiAgentCard, aiAgentId, setAiAgentId,
+    // Punt 20
+    published, setPublished, channels, toggleChannel, applicationSettings, setApplicationSetting,
+    // Punten 21+22
+    showAttachmentCards, postCreatePhase,
   }
 }

@@ -4,12 +4,9 @@ import { useTranslation } from 'react-i18next'
 import SelectMenuJs from '@/components/ui/SelectMenu'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS } from '../data/applicationSettingsDefaults'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
-
-// Tenant default a vacancy inherits when it has no application settings of its own.
-const VACANCY_APP_DEFAULTS_KEY = 'vacancy_default_application_settings'
-const FALLBACK_APP_SETTINGS = { cv: 'required', cover_letter: 'optional', photo: 'optional', remarks: 'optional', interview_consent: 'hidden' }
 
 type AnyProps = Record<string, unknown>
 const SelectMenu = SelectMenuJs as unknown as ComponentType<AnyProps>

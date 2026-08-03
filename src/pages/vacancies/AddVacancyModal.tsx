@@ -1,17 +1,21 @@
 /**
- * AddVacancyModal — create a vacancy. SLICE 1 of Danny's 22-point spec: split
+ * AddVacancyModal — create a vacancy. SLICE 1+2 of Danny's 22-point spec: split
  * into `addmodal/` (mirrors pages/candidates/addmodal/) — one component per
  * card, all state/lookups/cascade/submit logic in useAddVacancyForm. This file
- * is now a thin assembler (shell + card wiring only); 20+ fields across seven
+ * is now a thin assembler (shell + card wiring only); 30+ fields across eleven
  * cards would have blown a single-file component well past the ~400-line
  * split trigger (§3). The landed prefill props (lockCustomerId/lockCustomerName,
  * initialCustomerLocationId/DepartmentId/Names) keep working exactly as before
- * — only `initialIndustry` is new (punt 4).
+ * — only `initialIndustry` is new (punt 4). SLICE 2 adds Matchprofiel/AI-agent/
+ * Publicatie cards and (permission-gated) a Documenten+notitie card whose
+ * uploads/note run AFTER create via the separate usePostCreateAttachments hook
+ * — nothing pending keeps the exact pre-SLICE-2 immediate-close behaviour.
  */
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { BTN_H } from '@/config/buttonMetrics'
 import { useAddVacancyForm } from './addmodal/useAddVacancyForm'
+import { usePostCreateAttachments } from './addmodal/usePostCreateAttachments'
 import ModalHeader from './addmodal/ModalHeader'
 import GeneralCard from './addmodal/GeneralCard'
 import ClientCascadeCard from './addmodal/ClientCascadeCard'
@@ -19,6 +23,11 @@ import PlacementCard from './addmodal/PlacementCard'
 import RequirementsCard from './addmodal/RequirementsCard'
 import ConditionsCard from './addmodal/ConditionsCard'
 import DescriptionCard from './addmodal/DescriptionCard'
+import MatchProfileCard from './addmodal/MatchProfileCard'
+import AiAgentCard from './addmodal/AiAgentCard'
+import PublicationCard from './addmodal/PublicationCard'
+import AttachmentsCard from './addmodal/AttachmentsCard'
+import PostCreateResultsPanel from './addmodal/PostCreateResultsPanel'
 import RecruiterCard from './addmodal/RecruiterCard'
 import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -46,11 +55,32 @@ export default function AddVacancyModal({
   initialIndustry?: string
 }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
+  // Punten 21+22: a SEPARATE hook (own lifecycle: pick now, run after create) —
+  // handed into useAddVacancyForm only so submit can sequence it (§ own hook).
+  const attachments = usePostCreateAttachments()
   const f = useAddVacancyForm({
     onClose, onCreated, users, customers, lockCustomerId,
     initialCustomerLocationId, initialCustomerDepartmentId, initialCustomerLocationName, initialCustomerDepartmentName,
-    initialIndustry,
+    initialIndustry, attachments,
   })
+
+  // Punten 21+22: the vacancy already exists once this is true — show the
+  // per-item post-create outcome instead of the form, Close is the recruiter's call.
+  if (f.postCreatePhase) {
+    return (
+      <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
+        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <div role="dialog" aria-modal="true" aria-label={f.t('modal.attachments.resultsTitle')} tabIndex={-1}
+          style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', ...WIDE_MODAL,
+          boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <PostCreateResultsPanel files={attachments.files} noteText={attachments.noteText}
+            noteStatus={attachments.noteStatus} noteError={attachments.noteError} running={attachments.running}
+            onRetryFile={attachments.retryFile} onRetryNote={attachments.retryNote} onClose={onClose} />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -98,7 +128,22 @@ export default function AddVacancyModal({
             onChange={f.onConditionsChange}
           />
           <DescriptionCard value={f.form.description} onChange={v => f.set('description', v)}
-            expanded={f.descExpanded} setExpanded={f.setDescExpanded} editing={f.descEditing} setEditing={f.setDescEditing} />
+            expanded={f.descExpanded} setExpanded={f.setDescExpanded} editing={f.descEditing} setEditing={f.setDescEditing}
+            genFields={f.genFields} />
+          <MatchProfileCard templateId={f.matchWeightTemplateId} onTemplateChange={f.setMatchWeightTemplateId}
+            onWeightsChange={f.setMatchWeights} />
+          {/* Punt 19: rendered as NOTHING without module `aiagents` + settings.view —
+              GET /ai/agents is gated on both, never a disabled tease (§3). */}
+          {f.showAiAgentCard && <AiAgentCard agentId={f.aiAgentId} onAgentChange={f.setAiAgentId} />}
+          <PublicationCard published={f.published} onPublishedChange={f.setPublished}
+            channels={f.channels} onToggleChannel={f.toggleChannel}
+            applicationSettings={f.applicationSettings} onSettingChange={f.setApplicationSetting} />
+          {/* Punten 21+22: both POST .../documents and .../notes need vacancies.update
+              next to vacancies.create (measured) — hidden entirely without it. */}
+          {f.showAttachmentCards && (
+            <AttachmentsCard files={attachments.files} onAddFile={attachments.addFile} onRemoveFile={attachments.removeFile}
+              noteText={attachments.noteText} onNoteChange={attachments.setNoteText} />
+          )}
           <RecruiterCard ownerId={f.form.ownerId} onOwnerChange={v => f.set('ownerId', v)} userOptions={f.userOptions} />
         </div>
 

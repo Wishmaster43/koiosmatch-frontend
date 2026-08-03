@@ -1,10 +1,15 @@
 /**
- * PriceAgreementsTab · "+ Prijsafspraak toevoegen" trigger (Danny 27-07: "+
- * Prijsafspraak toevoegen moet ook knopje zijn!!! zoals in kandidaat drill
- * down") — covers only the house-button swap: the bare text link is now the
- * shared DrawerAddButton, same onClick (reveals the add form). PriceAgreementForm
- * is a different file's scope (tenant lookup hooks: useFunctions/useCao) — stood
- * in with a marker exposing onSave/onCancel, mirroring WorkTab.test.tsx's pattern.
+ * PriceAgreementsTab · "+ Prijsafspraak toevoegen" trigger (Danny 27-07 → 03-08):
+ * 27-07 swapped the bare text link for the shared DrawerAddButton; 03-08 moved
+ * the ADD path from an inline expanding form into AddPriceAgreementModal (a real
+ * popup, mirroring every other entity's "+"). This now covers: the trigger opens
+ * a MODAL (role="dialog"), not the old inline panel; Save posts the exact payload
+ * the hook receives (assert the REQUEST, §13); Escape and the form's own Cancel
+ * both close without saving. PriceAgreementForm is a different file's scope
+ * (tenant lookup hooks: useFunctions/useCao) — stood in with a marker exposing
+ * onSave/onCancel, mirroring WorkTab.test.tsx's pattern; the one mock backs both
+ * call sites (PriceAgreementsTab's type-only import and AddPriceAgreementModal's
+ * default import), since vitest mocks by resolved module id.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
@@ -34,24 +39,61 @@ vi.mock('./PriceAgreementForm', () => ({
 }))
 
 const baseHook = { agreements: [], loading: false, error: false, reload: vi.fn(), add: vi.fn(), update: vi.fn(), remove: vi.fn() }
+// The exact body the hook's add() receives for a fresh (untouched) draft — the
+// stubbed draftToPayload above is the identity function, so this IS the request.
+const emptyPayload = { functionTitle: '', cao: '', scale: '', step: '', purchaseRate: '', saleRate: '', validFrom: '', validUntil: '', remarks: '' }
 
-describe('PriceAgreementsTab · "+ Prijsafspraak toevoegen" trigger (Danny 27-07: house button)', () => {
-  it('does not render the add form until the trigger is clicked', () => {
+describe('PriceAgreementsTab · "+ Prijsafspraak toevoegen" opens AddPriceAgreementModal (Danny 03-08: popup, not inline)', () => {
+  it('does not render the modal until the trigger is clicked', () => {
     vi.mocked(usePriceAgreements).mockReturnValue(baseHook)
     render(<PriceAgreementsTab customerId="cust-1" />)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.queryByTestId('price-agreement-form')).not.toBeInTheDocument()
   })
 
-  it('opens the add form when the house button is clicked, and submits via the hook\'s add()', async () => {
+  it('opens a real MODAL (role="dialog") when the house button is clicked — not the old inline panel', async () => {
+    vi.mocked(usePriceAgreements).mockReturnValue(baseHook)
+    const user = userEvent.setup()
+    render(<PriceAgreementsTab customerId="cust-1" />)
+    await user.click(screen.getByRole('button', { name: 'priceAgreements.add' }))
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByTestId('price-agreement-form')).toBeInTheDocument()
+  })
+
+  it('submits via the hook\'s add() with the exact request body (assert the REQUEST, §13), then closes the modal', async () => {
     const add = vi.fn()
     vi.mocked(usePriceAgreements).mockReturnValue({ ...baseHook, add })
     const user = userEvent.setup()
     render(<PriceAgreementsTab customerId="cust-1" />)
     await user.click(screen.getByRole('button', { name: 'priceAgreements.add' }))
-    const form = screen.getByTestId('price-agreement-form')
-    expect(form).toBeInTheDocument()
-    await user.click(within(form).getByRole('button', { name: 'priceAgreements.add' }))
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: 'priceAgreements.add' }))
     expect(add).toHaveBeenCalledTimes(1)
+    expect(add).toHaveBeenCalledWith(emptyPayload)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('Escape closes the modal without saving', async () => {
+    const add = vi.fn()
+    vi.mocked(usePriceAgreements).mockReturnValue({ ...baseHook, add })
+    const user = userEvent.setup()
+    render(<PriceAgreementsTab customerId="cust-1" />)
+    await user.click(screen.getByRole('button', { name: 'priceAgreements.add' }))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(add).not.toHaveBeenCalled()
+  })
+
+  it('the form\'s own Cancel button closes the modal without saving', async () => {
+    const add = vi.fn()
+    vi.mocked(usePriceAgreements).mockReturnValue({ ...baseHook, add })
+    const user = userEvent.setup()
+    render(<PriceAgreementsTab customerId="cust-1" />)
+    await user.click(screen.getByRole('button', { name: 'priceAgreements.add' }))
+    await user.click(screen.getByRole('button', { name: 'cancel-form' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(add).not.toHaveBeenCalled()
   })
 })
 

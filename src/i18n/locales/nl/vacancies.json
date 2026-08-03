@@ -156,6 +156,8 @@
     "very": "Zeer belangrijk",
     "save": "Opslaan",
     "saved": "Opgeslagen",
+    "adjust": "Aanpassen",
+    "hideAdjust": "Verbergen",
     "templatesError": "Matchprofielen konden niet worden geladen.",
     "noTemplates": "Nog geen matchprofielen — maak er een aan via Instellingen.",
     "snapshotHint": "De gewichten worden eenmalig gekopieerd van het profiel naar deze vacature; latere wijzigingen aan het profiel werken deze vacature niet automatisch bij.",
@@ -253,7 +255,8 @@
     "error": "Genereren is niet gelukt. Probeer het opnieuw.",
     "previewLabel": "Voorstel (concept) — nog niet opgeslagen",
     "apply": "Toepassen",
-    "discard": "Verwerpen"
+    "discard": "Verwerpen",
+    "needsTitleFirst": "Vul eerst een titel in om een concept te genereren."
   },
   "publishing": {
     "channels": "Vacaturesites",
@@ -334,11 +337,20 @@
       "cardGeneral": "Algemeen",
       "cardPlacement": "Inzet",
       "cardPublication": "Publicatie",
+      "cardMatching": "Matchprofiel",
+      "cardAiAgent": "AI-agent",
       "scopedUnder": "Wordt aangemaakt onder: {{name}}",
       "cardClient": "Klant",
       "branch": "Vestiging",
       "cardOwner": "Recruiter",
       "salaryPeriodPlaceholder": "bijv. per maand"
+    },
+    "attachments": {
+      "cardTitle": "Documenten & notitie",
+      "noteLabel": "Notitie",
+      "notePlaceholder": "Voeg een interne notitie toe…",
+      "resultsTitle": "Vacature aangemaakt",
+      "resultsHint": "De bijlagen en notitie worden hieronder verwerkt. Mislukte items kun je opnieuw proberen."
     },
     "titlePlaceholder": "bijv. Verpleegkundige | Den Haag",
     "create": "Vacature aanmaken",

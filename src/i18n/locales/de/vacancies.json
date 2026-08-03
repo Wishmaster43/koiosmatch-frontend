@@ -154,6 +154,8 @@
     "very": "Sehr wichtig",
     "save": "Speichern",
     "saved": "Gespeichert",
+    "adjust": "Anpassen",
+    "hideAdjust": "Ausblenden",
     "templatesError": "Matchprofile konnten nicht geladen werden.",
     "noTemplates": "Noch keine Matchprofile — erstellen Sie eines in den Einstellungen.",
     "snapshotHint": "Die Gewichtung wird einmalig vom Profil auf diese Stelle kopiert; spätere Änderungen am Profil aktualisieren diese Stelle nicht automatisch.",
@@ -253,7 +255,8 @@
     "error": "Generieren ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
     "previewLabel": "Vorschlag (Konzept) — noch nicht gespeichert",
     "apply": "Übernehmen",
-    "discard": "Verwerfen"
+    "discard": "Verwerfen",
+    "needsTitleFirst": "Geben Sie zuerst einen Titel ein, um einen Entwurf zu erstellen."
   },
   "publishing": {
     "channels": "Jobbörsen",
@@ -334,11 +337,20 @@
       "cardGeneral": "Allgemein",
       "cardPlacement": "Einsatz",
       "cardPublication": "Veröffentlichung",
+      "cardMatching": "Match-Profil",
+      "cardAiAgent": "KI-Agent",
       "scopedUnder": "Wird erstellt unter: {{name}}",
       "cardClient": "Kunde",
       "branch": "Niederlassung",
       "cardOwner": "Recruiter",
       "salaryPeriodPlaceholder": "z. B. pro Monat"
+    },
+    "attachments": {
+      "cardTitle": "Dokumente & Notiz",
+      "noteLabel": "Notiz",
+      "notePlaceholder": "Interne Notiz hinzufügen…",
+      "resultsTitle": "Stelle erstellt",
+      "resultsHint": "Anhänge und Notiz werden unten verarbeitet. Fehlgeschlagene Elemente können erneut versucht werden."
     },
     "titlePlaceholder": "z. B. Pflegekraft | Den Haag",
     "create": "Stelle erstellen",
