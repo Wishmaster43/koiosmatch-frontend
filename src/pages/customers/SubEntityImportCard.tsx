@@ -39,8 +39,9 @@
 import { useMemo, useRef, useState } from 'react'
 import type { ChangeEvent, DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { AlertTriangle, FileUp, FileText, Loader2 } from 'lucide-react'
-import { cardHead, cardBox } from '@/components/ui/modalCards'
+import { cardBox } from '@/components/ui/modalCards'
 import { BTN_H } from '@/config/buttonMetrics'
 import { useConfirm } from '@/hooks/useConfirm'
 import PreviewStep from '@/pages/settings/sections/importeren/PreviewStep'
@@ -52,6 +53,13 @@ import type { ImportRowResult } from '@/pages/settings/sections/importeren/impor
 // The three per-entity importers this card can drive — verified against the
 // backend's ImportRegistry::IMPORTERS keys, never guessed from a display label.
 export type SubEntityImportEntity = 'locations' | 'departments' | 'contacts'
+
+// Shared title text for the CollapsedCard wrapping this card — the three caller
+// modals (Location/Department/Contact) all need the exact same string for the
+// collapsed header, so it lives here once instead of three duplicated t() calls.
+export function subEntityImportTitle(t: TFunction, entity: SubEntityImportEntity): string {
+  return t('subModal.import.title', { entity: t(`settings:import.entities.${entity}.label`) })
+}
 
 type Wizard = ReturnType<typeof useImportWizard>
 
@@ -167,8 +175,9 @@ export default function SubEntityImportCard({ entity, customerName, wizard, canV
   const handleDownloadTemplate = () => { void downloadImportTemplate(entity) }
 
   return (
-    <div>
-      <div style={cardHead}>{t('subModal.import.title', { entity: entityLabel })}</div>
+    <>
+      {/* The heading now lives in the caller's CollapsedCard title prop (see
+          subEntityImportTitle above) — this card renders only its own boxed body. */}
       <div
         onDragOver={event => { event.preventDefault(); if (canImport) setDragOver(true) }}
         onDragLeave={() => setDragOver(false)}
@@ -290,6 +299,6 @@ export default function SubEntityImportCard({ entity, customerName, wizard, canV
           style={{ position: 'absolute', width: 0, height: 0, opacity: 0, border: 0, padding: 0 }} />
       </div>
       {dialog}
-    </div>
+    </>
   )
 }

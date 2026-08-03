@@ -38,7 +38,8 @@ import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
-import SubEntityImportCard from './SubEntityImportCard'
+import CollapsedCard from '@/components/ui/CollapsedCard'
+import SubEntityImportCard, { subEntityImportTitle } from './SubEntityImportCard'
 import { useImportWizard } from '@/pages/settings/sections/importeren/useImportWizard'
 import type { DepartmentPayload } from './hooks/useCustomerDepartments'
 import type { Department } from '@/types/customer'
@@ -166,14 +167,6 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* SUBENTITY-IMPORT-1: the file-import path, CREATE only — same top spot as
-              CvUploadCard/CustomerImportCard. Editing a single department has no batch
-              concept, so the card never renders there. */}
-          {!isEdit && (
-            <SubEntityImportCard entity="departments" wizard={importWizard} customerName={customerName}
-              canView={canViewImportTemplate} canImport={canRunImport} />
-          )}
-
           {/* Algemeen — name, locatie (searchable, hidden when locked), status.
               Location+status pair in one row when both show; status alone stays
               constrained to ~a third of the width (row3Even) rather than
@@ -261,6 +254,18 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
                 placeholder={t('common:add')} ariaLabel={t('departments.detail.description')} />
             </div>
           </div>
+
+          {/* SUBENTITY-IMPORT-1 (moved to the bottom + collapsed, Danny 03-08 A+D
+              decision): a secondary/optional bulk-create path must never force a
+              scroll past it before the required manual fields are even visible.
+              No column split here — this form is too short to justify one (unlike
+              AddLocationModal's own two-column pass). */}
+          {!isEdit && (
+            <CollapsedCard title={subEntityImportTitle(t, 'departments')} filled={!!importWizard.file}>
+              <SubEntityImportCard entity="departments" wizard={importWizard} customerName={customerName}
+                canView={canViewImportTemplate} canImport={canRunImport} />
+            </CollapsedCard>
+          )}
         </div>
 
         {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}

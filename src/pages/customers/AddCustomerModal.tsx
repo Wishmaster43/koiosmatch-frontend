@@ -14,7 +14,8 @@ import { BTN_H } from '@/config/buttonMetrics'
 import SearchSelect from '@/components/ui/SearchSelect'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
-import { cardHead, cardBox, row2, cardPair } from '@/components/ui/modalCards'
+import { cardHead, cardBox, row2, modalColumns } from '@/components/ui/modalCards'
+import CollapsedCard from '@/components/ui/CollapsedCard'
 import AddressCard from './addmodal/AddressCard'
 import CustomerImportCard from './addmodal/CustomerImportCard'
 import { useCustomerImport } from './addmodal/useCustomerImport'
@@ -84,15 +85,17 @@ const API_TO_FORM: Record<string, string> = {
  *
  * CUSTOMER-IMPORT-1 (Danny 02-08: "bovenin ... import cvs of excel file"): the
  * italic bottom-of-modal hint that only NAMED the Settings import screen is gone;
- * in its place (top of the modal, CvUploadCard's exact spot) sits
- * CustomerImportCard, which actually RUNS the customer_tree importer here — dry
- * run first, then confirm. Unlike the CV card this does not prefill the form: a
- * real import writes the customer (+ locations/departments/contacts) directly, so
- * a clean result (something landed) closes this modal and refreshes the list
- * instead of leaving an untouched create form open behind a customer that already
- * exists (that invites a duplicate). While the import is past its upload step, the
- * manual submit below is disabled for the same reason — never two creation paths
- * armed at once.
+ * in its place sits CustomerImportCard, which actually RUNS the customer_tree
+ * importer here — dry run first, then confirm. Unlike the CV card this does not
+ * prefill the form: a real import writes the customer (+ locations/departments/
+ * contacts) directly, so a clean result (something landed) closes this modal and
+ * refreshes the list instead of leaving an untouched create form open behind a
+ * customer that already exists (that invites a duplicate). While the import is
+ * past its upload step, the manual submit below is disabled for the same reason
+ * — never two creation paths armed at once. KLANT-LAYOUT-2 (Danny 03-08) moved
+ * the card from its original top-of-modal spot to a collapsed-by-default section
+ * at the bottom (see CollapsedCard below) — a rare, optional path shouldn't sit
+ * above the name field the recruiter almost always fills by hand.
  */
 export default function AddCustomerModal({ onClose, onCreate, onImported, users = [], statuses = [] }: {
   onClose: () => void; onCreate?: (form: CustomerForm) => unknown
@@ -259,132 +262,157 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
           </button>
         </div>
 
-        {/* Body — titled bordered cards: Bedrijf and Adres full width (mirrors
-            AddCandidateModal 1:1, Danny 02-08); Eigenaar full width (status is
-            hidden — see below); Online / Facturatie paired. */}
+        {/* Body — KLANT-LAYOUT-2 (Danny 03-08 A+D decision): these cards used to
+            stack in ONE column inside this WIDE_MODAL frame, wasting half its
+            width and forcing a scroll for what should fit on one screen. Split
+            into two responsive columns (falls back to one column below 340px
+            per column, same idiom as WorkflowsListPanel): LEFT keeps the
+            required/identity fields (Bedrijf, Adres) the recruiter always
+            fills; RIGHT holds the secondary/optional ones (Eigenaar, Online,
+            Facturatie, Bedrijfstekst, Vestigingen). The import card — rare and
+            fully optional — moves out of the grid entirely to a collapsed
+            section at the bottom (see below). */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* CUSTOMER-IMPORT-1: the file-import path, same top spot as CvUploadCard. */}
-          <CustomerImportCard wizard={importWizard} canView={canViewImportTemplate} canImport={canRunImport} />
-
-          <div>
-            <div style={cardHead}>{t('modal.fields.cardCompany')}</div>
-            <div style={cardBox}>
+          <div style={modalColumns('repeat(auto-fit, minmax(340px, 1fr))')}>
+            {/* LEFT — required identity: name/industry/employeeCount + the full address. */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div>
-                <Field label={t('modal.fields.name')} required>
-                  <TextField value={form.name} onChange={v => set('name', v)} placeholder={t('modal.fields.namePlaceholder')} error={errors.name} />
-                </Field>
-                {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
+                <div style={cardHead}>{t('modal.fields.cardCompany')}</div>
+                <div style={cardBox}>
+                  <div>
+                    <Field label={t('modal.fields.name')} required>
+                      <TextField value={form.name} onChange={v => set('name', v)} placeholder={t('modal.fields.namePlaceholder')} error={errors.name} />
+                    </Field>
+                    {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
+                  </div>
+                  {/* DEBITEURNUMMER-1 (Danny 02-08): the debtor number is no longer collected
+                      here — it is the customer's own accounting number, decided later, and
+                      stays editable everywhere else (drawer/table/search). Two fields remain. */}
+                  <div style={row2}>
+                    {/* Branche (industry/sector) — searchable tenant lookup, distinct from the
+                        "Vestiging" (establishment) picker below. */}
+                    <Field label={t('modal.fields.industry')}>
+                      <CreatableSelect value={form.industry || null} onChange={v => set('industry', v)} allowCreate={false}
+                        placeholder={t('modal.fields.selectIndustry')} options={industries} />
+                    </Field>
+                    <Field label={t('overview.employeeCount')}>
+                      <TextField type="number" value={form.employeeCount} onChange={v => set('employeeCount', v)} />
+                    </Field>
+                  </div>
+                </div>
               </div>
-              {/* DEBITEURNUMMER-1 (Danny 02-08): the debtor number is no longer collected
-                  here — it is the customer's own accounting number, decided later, and
-                  stays editable everywhere else (drawer/table/search). Two fields remain. */}
-              <div style={row2}>
-                {/* Branche (industry/sector) — searchable tenant lookup, distinct from the
-                    "Vestiging" (establishment) picker below. */}
-                <Field label={t('modal.fields.industry')}>
-                  <CreatableSelect value={form.industry || null} onChange={v => set('industry', v)} allowCreate={false}
-                    placeholder={t('modal.fields.selectIndustry')} options={industries} />
-                </Field>
-                <Field label={t('overview.employeeCount')}>
-                  <TextField type="number" value={form.employeeCount} onChange={v => set('employeeCount', v)} />
-                </Field>
-              </div>
-            </div>
-          </div>
 
-          {/* KLANT-ADRES-1 (Danny 02-08): the customer's own visiting address, the
-              same full-width card/field grouping as AddCandidateModal's AddressCard. */}
-          <AddressCard form={form} set={set} provinces={provinces} />
-
-          <div>
-            {/* STATUS-HIDDEN-1 (Danny 02-08): deployability status is no longer picked
-                here — the phase pills above already carry the lifecycle choice, and a
-                new customer starts on the tenant's default status (see defaultStatusValue
-                above), sent along unseen. Only the owner picker remains in this card. */}
-            <div style={cardHead}>{t('modal.fields.cardOwner')}</div>
-            <div style={cardBox}>
-              <Field label={t('modal.fields.accountManager')}>
-                <CreatableSelect value={form.ownerId || null} onChange={v => set('ownerId', v)} allowCreate={false}
-                  placeholder={t('modal.fields.selectOwner')} options={userOptions} />
-              </Field>
+              {/* KLANT-ADRES-1 (Danny 02-08): the customer's own visiting address, the
+                  same full-width card/field grouping as AddCandidateModal's AddressCard. */}
+              <AddressCard form={form} set={set} provinces={provinces} />
             </div>
-          </div>
 
-          <div style={cardPair}>
-            <div>
-              {/* Reuses the drawer OverviewTab's own "Online" card heading (one
-                  translation source for the same grouping). Website only now —
-                  Bedrijfstekst moved to its own collapsed-ghost card below. */}
-              <div style={cardHead}>{t('overview.online')}</div>
-              <div style={cardBox}>
-                <Field label={t('overview.website')}>
-                  <TextField value={form.website} onChange={v => set('website', v)} placeholder="https://" />
-                </Field>
-              </div>
-            </div>
-            <div>
-              {/* Reuses the drawer OverviewTab's own "Facturatie" card heading. */}
-              <div style={cardHead}>{t('overview.billing')}</div>
-              <div style={cardBox}>
-                <div style={row2}>
-                  <Field label={t('overview.costCenter')}>
-                    <TextField value={form.costCenter} onChange={v => set('costCenter', v)} />
+            {/* RIGHT — secondary/optional: owner, online/billing, company text, branch. */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                {/* STATUS-HIDDEN-1 (Danny 02-08): deployability status is no longer picked
+                    here — the phase pills above already carry the lifecycle choice, and a
+                    new customer starts on the tenant's default status (see defaultStatusValue
+                    above), sent along unseen. Only the owner picker remains in this card. */}
+                <div style={cardHead}>{t('modal.fields.cardOwner')}</div>
+                <div style={cardBox}>
+                  <Field label={t('modal.fields.accountManager')}>
+                    <CreatableSelect value={form.ownerId || null} onChange={v => set('ownerId', v)} allowCreate={false}
+                      placeholder={t('modal.fields.selectOwner')} options={userOptions} />
                   </Field>
-                  <Field label={t('overview.billingEmail')}>
-                    <TextField type="email" value={form.billingEmail} onChange={v => set('billingEmail', v)} />
+                </div>
+              </div>
+
+              <div>
+                {/* Reuses the drawer OverviewTab's own "Online" card heading (one
+                    translation source for the same grouping). Website only now —
+                    Bedrijfstekst moved to its own collapsed-ghost card below. KLANT-LAYOUT-2:
+                    un-paired from Facturatie (was a cardPair) — a second inner 2-column grid
+                    inside an already-halved column reads worse than plain stacking. */}
+                <div style={cardHead}>{t('overview.online')}</div>
+                <div style={cardBox}>
+                  <Field label={t('overview.website')}>
+                    <TextField value={form.website} onChange={v => set('website', v)} placeholder="https://" />
                   </Field>
+                </div>
+              </div>
+
+              <div>
+                {/* Reuses the drawer OverviewTab's own "Facturatie" card heading. */}
+                <div style={cardHead}>{t('overview.billing')}</div>
+                <div style={cardBox}>
+                  <div style={row2}>
+                    <Field label={t('overview.costCenter')}>
+                      <TextField value={form.costCenter} onChange={v => set('costCenter', v)} />
+                    </Field>
+                    <Field label={t('overview.billingEmail')}>
+                      <TextField type="email" value={form.billingEmail} onChange={v => set('billingEmail', v)} />
+                    </Field>
+                  </div>
+                </div>
+              </div>
+
+              {/* BEDRIJFSTEKST-1 (Danny 02-08): "Schrijfstijl" was a single-line TextField —
+                  the exact defect this pass fixes (prose in a one-line input). Now the shared
+                  collapsed-ghost block (COLLAPSIBLE-TEXT-1, same shape as +Match's Opmerkingen),
+                  own full-width card, reusing the SAME overview.companyText key the drawer's
+                  merged company-text field already uses (one label, not a second copy). The
+                  internal `toneOfVoice` form key is unchanged — it POSTs under `description`
+                  (useCustomerRecord's OPTIONAL_CREATE_FIELDS; the backend column `tone_of_voice`
+                  was dropped and merged into `description` — verified against CustomerRequest::
+                  sharedRules, which accepts `description` but no longer has a `tone_of_voice` rule). */}
+              <div>
+                <div style={cardHead}>{t('overview.companyText')}</div>
+                <div style={cardBox}>
+                  <CollapsibleRichText t={t} value={form.toneOfVoice} onChange={v => set('toneOfVoice', v)}
+                    expanded={toneOfVoiceExpanded} setExpanded={setToneOfVoiceExpanded}
+                    editing={toneOfVoiceEditing} setEditing={setToneOfVoiceEditing}
+                    placeholder={t('common:add')} />
+                </div>
+              </div>
+
+              {/* Vestigingen — last block, exactly as the candidate modal does it: the heading
+                  with its own add trigger on the right, chips below, and the sentence saying
+                  what LEAVING IT EMPTY means. That sentence is the point: empty is a real,
+                  useful choice here, not an unfinished field. KLANT-LAYOUT-2: no more
+                  `marginTop` override — this column's own `gap: 16` already spaces it from
+                  Bedrijfstekst above. */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
+                  <div style={{ ...cardHead, marginBottom: 0 }}>{t('overview.branch')}</div>
+                  <SearchSelect triggerLabel={t('modal.fields.branchAdd')} options={branchOptions}
+                    selected={form.branchId ? [form.branchId] : []}
+                    onToggle={(id: string) => set('branchId', form.branchId === id ? '' : id)}
+                    menuAlign="right"
+                    renderTrigger={(toggleOpen: () => void) => <DrawerAddButton onClick={toggleOpen} label={t('modal.fields.branchAdd')} />} />
+                </div>
+                <div style={cardBox}>
+                  {form.branchId ? (
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '3px 8px',
+                        borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
+                        {branchOptions.find(o => String(o.value) === form.branchId)?.label ?? form.branchId}
+                        <button type="button" onClick={() => set('branchId', '')} aria-label={t('common:remove')}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
+                      </span>
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', margin: 0 }}>{t('modal.fields.branchAutoHint')}</p>
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* BEDRIJFSTEKST-1 (Danny 02-08): "Schrijfstijl" was a single-line TextField —
-              the exact defect this pass fixes (prose in a one-line input). Now the shared
-              collapsed-ghost block (COLLAPSIBLE-TEXT-1, same shape as +Match's Opmerkingen),
-              own full-width card, reusing the SAME overview.companyText key the drawer's
-              merged company-text field already uses (one label, not a second copy). The
-              internal `toneOfVoice` form key is unchanged — it POSTs under `description`
-              (useCustomerRecord's OPTIONAL_CREATE_FIELDS; the backend column `tone_of_voice`
-              was dropped and merged into `description` — verified against CustomerRequest::
-              sharedRules, which accepts `description` but no longer has a `tone_of_voice` rule). */}
-          <div>
-            <div style={cardHead}>{t('overview.companyText')}</div>
-            <div style={cardBox}>
-              <CollapsibleRichText t={t} value={form.toneOfVoice} onChange={v => set('toneOfVoice', v)}
-                expanded={toneOfVoiceExpanded} setExpanded={setToneOfVoiceExpanded}
-                editing={toneOfVoiceEditing} setEditing={setToneOfVoiceEditing}
-                placeholder={t('common:add')} />
-            </div>
-          </div>
-
-          {/* Vestigingen — last block, exactly as the candidate modal does it: the heading
-              with its own add trigger on the right, chips below, and the sentence saying
-              what LEAVING IT EMPTY means. That sentence is the point: empty is a real,
-              useful choice here, not an unfinished field. */}
-          <div style={{ marginTop: 14 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
-              <div style={{ ...cardHead, marginBottom: 0 }}>{t('overview.branch')}</div>
-              <SearchSelect triggerLabel={t('modal.fields.branchAdd')} options={branchOptions}
-                selected={form.branchId ? [form.branchId] : []}
-                onToggle={(id: string) => set('branchId', form.branchId === id ? '' : id)}
-                menuAlign="right"
-                renderTrigger={(toggleOpen: () => void) => <DrawerAddButton onClick={toggleOpen} label={t('modal.fields.branchAdd')} />} />
-            </div>
-            <div style={cardBox}>
-              {form.branchId ? (
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '3px 8px',
-                    borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
-                    {branchOptions.find(o => String(o.value) === form.branchId)?.label ?? form.branchId}
-                    <button type="button" onClick={() => set('branchId', '')} aria-label={t('common:remove')}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
-                  </span>
-                </div>
-              ) : (
-                <p style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', margin: 0 }}>{t('modal.fields.branchAutoHint')}</p>
-              )}
-            </div>
-          </div>
+          {/* CUSTOMER-IMPORT-1 / KLANT-LAYOUT-2: moved from the top of the modal (it used
+              to sit above the name field) to a collapsed-by-default section at the very
+              bottom — importing a whole customer tree from a file is a rare, secondary
+              path, not the first thing a recruiter should see. `filled` tints the
+              indicator dot once a file is picked, so a recruiter mid-import can tell the
+              section holds something even while collapsed. */}
+          <CollapsedCard title={t('modal.import.title')} filled={!!importWizard.file}>
+            <CustomerImportCard wizard={importWizard} canView={canViewImportTemplate} canImport={canRunImport} />
+          </CollapsedCard>
         </div>
 
         {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}

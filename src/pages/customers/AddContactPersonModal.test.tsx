@@ -464,9 +464,14 @@ describe('AddContactPersonModal · import card (Danny 02-08: "+ nieuwe contactpe
     ...cleanResult,
     rows: [{ row: 1, action: 'create', reference: 'Thuiszorg De Brug / Marieke de Vries', id: null, messages: [] }],
   }
+  // COLLAPSED-CARD-1 (03-08 A+D): the import card now lives behind a CollapsedCard
+  // whose accessible button name is exactly this title text — every test below that
+  // touches the card's contents must open it first.
+  const importCardTitle = ct('subModal.import.title', { entity: st('import.entities.contacts.label') })
 
   it('refuses an .xlsx file client-side with the save-as-CSV instruction, and never calls the dry run', () => {
     render(<AddContactPersonModal onClose={() => {}} locations={locations} statuses={statuses} customerName="Zorggroep Middenland" />)
+    fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
 
     // COMPACT-IMPORT-1: the compact card has no dedicated dropzone element — the
     // whole card body accepts a drop, so its own intro line (a direct child of the
@@ -482,6 +487,7 @@ describe('AddContactPersonModal · import card (Danny 02-08: "+ nieuwe contactpe
     const user = userEvent.setup()
     vi.mocked(dryRunImport).mockResolvedValue(cleanResult)
     render(<AddContactPersonModal onClose={() => {}} locations={locations} statuses={statuses} customerName="Zorggroep Middenland" />)
+    await user.click(screen.getByRole('button', { name: importCardTitle }))
 
     expect(screen.queryByRole('button', { name: st('import.preview.confirm') })).not.toBeInTheDocument()
 
@@ -502,6 +508,7 @@ describe('AddContactPersonModal · import card (Danny 02-08: "+ nieuwe contactpe
     vi.mocked(runImport).mockResolvedValue({ ...cleanResult, dry_run: false, rows: [{ ...cleanResult.rows[0], id: 'c-1' }] })
 
     render(<AddContactPersonModal onClose={onClose} onImported={onImported} locations={locations} statuses={statuses} customerName="Zorggroep Middenland" />)
+    await user.click(screen.getByRole('button', { name: importCardTitle }))
 
     const input = screen.getByLabelText(st('import.selectCsv'))
     await user.upload(input, csvFile)
@@ -516,6 +523,7 @@ describe('AddContactPersonModal · import card (Danny 02-08: "+ nieuwe contactpe
   it('gates the picker on customers.create: disabled, with the honest notice, not a button that would 403', () => {
     authState.hasPermission = (perm: string) => perm !== 'customers.create'
     render(<AddContactPersonModal onClose={() => {}} locations={locations} statuses={statuses} customerName="Zorggroep Middenland" />)
+    fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
 
     expect(screen.getByLabelText(st('import.selectCsv'))).toBeDisabled()
     expect(screen.getByText(st('import.noImportPermission'))).toBeInTheDocument()
@@ -526,6 +534,7 @@ describe('AddContactPersonModal · import card (Danny 02-08: "+ nieuwe contactpe
     vi.mocked(dryRunImport).mockResolvedValue(mismatchResult)
     vi.mocked(runImport).mockResolvedValue({ ...mismatchResult, dry_run: false })
     render(<AddContactPersonModal onClose={() => {}} locations={locations} statuses={statuses} customerName="Zorggroep Middenland" />)
+    await user.click(screen.getByRole('button', { name: importCardTitle }))
 
     const input = screen.getByLabelText(st('import.selectCsv'))
     await user.upload(input, csvFile)
@@ -538,5 +547,13 @@ describe('AddContactPersonModal · import card (Danny 02-08: "+ nieuwe contactpe
 
     await user.click(screen.getByRole('button', { name: ct('subModal.import.mismatchProceed') }))
     await waitFor(() => expect(runImport).toHaveBeenCalledTimes(1))
+  })
+
+  // COLLAPSED-CARD-1 (03-08 A+D): proves the card is genuinely collapsed by
+  // default — its contents are absent from the DOM until opened.
+  it('the import card starts collapsed', () => {
+    render(<AddContactPersonModal onClose={() => {}} locations={locations} statuses={statuses} customerName="Zorggroep Middenland" />)
+    expect(screen.queryByLabelText(st('import.selectCsv'))).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: importCardTitle })).toHaveAttribute('aria-expanded', 'false')
   })
 })

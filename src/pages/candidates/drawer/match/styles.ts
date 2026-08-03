@@ -5,6 +5,7 @@
  * redefining its own — one look, one place to change it.
  */
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { modalColumns } from '@/components/ui/modalCards'
 
 export const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 60 }
 // Standardized frame (Danny 24-07 point 6): same maxWidth/maxHeight as +Kandidaat
@@ -33,7 +34,9 @@ export const errMsg: React.CSSProperties = { fontSize: 11, color: 'var(--color-d
 // shorter, plain-input-heavy sections that pair up fine in half the width.
 // Financieel (right) gets the wider share (Danny 24-07: "financieel moet groter") —
 // its three-across rate row + billing block need the room; Contract/Opmerkingen don't.
-export const twoColSections: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1.35fr', gap: 24, alignItems: 'start' }
+// Built from the shared `modalColumns` factory (promoted to components/ui/modalCards,
+// Danny 03-08) — same gap/alignItems, this section's own asymmetric ratio unchanged.
+export const twoColSections: React.CSSProperties = modalColumns('1fr 1.35fr')
 
 // Consistent search-box width for the relational pickers below — the wide panel
 // gives the full-width Relaties row2 columns plenty of room, so a wider menu

@@ -330,6 +330,9 @@ describe('AddCustomerModal · lifecycle phase (KLANT-FASE-1)', () => {
 })
 
 describe('AddCustomerModal · import card (Danny 02-08: replaces the italic import hint with a real importer)', () => {
+  // KLANT-LAYOUT-2 (Danny 03-08): the card now lives inside a CollapsedCard, closed
+  // by default — every test below must open it before it can query the card's contents.
+  const importCardTitle = ct('modal.import.title')
   const csvFile = new File(['klant_naam,straat\nAcme,Kerkstraat 1'], 'acme.csv', { type: 'text/csv' })
   const xlsxFile = new File(['binary'], 'acme.xlsx', {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -344,6 +347,7 @@ describe('AddCustomerModal · import card (Danny 02-08: replaces the italic impo
 
   it('refuses an .xlsx file client-side with the save-as-CSV instruction, and never calls the dry run', () => {
     render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
+    fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
 
     // Dropped rather than picked via the file dialog: the input's `accept=".csv,.txt"`
     // only filters the OS picker, never a drag-and-drop delivery — exactly why the
@@ -360,6 +364,7 @@ describe('AddCustomerModal · import card (Danny 02-08: replaces the italic impo
     const user = userEvent.setup()
     vi.mocked(dryRunImport).mockResolvedValue(cleanResult)
     render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
+    await user.click(screen.getByRole('button', { name: importCardTitle }))
 
     // Before any file is picked, no confirm/real-import control exists at all —
     // there is no shortcut straight to runImport.
@@ -385,6 +390,7 @@ describe('AddCustomerModal · import card (Danny 02-08: replaces the italic impo
     })
 
     render(<AddCustomerModal onClose={onClose} onImported={onImported} users={users} statuses={statuses} />)
+    await user.click(screen.getByRole('button', { name: importCardTitle }))
 
     const input = screen.getByLabelText(st('import.selectCsv'))
     await user.upload(input, csvFile)
@@ -401,8 +407,18 @@ describe('AddCustomerModal · import card (Danny 02-08: replaces the italic impo
   it('gates the picker on customers.create: disabled, with the honest notice, not a button that would 403', () => {
     authState.hasPermission = (perm: string) => perm !== 'customers.create'
     render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
+    fireEvent.click(screen.getByRole('button', { name: importCardTitle }))
 
     expect(screen.getByLabelText(st('import.selectCsv'))).toBeDisabled()
     expect(screen.getByText(st('import.noImportPermission'))).toBeInTheDocument()
+  })
+
+  // KLANT-LAYOUT-2 (Danny 03-08): the import card is secondary/optional, so it
+  // starts collapsed — verifies the CollapsedCard wiring itself, not just the
+  // open-then-assert pattern the other tests above now use.
+  it('the import card starts collapsed', () => {
+    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
+    expect(screen.queryByLabelText(st('import.selectCsv'))).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: importCardTitle })).toHaveAttribute('aria-expanded', 'false')
   })
 })

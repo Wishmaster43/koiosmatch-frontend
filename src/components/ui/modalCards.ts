@@ -29,3 +29,19 @@ export const row3Even = row('1fr 1fr 1fr')
 // ONE card) — the wide frame's two-column section layout (e.g. Vestiging +
 // Eigenaar&status, Algemeen + Bron, Algemeen + Waarde&fase).
 export const cardPair = { display: 'grid' as const, gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' as const }
+
+// Two-column SECTION layout — pairs a stack of CARDS in one column against a
+// stack in the other (distinct from cardPair's single pair). Promoted here from
+// candidates/drawer/match/styles.ts's own `twoColSections` (Danny 03-08 A+D
+// decision on the "+ Nieuwe locatie" scroll complaint: six cards stacked in ONE
+// column inside the WIDE_MODAL frame left half the width idle — two columns +
+// collapsed secondary cards fix it). The ratio is parameterizable so a caller
+// with an asymmetric split (e.g. match's own Financieel-gets-more-room 1fr/1.35fr)
+// keeps its exact layout; the plain '1fr 1fr' default suits an even split. Pass
+// a CSS `repeat(auto-fit, minmax(...))` expression instead of a fixed ratio for a
+// section that must also fall back to one column at narrow widths (this
+// codebase's existing responsive-grid idiom — mirrors ModulePicker/
+// CandidatesKpiRow/WorkflowsListPanel, no container queries needed).
+export const modalColumns = (ratio = '1fr 1fr'): CSSProperties => ({
+  display: 'grid', gridTemplateColumns: ratio, gap: 24, alignItems: 'start',
+})

@@ -53,7 +53,8 @@ import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
-import SubEntityImportCard from './SubEntityImportCard'
+import CollapsedCard from '@/components/ui/CollapsedCard'
+import SubEntityImportCard, { subEntityImportTitle } from './SubEntityImportCard'
 import ContactLinkCard from './ContactLinkCard'
 import { useImportWizard } from '@/pages/settings/sections/importeren/useImportWizard'
 import type { ContactPayload } from './hooks/useCustomerContacts'
@@ -297,14 +298,6 @@ export default function AddContactPersonModal({
           <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}><X size={18} /></button>
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* SUBENTITY-IMPORT-1: the file-import path, CREATE only — same top spot as
-              CvUploadCard/CustomerImportCard. Editing a single contact has no batch
-              concept, so the card never renders there. */}
-          {!isEdit && (
-            <SubEntityImportCard entity="contacts" wizard={importWizard} customerName={customerName}
-              canView={canViewImportTemplate} canImport={canRunImport} />
-          )}
-
           {/* Persoon — name + function (Danny 27-07 card split: name/lastname/functie). */}
           <div>
             <div style={cardHead}>{t('subModal.groups.person')}</div>
@@ -392,6 +385,18 @@ export default function AddContactPersonModal({
             onStatusChange={v => set('statusId', v || null)}
             onPrimaryToggle={handlePrimaryToggle}
           />
+
+          {/* SUBENTITY-IMPORT-1 (moved to the bottom + collapsed, Danny 03-08 A+D
+              decision): a secondary/optional bulk-create path must never force a
+              scroll past it before the required manual fields are even visible.
+              No column split here — this form is too short to justify one (unlike
+              AddLocationModal's own two-column pass). */}
+          {!isEdit && (
+            <CollapsedCard title={subEntityImportTitle(t, 'contacts')} filled={!!importWizard.file}>
+              <SubEntityImportCard entity="contacts" wizard={importWizard} customerName={customerName}
+                canView={canViewImportTemplate} canImport={canRunImport} />
+            </CollapsedCard>
+          )}
         </div>
 
         {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}

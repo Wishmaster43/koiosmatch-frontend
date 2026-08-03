@@ -25,7 +25,7 @@ import { useRef, useState } from 'react'
 import type { ChangeEvent, DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileUp, FileText, Loader2, AlertTriangle } from 'lucide-react'
-import { cardHead, cardBox } from '@/components/ui/modalCards'
+import { cardBox } from '@/components/ui/modalCards'
 import { BTN_H } from '@/config/buttonMetrics'
 // CUSTOMER-IMPORT-1 (Danny 02-08): the PREVIEW/RESULT panels and the download-
 // template call are reused straight from Settings' working import wizard — cross-
@@ -97,109 +97,109 @@ export default function CustomerImportCard({ wizard, canView, canImport }: Custo
 
   const handleDownloadTemplate = () => { void downloadImportTemplate(CUSTOMER_TREE_ENTITY) }
 
+  // KLANT-LAYOUT-2 (Danny 03-08): the own heading moved OUT of this component —
+  // it now lives inside AddCustomerModal's wrapping CollapsedCard, which supplies
+  // its own title row, so this returns only the self-boxed drag/drop surface.
   return (
-    <div>
-      <div style={cardHead}>{t('modal.import.title')}</div>
-      <div
-        onDragOver={event => { event.preventDefault(); if (canImport) setDragOver(true) }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={handleDrop}
-        style={{ ...cardBox, gap: 8,
-          border: dragOver ? '1px solid var(--color-primary)' : cardBox.border,
-          background: dragOver ? 'color-mix(in srgb, var(--color-primary) 6%, transparent)' : cardBox.background }}>
+    <div
+      onDragOver={event => { event.preventDefault(); if (canImport) setDragOver(true) }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={handleDrop}
+      style={{ ...cardBox, gap: 8,
+        border: dragOver ? '1px solid var(--color-primary)' : cardBox.border,
+        background: dragOver ? 'color-mix(in srgb, var(--color-primary) 6%, transparent)' : cardBox.background }}>
 
-        {/* Step 1, no file yet: the honest distinction + ONE compact action row —
-            select, download example, accepted-types hint, all on one line. */}
-        {step === 'upload' && !file && (
-          <>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('modal.import.intro')}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <button type="button" onClick={() => inputRef.current?.click()} disabled={!canImport}
-                title={canImport ? undefined : t('import.noImportPermission', { ns: 'settings' })}
-                style={{ ...ghostBtn, borderColor: 'color-mix(in srgb, var(--color-primary) 45%, transparent)',
-                  background: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
-                  color: 'var(--color-primary)', fontWeight: 600, opacity: canImport ? 1 : 0.5,
-                  cursor: canImport ? 'pointer' : 'not-allowed' }}>
-                <FileUp size={14} /> {t('import.selectCsv', { ns: 'settings' })}
-              </button>
-              <button type="button" onClick={handleDownloadTemplate} disabled={!canView}
-                title={canView ? undefined : t('import.noViewPermission', { ns: 'settings' })}
-                style={{ fontSize: 12, color: 'var(--color-primary)', background: 'none', border: 'none',
-                  padding: 0, cursor: canView ? 'pointer' : 'not-allowed', opacity: canView ? 1 : 0.5 }}>
-                {t('import.downloadTemplate', { ns: 'settings' })}
-              </button>
-              <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>
-                {t('import.acceptedTypes', { ns: 'settings' })}
-              </span>
-            </div>
-            {typeError && (
-              <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--color-danger)' }}>
-                <AlertTriangle size={12} /> {typeError}
-              </div>
-            )}
-            {!canImport && (
-              <div style={{ fontSize: 11, color: 'var(--color-warning)' }}>{t('import.noImportPermission', { ns: 'settings' })}</div>
-            )}
-          </>
-        )}
-
-        {/* Step 1, file picked: one row — filename, a "different file" link, and the
-            mandatory-dry-run trigger. Never a shortcut straight to the real import. */}
-        {step === 'upload' && file && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <FileText size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-              <span style={{ fontSize: 12, color: 'var(--text)', minWidth: 0, overflowWrap: 'anywhere' }}>
-                {t('import.fileSelected', { ns: 'settings', name: file.name })}
-              </span>
-              <button type="button" onClick={() => inputRef.current?.click()} disabled={checking}
-                style={{ fontSize: 12, color: 'var(--color-primary)', background: 'none', border: 'none',
-                  padding: 0, cursor: checking ? 'not-allowed' : 'pointer' }}>
-                {t('import.replaceFile', { ns: 'settings' })}
-              </button>
-              <button type="button" onClick={wizard.runPreview} disabled={!canImport || checking}
-                style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
-                  fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 8,
-                  background: 'var(--color-primary)', color: 'white',
-                  cursor: !canImport || checking ? 'not-allowed' : 'pointer', opacity: !canImport ? 0.5 : 1 }}>
-                {checking && <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />}
-                {checking ? t('import.runningPreview', { ns: 'settings' }) : t('import.runPreview', { ns: 'settings' })}
-              </button>
-            </div>
-            {preview.status === 'error' && (
-              <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--color-danger)' }}>
-                <AlertTriangle size={12} /> {preview.message || t('import.previewErrorFallback', { ns: 'settings' })}
-              </div>
-            )}
+      {/* Step 1, no file yet: the honest distinction + ONE compact action row —
+          select, download example, accepted-types hint, all on one line. */}
+      {step === 'upload' && !file && (
+        <>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('modal.import.intro')}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <button type="button" onClick={() => inputRef.current?.click()} disabled={!canImport}
+              title={canImport ? undefined : t('import.noImportPermission', { ns: 'settings' })}
+              style={{ ...ghostBtn, borderColor: 'color-mix(in srgb, var(--color-primary) 45%, transparent)',
+                background: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
+                color: 'var(--color-primary)', fontWeight: 600, opacity: canImport ? 1 : 0.5,
+                cursor: canImport ? 'pointer' : 'not-allowed' }}>
+              <FileUp size={14} /> {t('import.selectCsv', { ns: 'settings' })}
+            </button>
+            <button type="button" onClick={handleDownloadTemplate} disabled={!canView}
+              title={canView ? undefined : t('import.noViewPermission', { ns: 'settings' })}
+              style={{ fontSize: 12, color: 'var(--color-primary)', background: 'none', border: 'none',
+                padding: 0, cursor: canView ? 'pointer' : 'not-allowed', opacity: canView ? 1 : 0.5 }}>
+              {t('import.downloadTemplate', { ns: 'settings' })}
+            </button>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>
+              {t('import.acceptedTypes', { ns: 'settings' })}
+            </span>
           </div>
-        )}
+          {typeError && (
+            <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--color-danger)' }}>
+              <AlertTriangle size={12} /> {typeError}
+            </div>
+          )}
+          {!canImport && (
+            <div style={{ fontSize: 11, color: 'var(--color-warning)' }}>{t('import.noImportPermission', { ns: 'settings' })}</div>
+          )}
+        </>
+      )}
 
-        {/* Step 2: the mandatory dry-run report — reused verbatim from Settings. */}
-        {step === 'preview' && preview.status === 'success' && (
-          <PreviewStep
-            result={preview.result}
-            runStatus={run.status}
-            runError={run.status === 'error' ? run.message : undefined}
-            canImport={canImport}
-            wholeTree
-            onConfirm={wizard.confirmImport}
-            onBack={wizard.backToUpload}
-          />
-        )}
+      {/* Step 1, file picked: one row — filename, a "different file" link, and the
+          mandatory-dry-run trigger. Never a shortcut straight to the real import. */}
+      {step === 'upload' && file && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <FileText size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+            <span style={{ fontSize: 12, color: 'var(--text)', minWidth: 0, overflowWrap: 'anywhere' }}>
+              {t('import.fileSelected', { ns: 'settings', name: file.name })}
+            </span>
+            <button type="button" onClick={() => inputRef.current?.click()} disabled={checking}
+              style={{ fontSize: 12, color: 'var(--color-primary)', background: 'none', border: 'none',
+                padding: 0, cursor: checking ? 'not-allowed' : 'pointer' }}>
+              {t('import.replaceFile', { ns: 'settings' })}
+            </button>
+            <button type="button" onClick={wizard.runPreview} disabled={!canImport || checking}
+              style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
+                fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 8,
+                background: 'var(--color-primary)', color: 'white',
+                cursor: !canImport || checking ? 'not-allowed' : 'pointer', opacity: !canImport ? 0.5 : 1 }}>
+              {checking && <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />}
+              {checking ? t('import.runningPreview', { ns: 'settings' }) : t('import.runPreview', { ns: 'settings' })}
+            </button>
+          </div>
+          {preview.status === 'error' && (
+            <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--color-danger)' }}>
+              <AlertTriangle size={12} /> {preview.message || t('import.previewErrorFallback', { ns: 'settings' })}
+            </div>
+          )}
+        </div>
+      )}
 
-        {/* Only reached when the real run left NOTHING resolved (see useCustomerImport's
-            auto-close effect) — a clean import closes the modal before this ever renders,
-            so this is exclusively the "here is why nothing landed" explanation. */}
-        {step === 'result' && run.status === 'success' && (
-          <ResultStep result={run.result} wholeTree onReset={wizard.reset} />
-        )}
+      {/* Step 2: the mandatory dry-run report — reused verbatim from Settings. */}
+      {step === 'preview' && preview.status === 'success' && (
+        <PreviewStep
+          result={preview.result}
+          runStatus={run.status}
+          runError={run.status === 'error' ? run.message : undefined}
+          canImport={canImport}
+          wholeTree
+          onConfirm={wizard.confirmImport}
+          onBack={wizard.backToUpload}
+        />
+      )}
 
-        {/* The real input: labelled for assistive tech, kept out of the tab order and
-            out of sight — the visible button is what drives it (§6). */}
-        <input ref={inputRef} type="file" accept=".csv,.txt" onChange={handleChange}
-          aria-label={t('import.selectCsv', { ns: 'settings' })} tabIndex={-1} disabled={!canImport}
-          style={{ position: 'absolute', width: 0, height: 0, opacity: 0, border: 0, padding: 0 }} />
-      </div>
+      {/* Only reached when the real run left NOTHING resolved (see useCustomerImport's
+          auto-close effect) — a clean import closes the modal before this ever renders,
+          so this is exclusively the "here is why nothing landed" explanation. */}
+      {step === 'result' && run.status === 'success' && (
+        <ResultStep result={run.result} wholeTree onReset={wizard.reset} />
+      )}
+
+      {/* The real input: labelled for assistive tech, kept out of the tab order and
+          out of sight — the visible button is what drives it (§6). */}
+      <input ref={inputRef} type="file" accept=".csv,.txt" onChange={handleChange}
+        aria-label={t('import.selectCsv', { ns: 'settings' })} tabIndex={-1} disabled={!canImport}
+        style={{ position: 'absolute', width: 0, height: 0, opacity: 0, border: 0, padding: 0 }} />
     </div>
   )
 }

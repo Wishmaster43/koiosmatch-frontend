@@ -35,8 +35,9 @@ import { notifyError } from '@/lib/notify'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
-import { cardHead, cardBox, row2, row3Even, row } from '@/components/ui/modalCards'
-import SubEntityImportCard from './SubEntityImportCard'
+import { cardHead, cardBox, row2, row3Even, row, modalColumns } from '@/components/ui/modalCards'
+import CollapsedCard from '@/components/ui/CollapsedCard'
+import SubEntityImportCard, { subEntityImportTitle } from './SubEntityImportCard'
 import ContactOnSiteCard from './locationmodal/ContactOnSiteCard'
 import { useImportWizard } from '@/pages/settings/sections/importeren/useImportWizard'
 import { setLocationPrimaryContact, splitContactName } from './hooks/useCustomerContacts'
@@ -272,116 +273,130 @@ export default function AddLocationModal({
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* SUBENTITY-IMPORT-1: the file-import path, CREATE only — same top spot as
-              CvUploadCard/CustomerImportCard. Editing a single location has no batch
-              concept, so the card never renders there. */}
-          {!isEdit && (
-            <SubEntityImportCard entity="locations" wizard={importWizard} customerName={customerName}
-              canView={canViewImportTemplate} canImport={canRunImport} />
-          )}
-
-          {/* Algemeen — name + status. */}
-          <div>
-            <div style={cardHead}>{t('subModal.groups.general')}</div>
-            <div style={cardBox}>
+          {/* Two-column section split (Danny 03-08 A+D decision): six cards stacked
+              in ONE column left half the wide 1060px frame idle and forced a
+              scroll — the required core (Algemeen/Adres) now sits left, the
+              secondary cards (Zakelijk/Contact ter plaatse/Omschrijving) right;
+              falls back to one column at narrow widths via the auto-fit idiom. */}
+          <div style={modalColumns('repeat(auto-fit, minmax(340px, 1fr))')}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Algemeen — name + status. */}
               <div>
-                <Field label={t('subModal.locationName')} required>
-                  <TextField value={form.name} onChange={v => set('name', v)} placeholder={t('subModal.locationPlaceholder')} error={errors.name} />
-                </Field>
-                {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('subModal.required')}</div>}
-              </div>
-              {/* STATUS-HIDDEN-1: hidden unless the tenant marked it required —
-                  LocationDetail's own title-row picker is where status is set. */}
-              {showStatusPicker && (
-                <div style={{ ...row2, alignItems: 'end' }}>
-                  <Field label={t('subModal.status')}>
-                    <CreatableSelect value={form.statusId ? String(form.statusId) : null} onChange={v => set('statusId', v || null)} allowCreate={false}
-                      placeholder={t('subModal.selectStatus')} options={statusOptions} style={pickerStyle} />
-                  </Field>
-                  <div />
+                <div style={cardHead}>{t('subModal.groups.general')}</div>
+                <div style={cardBox}>
+                  <div>
+                    <Field label={t('subModal.locationName')} required>
+                      <TextField value={form.name} onChange={v => set('name', v)} placeholder={t('subModal.locationPlaceholder')} error={errors.name} />
+                    </Field>
+                    {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('subModal.required')}</div>}
+                  </div>
+                  {/* STATUS-HIDDEN-1: hidden unless the tenant marked it required —
+                      LocationDetail's own title-row picker is where status is set. */}
+                  {showStatusPicker && (
+                    <div style={{ ...row2, alignItems: 'end' }}>
+                      <Field label={t('subModal.status')}>
+                        <CreatableSelect value={form.statusId ? String(form.statusId) : null} onChange={v => set('statusId', v || null)} allowCreate={false}
+                          placeholder={t('subModal.selectStatus')} options={statusOptions} style={pickerStyle} />
+                      </Field>
+                      <div />
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+
+              {/* Adres. */}
+              <div>
+                <div style={cardHead}>{t('subModal.groups.address')}</div>
+                <div style={cardBox}>
+                  <div style={rowStreet}>
+                    <Field label={t('subModal.street')}><TextField value={form.street} onChange={v => set('street', v)} /></Field>
+                    <Field label={t('subModal.houseNumber')}><TextField value={form.houseNumber} onChange={v => set('houseNumber', v)} /></Field>
+                    <Field label={t('subModal.houseNumberSuffix')}><TextField value={form.houseNumberSuffix} onChange={v => set('houseNumberSuffix', v)} /></Field>
+                  </div>
+                  <div style={rowPostal}>
+                    <Field label={t('subModal.postalCode')}><TextField value={form.postalCode} onChange={v => set('postalCode', v)} placeholder="1234 AB" /></Field>
+                    <Field label={t('subModal.city')}><TextField value={form.city} onChange={v => set('city', v)} /></Field>
+                  </div>
+                  <div style={row2}>
+                    {/* PROVINCIE-1 (Danny 02-08: "provincie heeft geen zoekbare dropdown???"):
+                        a searchable picker fed by the same shared useProvinces hook the
+                        customer's own AddressCard uses — was a bare TextField, the one
+                        inconsistency in this modal against every other relational field
+                        here. Sends `state` (unchanged wire key): CustomerLocationController
+                        aliases `state` onto `province` server-side whenever `province`
+                        itself is absent (normaliseLegacyKeys) — verified in the controller
+                        source, so this is not a silently-dropped key, just the legacy name. */}
+                    <Field label={t('subModal.state')}>
+                      <CreatableSelect value={form.state || null} onChange={v => set('state', v)} allowCreate={false}
+                        placeholder={t('common:select')} options={provinces} menuWidth={260} style={pickerStyle} />
+                    </Field>
+                    {/* `country` stays free text on purpose — see file header comment. */}
+                    <Field label={t('subModal.country')}><TextField value={form.country} onChange={v => set('country', v)} /></Field>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Zakelijk — KvK/BTW (was "Registratie") + kostenplaats (was its own
+                  "Facturatie" card) merged into one card (Danny 27-07 grouping): all
+                  three now fit on a single row at the wider width. */}
+              <div>
+                <div style={cardHead}>{t('subModal.groups.business')}</div>
+                <div style={cardBox}>
+                  <div style={row3Even}>
+                    <Field label={t('subModal.coc')}><TextField value={form.cocNumber} onChange={v => set('cocNumber', v)} /></Field>
+                    <Field label={t('subModal.vat')}><TextField value={form.vatNumber} onChange={v => set('vatNumber', v)} /></Field>
+                    <Field label={t('subModal.costCenter')}><TextField value={form.costCenter} onChange={v => set('costCenter', v)} /></Field>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact ter plaatse — extracted card (§0.3 split, 2026-08-03): the
+                  existing-contact picker, new-contact fields and their local render
+                  logic live in ContactOnSiteCard; only pickedContactId's OWNERSHIP
+                  stays here (the post-create coupling call in submit() needs it). */}
+              <ContactOnSiteCard
+                isEdit={isEdit}
+                contactName={form.contactName} email={form.email} phone={form.phone}
+                onContactNameChange={v => set('contactName', v)}
+                onEmailChange={v => set('email', v)}
+                onPhoneChange={v => set('phone', v)}
+                pickedContactId={pickedContactId} onPickedContactChange={setPickedContactId}
+                existingContacts={existingContacts}
+              />
+
+              {/* Omschrijving — its own card, same convention as AddDepartmentModal's
+                  (Danny 02-08: "bij locatie en afdeling moeten we ook een beschrijving
+                  hebben"). COLLAPSIBLE-TEXT-1 (02-08 round 2): the always-open editor
+                  became the shared collapsed-ghost block (same shape as +Match's
+                  Opmerkingen) so every create modal behaves identically. */}
+              <div>
+                <div style={cardHead}>{t('locations.detail.description')}</div>
+                <div style={cardBox}>
+                  {/* ARIA-LABEL-1: this modal's own footer button is ALSO labelled
+                      subModal.create ("Toevoegen"/"Add", same word as the generic
+                      common:add placeholder) — a distinct aria-label (the card's own
+                      heading) prevents two buttons sharing one accessible name. */}
+                  <CollapsibleRichText t={t} value={form.description} onChange={v => set('description', v)}
+                    expanded={descExpanded} setExpanded={setDescExpanded}
+                    editing={descEditing} setEditing={setDescEditing}
+                    placeholder={t('common:add')} ariaLabel={t('locations.detail.description')} />
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Adres. */}
-          <div>
-            <div style={cardHead}>{t('subModal.groups.address')}</div>
-            <div style={cardBox}>
-              <div style={rowStreet}>
-                <Field label={t('subModal.street')}><TextField value={form.street} onChange={v => set('street', v)} /></Field>
-                <Field label={t('subModal.houseNumber')}><TextField value={form.houseNumber} onChange={v => set('houseNumber', v)} /></Field>
-                <Field label={t('subModal.houseNumberSuffix')}><TextField value={form.houseNumberSuffix} onChange={v => set('houseNumberSuffix', v)} /></Field>
-              </div>
-              <div style={rowPostal}>
-                <Field label={t('subModal.postalCode')}><TextField value={form.postalCode} onChange={v => set('postalCode', v)} placeholder="1234 AB" /></Field>
-                <Field label={t('subModal.city')}><TextField value={form.city} onChange={v => set('city', v)} /></Field>
-              </div>
-              <div style={row2}>
-                {/* PROVINCIE-1 (Danny 02-08: "provincie heeft geen zoekbare dropdown???"):
-                    a searchable picker fed by the same shared useProvinces hook the
-                    customer's own AddressCard uses — was a bare TextField, the one
-                    inconsistency in this modal against every other relational field
-                    here. Sends `state` (unchanged wire key): CustomerLocationController
-                    aliases `state` onto `province` server-side whenever `province`
-                    itself is absent (normaliseLegacyKeys) — verified in the controller
-                    source, so this is not a silently-dropped key, just the legacy name. */}
-                <Field label={t('subModal.state')}>
-                  <CreatableSelect value={form.state || null} onChange={v => set('state', v)} allowCreate={false}
-                    placeholder={t('common:select')} options={provinces} menuWidth={260} style={pickerStyle} />
-                </Field>
-                {/* `country` stays free text on purpose — see file header comment. */}
-                <Field label={t('subModal.country')}><TextField value={form.country} onChange={v => set('country', v)} /></Field>
-              </div>
-            </div>
-          </div>
-
-          {/* Zakelijk — KvK/BTW (was "Registratie") + kostenplaats (was its own
-              "Facturatie" card) merged into one card (Danny 27-07 grouping): all
-              three now fit on a single row at the wider width. */}
-          <div>
-            <div style={cardHead}>{t('subModal.groups.business')}</div>
-            <div style={cardBox}>
-              <div style={row3Even}>
-                <Field label={t('subModal.coc')}><TextField value={form.cocNumber} onChange={v => set('cocNumber', v)} /></Field>
-                <Field label={t('subModal.vat')}><TextField value={form.vatNumber} onChange={v => set('vatNumber', v)} /></Field>
-                <Field label={t('subModal.costCenter')}><TextField value={form.costCenter} onChange={v => set('costCenter', v)} /></Field>
-              </div>
-            </div>
-          </div>
-
-          {/* Contact ter plaatse — extracted card (§0.3 split, 2026-08-03): the
-              existing-contact picker, new-contact fields and their local render
-              logic live in ContactOnSiteCard; only pickedContactId's OWNERSHIP
-              stays here (the post-create coupling call in submit() needs it). */}
-          <ContactOnSiteCard
-            isEdit={isEdit}
-            contactName={form.contactName} email={form.email} phone={form.phone}
-            onContactNameChange={v => set('contactName', v)}
-            onEmailChange={v => set('email', v)}
-            onPhoneChange={v => set('phone', v)}
-            pickedContactId={pickedContactId} onPickedContactChange={setPickedContactId}
-            existingContacts={existingContacts}
-          />
-
-          {/* Omschrijving — its own card, same convention as AddDepartmentModal's
-              (Danny 02-08: "bij locatie en afdeling moeten we ook een beschrijving
-              hebben"). COLLAPSIBLE-TEXT-1 (02-08 round 2): the always-open editor
-              became the shared collapsed-ghost block (same shape as +Match's
-              Opmerkingen) so every create modal behaves identically. */}
-          <div>
-            <div style={cardHead}>{t('locations.detail.description')}</div>
-            <div style={cardBox}>
-              {/* ARIA-LABEL-1: this modal's own footer button is ALSO labelled
-                  subModal.create ("Toevoegen"/"Add", same word as the generic
-                  common:add placeholder) — a distinct aria-label (the card's own
-                  heading) prevents two buttons sharing one accessible name. */}
-              <CollapsibleRichText t={t} value={form.description} onChange={v => set('description', v)}
-                expanded={descExpanded} setExpanded={setDescExpanded}
-                editing={descEditing} setEditing={setDescEditing}
-                placeholder={t('common:add')} ariaLabel={t('locations.detail.description')} />
-            </div>
-          </div>
+          {/* SUBENTITY-IMPORT-1 (moved to the bottom + collapsed, Danny 03-08 A+D
+              decision): a secondary/optional bulk-create path must never force a
+              scroll past it before the required manual fields are even visible —
+              starts closed, `filled` reflects whether a file is already picked. */}
+          {!isEdit && (
+            <CollapsedCard title={subEntityImportTitle(t, 'locations')} filled={!!importWizard.file}>
+              <SubEntityImportCard entity="locations" wizard={importWizard} customerName={customerName}
+                canView={canViewImportTemplate} canImport={canRunImport} />
+            </CollapsedCard>
+          )}
         </div>
 
         {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}
