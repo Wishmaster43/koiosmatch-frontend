@@ -60,7 +60,7 @@
     "status": "Status",
     "owner": "Recruiter",
     "client": "Klant",
-    "category": "Categorie",
+    "category": "Functie",
     "industry": "Branche",
     "employmentType": "Soort dienstverband",
     "categories": {
@@ -193,7 +193,7 @@
     "education": "Opleiding",
     "industry": "Branche",
     "preferredIndustry": "Voorkeurs branche",
-    "category": "Categorie",
+    "category": "Functie",
     "function": "Functie",
     "address": "Adres",
     "street": "Straat",
@@ -209,7 +209,7 @@
     "pickClientFirst": "Kies eerst een klant",
     "skills": "Vereiste vaardigheden",
     "addSkill": "Vaardigheid toevoegen",
-    "description": "Beschrijving"
+    "description": "Vacaturetekst"
   },
   "aiagent": {
     "pickerLabel": "AI-agent",
@@ -329,12 +329,16 @@
       "owner": "Recruiter",
       "employmentType": "Soort dienstverband",
       "industry": "Branche",
-      "category": "Categorie",
+      "category": "Functie",
       "location": "Locatie",
       "cardGeneral": "Algemeen",
       "cardPlacement": "Inzet",
       "cardPublication": "Publicatie",
-      "scopedUnder": "Wordt aangemaakt onder: {{name}}"
+      "scopedUnder": "Wordt aangemaakt onder: {{name}}",
+      "cardClient": "Klant",
+      "branch": "Vestiging",
+      "cardOwner": "Recruiter",
+      "salaryPeriodPlaceholder": "bijv. per maand"
     },
     "titlePlaceholder": "bijv. Verpleegkundige | Den Haag",
     "create": "Vacature aanmaken",
@@ -377,7 +381,7 @@
     },
     "fields": {
       "title": "Titel",
-      "description": "Beschrijving",
+      "description": "Vacaturetekst",
       "vacancy_status_id": "Status",
       "start_date": "Startdatum",
       "end_date": "Einddatum",

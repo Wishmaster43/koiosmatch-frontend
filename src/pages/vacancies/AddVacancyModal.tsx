@@ -1,231 +1,113 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
-import { extractApiError } from '@/lib/extractApiError'
-import api, { unwrap } from '@/lib/api'
-import { Field, TextField } from '@/components/forms/fields'
-import CreatableSelect from '@/components/ui/CreatableSelect'
+/**
+ * AddVacancyModal — create a vacancy. SLICE 1 of Danny's 22-point spec: split
+ * into `addmodal/` (mirrors pages/candidates/addmodal/) — one component per
+ * card, all state/lookups/cascade/submit logic in useAddVacancyForm. This file
+ * is now a thin assembler (shell + card wiring only); 20+ fields across seven
+ * cards would have blown a single-file component well past the ~400-line
+ * split trigger (§3). The landed prefill props (lockCustomerId/lockCustomerName,
+ * initialCustomerLocationId/DepartmentId/Names) keep working exactly as before
+ * — only `initialIndustry` is new (punt 4).
+ */
 import { useFocusTrap } from '@/hooks/useFocusTrap'
-import { useVacancyLookups } from '@/context/VacancyLookupsContext'
-import { useIndustries } from '@/lib/useIndustries'
-import { useFunctions } from '@/lib/useFunctions'
-import { mapVacancy } from './data/mapVacancy'
-import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
-import { cardHead, cardBox, row2, row3Even } from '@/components/ui/modalCards'
-import type { ApiVacancy, Vacancy } from '@/types/vacancy'
+import { BTN_H } from '@/config/buttonMetrics'
+import { useAddVacancyForm } from './addmodal/useAddVacancyForm'
+import ModalHeader from './addmodal/ModalHeader'
+import GeneralCard from './addmodal/GeneralCard'
+import ClientCascadeCard from './addmodal/ClientCascadeCard'
+import PlacementCard from './addmodal/PlacementCard'
+import RequirementsCard from './addmodal/RequirementsCard'
+import ConditionsCard from './addmodal/ConditionsCard'
+import DescriptionCard from './addmodal/DescriptionCard'
+import RecruiterCard from './addmodal/RecruiterCard'
+import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
-// 422 field-error keys are snake_case; map them back to this form's field names.
-const API_TO_FORM: Record<string, string> = {
-  title: 'title', status: 'status', owner_id: 'ownerId', customer_id: 'clientId',
-  industry: 'industry', category: 'category', location: 'location',
-}
-
-interface VacancyForm { title: string; clientId: string; status: string; ownerId: string; industry: string; category: string; location: string }
 interface ModalUser { id: Id; name: string }
 interface ModalCustomer { id: Id; name: string }
 
-/**
- * AddVacancyModal — create a vacancy. Mirrors AddCandidateModal/AddMatch (Danny
- * 27-07: "+ vacature is niet zo groot... geen mooie kaders en zoekbare dropdown"):
- * the house WIDE_MODAL footprint, fields regrouped into titled bordered cards
- * (Algemeen/Plaatsing/Publicatie), and every dropdown (client/industry/category/
- * status/owner) is now a searchable CreatableSelect instead of a bare `<select>`.
- * Lookups via hooks (never hardcoded option lists), 422 mapping unchanged. Only
- * the fields this form already submitted move around — no new field was added
- * (Danny's suggested "aantal/startdatum/uren/dienstverband/publiceren-vlag" don't
- * exist on this create form yet, so Plaatsing stays a single-field card for now;
- * see the delivery report).
- */
 export default function AddVacancyModal({
   onClose, onCreated, users = [], customers = [], lockCustomerId, lockCustomerName,
   initialCustomerLocationId, initialCustomerDepartmentId, initialCustomerLocationName, initialCustomerDepartmentName,
+  initialIndustry,
 }: {
   onClose: () => void; onCreated?: (v: Vacancy) => void; users?: ModalUser[]; customers?: ModalCustomer[]
-  // Opened from a customer drawer (Danny 28-07: "+ nieuwe vacature vanuit de klanten
-  // drill down"): the client is already known, so it is pre-filled and shown read-only
-  // instead of asking the recruiter to pick the customer they are already looking at.
-  // Mirrors AddDepartmentModal's lockLocationId.
+  // Opened from a customer drawer: the client is already known, so it is
+  // pre-filled and shown read-only instead of asking the recruiter to pick the
+  // customer they are already looking at (mirrors AddDepartmentModal's lockLocationId).
   lockCustomerId?: string; lockCustomerName?: string
-  // Point 1 (Danny's ten-point round): opened from a location/department drill-
-  // down's own "+ Vacature" — StoreVacancyRequest.php:79-80 accepts both FKs.
-  // This form has no location/department PICKER (unlike MatchModal's live
-  // cascade), so the id rides the POST body silently and the NAME renders as a
-  // small read-only info line (§3: honest about what will be created) instead
-  // of building a whole new cascade UI for one create form.
+  // Opened from a location/department drill-down's own "+ Vacature" — seeds
+  // the ClientCascadeCard's cascade (punt 6), still editable from there.
   initialCustomerLocationId?: string; initialCustomerDepartmentId?: string
   initialCustomerLocationName?: string; initialCustomerDepartmentName?: string
+  // Punt 4: prefilled ONLY when active for this tenant (useAddVacancyForm
+  // validates against the live /industries list) — an inactive/unknown name
+  // would 422, so it silently falls back to empty instead.
+  initialIndustry?: string
 }) {
-  const { t } = useTranslation(['vacancies', 'common'])
-  const { statuses } = useVacancyLookups()
-  const { industries } = useIndustries()
-  const { functions } = useFunctions()
-  // Esc closes + tab-trap + focus-restore (house pattern, §6) — was missing here.
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
-
-  const [errors, setErrors] = useState<Record<string, boolean>>({})
-  const [saving, setSaving] = useState(false)
-  // AUDIT-1 (item 9): a non-422 failure used to fall through the apiErrors branch
-  // silently — the button just stopped spinning with no feedback. Now every
-  // failure shows something inline; modal stays open.
-  const [createError, setCreateError] = useState<string | null>(null)
-  const [form, setForm] = useState<VacancyForm>({
-    title: '', clientId: lockCustomerId ?? '', status: statuses[0]?.value ?? '', ownerId: '',
-    industry: '', category: '', location: '',
+  const f = useAddVacancyForm({
+    onClose, onCreated, users, customers, lockCustomerId,
+    initialCustomerLocationId, initialCustomerDepartmentId, initialCustomerLocationName, initialCustomerDepartmentName,
+    initialIndustry,
   })
-
-  const set = (k: keyof VacancyForm, v: string) => {
-    setForm(f => ({ ...f, [k]: v }))
-    if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
-  }
-
-  const handleSubmit = async () => {
-    if (!form.title.trim()) { setErrors({ title: true }); return }
-    setSaving(true)
-    setCreateError(null)
-    try {
-      const body = {
-        title: form.title.trim(),
-        status: form.status || null,
-        owner_id: form.ownerId || null,
-        customer_id: form.clientId || null,
-        industry: form.industry || null,
-        category: form.category || null,
-        location: form.location || null,
-        // Point 1: additive-only — absent unless opened from a location/department
-        // drill-down's own "+ Vacature" (never sent as an explicit null, so the
-        // exact body other callers already assert stays byte-identical).
-        ...(initialCustomerLocationId ? { customer_location_id: initialCustomerLocationId } : {}),
-        ...(initialCustomerDepartmentId ? { customer_department_id: initialCustomerDepartmentId } : {}),
-      }
-      const r = await api.post('/vacancies', body)
-      onCreated?.(mapVacancy(unwrap<ApiVacancy>(r)))
-      onClose()
-    } catch (err) {
-      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
-      const apiErrors = e?.response?.data?.errors
-      if (apiErrors) {
-        const e2: Record<string, boolean> = {}
-        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
-        setErrors(e2)
-      } else {
-        // Fallback: no field-level 422 — surface the server message (or a generic
-        // one) instead of failing silently.
-        setCreateError(extractApiError(err, t('common:errorGeneric')))
-      }
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const canSubmit = !!form.title.trim()
-  const statusOptions = statuses.map(s => ({ value: s.value, label: s.label }))
-  const userOptions = users.map(u => ({ value: String(u.id), label: u.name }))
-  const customerOptions = customers.map(c => ({ value: String(c.id), label: c.name }))
 
   return (
     <div
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('modal.title')} tabIndex={-1}
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={f.t('modal.title')} tabIndex={-1}
         style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', ...WIDE_MODAL,
         boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
-        {/* Header */}
-        <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border)', flexShrink: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('modal.title')}</span>
-          <button onClick={onClose} aria-label={t('common:cancel')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
-            <X size={18} />
-          </button>
-        </div>
+        <ModalHeader status={f.form.status} statusOptions={f.statusOptions}
+          onSelectStatus={v => f.set('status', v)} onClose={onClose} />
 
-        {/* Form — titled bordered cards, stacked full-width (mirrors the
-            customers sub-modals): Algemeen / Plaatsing / Publicatie. */}
+        {/* Form — titled bordered cards, stacked full-width (mirrors AddCandidateModal/
+            AddCustomerModal): Algemeen / Klant / Inzet / Functie-eisen / Voorwaarden /
+            Beschrijving / Recruiter. */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <div style={cardHead}>{t('modal.fields.cardGeneral')}</div>
-            <div style={cardBox}>
-              <div>
-                <Field label={t('modal.fields.title')} required>
-                  <TextField value={form.title} onChange={v => set('title', v)} placeholder={t('modal.titlePlaceholder')} error={errors.title} />
-                </Field>
-                {errors.title && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
-              </div>
-              <div style={row3Even}>
-                {/* Klant/branche/categorie — searchable (Danny 27-07), never a bare `<select>`. */}
-                <Field label={t('modal.fields.client')}>
-                  {lockCustomerId
-                    ? (
-                      // Read-only: the drawer already fixes which customer this is.
-                      <div style={{ padding: '8px 11px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
-                        background: 'var(--bg)', color: 'var(--text-muted)' }}>{lockCustomerName ?? ''}</div>
-                    )
-                    : <CreatableSelect value={form.clientId || null} onChange={v => set('clientId', v)} allowCreate={false}
-                        placeholder={t('common:select')} options={customerOptions} />}
-                </Field>
-                <Field label={t('modal.fields.industry')}>
-                  <CreatableSelect value={form.industry || null} onChange={v => set('industry', v)} allowCreate={false}
-                    placeholder={t('common:select')} options={industries} />
-                </Field>
-                <Field label={t('modal.fields.category')}>
-                  <CreatableSelect value={form.category || null} onChange={v => set('category', v)} allowCreate={false}
-                    placeholder={t('common:select')} options={functions} />
-                </Field>
-              </div>
-              {/* Point 1: honest about the scope this vacancy will be created under
-                  — this form has no location/department picker, so the id rides the
-                  POST body silently (see handleSubmit) and only the NAME shows here. */}
-              {(initialCustomerLocationName || initialCustomerDepartmentName) && (
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                  {t('modal.fields.scopedUnder', { name: initialCustomerDepartmentName || initialCustomerLocationName })}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <div style={cardHead}>{t('modal.fields.cardPlacement')}</div>
-            <div style={cardBox}>
-              {/* Plaatsing stays a single-field card for now: this create form does not
-                  yet submit startdatum/uren/dienstverband (Danny's suggested grouping),
-                  only locatie — see the delivery report re: sparse-by-honesty. */}
-              <div style={row3Even}>
-                <Field label={t('modal.fields.location')}>
-                  <TextField value={form.location} onChange={v => set('location', v)} placeholder={t('modal.fields.location')} />
-                </Field>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div style={cardHead}>{t('modal.fields.cardPublication')}</div>
-            <div style={cardBox}>
-              <div style={row2}>
-                <Field label={t('modal.fields.status')}>
-                  {/* Placeholder given even though a default is always selected — it
-                      becomes the search box's accessible label once opened (§6). */}
-                  <CreatableSelect value={form.status || null} onChange={v => set('status', v)} allowCreate={false}
-                    placeholder={t('modal.fields.status')} options={statusOptions} />
-                </Field>
-                <Field label={t('modal.fields.owner')}>
-                  <CreatableSelect value={form.ownerId || null} onChange={v => set('ownerId', v)} allowCreate={false}
-                    placeholder={t('common:select')} options={userOptions} />
-                </Field>
-              </div>
-            </div>
-          </div>
+          <GeneralCard
+            title={f.form.title} onTitleChange={v => f.set('title', v)} titleError={f.errors.title}
+            category={f.form.category} onCategoryChange={v => f.set('category', v)} functions={f.functions}
+            industry={f.form.industry} onIndustryChange={v => f.set('industry', v)} industries={f.industries}
+          />
+          <ClientCascadeCard
+            lockCustomerId={lockCustomerId} lockCustomerName={lockCustomerName}
+            clientId={f.form.clientId} onClientChange={f.handleClientChange} customerOptions={f.customerOptions}
+            locationPicker={f.locationPicker} departmentPicker={f.departmentPicker} contactPicker={f.contactPicker}
+          />
+          <PlacementCard
+            contractTypes={f.form.contractTypes} candidateTypes={f.candidateTypes} onToggleType={f.toggleContractType}
+            startDate={f.form.startDate} endDate={f.form.endDate}
+            onStartDateChange={v => f.set('startDate', v)} onEndDateChange={v => f.set('endDate', v)}
+            street={f.form.street} houseNumber={f.form.houseNumber} houseNumberSuffix={f.form.houseNumberSuffix}
+            postalCode={f.form.postalCode} city={f.form.city} province={f.form.province} country={f.form.country}
+            onFieldChange={f.onAddressChange} provinces={f.provinces}
+            branchId={f.form.branchId} onBranchChange={v => f.set('branchId', v)} branchOptions={f.branchOptions}
+          />
+          <RequirementsCard
+            seniority={f.form.seniority} onSeniorityChange={v => f.set('seniority', v)} seniorityLevels={f.seniorityLevels}
+            education={f.form.education} onEducationChange={v => f.set('education', v)} educationLevels={f.educationLevels}
+            skills={f.skills} newSkill={f.newSkill} onNewSkillChange={f.setNewSkill} onAddSkill={f.addSkill} onRemoveSkill={f.removeSkill}
+          />
+          <ConditionsCard
+            salaryMin={f.form.salaryMin} salaryMax={f.form.salaryMax} salaryPeriod={f.form.salaryPeriod}
+            hoursMin={f.form.hoursMin} hoursMax={f.form.hoursMax}
+            onChange={f.onConditionsChange}
+          />
+          <DescriptionCard value={f.form.description} onChange={v => f.set('description', v)}
+            expanded={f.descExpanded} setExpanded={f.setDescExpanded} editing={f.descEditing} setEditing={f.setDescEditing} />
+          <RecruiterCard ownerId={f.form.ownerId} onOwnerChange={v => f.set('ownerId', v)} userOptions={f.userOptions} />
         </div>
 
         {/* Server-side rejection (validation / matrix-guard) — shown in place, modal stays open. */}
-        {createError && (
+        {f.createError && (
           <div role="alert" style={{ margin: '0 22px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
             color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
             border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', flexShrink: 0 }}>
-            {createError}
+            {f.createError}
           </div>
         )}
 
@@ -235,16 +117,14 @@ export default function AddVacancyModal({
           <button onClick={onClose}
             style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8,
               border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
-            {t('modal.cancel')}
+            {f.t('modal.cancel')}
           </button>
-          <button onClick={handleSubmit} disabled={!canSubmit || saving}
+          <button onClick={f.handleSubmit} disabled={!f.canSubmit || f.saving}
             style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-              // Audit R1 item 3: hardcoded hex → design tokens (blueprint parity
-              // with AddCandidateModal's disabled-state colours, §4).
-              background: (canSubmit && !saving) ? 'var(--color-primary)' : 'var(--border)',
-              color: (canSubmit && !saving) ? 'white' : 'var(--text-muted)',
-              cursor: (canSubmit && !saving) ? 'pointer' : 'not-allowed' }}>
-            {saving ? t('modal.creating') : t('modal.create')}
+              background: (f.canSubmit && !f.saving) ? 'var(--color-primary)' : 'var(--border)',
+              color: (f.canSubmit && !f.saving) ? 'white' : 'var(--text-muted)',
+              cursor: (f.canSubmit && !f.saving) ? 'pointer' : 'not-allowed' }}>
+            {f.saving ? f.t('modal.creating') : f.t('modal.create')}
           </button>
         </div>
       </div>

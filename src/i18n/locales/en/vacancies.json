@@ -60,7 +60,7 @@
     "status": "Status",
     "owner": "Recruiter",
     "client": "Client",
-    "category": "Category",
+    "category": "Function",
     "industry": "Industry",
     "employmentType": "Employment type",
     "categories": {
@@ -193,7 +193,7 @@
     "education": "Education",
     "industry": "Industry",
     "preferredIndustry": "Preferred industry",
-    "category": "Category",
+    "category": "Function",
     "function": "Function",
     "address": "Address",
     "street": "Street",
@@ -209,7 +209,7 @@
     "pickClientFirst": "Pick a client first",
     "skills": "Required skills",
     "addSkill": "Add skill",
-    "description": "Description"
+    "description": "Vacancy text"
   },
   "aiagent": {
     "pickerLabel": "AI agent",
@@ -329,12 +329,16 @@
       "owner": "Recruiter",
       "employmentType": "Employment type",
       "industry": "Industry",
-      "category": "Category",
+      "category": "Function",
       "location": "Location",
       "cardGeneral": "General",
       "cardPlacement": "Assignment",
       "cardPublication": "Publication",
-      "scopedUnder": "Will be created under: {{name}}"
+      "scopedUnder": "Will be created under: {{name}}",
+      "cardClient": "Client",
+      "branch": "Branch",
+      "cardOwner": "Recruiter",
+      "salaryPeriodPlaceholder": "e.g. per month"
     },
     "titlePlaceholder": "e.g. Nurse | The Hague",
     "create": "Create vacancy",
@@ -377,7 +381,7 @@
     },
     "fields": {
       "title": "Title",
-      "description": "Description",
+      "description": "Vacancy text",
       "vacancy_status_id": "Status",
       "start_date": "Start date",
       "end_date": "End date",
