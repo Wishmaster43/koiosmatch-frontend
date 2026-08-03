@@ -226,7 +226,9 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
       </div>
       )}
 
-      {modal === 'apply'  && <AddApplicationModal candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
+      {/* OWNER-DEVIATION-1: candidate owner passed from this already-loaded record
+          (no refetch) so the modal can flag a recruiter/owner deviation. */}
+      {modal === 'apply'  && <AddApplicationModal candidateId={c.id} candidateOwnerId={c.ownerId} candidateOwnerName={c.owner} onClose={() => setModal(null)} onCreated={reload} />}
       {modal === 'intake' && <PlanIntakeModal     candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} defaultVacancyId={soleVacancyId} />}
       {modal === 'match'  && <MatchModal candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
       {editAppt && <PlanIntakeModal candidateId={c.id} existing={editAppt} onClose={() => setEditAppt(null)} onCreated={reload} />}

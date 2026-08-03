@@ -17,10 +17,22 @@
  * shows an inline banner and still lets the recruiter proceed; a block cell (e.g. an
  * archived/blacklisted candidate) additionally disables Create, matching what the
  * backend's own ApplicationController::store guard will refuse anyway.
+ *
+ * OWNER-DEVIATION-1 (Danny: "de recruiter moet default zijn degene die de plus
+ * drukt"): a Recruiter picker defaults to the logged-in user (mirrors
+ * pages/applications/AddApplicationModal.tsx's identical owner-default guard — the
+ * "+ Sollicitatie" flow from the vacancy side, StoreApplicationRequest.php:28
+ * accepts `owner_id` for both entry points) — but ONLY when they are an
+ * assignable tenant user, never a super-admin the server would 422 on. Danny said
+ * a MELDING, not a block: when the chosen recruiter differs from the candidate's
+ * own owner (prop from the drawer's already-loaded record) or the picked vacancy's
+ * owner (VacancyListResource already resolves it on the same /vacancies row
+ * useVacancyOptions reads — no extra fetch), an inline warning names who owns
+ * what; Create stays enabled either way.
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
+import { X, AlertTriangle } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import CreatableSelect from '@/components/ui/CreatableSelect'
@@ -28,6 +40,8 @@ import { useVacancyOptions } from '../hooks/useVacancyOptions'
 import { useApplicationStages } from '@/hooks/useApplicationStages'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrules'
+import { useAuth } from '@/context/AuthContext'
+import { useUsers } from '@/lib/queries'
 import type { Id } from '@/types/common'
 
 const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 60 }
@@ -41,10 +55,14 @@ const pickerMenuWidth = 340
 const fieldFootprint: React.CSSProperties = { padding: '8px 11px', borderRadius: 8, fontSize: 13 }
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
-const API_TO_FORM: Record<string, string> = { candidate_id: 'candidateId', vacancy_id: 'vacancyId', application_stage_id: 'phase' }
+const API_TO_FORM: Record<string, string> = { candidate_id: 'candidateId', vacancy_id: 'vacancyId', owner_id: 'ownerId', application_stage_id: 'phase' }
 
-export default function AddApplicationModal({ candidateId, onClose, onCreated }: {
+export default function AddApplicationModal({ candidateId, candidateOwnerId, candidateOwnerName, onClose, onCreated }: {
   candidateId: Id
+  // OWNER-DEVIATION-1: the candidate's own owner, passed down from the already-
+  // loaded drawer record (WorkTab's `c.ownerId`/`c.owner`) — never refetched.
+  candidateOwnerId?: Id | null
+  candidateOwnerName?: string
   onClose: () => void
   onCreated: () => void
 }) {
@@ -52,6 +70,17 @@ export default function AddApplicationModal({ candidateId, onClose, onCreated }:
   const vacancyOptions = useVacancyOptions(true)
   // S24b: the real stage id (not just the slug) — needed to submit application_stage_id.
   const { stages, defaultStage } = useApplicationStages()
+
+  // OWNER-DEVIATION-1: recruiter picker, defaulted to the logged-in user — but only
+  // once they are confirmed to be an assignable tenant user (mirrors
+  // pages/applications/AddApplicationModal.tsx's meIsAssignable guard; a non-tenant
+  // login, e.g. a super-admin, is never proposed as the default owner).
+  const { user: me } = useAuth() as unknown as { user: { id?: Id; name?: string } | null }
+  const { data: users = [] } = useUsers() as { data?: { id: Id; name: string }[] }
+  const userOptions = users.map(u => ({ value: String(u.id), label: u.name }))
+  const meIsAssignable = me?.id != null && userOptions.some(o => o.value === String(me.id))
+  const [ownerId, setOwnerId] = useState('')
+  useEffect(() => { if (meIsAssignable && !ownerId) setOwnerId(String(me!.id)) }, [meIsAssignable]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // AXIS-MATRIX-2 preflight (mirrors MatchModal's match.create wiring, the
   // reference implementation): POST /applications enforces application.create against
@@ -67,6 +96,17 @@ export default function AddApplicationModal({ candidateId, onClose, onCreated }:
   const [phaseId, setPhaseId] = useState(() => defaultStage?.id ?? '')
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
+
+  // OWNER-DEVIATION-1: a soft warning, never a block (Danny: "wel een melding") —
+  // the picked recruiter differs from the candidate's own owner and/or the picked
+  // vacancy's owner. Both sides must be a KNOWN owner to compare (an unowned
+  // candidate/vacancy is not a "deviation", mirroring useBranchMismatch's own
+  // "both sides nullable" rule) — never claims a mismatch against an unknown "—".
+  const pickedVacancy = vacancyOptions.find(v => String(v.value) === String(vacancyId))
+  const ownerDiffersFromCandidate = Boolean(
+    ownerId && candidateOwnerId != null && String(candidateOwnerId) !== String(ownerId))
+  const ownerDiffersFromVacancy = Boolean(
+    ownerId && pickedVacancy?.ownerId != null && String(pickedVacancy.ownerId) !== String(ownerId))
 
   // Measured live (PlanIntakeModal probe hit the identical bug — see its S24a(c)
   // comment): the lazy useState initializer above only reads `stages` at MOUNT time,
@@ -88,7 +128,10 @@ export default function AddApplicationModal({ candidateId, onClose, onCreated }:
     setSaving(true)
     setErrors({})
     try {
-      await api.post('/applications', { candidate_id: candidateId, vacancy_id: vacancyId, application_stage_id: phaseId || undefined })
+      await api.post('/applications', {
+        candidate_id: candidateId, vacancy_id: vacancyId, owner_id: ownerId || null,
+        application_stage_id: phaseId || undefined,
+      })
       notifySuccess(t('work.applicationCreated'))
       onCreated(); onClose()
     } catch (err) {
@@ -132,12 +175,45 @@ export default function AddApplicationModal({ candidateId, onClose, onCreated }:
           {errors.vacancyId && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
         </div>
         {/* Fase — searchable pick-only combobox; now submits the real stage id (S24b). */}
-        <div style={{ marginBottom: 20 }}>
+        <div style={{ marginBottom: 14 }}>
           <div style={fieldLabel}>{t('work.phase')}</div>
           <CreatableSelect value={phaseId || null} onChange={setPhaseId} allowCreate={false} menuWidth={pickerMenuWidth}
             style={fieldFootprint} options={stages.map(s => ({ value: s.id, label: s.label }))} />
           {errors.phase && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
         </div>
+        {/* OWNER-DEVIATION-1: recruiter picker, defaulted to the logged-in user (see
+            the meIsAssignable effect above) but always changeable via the house
+            user-picker, same searchable-combobox footprint as the fields above. */}
+        <div style={{ marginBottom: 14 }}>
+          <div style={fieldLabel}>{t('work.owner')}</div>
+          <CreatableSelect value={ownerId || null} onChange={setOwnerId} placeholder={t('work.pickOwner')}
+            allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint} options={userOptions} />
+          {errors.ownerId && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
+        </div>
+        {/* Soft warning (never a block, Danny: "wel een melding") — mirrors the
+            AXIS-MATRIX banner's warn tint (ActionRuleBanner) so both notices in this
+            modal read as the same idiom. Only fires once both sides of a comparison
+            are a KNOWN owner (§ useBranchMismatch's "both sides nullable" rule). */}
+        {(ownerDiffersFromCandidate || ownerDiffersFromVacancy) && (
+          <div role="alert" aria-label={t('work.ownerDeviation')} style={{ display: 'flex', gap: 8, alignItems: 'flex-start',
+            padding: '8px 10px', borderRadius: 8, marginBottom: 20,
+            background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
+            border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)' }}>
+            <AlertTriangle size={15} color="var(--color-warning)" style={{ flexShrink: 0, marginTop: 1 }} aria-hidden="true" />
+            <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {ownerDiffersFromCandidate && (
+                <div style={{ fontSize: 12, color: 'var(--text)' }}>
+                  {t('work.ownerDeviationCandidate', { name: candidateOwnerName || '—' })}
+                </div>
+              )}
+              {ownerDiffersFromVacancy && (
+                <div style={{ fontSize: 12, color: 'var(--text)' }}>
+                  {t('work.ownerDeviationVacancy', { name: pickedVacancy?.ownerName || '—' })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
           <button onClick={submit} disabled={saving || !vacancyId || appRuleBlocked}
