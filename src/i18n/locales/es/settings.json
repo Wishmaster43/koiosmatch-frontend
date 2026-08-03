@@ -58,7 +58,8 @@
     "note_types": "Tipos de nota",
     "action_rules": "Reglas de acción",
     "ai": "Koios AI",
-    "import_export": "Importar y exportar"
+    "import_export": "Importar y exportar",
+    "document_types": "Tipos de documento"
   },
   "nav": {
     "candidate_display": "Visualización de la tabla",
@@ -153,7 +154,6 @@
     "task_types": "Tipos de actividad",
     "task_priorities": "Prioridades",
     "task_display": "Vista de tabla",
-    "document_types": "Tipos de documento",
     "candidate_phases": "Fase",
     "candidate_required_fields": "Campos obligatorios",
     "customer_required_fields": "Campos obligatorios",
@@ -203,7 +203,17 @@
     "org_policy": "Política de organización",
     "career_site": "Sitio de empleo",
     "cao": "Convenios",
-    "customer_conversion": "Conversión"
+    "customer_conversion": "Conversión",
+    "dt_candidate": "Candidatos",
+    "dt_customer": "Clientes",
+    "dt_customer_location": "Ubicaciones",
+    "dt_customer_department": "Departamentos",
+    "dt_contact": "Contactos",
+    "dt_opportunity": "Oportunidades",
+    "dt_task": "Tareas",
+    "dt_call_list": "Listas de llamadas",
+    "dt_match": "Coincidencias",
+    "dt_vacancy": "Vacantes"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -1796,11 +1806,10 @@
     "add": "Añadir género"
   },
   "documentTypes": {
-    "title": "Tipos de documento",
-    "subtitle": "Categorías y colores para documentos de candidatos (CV, identificación, diploma, …).",
+    "title": "Tipos de documento — {{entity}}",
+    "subtitle": "Categorías, colores e iconos para documentos de esta sección.",
     "add": "Añadir tipo",
-    "icon": "Icono",
-    "globalBadge": "Global"
+    "icon": "Icono"
   },
   "requiredFields": {
     "title": "Campos obligatorios",
@@ -2529,6 +2538,12 @@
   "customerConversion": {
     "title": "Estado predeterminado tras la conversión",
     "subtitle": "El estado que recibe un cliente justo después de convertir de Prospecto a Cliente. Sin configuración, el estado queda vacío — elija un estado para aplicarlo automáticamente.",
+    "none": "Ninguno (establecer manualmente)",
+    "saveFailed": "Error al guardar"
+  },
+  "vacancyDefaultStatus": {
+    "title": "Estado predeterminado al crear",
+    "subtitle": "El estado que recibe una nueva vacante cuando no se indica ninguno. Sin configuración, el estado queda vacío — elija un estado para aplicarlo automáticamente.",
     "none": "Ninguno (establecer manualmente)",
     "saveFailed": "Error al guardar"
   }

@@ -1,11 +1,11 @@
 /**
- * DocumentTypesSettings — V20b entity sub-tabs (Kandidaat/Vacature/Klant). Covers
- * the two behaviours that matter for the entity/global axis: (1) creating a type
- * from a sub-tab sends that tab's `entity` in the POST body, and (2) a Global
- * (entity=null) row is folded into EVERY tab's list, exactly like the backend's
- * `?entity=X OR entity IS NULL` contract — plus a regression guard for the
- * deliberate "edit never sends entity" choice (see the component's own header
- * comment) so a Global row can never be silently narrowed to one entity by an edit.
+ * DocumentTypesSettings (DOCTYPE-ENTITY-1 / DOCTYPE-STRICT-1) — now a thin per-entity
+ * StatusListEditor wrapper (registry.jsx `document_types` group renders one instance
+ * per entity sub-tab), mirroring NoteTypesSettings. These assert the REQUESTS (§13):
+ * the GET is scoped by `?entity=`, and — the key regression guard — an EDIT now sends
+ * `entity` too (the old bespoke component deliberately withheld it on edit to protect
+ * a cross-entity "Global row" fallback the backend no longer serves; StatusListEditor's
+ * plain `entity` prop sends it on every submit, which is now the correct contract).
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -23,32 +23,33 @@ vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() })
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 
+// eslint-disable-next-line no-restricted-syntax -- DATA: a fixture row's tenant-picked colour, not a style rule.
+const row = (over = {}) => ({ id: 'row-1', name: 'CV', color: '#3B8FD4', icon: null, entity: 'candidate', in_use: false, ...over })
+
 afterEach(() => vi.clearAllMocks())
 
-// A Global row (entity: null) plus one row scoped to whichever entity the mock is
-// asked for — mirrors the backend's `?entity=X` response shape (that entity's own
-// rows PLUS the global ones) for every tab.
-const rowsFor = (ent) => [
-  // eslint-disable-next-line no-restricted-syntax -- DATA: fixture rows mirroring stored tenant colours, not UI styling
-  { id: 'global-1', name: 'CV', color: '#3B8FD4', entity: null },
-  // eslint-disable-next-line no-restricted-syntax -- DATA: fixture rows mirroring stored tenant colours, not UI styling
-  { id: `${ent}-1`, name: `${ent} only`, color: '#059669', entity: ent },
-]
+describe('DocumentTypesSettings — per-entity tab', () => {
+  it('GETs scoped by the entity prop', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    render(<DocumentTypesSettings entity="candidate" />)
 
-describe('DocumentTypesSettings — entity sub-tabs', () => {
-  it('GETs the default (candidate) tab scoped by entity on mount', async () => {
-    api.get.mockResolvedValue({ data: rowsFor('candidate') })
-    render(<DocumentTypesSettings />)
-
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/document-types', { params: { entity: 'candidate' } }))
+    await screen.findByText('CV')
+    expect(api.get).toHaveBeenCalledWith('/document-types', { params: { entity: 'candidate' } })
   })
 
-  it('creating a type from the active tab sends that tab entity in the POST body', async () => {
-    api.get.mockResolvedValue({ data: rowsFor('candidate') })
-    // eslint-disable-next-line no-restricted-syntax -- DATA: fixture response mirroring a stored tenant colour, not UI styling
-    api.post.mockResolvedValue({ data: { id: 'new-1', name: 'Diploma', color: '#3B8FD4', entity: 'candidate' } })
+  it('a different entity prop scopes its own GET (registry mounts one instance per tab)', async () => {
+    api.get.mockResolvedValue({ data: [row({ id: 'row-2', name: 'Contract', entity: 'vacancy' })] })
+    render(<DocumentTypesSettings entity="vacancy" />)
+
+    await screen.findByText('Contract')
+    expect(api.get).toHaveBeenCalledWith('/document-types', { params: { entity: 'vacancy' } })
+  })
+
+  it('creating a type sends this tab entity + name in the POST body', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    api.post.mockResolvedValue({ data: row({ id: 'row-3', name: 'Diploma' }) })
     const user = userEvent.setup()
-    render(<DocumentTypesSettings />)
+    render(<DocumentTypesSettings entity="candidate" />)
 
     await screen.findByText('CV')
     await user.click(screen.getByRole('button', { name: st('documentTypes.add') }))
@@ -58,44 +59,55 @@ describe('DocumentTypesSettings — entity sub-tabs', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/document-types', expect.objectContaining({ entity: 'candidate', name: 'Diploma' })))
   })
 
-  it('switching tabs re-fetches scoped by the new entity, and a Global row shows on every tab', async () => {
-    api.get.mockImplementation((_url, config) => Promise.resolve({ data: rowsFor(config.params.entity) }))
-    const user = userEvent.setup()
-    render(<DocumentTypesSettings />)
-
-    await screen.findByText('CV')
-    expect(screen.getByText('candidate only')).toBeInTheDocument()
-
-    await user.click(screen.getByRole('tab', { name: st('nav.cf_vacancy') }))
-
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/document-types', { params: { entity: 'vacancy' } }))
-    expect(await screen.findByText('vacancy only')).toBeInTheDocument()
-    // The Global row is still there — it was never tied to the previous tab.
-    expect(screen.getByText('CV')).toBeInTheDocument()
-    // The previous tab's own-entity row is gone (the list remounted for the new tab).
-    expect(screen.queryByText('candidate only')).not.toBeInTheDocument()
-  })
-
-  // Regression guard for the component's deliberate design choice: an edit must
-  // never carry `entity`, so a Global row can never be silently narrowed to one
-  // entity by renaming/recolouring it from inside a specific tab.
-  it('editing the Global row never sends `entity` in the PUT body', async () => {
-    api.get.mockResolvedValue({ data: rowsFor('candidate') })
+  // Regression guard for DOCTYPE-STRICT-1: unlike the old bespoke component, an
+  // EDIT now sends `entity` too — the backend's strict `?entity=` scope means a
+  // row only ever surfaces on its own tab, so re-sending its own entity is a no-op
+  // and keeps this lookup's write path consistent with note-types.
+  it('editing a type sends its entity in the PUT body', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
     api.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
-    render(<DocumentTypesSettings />)
+    render(<DocumentTypesSettings entity="candidate" />)
 
     await screen.findByText('CV')
-    // rowsFor() lists the Global "CV" row first, so its edit button is index 0.
-    const editButtons = screen.getAllByRole('button', { name: st('statusList.edit') })
-    await user.click(editButtons[0])
+    await user.click(screen.getByRole('button', { name: st('statusList.edit') }))
     // Two "Save" buttons coexist while the modal is open (the toolbar's reorder
-    // Save + the modal's submit) — the modal's is always the last in DOM order.
+    // Save + the modal's submit) — the modal's is always the last in DOM order
+    // (mirrors CustomerPhasesSettings/DocumentTypesSettings' prior test).
     const saveButtons = screen.getAllByRole('button', { name: st('common.save') })
     await user.click(saveButtons[saveButtons.length - 1])
 
-    await waitFor(() => expect(api.put).toHaveBeenCalled())
-    const [, body] = api.put.mock.calls[0]
-    expect(body).not.toHaveProperty('entity')
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/document-types/row-1', expect.objectContaining({ entity: 'candidate', name: 'CV' })))
+  })
+
+  it('picking a curated icon PUTs it on the row', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<DocumentTypesSettings entity="candidate" />)
+
+    await screen.findByText('CV')
+    await user.click(screen.getByRole('button', { name: `${st('documentTypes.icon')}: CV` }))
+    await user.click(screen.getByRole('menuitem', { name: `${st('documentTypes.icon')}: id-card` }))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/document-types/row-1', expect.objectContaining({ icon: 'id-card' })))
+  })
+
+  it('keeps an in-use row on a 409 delete instead of removing it', async () => {
+    api.get.mockResolvedValue({ data: [row({ in_use: false })] })
+    api.delete.mockRejectedValue({ response: { status: 409 } })
+    const user = userEvent.setup()
+    render(<DocumentTypesSettings entity="candidate" />)
+
+    await screen.findByText('CV')
+    // Row layout is [swatch, icon-picker, badge, …, edit, delete] — delete is
+    // reliably the LAST button in the row (mirrors AppointmentLocationSettings' test).
+    const cvRow = screen.getByText('CV').closest('div')
+    const rowButtons = cvRow.querySelectorAll('button')
+    await user.click(rowButtons[rowButtons.length - 1])
+    await user.click(await screen.findByRole('button', { name: i18n.t('confirm', { ns: 'common' }) }))
+
+    await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/document-types/row-1'))
+    expect(screen.getByText('CV')).toBeInTheDocument()
   })
 })

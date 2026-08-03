@@ -58,7 +58,8 @@
     "note_types": "Note types",
     "action_rules": "Action rules",
     "ai": "Koios AI",
-    "import_export": "Import & Export"
+    "import_export": "Import & Export",
+    "document_types": "Document types"
   },
   "nav": {
     "candidate_display": "Table display",
@@ -155,7 +156,6 @@
     "department_statuses": "Department statuses",
     "contact_statuses": "Statuses",
     "last_contact_types": "Contact type",
-    "document_types": "Document types",
     "candidate_phases": "Phase",
     "candidate_required_fields": "Required fields",
     "customer_required_fields": "Required fields",
@@ -203,7 +203,17 @@
     "org_policy": "Organisation policy",
     "career_site": "Career site",
     "cao": "CLAs",
-    "customer_conversion": "Conversion"
+    "customer_conversion": "Conversion",
+    "dt_candidate": "Candidates",
+    "dt_customer": "Customers",
+    "dt_customer_location": "Locations",
+    "dt_customer_department": "Departments",
+    "dt_contact": "Contacts",
+    "dt_opportunity": "Opportunities",
+    "dt_task": "Tasks",
+    "dt_call_list": "Call lists",
+    "dt_match": "Matches",
+    "dt_vacancy": "Vacancies"
   },
   "kpis": {
     "title": "KPI settings",
@@ -1818,11 +1828,10 @@
     "add": "Add type"
   },
   "documentTypes": {
-    "title": "Document types",
-    "subtitle": "Categories and colours for candidate documents (CV, ID, diploma, …).",
+    "title": "Document types — {{entity}}",
+    "subtitle": "Categories, colours and icons for documents on this entity.",
     "add": "Add type",
-    "icon": "Icon",
-    "globalBadge": "Global"
+    "icon": "Icon"
   },
   "requiredFields": {
     "title": "Required fields",
@@ -2529,6 +2538,12 @@
   "customerConversion": {
     "title": "Default status after conversion",
     "subtitle": "The status a customer gets right after converting from Prospect to Customer. No setting configured leaves the status empty — pick a status to apply it automatically.",
+    "none": "None (set manually)",
+    "saveFailed": "Saving failed"
+  },
+  "vacancyDefaultStatus": {
+    "title": "Default status on create",
+    "subtitle": "The status a new vacancy gets when none is specified. No setting configured leaves the status empty — pick a status to apply it automatically.",
     "none": "None (set manually)",
     "saveFailed": "Saving failed"
   }

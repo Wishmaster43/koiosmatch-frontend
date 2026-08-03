@@ -58,7 +58,8 @@
     "note_types": "Types de note",
     "action_rules": "Règles d'action",
     "ai": "Koios AI",
-    "import_export": "Import & Export"
+    "import_export": "Import & Export",
+    "document_types": "Types de document"
   },
   "nav": {
     "candidate_display": "Affichage du tableau",
@@ -153,7 +154,6 @@
     "task_types": "Types d'activité",
     "task_priorities": "Priorités",
     "task_display": "Affichage tableau",
-    "document_types": "Types de document",
     "candidate_phases": "Phase",
     "candidate_required_fields": "Champs requis",
     "customer_required_fields": "Champs requis",
@@ -203,7 +203,17 @@
     "org_policy": "Politique d'organisation",
     "career_site": "Site carrière",
     "cao": "Conventions",
-    "customer_conversion": "Conversion"
+    "customer_conversion": "Conversion",
+    "dt_candidate": "Candidats",
+    "dt_customer": "Clients",
+    "dt_customer_location": "Sites",
+    "dt_customer_department": "Services",
+    "dt_contact": "Contacts",
+    "dt_opportunity": "Opportunités",
+    "dt_task": "Tâches",
+    "dt_call_list": "Listes d'appels",
+    "dt_match": "Matchs",
+    "dt_vacancy": "Postes"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -1796,11 +1806,10 @@
     "add": "Ajouter un genre"
   },
   "documentTypes": {
-    "title": "Types de document",
-    "subtitle": "Catégories et couleurs pour les documents candidats (CV, pièce d'identité, diplôme, …).",
+    "title": "Types de document — {{entity}}",
+    "subtitle": "Catégories, couleurs et icônes pour les documents de cette section.",
     "add": "Ajouter un type",
-    "icon": "Icône",
-    "globalBadge": "Global"
+    "icon": "Icône"
   },
   "requiredFields": {
     "title": "Champs requis",
@@ -2529,6 +2538,12 @@
   "customerConversion": {
     "title": "Statut par défaut après conversion",
     "subtitle": "Le statut attribué à un client juste après la conversion de Prospect en Client. Sans configuration, le statut reste vide — choisissez un statut pour l'appliquer automatiquement.",
+    "none": "Aucun (définir manuellement)",
+    "saveFailed": "Échec de l'enregistrement"
+  },
+  "vacancyDefaultStatus": {
+    "title": "Statut par défaut à la création",
+    "subtitle": "Le statut attribué à un nouveau poste lorsqu'aucun n'est précisé. Sans configuration, le statut reste vide — choisissez un statut pour l'appliquer automatiquement.",
     "none": "Aucun (définir manuellement)",
     "saveFailed": "Échec de l'enregistrement"
   }

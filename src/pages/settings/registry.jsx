@@ -49,6 +49,7 @@ import ProvincesSettings from './sections/ProvincesSettings'
 import FunctionsSettings from './sections/FunctionsSettings'
 import ContactFunctionsSettings from './sections/ContactFunctionsSettings'
 import { VacancyStatusSettings, VacancyPhaseSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings, VacancyApplicationDefaultsSettings } from './sections/VacancySettings'
+import VacancyDefaultStatusSettings from './sections/VacancyDefaultStatusSettings'
 import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
 import VacancyCandidateTabSettings from './sections/VacancyCandidateTabSettings'
 import CustomerDisplaySettings from './sections/CustomerDisplaySettings'
@@ -177,7 +178,9 @@ export const NAV_GROUPS = [
       { id: 'contract_forms', icon: Tags, component: ContractFormsSettings },
       { id: 'pools', icon: Star, component: PoolsSettings },
       { id: 'cv_template', icon: FileText, component: CvTemplateSettings },
-      { id: 'document_types', icon: FileText, component: DocumentTypesSettings },
+      // Document types moved OUT to their own top-level `document_types` group
+      // below (DOCTYPE-ENTITY-1/DOCTYPE-STRICT-1) — the lookup now spans every
+      // entity the backend supports, not just the candidate, mirroring note_types.
       { id: 'driver_licenses', icon: Car, component: DriverLicenseSettings },
       { id: 'candidate_display', icon: Palette, schema: candidateDisplay },
       // Conversion behaviour: default deployability status after Lead → Kandidaat.
@@ -257,6 +260,10 @@ export const NAV_GROUPS = [
     key: 'vacancies', icon: Briefcase,
     items: [
       { id: 'vacancy_statuses', icon: Briefcase, component: VacancyStatusSettings },
+      // VACSTATUS-DEFAULT-1: which status a status-less vacancy create gets
+      // (backend VacancyDefaultStatusResolver) — same UserCheck icon as the
+      // candidate/customer conversion pickers, reads as "the same concept".
+      { id: 'vacancy_default_status', icon: UserCheck, component: VacancyDefaultStatusSettings },
       { id: 'vacancy_phases', icon: Target, component: VacancyPhaseSettings },
       { id: 'vacancy_seniority', icon: BarChart2, component: VacancySenioritySettings },
       { id: 'vacancy_education', icon: BookOpen, component: VacancyEducationSettings },
@@ -353,6 +360,33 @@ export const NAV_GROUPS = [
       { id: 'nt_application', icon: ClipboardList, render: () => <NoteTypesSettings entity="application" /> },
       { id: 'nt_customer', icon: Building2, render: () => <NoteTypesSettings entity="customer" /> },
       { id: 'nt_opportunity', icon: Target, render: () => <NoteTypesSettings entity="opportunity" /> },
+    ],
+  },
+  {
+    // Document types (DOCTYPE-ENTITY-1, mirrors the note_types group above) — own
+    // top-level group, one DocumentTypesSettings(entity) sub-tab per entity the
+    // backend's CandidateDocumentType::ENTITIES lookup supports today (Danny's full
+    // list: kandidaat/klant/locatie/afdeling/contactpersoon/kans/taak/bellijst/match
+    // + vacature — every one of them is already a valid, tenant-configurable entity
+    // value on the backend, ahead of some of their own document-upload surfaces
+    // landing — same "entity precedes its own reader" order as note_types' history).
+    // Replaces the old candidate-only `document_types` entry (a bespoke multi-tab
+    // wrapper with its own internal SubTabBar + a "Global row" cross-entity fallback):
+    // the backend's `?entity=` scope is now STRICT (mirrors NoteTypeController::
+    // scopeIndex() exactly, no orWhereNull fallback), so that protection was guarding
+    // a behaviour the backend no longer serves — see DocumentTypesSettings.jsx.
+    key: 'document_types', icon: FileText,
+    items: [
+      { id: 'dt_candidate', icon: Users, render: () => <DocumentTypesSettings entity="candidate" /> },
+      { id: 'dt_customer', icon: Building2, render: () => <DocumentTypesSettings entity="customer" /> },
+      { id: 'dt_customer_location', icon: MapPin, render: () => <DocumentTypesSettings entity="customer_location" /> },
+      { id: 'dt_customer_department', icon: Building2, render: () => <DocumentTypesSettings entity="customer_department" /> },
+      { id: 'dt_contact', icon: Users, render: () => <DocumentTypesSettings entity="contact" /> },
+      { id: 'dt_opportunity', icon: Target, render: () => <DocumentTypesSettings entity="opportunity" /> },
+      { id: 'dt_task', icon: ListChecks, render: () => <DocumentTypesSettings entity="task" /> },
+      { id: 'dt_call_list', icon: Phone, render: () => <DocumentTypesSettings entity="call_list" /> },
+      { id: 'dt_match', icon: Sparkles, render: () => <DocumentTypesSettings entity="match" /> },
+      { id: 'dt_vacancy', icon: Briefcase, render: () => <DocumentTypesSettings entity="vacancy" /> },
     ],
   },
   {

@@ -58,7 +58,8 @@
     "note_types": "Notitietypes",
     "action_rules": "Actieregels",
     "ai": "Koios AI",
-    "import_export": "Import & Export"
+    "import_export": "Import & Export",
+    "document_types": "Documenttypes"
   },
   "nav": {
     "candidate_display": "Tabelweergave",
@@ -155,7 +156,6 @@
     "department_statuses": "Afdeling statussen",
     "contact_statuses": "Statussen",
     "last_contact_types": "Contacttype",
-    "document_types": "Documenttypes",
     "candidate_phases": "Fase",
     "candidate_required_fields": "Verplichte velden",
     "customer_required_fields": "Verplichte velden",
@@ -203,7 +203,17 @@
     "org_policy": "Organisatiebeleid",
     "career_site": "Carrière-site",
     "cao": "CAO's",
-    "customer_conversion": "Conversie"
+    "customer_conversion": "Conversie",
+    "dt_candidate": "Kandidaten",
+    "dt_customer": "Klanten",
+    "dt_customer_location": "Locaties",
+    "dt_customer_department": "Afdelingen",
+    "dt_contact": "Contactpersonen",
+    "dt_opportunity": "Kansen",
+    "dt_task": "Taken",
+    "dt_call_list": "Bellijsten",
+    "dt_match": "Matches",
+    "dt_vacancy": "Vacatures"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -1818,11 +1828,10 @@
     "add": "Type toevoegen"
   },
   "documentTypes": {
-    "title": "Documenttypes",
-    "subtitle": "Categorieën en kleuren voor kandidaatdocumenten (cv, id-bewijs, diploma, …).",
+    "title": "Documenttypes — {{entity}}",
+    "subtitle": "Categorieën, kleuren en iconen voor documenten bij dit onderdeel.",
     "add": "Type toevoegen",
-    "icon": "Icoon",
-    "globalBadge": "Overal"
+    "icon": "Icoon"
   },
   "requiredFields": {
     "title": "Verplichte velden",
@@ -2529,6 +2538,12 @@
   "customerConversion": {
     "title": "Standaardstatus na conversie",
     "subtitle": "De status die een klant direct krijgt na conversie van Prospect naar Klant. Een ontbrekende instelling laat de status leeg — kies een status om die automatisch toe te passen.",
+    "none": "Geen (handmatig instellen)",
+    "saveFailed": "Opslaan mislukt"
+  },
+  "vacancyDefaultStatus": {
+    "title": "Standaardstatus bij aanmaken",
+    "subtitle": "De status die een nieuwe vacature krijgt wanneer er geen status wordt meegegeven. Een ontbrekende instelling laat de status leeg — kies een status om die automatisch toe te passen.",
     "none": "Geen (handmatig instellen)",
     "saveFailed": "Opslaan mislukt"
   }

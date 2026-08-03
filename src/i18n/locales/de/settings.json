@@ -58,7 +58,8 @@
     "note_types": "Notiztypen",
     "action_rules": "Aktionsregeln",
     "ai": "Koios AI",
-    "import_export": "Import & Export"
+    "import_export": "Import & Export",
+    "document_types": "Dokumenttypen"
   },
   "nav": {
     "candidate_display": "Tabellenansicht",
@@ -153,7 +154,6 @@
     "task_types": "Aktivitätstypen",
     "task_priorities": "Prioritäten",
     "task_display": "Tabellenansicht",
-    "document_types": "Dokumenttypen",
     "candidate_phases": "Phase",
     "candidate_required_fields": "Pflichtfelder",
     "customer_required_fields": "Pflichtfelder",
@@ -203,7 +203,17 @@
     "org_policy": "Organisationsrichtlinien",
     "career_site": "Karriereseite",
     "cao": "Tarifverträge",
-    "customer_conversion": "Konvertierung"
+    "customer_conversion": "Konvertierung",
+    "dt_candidate": "Kandidaten",
+    "dt_customer": "Kunden",
+    "dt_customer_location": "Standorte",
+    "dt_customer_department": "Abteilungen",
+    "dt_contact": "Kontakte",
+    "dt_opportunity": "Chancen",
+    "dt_task": "Aufgaben",
+    "dt_call_list": "Anruflisten",
+    "dt_match": "Matches",
+    "dt_vacancy": "Stellen"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -1796,11 +1806,10 @@
     "add": "Geschlecht hinzufügen"
   },
   "documentTypes": {
-    "title": "Dokumenttypen",
-    "subtitle": "Kategorien und Farben für Kandidatendokumente (Lebenslauf, Ausweis, Diplom, …).",
+    "title": "Dokumenttypen — {{entity}}",
+    "subtitle": "Kategorien, Farben und Symbole für Dokumente in diesem Bereich.",
     "add": "Typ hinzufügen",
-    "icon": "Symbol",
-    "globalBadge": "Global"
+    "icon": "Symbol"
   },
   "requiredFields": {
     "title": "Pflichtfelder",
@@ -2529,6 +2538,12 @@
   "customerConversion": {
     "title": "Standardstatus nach Konvertierung",
     "subtitle": "Der Status, den ein Kunde direkt nach der Konvertierung von Interessent zu Kunde erhält. Ohne Einstellung bleibt der Status leer — wählen Sie einen Status, um ihn automatisch anzuwenden.",
+    "none": "Keine (manuell setzen)",
+    "saveFailed": "Speichern fehlgeschlagen"
+  },
+  "vacancyDefaultStatus": {
+    "title": "Standardstatus beim Erstellen",
+    "subtitle": "Der Status, den eine neue Stelle erhält, wenn keiner angegeben wird. Ohne Einstellung bleibt der Status leer — wählen Sie einen Status, um ihn automatisch anzuwenden.",
     "none": "Keine (manuell setzen)",
     "saveFailed": "Speichern fehlgeschlagen"
   }
