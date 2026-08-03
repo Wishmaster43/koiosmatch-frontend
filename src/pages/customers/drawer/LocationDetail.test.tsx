@@ -59,7 +59,7 @@ beforeEach(() => { vi.clearAllMocks(); mockPost.mockResolvedValue({ status: 202,
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
-const cm = (key: string) => i18n.t(key, { ns: 'common' })
+const cm = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
 
 // Hex values here are DATA — fixture colours for a tenant lookup, not UI styling.
 const statuses: LookupOption[] = [
@@ -201,16 +201,23 @@ describe('LocationDetail · PDOK card in Koppelingen', () => {
 })
 
 /**
- * CONTACT-LOCATION-PRIMARY-1 — THE original complaint. A location used to carry only free
- * text ("Contact ter plaatse") and the screen GUESSED which contact record the typed name
- * meant: it matched on the name, gave up when two people shared one, and when it did match
- * it could open somebody who was never meant. Danny: "je typt Joost de Boer en Joost weet
- * van niets."
+ * CONTACT-LOCATION-PRIMARY-1 — two rounds of the same underlying complaint.
  *
- * The real link now exists (customer_contact_customer_location.is_primary), so the site's
- * primary contact is RESOLVED, not guessed. These assert both halves: the real link is
- * there, and the guess is gone — including in the case the old code handled "successfully"
- * (exactly one name match), which is the one that quietly opened the wrong person.
+ * ROUND ONE: a location used to carry only free text ("Contact ter plaatse") and the screen
+ * GUESSED which contact record the typed name meant: it matched on the name, gave up when two
+ * people shared one, and when it did match it could open somebody who was never meant. Danny:
+ * "je typt Joost de Boer en Joost weet van niets." Fixed by resolving the real coupling
+ * (customer_contact_customer_location.is_primary) instead of guessing from text.
+ *
+ * ROUND TWO (02-08): that fix left TWO blocks on screen — "Contact ter plaatse" (free text)
+ * and "Primaire contactpersoon" (the real coupling) — which could flatly disagree: Danny typed
+ * a contact when creating the location, saw it under "Contact ter plaatse", and the adjacent
+ * block still said "Nog geen primaire contactpersoon" for the exact same location. "Dat is
+ * fout: contact ter plaatse is aangegeven als primaire contactpersoon van deze vestiging!!"
+ * Fixed by merging into ONE block (LocationContactSection): the coupling is the only thing
+ * rendered as a live, linked record; legacy free text is a plain (unlinked, non-editable)
+ * fallback shown only until a real contact is coupled — never both, never a claim of "none"
+ * while text is sitting right there.
  */
 const contactFixture = (over: Partial<Contact> = {}): Contact => ({
   id: 'con-1', helloflexLink: null, shiftmanagerLink: null, customerId: 'cust-1',
@@ -227,14 +234,16 @@ const contactFixture = (over: Partial<Contact> = {}): Contact => ({
 const primaryAt = (locationIds: string[], over: Partial<Contact> = {}): Contact =>
   ({ ...contactFixture(over), primaryLocationIds: locationIds } as Contact)
 
-describe('LocationDetail · primary contact of THIS site', () => {
-  it('resolves the site\'s primary contact from the coupling flag and links to the real record', async () => {
+describe('LocationDetail · one contact block, one truth (round two)', () => {
+  it('resolves the site\'s primary contact from the coupling flag and links to the real record, with its own email', async () => {
     const user = userEvent.setup()
     render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps}
       contacts={[primaryAt(['loc-1'])]} />)
 
     const link = screen.getByRole('button', { name: 'Joost de Boer' })
     expect(link).toBeInTheDocument()
+    // The coupled contact's OWN email shows here too — one full identity, not just a name.
+    expect(screen.getByText('joost@klant.test')).toBeInTheDocument()
     // It opens THAT contact's own screen, on the Contactpersonen sub-tab.
     await user.click(link)
     expect(screen.getByText(ct('contacts.detail.infoTitle'))).toBeInTheDocument()
@@ -269,20 +278,37 @@ describe('LocationDetail · primary contact of THIS site', () => {
     expect(screen.queryByRole('button', { name: 'Joost de Boer' })).toBeNull()
   })
 
-  it('keeps the free-text field editable, so no typed value is lost', async () => {
-    const user = userEvent.setup()
+  /**
+   * THE REPORTED CONTRADICTION (Danny 02-08). Before this fix, "Contact ter plaatse" showed
+   * the typed name/email/phone while the SEPARATE "Primaire contactpersoon" block, right next
+   * to it, claimed there was none — for the exact same location. Danny: "Dat is fout: contact
+   * ter plaatse is aangegeven als primaire contactpersoon van deze vestiging!!" Proven here:
+   * with typed on-site text but no coupled contact, the screen must never claim "no contact",
+   * and there must be only ONE contact heading, never two disagreeing ones.
+   */
+  it('does not claim there is no contact when on-site text is filled but not yet coupled — the reported contradiction', () => {
+    render(<LocationDetail location={location({ contactName: 'Sanne de Vries', email: 'locatie1@example.test', phone: '+31104811775' })}
+      onSave={vi.fn()} {...baseProps} contacts={[]} />)
+
+    expect(screen.queryByText(ct('locations.detail.noPrimaryContact'))).not.toBeInTheDocument()
+    // The typed identity is still visible — never silently dropped — and honestly marked
+    // as not yet linked, rather than presented as a second, competing truth.
+    expect(screen.getByText('Sanne de Vries')).toBeInTheDocument()
+    expect(screen.getByText('locatie1@example.test')).toBeInTheDocument()
+    expect(screen.getByText(ct('locations.detail.contactNotLinked'))).toBeInTheDocument()
+    // Never a second, separate "Primaire contactpersoon" heading competing with this one.
+    expect(screen.queryByText(ct('locations.detail.primaryContactTitle'))).not.toBeInTheDocument()
+  })
+
+  it('no longer offers to edit the free text here — the fix is coupling a real contact, not retyping text', () => {
     const onSave = vi.fn()
-    render(<LocationDetail location={location({ contactName: 'Joost de Boer' })} onSave={onSave} {...baseProps} />)
+    render(<LocationDetail location={location({ contactName: 'Joost de Boer' })} onSave={onSave} {...baseProps}
+      contacts={[contactFixture()]} />)
 
-    // The "Contact ter plaatse" card's own pencil — the third field group on this sub-tab.
-    const pencils = screen.getAllByRole('button', { name: cm('edit') })
-    await user.click(pencils[pencils.length - 1])
-    const input = screen.getByDisplayValue('Joost de Boer')
-    await user.clear(input)
-    await user.type(input, 'Marieke Jansen')
-    await user.click(screen.getByRole('button', { name: cm('save') }))
-
-    expect(onSave).toHaveBeenCalledWith('loc-1', expect.objectContaining({ contactName: 'Marieke Jansen' }))
+    // Only the description's own pencil plus the two remaining field tables (Gegevens/Adres)
+    // — none of the three belongs to the on-site contact block any more.
+    expect(screen.getAllByRole('button', { name: cm('edit') })).toHaveLength(3)
+    expect(onSave).not.toHaveBeenCalled()
   })
 })
 
@@ -309,15 +335,97 @@ describe('LocationDetail · description (LOCATIE-OMSCHRIJVING-1)', () => {
     const onSave = vi.fn()
     render(<LocationDetail location={location({ description: '<p>Oud</p>' })} onSave={onSave} {...baseProps} />)
 
-    // The description block's OWN pencil (Edit2, title="edit") — it comes first in
-    // DOM order, ahead of the three field-table pencils.
+    // The description block's OWN pencil (Edit2, title="edit") now comes LAST in DOM
+    // order — Danny 02-08 moved Omschrijving to mirror the Bedrijf tab's field-tables →
+    // Contact → Omschrijving sequence, trailing the two field-table pencils (Gegevens/Adres)
+    // instead of leading them (see the full-order test below).
     const pencils = screen.getAllByRole('button', { name: cm('edit') })
-    await user.click(pencils[0])
+    await user.click(pencils[2])
     const rte = screen.getByTestId('rte')
     await user.clear(rte)
     await user.type(rte, '<p>Nieuw</p>')
     await user.click(screen.getByTitle(cm('save')))
 
     expect(onSave).toHaveBeenCalledWith('loc-1', { description: '<p>Nieuw</p>' })
+  })
+})
+
+/**
+ * LOCATIE-SECTIE-VOLGORDE-1 (Danny 02-08, same day as KOIOS-ADVICE-POSITION-1, then
+ * overruled again). The customer's own Bedrijf tab (OverviewTab.tsx) renders, top to
+ * bottom: field tables (Gegevens → Adres) → Contact → Bedrijfstekst → Koios advice →
+ * Vestiging — OverviewTab.tsx:162 puts its description directly under Contact. The
+ * location used to put Omschrijving FIRST (ahead of the field tables); Danny overruled
+ * that placement the same day, so this pins the WHOLE sequence, not just Koios-vs-
+ * Vestiging, so a future drift on any one block fails here.
+ */
+describe('LocationDetail · Adres & gegevens section order (mirrors the Bedrijf tab)', () => {
+  it('renders field tables → Contact → Omschrijving → Koios advice → Vestiging, in that order', () => {
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
+
+    const gegevens = screen.getByText(ct('overview.details'))
+    // "Adres" legitimately appears twice: the field table's own title, THEN (further
+    // down, still inside that same table) the address composite row's label, which
+    // reuses the exact same translation key. The table's title always renders first.
+    const adres = screen.getAllByText(ct('subModal.groups.address'))[0]
+    const contact = screen.getByText(ct('locations.detail.contactTitle'))
+    const omschrijving = screen.getByText(ct('locations.detail.description'))
+    const koios = screen.getByText(ct('ai.title'))
+    const vestiging = screen.getByText(ct('locations.detail.branchTitle'))
+
+    // DOCUMENT_POSITION_FOLLOWING on `b` relative to `a` means `a` sits first in DOM order.
+    const isBefore = (a: HTMLElement, b: HTMLElement) =>
+      Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)
+
+    expect(isBefore(gegevens, adres)).toBe(true)
+    expect(isBefore(adres, contact)).toBe(true)
+    expect(isBefore(contact, omschrijving)).toBe(true)
+    expect(isBefore(omschrijving, koios)).toBe(true)
+    expect(isBefore(koios, vestiging)).toBe(true)
+  })
+})
+
+/**
+ * DRILL-PAGER-1 (Danny 02-08) — LocationDetail only RENDERS the pager the caller
+ * (LocationsTab) hands it; the caller-side scoping/navigation is covered in
+ * LocationsTab.test.tsx. This proves the wiring: no `pager` prop → no pager on
+ * screen (today's behaviour, unaffected); a `pager` prop renders it in the title
+ * row, before the delete button, and its buttons call exactly what was passed in.
+ */
+describe('LocationDetail · pager wiring', () => {
+  it('renders no pager when the caller passes none', () => {
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
+    expect(screen.queryByLabelText(cm('drillPager.next'))).toBeNull()
+  })
+
+  it('renders the pager before the delete button, wired to the caller\'s own handlers', async () => {
+    const user = userEvent.setup()
+    const onPrev = vi.fn()
+    const onNext = vi.fn()
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps}
+      pager={{ index: 2, total: 4, onPrev, onNext }} />)
+
+    expect(screen.getByTitle(cm('drillPager.nextAt', { index: 2, total: 4 }))).toBeInTheDocument()
+    // The delete button carries only a `title`, no aria-label — matched the same way
+    // the save/cancel buttons elsewhere in this file already are (getByTitle).
+    const deleteBtn = screen.getByTitle(ct('locations.detail.deleteLocation'))
+    const nextBtn = screen.getByRole('button', { name: cm('drillPager.next') })
+    // The pager sits BEFORE the delete button in the same title-row corner.
+    expect(nextBtn.compareDocumentPosition(deleteBtn) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+
+    await user.click(nextBtn)
+    expect(onNext).toHaveBeenCalledTimes(1)
+    await user.click(screen.getByRole('button', { name: cm('drillPager.prev') }))
+    expect(onPrev).toHaveBeenCalledTimes(1)
+  })
+})
+
+/** VESTIGING-HINT-1 (Danny: "Weg die txt toch?") — the inherited/deviate explainer
+ *  paragraph under Vestiging was noise Danny asked removed; the state badge (Volgt de
+ *  klant / Afwijkend ingesteld) already says the same thing in three words. */
+describe('LocationDetail · Vestiging helper text removed', () => {
+  it('no longer renders the inherited/deviate explainer paragraph under Vestiging', () => {
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
+    expect(screen.queryByText(ct('locations.detail.branchHint'))).not.toBeInTheDocument()
   })
 })

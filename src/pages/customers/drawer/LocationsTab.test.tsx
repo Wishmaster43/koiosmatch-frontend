@@ -6,11 +6,15 @@
  * plain text without losing the label (§6 — colour is never the only signal).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import i18n from '@/i18n'
 import api from '@/lib/api'
 import { invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import LocationsTab from './LocationsTab'
 import type { Location } from '@/types/customer'
+
+const cm = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
 
 // Defensive mocks — LocationsTab only renders the list (no row is clicked here), but
 // its module graph pulls in LocationDetail/AddLocationModal, which reach these hooks.
@@ -106,5 +110,57 @@ describe('LocationsTab · tenant-configured default status filter (TENANT-DEFAUL
       expect(screen.getByText('Actieve locatie')).toBeInTheDocument()
       expect(screen.getByText('Inactieve locatie')).toBeInTheDocument()
     })
+  })
+})
+
+/**
+ * DRILL-PAGER-1 (Danny 02-08: "moeten er pijltjes komen zodat je vanuit één
+ * contactpersoon naar de volgende kan en terug" — same request, top-level Locaties
+ * tab). The pager must step through EXACTLY the rows the user was looking at: with
+ * the status filter narrowing three locations to two, "next" must never land on the
+ * filtered-out third one, and the counter must report against the FILTERED total
+ * (2), not the wider unscoped one (3). This also proves LocationsTab's own move off
+ * SubEntityTab (see the file header) still opens/steps locations correctly.
+ */
+describe('LocationsTab · pager steps through the caller\'s OWN filtered rows (DRILL-PAGER-1)', () => {
+  // A prior describe block's LAST test leaves a custom /settings mockImplementation
+  // behind (mockClear() clears call history, never a mocked implementation) — reset
+  // it explicitly so this block's "no configured default" assumption holds regardless
+  // of file execution order.
+  beforeEach(() => vi.mocked(api.get).mockImplementation(() => Promise.resolve({ data: { data: [] } })))
+
+  const statuses = [
+    { id: 'status-active', value: 'active', label: 'Actief' },
+    { id: 'status-inactive', value: 'inactive', label: 'Inactief' },
+  ]
+  const threeLocations = [
+    location({ id: 'loc-a', name: 'Vestiging Alpha', statusId: 'status-active', statusLabel: 'Actief' }),
+    location({ id: 'loc-b', name: 'Vestiging Bravo', statusId: 'status-active', statusLabel: 'Actief' }),
+    // Filtered OUT by the default "active only" guess — proves the pager counts ONLY
+    // what the status filter actually shows, never the wider unscoped list.
+    location({ id: 'loc-c', name: 'Vestiging Charlie', statusId: 'status-inactive', statusLabel: 'Inactief' }),
+  ]
+
+  it('pages to the next VISIBLE location, never the one the filter hid, and disables at each end', async () => {
+    const user = userEvent.setup()
+    render(<LocationsTab {...base} locations={threeLocations} statuses={statuses} />)
+
+    await waitFor(() => expect(screen.getByText('Vestiging Alpha')).toBeInTheDocument())
+    // The filter really did narrow the list — the scoping this pager must respect.
+    expect(screen.queryByText('Vestiging Charlie')).toBeNull()
+
+    await user.click(screen.getByText('Vestiging Alpha'))
+    // First of TWO visible locations (never three) — prev is honestly disabled here.
+    expect(screen.getByTitle(cm('drillPager.nextAt', { index: 1, total: 2 }))).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: cm('drillPager.prev') })).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: cm('drillPager.next') }))
+    // Landed on the SECOND visible location, never the filtered-out third. The name
+    // legitimately repeats on screen (breadcrumb "current" + title + a Gegevens field
+    // row), so scope to the breadcrumb, which is the one spot it can only mean "this
+    // is the record now open".
+    expect(within(screen.getByRole('navigation')).getByText('Vestiging Bravo')).toBeInTheDocument()
+    expect(screen.getByTitle(cm('drillPager.nextAt', { index: 2, total: 2 }))).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: cm('drillPager.next') })).toBeDisabled()
   })
 })

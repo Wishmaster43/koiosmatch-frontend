@@ -36,6 +36,7 @@ import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import TitleBadge from '@/components/drawer/TitleBadge'
+import DrillPager, { type DrillPagerProps } from '@/components/drawer/DrillPager'
 import ContactLinkSection from './ContactLinkSection'
 import { emailValue, phoneValue } from '@/components/drawer/contactLinks'
 import SubTabBar from '@/components/drawer/SubTabBar'
@@ -53,7 +54,7 @@ import type { Id, LookupOption } from '@/types/common'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 
 
-export default function ContactDetail({ contact, locations, departments, statuses, existing = [], canLinkBackoffice = false, onSave, onDelete, close, onMerged }: {
+export default function ContactDetail({ contact, locations, departments, statuses, existing = [], canLinkBackoffice = false, pager, onSave, onDelete, close, onMerged }: {
   contact: Contact
   locations: { id: Id; name: string }[]
   departments: Department[]
@@ -63,6 +64,9 @@ export default function ContactDetail({ contact, locations, departments, statuse
   // EXTRACT-1: the caller's own customers.update permission check for the
   // Koppelingen sub-tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
   canLinkBackoffice?: boolean
+  /** Prev/next through the caller's OWN filtered rows (DRILL-PAGER-1) — absent when
+   * the open contact fell out of that filtered set (nothing sane to page to). */
+  pager?: DrillPagerProps
   onSave: (id: Id, payload: Partial<ContactPayload>) => void
   onDelete: (id: Id) => void
   close: () => void
@@ -230,6 +234,9 @@ export default function ContactDetail({ contact, locations, departments, statuse
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          {/* Prev/next through the list this contact was opened from (DRILL-PAGER-1) —
+              before the merge/delete actions, same corner as every other detail pager. */}
+          {pager && <DrillPager {...pager} />}
           {/* Merge — title-row action, exactly like the candidate drawer (§3A). Hidden
               without customers.update and when this customer has no second contact to
               merge with: a button that can only ever fail is a fake affordance. */}

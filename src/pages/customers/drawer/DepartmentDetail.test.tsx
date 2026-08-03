@@ -1,0 +1,172 @@
+/**
+ * DepartmentDetail · house-style parity with LocationDetail (PARITY-DEPARTMENT-1,
+ * Danny 2026-08-02: "Afdeling loopt achter — zorg ervoor dat de huisstijl klopt").
+ * Guards the three things this pass fixed and that are easy to regress again:
+ *
+ *  1. The status badge is a colour-coded TitleBadge next to the name (JOB-STATUS-1,
+ *     mirrors LocationDetail), not a select row buried in the field table.
+ *  2. The reference-number chip (NUMMER-1) renders when the record has one, and
+ *     stays silent when it doesn't (never an empty chip).
+ *  3. Section order mirrors LocationDetail: Omschrijving → the titled field card →
+ *     Koios advice.
+ *
+ * EditableFieldTable pulls in `@/lib/datetime`, which side-effect-imports the real
+ * i18n instance — so (like LocationDetail.test.tsx) this file resolves assertions
+ * through the ACTIVE locale's own copy instead of guessing/hardcoding a language.
+ */
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import i18n from '@/i18n'
+import DepartmentDetail from './DepartmentDetail'
+import type { Department } from '@/types/customer'
+import type { LookupOption } from '@/types/common'
+
+// useCustomFields hits the API in an effect — stub it so the Extra sub-tab stays
+// hidden (no custom fields defined) and no network call happens under test.
+vi.mock('@/lib/useCustomFields', () => ({
+  useCustomFields: () => ({ fields: [], allFields: [], loading: false, invalidate: () => {} }),
+}))
+vi.mock('@/lib/notify', () => ({ notifySuccess: vi.fn(), notifyError: vi.fn() }))
+// Tiptap needs a real browser to mount — stubbed with a plain controlled textarea,
+// mirrors LocationDetail.test.tsx's own convention (RichTextEditor's own pencil/
+// save/cancel dance is unit-tested on EditableRichTextField.test.tsx).
+vi.mock('@/components/ui/RichTextEditor', () => ({
+  default: ({ value, onChange }: { value?: string; onChange: (v: string) => void }) => (
+    <textarea data-testid="rte" value={value ?? ''} onChange={e => onChange(e.target.value)} />
+  ),
+}))
+
+beforeEach(() => vi.clearAllMocks())
+
+// Resolve the active locale's own copy so assertions never guess/hardcode a language.
+const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
+const cm = (key: string) => i18n.t(key, { ns: 'common' })
+
+const department = (over: Partial<Department> = {}): Department => ({
+  id: 'd1', helloflexLink: null, shiftmanagerLink: null,
+  name: 'Zorg', description: '', locationId: 'loc-1', locationName: 'Vestiging Noord',
+  contacts: [], costCenter: '', statusId: null, status: '', statusLabel: '', statusColor: '',
+  customFields: {},
+  ...over,
+} as Department)
+
+// Hex values here are DATA — fixture colours for a tenant lookup, not UI styling.
+const statuses: LookupOption[] = [
+  // eslint-disable-next-line no-restricted-syntax -- DATA fixture, mirrors a tenant lookup colour
+  { value: 'status-active', label: 'Actief', color: '#22C55E', id: 'status-active' },
+  // eslint-disable-next-line no-restricted-syntax -- DATA fixture, mirrors a tenant lookup colour
+  { value: 'status-inactive', label: 'Inactief', color: '#9CA3AF', id: 'status-inactive' },
+]
+
+// Every required prop the component reads — kept minimal, only onSave is asserted.
+const baseProps = {
+  locations: [{ id: 'loc-1', name: 'Vestiging Noord' }], departments: [], contacts: [],
+  statuses, onAddContact: vi.fn(), onUpdateContact: vi.fn(), onRemoveContact: vi.fn(),
+  onDelete: vi.fn(), close: vi.fn(),
+}
+
+// A department carrying the "active" status lookup above — reuses its colour so
+// the hex literal lives in exactly one place (the `statuses` fixture).
+const activeDepartment = (over: Partial<Department> = {}) =>
+  department({ statusId: 'status-active', statusLabel: 'Actief', statusColor: statuses[0].color, ...over })
+
+describe('DepartmentDetail · title-row status badge (JOB-STATUS-1)', () => {
+  it('renders the status as a read-only badge next to the name, not a field-table row', () => {
+    render(<DepartmentDetail department={activeDepartment()} onSave={vi.fn()} {...baseProps} />)
+    expect(screen.getByText('Actief')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: ct('locations.detail.changeStatus') })).toBeInTheDocument()
+    // Only ONE "Actief" on screen — the title badge — not a second one inside a field row.
+    expect(screen.getAllByText('Actief')).toHaveLength(1)
+  })
+
+  it('colours the badge with the lookup\'s own colour, not a fixed brand colour', () => {
+    render(<DepartmentDetail department={activeDepartment()} onSave={vi.fn()} {...baseProps} />)
+    expect(screen.getByText('Actief')).toHaveStyle({ color: statuses[0].color })
+  })
+
+  it('renders no badge (but still an edit affordance) when the department carries no status yet', () => {
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+    expect(screen.queryByText('Actief')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: ct('locations.detail.changeStatus') })).toBeInTheDocument()
+  })
+
+  it('pencil reveals a picker seeded with the current status; picking another value + save PATCHes statusId', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<DepartmentDetail department={activeDepartment()} onSave={onSave} {...baseProps} />)
+
+    await user.click(screen.getByRole('button', { name: ct('locations.detail.changeStatus') }))
+    // Seeded with the current value — the trigger shows "Actief" (closed dropdown, one match).
+    await user.click(screen.getByRole('button', { name: 'Actief' }))
+    await user.click(screen.getByRole('button', { name: 'Inactief' }))
+    await user.click(screen.getByRole('button', { name: cm('save') }))
+
+    expect(onSave).toHaveBeenCalledWith('d1', { statusId: 'status-inactive' })
+    // Back to read-only badge display — the local edit state must have closed.
+    expect(screen.queryByRole('button', { name: cm('save') })).not.toBeInTheDocument()
+  })
+
+  it('cancel discards the draft without calling onSave', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<DepartmentDetail department={activeDepartment()} onSave={onSave} {...baseProps} />)
+
+    await user.click(screen.getByRole('button', { name: ct('locations.detail.changeStatus') }))
+    await user.click(screen.getByRole('button', { name: cm('cancel') }))
+
+    expect(onSave).not.toHaveBeenCalled()
+    expect(screen.getByText('Actief')).toBeInTheDocument()
+  })
+
+  it('the field table no longer has its own status row (moved to the title)', () => {
+    render(<DepartmentDetail department={activeDepartment()} onSave={vi.fn()} {...baseProps} />)
+    // Only ONE "Actief" on screen — the title badge — not a second one inside a field row.
+    expect(screen.getAllByText('Actief')).toHaveLength(1)
+  })
+})
+
+describe('DepartmentDetail · reference-number chip (NUMMER-1)', () => {
+  it('renders the reference number next to the name when the department has one', () => {
+    render(<DepartmentDetail department={department({ referenceNumber: 'A-012' })} onSave={vi.fn()} {...baseProps} />)
+    expect(screen.getByText('A-012')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: cm('referenceNumber.copy') })).toBeInTheDocument()
+  })
+
+  it('renders no chip when the department has no reference number yet', () => {
+    render(<DepartmentDetail department={department({ referenceNumber: '' })} onSave={vi.fn()} {...baseProps} />)
+    expect(screen.queryByText(/^[A-Z]-\d+$/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: cm('referenceNumber.copy') })).toBeNull()
+  })
+})
+
+/**
+ * PARITY-DEPARTMENT-1: pins the Bedrijf-tab section order (Danny 02-08: "bij locatie
+ * en afdelingen moet de txt dezelfde volgorde hebben zoals tabje Bedrijf bij de
+ * klant") — the field table first, then Omschrijving, then Koios advice.
+ *
+ * The field card is deliberately NOT given a title here (unlike LocationDetail's
+ * group cards) — see DepartmentDetail.tsx's own comment: this sub-tab's label
+ * already IS "Gegevens"/"Details" in three of five locales, so titling the card
+ * would duplicate it and collide with DepartmentsPanel.test.tsx's getByText on
+ * that same sub-tab label (a file out of scope for this change).
+ */
+describe('DepartmentDetail · section order mirrors the customer Bedrijf tab', () => {
+  it('renders the field table first, then Omschrijving, then Koios advice', () => {
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+    const description = screen.getByText(ct('departments.detail.description'))
+    // "Cost center" only ever renders inside the field table — a stable, unambiguous
+    // marker for "the field card has rendered".
+    const costCenterLabel = screen.getByText(ct('departments.detail.costCenter'))
+    const koios = screen.getByText(ct('ai.title'))
+    expect(costCenterLabel.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(description.compareDocumentPosition(koios) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('does not duplicate the sub-tab label onto the field card (verified collision, see file header)', () => {
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+    // Exactly ONE "Gegevens"/"Details" on screen — the sub-tab button — not a
+    // second one from a card title that would repeat the same text.
+    expect(screen.getAllByText(ct('overview.details'))).toHaveLength(1)
+  })
+})

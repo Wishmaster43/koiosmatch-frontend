@@ -26,21 +26,22 @@ import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import { getCountryOptions } from '@/lib/countries'
 import { useProvinces } from '@/hooks/useProvinces'
-import { emailValue, phoneValue, kvkValue, vatValue } from '@/components/drawer/contactLinks'
+import { kvkValue, vatValue } from '@/components/drawer/contactLinks'
 // JOB-STATUS-1 (Danny 28-07: "Status van locatie moet hier!!") — the read-only
 // title-row badge (§3A(c)) + the searchable picker reused for its inline edit.
 import TitleBadge from '@/components/drawer/TitleBadge'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import DrillPager, { type DrillPagerProps } from '@/components/drawer/DrillPager'
 import { useConfirm } from '@/hooks/useConfirm'
 import EditableRichTextField from './EditableRichTextField'
 import DepartmentsPanel from './DepartmentsPanel'
 import ContactsPanel from './ContactsPanel'
+import LocationContactSection from './LocationContactSection'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import PdokCard from '@/components/drawer/PdokCard'
 import LocationBranchSection from './LocationBranchSection'
 import { useLocations } from '@/lib/useLocations'
 import { buildLocationAdviceInsights } from './locationAiInsights'
-import ContactNameLink from './ContactNameLink'
 import DrillBreadcrumb from '@/components/drawer/DrillBreadcrumb'
 import PlanningSummary from './PlanningSummary'
 import { useAuth } from '@/context/AuthContext'
@@ -74,13 +75,16 @@ interface Props {
   /** Label of the list this location was opened from — the first breadcrumb. */
   backLabel?: string
   onRemoveContact: (id: Id) => void
+  /** Prev/next through the caller's OWN filtered rows (DRILL-PAGER-1) — absent when
+   * the open location fell out of that filtered set (nothing sane to page to). */
+  pager?: DrillPagerProps
   close: () => void
 }
 
 export default function LocationDetail({
   location: l, customerId, locations, departments, contacts, statuses, departmentStatuses, contactStatuses, canLinkBackoffice = false,
   onSave, onDelete, onAddDepartment, onUpdateDepartment, onRemoveDepartment, onAddContact, onUpdateContact, onRemoveContact,
-  backLabel, close,
+  backLabel, pager, close,
 }: Props) {
   const { t, i18n } = useTranslation('customers')
 
@@ -161,32 +165,20 @@ export default function LocationDetail({
     // the location picked on a match, so an editable one would be a misleading
     // affordance (§3) — see OverviewTab for the real billing email.
     { key: 'costCenter', label: t('locations.detail.costCenter'), type: 'text', group: t('overview.details') },
-    // "Contact ter plaatse" is FREE TEXT on the location (customer_locations.contact_name)
-    // and stays free text — the typed value is real data and is never silently dropped.
-    //
-    // It NO LONGER GUESSES which contact record the typed name means. That guess was the
-    // bug: it matched on the name, so two people called "Joost de Boer" made it give up,
-    // and one match made it open a person who may never have been meant. The real link now
-    // exists — customer_contact_customer_location.is_primary, rendered as its own resolved
-    // row below (CONTACT-LOCATION-PRIMARY-1) — so a name-matched link would only be a
-    // second, less trustworthy answer to a question that already has a correct one.
-    { key: 'contactName', label: t('locations.detail.contactName'), type: 'text', group: t('locations.detail.contactTitle'),
-      renderValue: v => {
-        const typed = typeof v === 'string' ? v.trim() : ''
-        return <span style={{ fontSize: 12, color: typed ? 'var(--text)' : 'var(--text-muted)' }}>{typed || '-'}</span>
-      } },
-    { key: 'email', label: t('locations.detail.email'), type: 'text', group: t('locations.detail.contactTitle'),
-      renderValue: v => emailValue(v, t('overview.sendEmail')) },
-    { key: 'phone', label: t('locations.detail.phone'), type: 'text', group: t('locations.detail.contactTitle'),
-      renderValue: v => phoneValue(v, t('overview.callPhone')) },
+    // "Contact ter plaatse" / "Primaire contactpersoon" no longer live here as editable free
+    // text — CONTACT-LOCATION-PRIMARY-1 round two (Danny 02-08) merged them into ONE
+    // read-only section (LocationContactSection, rendered below) so the two can never again
+    // tell a contradicting story about the same person. See that component's own comment.
   ]
 
+  // contactName/email/phone are deliberately NOT here any more (CONTACT-LOCATION-PRIMARY-1
+  // round two) — they are no longer editable through a field table, only shown read-only
+  // (as a legacy fallback) by LocationContactSection below, straight off `l`.
   const values = {
     name: l.name,
     street: l.street, houseNumber: l.houseNumber, houseNumberSuffix: l.houseNumberSuffix,
     postalCode: l.postalCode, city: l.city, state: l.state, country: l.country,
     cocNumber: l.cocNumber, vatNumber: l.vatNumber,
-    contactName: l.contactName, email: l.email, phone: l.phone,
     costCenter: l.costCenter,
   }
 
@@ -196,7 +188,6 @@ export default function LocationDetail({
       street: v.street as string, houseNumber: v.houseNumber as string, houseNumberSuffix: v.houseNumberSuffix as string,
       postalCode: v.postalCode as string, city: v.city as string, state: v.state as string, country: v.country as string,
       cocNumber: v.cocNumber as string, vatNumber: v.vatNumber as string,
-      contactName: v.contactName as string, email: v.email as string, phone: v.phone as string,
       costCenter: v.costCenter as string,
     })
   }
@@ -278,10 +269,15 @@ export default function LocationDetail({
             </>
           )}
         </div>
-        <button onClick={remove} title={t('locations.detail.deleteLocation')}
-          style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--color-danger)', flexShrink: 0 }}>
-          <Trash2 size={13} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          {/* Prev/next through the list this location was opened from (DRILL-PAGER-1) —
+              before the delete action, same corner as every other detail pager. */}
+          {pager && <DrillPager {...pager} />}
+          <button onClick={remove} title={t('locations.detail.deleteLocation')}
+            style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--color-danger)', flexShrink: 0 }}>
+            <Trash2 size={13} />
+          </button>
+        </div>
       </div>
 
       {/* Sub-tab strip — same shared bar as the candidate Communicatie tab; short labels. */}
@@ -302,47 +298,40 @@ export default function LocationDetail({
       {/* Adres & gegevens — no repeated title (it would duplicate the sub-tab label). */}
       {subTab === 'address' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {/* LOCATIE-OMSCHRIJVING-1 (Danny 02-08): with the record's own identity
-              fields, not buried at the bottom — placed FIRST (ahead of the field
-              tables) rather than after them, so it never shifts which pencil is
-              "last" for the Contact-ter-plaatse block below (its own test keys off
-              that). Same component DepartmentDetail already uses for its own
-              Omschrijving block (EditableRichTextField — own pencil/save/cancel). */}
-          <EditableRichTextField label={t('locations.detail.description')} value={l.description ?? ''} onSave={saveDescription} />
-
           {/* Same block order as the customer's Bedrijf tab (Danny 28-07: "zelfde format
               als klant"): Gegevens · Adres · Contact. Registratie is no longer its own
               card — KvK and BTW are plain facts about this site, so they sit in Gegevens
               next to the name instead of behind their own heading. */}
-          {[t('overview.details'), t('subModal.groups.address'), t('locations.detail.contactTitle')].map(group => (
+          {[t('overview.details'), t('subModal.groups.address')].map(group => (
             <EditableFieldTable key={group} title={group} labelWidth={140} value={values} onSave={save}
               fields={generalFields.filter(f => f.group === group).map(f => ({ ...f, group: undefined }))} />
           ))}
 
-          {/* CONTACT-LOCATION-PRIMARY-1 — who you actually call at THIS site, as a link to
-              the real record. The title names the site on purpose: the customer's own main
-              contact is a separate thing and the two must never read as one. Setting it
-              lives where the people are, on the Contactpersonen sub-tab, so there is one
-              place that owns the change. */}
-          <SectionCard title={t('locations.detail.primaryContactTitle')}>
-            {primaryContact ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
-                <ContactNameLink name={primaryContact.name} id={primaryContact.id}
-                  onOpen={id => { setSubTab('contacts'); setOpenContactId(id) }} title={t('contacts.openContact')} />
-                {primaryContact.role && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{primaryContact.role}</span>}
-              </div>
-            ) : (
-              // Honest empty state + the one route to fix it, never a blank line.
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 12, fontStyle: 'italic', color: 'var(--text-muted)' }}>{t('locations.detail.noPrimaryContact')}</span>
-                <button type="button" onClick={() => setSubTab('contacts')}
-                  style={{ padding: 0, background: 'none', border: 'none', fontFamily: 'inherit', fontSize: 12,
-                    color: 'var(--color-info)', cursor: 'pointer' }}>
-                  {t('locations.detail.pickPrimaryContact')}
-                </button>
-              </div>
-            )}
-          </SectionCard>
+          {/* CONTACT-LOCATION-PRIMARY-1, round two (Danny 02-08) — ONE contact block, and the
+              coupling is the only truth it shows as a link. Setting/changing it lives where
+              the people are, on the Contactpersonen sub-tab (the "make primary" star), so
+              there is one place that owns the change. See LocationContactSection's own
+              comment for why the legacy free text is shown but no longer editable here. */}
+          <LocationContactSection
+            primaryContact={primaryContact}
+            legacyName={l.contactName ?? ''} legacyEmail={l.email ?? ''} legacyPhone={l.phone ?? ''}
+            onOpenContact={id => { setSubTab('contacts'); setOpenContactId(id) }}
+            onPickContact={() => setSubTab('contacts')} />
+
+          {/* LOCATIE-OMSCHRIJVING-1 (Danny 02-08, order overruled same day): mirrors the
+              Bedrijf tab exactly — OverviewTab puts its own description directly under
+              Contact (OverviewTab.tsx:162), so this moved from FIRST (this morning's
+              placement, ahead of the field tables) to right here, after
+              LocationContactSection, same as Bedrijf's Gegevens → Adres → Contact →
+              Bedrijfstekst sequence. */}
+          <EditableRichTextField label={t('locations.detail.description')} value={l.description ?? ''} onSave={saveDescription} />
+
+          {/* Koios advice, in the same slot the customer's Bedrijf tab puts it: right after
+              the fields/contact/description block and BEFORE Vestiging (Danny 02-08: "Koios
+              adviseert staat opeens onder vestiging??" — it had drifted below
+              LocationBranchSection). Pure FE heuristics over this location's OWN
+              completeness — no API call. */}
+          <KoiosAdviceBlock namespace="customers" insights={buildLocationAdviceInsights(l, t)} />
 
           {/* Vestiging — which of OUR branches this site works under, and whether that is
               inherited from the customer or set here on purpose (LOCATIE-VESTIGING-1). */}
@@ -351,10 +340,6 @@ export default function LocationDetail({
             inherited={l.branchInherited} effectiveBranches={l.effectiveBranches}
             options={branchOptions}
             onChange={ids => onSave(l.id as Id, { branchIds: ids })} />
-
-          {/* Koios advice, in the same slot the customer tab puts it: after the fields.
-              Pure FE heuristics over this location's OWN completeness — no API call. */}
-          <KoiosAdviceBlock namespace="customers" insights={buildLocationAdviceInsights(l, t)} />
         </div>
       )}
 

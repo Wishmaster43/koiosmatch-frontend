@@ -82,7 +82,6 @@ export default function LocationBranchSection({ branchIds, branches, inherited, 
         ) : (
           <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('locations.detail.branchEmpty')}</span>
         )}
-        <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '8px 0 0' }}>{t('locations.detail.branchHint')}</p>
       </div>
     </div>
   )

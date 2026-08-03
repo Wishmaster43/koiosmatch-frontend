@@ -268,3 +268,38 @@ describe('ContactDetail · merge entry point', () => {
     expect(screen.getByText('Jan Janssen')).toBeInTheDocument()
   })
 })
+
+/**
+ * DRILL-PAGER-1 (Danny 02-08) — ContactDetail only RENDERS the pager the caller
+ * (ContactsPanel) hands it; the caller-side scoping/navigation is covered in
+ * ContactsPanel.test.tsx. This proves the wiring: no `pager` prop → no pager on
+ * screen (today's behaviour, unaffected); a `pager` prop renders it in the title
+ * row, before the delete button, and its buttons call exactly what was passed in.
+ */
+describe('ContactDetail · pager wiring', () => {
+  it('renders no pager when the caller passes none', () => {
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    expect(screen.queryByLabelText(cm('drillPager.next'))).toBeNull()
+  })
+
+  it('renders the pager before the delete button, wired to the caller\'s own handlers', async () => {
+    const user = userEvent.setup()
+    const onPrev = vi.fn()
+    const onNext = vi.fn()
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} pager={{ index: 1, total: 3, onNext }} />)
+
+    expect(screen.getByTitle(cm('drillPager.nextAt', { index: 1, total: 3 }))).toBeInTheDocument()
+    // First record: prev has no handler, so its button renders disabled.
+    expect(screen.getByRole('button', { name: cm('drillPager.prev') })).toBeDisabled()
+    const deleteBtn = screen.getByTitle(cm('delete'))
+    const nextBtn = screen.getByRole('button', { name: cm('drillPager.next') })
+    // The pager sits BEFORE the delete button in the same title-row corner.
+    expect(nextBtn.compareDocumentPosition(deleteBtn) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+
+    await user.click(nextBtn)
+    expect(onNext).toHaveBeenCalledTimes(1)
+    expect(onPrev).not.toHaveBeenCalled()
+  })
+})

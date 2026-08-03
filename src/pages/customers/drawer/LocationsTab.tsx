@@ -3,16 +3,24 @@
  * the fully editable LocationDetail (C-6 address fields + status + nested
  * departments/contacts management). "+ Locatie toevoegen" opens the full grouped
  * AddLocationModal (Danny 13/7: the old name+city-only popup was "far too bare").
+ *
+ * Owns "which location is open" itself (DRILL-PAGER-1, Danny 02-08) instead of
+ * delegating to the generic SubEntityTab shell — mirrors ContactsTab/DepartmentsTab,
+ * which already dropped SubEntityTab for the same reason (see their own docblocks).
+ * The pager needs to step the open id DIRECTLY, without unmounting through the list,
+ * which SubEntityTab's private internal selectedId state could not offer from outside.
  */
 import { useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MapPin } from 'lucide-react'
-import SubEntityTab from './SubEntityTab'
+import { MapPin, Search } from 'lucide-react'
+import DataTable from '@/components/ui/DataTable'
+import type { Column } from '@/components/ui/DataTable'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import StatusFilterSelect, { useStatusFilter } from './StatusFilterSelect'
 import { useAllSettings, useSettingsLoaded, getBoolSetting, getStringSetting } from '@/lib/settings/useAllSettings'
 import LocationDetail from './LocationDetail'
 import AddLocationModal from '../AddLocationModal'
-import type { Column } from '@/components/ui/DataTable'
+import type { DrillPagerProps } from '@/components/drawer/DrillPager'
 import SoftChipJs from '@/components/ui/SoftChip'
 import type { Contact, Department, Location } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
@@ -25,6 +33,13 @@ const SoftChip = SoftChipJs as unknown as ComponentType<AnyProps>
 // Plain-text fallback style for a coloured column toggled off (CHIPKLEUR-INSTELBAAR-1) —
 // mirrors the `plainCell` convention in CandidatesTable/CustomersTable.
 const plainCell = { color: 'var(--text)', fontSize: 12 }
+
+// Mirrors SubEntityTab's search box, now owned directly here (see file header).
+const searchWrap = {
+  display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 120, padding: '6px 10px',
+  background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8,
+} as const
+const searchInput = { flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' } as const
 
 interface Props {
   customerId?: Id
@@ -57,6 +72,10 @@ export default function LocationsTab({
 }: Props) {
   const { t } = useTranslation('customers')
   const [adding, setAdding] = useState(false)
+  const [search, setSearch] = useState('')
+  // The host owns which location is open (DRILL-PAGER-1, mirrors ContactsTab) — the
+  // pager below sets this id directly, so paging never round-trips through the list.
+  const [openId, setOpenId] = useState<Id | null>(null)
   // Colour-on/off flag for the status column (CHIPKLEUR-INSTELBAAR-1) — defaults ON,
   // so an absent setting keeps today's coloured-chip look.
   const settings = useAllSettings()
@@ -67,8 +86,26 @@ export default function LocationsTab({
   // stops the hook from deciding before /settings has actually answered (see its own docblock).
   const settingsLoaded = useSettingsLoaded()
   const defaultStatusFilter = getStringSetting(settings, 'customer_location_default_status_filter')
-  const { value: statusFilter, toggle: toggleStatus, filtered: visibleLocations } =
+  const { value: statusFilter, toggle: toggleStatus, filtered: rows } =
     useStatusFilter(locations, statuses, undefined, defaultStatusFilter, settingsLoaded)
+
+  // Client-side search over name/city, same behaviour SubEntityTab used to run — the
+  // pager below must page through EXACTLY this list, the one the table actually shows.
+  const q = search.trim().toLowerCase()
+  const visible = q ? rows.filter(l => [l.name, l.city].some(v => String(v ?? '').toLowerCase().includes(q))) : rows
+
+  // Resolved against the CUSTOMER-WIDE list, never `visible`: editing a location's
+  // status can move it out of the active filter, and the open detail must not vanish.
+  const selected = openId != null ? locations.find(l => String(l.id) === String(openId)) ?? null : null
+  // Pager: 1-based position of the OPEN location within `visible`. No pager at all when
+  // the open location fell out of `visible` — nothing sane to page to in that case.
+  const openIndex = selected ? visible.findIndex(l => String(l.id) === String(selected.id)) : -1
+  const pager: DrillPagerProps | undefined = openIndex >= 0 ? {
+    index: openIndex + 1,
+    total: visible.length,
+    onPrev: openIndex > 0 ? () => setOpenId(visible[openIndex - 1].id as Id) : undefined,
+    onNext: openIndex < visible.length - 1 ? () => setOpenId(visible[openIndex + 1].id as Id) : undefined,
+  } : undefined
 
   const columns: Column<Location>[] = [
     { key: 'name', header: t('locations.col.name'), sortable: true, sortValue: l => l.name,
@@ -91,34 +128,41 @@ export default function LocationsTab({
       render: l => contacts.filter(c => String(c.locationId) === String(l.id)).length },
   ]
 
-  const renderDetail = (l: Location, close: () => void) => (
-    <LocationDetail
-      location={l} customerId={customerId}
-      locations={locations.map(x => ({ id: x.id as Id, name: x.name }))}
-      departments={departments} contacts={contacts}
-      statuses={statuses} departmentStatuses={departmentStatuses} contactStatuses={contactStatuses}
-      canLinkBackoffice={canLinkBackoffice}
-      onSave={onSaveLocation} onDelete={onDeleteLocation}
-      onAddDepartment={onAddDepartment} onUpdateDepartment={onUpdateDepartment} onRemoveDepartment={onRemoveDepartment}
-      onAddContact={onAddContact} onUpdateContact={onUpdateContact} onRemoveContact={onRemoveContact}
-      backLabel={t('drawer.tabs.locations')}
-      close={close}
-    />
-  )
+  // ── Detail view: `key` remounts on every id change — paging to another location
+  //    must never carry over in-progress edit/sub-tab state from the previous one.
+  if (selected) {
+    return (
+      <LocationDetail
+        key={String(selected.id)}
+        location={selected} customerId={customerId}
+        locations={locations.map(x => ({ id: x.id as Id, name: x.name }))}
+        departments={departments} contacts={contacts}
+        statuses={statuses} departmentStatuses={departmentStatuses} contactStatuses={contactStatuses}
+        canLinkBackoffice={canLinkBackoffice} pager={pager}
+        onSave={onSaveLocation} onDelete={onDeleteLocation}
+        onAddDepartment={onAddDepartment} onUpdateDepartment={onUpdateDepartment} onRemoveDepartment={onRemoveDepartment}
+        onAddContact={onAddContact} onUpdateContact={onUpdateContact} onRemoveContact={onRemoveContact}
+        backLabel={t('drawer.tabs.locations')}
+        close={() => setOpenId(null)}
+      />
+    )
+  }
 
+  // ── List view ──
   return (
     <>
-      <SubEntityTab
-        items={visibleLocations}
-        columns={columns}
-        addLabel={t('locations.add')}
-        emptyText={t('locations.empty')}
-        searchPlaceholder={t('locations.searchPlaceholder')}
-        searchKeys={['name', 'city']}
-        filter={<StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />}
-        onAdd={() => setAdding(true)}
-        renderDetail={renderDetail}
-      />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={searchWrap}>
+            <Search size={13} color="var(--text-muted)" />
+            <input value={search} onChange={e => setSearch(e.target.value)}
+              placeholder={t('locations.searchPlaceholder')} aria-label={t('locations.searchPlaceholder')} style={searchInput} />
+          </div>
+          <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
+          <DrawerAddButton onClick={() => setAdding(true)} label={t('locations.add')} />
+        </div>
+        <DataTable columns={columns} rows={visible} onRowClick={l => setOpenId(l.id as Id)} emptyText={t('locations.empty')} />
+      </div>
       {adding && (
         // customerId + existingContacts (CONTACT-PRIMAIR-LOCATIE-1): both already live
         // in this component's own props, just never reached the modal — needed so the

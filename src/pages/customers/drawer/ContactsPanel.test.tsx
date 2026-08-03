@@ -44,6 +44,7 @@ vi.mock('@/lib/useContactFunctions', () => ({ useContactFunctions: () => ({ cont
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
+const cm = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
 
 const contact = (over: Partial<Contact> = {}): Contact => ({
   id: 'c1', helloflexLink: null, shiftmanagerLink: null,
@@ -305,6 +306,60 @@ describe('ContactsPanel · tenant-configured default status filter (TENANT-DEFAU
       expect(screen.getByText('Actieve contactpersoon')).toBeInTheDocument()
       expect(screen.getByText('Inactieve contactpersoon')).toBeInTheDocument()
     })
+  })
+})
+
+/**
+ * DRILL-PAGER-1 (Danny 02-08: "moeten er pijltjes komen zodat je vanuit één
+ * contactpersoon naar de volgende kan en terug"). The pager must step through
+ * EXACTLY the rows the user was looking at — with the status filter narrowing the
+ * list to two of three contacts, "next" must never land on the filtered-out third
+ * one, and the counter must report against the FILTERED total (2), not the wider
+ * unscoped one (3). Without DrillPager's adoption this whole block fails: there is
+ * no pager to find at all.
+ */
+describe('ContactsPanel · pager steps through the caller\'s OWN filtered rows (DRILL-PAGER-1)', () => {
+  // A prior describe block's LAST test leaves a custom /settings mockImplementation
+  // behind (mockClear() clears call history, never a mocked implementation) — reset
+  // it explicitly so this block's "no configured default" assumption holds regardless
+  // of file execution order.
+  beforeEach(() => {
+    invalidateAllSettingsCache()
+    vi.mocked(api.get).mockImplementation(() => Promise.resolve({ data: { data: [] } }))
+  })
+
+  const statuses = [
+    { id: 'status-active', value: 'active', label: 'Actief' },
+    { id: 'status-inactive', value: 'inactive', label: 'Inactief' },
+  ]
+  const threeContacts = [
+    contact({ id: 'c-a', name: 'Anna Actief', statusId: 'status-active', statusLabel: 'Actief' }),
+    contact({ id: 'c-b', name: 'Bram Actief', statusId: 'status-active', statusLabel: 'Actief' }),
+    // Filtered OUT by the default "active only" guess — proves the pager counts ONLY
+    // what the status filter actually shows, never the wider unscoped list.
+    contact({ id: 'c-c', name: 'Cor Inactief', statusId: 'status-inactive', statusLabel: 'Inactief' }),
+  ]
+
+  it('pages to the next VISIBLE contact, never the one the filter hid, and disables at each end', async () => {
+    const user = userEvent.setup()
+    render(<Host {...base} scope="customer" contacts={threeContacts} statuses={statuses} />)
+
+    await waitFor(() => expect(screen.getByText('Anna Actief')).toBeInTheDocument())
+    // The filter really did narrow the list — the scoping this pager must respect.
+    expect(screen.queryByText('Cor Inactief')).toBeNull()
+
+    await user.click(screen.getByText('Anna Actief'))
+    // First of TWO visible contacts (never three) — prev is honestly disabled here.
+    expect(screen.getByTitle(cm('drillPager.nextAt', { index: 1, total: 2 }))).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: cm('drillPager.prev') })).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: cm('drillPager.next') }))
+    // Landed on the SECOND visible contact, never the filtered-out third. The name
+    // legitimately repeats (breadcrumb "current" + title), so scope to the breadcrumb,
+    // the one spot that can only mean "this is the record now open".
+    expect(within(screen.getByRole('navigation')).getByText('Bram Actief')).toBeInTheDocument()
+    expect(screen.getByTitle(cm('drillPager.nextAt', { index: 2, total: 2 }))).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: cm('drillPager.next') })).toBeDisabled()
   })
 })
 

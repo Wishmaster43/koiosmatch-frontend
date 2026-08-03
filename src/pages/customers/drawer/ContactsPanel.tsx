@@ -41,6 +41,7 @@ import type { Id, LookupOption } from '@/types/common'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { CONTACTS_CHANGED_EVENT, isPrimaryForLocation, setLocationPrimaryContact } from '../hooks/useCustomerContacts'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
+import type { DrillPagerProps } from '@/components/drawer/DrillPager'
 
 type AnyProps = Record<string, unknown>
 const SoftChip = SoftChipJs as unknown as ComponentType<AnyProps>
@@ -169,6 +170,24 @@ export default function ContactsPanel({
   // location moves it out of this scope, and the open detail must not vanish mid-edit.
   const selected = openId != null ? contacts.find(c => String(c.id) === String(openId)) ?? null : null
 
+  // Client-side search — same rows the table below actually renders. Computed here
+  // (ahead of the detail branch) so the pager below can step through EXACTLY what the
+  // user was looking at, never a wider or unfiltered set (DRILL-PAGER-1, Danny 02-08).
+  const q = search.trim().toLowerCase()
+  const visible = q
+    ? rows.filter(c => [c.name, c.role, c.email, c.mobile].some(v => String(v ?? '').toLowerCase().includes(q)))
+    : rows
+  // Pager: 1-based position of the OPEN contact within `visible`. No pager at all when
+  // the open contact fell out of `visible` (e.g. an edit changed its status while the
+  // status filter is active) — there is nothing sane to page to in that case.
+  const openIndex = selected ? visible.findIndex(c => String(c.id) === String(selected.id)) : -1
+  const pager: DrillPagerProps | undefined = openIndex >= 0 ? {
+    index: openIndex + 1,
+    total: visible.length,
+    onPrev: openIndex > 0 ? () => onOpenChange(visible[openIndex - 1].id as Id) : undefined,
+    onNext: openIndex < visible.length - 1 ? () => onOpenChange(visible[openIndex + 1].id as Id) : undefined,
+  } : undefined
+
   // Fallback resolver — the plural locations[]/departments[] arrays come back EMPTY for
   // every seeded contact; resolve the singular id against the customer-wide lists so the
   // column shows real data instead of a blanket dash.
@@ -292,11 +311,13 @@ export default function ContactsPanel({
     return (
       <div>
         <DrillBreadcrumb trail={[...trail, listCrumb]} current={selected.name} />
-        {/* After a merge the duplicate row is gone server-side; switch the drill-down to
-            the SURVIVOR so the open panel never points at a record that no longer exists.
-            The list itself refetches via the hook's CONTACTS_CHANGED_EVENT listener. */}
-        <ContactDetail contact={selected} locations={locations} departments={departments} statuses={statuses}
-          existing={contacts} canLinkBackoffice={canLinkBackoffice}
+        {/* `key` remounts on every id change — paging to another contact (or a merge
+            survivor swap, see onMerged below) must never carry over in-progress edit
+            state (editing/subTab/etc.) from the previous record onto the new one. This
+            mirrors what already happened before: the only way to open a DIFFERENT
+            contact used to be closing back to the list (which unmounts) and reopening. */}
+        <ContactDetail key={String(selected.id)} contact={selected} locations={locations} departments={departments} statuses={statuses}
+          existing={contacts} canLinkBackoffice={canLinkBackoffice} pager={pager}
           onSave={onUpdate} onDelete={onRemove} close={() => onOpenChange(null)}
           onMerged={survivorId => onOpenChange(survivorId)} />
       </div>
@@ -304,10 +325,6 @@ export default function ContactsPanel({
   }
 
   // ── List view ──
-  const q = search.trim().toLowerCase()
-  const visible = q
-    ? rows.filter(c => [c.name, c.role, c.email, c.mobile].some(v => String(v ?? '').toLowerCase().includes(q)))
-    : rows
   // Couple candidates: everyone NOT already in this scope.
   const candidates = contacts.filter(c => !inScope(c))
   const coupleNote = scope === 'location' ? t('locations.detail.coupleNote') : t('departments.detail.coupleNote')
