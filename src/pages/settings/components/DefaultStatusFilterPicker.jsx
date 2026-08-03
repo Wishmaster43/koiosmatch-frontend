@@ -22,7 +22,7 @@
 import { useTranslation } from 'react-i18next'
 import SelectMenu from '@/components/ui/SelectMenu'
 import { SettingRow } from './SettingsKit'
-import { STATUS_FILTER_ALL, isActiveValue } from '@/pages/customers/drawer/StatusFilterSelect'
+import { STATUS_FILTER_ALL, isActiveValue } from '@/components/drawer/StatusFilterSelect'
 
 export default function DefaultStatusFilterPicker({ statuses, value, onChange }) {
   const { t } = useTranslation('settings')
