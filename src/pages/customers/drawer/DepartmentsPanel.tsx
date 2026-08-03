@@ -40,6 +40,7 @@ import { useAllSettings, useSettingsLoaded, getBoolSetting, getStringSetting } f
 import type { Crumb } from '@/components/drawer/DrillBreadcrumb'
 import SoftChipJs from '@/components/ui/SoftChip'
 import DepartmentDetail from './DepartmentDetail'
+import type { DrillPagerProps } from '@/components/drawer/DrillPager'
 import AddDepartmentModal from '../AddDepartmentModal'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
@@ -147,25 +148,39 @@ export default function DepartmentsPanel({
       render: d => contacts.filter(c => String(c.departmentId) === String(d.id)).length },
   ]
 
+  // Client-side search — computed ahead of the detail branch so the pager steps through
+  // EXACTLY the rows the table renders, never a wider set (DRILL-PAGER-1, mirrors
+  // ContactsPanel verbatim).
+  const q = search.trim().toLowerCase()
+  const visible = q ? rows.filter(d => [d.name, d.locationName].some(v => String(v ?? '').toLowerCase().includes(q))) : rows
+  // Pager: 1-based position of the OPEN department within `visible`; none when the open
+  // record fell out of the filtered set — nothing sane to page to then.
+  const openIndex = selected ? visible.findIndex(d => String(d.id) === String(selected.id)) : -1
+  const pager: DrillPagerProps | undefined = openIndex >= 0 ? {
+    index: openIndex + 1,
+    total: visible.length,
+    onPrev: openIndex > 0 ? () => onOpenChange(visible[openIndex - 1].id as Id) : undefined,
+    onNext: openIndex < visible.length - 1 ? () => onOpenChange(visible[openIndex + 1].id as Id) : undefined,
+  } : undefined
+
   // ── Detail view: DepartmentDetail draws the breadcrumb itself (exactly ONE nav on
   //    screen), from the ancestors this panel hands it plus its own list crumb — so every
   //    hop stays independently clickable instead of one folded label.
   if (selected) {
     const listLabel = scope === 'customer' ? t('drawer.tabs.departments') : (scopeName ?? t('drawer.tabs.departments'))
     const detailTrail = [...trail, { label: listLabel, onClick: () => onOpenChange(null) }]
+    // key: remount per id so paging never bleeds one record's edit state onto the next.
     return (
-      <DepartmentDetail department={selected} locations={locations} statuses={statuses}
+      <DepartmentDetail key={String(selected.id)} department={selected} locations={locations} statuses={statuses}
         contacts={contacts.filter(c => String(c.departmentId) === String(selected.id))}
         canLinkBackoffice={canLinkBackoffice} departments={departments} contactStatuses={contactStatuses}
-        trail={detailTrail}
+        trail={detailTrail} pager={pager}
         onAddContact={onAddContact} onUpdateContact={onUpdateContact} onRemoveContact={onRemoveContact}
         onSave={onUpdate} onDelete={onRemove} close={() => onOpenChange(null)} />
     )
   }
 
   // ── List view ──
-  const q = search.trim().toLowerCase()
-  const visible = q ? rows.filter(d => [d.name, d.locationName].some(v => String(v ?? '').toLowerCase().includes(q))) : rows
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

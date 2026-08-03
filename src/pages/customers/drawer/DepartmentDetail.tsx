@@ -52,6 +52,8 @@ import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
 import ContactsPanel from './ContactsPanel'
 import DrillBreadcrumb from '@/components/drawer/DrillBreadcrumb'
+import DrillPager from '@/components/drawer/DrillPager'
+import type { DrillPagerProps } from '@/components/drawer/DrillPager'
 import type { Crumb } from '@/components/drawer/DrillBreadcrumb'
 import EditableRichTextField from './EditableRichTextField'
 import { useCustomFields } from '@/lib/useCustomFields'
@@ -83,7 +85,7 @@ function buildDepartmentAdviceInsights(d: Department, t: Tx): KoiosAdviceInsight
   ]
 }
 
-export default function DepartmentDetail({ department, locations, statuses, contactStatuses = [], departments = [], contacts = [], canLinkBackoffice = false, trail = [], onAddContact, onUpdateContact, onRemoveContact, onSave, onDelete, close }: {
+export default function DepartmentDetail({ department, locations, statuses, contactStatuses = [], departments = [], contacts = [], canLinkBackoffice = false, trail = [], pager, onAddContact, onUpdateContact, onRemoveContact, onSave, onDelete, close }: {
   department: Department
   locations: { id: Id; name: string }[]
   statuses: LookupOption[]
@@ -103,6 +105,8 @@ export default function DepartmentDetail({ department, locations, statuses, cont
    * contact gets. A single folded label would make the ancestors read as text.
    */
   trail?: Crumb[]
+  /** Prev/next stepper through the panel's own filtered rows (DRILL-PAGER-1). */
+  pager?: DrillPagerProps
   onAddContact: (payload: ContactPayload) => void
   onUpdateContact: (id: Id, payload: Partial<ContactPayload>) => void
   onRemoveContact: (id: Id) => void
@@ -215,6 +219,8 @@ export default function DepartmentDetail({ department, locations, statuses, cont
             </>
           )}
         </div>
+        {/* Browse arrows before the delete button — same slot as every sibling detail. */}
+        {pager && <DrillPager {...pager} />}
         <button onClick={remove} title={t('common:delete')}
           style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--color-danger)', flexShrink: 0 }}>
           <Trash2 size={13} />

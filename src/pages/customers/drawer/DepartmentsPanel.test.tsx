@@ -8,7 +8,7 @@
  */
 import { useState } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, within, waitFor } from '@testing-library/react'
+import { render, screen, within, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
@@ -47,6 +47,7 @@ vi.mock('@/lib/useContactFunctions', () => ({ useContactFunctions: () => ({ cont
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
+const cm = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
 
 const department = (over: Partial<Department> = {}): Department => ({
   id: 'd1', helloflexLink: null, shiftmanagerLink: null,
@@ -252,5 +253,37 @@ describe('DepartmentsPanel · add trigger pre-selects the location it was opened
     // so an unscoped query would match both and fail as ambiguous.
     const dialog = screen.getByRole('dialog')
     expect(within(dialog).getByText(ct('subModal.selectLocation'))).toBeInTheDocument()
+  })
+})
+
+/**
+ * DRILL-PAGER-1 adoption (recipe from the pager lane): the department pager steps
+ * through EXACTLY the rows the search filter left visible — "next" from the first
+ * visible department lands on the second visible one, never the filtered-out row,
+ * and the ends disable. Without the DepartmentsPanel/DepartmentDetail wiring this
+ * block fails wholesale: there is no pager to find.
+ */
+describe('DepartmentsPanel · pager steps through the filtered rows (DRILL-PAGER-1)', () => {
+  const three = [
+    department({ id: 'd-a', name: 'Ambulant' }),
+    department({ id: 'd-b', name: 'Anesthesie' }),
+    // Filtered OUT by the search below — proves the pager follows the visible set.
+    department({ id: 'd-x', name: 'Wijkzorg' }),
+  ]
+
+  it('pages to the next VISIBLE department and disables at each end', async () => {
+    render(<Host {...base} scope="customer" departments={three} />)
+    // Narrow to the two "A…" departments, then open the first.
+    fireEvent.change(screen.getByPlaceholderText(ct('departments.searchPlaceholder')), { target: { value: 'An' } })
+    fireEvent.click(screen.getByText('Ambulant'))
+    // Counter runs against the FILTERED total (2), not the wider list (3).
+    const next = screen.getByTitle(cm('drillPager.nextAt', { index: 1, total: 2 }))
+    expect(screen.getByTitle(cm('drillPager.prevAt', { index: 1, total: 2 }))).toBeDisabled()
+    fireEvent.click(next)
+    // Landed on the second visible one (name renders in breadcrumb AND title — both fine);
+    // never on the filtered-out Wijkzorg.
+    expect(screen.getAllByText('Anesthesie').length).toBeGreaterThanOrEqual(1)
+    expect(screen.queryByText('Wijkzorg')).not.toBeInTheDocument()
+    expect(screen.getByTitle(cm('drillPager.nextAt', { index: 2, total: 2 }))).toBeDisabled()
   })
 })
