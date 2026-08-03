@@ -12,7 +12,7 @@ import { useCustomerCascade } from './hooks/useCustomerCascade'
 // The shared "Name — Function" contact-option label (§11 — one shared builder,
 // not a per-screen copy); imported straight from the real implementation since
 // the local re-export above only re-exports the hook itself.
-import { contactOptionLabel } from '@/hooks/useCustomerCascade'
+import { contactOptionLabel } from '@/lib/contactLabel'
 import { mapOpportunity } from './data/mapOpportunity'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'

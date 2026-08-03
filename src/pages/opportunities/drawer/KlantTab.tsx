@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { contactOptionLabel } from '@/hooks/useCustomerCascade'
+import { contactOptionLabel } from '@/lib/contactLabel'
 import { Building2, Edit2, Save, X } from 'lucide-react'
 import DetailTableJs from '@/components/ui/DetailTable'
 import CreatableSelect from '@/components/ui/CreatableSelect'

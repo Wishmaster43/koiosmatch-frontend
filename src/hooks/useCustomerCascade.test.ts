@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
-import { useCustomerCascade, contactFunctionOf, contactOptionLabel } from './useCustomerCascade'
+import { useCustomerCascade } from './useCustomerCascade'
 import api from '@/lib/api'
 
 vi.mock('@/lib/api', () => ({
@@ -71,27 +71,7 @@ describe('useCustomerCascade', () => {
   })
 })
 
-// Danny 28-07: same-named contacts (one row per location/department coupling)
-// rendered indistinguishable in a picker — these two exports are the ONE shared
-// "Name — Function" label builder every contact-picker option should use.
-describe('contactFunctionOf / contactOptionLabel', () => {
-  it('reads the function under whichever key the response used', () => {
-    expect(contactFunctionOf({ function: 'HR Manager' })).toBe('HR Manager')
-    expect(contactFunctionOf({ function_title: 'Recruiter' })).toBe('Recruiter')
-    expect(contactFunctionOf({ position: 'Manager' })).toBe('Manager')
-    expect(contactFunctionOf({ job_title: 'Directeur' })).toBe('Directeur')
-    expect(contactFunctionOf({})).toBe('')
-  })
-
-  it('appends the function with the house " — " separator', () => {
-    expect(contactOptionLabel({ name: 'Eva Bos', function: 'HR Manager' })).toBe('Eva Bos — HR Manager')
-  })
-
-  it('falls back to the bare name — never a dangling separator — when no function is present', () => {
-    expect(contactOptionLabel({ name: 'Eva Bos' })).toBe('Eva Bos')
-  })
-
-  it('falls back to the dash placeholder when even the name is missing', () => {
-    expect(contactOptionLabel({})).toBe('—')
-  })
-})
+// contactFunctionOf / contactOptionLabel (the shared "Name — Function" label
+// builder) moved to lib/contactLabel.ts and are covered there in full
+// (contactLabel.test.ts) — this hook no longer implements them, so their
+// coverage doesn't belong in this file.

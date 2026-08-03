@@ -26,6 +26,7 @@ import type { CustomerOption } from '@/pages/vacancies/hooks/useCustomerOptions'
 import type { VacancyOption } from '@/pages/candidates/hooks/useVacancyOptions'
 import type { LocationOption } from '@/lib/useLocations'
 import type { Id } from '@/types/common'
+import { contactOptionLabel } from '@/lib/contactLabel'
 
 interface UserLike { id?: Id; name?: string }
 interface NewContact { first_name: string; last_name: string; email: string; phone: string; mobile: string; function: string }
@@ -33,14 +34,10 @@ interface NewContact { first_name: string; last_name: string; email: string; pho
 // A relational option list → { value, label } pairs for the shared pickers.
 const opt = (arr: Array<{ id?: Id; name?: string }>) => arr.map(x => ({ value: String(x.id), label: x.name ?? '—' }))
 
-// A contact's function/job title — the key name varies by response shape (Danny
-// 24-07 live screenshot: same-named contacts were indistinguishable), so read it
-// tolerantly and never leave a dangling separator when it's absent.
-const contactFunctionOf = (c: CascadeOption) => c.function || c.function_title || c.position || c.job_title || ''
-const contactOpt = (arr: CascadeOption[]) => arr.map(c => {
-  const fn = contactFunctionOf(c)
-  return { value: String(c.id), label: fn ? `${c.name ?? '—'} — ${fn}` : (c.name ?? '—') }
-})
+// Contact-person options via the shared "Name — Function" label builder (Danny
+// 24-07 live screenshot: same-named contacts were indistinguishable). Was a
+// local copy here; now the one shared implementation in lib/contactLabel.
+const contactOpt = (arr: CascadeOption[]) => arr.map(c => ({ value: String(c.id), label: contactOptionLabel(c) }))
 
 export default function RelationsSection({
   t, errors, editing,

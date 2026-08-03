@@ -28,7 +28,11 @@ import type { CvCandidate } from '@/pages/candidates/CandidateCvTemplate'
 import type { ApplicationDetail } from '@/types/application'
 import type { Candidate } from '@/types/candidate'
 
-export interface ProposeContact { id: string; name: string; email: string; phone?: string }
+// `function` is optional — the fallback recipient built from `application.contact`
+// (ApplicationDetailResource::contact() only sends id/name/email/phone) never
+// carries one; contactOptionLabel degrades to the bare name with no dangling
+// separator when it's absent.
+export interface ProposeContact { id: string; name: string; email: string; phone?: string; function?: string }
 export type CvVariant = 'proposal' | 'full'
 export type ProposeDisabledReason = 'loading' | 'noCandidate' | 'noContact' | 'noConsent' | null
 
@@ -77,8 +81,10 @@ export function useProposeForm(application: ApplicationDetail) {
     api.get(`/customers/${customerId}`)
       .then(r => {
         if (!alive) return
-        const raw = ((unwrap(r) as { contacts?: Array<{ id?: string; name?: string; email?: string; phone?: string }> })?.contacts) ?? []
-        setContacts(raw.map(c => ({ id: String(c.id ?? ''), name: c.name ?? '', email: c.email ?? '', phone: c.phone ?? '' })))
+        const raw = ((unwrap(r) as { contacts?: Array<{ id?: string; name?: string; email?: string; phone?: string; function?: string }> })?.contacts) ?? []
+        // CustomerContactResource sends `function` (CustomerContactResource.php:43) —
+        // carried through so the recipient picker can distinguish same-named contacts.
+        setContacts(raw.map(c => ({ id: String(c.id ?? ''), name: c.name ?? '', email: c.email ?? '', phone: c.phone ?? '', function: c.function ?? '' })))
       })
       .catch(() => { if (alive) setContactsError(true) })
       .finally(() => { if (alive) setContactsLoading(false) })

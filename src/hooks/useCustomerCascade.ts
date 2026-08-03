@@ -18,11 +18,11 @@ import api, { unwrap } from '@/lib/api'
 import type { Id } from '@/types/common'
 
 // Extra optional fields (Danny 24-07): the contact picker shows "Naam —
-// Functietitel" (dupes like two "Eva Bos" stay distinguishable) and the inline
-// create form duplicate-checks on email/phone/mobile against this same list —
-// both read tolerantly since the raw contact-function key name varies by response
-// shape. Optional so every OTHER consumer (locations/departments, which never
-// carry these) stays unaffected.
+// Functietitel" (dupes like two "Eva Bos" stay distinguishable, via the shared
+// `contactOptionLabel` in lib/contactLabel) and the inline create form
+// duplicate-checks on email/phone/mobile against this same list. Optional so
+// every OTHER consumer (locations/departments, which never carry these) stays
+// unaffected.
 export interface CascadeOption {
   id?: Id; name?: string
   function?: string; function_title?: string; position?: string; job_title?: string
@@ -36,26 +36,6 @@ export interface CascadeLocation extends CascadeOption {
   departments?: CascadeDepartment[]
   cost_center?: string | null
   billing_email?: string | null
-}
-// A contact's function/job title — the key name varies by response shape (see
-// the comment above), read tolerantly. THE shared reader: consumers building a
-// contact-picker option label call this instead of re-deriving it inline (§11 —
-// this exact fallback chain was already duplicated in RelationsSection.tsx
-// before this export existed; new/touched consumers should import it here).
-export const contactFunctionOf = (c: CascadeOption): string =>
-  c.function || c.function_title || c.position || c.job_title || ''
-
-// The shared "Name — Function" contact-option label (Danny 28-07: the opportunity
-// modal's contact picker showed the same name several times over — one row per
-// location/department coupling — with nothing to tell them apart). Mirrors the
-// " — " subtitle convention already used for contacts elsewhere (RelationsSection's
-// match contact picker, ProposeCandidateModal's recipient picker) — pure
-// data concatenation, not a translatable UI string, so no i18n key. Never leaves a
-// dangling separator when the function is absent.
-export const contactOptionLabel = (c: CascadeOption): string => {
-  const fn = contactFunctionOf(c)
-  const name = c.name ?? '—'
-  return fn ? `${name} — ${fn}` : name
 }
 
 export interface CustomerCascadeDetail {

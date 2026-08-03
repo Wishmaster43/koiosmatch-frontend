@@ -31,17 +31,22 @@ import { notifyError, notifySuccess } from '@/lib/notify'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { BTN_H } from '@/config/buttonMetrics'
 import { CONTACTS_CHANGED_EVENT } from '../hooks/useCustomerContacts'
+import { contactOptionLabel } from '@/lib/contactLabel'
 import type { Contact } from '@/types/customer'
 import type { Id } from '@/types/common'
 
-// Only the fields the two picker cards show — never the whole contact record (§8).
-interface LiteContact { id: Id; name: string; code?: string; email?: string }
+// Only the fields the two picker cards show — never the whole contact record
+// (§8). `role` (mapCustomer.ts's normalised function/job-title field) is
+// included so same-named contacts stay distinguishable, mirroring every other
+// contact picker's "Name — Function" label.
+interface LiteContact { id: Id; name: string; code?: string; email?: string; role?: string }
 
 const toLite = (c: Contact): LiteContact => ({
   id: c.id as Id,
   name: c.name,
   code: c.referenceNumber || undefined,
   email: c.email || undefined,
+  role: c.role || undefined,
 })
 
 export default function MergeContactModal({ customerId, current, others, onClose, onMerged }: {
@@ -104,7 +109,7 @@ export default function MergeContactModal({ customerId, current, others, onClose
         style={{ flex: 1, textAlign: 'left', padding: '10px 12px', borderRadius: 10, cursor: 'pointer',
           border: `1px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
           background: active ? 'var(--color-primary-bg)' : 'var(--surface)' }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{c.name}</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{contactOptionLabel(c)}</div>
         <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>{c.code ?? '—'}</div>
         {c.email && <div style={{ fontSize: 11, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.email}</div>}
         <div style={{ fontSize: 10, marginTop: 4, fontWeight: active ? 600 : 400, color: active ? 'var(--color-primary)' : 'var(--text-muted)' }}>
@@ -142,7 +147,7 @@ export default function MergeContactModal({ customerId, current, others, onClose
               {results.map(c => (
                 <button key={String(c.id)} type="button" onClick={() => setOther(c)}
                   style={{ textAlign: 'left', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer' }}>
-                  <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)' }}>{c.name}</span>
+                  <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)' }}>{contactOptionLabel(c)}</span>
                   <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8, fontFamily: "'JetBrains Mono', monospace" }}>{c.code ?? ''}</span>
                   {c.email && <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8 }}>{c.email}</span>}
                 </button>

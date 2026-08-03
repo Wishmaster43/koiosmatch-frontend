@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { contactOptionLabel } from '@/hooks/useCustomerCascade'
+import { contactOptionLabel } from '@/lib/contactLabel'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useCustomerCascade} from './useCustomerCascade'
 

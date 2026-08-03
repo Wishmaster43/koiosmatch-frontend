@@ -7,6 +7,7 @@ import type { ActionRuleDecision } from '@/components/actionrules'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import { BTN_H } from '@/config/buttonMetrics'
+import { contactOptionLabel } from '@/lib/contactLabel'
 import { useProposeForm } from './useProposeForm'
 import type { ApplicationDetail } from '@/types/application'
 
@@ -60,7 +61,9 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
     return <ActionRuleDialog open decision={decision} onConfirm={onClose} onCancel={onClose} />
   }
 
-  const contactOptions = form.contacts.map(c => ({ value: c.id, label: c.email ? `${c.name} — ${c.email}` : c.name }))
+  // The shared "Name — Function" label (same as every other contact picker) —
+  // distinguishes same-named contacts on the customer, never a dangling separator.
+  const contactOptions = form.contacts.map(c => ({ value: c.id, label: contactOptionLabel(c) }))
 
   // Human-readable reason the primary action is disabled (§3 — never a bare
   // greyed-out button with no explanation).
