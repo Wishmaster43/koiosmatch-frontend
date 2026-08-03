@@ -82,6 +82,17 @@ vi.mock('./ScopedMatchesTab', () => ({
 vi.mock('@/components/drawer/tabs/EntityTasksTab', () => ({
   default: ({ linkType, id }: { linkType: string; id?: string }) => <div data-testid="entity-tasks">{linkType}:{id}</div>,
 }))
+// NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: same stub convention as ScopedVacanciesTab/
+// ScopedMatchesTab above — this file only proves LocationDetail's OWN wiring
+// (right scope/id/customerId), not the shared tabs' own fetch (covered elsewhere).
+vi.mock('./ScopedNotesTab', () => ({
+  default: ({ scope, id, customerId }: { scope: string; id?: string; customerId?: string }) =>
+    <div data-testid="scoped-notes">{scope}:{id}:{customerId}</div>,
+}))
+vi.mock('./ScopedDocumentsTab', () => ({
+  default: ({ scope, id, customerId }: { scope: string; id?: string; customerId?: string }) =>
+    <div data-testid="scoped-documents">{scope}:{id}:{customerId}</div>,
+}))
 
 // SOLLICITATIES-SCOPE-1: opening the new Sollicitaties sub-tab mounts
 // LocationSollicitatiesTab, which calls a REAL react-query hook
@@ -700,6 +711,27 @@ describe('LocationDetail · Vacatures/Matches sub-tabs', () => {
     render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
     await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.matches') }))
     expect(screen.getByTestId('scoped-matches')).toHaveTextContent('location:loc-1:cust-1')
+  })
+})
+
+/**
+ * NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1 — this location's own Notities/Documenten
+ * sub-tabs, right after Sollicitaties, wired with the "location" scope + this
+ * location's own id + the customer id (stubbed above).
+ */
+describe('LocationDetail · Notities/Documenten sub-tabs (NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1)', () => {
+  it('wires the location scope + id into ScopedNotesTab', async () => {
+    const user = userEvent.setup()
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.notes') }))
+    expect(screen.getByTestId('scoped-notes')).toHaveTextContent('location:loc-1:cust-1')
+  })
+
+  it('wires the location scope + id into ScopedDocumentsTab', async () => {
+    const user = userEvent.setup()
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.documents') }))
+    expect(screen.getByTestId('scoped-documents')).toHaveTextContent('location:loc-1:cust-1')
   })
 })
 

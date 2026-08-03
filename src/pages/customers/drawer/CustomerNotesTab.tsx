@@ -22,6 +22,19 @@
  * Taken tab could not be built and a create-only button was the most that was honest.
  * That filter works now (TASKS-LINK-FILTER-1), so tasks belong in their own tab on the
  * customer — not bolted onto Notities.
+ *
+ * NOTES-LOC-DEPT-1 (Danny: "notities moet buiten de categorie ook gelinkt worden aan
+ * klant, locatie, afdeling, contactpersoon"): the CONTACT-NOTITIES-1 contact-only picker
+ * below is widened into ONE "gekoppeld aan" picker over all four levels (Klant · Locatie ·
+ * Afdeling · Contactpersoon). Shape measured against SelectMenu (components/ui/
+ * SelectMenu.tsx) rather than inventing a grouped variant: it already supports a
+ * non-selectable `disabled` row, so a SINGLE flat option list with a disabled header row
+ * per non-empty level reads as a grouped picker without a new component — a two-step
+ * (level-select → record-select) UI would need twice the state and a second SelectMenu for
+ * the same result. The value is `level` for Klant or `level:id` for the other three, so
+ * exactly one link id ever rides along (never more than one, per the backend's own
+ * "deepest level wins" rule — CustomerNote::levelContext()). A level only appears when the
+ * customer actually HAS a record at it (no dead-end options, §3).
  */
 import { useState, useEffect } from 'react'
 import type { ComponentType, ReactNode } from 'react'
@@ -60,7 +73,12 @@ interface Props {
   // `(id, payload: { type, title, body }) => void` the parent (CustomerDrawer)
   // still declares stays assignable here (a variable of THIS wider shape is
   // always assignable where the narrower one is expected).
-  onAddNote?: (payload: { type: string; title: string; body: string; customer_contact_id?: Id }) => void
+  // NOTES-LOC-DEPT-1: `customer_location_id`/`customer_department_id` widen it
+  // further — same assignability reasoning, exactly one of the three ever set.
+  onAddNote?: (payload: {
+    type: string; title: string; body: string
+    customer_contact_id?: Id; customer_location_id?: Id; customer_department_id?: Id
+  }) => void
   // The record itself + its save path, for the Vacature-zichtbaarheid sub-tab (it edits
   // three customer fields through the drawer's own optimistic PATCH).
   c: Customer
@@ -80,36 +98,65 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
   const [timeline, setTimeline] = useState<TimelineEntry[]>([])
   const active = subTab
 
-  // CONTACT-NOTITIES-1 (Danny quick win): optionally file the next note against
-  // one of this customer's own contacts — the API already accepts
-  // `customer_contact_id` (scoped to this customer, CustomerController::addNote)
-  // but nothing offered picking one. Resets after each save (see handleAddNote)
-  // so linking one note never silently carries over onto the next, unrelated one.
-  const [pendingContactId, setPendingContactId] = useState('')
+  // NOTES-LOC-DEPT-1: optionally file the next note against one of this customer's
+  // own locations/departments/contacts (or leave it at "Klant", the default — no
+  // link at all). Resets after each save (see handleAddNote) so linking one note
+  // never silently carries over onto the next, unrelated one. Encoded as a single
+  // string: 'customer' or '<level>:<id>' — see the file header for why this is
+  // ONE SelectMenu (disabled header rows) rather than a two-step level→record UI.
+  const [pendingLink, setPendingLink] = useState('customer')
+  const [pendingKind, pendingRecordId] = pendingLink.includes(':')
+    ? (pendingLink.split(':') as [string, string]) : [pendingLink, '']
+  const locationOptions = (c.locations ?? [])
+    .filter(l => l.id != null)
+    .map(l => ({ value: `location:${l.id}`, label: l.name }))
+  const departmentOptions = (c.departments ?? [])
+    .filter(d => d.id != null)
+    .map(d => ({ value: `department:${d.id}`, label: d.locationName ? `${d.name} — ${d.locationName}` : d.name }))
   const contactOptions = (c.contacts ?? [])
     .filter(contact => contact.id != null)
-    .map(contact => ({ value: String(contact.id), label: contactOptionLabel(contact) }))
-  const noteTypes = pendingContactId ? contactNoteTypes : customerNoteTypes
+    .map(contact => ({ value: `contact:${contact.id}`, label: contactOptionLabel(contact) }))
+  // The full "gekoppeld aan" option list: Klant, then one disabled header row per
+  // non-empty level followed by its own records — never a level with zero options
+  // (a picker entry that always errors is a fake affordance, §3).
+  const linkOptions = [
+    { value: 'customer', label: t('notes.linkLevelOptions.customer') },
+    ...(locationOptions.length > 0 ? [{ value: '__hdr_location', label: t('notes.linkLevelOptions.location'), disabled: true }, ...locationOptions] : []),
+    ...(departmentOptions.length > 0 ? [{ value: '__hdr_department', label: t('notes.linkLevelOptions.department'), disabled: true }, ...departmentOptions] : []),
+    ...(contactOptions.length > 0 ? [{ value: '__hdr_contact', label: t('notes.linkLevelOptions.contact'), disabled: true }, ...contactOptions] : []),
+  ]
+  const hasLinkChoices = locationOptions.length > 0 || departmentOptions.length > 0 || contactOptions.length > 0
+  // CustomerController::addNote validates `type` against entity=contact only when
+  // customer_contact_id is filled, entity=customer otherwise (NOTE-TYPES-3-GAP-1)
+  // — location/department links stay on the customer scope, only a contact link
+  // switches it (matches the backend's own condition exactly).
+  const noteTypes = pendingKind === 'contact' ? contactNoteTypes : customerNoteTypes
   // Historical notes may have been filed under EITHER scope — merge both lookups
   // (deduped by value) so an existing note's type chip always resolves its real
   // label/colour regardless of which scope it was written under.
   const chipTypes = [...customerChipTypes, ...contactChipTypes]
     .filter((nt, i, arr) => arr.findIndex(x => x.value === nt.value) === i)
 
-  // Carries the picked contact link along with the composer's own payload, then
-  // clears the picker — a fresh note starts unlinked unless picked again.
+  // Carries the picked link along with the composer's own payload (exactly ONE of
+  // the three ids, per the picked level), then resets the picker to "Klant" — a
+  // fresh note starts unlinked unless a level is picked again.
   const handleAddNote = (payload: { type: string; title: string; body: string }) => {
-    onAddNote?.({ ...payload, customer_contact_id: pendingContactId || undefined })
-    setPendingContactId('')
+    onAddNote?.({
+      ...payload,
+      customer_contact_id: pendingKind === 'contact' ? pendingRecordId : undefined,
+      customer_location_id: pendingKind === 'location' ? pendingRecordId : undefined,
+      customer_department_id: pendingKind === 'department' ? pendingRecordId : undefined,
+    })
+    setPendingLink('customer')
   }
 
-  // Soft-tint "linked to {contact}" chip (§4 convention). The shared NotesTab
-  // (components/drawer/tabs/NotesTab.tsx) has no per-note extension point and is
-  // out of scope for this change (owned by a parallel lane) — but its title cell
-  // already renders whatever ReactNode it is given (`{n.title ?? who}`), so this
-  // stays entirely inside THIS file: a note with a linked contact gets this chip
-  // AS its title, never a change to the shared component.
-  const contactChip = (name: string) => (
+  // Soft-tint "linked to {name}" chip (§4 convention) — one chip for all three
+  // deeper levels (location/department/contact), never a per-level fork. The
+  // shared NotesTab (components/drawer/tabs/NotesTab.tsx) has no per-note
+  // extension point and is out of scope for this change (owned by a parallel
+  // lane) — but its title cell already renders whatever ReactNode it is given
+  // (`{n.title ?? who}`), so this stays entirely inside THIS file.
+  const linkChip = (name: string) => (
     <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: 10, fontWeight: 600,
       padding: '1px 6px', borderRadius: 99, marginRight: 6,
       background: 'color-mix(in srgb, var(--color-info) 12%, transparent)', color: 'var(--color-info)',
@@ -117,10 +164,14 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
       {t('notes.linkedTo', { name })}
     </span>
   )
-  // Notes with a linked contact show the chip where the (never-persisted) title
-  // would sit; every other note is untouched.
-  const notesWithChip: Array<Omit<CustomerNote, 'title'> & { title: ReactNode }> = notes.map(n =>
-    n.contactName ? { ...n, title: contactChip(n.contactName) } : n)
+  // Notes with a linked location/department/contact show the chip where the
+  // (never-persisted) title would sit — department wins over location (the
+  // deepest level, mirrors the backend's own CustomerNote::levelContext()
+  // priority), then the independent contact link; every other note is untouched.
+  const notesWithChip: Array<Omit<CustomerNote, 'title'> & { title: ReactNode }> = notes.map(n => {
+    const linkedName = n.departmentName || n.locationName || n.contactName
+    return linkedName ? { ...n, title: linkChip(linkedName) } : n
+  })
 
   // Fetch the activity feed lazily, only once the Tijdlijn sub-tab is opened.
   useEffect(() => {
@@ -143,10 +194,8 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
       save: t('notes.save'), cancel: t('notes.cancel'), edit: t('notes.edit'),
       notesEmpty: t('notes.notesEmpty'), timeline: t('notes.timeline'), timelineEmpty: t('notes.timelineEmpty'),
       notePlaceholder: () => t('notes.notePlaceholder'),
-      // TAKEN-TOOLBAR/NOTES-SEARCH-1 (Danny 03-08): minimal additive line only —
-      // another lane is actively editing this file's contact-link picker
-      // (SelectMenu/contactOptionLabel above); this just supplies the shared
-      // NotesTab's new search placeholder, nothing else touched here.
+      // TAKEN-TOOLBAR/NOTES-SEARCH-1 (Danny 03-08): supplies the shared NotesTab's
+      // search placeholder.
       searchPlaceholder: t('notes.searchPlaceholder'),
     },
   }
@@ -165,25 +214,26 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
         active={subTab}
         onChange={setSubTab}
       />
-      {/* CONTACT-NOTITIES-1: optional "link the next note to a contact" picker —
-          only where it applies (the composer lives on this sub-tab) and only when
-          there is anyone to link to. Positioned above the composer rather than
-          inside it: the composer itself belongs to the shared NotesTab component,
-          out of scope for this change (see the chip comment above). */}
-      {active === 'notes' && contactOptions.length > 0 && (
+      {/* NOTES-LOC-DEPT-1: optional "link the next note to" picker over all four
+          levels (Klant · Locatie · Afdeling · Contactpersoon) — only where it
+          applies (the composer lives on this sub-tab) and only when there is
+          anything below Klant to link to. Positioned above the composer rather
+          than inside it: the composer itself belongs to the shared NotesTab
+          component, out of scope for this change (see the chip comment above). */}
+      {active === 'notes' && hasLinkChoices && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{t('notes.linkContactLabel')}</span>
           <div style={{ width: 240 }}>
-            <SelectMenu value={pendingContactId} onChange={setPendingContactId}
-              options={[{ value: '', label: t('notes.linkContactNone') }, ...contactOptions]}
-              placeholder={t('notes.linkContactNone')} />
+            <SelectMenu value={pendingLink} onChange={setPendingLink}
+              options={linkOptions}
+              placeholder={t('notes.linkLevelOptions.customer')} />
           </div>
         </div>
       )}
-      {/* `key` remounts the composer when the linked contact changes — its writable
+      {/* `key` remounts the composer when the picked link changes — its writable
           note-type list switches scope (see noteTypes above), and a stale type
           picked under the OTHER scope would otherwise 422 on save. */}
-      {active === 'notes'    && <NotesTab key={pendingContactId || 'none'} {...notesProps} showTimeline={false} showConversations={false} />}
+      {active === 'notes'    && <NotesTab key={pendingLink} {...notesProps} showTimeline={false} showConversations={false} />}
       {/* The customer's Taken surface — moved here from the top-level drawer tab
           (Danny 03-08); the shared tab brings its own search/status-filter/add toolbar. */}
       {active === 'tasks' && (

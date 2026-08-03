@@ -4,8 +4,32 @@ import { backofficeLinkOf } from '@/lib/backofficeLink'
 import type { Id } from '@/types/common'
 import type {
   ApiContact, ApiDepartment, ApiLocation, ApiCustomer,
-  Contact, Department, Location, Customer,
+  Contact, Department, Location, Customer, CustomerNote,
 } from '@/types/customer'
+
+// NOTES-LOC-DEPT-1: the raw note-row shape shared by BOTH the embedded
+// `customer.notes[]` (CustomerDetailResource) and the standalone scoped-notes
+// endpoints (CustomerNoteResource, GET .../notes) — same fields, so ONE mapper
+// (below) serves both call sites instead of a forked copy (§11).
+export interface ApiCustomerNoteRow {
+  id?: Id; type?: string; title?: string; text?: string; body?: string
+  created_at?: string; ago?: string
+  customer_contact_id?: Id | null; contact_name?: string | null
+  customer_location_id?: Id | null; location_name?: string | null
+  customer_department_id?: Id | null; department_name?: string | null
+  level?: string
+}
+
+/** mapCustomerNoteRow — raw API note row → flat UI shape (CONTACT-NOTITIES-1 + NOTES-LOC-DEPT-1). */
+export function mapCustomerNoteRow(n: ApiCustomerNoteRow = {}): CustomerNote {
+  return {
+    id: n.id, type: n.type ?? '', title: n.title ?? '', text: n.text ?? n.body ?? '', ago: n.created_at ?? n.ago ?? '',
+    contactId: n.customer_contact_id ?? null, contactName: n.contact_name ?? '',
+    locationId: n.customer_location_id ?? null, locationName: n.location_name ?? '',
+    departmentId: n.customer_department_id ?? null, departmentName: n.department_name ?? '',
+    level: n.level ?? '',
+  }
+}
 
 // Compact one-line address: "Straat 12a, 1234 AB Plaats".
 // BUG FIX (Danny 13/7): the API field is `postcode`, not `postal_code` — the old
@@ -253,10 +277,9 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     // CONTACT-NOTITIES-1 (Danny quick win): the person a note is filed against —
     // both were returned by CustomerDetailResource all along but dropped here, so
     // the drawer could never show or set the link (contactId null = a company-level note).
-    notes: (c.notes ?? []).map(n => ({
-      id: n.id, type: n.type ?? '', title: n.title ?? '', text: n.text ?? n.body ?? '', ago: n.created_at ?? n.ago ?? '',
-      contactId: n.customer_contact_id ?? null, contactName: n.contact_name ?? '',
-    })),
+    // NOTES-LOC-DEPT-1: shares the ONE row mapper with the scoped notes endpoints
+    // (useScopedCustomerNotes) — never a second, drifting copy of this shape (§11).
+    notes: (c.notes ?? []).map(mapCustomerNoteRow),
     locationsCount: c.locations_count ?? locations.length,
     departmentsCount: c.departments_count ?? departments.length,
     contactsCount: c.contacts_count ?? contacts.length,

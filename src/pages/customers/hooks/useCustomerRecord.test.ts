@@ -225,3 +225,56 @@ describe('useCustomerRecord · customer phase (KLANT-FASE-1)', () => {
     expect(body).not.toHaveProperty('phase')
   })
 })
+
+/**
+ * NOTES-LOC-DEPT-1 — the composer's picked level (customer_contact_id/
+ * customer_location_id/customer_department_id) must reach the exact POST body
+ * addNote sends, unchanged. Asserts the REQUEST (§13), not only that a callback fired.
+ */
+describe('useCustomerRecord · addNote (NOTES-LOC-DEPT-1)', () => {
+  it('POSTs the contact link when the composer picked a contact', () => {
+    vi.mocked(api.post).mockResolvedValue({})
+    const r = harness([customer({ id: 1 })])
+    act(() => { r.result.current.record.addNote(1, { type: 'general', title: '', body: 'Belafspraak', customer_contact_id: 'con-1' }) })
+
+    expect(vi.mocked(api.post)).toHaveBeenCalledWith('/customers/1/notes', {
+      type: 'general', title: '', text: 'Belafspraak',
+      customer_contact_id: 'con-1', customer_location_id: undefined, customer_department_id: undefined,
+    })
+  })
+
+  it('POSTs the location link when the composer picked a location', () => {
+    vi.mocked(api.post).mockResolvedValue({})
+    const r = harness([customer({ id: 1 })])
+    act(() => { r.result.current.record.addNote(1, { type: 'general', title: '', body: 'Bezoek gepland', customer_location_id: 'loc-1' }) })
+
+    expect(vi.mocked(api.post)).toHaveBeenCalledWith('/customers/1/notes', {
+      type: 'general', title: '', text: 'Bezoek gepland',
+      customer_contact_id: undefined, customer_location_id: 'loc-1', customer_department_id: undefined,
+    })
+  })
+
+  it('POSTs the department link when the composer picked a department', () => {
+    vi.mocked(api.post).mockResolvedValue({})
+    const r = harness([customer({ id: 1 })])
+    act(() => { r.result.current.record.addNote(1, { type: 'general', title: '', body: 'Personeelswissel', customer_department_id: 'dep-1' }) })
+
+    expect(vi.mocked(api.post)).toHaveBeenCalledWith('/customers/1/notes', {
+      type: 'general', title: '', text: 'Personeelswissel',
+      customer_contact_id: undefined, customer_location_id: undefined, customer_department_id: 'dep-1',
+    })
+  })
+
+  it('adds an optimistic row carrying the picked link id (name resolves once the real detail reloads)', async () => {
+    mockedGet.mockResolvedValue({ data: { id: 1, name: 'Test customer' } })
+    vi.mocked(api.post).mockResolvedValue({})
+    const r = harness([customer({ id: 1 })])
+    act(() => { r.result.current.record.selectCustomer(customer({ id: 1 })) })
+    await waitFor(() => expect(r.result.current.record.detail?.id).toBe(1))
+
+    act(() => { r.result.current.record.addNote(1, { type: 'general', title: '', body: 'Bezoek gepland', customer_location_id: 'loc-1' }) })
+
+    const optimisticNote = r.result.current.record.detail?.notes?.[0]
+    expect(optimisticNote).toMatchObject({ locationId: 'loc-1', locationName: '', departmentId: null, contactId: null })
+  })
+})

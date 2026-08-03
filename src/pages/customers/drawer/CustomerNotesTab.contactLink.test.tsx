@@ -1,9 +1,10 @@
 /**
- * CustomerNotesTab · CONTACT-NOTITIES-1 (Danny quick win) — a note can be filed
- * against one of this customer's own contacts. Kept in its own file (real i18n,
- * unlike CustomerNotesTab.test.tsx which deliberately mocks @/lib/datetime to
- * keep t() echoing raw keys) so these assertions read the real translated copy,
- * mirroring LocationDetail.test.tsx's own convention.
+ * CustomerNotesTab · CONTACT-NOTITIES-1 + NOTES-LOC-DEPT-1 — a note can be filed
+ * against one of this customer's own contacts, or (NOTES-LOC-DEPT-1) against one
+ * of its locations/departments instead. Kept in its own file (real i18n, unlike
+ * CustomerNotesTab.test.tsx which deliberately mocks @/lib/datetime to keep t()
+ * echoing raw keys) so these assertions read the real translated copy, mirroring
+ * LocationDetail.test.tsx's own convention.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -35,63 +36,117 @@ beforeEach(() => vi.clearAllMocks())
 
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
 
-// Minimal customer carrying one contact (the picker's own option list).
-const customerWithContact = {
+// A customer carrying one of each linkable record (contact/location/department) —
+// the picker's own option list at every non-default level.
+const customerWithLinks = {
   id: 'cust-1', name: 'Acme Zorg',
   contacts: [{ id: 'con-1', name: 'Joost de Boer', role: 'Teamleider' }],
+  locations: [{ id: 'loc-1', name: 'Hoofdlocatie' }],
+  departments: [{ id: 'dep-1', name: 'Verpleging', locationName: 'Hoofdlocatie' }],
 } as unknown as Customer
 
 const note = (over: Partial<CustomerNote> = {}): CustomerNote =>
-  ({ id: 'n-1', type: '', title: '', text: 'Belafspraak gemaakt', ago: '2 dagen geleden', contactId: null, contactName: '', ...over })
+  ({
+    id: 'n-1', type: '', title: '', text: 'Belafspraak gemaakt', ago: '2 dagen geleden', contactId: null, contactName: '',
+    // NOTES-LOC-DEPT-1: the location/department link fields — null/empty by
+    // default, exactly like contactId/contactName above (a company-level note).
+    locationId: null, locationName: '', departmentId: null, departmentName: '',
+    ...over,
+  })
 
-describe('CustomerNotesTab · linked-contact chip', () => {
+describe('CustomerNotesTab · linked-to chip', () => {
   it('renders the "linked to" chip on a note that carries a contactName', () => {
     render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[note({ contactId: 'con-1', contactName: 'Joost de Boer' })]}
-      onAddNote={vi.fn()} c={customerWithContact} onSave={vi.fn()} />)
+      onAddNote={vi.fn()} c={customerWithLinks} onSave={vi.fn()} />)
     expect(screen.getByText(ct('notes.linkedTo', { name: 'Joost de Boer' }))).toBeInTheDocument()
   })
 
-  it('renders no chip on a company-level note (no linked contact)', () => {
+  it('renders the "linked to" chip on a note carrying a locationName, and prefers departmentName when both are set', () => {
+    render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg"
+      notes={[note({ locationId: 'loc-1', locationName: 'Hoofdlocatie' }), note({ id: 'n-2', locationId: 'loc-1', locationName: 'Hoofdlocatie', departmentId: 'dep-1', departmentName: 'Verpleging' })]}
+      onAddNote={vi.fn()} c={customerWithLinks} onSave={vi.fn()} />)
+    expect(screen.getByText(ct('notes.linkedTo', { name: 'Hoofdlocatie' }))).toBeInTheDocument()
+    expect(screen.getByText(ct('notes.linkedTo', { name: 'Verpleging' }))).toBeInTheDocument()
+  })
+
+  it('renders no chip on a company-level note (no linked record)', () => {
     render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[note()]}
-      onAddNote={vi.fn()} c={customerWithContact} onSave={vi.fn()} />)
+      onAddNote={vi.fn()} c={customerWithLinks} onSave={vi.fn()} />)
     expect(screen.queryByText(ct('notes.linkedTo', { name: 'Joost de Boer' }))).not.toBeInTheDocument()
   })
 })
 
-describe('CustomerNotesTab · contact picker (composer)', () => {
-  it('offers no picker at all when the customer has no contacts', () => {
-    const customerNoContacts = { id: 'cust-1', name: 'Acme Zorg', contacts: [] } as unknown as Customer
+describe('CustomerNotesTab · "gekoppeld aan" picker (composer)', () => {
+  it('offers no picker at all when the customer has nothing to link to', () => {
+    const customerEmpty = { id: 'cust-1', name: 'Acme Zorg', contacts: [], locations: [], departments: [] } as unknown as Customer
     render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]}
-      onAddNote={vi.fn()} c={customerNoContacts} onSave={vi.fn()} />)
+      onAddNote={vi.fn()} c={customerEmpty} onSave={vi.fn()} />)
     expect(screen.queryByText(ct('notes.linkContactLabel'))).not.toBeInTheDocument()
   })
 
-  it('sends the picked contact\'s id as customer_contact_id on the next note', async () => {
+  it('sends the picked contact\'s id as customer_contact_id, and nothing else, on the next note', async () => {
     const user = userEvent.setup()
     const onAddNote = vi.fn()
     render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]}
-      onAddNote={onAddNote} c={customerWithContact} onSave={vi.fn()} />)
+      onAddNote={onAddNote} c={customerWithLinks} onSave={vi.fn()} />)
 
-    // Pick the contact via the new picker (defaults to "no contact").
-    await user.click(screen.getByRole('button', { name: ct('notes.linkContactNone') }))
+    // The picker defaults to "Klant" (no link) — open it and pick the contact.
+    await user.click(screen.getByRole('button', { name: ct('notes.linkLevelOptions.customer') }))
     await user.click(screen.getByRole('button', { name: 'Joost de Boer — Teamleider' }))
 
-    // Compose and save through the shared composer.
     await user.click(screen.getByRole('button', { name: ct('notes.newNote') }))
     await user.click(screen.getByTitle(ct('notes.save')))
 
-    expect(onAddNote).toHaveBeenCalledWith(expect.objectContaining({ customer_contact_id: 'con-1' }))
+    expect(onAddNote).toHaveBeenCalledWith(expect.objectContaining({
+      customer_contact_id: 'con-1', customer_location_id: undefined, customer_department_id: undefined,
+    }))
   })
 
-  it('a note left unlinked (nothing picked) sends no customer_contact_id', async () => {
+  it('sends the picked location\'s id as customer_location_id, and nothing else, on the next note', async () => {
     const user = userEvent.setup()
     const onAddNote = vi.fn()
     render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]}
-      onAddNote={onAddNote} c={customerWithContact} onSave={vi.fn()} />)
+      onAddNote={onAddNote} c={customerWithLinks} onSave={vi.fn()} />)
+
+    await user.click(screen.getByRole('button', { name: ct('notes.linkLevelOptions.customer') }))
+    await user.click(screen.getByRole('button', { name: 'Hoofdlocatie' }))
 
     await user.click(screen.getByRole('button', { name: ct('notes.newNote') }))
     await user.click(screen.getByTitle(ct('notes.save')))
 
-    expect(onAddNote).toHaveBeenCalledWith(expect.objectContaining({ customer_contact_id: undefined }))
+    expect(onAddNote).toHaveBeenCalledWith(expect.objectContaining({
+      customer_location_id: 'loc-1', customer_contact_id: undefined, customer_department_id: undefined,
+    }))
+  })
+
+  it('sends the picked department\'s id as customer_department_id, and nothing else, on the next note', async () => {
+    const user = userEvent.setup()
+    const onAddNote = vi.fn()
+    render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]}
+      onAddNote={onAddNote} c={customerWithLinks} onSave={vi.fn()} />)
+
+    await user.click(screen.getByRole('button', { name: ct('notes.linkLevelOptions.customer') }))
+    await user.click(screen.getByRole('button', { name: 'Verpleging — Hoofdlocatie' }))
+
+    await user.click(screen.getByRole('button', { name: ct('notes.newNote') }))
+    await user.click(screen.getByTitle(ct('notes.save')))
+
+    expect(onAddNote).toHaveBeenCalledWith(expect.objectContaining({
+      customer_department_id: 'dep-1', customer_contact_id: undefined, customer_location_id: undefined,
+    }))
+  })
+
+  it('a note left at "Klant" (nothing picked) sends none of the three link ids', async () => {
+    const user = userEvent.setup()
+    const onAddNote = vi.fn()
+    render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]}
+      onAddNote={onAddNote} c={customerWithLinks} onSave={vi.fn()} />)
+
+    await user.click(screen.getByRole('button', { name: ct('notes.newNote') }))
+    await user.click(screen.getByTitle(ct('notes.save')))
+
+    expect(onAddNote).toHaveBeenCalledWith(expect.objectContaining({
+      customer_contact_id: undefined, customer_location_id: undefined, customer_department_id: undefined,
+    }))
   })
 })

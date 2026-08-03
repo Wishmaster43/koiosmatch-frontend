@@ -7,6 +7,17 @@
  *   { id (uuid), name, type, size, url, download_url, created_at }
  * `url` = authenticated stream (needs the session); `download_url` = signed capability
  * URL (absolute, ~5 min TTL) — the FE opens THAT for preview, never the relative `url`.
+ *
+ * DOCS-LOC-DEPT-1: `listUrl` optionally OVERRIDES the GET listing endpoint — the
+ * customer's location/department drill-down (ScopedDocumentsTab) reads through the
+ * byLocation/byDepartment routes instead of the flat customer list, while every
+ * write (upload/rename/delete) still targets the customer's own `/customers/{id}/
+ * documents` routes (the only ones that exist — a document's parent is always the
+ * customer, the location/department id is a secondary link, never a route segment).
+ * `upload()`'s optional 5th argument carries that same link as extra multipart
+ * fields (e.g. `{ customer_location_id: '...' }`) — omitted entirely (not merely
+ * undefined) when there is nothing to link, so an unlinked upload's request body
+ * is byte-identical to before this axis existed.
  */
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -22,6 +33,12 @@ export interface EntityDoc {
   // ticket DOC-UPLOADER-1; render tolerantly against both shapes in the meantime).
   uploaded_by?: string | { name?: string }; created_by?: string | { name?: string }
   uploaded_at?: string
+  // DOCS-LOC-DEPT-1: the OPTIONAL location/department link + the backend's own
+  // resolved `level` (only CustomerDocument carries these — see EntityDocumentController::
+  // payload()'s levelContext() spread; absent on every other entity's documents).
+  level?: string
+  customer_location_id?: Id | null; location_name?: string | null
+  customer_department_id?: Id | null; department_name?: string | null
 }
 
 // A persisted doc has a real (UUID) id; an optimistic row carries a `tmp-…` id.
@@ -43,27 +60,32 @@ const fmtSize = (s: string | number | undefined): string => {
   return s >= 1_048_576 ? (s / 1_048_576).toFixed(1) + ' MB' : Math.max(1, Math.round(s / 1024)) + ' KB'
 }
 
-export function useEntityDocuments(prefix: string, parentId: Id | undefined) {
+export function useEntityDocuments(prefix: string, parentId: Id | undefined, listUrl?: string) {
   const { t } = useTranslation()
   const [docs, setDocs] = useState<EntityDoc[]>([])
 
-  // Load the list (server returns newest-first) whenever the parent changes.
+  // Load the list (server returns newest-first) whenever the parent (or, for a
+  // scoped drill-down, the DOCS-LOC-DEPT-1 listUrl override) changes.
   useEffect(() => {
     if (!parentId) { setDocs([]); return }
     let alive = true
-    api.get(`/${prefix}/${parentId}/documents`)
+    api.get(listUrl ?? `/${prefix}/${parentId}/documents`)
       .then(res => { if (alive) setDocs(unwrapList<EntityDoc>(res).rows.map(d => ({ ...d, size: fmtSize(d.size) }))) })
       .catch(() => { if (alive) setDocs([]) })
     return () => { alive = false }
-  }, [prefix, parentId])
+  }, [prefix, parentId, listUrl])
 
   // Upload (multipart) — optimistic row with a temp id, swapped for the server doc.
-  const upload = useCallback((file: File, type: string, name: string, objectUrl: string) => {
+  // DOCS-LOC-DEPT-1: `extraFields` (e.g. `{ customer_location_id: '...' }`) rides
+  // along as extra FormData fields when given — omitted entirely when absent, so
+  // an unlinked upload's request body never gains a stray empty field.
+  const upload = useCallback((file: File, type: string, name: string, objectUrl: string, extraFields?: Record<string, string>) => {
     if (!parentId) return
     const tmpId = `tmp-${Date.now()}-${++tempDocSeq}`
     setDocs(d => [{ id: tmpId, name, type, size: fmtSize(file.size), objectUrl }, ...d])
     const fd = new FormData()
     fd.append('file', file); fd.append('type', type); fd.append('name', name)
+    Object.entries(extraFields ?? {}).forEach(([k, v]) => fd.append(k, v))
     api.post(`/${prefix}/${parentId}/documents`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       // Audit R1 🔴: the optimistic row's object URL leaked on every upload — revoke it
       // the moment the server doc replaces (or the failure drops) the temp row.

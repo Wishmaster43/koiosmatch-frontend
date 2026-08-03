@@ -4,7 +4,7 @@
  * fetches via React Query (A-3: cached + dedup + signal-cancel), disabled until their
  * inputs exist, and tolerant of a missing endpoint (empty/null, never a hard error).
  */
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import api, { unwrap, unwrapList } from '@/lib/api'
 // MATCHES-TAB-1: reuse the matches PAGE's own mapper rather than a third one.
 import { mapMatch } from '@/pages/matches/hooks/useMatches'
@@ -15,8 +15,12 @@ import { mapApplication } from '@/pages/applications/data/mapApplication'
 // sub-tab) reused below to resolve a level's OWN vacancy ids for its Sollicitaties
 // sub-tab — same hook, same queryKey shape, so the two sub-tabs share one cache entry.
 import { useScopedEntityList } from './useScopedEntityList'
+// NOTES-LOC-DEPT-1: the ONE note-row mapper shared with mapCustomer's embedded
+// `notes` field (§11 — never a second, drifting copy of this shape).
+import { mapCustomerNoteRow, type ApiCustomerNoteRow } from '../data/mapCustomer'
 import type { RawMatch, MatchRow } from '@/types/match'
 import type { ApiApplication, Application } from '@/types/application'
+import type { CustomerNote } from '@/types/customer'
 import type { LookupItem } from '@/context/LookupsContext'
 import type { Id } from '@/types/common'
 
@@ -215,4 +219,33 @@ export function useScopedVacancyIds(scope: 'department' | 'location', id: Id | u
   const { rows, loading, error } = useScopedEntityList<VacancyRow>(`${scope}-vacancies`, '/vacancies', paramName, id, mapVacancyRow)
   const vacancyIds = rows.map(v => v.id).filter((v): v is Id => v != null)
   return { vacancyIds, loading, error }
+}
+
+/**
+ * NOTES-LOC-DEPT-1 — a location/department's own Notities sub-tab (ScopedNotesTab).
+ * Reads the dedicated scoped-notes endpoints (CustomerLocationController::notes /
+ * CustomerDepartmentController::notes), NOT the customer's embedded `notes[]` —
+ * those endpoints already do the server-side scoping (own notes + `?rollup=1`
+ * folding in a location's departments' notes; a department is a leaf, nothing to
+ * roll up under it). Same ONE row mapper mapCustomer's own `notes` field uses
+ * (§11), so a note's chip/type resolve identically wherever it is listed.
+ */
+export function useScopedCustomerNotes(customerId: Id | undefined, scope: 'location' | 'department', id: Id | undefined) {
+  const queryClient = useQueryClient()
+  const endpoint = scope === 'location'
+    ? `/customers/${customerId}/locations/${id}/notes`
+    : `/customers/${customerId}/departments/${id}/notes`
+  const queryKey = ['customers', customerId, scope, id, 'notes']
+  const { data = [], isLoading: loading, isError: error } = useQuery({
+    queryKey,
+    enabled: !!customerId && !!id,
+    queryFn: async ({ signal }): Promise<CustomerNote[]> => {
+      // Only the location scope rolls up its departments' notes — a department is a leaf.
+      const params = scope === 'location' ? { rollup: 1 } : undefined
+      return unwrapList<ApiCustomerNoteRow>(await api.get(endpoint, { params, signal })).rows.map(mapCustomerNoteRow)
+    },
+  })
+  // A freshly-added note (POST goes straight to the customer's own /notes route,
+  // see ScopedNotesTab) invalidates this query so the scoped list picks it up too.
+  return { notes: data, loading, error, reload: () => queryClient.invalidateQueries({ queryKey }) }
 }

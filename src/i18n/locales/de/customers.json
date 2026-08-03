@@ -508,7 +508,8 @@
     "deleteTitle": "Dokument löschen",
     "deleteOneMessage": "Sind Sie sicher? '{{name}}' wird endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
     "deleteManyMessage": "Sind Sie sicher? {{count}} Dokumente werden endgültig gelöscht — dies kann nicht rückgängig gemacht werden.",
-    "deleteSelected": "Löschen ({{count}})"
+    "deleteSelected": "Löschen ({{count}})",
+    "linkLevelLabel": "Dokument verknüpfen mit"
   },
   "priceAgreements": {
     "add": "Neue Preisvereinbarung",
@@ -550,7 +551,13 @@
     "linkedTo": "Verknüpft mit {{name}}",
     "linkContactLabel": "Notiz verknüpfen mit",
     "linkContactNone": "Kein Kontakt",
-    "searchPlaceholder": "Notizen suchen…"
+    "searchPlaceholder": "Notizen suchen…",
+    "linkLevelOptions": {
+      "customer": "Kunde",
+      "location": "Standort",
+      "department": "Abteilung",
+      "contact": "Ansprechpartner"
+    }
   },
   "bulk": {
     "selected": "{{count}} ausgewählt",

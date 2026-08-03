@@ -508,7 +508,8 @@
     "deleteTitle": "Eliminar documento",
     "deleteOneMessage": "¿Estás seguro? '{{name}}' se eliminará definitivamente — esto no se puede deshacer.",
     "deleteManyMessage": "¿Estás seguro? Se eliminarán definitivamente {{count}} documentos — esto no se puede deshacer.",
-    "deleteSelected": "Eliminar ({{count}})"
+    "deleteSelected": "Eliminar ({{count}})",
+    "linkLevelLabel": "Vincular documento a"
   },
   "priceAgreements": {
     "add": "Nuevo acuerdo de precios",
@@ -550,7 +551,13 @@
     "linkedTo": "Vinculado a {{name}}",
     "linkContactLabel": "Vincular nota a",
     "linkContactNone": "Sin contacto",
-    "searchPlaceholder": "Buscar notas…"
+    "searchPlaceholder": "Buscar notas…",
+    "linkLevelOptions": {
+      "customer": "Cliente",
+      "location": "Ubicación",
+      "department": "Departamento",
+      "contact": "Persona de contacto"
+    }
   },
   "bulk": {
     "selected": "{{count}} seleccionado(s)",

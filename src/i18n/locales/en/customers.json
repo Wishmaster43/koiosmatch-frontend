@@ -508,7 +508,8 @@
     "deleteTitle": "Delete document",
     "deleteOneMessage": "Are you sure? '{{name}}' will be permanently deleted — this cannot be undone.",
     "deleteManyMessage": "Are you sure? {{count}} documents will be permanently deleted — this cannot be undone.",
-    "deleteSelected": "Delete ({{count}})"
+    "deleteSelected": "Delete ({{count}})",
+    "linkLevelLabel": "Link document to"
   },
   "priceAgreements": {
     "add": "New price agreement",
@@ -550,7 +551,13 @@
     "linkedTo": "Linked to {{name}}",
     "linkContactLabel": "Link note to",
     "linkContactNone": "No contact",
-    "searchPlaceholder": "Search notes…"
+    "searchPlaceholder": "Search notes…",
+    "linkLevelOptions": {
+      "customer": "Customer",
+      "location": "Location",
+      "department": "Department",
+      "contact": "Contact person"
+    }
   },
   "bulk": {
     "selected": "{{count}} selected",

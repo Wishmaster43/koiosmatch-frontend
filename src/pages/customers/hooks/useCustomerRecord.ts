@@ -23,7 +23,13 @@ interface AppUser { id: Id; name: string; avatar_color?: string }
 // CONTACT-NOTITIES-1: the person this note is filed against — optional, a
 // company-level note carries none. Validated (and scoped to this customer)
 // server-side, CustomerController::addNote.
-type NotePayload = { type: string; title: string; body: string; customer_contact_id?: Id }
+// NOTES-LOC-DEPT-1: the OPTIONAL deeper link — a note may instead hang off one
+// location or one department of this customer. The composer (CustomerNotesTab)
+// sends exactly ONE of the three ids, never more than one.
+type NotePayload = {
+  type: string; title: string; body: string
+  customer_contact_id?: Id; customer_location_id?: Id; customer_department_id?: Id
+}
 // The create form's full shape. Everything past `city` is optional (the backend's
 // CustomerRequest::sharedRules marks them sometimes|nullable) and only travels when
 // filled — the modal collects them since Danny 27-07 ("+ Klant mist heel veel
@@ -205,17 +211,26 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
   // `customer_contact_id` files the note against one of this customer's own
   // contacts — the optimistic row carries the id but not yet the contact's name
   // (the composer doesn't send it), so its chip appears once the real detail reloads.
+  // NOTES-LOC-DEPT-1: same treatment for the optional location/department link —
+  // the name resolves once the real detail reloads, same as the contact link above.
   const addNote = (id: Id | undefined, payload: NotePayload) => {
     const note = {
       id: `tmp-${Date.now()}`, type: payload.type, title: payload.title, text: payload.body, ago: '',
       contactId: payload.customer_contact_id ?? null, contactName: '',
+      locationId: payload.customer_location_id ?? null, locationName: '',
+      departmentId: payload.customer_department_id ?? null, departmentName: '',
     }
     setDetail(prev => (prev && prev.id === id ? ({ ...prev, notes: [note, ...(prev.notes ?? [])] } as Customer) : prev))
     // OPTIMISTIC-REVERT-1: a failed note used to stay on screen with only a toast, so an
     // account manager who believed it was recorded would never write it again. Drop the
     // optimistic entry again (by reference, so notes added meanwhile survive) and surface
     // the server's own message.
-    api.post(`/customers/${id}/notes`, { type: payload.type, title: payload.title, text: payload.body, customer_contact_id: payload.customer_contact_id })
+    api.post(`/customers/${id}/notes`, {
+      type: payload.type, title: payload.title, text: payload.body,
+      customer_contact_id: payload.customer_contact_id,
+      customer_location_id: payload.customer_location_id,
+      customer_department_id: payload.customer_department_id,
+    })
       .catch(err => {
         setDetail(prev => (prev && prev.id === id
           ? ({ ...prev, notes: (prev.notes ?? []).filter(n => n !== note) } as Customer)

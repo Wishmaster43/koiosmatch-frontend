@@ -164,6 +164,16 @@ export interface CustomerNote {
   // company-level note) — both read straight off CustomerDetailResource.
   contactId: Id | null
   contactName: string
+  // NOTES-LOC-DEPT-1: the OPTIONAL deeper link — a note may hang off one location
+  // or one department of this customer instead of the company as a whole (both
+  // null = a company-level note, mirrors contactId/contactName above). `level`
+  // ('customer'/'location'/'department') is the backend's own resolved reading,
+  // used only for display priority (a note never carries more than one link).
+  locationId: Id | null
+  locationName: string
+  departmentId: Id | null
+  departmentName: string
+  level?: string
   // Loose backend note shape — keeps it compatible with the shared NotesTab item.
   [k: string]: unknown
 }
@@ -357,7 +367,14 @@ export interface ApiCustomer {
   tags?: unknown[]
   locations?: ApiLocation[]; departments?: ApiDepartment[]; contacts?: ApiContact[]; contact_persons?: ApiContact[]
   // CONTACT-NOTITIES-1: the contactpersoon a note is filed against (CustomerDetailResource.php:158-163).
-  notes?: Array<{ id?: Id; type?: string; title?: string; text?: string; body?: string; created_at?: string; ago?: string; customer_contact_id?: Id | null; contact_name?: string | null }>
+  // NOTES-LOC-DEPT-1: the OPTIONAL location/department link + the backend's resolved `level`.
+  notes?: Array<{
+    id?: Id; type?: string; title?: string; text?: string; body?: string; created_at?: string; ago?: string
+    customer_contact_id?: Id | null; contact_name?: string | null
+    customer_location_id?: Id | null; location_name?: string | null
+    customer_department_id?: Id | null; department_name?: string | null
+    level?: string
+  }>
   locations_count?: number; departments_count?: number; contacts_count?: number
   open_vacancies_count?: number; openVacanciesCount?: number
   active_matches_count?: number; activeMatchesCount?: number

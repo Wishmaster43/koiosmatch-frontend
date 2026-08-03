@@ -508,7 +508,8 @@
     "deleteTitle": "Supprimer le document",
     "deleteOneMessage": "Es-tu sûr ? '{{name}}' sera définitivement supprimé — cette action est irréversible.",
     "deleteManyMessage": "Es-tu sûr ? {{count}} documents seront définitivement supprimés — cette action est irréversible.",
-    "deleteSelected": "Supprimer ({{count}})"
+    "deleteSelected": "Supprimer ({{count}})",
+    "linkLevelLabel": "Lier le document à"
   },
   "priceAgreements": {
     "add": "Nouvel accord tarifaire",
@@ -550,7 +551,13 @@
     "linkedTo": "Lié à {{name}}",
     "linkContactLabel": "Lier la note à",
     "linkContactNone": "Aucun contact",
-    "searchPlaceholder": "Rechercher des notes…"
+    "searchPlaceholder": "Rechercher des notes…",
+    "linkLevelOptions": {
+      "customer": "Client",
+      "location": "Site",
+      "department": "Département",
+      "contact": "Personne de contact"
+    }
   },
   "bulk": {
     "selected": "{{count}} sélectionné(s)",

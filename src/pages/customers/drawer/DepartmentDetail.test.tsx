@@ -69,6 +69,17 @@ vi.mock('./ScopedMatchesTab', () => ({
 vi.mock('@/components/drawer/tabs/EntityTasksTab', () => ({
   default: ({ linkType, id }: { linkType: string; id?: string }) => <div data-testid="entity-tasks">{linkType}:{id}</div>,
 }))
+// NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: same stub convention as ScopedVacanciesTab/
+// ScopedMatchesTab above — this file only proves DepartmentDetail's OWN wiring
+// (right scope/id/customerId), not the shared tabs' own fetch (covered elsewhere).
+vi.mock('./ScopedNotesTab', () => ({
+  default: ({ scope, id, customerId }: { scope: string; id?: string; customerId?: string }) =>
+    <div data-testid="scoped-notes">{scope}:{id}:{customerId}</div>,
+}))
+vi.mock('./ScopedDocumentsTab', () => ({
+  default: ({ scope, id, customerId }: { scope: string; id?: string; customerId?: string }) =>
+    <div data-testid="scoped-documents">{scope}:{id}:{customerId}</div>,
+}))
 
 // SOLLICITATIES-SCOPE-1: opening the new Sollicitaties sub-tab mounts
 // DepartmentSollicitatiesTab, which calls a REAL react-query hook
@@ -263,6 +274,27 @@ describe('DepartmentDetail · Vacatures/Matches/Taken sub-tabs', () => {
     render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
     await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.tasks') }))
     expect(screen.getByTestId('entity-tasks')).toHaveTextContent('department:d1')
+  })
+})
+
+/**
+ * NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1 — this department's own Notities/Documenten
+ * sub-tabs, right after Sollicitaties, wired with the "department" scope + this
+ * department's own id + the customer id (stubbed above).
+ */
+describe('DepartmentDetail · Notities/Documenten sub-tabs (NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1)', () => {
+  it('wires the department scope + id into ScopedNotesTab', async () => {
+    const user = userEvent.setup()
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.notes') }))
+    expect(screen.getByTestId('scoped-notes')).toHaveTextContent('department:d1:cust-1')
+  })
+
+  it('wires the department scope + id into ScopedDocumentsTab', async () => {
+    const user = userEvent.setup()
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.documents') }))
+    expect(screen.getByTestId('scoped-documents')).toHaveTextContent('department:d1:cust-1')
   })
 })
 

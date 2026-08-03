@@ -9,7 +9,7 @@
  * the /customer-phases lookup, so a tenant rename needs no re-fetch of the list.
  */
 import { describe, it, expect } from 'vitest'
-import { mapCustomer } from './mapCustomer'
+import { mapCustomer, mapCustomerNoteRow } from './mapCustomer'
 import type { ApiCustomer } from '@/types/customer'
 
 describe('mapCustomer · phase (KLANT-FASE-1)', () => {
@@ -30,5 +30,42 @@ describe('mapCustomer · phase (KLANT-FASE-1)', () => {
     } as ApiCustomer)
     expect(c.phase).toBe('prospect')
     expect(c.status).toBe('active')
+  })
+})
+
+/**
+ * NOTES-LOC-DEPT-1 — a note's optional location/department link. mapCustomerNoteRow
+ * is the ONE row mapper shared by mapCustomer's embedded `notes[]` AND the scoped
+ * notes endpoints (useScopedCustomerNotes) — covering it here covers both call sites.
+ */
+describe('mapCustomerNoteRow (NOTES-LOC-DEPT-1)', () => {
+  it('maps the location link + level, leaving department/contact null', () => {
+    const n = mapCustomerNoteRow({
+      id: 'n-1', type: 'general', text: 'Bezoek gepland',
+      customer_location_id: 'loc-1', location_name: 'Hoofdlocatie', level: 'location',
+    })
+    expect(n).toMatchObject({ locationId: 'loc-1', locationName: 'Hoofdlocatie', departmentId: null, departmentName: '', contactId: null, contactName: '', level: 'location' })
+  })
+
+  it('maps the department link + level', () => {
+    const n = mapCustomerNoteRow({
+      id: 'n-2', customer_department_id: 'dep-1', department_name: 'Verpleging', level: 'department',
+    })
+    expect(n).toMatchObject({ departmentId: 'dep-1', departmentName: 'Verpleging', locationId: null, level: 'department' })
+  })
+
+  it('a company-level note (no link at all) maps every link field to null/empty', () => {
+    const n = mapCustomerNoteRow({ id: 'n-3', level: 'customer' })
+    expect(n).toMatchObject({
+      locationId: null, locationName: '', departmentId: null, departmentName: '', contactId: null, contactName: '',
+    })
+  })
+
+  it('mapCustomer folds the same shape through its embedded notes[] field', () => {
+    const c = mapCustomer({
+      id: 1, name: 'X',
+      notes: [{ id: 'n-1', customer_location_id: 'loc-1', location_name: 'Hoofdlocatie', level: 'location' }],
+    } as ApiCustomer)
+    expect(c.notes[0]).toMatchObject({ locationId: 'loc-1', locationName: 'Hoofdlocatie' })
   })
 })

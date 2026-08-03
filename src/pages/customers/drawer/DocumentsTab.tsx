@@ -12,6 +12,16 @@
  * serves both entities) opens instead: it fetches the doc as a BLOB, which never
  * triggers the attachment disposition, and renders it in-dialog. The separate
  * "download" bulk/row actions are untouched — they still open the real download route.
+ *
+ * DOCS-LOC-DEPT-1 (Danny: "je moet weten op welk niveau [een document] gekoppeld
+ * wordt: KLANT, LOCATIE, AFDELING, CONTACTPERSOON"): a document may ALSO hang off
+ * one location or one department of this customer — `customer_documents` has no
+ * `customer_contact_id` column (measured: EntityDocumentController::store/update
+ * only validate customer_location_id/customer_department_id), so unlike notes the
+ * upload picker below offers three levels, not four. `locations`/`departments`
+ * being passed at all is what enables the picker — ScopedDocumentsTab (the
+ * location/department drill-down) instead passes `lockedLevelFields` + `listUrl`
+ * and no picker shows: the level is already fixed by which tab you are on.
  */
 import { useState, useRef } from 'react'
 import type { ChangeEvent } from 'react'
@@ -20,7 +30,11 @@ import { Search, X, Pencil, Eye, Download, Trash2 } from 'lucide-react'
 import { useDocumentTypes, resolveDocTypeIcon } from '@/lib/useDocumentTypes'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from '@/components/ui/SectionCard'
+// DOCS-LOC-DEPT-1: the same shared picker component the notes composer's
+// "gekoppeld aan" level picker uses (§11 — one component, never a fork).
+import SelectMenu from '@/components/ui/SelectMenu'
 import { useEntityDocuments, type EntityDoc } from '@/hooks/useEntityDocuments'
+import { useDocumentLinkPicker } from '../hooks/useDocumentLinkPicker'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
@@ -44,14 +58,32 @@ const docUrl = (d: EntityDoc): string | undefined => d.download_url ?? d.objectU
 // Grid used by both the header row and every data row — one source so they never drift.
 const DOC_GRID_COLUMNS = '18px 1fr 80px 100px'
 
-export default function DocumentsTab({ customerId }: { customerId: Id | undefined }) {
+interface DocumentsTabProps {
+  customerId: Id | undefined
+  // DOCS-LOC-DEPT-1: this customer's own locations/departments — presence of
+  // either enables the "gekoppeld aan" upload picker below. Omitted (the
+  // ScopedDocumentsTab drill-down case) means no picker at all (see file header).
+  locations?: { id: Id | undefined; name: string }[]
+  departments?: { id: Id | undefined; name: string; locationName?: string }[]
+  // ScopedDocumentsTab: overrides the GET listing endpoint (byLocation/byDepartment)
+  // and fixes every upload to this level — no picker is offered when this is set.
+  listUrl?: string
+  lockedLevelFields?: Record<string, string>
+}
+
+export default function DocumentsTab({ customerId, locations = [], departments = [], listUrl, lockedLevelFields }: DocumentsTabProps) {
   const { t } = useTranslation('customers')
   const { formatDate } = useDateFormat()
   // Customer documents offer the customer's own types PLUS the global ones — the backend
   // adds the globals to `?entity=customer` itself (null = applies everywhere).
   const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes('customer')
-  // List + optimistic upload/rename/delete against /customers/{id}/documents.
-  const { docs, upload, rename, remove } = useEntityDocuments('customers', customerId)
+  // List + optimistic upload/rename/delete against /customers/{id}/documents —
+  // DOCS-LOC-DEPT-1: `listUrl` overrides the GET endpoint for a scoped drill-down.
+  const { docs, upload, rename, remove } = useEntityDocuments('customers', customerId, listUrl)
+  // DOCS-LOC-DEPT-1: the upload's "gekoppeld aan" picker state + derived options
+  // (own hook, §3 — kept this file from crossing the ~400-line split trigger).
+  const { uploadLink, setUploadLink, linkOptions, showLinkPicker, uploadExtraFields } =
+    useDocumentLinkPicker(locations, departments, lockedLevelFields)
   const [pending,     setPending]     = useState<PendingItem[]>([])
   const [renamingId,  setRenamingId]  = useState<Id | null>(null)
   const [renameValue, setRenameValue] = useState('')
@@ -92,11 +124,19 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
 
   // Send every queued file to the server — one upload() call per item, each with
   // its OWN type — so a multi-file pick uploads all of them, not just the first.
+  // DOCS-LOC-DEPT-1: `uploadExtraFields` is only ever spread in when it actually
+  // carries something — an unlinked upload keeps calling upload() with exactly
+  // its original 4 arguments (never a stray 5th `undefined`).
   const uploadAll = () => {
     if (!pending.length) return
     const items = pending
     setPending([])
-    for (const item of items) upload(item.file, item.type, item.name, item.objectUrl)
+    for (const item of items) {
+      if (uploadExtraFields) upload(item.file, item.type, item.name, item.objectUrl, uploadExtraFields)
+      else upload(item.file, item.type, item.name, item.objectUrl)
+    }
+    // A fresh upload batch starts unlinked again unless the picker is used once more.
+    setUploadLink('customer')
   }
   // Set one item's doc type (its own select) without touching the others.
   const setItemType = (idx: number, type: string) => setPending(items => items.map((it, i) => (i === idx ? { ...it, type } : it)))
@@ -198,6 +238,20 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
                 )
               })}
             </div>
+            {/* DOCS-LOC-DEPT-1: the "gekoppeld aan" level picker — applies to the WHOLE
+                queued batch (a batch is normally meant for one place), unlike the
+                per-file type select below. Hidden entirely once the scope is locked
+                (ScopedDocumentsTab) or the customer has neither a location nor a
+                department to link to (§3 — no dead-end picker). */}
+            {showLinkPicker && (
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('documents.linkLevelLabel')}</div>
+                <div style={{ width: 220 }}>
+                  <SelectMenu value={uploadLink} onChange={setUploadLink} options={linkOptions}
+                    placeholder={t('notes.linkLevelOptions.customer')} />
+                </div>
+              </div>
+            )}
             {/* One compact row per queued file — its own type select + remove. */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
               {pending.map((item, idx) => (
@@ -259,6 +313,17 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
                       </div>
                     : <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name ?? d.file_name}</span>
                   }
+                  {/* DOCS-LOC-DEPT-1: "gekoppeld aan" soft-tint chip (§4) — department wins
+                      over location (the deepest level, mirrors CustomerDocument::levelContext()'s
+                      own priority); absent entirely for a company-level document. */}
+                  {(d.department_name ?? d.location_name) && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: 10, fontWeight: 600,
+                      padding: '1px 6px', borderRadius: 99, marginTop: 2,
+                      background: 'color-mix(in srgb, var(--color-info) 12%, transparent)', color: 'var(--color-info)',
+                      border: '1px solid color-mix(in srgb, var(--color-info) 40%, transparent)' }}>
+                      {t('notes.linkedTo', { name: d.department_name ?? d.location_name })}
+                    </span>
+                  )}
                   {/* Added by whom + when (shown when the backend provides them). */}
                   {(() => {
                     const by = (typeof d.uploaded_by === 'object' ? d.uploaded_by?.name : d.uploaded_by)

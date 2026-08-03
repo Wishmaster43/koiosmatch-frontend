@@ -76,6 +76,10 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
 import ScopedSollicitatiesTab from './ScopedSollicitatiesTab'
+// NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: this department's own Notities/Documenten
+// sub-tabs (§3A — shared config-driven surfaces, never a forked copy).
+import ScopedNotesTab from './ScopedNotesTab'
+import ScopedDocumentsTab from './ScopedDocumentsTab'
 import { archiveDepartment, restoreDepartment } from '../hooks/useCustomerDepartments'
 import { useSubEntityArchive } from '../hooks/useSubEntityArchive'
 import type { Contact, Department } from '@/types/customer'
@@ -169,8 +173,8 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   const { fields: customFieldDefs } = useCustomFields('customer_department')
   // Sub-tabs (short labels, Danny 2026-07-14) — default Gegevens. SCOPED-LIST-TAB-1/
   // TAKEN-OP-AFDELING-1 added vacancies/matches/tasks. SOLLICITATIES-SCOPE-1 added
-  // 'applications'.
-  const [subTab, setSubTab] = useState<'data' | 'contacts' | 'vacancies' | 'applications' | 'matches' | 'tasks' | 'extra' | 'koppelingen'>('data')
+  // 'applications'. NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1 added 'notes'/'documents'.
+  const [subTab, setSubTab] = useState<'data' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'documents' | 'matches' | 'tasks' | 'extra' | 'koppelingen'>('data')
 
   // JOB-STATUS-1 (mirrors LocationDetail): status options for the title-row picker.
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
@@ -285,6 +289,11 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           // SOLLICITATIES-SCOPE-1: reuses the applications page's own title key —
           // already carries full five-locale parity, verified in c0e0d900.
           { id: 'applications', label: t('applications:title') },
+          // NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: reuse the existing top-level
+          // drawer.tabs.notes/documents keys (already five-locale complete) —
+          // right after Sollicitaties, per Danny's ask.
+          { id: 'notes',     label: t('drawer.tabs.notes') },
+          { id: 'documents', label: t('drawer.tabs.documents') },
           { id: 'matches',   label: t('drawer.tabs.matches') },
           // TAKEN-OP-AFDELING-1: TaskLinkResolver already knows 'department' → task_links.
           { id: 'tasks',     label: t('drawer.tabs.tasks') },
@@ -327,6 +336,11 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           keeps useScopedVacancyIds' react-query call out of every OTHER sub-tab/caller
           that never opens this one (no QueryClientProvider needed for those). */}
       {subTab === 'applications' && <ScopedSollicitatiesTab scope="department" id={department.id as Id} />}
+      {/* NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: this department's own Notities/Documenten
+          — a department is a LEAF, so neither scoped fetch adds a rollup param
+          (mirrors LocationDetail's identical wiring, minus the rollup). */}
+      {subTab === 'notes' && <ScopedNotesTab scope="department" id={department.id as Id} customerId={customerId} />}
+      {subTab === 'documents' && <ScopedDocumentsTab scope="department" id={department.id as Id} customerId={customerId} />}
       {subTab === 'matches' && <ScopedMatchesTab scope="department" id={department.id as Id} customerId={customerId} />}
       {/* TAKEN-OP-AFDELING-1: own scoped label block (mirrors contacts.tasks.*) —
           the shared tab's CURRENT labels interface (newTask/searchPlaceholder/empty/

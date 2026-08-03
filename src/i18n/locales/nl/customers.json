@@ -508,7 +508,8 @@
     "deleteTitle": "Document verwijderen",
     "deleteOneMessage": "Weet je het zeker? '{{name}}' wordt definitief verwijderd — dit kan niet ongedaan worden gemaakt.",
     "deleteManyMessage": "Weet je het zeker? {{count}} documenten worden definitief verwijderd — dit kan niet ongedaan worden gemaakt.",
-    "deleteSelected": "Verwijder ({{count}})"
+    "deleteSelected": "Verwijder ({{count}})",
+    "linkLevelLabel": "Document koppelen aan"
   },
   "priceAgreements": {
     "add": "Nieuwe prijsafspraak",
@@ -550,7 +551,13 @@
     "linkedTo": "Gekoppeld aan {{name}}",
     "linkContactLabel": "Notitie koppelen aan",
     "linkContactNone": "Geen contactpersoon",
-    "searchPlaceholder": "Zoek notities…"
+    "searchPlaceholder": "Zoek notities…",
+    "linkLevelOptions": {
+      "customer": "Klant",
+      "location": "Locatie",
+      "department": "Afdeling",
+      "contact": "Contactpersoon"
+    }
   },
   "bulk": {
     "selected": "{{count}} geselecteerd",

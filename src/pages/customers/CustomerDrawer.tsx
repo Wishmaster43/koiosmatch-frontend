@@ -307,7 +307,10 @@ export default function CustomerDrawer({
       case 'planning':      return <PlanningTab customerId={c.id ?? ''} />
       case 'statistics':    return <StatisticsTab c={c} onGoToVacancies={() => setActiveTab?.('vacancies')} />
       case 'priceAgreements': return <PriceAgreementsTab customerId={c.id} c={c} onSave={v => onUpdate?.(c.id, v)} />
-      case 'documents':     return <DocumentsTab customerId={c.id} />
+      // DOCS-LOC-DEPT-1: the customer's own locations/departments enable the
+      // "gekoppeld aan" upload picker inside DocumentsTab (§3A — the customer-level
+      // documents tab is the only unlocked one; ScopedDocumentsTab locks its own).
+      case 'documents':     return <DocumentsTab customerId={c.id} locations={locationsApi.locations} departments={departmentsApi.departments} />
       case 'communication': return (
         <CustomerNotesTab
           customerId={c.id} customerName={c.name} customerInitials={c.initials}
