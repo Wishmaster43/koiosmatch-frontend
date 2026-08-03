@@ -261,7 +261,15 @@
       "coupleNote": "Das Verknüpfen verschiebt den Kontakt in diese Abteilung.",
       "coupleAction": "Verknüpfen",
       "addContactHere": "Neuer Kontakt",
-      "uncoupleAction": "Verknüpfung lösen"
+      "uncoupleAction": "Verknüpfung lösen",
+      "tasks": {
+        "newTask": "Neue Aufgabe",
+        "empty": "Noch keine Aufgaben für diese Abteilung",
+        "loading": "Aufgaben werden geladen…",
+        "error": "Aufgaben konnten nicht geladen werden",
+        "openTask": "Aufgabe öffnen",
+        "searchPlaceholder": "Aufgabe suchen…"
+      }
     },
     "deleteConfirm": "Diese Abteilung löschen?",
     "saveFailed": "Speichern fehlgeschlagen.",
@@ -378,7 +386,8 @@
       "date": "Datum",
       "shift": "Dienst",
       "department": "Abteilung"
-    }
+    },
+    "searchPlaceholder": "Chance suchen…"
   },
   "planning": {
     "title": "Planung",
@@ -460,7 +469,11 @@
     "timeline": "Verlauf",
     "timelineEmpty": "Noch keine Aktivität.",
     "conversations": "Gespräche",
-    "conversationsEmpty": "Noch keine Gespräche."
+    "conversationsEmpty": "Noch keine Gespräche.",
+    "linkedTo": "Verknüpft mit {{name}}",
+    "linkContactLabel": "Notiz verknüpfen mit",
+    "linkContactNone": "Kein Kontakt",
+    "searchPlaceholder": "Notizen suchen…"
   },
   "bulk": {
     "selected": "{{count}} ausgewählt",
@@ -600,7 +613,8 @@
       "mismatchProceed": "Trotzdem importieren"
     },
     "contactPersonHint": "Wählen Sie einen bestehenden Kontakt dieses Kunden oder geben Sie einen neuen Namen ein.",
-    "contactCouplingFailed": "Standort „{{name}}\" wurde angelegt, aber die Verknüpfung mit der Kontaktperson ist fehlgeschlagen. Verknüpfen Sie sie später manuell über den Standort."
+    "contactCouplingFailed": "Standort „{{name}}\" wurde angelegt, aber die Verknüpfung mit der Kontaktperson ist fehlgeschlagen. Verknüpfen Sie sie später manuell über den Standort.",
+    "contactCreateFailed": "Standort „{{name}}\" wurde angelegt, aber das Anlegen der neuen Kontaktperson ist fehlgeschlagen. Fügen Sie sie später manuell hinzu und verknüpfen Sie sie über den Standort."
   },
   "changelog": {
     "empty": "Noch keine Änderungen."
@@ -635,6 +649,18 @@
     "searchPlaceholder": "Aufgabe suchen…"
   },
   "matches": {
-    "loadError": "Matches konnten nicht geladen werden."
+    "loadError": "Matches konnten nicht geladen werden.",
+    "searchPlaceholder": "Match suchen…"
+  },
+  "scopedList": {
+    "vacanciesEmpty": "Noch keine Stellen.",
+    "matchesEmpty": "Noch keine Matches.",
+    "loadError": "Laden fehlgeschlagen. Möglicherweise haben Sie keinen Zugriff auf diesen Standort."
+  },
+  "inUse": {
+    "title": "Noch in Verwendung",
+    "close": "Schließen",
+    "planningOrders": "Planungsaufträge",
+    "planningShifts": "Planungsdienste"
   }
 }

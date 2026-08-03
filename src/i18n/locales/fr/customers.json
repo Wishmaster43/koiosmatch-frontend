@@ -261,7 +261,15 @@
       "coupleNote": "Lier déplace le contact vers ce service.",
       "coupleAction": "Lier",
       "addContactHere": "Nouveau contact",
-      "uncoupleAction": "Détacher"
+      "uncoupleAction": "Détacher",
+      "tasks": {
+        "newTask": "Nouvelle tâche",
+        "empty": "Aucune tâche pour ce service pour le moment",
+        "loading": "Chargement des tâches…",
+        "error": "Impossible de charger les tâches",
+        "openTask": "Ouvrir la tâche",
+        "searchPlaceholder": "Rechercher une tâche…"
+      }
     },
     "deleteConfirm": "Supprimer ce service ?",
     "saveFailed": "L'enregistrement a échoué.",
@@ -378,7 +386,8 @@
       "date": "Date",
       "shift": "Mission",
       "department": "Service"
-    }
+    },
+    "searchPlaceholder": "Rechercher une opportunité…"
   },
   "planning": {
     "title": "Planning",
@@ -460,7 +469,11 @@
     "timeline": "Chronologie",
     "timelineEmpty": "Aucune activité pour le moment.",
     "conversations": "Conversations",
-    "conversationsEmpty": "Aucune conversation pour le moment."
+    "conversationsEmpty": "Aucune conversation pour le moment.",
+    "linkedTo": "Lié à {{name}}",
+    "linkContactLabel": "Lier la note à",
+    "linkContactNone": "Aucun contact",
+    "searchPlaceholder": "Rechercher des notes…"
   },
   "bulk": {
     "selected": "{{count}} sélectionné(s)",
@@ -600,7 +613,8 @@
       "mismatchProceed": "Importer quand même"
     },
     "contactPersonHint": "Choisissez un contact existant de ce client, ou saisissez un nouveau nom.",
-    "contactCouplingFailed": "L'établissement « {{name}} » a été créé, mais la liaison avec le contact a échoué. Liez-le manuellement plus tard depuis l'établissement."
+    "contactCouplingFailed": "L'établissement « {{name}} » a été créé, mais la liaison avec le contact a échoué. Liez-le manuellement plus tard depuis l'établissement.",
+    "contactCreateFailed": "L'établissement « {{name}} » a été créé, mais la création du nouveau contact a échoué. Ajoutez-le manuellement et liez-le depuis l'établissement plus tard."
   },
   "changelog": {
     "empty": "Aucun changement pour le moment."
@@ -635,6 +649,18 @@
     "searchPlaceholder": "Rechercher une tâche…"
   },
   "matches": {
-    "loadError": "Impossible de charger les matchs."
+    "loadError": "Impossible de charger les matchs.",
+    "searchPlaceholder": "Rechercher un match…"
+  },
+  "scopedList": {
+    "vacanciesEmpty": "Aucun poste pour le moment.",
+    "matchesEmpty": "Aucun match pour le moment.",
+    "loadError": "Le chargement a échoué. Vous n'avez peut-être pas accès à ce site."
+  },
+  "inUse": {
+    "title": "Encore utilisé",
+    "close": "Fermer",
+    "planningOrders": "Ordres de planning",
+    "planningShifts": "Services de planning"
   }
 }

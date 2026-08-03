@@ -261,7 +261,15 @@
       "coupleNote": "Koppelen verplaatst de contactpersoon naar deze afdeling.",
       "coupleAction": "Koppelen",
       "addContactHere": "Nieuwe contactpersoon",
-      "uncoupleAction": "Ontkoppelen"
+      "uncoupleAction": "Ontkoppelen",
+      "tasks": {
+        "newTask": "Nieuwe taak",
+        "empty": "Nog geen taken voor deze afdeling",
+        "loading": "Taken laden…",
+        "error": "Taken konden niet worden geladen",
+        "openTask": "Open taak",
+        "searchPlaceholder": "Zoek taak…"
+      }
     },
     "deleteConfirm": "Deze afdeling verwijderen?",
     "saveFailed": "Opslaan is mislukt.",
@@ -378,7 +386,8 @@
       "date": "Datum",
       "shift": "Dienst",
       "department": "Afdeling"
-    }
+    },
+    "searchPlaceholder": "Zoek kans…"
   },
   "planning": {
     "title": "Planning",
@@ -460,7 +469,11 @@
     "timeline": "Tijdlijn",
     "timelineEmpty": "Nog geen activiteit.",
     "conversations": "Gesprekken",
-    "conversationsEmpty": "Nog geen gesprekken."
+    "conversationsEmpty": "Nog geen gesprekken.",
+    "linkedTo": "Gekoppeld aan {{name}}",
+    "linkContactLabel": "Notitie koppelen aan",
+    "linkContactNone": "Geen contactpersoon",
+    "searchPlaceholder": "Zoek notities…"
   },
   "bulk": {
     "selected": "{{count}} geselecteerd",
@@ -600,7 +613,8 @@
       "mismatchProceed": "Toch importeren"
     },
     "contactPersonHint": "Kies een bestaand contact van deze klant, of typ een nieuwe naam.",
-    "contactCouplingFailed": "Locatie \"{{name}}\" is aangemaakt, maar het koppelen van de contactpersoon is mislukt. Koppel deze later handmatig via de locatie."
+    "contactCouplingFailed": "Locatie \"{{name}}\" is aangemaakt, maar het koppelen van de contactpersoon is mislukt. Koppel deze later handmatig via de locatie.",
+    "contactCreateFailed": "Locatie \"{{name}}\" is aangemaakt, maar het aanmaken van de nieuwe contactpersoon is mislukt. Voeg deze later handmatig toe en koppel via de locatie."
   },
   "changelog": {
     "empty": "Nog geen wijzigingen."
@@ -635,6 +649,18 @@
     "searchPlaceholder": "Zoek taak…"
   },
   "matches": {
-    "loadError": "Matches konden niet worden geladen."
+    "loadError": "Matches konden niet worden geladen.",
+    "searchPlaceholder": "Zoek match…"
+  },
+  "scopedList": {
+    "vacanciesEmpty": "Nog geen vacatures.",
+    "matchesEmpty": "Nog geen matches.",
+    "loadError": "Laden is mislukt. Mogelijk heb je geen toegang tot deze vestiging."
+  },
+  "inUse": {
+    "title": "Nog in gebruik",
+    "close": "Sluiten",
+    "planningOrders": "Planningopdrachten",
+    "planningShifts": "Planningdiensten"
   }
 }

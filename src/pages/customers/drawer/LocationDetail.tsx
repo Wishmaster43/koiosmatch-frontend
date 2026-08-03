@@ -46,12 +46,19 @@ import DrillBreadcrumb from '@/components/drawer/DrillBreadcrumb'
 import PlanningSummary from './PlanningSummary'
 import { useAuth } from '@/context/AuthContext'
 import { useCustomFields } from '@/lib/useCustomFields'
+// SCOPED-LIST-TAB-1: the location's own Vacatures/Matches sub-tabs (§3A —
+// shared config-driven tab, never a forked copy — mirrors DepartmentDetail).
+import ScopedVacanciesTab from './ScopedVacanciesTab'
+import ScopedMatchesTab from './ScopedMatchesTab'
+// SUBENTITEIT-DELETE-1: the honest disabled-trash + 409-race counts dialog.
+import InUseCountsDialog from './InUseCountsDialog'
 import type { Contact, Department, Location } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { LocationPayload } from '../hooks/useCustomerLocations'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
 import { isPrimaryForLocation } from '../hooks/useCustomerContacts'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
+import type { DeleteResult } from '../hooks/subEntityDelete'
 
 interface Props {
   location: Location
@@ -66,7 +73,9 @@ interface Props {
   // Koppelingen sub-tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
   canLinkBackoffice?: boolean
   onSave: (id: Id, payload: Partial<LocationPayload>) => void
-  onDelete: (id: Id) => void
+  // SUBENTITEIT-DELETE-1: widened from `=> void` — see DepartmentDetail's identical
+  // comment for why the existing `(id) => void`-typed callers stay compatible.
+  onDelete: (id: Id) => void | Promise<DeleteResult>
   onAddDepartment: (payload: DepartmentPayload, locationName?: string) => void
   onUpdateDepartment: (id: Id, payload: Partial<DepartmentPayload>, locationName?: string) => void
   onRemoveDepartment: (id: Id) => void
@@ -118,6 +127,9 @@ export default function LocationDetail({
   const departmentOpen = openDepartmentId != null
 
   const { confirm, dialog } = useConfirm()
+  // SUBENTITEIT-DELETE-1: a 409 RACE (something got linked after `inUse` was last
+  // read) surfaces the server's own per-relation counts here instead of a blanket toast.
+  const [blockedCounts, setBlockedCounts] = useState<Record<string, number> | null>(null)
   const auth = useAuth()
   const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
   // The Extra sub-tab only shows when the tenant has defined customer_location custom fields (§3A(f)).
@@ -125,7 +137,8 @@ export default function LocationDetail({
   // Sub-tabs (short labels, Danny 2026-07-14) — default Adres & gegevens. Each
   // EditableFieldTable below manages its own uncontrolled edit toggle (they no
   // longer share one global pencil now that they live on separate sub-tabs).
-  const [subTab, setSubTab] = useState<'address' | 'departments' | 'contacts' | 'extra' | 'koppelingen'>('address')
+  // SCOPED-LIST-TAB-1 added vacancies/matches (no location Taken tab — see WORKLIST).
+  const [subTab, setSubTab] = useState<'address' | 'departments' | 'contacts' | 'vacancies' | 'matches' | 'extra' | 'koppelingen'>('address')
 
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
   // CONTACT-LOCATION-PRIMARY-1: THIS site's own primary contact — a real record resolved
@@ -192,7 +205,15 @@ export default function LocationDetail({
     })
   }
 
-  const remove = () => confirm(t('locations.detail.confirmDelete'), () => { onDelete(l.id as Id); close() }, { danger: true })
+  // SUBENTITEIT-DELETE-1: awaits the hook's DeleteResult — only close on a real
+  // success; a 409 race opens the counts dialog instead of closing over nothing.
+  const remove = () => confirm(t('locations.detail.confirmDelete'), () => {
+    Promise.resolve(onDelete(l.id as Id)).then(result => {
+      if (!result) { close(); return } // legacy void return (older callers/tests)
+      if (result.ok) { close(); return }
+      if (result.blocked) setBlockedCounts(result.blocked.counts)
+    })
+  }, { danger: true })
   // LOCATIE-OMSCHRIJVING-1 (Danny 02-08): its own rich-text block, same pattern the
   // department detail already uses (EditableRichTextField — own pencil/save/cancel,
   // RichTextEditor + SafeHtml) — a bare textarea is not the house pattern for prose.
@@ -273,8 +294,14 @@ export default function LocationDetail({
           {/* Prev/next through the list this location was opened from (DRILL-PAGER-1) —
               before the delete action, same corner as every other detail pager. */}
           {pager && <DrillPager {...pager} />}
-          <button onClick={remove} title={t('locations.detail.deleteLocation')}
-            style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--color-danger)', flexShrink: 0 }}>
+          {/* SUBENTITEIT-DELETE-1: still visible but honestly disabled while a live
+              coupling exists (§3 — no fake affordance) — the title explains why,
+              same message the old blanket 409 toast used. */}
+          <button onClick={remove} disabled={l.inUse}
+            title={l.inUse ? t('locations.deleteInUse') : t('locations.detail.deleteLocation')}
+            style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7,
+              cursor: l.inUse ? 'not-allowed' : 'pointer', border: '1px solid var(--border)', background: 'var(--bg)',
+              color: l.inUse ? 'var(--text-muted)' : 'var(--color-danger)', opacity: l.inUse ? 0.6 : 1, flexShrink: 0 }}>
             <Trash2 size={13} />
           </button>
         </div>
@@ -286,6 +313,9 @@ export default function LocationDetail({
           { id: 'address',     label: t('locations.detail.addressTitle') },
           { id: 'departments', label: t('drawer.tabs.departments') },
           { id: 'contacts',    label: t('drawer.tabs.contacts') },
+          // SCOPED-LIST-TAB-1: read-only lists scoped to this location (§3A shared tab).
+          { id: 'vacancies',   label: t('drawer.tabs.vacancies') },
+          { id: 'matches',     label: t('drawer.tabs.matches') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
           // EXTRACT-1: the shared Koppelingen sub-tab, always last (§3A/§11) — the
           // shared common:backofficeLinks.tabLabel key, not this file's own labels.
@@ -364,6 +394,10 @@ export default function LocationDetail({
           departments={departments} statuses={contactStatuses} onAdd={onAddContact} onUpdate={onUpdateContact} />
       )}
 
+      {/* SCOPED-LIST-TAB-1: read-only, opens the real vacancy/match on row-click. */}
+      {subTab === 'vacancies' && <ScopedVacanciesTab scope="location" id={l.id as Id} />}
+      {subTab === 'matches' && <ScopedMatchesTab scope="location" id={l.id as Id} />}
+
       {subTab === 'extra' && (
         <CustomFieldsTab entityType="customer_location" values={l.customFields ?? {}}
           onSave={patch => onSave(l.id as Id, { customFields: { ...l.customFields, ...patch } })} />
@@ -393,6 +427,7 @@ export default function LocationDetail({
         </SectionCard>
       )}
       {dialog}
+      <InUseCountsDialog open={blockedCounts != null} counts={blockedCounts ?? {}} onClose={() => setBlockedCounts(null)} />
     </div>
   )
 }

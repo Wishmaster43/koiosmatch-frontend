@@ -56,12 +56,22 @@ import DrillPager from '@/components/drawer/DrillPager'
 import type { DrillPagerProps } from '@/components/drawer/DrillPager'
 import type { Crumb } from '@/components/drawer/DrillBreadcrumb'
 import EditableRichTextField from './EditableRichTextField'
+// SCOPED-LIST-TAB-1: the department's own Vacatures/Matches sub-tabs (§3A —
+// shared config-driven tab, never a forked copy).
+import ScopedVacanciesTab from './ScopedVacanciesTab'
+import ScopedMatchesTab from './ScopedMatchesTab'
+// TAKEN-OP-AFDELING-1: TaskLinkResolver already knows 'department' (task_links),
+// so this is one more <EntityTasksTab linkType="…"> line, never a new component.
+import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
+// SUBENTITEIT-DELETE-1: the honest disabled-trash + 409-race counts dialog.
+import InUseCountsDialog from './InUseCountsDialog'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useConfirm } from '@/hooks/useConfirm'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
+import type { DeleteResult } from '../hooks/subEntityDelete'
 
 // A bound-namespace translate function (mirrors locationAiInsights.ts/customerAiInsights.ts).
 type Tx = (key: string, opts?: Record<string, unknown>) => string
@@ -111,7 +121,12 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   onUpdateContact: (id: Id, payload: Partial<ContactPayload>) => void
   onRemoveContact: (id: Id) => void
   onSave: (id: Id, payload: Partial<DepartmentPayload>) => void
-  onDelete: (id: Id) => void
+  // SUBENTITEIT-DELETE-1: the real (useCustomerDepartments) `remove` resolves to a
+  // DeleteResult (ok / 409-race-with-counts); widened from `=> void` so this file
+  // can react to it — still assignable from the plain `(id) => void` prop type
+  // DepartmentsPanel/CustomerDrawer declare (a void-returning function is always
+  // assignable where a richer return type is accepted, so neither needs to change).
+  onDelete: (id: Id) => void | Promise<DeleteResult>
   close: () => void
 }) {
   const { t } = useTranslation('customers')
@@ -120,10 +135,14 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   const contactOpen = openContactId != null
 
   const { confirm, dialog } = useConfirm()
+  // SUBENTITEIT-DELETE-1: a 409 RACE (something got linked after `inUse` was last
+  // read) surfaces the server's own per-relation counts here instead of a blanket toast.
+  const [blockedCounts, setBlockedCounts] = useState<Record<string, number> | null>(null)
   // The Extra sub-tab only shows when the tenant has defined customer_department custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer_department')
-  // Sub-tabs (short labels, Danny 2026-07-14) — default Gegevens.
-  const [subTab, setSubTab] = useState<'data' | 'contacts' | 'extra' | 'koppelingen'>('data')
+  // Sub-tabs (short labels, Danny 2026-07-14) — default Gegevens. SCOPED-LIST-TAB-1/
+  // TAKEN-OP-AFDELING-1 added vacancies/matches/tasks.
+  const [subTab, setSubTab] = useState<'data' | 'contacts' | 'vacancies' | 'matches' | 'tasks' | 'extra' | 'koppelingen'>('data')
 
   // JOB-STATUS-1 (mirrors LocationDetail): status options for the title-row picker.
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
@@ -165,7 +184,16 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   const cancelStatus = () => setEditingStatus(false)
   const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
 
-  const remove = () => confirm(t('departments.deleteConfirm'), () => { onDelete(department.id as Id); close() }, { danger: true })
+  // SUBENTITEIT-DELETE-1: the confirmed delete awaits the hook's DeleteResult —
+  // only close on a real success; a 409 race opens the counts dialog instead of
+  // silently closing over a delete that never happened.
+  const remove = () => confirm(t('departments.deleteConfirm'), () => {
+    Promise.resolve(onDelete(department.id as Id)).then(result => {
+      if (!result) { close(); return } // legacy void return (older callers/tests)
+      if (result.ok) { close(); return }
+      if (result.blocked) setBlockedCounts(result.blocked.counts)
+    })
+  }, { danger: true })
 
   // A contact opened from this department's list brings its own full trail, so the
   // department steps aside — one title, one delete button, one way back.
@@ -224,8 +252,14 @@ export default function DepartmentDetail({ department, locations, statuses, cont
             space-between parks the arrows in the middle of the title row. */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           {pager && <DrillPager {...pager} />}
-          <button onClick={remove} title={t('common:delete')}
-            style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--color-danger)', flexShrink: 0 }}>
+          {/* SUBENTITEIT-DELETE-1: still visible but honestly disabled while a live
+              coupling exists (§3 — no fake affordance) — the title explains why,
+              same message the old blanket 409 toast used. */}
+          <button onClick={remove} disabled={department.inUse}
+            title={department.inUse ? t('departments.deleteInUse') : t('common:delete')}
+            style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7,
+              cursor: department.inUse ? 'not-allowed' : 'pointer', border: '1px solid var(--border)', background: 'var(--bg)',
+              color: department.inUse ? 'var(--text-muted)' : 'var(--color-danger)', opacity: department.inUse ? 0.6 : 1, flexShrink: 0 }}>
             <Trash2 size={13} />
           </button>
         </div>
@@ -236,6 +270,11 @@ export default function DepartmentDetail({ department, locations, statuses, cont
         tabs={[
           { id: 'data',     label: t('departments.detail.subtabs.data') },
           { id: 'contacts', label: t('drawer.tabs.contacts') },
+          // SCOPED-LIST-TAB-1: read-only lists scoped to this department (§3A shared tab).
+          { id: 'vacancies', label: t('drawer.tabs.vacancies') },
+          { id: 'matches',   label: t('drawer.tabs.matches') },
+          // TAKEN-OP-AFDELING-1: TaskLinkResolver already knows 'department' → task_links.
+          { id: 'tasks',     label: t('drawer.tabs.tasks') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
           // EXTRACT-1: the shared Koppelingen sub-tab, always last (§3A/§11).
           { id: 'koppelingen', label: t('common:backofficeLinks.tabLabel') },
@@ -265,6 +304,24 @@ export default function DepartmentDetail({ department, locations, statuses, cont
         </div>
       )}
 
+      {/* SCOPED-LIST-TAB-1: read-only, opens the real vacancy/match on row-click. */}
+      {subTab === 'vacancies' && <ScopedVacanciesTab scope="department" id={department.id as Id} />}
+      {subTab === 'matches' && <ScopedMatchesTab scope="department" id={department.id as Id} />}
+      {/* TAKEN-OP-AFDELING-1: own scoped label block (mirrors contacts.tasks.*) —
+          the shared tab's CURRENT labels interface (newTask/searchPlaceholder/empty/
+          loading/error/openTask); re-check this call site if EntityTasksTab's
+          interface changes again before this lands. */}
+      {subTab === 'tasks' && (
+        <EntityTasksTab linkType="department" id={department.id as Id} labels={{
+          newTask: t('departments.detail.tasks.newTask'),
+          searchPlaceholder: t('departments.detail.tasks.searchPlaceholder'),
+          empty: t('departments.detail.tasks.empty'),
+          loading: t('departments.detail.tasks.loading'),
+          error: t('departments.detail.tasks.error'),
+          openTask: t('departments.detail.tasks.openTask'),
+        }} />
+      )}
+
       {subTab === 'extra' && (
         <CustomFieldsTab entityType="customer_department" values={department.customFields ?? {}}
           onSave={patch => onSave(department.id as Id, { customFields: { ...department.customFields, ...patch } })} />
@@ -285,6 +342,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           onAdd={onAddContact} onUpdate={onUpdateContact} onRemove={onRemoveContact} />
       )}
       {dialog}
+      <InUseCountsDialog open={blockedCounts != null} counts={blockedCounts ?? {}} onClose={() => setBlockedCounts(null)} />
     </div>
   )
 }

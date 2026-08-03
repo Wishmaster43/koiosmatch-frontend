@@ -261,7 +261,15 @@
       "coupleNote": "Vincular mueve el contacto a este departamento.",
       "coupleAction": "Vincular",
       "addContactHere": "Nuevo contacto",
-      "uncoupleAction": "Desvincular"
+      "uncoupleAction": "Desvincular",
+      "tasks": {
+        "newTask": "Nueva tarea",
+        "empty": "Aún no hay tareas para este departamento",
+        "loading": "Cargando tareas…",
+        "error": "No se pudieron cargar las tareas",
+        "openTask": "Abrir tarea",
+        "searchPlaceholder": "Buscar tarea…"
+      }
     },
     "deleteConfirm": "¿Eliminar este departamento?",
     "saveFailed": "Error al guardar.",
@@ -378,7 +386,8 @@
       "date": "Fecha",
       "shift": "Turno",
       "department": "Departamento"
-    }
+    },
+    "searchPlaceholder": "Buscar oportunidad…"
   },
   "planning": {
     "title": "Planificación",
@@ -460,7 +469,11 @@
     "timeline": "Cronología",
     "timelineEmpty": "Aún no hay actividad.",
     "conversations": "Conversaciones",
-    "conversationsEmpty": "Aún no hay conversaciones."
+    "conversationsEmpty": "Aún no hay conversaciones.",
+    "linkedTo": "Vinculado a {{name}}",
+    "linkContactLabel": "Vincular nota a",
+    "linkContactNone": "Sin contacto",
+    "searchPlaceholder": "Buscar notas…"
   },
   "bulk": {
     "selected": "{{count}} seleccionado(s)",
@@ -600,7 +613,8 @@
       "mismatchProceed": "Importar de todos modos"
     },
     "contactPersonHint": "Elige un contacto existente de este cliente, o escribe un nombre nuevo.",
-    "contactCouplingFailed": "La sede \"{{name}}\" se creó, pero no se pudo vincular el contacto. Vincúlalo manualmente más tarde desde la sede."
+    "contactCouplingFailed": "La sede \"{{name}}\" se creó, pero no se pudo vincular el contacto. Vincúlalo manualmente más tarde desde la sede.",
+    "contactCreateFailed": "La sede \"{{name}}\" se creó, pero no se pudo crear el nuevo contacto. Añádelo manualmente y vincúlalo desde la sede más tarde."
   },
   "changelog": {
     "empty": "Aún no hay cambios."
@@ -635,6 +649,18 @@
     "searchPlaceholder": "Buscar tarea…"
   },
   "matches": {
-    "loadError": "No se pudieron cargar las coincidencias."
+    "loadError": "No se pudieron cargar las coincidencias.",
+    "searchPlaceholder": "Buscar match…"
+  },
+  "scopedList": {
+    "vacanciesEmpty": "Aún no hay vacantes.",
+    "matchesEmpty": "Aún no hay coincidencias.",
+    "loadError": "Error al cargar. Puede que no tengas acceso a esta ubicación."
+  },
+  "inUse": {
+    "title": "Todavía en uso",
+    "close": "Cerrar",
+    "planningOrders": "Órdenes de planificación",
+    "planningShifts": "Turnos de planificación"
   }
 }

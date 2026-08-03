@@ -44,6 +44,8 @@ export function mapDepartment(d: ApiDepartment = {}): Department {
     statusId: d.status_id ?? null,
     ...mapStatusRef(d.status),
     customFields: d.custom_fields ?? {},
+    // SUBENTITEIT-DELETE-1: false when absent (a write response never sets it).
+    inUse: Boolean(d.in_use),
   }
 }
 
@@ -144,6 +146,8 @@ export function mapLocation(l: ApiLocation = {}): Location {
     statusId: l.status_id ?? null,
     ...mapStatusRef(l.status),
     customFields: l.custom_fields ?? {},
+    // SUBENTITEIT-DELETE-1: false when absent (a write response never sets it).
+    inUse: Boolean(l.in_use),
   }
 }
 
@@ -236,7 +240,13 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     locations,
     departments,
     contacts,
-    notes: (c.notes ?? []).map(n => ({ id: n.id, type: n.type ?? '', title: n.title ?? '', text: n.text ?? n.body ?? '', ago: n.created_at ?? n.ago ?? '' })),
+    // CONTACT-NOTITIES-1 (Danny quick win): the person a note is filed against —
+    // both were returned by CustomerDetailResource all along but dropped here, so
+    // the drawer could never show or set the link (contactId null = a company-level note).
+    notes: (c.notes ?? []).map(n => ({
+      id: n.id, type: n.type ?? '', title: n.title ?? '', text: n.text ?? n.body ?? '', ago: n.created_at ?? n.ago ?? '',
+      contactId: n.customer_contact_id ?? null, contactName: n.contact_name ?? '',
+    })),
     locationsCount: c.locations_count ?? locations.length,
     departmentsCount: c.departments_count ?? departments.length,
     contactsCount: c.contacts_count ?? contacts.length,

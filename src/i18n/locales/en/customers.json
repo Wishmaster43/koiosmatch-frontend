@@ -261,7 +261,15 @@
       "coupleNote": "Linking moves the contact to this department.",
       "coupleAction": "Link",
       "addContactHere": "New contact",
-      "uncoupleAction": "Unlink"
+      "uncoupleAction": "Unlink",
+      "tasks": {
+        "newTask": "New task",
+        "empty": "No tasks for this department yet",
+        "loading": "Loading tasks…",
+        "error": "Tasks could not be loaded",
+        "openTask": "Open task",
+        "searchPlaceholder": "Search task…"
+      }
     },
     "deleteConfirm": "Delete this department?",
     "saveFailed": "Saving failed.",
@@ -378,7 +386,8 @@
       "date": "Date",
       "shift": "Shift",
       "department": "Department"
-    }
+    },
+    "searchPlaceholder": "Search opportunity…"
   },
   "planning": {
     "title": "Planning",
@@ -460,7 +469,11 @@
     "timeline": "Timeline",
     "timelineEmpty": "No activity yet.",
     "conversations": "Conversations",
-    "conversationsEmpty": "No conversations yet."
+    "conversationsEmpty": "No conversations yet.",
+    "linkedTo": "Linked to {{name}}",
+    "linkContactLabel": "Link note to",
+    "linkContactNone": "No contact",
+    "searchPlaceholder": "Search notes…"
   },
   "bulk": {
     "selected": "{{count}} selected",
@@ -600,7 +613,8 @@
       "mismatchProceed": "Import anyway"
     },
     "contactPersonHint": "Pick an existing contact of this customer, or type a new name.",
-    "contactCouplingFailed": "Location \"{{name}}\" was created, but linking the contact failed. Link it manually from the location later."
+    "contactCouplingFailed": "Location \"{{name}}\" was created, but linking the contact failed. Link it manually from the location later.",
+    "contactCreateFailed": "Location \"{{name}}\" was created, but creating the new contact failed. Add it manually and link it from the location later."
   },
   "changelog": {
     "empty": "No changes yet."
@@ -635,6 +649,18 @@
     "searchPlaceholder": "Search task…"
   },
   "matches": {
-    "loadError": "Could not load matches."
+    "loadError": "Could not load matches.",
+    "searchPlaceholder": "Search match…"
+  },
+  "scopedList": {
+    "vacanciesEmpty": "No vacancies yet.",
+    "matchesEmpty": "No matches yet.",
+    "loadError": "Loading failed. You may not have access to this branch."
+  },
+  "inUse": {
+    "title": "Still in use",
+    "close": "Close",
+    "planningOrders": "Planning orders",
+    "planningShifts": "Planning shifts"
   }
 }

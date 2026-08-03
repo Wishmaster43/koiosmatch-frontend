@@ -81,7 +81,7 @@ beforeEach(() => {
 // (id/name/locationId) vary per test; everything else is a harmless default.
 const dept = (id: string, name: string, locationId: string): Department => ({
   id, helloflexLink: null, shiftmanagerLink: null, name, description: '', locationId, locationName: '',
-  contacts: [], costCenter: '', statusId: null, status: '', statusLabel: '', statusColor: '', customFields: {},
+  contacts: [], costCenter: '', statusId: null, status: '', statusLabel: '', statusColor: '', customFields: {}, inUse: false,
 })
 const departments = [dept('dep-1', 'Verpleging', 'loc-1'), dept('dep-2', 'Thuiszorg', 'loc-2')]
 

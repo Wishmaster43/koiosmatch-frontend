@@ -20,7 +20,10 @@ import type { Customer, ApiCustomer } from '@/types/customer'
 import type { Id } from '@/types/common'
 
 interface AppUser { id: Id; name: string; avatar_color?: string }
-type NotePayload = { type: string; title: string; body: string }
+// CONTACT-NOTITIES-1: the person this note is filed against — optional, a
+// company-level note carries none. Validated (and scoped to this customer)
+// server-side, CustomerController::addNote.
+type NotePayload = { type: string; title: string; body: string; customer_contact_id?: Id }
 // The create form's full shape. Everything past `city` is optional (the backend's
 // CustomerRequest::sharedRules marks them sometimes|nullable) and only travels when
 // filled — the modal collects them since Danny 27-07 ("+ Klant mist heel veel
@@ -198,15 +201,21 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
       .catch(err => { setCustomers(prev => prev.filter(x => x.id !== tmpId)); setTotal(tt => tt - 1); throw err })
   }
 
-  // Add a note to a customer (optimistic + POST).
+  // Add a note to a customer (optimistic + POST). CONTACT-NOTITIES-1: an optional
+  // `customer_contact_id` files the note against one of this customer's own
+  // contacts — the optimistic row carries the id but not yet the contact's name
+  // (the composer doesn't send it), so its chip appears once the real detail reloads.
   const addNote = (id: Id | undefined, payload: NotePayload) => {
-    const note = { id: `tmp-${Date.now()}`, type: payload.type, title: payload.title, text: payload.body, ago: '' }
+    const note = {
+      id: `tmp-${Date.now()}`, type: payload.type, title: payload.title, text: payload.body, ago: '',
+      contactId: payload.customer_contact_id ?? null, contactName: '',
+    }
     setDetail(prev => (prev && prev.id === id ? ({ ...prev, notes: [note, ...(prev.notes ?? [])] } as Customer) : prev))
     // OPTIMISTIC-REVERT-1: a failed note used to stay on screen with only a toast, so an
     // account manager who believed it was recorded would never write it again. Drop the
     // optimistic entry again (by reference, so notes added meanwhile survive) and surface
     // the server's own message.
-    api.post(`/customers/${id}/notes`, { type: payload.type, title: payload.title, text: payload.body })
+    api.post(`/customers/${id}/notes`, { type: payload.type, title: payload.title, text: payload.body, customer_contact_id: payload.customer_contact_id })
       .catch(err => {
         setDetail(prev => (prev && prev.id === id
           ? ({ ...prev, notes: (prev.notes ?? []).filter(n => n !== note) } as Customer)

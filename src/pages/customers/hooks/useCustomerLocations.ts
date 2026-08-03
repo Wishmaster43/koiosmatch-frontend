@@ -12,6 +12,7 @@ import { notifyError } from '@/lib/notify'
 import { mapLocation } from '../data/mapCustomer'
 import type { Location, ApiLocation } from '@/types/customer'
 import type { Id } from '@/types/common'
+import type { DeleteResult } from './subEntityDelete'
 
 // The editable payload — every BE-accepted field (CustomerLocationController::rules).
 export interface LocationPayload {
@@ -122,18 +123,24 @@ export function useCustomerLocations(customerId: Id | undefined) {
       .catch(() => { setLocations(snapshot); notifyError(t('locations.saveFailed')); return null })
   }, [customerId, locations, t])
 
-  // Delete — optimistic remove; a 409 (still referenced) gets its own message.
-  const remove = useCallback((id: Id) => {
+  // Delete — optimistic remove; a 409 (still referenced — the row's own `in_use`
+  // flag was stale) resolves with the server's per-relation counts (SUBENTITEIT-
+  // DELETE-1) instead of a blanket toast, so the caller can render the shared
+  // counts dialog. Any OTHER failure still gets the old generic toast.
+  const remove = useCallback((id: Id): Promise<DeleteResult> | undefined => {
     if (!customerId) return
     const snapshot = locations
     setLocations(ls => ls.filter(x => x.id !== id))
-    if (isTemp(id)) return
+    if (isTemp(id)) return Promise.resolve({ ok: true })
     return api.delete(`/customers/${customerId}/locations/${id}`)
-      .then(() => true)
+      .then(() => ({ ok: true }))
       .catch(e => {
         setLocations(snapshot)
-        notifyError(e?.response?.status === 409 ? t('locations.deleteInUse') : t('locations.deleteFailed'))
-        return false
+        if (e?.response?.status === 409) {
+          return { ok: false, blocked: { message: e.response.data?.message, counts: e.response.data?.counts ?? {} } }
+        }
+        notifyError(t('locations.deleteFailed'))
+        return { ok: false }
       })
   }, [customerId, locations, t])
 

@@ -14,6 +14,7 @@ import { notifyError } from '@/lib/notify'
 import { mapDepartment } from '../data/mapCustomer'
 import type { Department, ApiDepartment } from '@/types/customer'
 import type { Id } from '@/types/common'
+import type { DeleteResult } from './subEntityDelete'
 
 // The editable payload — the fields CustomerDepartmentController::store/update accept.
 export interface DepartmentPayload {
@@ -98,18 +99,24 @@ export function useCustomerDepartments(customerId: Id | undefined) {
       .catch(() => { setDepartments(snapshot); notifyError(t('departments.saveFailed')); return null })
   }, [customerId, departments, t])
 
-  // Delete — optimistic remove; a 409 (still referenced, e.g. by contacts) gets its own message.
-  const remove = useCallback((id: Id) => {
+  // Delete — optimistic remove; a 409 (still referenced — the row's own `in_use`
+  // flag was stale) resolves with the server's per-relation counts (SUBENTITEIT-
+  // DELETE-1) instead of a blanket toast, so the caller can render the shared
+  // counts dialog. Any OTHER failure still gets the old generic toast.
+  const remove = useCallback((id: Id): Promise<DeleteResult> | undefined => {
     if (!customerId) return
     const snapshot = departments
     setDepartments(ds => ds.filter(x => x.id !== id))
-    if (isTemp(id)) return
+    if (isTemp(id)) return Promise.resolve({ ok: true })
     return api.delete(`/customers/${customerId}/departments/${id}`)
-      .then(() => true)
+      .then(() => ({ ok: true }))
       .catch(e => {
         setDepartments(snapshot)
-        notifyError(e?.response?.status === 409 ? t('departments.deleteInUse') : t('departments.deleteFailed'))
-        return false
+        if (e?.response?.status === 409) {
+          return { ok: false, blocked: { message: e.response.data?.message, counts: e.response.data?.counts ?? {} } }
+        }
+        notifyError(t('departments.deleteFailed'))
+        return { ok: false }
       })
   }, [customerId, departments, t])
 

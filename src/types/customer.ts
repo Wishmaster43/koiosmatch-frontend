@@ -82,6 +82,10 @@ export interface Department {
   statusLabel: string
   statusColor: string
   customFields: Record<string, unknown>
+  // SUBENTITEIT-DELETE-1: the index-level "still referenced" flag (false on a
+  // write response, where the controller never sets it) — drives the honest
+  // disabled-trash affordance (§3: no fake delete button).
+  inUse: boolean
 }
 
 /** A customer location with C-6 address fields (flat UI shape). SUB-STATUS-1: lifecycle status. */
@@ -130,6 +134,8 @@ export interface Location {
   statusLabel: string
   statusColor: string
   customFields: Record<string, unknown>
+  // SUBENTITEIT-DELETE-1: same honest-delete flag as Department.
+  inUse: boolean
 }
 
 /** A customer note (flat UI shape). */
@@ -139,6 +145,10 @@ export interface CustomerNote {
   title: string
   text: string
   ago: string
+  // CONTACT-NOTITIES-1: the contactpersoon this note is filed against (null = a
+  // company-level note) — both read straight off CustomerDetailResource.
+  contactId: Id | null
+  contactName: string
   // Loose backend note shape — keeps it compatible with the shared NotesTab item.
   [k: string]: unknown
 }
@@ -269,6 +279,8 @@ export interface ApiDepartment {
   custom_fields?: Record<string, unknown>
   // EXTRACT-1: the shared raw shape (src/lib/backofficeLink).
   backoffice_links?: ApiBackofficeLink[]
+  // SUBENTITEIT-DELETE-1: index-only flag (CustomerDepartmentResource.php:35).
+  in_use?: boolean
   [k: string]: unknown
 }
 
@@ -287,6 +299,8 @@ export interface ApiLocation {
   custom_fields?: Record<string, unknown>
   // EXTRACT-1: the shared raw shape (src/lib/backofficeLink).
   backoffice_links?: ApiBackofficeLink[]
+  // SUBENTITEIT-DELETE-1: index-only flag (CustomerLocationResource.php:66).
+  in_use?: boolean
   [k: string]: unknown
 }
 
@@ -321,7 +335,8 @@ export interface ApiCustomer {
   cost_center?: string; billing_email?: string
   tags?: unknown[]
   locations?: ApiLocation[]; departments?: ApiDepartment[]; contacts?: ApiContact[]; contact_persons?: ApiContact[]
-  notes?: Array<{ id?: Id; type?: string; title?: string; text?: string; body?: string; created_at?: string; ago?: string }>
+  // CONTACT-NOTITIES-1: the contactpersoon a note is filed against (CustomerDetailResource.php:158-163).
+  notes?: Array<{ id?: Id; type?: string; title?: string; text?: string; body?: string; created_at?: string; ago?: string; customer_contact_id?: Id | null; contact_name?: string | null }>
   locations_count?: number; departments_count?: number; contacts_count?: number
   open_vacancies_count?: number; openVacanciesCount?: number
   active_matches_count?: number; activeMatchesCount?: number

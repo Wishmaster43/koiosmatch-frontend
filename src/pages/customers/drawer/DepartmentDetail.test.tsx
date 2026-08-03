@@ -15,7 +15,7 @@
  * through the ACTIVE locale's own copy instead of guessing/hardcoding a language.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import DepartmentDetail from './DepartmentDetail'
@@ -35,6 +35,20 @@ vi.mock('@/components/ui/RichTextEditor', () => ({
   default: ({ value, onChange }: { value?: string; onChange: (v: string) => void }) => (
     <textarea data-testid="rte" value={value ?? ''} onChange={e => onChange(e.target.value)} />
   ),
+}))
+// SCOPED-LIST-TAB-1/TAKEN-OP-AFDELING-1: the three new sub-tabs each own their own
+// fetch (react-query/useMatchStatuses/useEntityTasks) — already covered by their
+// own tests (ScopedListTab.test.tsx, useScopedEntityList.test.ts). Stubbed here so
+// this file only proves DepartmentDetail's OWN wiring: the right scope/id reaches
+// the right child when its sub-tab is picked.
+vi.mock('./ScopedVacanciesTab', () => ({
+  default: ({ scope, id }: { scope: string; id?: string }) => <div data-testid="scoped-vacancies">{scope}:{id}</div>,
+}))
+vi.mock('./ScopedMatchesTab', () => ({
+  default: ({ scope, id }: { scope: string; id?: string }) => <div data-testid="scoped-matches">{scope}:{id}</div>,
+}))
+vi.mock('@/components/drawer/tabs/EntityTasksTab', () => ({
+  default: ({ linkType, id }: { linkType: string; id?: string }) => <div data-testid="entity-tasks">{linkType}:{id}</div>,
 }))
 
 beforeEach(() => vi.clearAllMocks())
@@ -168,5 +182,86 @@ describe('DepartmentDetail · section order mirrors the customer Bedrijf tab', (
     // Exactly ONE "Gegevens"/"Details" on screen — the sub-tab button — not a
     // second one from a card title that would repeat the same text.
     expect(screen.getAllByText(ct('overview.details'))).toHaveLength(1)
+  })
+})
+
+/**
+ * SCOPED-LIST-TAB-1 / TAKEN-OP-AFDELING-1 — the three new read-only sub-tabs
+ * pass this department's own id + the right scope token through to the shared
+ * children (stubbed above; their own fetch/columns are covered elsewhere).
+ */
+describe('DepartmentDetail · Vacatures/Matches/Taken sub-tabs', () => {
+  it('wires the department scope + id into ScopedVacanciesTab', async () => {
+    const user = userEvent.setup()
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.vacancies') }))
+    expect(screen.getByTestId('scoped-vacancies')).toHaveTextContent('department:d1')
+  })
+
+  it('wires the department scope + id into ScopedMatchesTab', async () => {
+    const user = userEvent.setup()
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.matches') }))
+    expect(screen.getByTestId('scoped-matches')).toHaveTextContent('department:d1')
+  })
+
+  it('wires linkType="department" + this department\'s id into EntityTasksTab', async () => {
+    const user = userEvent.setup()
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.tasks') }))
+    expect(screen.getByTestId('entity-tasks')).toHaveTextContent('department:d1')
+  })
+})
+
+/**
+ * SUBENTITEIT-DELETE-1 — the honest disabled-trash (no fake affordance, §3) and
+ * the shared counts dialog for a 409 RACE (the row's own `in_use` was stale).
+ */
+describe('DepartmentDetail · honest delete (SUBENTITEIT-DELETE-1)', () => {
+  it('disables the trash and names the reason when the department is still in use', () => {
+    render(<DepartmentDetail department={department({ inUse: true })} onSave={vi.fn()} {...baseProps} />)
+    const trash = screen.getByTitle(ct('departments.deleteInUse'))
+    expect(trash).toBeDisabled()
+  })
+
+  it('keeps the trash enabled with the normal label when nothing blocks it', () => {
+    render(<DepartmentDetail department={department({ inUse: false })} onSave={vi.fn()} {...baseProps} />)
+    const trash = screen.getByTitle(cm('delete'))
+    expect(trash).not.toBeDisabled()
+  })
+
+  it('closes the panel on a real delete success', async () => {
+    const user = userEvent.setup()
+    const close = vi.fn()
+    const onDelete = vi.fn().mockResolvedValue({ ok: true })
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} onDelete={onDelete} close={close} />)
+
+    await user.click(screen.getByTitle(cm('delete')))
+    await user.click(screen.getByRole('button', { name: cm('confirm') }))
+    expect(onDelete).toHaveBeenCalledWith('d1')
+    await waitFor(() => expect(close).toHaveBeenCalled())
+  })
+
+  it('opens the shared counts dialog on a 409 race instead of closing', async () => {
+    const user = userEvent.setup()
+    const close = vi.fn()
+    const onDelete = vi.fn().mockResolvedValue({ ok: false, blocked: { counts: { vacancies: 2, tasks: 1 } } })
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} onDelete={onDelete} close={close} />)
+
+    await user.click(screen.getByTitle(cm('delete')))
+    await user.click(screen.getByRole('button', { name: cm('confirm') }))
+
+    // Scoped to the dialog: "Vacatures"/"Taken" also label the (unrelated) sub-tab
+    // strip underneath, so an unscoped query would match twice.
+    const dialog = await screen.findByRole('dialog', { name: ct('inUse.title') })
+    expect(within(dialog).getByText(ct('drawer.tabs.vacancies'))).toBeInTheDocument()
+    expect(within(dialog).getByText('2')).toBeInTheDocument()
+    expect(within(dialog).getByText(ct('drawer.tabs.tasks'))).toBeInTheDocument()
+    expect(within(dialog).getByText('1')).toBeInTheDocument()
+    // The panel itself never closed — the delete did not actually go through.
+    expect(close).not.toHaveBeenCalled()
+
+    await user.click(within(dialog).getByRole('button', { name: ct('inUse.close') }))
+    expect(screen.queryByRole('dialog', { name: ct('inUse.title') })).not.toBeInTheDocument()
   })
 })

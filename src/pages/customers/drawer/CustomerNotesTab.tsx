@@ -24,14 +24,16 @@
  * customer — not bolted onto Notities.
  */
 import { useState, useEffect } from 'react'
-import type { ComponentType } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { isAbortError } from '@/lib/mocks'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 import VacancySettingsTab from './VacancySettingsTab'
+import SelectMenu from '@/components/ui/SelectMenu'
 import { useNoteTypes } from '@/lib/useNoteTypes'
+import { contactOptionLabel } from '@/lib/contactLabel'
 import type { Id } from '@/types/common'
 import type { Customer, CustomerNote } from '@/types/customer'
 
@@ -52,7 +54,12 @@ interface Props {
   // signed-in user (mirrors the previous inline NotesTab usage in this drawer).
   authorInitials?: string
   notes: CustomerNote[]
-  onAddNote?: (payload: { type: string; title: string; body: string }) => void
+  // CONTACT-NOTITIES-1 (Danny quick win): `customer_contact_id` rides along as an
+  // optional extra field — widened from `{ type, title, body }` only; the plain
+  // `(id, payload: { type, title, body }) => void` the parent (CustomerDrawer)
+  // still declares stays assignable here (a variable of THIS wider shape is
+  // always assignable where the narrower one is expected).
+  onAddNote?: (payload: { type: string; title: string; body: string; customer_contact_id?: Id }) => void
   // The record itself + its save path, for the Vacature-zichtbaarheid sub-tab (it edits
   // three customer fields through the drawer's own optimistic PATCH).
   c: Customer
@@ -61,12 +68,58 @@ interface Props {
 
 export default function CustomerNotesTab({ customerId, customerName, customerInitials, authorInitials, notes, onAddNote, c, onSave }: Props) {
   const { t } = useTranslation('customers')
-  // Note categories from the tenant lookup, scoped to 'customer' (NOTE-TYPES-2/3);
-  // writable list for the composer, the full list for chip-label resolution.
-  const { writableTypes: noteTypes, types: chipTypes } = useNoteTypes('customer')
+  // Note categories from the tenant lookup (NOTE-TYPES-2/3). CustomerController::
+  // addNote validates `type` against entity=contact when customer_contact_id is
+  // filled, entity=customer otherwise (NOTE-TYPES-3-GAP-1) — so the composer
+  // must offer the MATCHING scope's writable types, picked below on the linked
+  // contact selection, never always the customer ones.
+  const { writableTypes: customerNoteTypes, types: customerChipTypes } = useNoteTypes('customer')
+  const { writableTypes: contactNoteTypes, types: contactChipTypes } = useNoteTypes('contact')
   const [subTab, setSubTab] = useState('notes')
   const [timeline, setTimeline] = useState<TimelineEntry[]>([])
   const active = subTab
+
+  // CONTACT-NOTITIES-1 (Danny quick win): optionally file the next note against
+  // one of this customer's own contacts — the API already accepts
+  // `customer_contact_id` (scoped to this customer, CustomerController::addNote)
+  // but nothing offered picking one. Resets after each save (see handleAddNote)
+  // so linking one note never silently carries over onto the next, unrelated one.
+  const [pendingContactId, setPendingContactId] = useState('')
+  const contactOptions = (c.contacts ?? [])
+    .filter(contact => contact.id != null)
+    .map(contact => ({ value: String(contact.id), label: contactOptionLabel(contact) }))
+  const noteTypes = pendingContactId ? contactNoteTypes : customerNoteTypes
+  // Historical notes may have been filed under EITHER scope — merge both lookups
+  // (deduped by value) so an existing note's type chip always resolves its real
+  // label/colour regardless of which scope it was written under.
+  const chipTypes = [...customerChipTypes, ...contactChipTypes]
+    .filter((nt, i, arr) => arr.findIndex(x => x.value === nt.value) === i)
+
+  // Carries the picked contact link along with the composer's own payload, then
+  // clears the picker — a fresh note starts unlinked unless picked again.
+  const handleAddNote = (payload: { type: string; title: string; body: string }) => {
+    onAddNote?.({ ...payload, customer_contact_id: pendingContactId || undefined })
+    setPendingContactId('')
+  }
+
+  // Soft-tint "linked to {contact}" chip (§4 convention). The shared NotesTab
+  // (components/drawer/tabs/NotesTab.tsx) has no per-note extension point and is
+  // out of scope for this change (owned by a parallel lane) — but its title cell
+  // already renders whatever ReactNode it is given (`{n.title ?? who}`), so this
+  // stays entirely inside THIS file: a note with a linked contact gets this chip
+  // AS its title, never a change to the shared component.
+  const contactChip = (name: string) => (
+    <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: 10, fontWeight: 600,
+      padding: '1px 6px', borderRadius: 99, marginRight: 6,
+      background: 'color-mix(in srgb, var(--color-info) 12%, transparent)', color: 'var(--color-info)',
+      border: '1px solid color-mix(in srgb, var(--color-info) 40%, transparent)' }}>
+      {t('notes.linkedTo', { name })}
+    </span>
+  )
+  // Notes with a linked contact show the chip where the (never-persisted) title
+  // would sit; every other note is untouched.
+  const notesWithChip: Array<Omit<CustomerNote, 'title'> & { title: ReactNode }> = notes.map(n =>
+    n.contactName ? { ...n, title: contactChip(n.contactName) } : n)
 
   // Fetch the activity feed lazily, only once the Tijdlijn sub-tab is opened.
   useEffect(() => {
@@ -81,14 +134,19 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
 
   // Shared NotesTab props — each sub-tab renders exactly one of its sections.
   const notesProps = {
-    notes, onAddNote, timeline, noteTypes, chipTypes,
+    notes: notesWithChip, onAddNote: handleAddNote, timeline, noteTypes, chipTypes,
     authorInitials, timelineName: customerName, timelineInitials: customerInitials,
-   
+
     labels: {
       notes: t('notes.notes'), newNote: t('notes.newNote'), type: t('notes.type'),
       save: t('notes.save'), cancel: t('notes.cancel'), edit: t('notes.edit'),
       notesEmpty: t('notes.notesEmpty'), timeline: t('notes.timeline'), timelineEmpty: t('notes.timelineEmpty'),
       notePlaceholder: () => t('notes.notePlaceholder'),
+      // TAKEN-TOOLBAR/NOTES-SEARCH-1 (Danny 03-08): minimal additive line only —
+      // another lane is actively editing this file's contact-link picker
+      // (SelectMenu/contactOptionLabel above); this just supplies the shared
+      // NotesTab's new search placeholder, nothing else touched here.
+      searchPlaceholder: t('notes.searchPlaceholder'),
     },
   }
 
@@ -103,7 +161,25 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
         active={subTab}
         onChange={setSubTab}
       />
-      {active === 'notes'    && <NotesTab {...notesProps} showTimeline={false} showConversations={false} />}
+      {/* CONTACT-NOTITIES-1: optional "link the next note to a contact" picker —
+          only where it applies (the composer lives on this sub-tab) and only when
+          there is anyone to link to. Positioned above the composer rather than
+          inside it: the composer itself belongs to the shared NotesTab component,
+          out of scope for this change (see the chip comment above). */}
+      {active === 'notes' && contactOptions.length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{t('notes.linkContactLabel')}</span>
+          <div style={{ width: 240 }}>
+            <SelectMenu value={pendingContactId} onChange={setPendingContactId}
+              options={[{ value: '', label: t('notes.linkContactNone') }, ...contactOptions]}
+              placeholder={t('notes.linkContactNone')} />
+          </div>
+        </div>
+      )}
+      {/* `key` remounts the composer when the linked contact changes — its writable
+          note-type list switches scope (see noteTypes above), and a stale type
+          picked under the OTHER scope would otherwise 422 on save. */}
+      {active === 'notes'    && <NotesTab key={pendingContactId || 'none'} {...notesProps} showTimeline={false} showConversations={false} />}
       {active === 'timeline' && <NotesTab {...notesProps} showNotes={false} showConversations={false} />}
       {active === 'vacancySettings' && <VacancySettingsTab c={c} onSave={onSave} />}
 

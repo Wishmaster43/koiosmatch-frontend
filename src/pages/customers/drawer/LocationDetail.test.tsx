@@ -12,7 +12,7 @@
  */
 import { useState, useEffect } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import LocationDetail from './LocationDetail'
@@ -60,6 +60,15 @@ vi.mock('@/components/ui/RichTextEditor', () => ({
   default: ({ value, onChange }: { value?: string; onChange: (v: string) => void }) => (
     <textarea data-testid="rte" value={value ?? ''} onChange={e => onChange(e.target.value)} />
   ),
+}))
+// SCOPED-LIST-TAB-1: each own their own fetch (react-query/useMatchStatuses) —
+// covered by ScopedListTab.test.tsx/useScopedEntityList.test.ts. Stubbed here so
+// this file only proves LocationDetail's OWN wiring (right scope/id per sub-tab).
+vi.mock('./ScopedVacanciesTab', () => ({
+  default: ({ scope, id }: { scope: string; id?: string }) => <div data-testid="scoped-vacancies">{scope}:{id}</div>,
+}))
+vi.mock('./ScopedMatchesTab', () => ({
+  default: ({ scope, id }: { scope: string; id?: string }) => <div data-testid="scoped-matches">{scope}:{id}</div>,
 }))
 
 beforeEach(() => { vi.clearAllMocks(); mockPost.mockResolvedValue({ status: 202, data: {} }) })
@@ -527,5 +536,75 @@ describe('LocationDetail · Vestiging helper text removed', () => {
   it('no longer renders the inherited/deviate explainer paragraph under Vestiging', () => {
     render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
     expect(screen.queryByText(ct('locations.detail.branchHint'))).not.toBeInTheDocument()
+  })
+})
+
+/**
+ * SCOPED-LIST-TAB-1 — the two new read-only sub-tabs pass this location's own
+ * id + the right scope token through to the shared children (stubbed above).
+ */
+describe('LocationDetail · Vacatures/Matches sub-tabs', () => {
+  it('wires the location scope + id into ScopedVacanciesTab', async () => {
+    const user = userEvent.setup()
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.vacancies') }))
+    expect(screen.getByTestId('scoped-vacancies')).toHaveTextContent('location:loc-1')
+  })
+
+  it('wires the location scope + id into ScopedMatchesTab', async () => {
+    const user = userEvent.setup()
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.matches') }))
+    expect(screen.getByTestId('scoped-matches')).toHaveTextContent('location:loc-1')
+  })
+})
+
+/**
+ * SUBENTITEIT-DELETE-1 — the honest disabled-trash (no fake affordance, §3) and
+ * the shared counts dialog for a 409 RACE (the row's own `in_use` was stale).
+ */
+describe('LocationDetail · honest delete (SUBENTITEIT-DELETE-1)', () => {
+  it('disables the trash and names the reason when the location is still in use', () => {
+    render(<LocationDetail location={location({ inUse: true })} onSave={vi.fn()} {...baseProps} />)
+    expect(screen.getByTitle(ct('locations.deleteInUse'))).toBeDisabled()
+  })
+
+  it('keeps the trash enabled with the normal label when nothing blocks it', () => {
+    render(<LocationDetail location={location({ inUse: false })} onSave={vi.fn()} {...baseProps} />)
+    expect(screen.getByTitle(ct('locations.detail.deleteLocation'))).not.toBeDisabled()
+  })
+
+  it('closes the panel on a real delete success', async () => {
+    const user = userEvent.setup()
+    const close = vi.fn()
+    const onDelete = vi.fn().mockResolvedValue({ ok: true })
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} onDelete={onDelete} close={close} />)
+
+    await user.click(screen.getByTitle(ct('locations.detail.deleteLocation')))
+    await user.click(screen.getByRole('button', { name: cm('confirm') }))
+    expect(onDelete).toHaveBeenCalledWith('loc-1')
+    await waitFor(() => expect(close).toHaveBeenCalled())
+  })
+
+  it('opens the shared counts dialog on a 409 race instead of closing', async () => {
+    const user = userEvent.setup()
+    const close = vi.fn()
+    const onDelete = vi.fn().mockResolvedValue({ ok: false, blocked: { counts: { departments: 3, contacts: 1 } } })
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} onDelete={onDelete} close={close} />)
+
+    await user.click(screen.getByTitle(ct('locations.detail.deleteLocation')))
+    await user.click(screen.getByRole('button', { name: cm('confirm') }))
+
+    // Scoped to the dialog: "Afdelingen"/"Contactpersonen" also label other tabs
+    // on this same panel, so an unscoped query would match more than once.
+    const dialog = await screen.findByRole('dialog', { name: ct('inUse.title') })
+    expect(within(dialog).getByText(ct('drawer.tabs.departments'))).toBeInTheDocument()
+    expect(within(dialog).getByText('3')).toBeInTheDocument()
+    expect(within(dialog).getByText(ct('drawer.tabs.contacts'))).toBeInTheDocument()
+    expect(within(dialog).getByText('1')).toBeInTheDocument()
+    expect(close).not.toHaveBeenCalled()
+
+    await user.click(within(dialog).getByRole('button', { name: ct('inUse.close') }))
+    expect(screen.queryByRole('dialog', { name: ct('inUse.title') })).not.toBeInTheDocument()
   })
 })

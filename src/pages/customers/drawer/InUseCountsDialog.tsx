@@ -1,0 +1,76 @@
+/**
+ * InUseCountsDialog — the ONE shared "still in use" dialog for a customer
+ * location/department delete that lost the 409 RACE (something got linked after
+ * the row's own `in_use` flag was last read — SUBENTITEIT-DELETE-1). Lists every
+ * blocking relation with its count, translated, mirroring ConfirmDialog's panel
+ * shell but with only a Close action — there is nothing to confirm here, only
+ * to explain why the delete did not go through.
+ */
+import { useTranslation } from 'react-i18next'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
+
+// Relation keys the backend's usageCounts() may send (location: 7 keys incl.
+// `departments`; department: same minus `departments` plus `tasks` — both
+// controllers, CustomerLocationController.php/CustomerDepartmentController.php).
+// Reuses the EXISTING tab labels wherever one already names the same thing
+// (§11: never a fresh label for something already named elsewhere) — only the
+// two planning relations have no existing label to borrow.
+function useRelationLabel(): (key: string) => string {
+  const { t } = useTranslation('customers')
+  const map: Record<string, string> = {
+    departments: t('drawer.tabs.departments'),
+    contacts: t('drawer.tabs.contacts'),
+    vacancies: t('drawer.tabs.vacancies'),
+    matches: t('drawer.tabs.matches'),
+    opportunities: t('drawer.tabs.opportunities'),
+    planning_orders: t('inUse.planningOrders'),
+    planning_shifts: t('inUse.planningShifts'),
+    tasks: t('drawer.tabs.tasks'),
+  }
+  return (key: string) => map[key] ?? key
+}
+
+export interface InUseCountsDialogProps {
+  open: boolean
+  counts: Record<string, number>
+  onClose: () => void
+}
+
+export default function InUseCountsDialog({ open, counts, onClose }: InUseCountsDialogProps) {
+  const { t } = useTranslation('customers')
+  const relationLabel = useRelationLabel()
+  // useFocusTrap must run every render (hooks can't be conditional) — it no-ops
+  // internally while its ref never attaches (the panel below is unmounted).
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
+  if (!open) return null
+
+  const rows = Object.entries(counts).filter(([, n]) => n > 0)
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex',
+      alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.45)' }}
+      onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('inUse.title')} tabIndex={-1}
+        style={{ width: 'auto', minWidth: 320, maxWidth: 'min(480px, 90vw)', background: 'var(--surface)',
+          borderRadius: 14, border: '1px solid var(--border)', boxShadow: '0 20px 60px rgba(0,0,0,0.22)',
+          padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('inUse.title')}</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {rows.map(([key, n]) => (
+            <div key={key} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 13, color: 'var(--text)' }}>
+              <span>{relationLabel(key)}</span>
+              <span style={{ fontWeight: 600, fontFamily: 'JetBrains Mono, monospace' }}>{n}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button onClick={onClose}
+            style={{ height: 32, padding: '0 16px', borderRadius: 8, border: '1px solid var(--border)',
+              background: 'none', color: 'var(--text)', cursor: 'pointer', fontSize: 13 }}>
+            {t('inUse.close')}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}

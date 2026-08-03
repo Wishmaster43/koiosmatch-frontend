@@ -286,7 +286,9 @@ export default function CustomerDrawer({
         <EntityTasksTab
           linkType="customer" id={c.id}
           labels={{
-            newTask: t('tasks.newTask'), open: t('tasks.open'), history: t('tasks.history'),
+            // TAKEN-TOOLBAR-2: open/history dropped — the shared tab now filters by
+            // real task status (StatusFilterSelect), not a hardcoded open/history split.
+            newTask: t('tasks.newTask'),
             empty: t('tasks.empty'), loading: t('tasks.loading'), error: t('tasks.error'),
             openTask: t('tasks.openTask'), searchPlaceholder: t('tasks.searchPlaceholder'),
           }}

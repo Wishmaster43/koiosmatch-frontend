@@ -31,7 +31,9 @@ export interface VacancyRow { id?: Id; title: string; status: { value?: string; 
 // Defensive vacancy row mapper (snake_case-tolerant; status as object or string).
 // Keeps the status VALUE (slug) alongside the label/color so callers can filter
 // against the tenant lookup's stable value instead of matching on display text.
-const mapVacancyRow = (v: Record<string, unknown> = {}): VacancyRow => {
+// SCOPED-LIST-TAB-1: exported so the department/location scoped Vacatures tab
+// (ScopedVacanciesTab) reuses this mapper rather than forking a second copy.
+export const mapVacancyRow = (v: Record<string, unknown> = {}): VacancyRow => {
   const status = v.status as { value?: string; label?: string; color?: string } | string | undefined
   return {
     id: v.id as Id | undefined,
