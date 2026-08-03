@@ -156,12 +156,16 @@ export default function LocationContactSection({
           <Row label={t('locations.detail.email')}>{emailValue(legacyEmail, t('overview.sendEmail'))}</Row>
           <Row label={t('locations.detail.phone')}>{phoneValue(legacyPhone, t('overview.callPhone'))}</Row>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 4 }}>
-            <span style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--color-warning)' }}>{t('locations.detail.contactNotLinked')}</span>
-            {/* Exactly one email match: a one-click named couple IN PLACE OF the generic
-                search CTA. Zero or multiple matches keep today's unchanged behaviour. */}
+            {/* One message, not two (Danny 03-08 "waarom zie ik dit?"): when the system is
+                sure enough to offer a NAMED one-click couple, the warning text is noise —
+                the button IS the message. The italic warning only remains for the
+                genuinely ambiguous case where the manual pick is the only way forward. */}
             {canCouple && uniqueMatch
               ? <LinkMatchButton label={t('locations.detail.linkNamed', { name: uniqueMatch.name })} onClick={() => void coupleMatch()} busy={coupling} />
-              : <PickButton label={pickLabel} onClick={onPickContact} />}
+              : <>
+                  <span style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--color-warning)' }}>{t('locations.detail.contactNotLinked')}</span>
+                  <PickButton label={pickLabel} onClick={onPickContact} />
+                </>}
           </div>
         </div>
       ) : (

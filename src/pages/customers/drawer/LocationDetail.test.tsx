@@ -411,7 +411,8 @@ describe('LocationDetail · one-click couple on a unique email match (ONE-CLICK-
     }
     render(<Harness />)
 
-    expect(screen.getByText(ct('locations.detail.contactNotLinked'))).toBeInTheDocument()
+    // With a named one-click on offer the italic warning stays hidden (one message,
+    // not two — Danny 03-08); the button itself is the pre-couple state's proof.
     await user.click(screen.getByRole('button', { name: ct('locations.detail.linkNamed', { name: 'Joost de Boer' }) }))
 
     // The coupled branch renders (real link + email row), and the legacy warning is gone —
