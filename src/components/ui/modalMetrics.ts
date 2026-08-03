@@ -6,4 +6,7 @@
  * future resize only ever touches this file. Adopted by AddCandidateModal.tsx
  * and match/styles.ts.
  */
-export const WIDE_MODAL = { maxWidth: 1060, maxHeight: '94vh' } as const
+// minHeight (Danny 03-08): short forms used to shrink to their content, making
+// +Taak/+Kans/+Match read as "smaller" than +Kandidaat even at the same maxWidth —
+// the frame is now pinned on both axes, so every wide create modal is ONE footprint.
+export const WIDE_MODAL = { maxWidth: 1060, maxHeight: '94vh', minHeight: '94vh' } as const
