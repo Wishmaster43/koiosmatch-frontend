@@ -15,7 +15,6 @@ import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomerHeaderActions from './drawer/CustomerHeaderActions'
 import PdokCard from '@/components/drawer/PdokCard'
-import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import { useAuth } from '@/context/AuthContext'
@@ -63,7 +62,6 @@ const TABS = [
   // TAKEN-OP-KLANT-1: unblocked 28-07 — GET /tasks?customer={id} really filters now
   // (TASKS-LINK-FILTER-1). Before that the filter was ignored and this tab would have
   // shown every task in the tenant, which is why it did not exist.
-  { id: 'tasks',         tKey: 'tasks' },
   { id: 'documents',     tKey: 'documents' },
   // Communicatie is ONE tab with a sub-tab strip (scope correction, Danny 28-07):
   // Notities · Tijdlijn · Vacaturezichtbaarheid live inside CustomerNotesTab.tsx.
@@ -282,18 +280,6 @@ export default function CustomerDrawer({
       case 'planning':      return <PlanningTab customerId={c.id ?? ''} />
       case 'statistics':    return <StatisticsTab c={c} onGoToVacancies={() => setActiveTab?.('vacancies')} />
       case 'priceAgreements': return <PriceAgreementsTab customerId={c.id} c={c} onSave={v => onUpdate?.(c.id, v)} />
-      case 'tasks':         return (
-        <EntityTasksTab
-          linkType="customer" id={c.id}
-          labels={{
-            // TAKEN-TOOLBAR-2: open/history dropped — the shared tab now filters by
-            // real task status (StatusFilterSelect), not a hardcoded open/history split.
-            newTask: t('tasks.newTask'),
-            empty: t('tasks.empty'), loading: t('tasks.loading'), error: t('tasks.error'),
-            openTask: t('tasks.openTask'), searchPlaceholder: t('tasks.searchPlaceholder'),
-          }}
-        />
-      )
       case 'documents':     return <DocumentsTab customerId={c.id} />
       case 'communication': return (
         <CustomerNotesTab

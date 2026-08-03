@@ -1,11 +1,15 @@
 /**
- * CustomerNotesTab — this tab is notes and timeline, nothing else. It briefly carried a
- * "+ Nieuwe taak" trigger because GET /tasks?customer= ignored its filter, so a real
- * Taken tab could not be built; that filter works now and Danny had it removed
- * ("hoort hier niet"). This test holds that line: no task trigger, no task modal.
+ * CustomerNotesTab — notes, tasks, timeline and vacancy visibility under one
+ * Communicatie roof. Two Danny decisions coexist here and do NOT conflict:
+ * 28-07 removed the naked "+ Nieuwe taak" trigger from the Notities view ("hoort
+ * hier niet" — a create-only button without a list was the most that was honest),
+ * and 03-08 moved the FULL Taken tab (list + search/status toolbar + add) in as
+ * its own sub-tab. So: no task trigger on Notities, a complete tasks surface one
+ * sub-tab over. Both lines are held by tests below.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import CustomerNotesTab from './CustomerNotesTab'
 
@@ -56,5 +60,18 @@ describe('CustomerNotesTab · geen taak-trigger', () => {
     // t() echoes raw keys here (see the datetime mock), so the key IS the label.
     expect(screen.queryByRole('button', { name: 'drawer.newTask' })).toBeNull()
     expect(screen.queryByTestId('add-task-modal')).toBeNull()
+  })
+})
+
+/** TAKEN-NAAR-COMMUNICATIE-1 (Danny 03-08): the customer's Taken moved from a
+ *  top-level drawer tab into the Communicatie sub-tab bar. */
+describe('CustomerNotesTab · Taken sub-tab', () => {
+  it('renders the shared tasks tab when the Taken sub-tab is picked', async () => {
+    const user = userEvent.setup()
+    render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]} onAddNote={vi.fn()} c={customer} onSave={vi.fn()} />)
+    // t() echoes raw keys here (see the datetime mock), so the key IS the label.
+    await user.click(screen.getByText('drawer.tabs.tasks'))
+    // The shared tab's own add-trigger proves the real EntityTasksTab mounted.
+    expect(await screen.findByRole('button', { name: 'tasks.newTask' })).toBeInTheDocument()
   })
 })

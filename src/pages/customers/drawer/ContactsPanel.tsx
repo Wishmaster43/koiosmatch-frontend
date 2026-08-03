@@ -338,9 +338,12 @@ export default function ContactsPanel({
             placeholder={t('contacts.searchHere')} aria-label={t('contacts.searchHere')} style={searchInput} />
         </div>
         <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
-        {/* Coupling only exists inside a scope; at customer level a contact is already "here". */}
+        {/* Coupling only exists inside a scope; at customer level a contact is already "here".
+            Icon-only (Danny 03-08): with search + filter + two buttons the scoped row
+            overflowed and clipped the primary add button — the SECONDARY action gives up
+            its text (kept as title/aria-label), the primary "+ contactpersoon" never does. */}
         {scope !== 'customer' && (
-          <DrawerAddButton onClick={() => setModal('couple')} icon={Link2}
+          <DrawerAddButton onClick={() => setModal('couple')} icon={Link2} iconOnly
             label={t(scope === 'location' ? 'locations.detail.coupleAction' : 'departments.detail.coupleAction')} />
         )}
         <DrawerAddButton onClick={() => setModal('add')} label={t('contacts.add')} />

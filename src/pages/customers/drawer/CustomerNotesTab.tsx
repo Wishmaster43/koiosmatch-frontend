@@ -30,6 +30,7 @@ import api, { unwrapList } from '@/lib/api'
 import { isAbortError } from '@/lib/mocks'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
+import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import VacancySettingsTab from './VacancySettingsTab'
 import SelectMenu from '@/components/ui/SelectMenu'
 import { useNoteTypes } from '@/lib/useNoteTypes'
@@ -155,6 +156,9 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
       <SubTabBar
         tabs={[
           { id: 'notes',           label: t('notes.notes') },
+          // Danny 03-08: the customer's Taken moved from a top-level drawer tab into
+          // Communicatie — tasks sit between the notes (todo-adjacent) and the timeline.
+          { id: 'tasks',           label: t('drawer.tabs.tasks') },
           { id: 'timeline',        label: t('notes.timeline') },
           { id: 'vacancySettings', label: t('drawer.tabs.vacancySettings') },
         ]}
@@ -180,6 +184,15 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
           note-type list switches scope (see noteTypes above), and a stale type
           picked under the OTHER scope would otherwise 422 on save. */}
       {active === 'notes'    && <NotesTab key={pendingContactId || 'none'} {...notesProps} showTimeline={false} showConversations={false} />}
+      {/* The customer's Taken surface — moved here from the top-level drawer tab
+          (Danny 03-08); the shared tab brings its own search/status-filter/add toolbar. */}
+      {active === 'tasks' && (
+        <EntityTasksTab linkType="customer" id={customerId} labels={{
+          newTask: t('tasks.newTask'),
+          empty: t('tasks.empty'), loading: t('tasks.loading'), error: t('tasks.error'),
+          openTask: t('tasks.openTask'), searchPlaceholder: t('tasks.searchPlaceholder'),
+        }} />
+      )}
       {active === 'timeline' && <NotesTab {...notesProps} showNotes={false} showConversations={false} />}
       {active === 'vacancySettings' && <VacancySettingsTab c={c} onSave={onSave} />}
 
