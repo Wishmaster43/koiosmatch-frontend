@@ -319,7 +319,8 @@
       "empty": "No tasks for this contact yet",
       "loading": "Loading tasks…",
       "error": "Tasks could not be loaded",
-      "openTask": "Open task"
+      "openTask": "Open task",
+      "searchPlaceholder": "Search task…"
     },
     "openContact": "Open contact",
     "backTo": "Back to {{name}}",
@@ -630,7 +631,8 @@
     "empty": "No tasks for this customer yet",
     "loading": "Loading tasks…",
     "error": "Tasks could not be loaded",
-    "openTask": "Open task"
+    "openTask": "Open task",
+    "searchPlaceholder": "Search task…"
   },
   "matches": {
     "loadError": "Could not load matches."

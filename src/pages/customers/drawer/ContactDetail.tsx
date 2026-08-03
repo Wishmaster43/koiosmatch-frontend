@@ -291,7 +291,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
           labels={{
             newTask: t('contacts.tasks.newTask'), open: t('contacts.tasks.open'), history: t('contacts.tasks.history'),
             empty: t('contacts.tasks.empty'), loading: t('contacts.tasks.loading'), error: t('contacts.tasks.error'),
-            openTask: t('contacts.tasks.openTask'),
+            openTask: t('contacts.tasks.openTask'), searchPlaceholder: t('contacts.tasks.searchPlaceholder'),
           }}
         />
       )}

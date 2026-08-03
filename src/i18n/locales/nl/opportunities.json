@@ -86,7 +86,8 @@
     "newTask": "Nieuwe taak",
     "open": "Open",
     "history": "Historie",
-    "openTask": "Taak openen"
+    "openTask": "Taak openen",
+    "searchPlaceholder": "Zoek taak…"
   },
   "details": {
     "stage": "Fase",

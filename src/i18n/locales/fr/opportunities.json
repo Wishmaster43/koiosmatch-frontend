@@ -156,6 +156,7 @@
     "newTask": "Nouvelle tâche",
     "open": "Ouvertes",
     "history": "Historique",
-    "openTask": "Ouvrir la tâche"
+    "openTask": "Ouvrir la tâche",
+    "searchPlaceholder": "Rechercher une tâche…"
   }
 }

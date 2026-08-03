@@ -319,7 +319,8 @@
       "empty": "Aún no hay tareas para este contacto",
       "loading": "Cargando tareas…",
       "error": "No se pudieron cargar las tareas",
-      "openTask": "Abrir tarea"
+      "openTask": "Abrir tarea",
+      "searchPlaceholder": "Buscar tarea…"
     },
     "openContact": "Abrir contacto",
     "backTo": "Volver a {{name}}",
@@ -630,7 +631,8 @@
     "empty": "Aún no hay tareas para este cliente",
     "loading": "Cargando tareas…",
     "error": "No se pudieron cargar las tareas",
-    "openTask": "Abrir tarea"
+    "openTask": "Abrir tarea",
+    "searchPlaceholder": "Buscar tarea…"
   },
   "matches": {
     "loadError": "No se pudieron cargar las coincidencias."

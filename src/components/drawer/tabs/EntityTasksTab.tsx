@@ -1,8 +1,12 @@
 /**
  * EntityTasksTab — the ONE "Taken" tab body for every drawer that shows the tasks
- * linked to one record (contact, opportunity, customer, …). Open/Historie chips,
- * the house "+ Nieuwe taak" trigger, all four UI states, and rows that click
- * through to the task itself.
+ * linked to one record (contact, opportunity, customer, …). Open/Historie switch
+ * (the shared QuickViewToggle, §4), the house "+ Nieuwe taak" trigger, all four
+ * UI states, and rows that click through to the task itself.
+ *
+ * The status chip's colour respects `customer_task_table_color_status` (Settings →
+ * Klanten → Weergave → Taken) when this tab renders inside the customer drawer —
+ * see the `colorStatus` comment below for why it is scoped to that one linkType.
  *
  * Promoted out of pages/opportunities/drawer/TasksTab.tsx (§3A/§11 — a second copy
  * was about to be written for the contact drawer). Data comes from the generic
@@ -15,17 +19,21 @@
  * t() at the call site — nothing is hardcoded here.
  */
 import { useState } from 'react'
-import { ListChecks, AlertTriangle } from 'lucide-react'
+import { ListChecks, AlertTriangle, Search } from 'lucide-react'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import AddTaskModal from '@/pages/tasks/AddTaskModal'
 import { TaskLookupsProvider } from '@/context/TaskLookupsContext'
 import { useNavigation } from '@/context/NavigationContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useEntityTasks } from '@/hooks/useEntityTasks'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import type { Id } from '@/types/common'
 
 export interface EntityTasksLabels {
   newTask: string
+  /** Placeholder for the toolbar search input (mirrors the Afdelingen toolbar). */
+  searchPlaceholder: string
   open: string
   history: string
   empty: string
@@ -49,25 +57,35 @@ export default function EntityTasksTab({ linkType, id, labels, extraLinks = [] }
   const { items, loading, error, reload } = useEntityTasks(linkType, id)
   const [adding, setAdding] = useState(false)
   const [view, setView] = useState<'open' | 'history'>('open')
+  const [search, setSearch] = useState('')
 
-  const visible = items.filter(x => (view === 'open' ? !x.completed_at : !!x.completed_at))
+  // Search narrows on title + owner, client-side — same idiom as the panel searches.
+  const q = search.trim().toLowerCase()
+  const byView = items.filter(x => (view === 'open' ? !x.completed_at : !!x.completed_at))
+  const visible = q ? byView.filter(x => [x.title, x.owner_name].some(v => String(v ?? '').toLowerCase().includes(q))) : byView
 
-  // Open/Historie switch — the soft-tint convention (§4): inactive keeps its colour.
-  const chip = (key: 'open' | 'history', label: string) => (
-    <button key={key} type="button" onClick={() => setView(key)} aria-pressed={view === key}
-      style={{ padding: '2px 9px', fontSize: 10, fontWeight: view === key ? 600 : 500, borderRadius: 99, cursor: 'pointer',
-        color: 'var(--color-primary)',
-        border: `1px solid color-mix(in srgb, var(--color-primary) ${view === key ? 50 : 28}%, transparent)`,
-        background: `color-mix(in srgb, var(--color-primary) ${view === key ? 16 : 8}%, transparent)` }}>
-      {label}
-    </button>
-  )
+  // Status-chip colour toggle (CHIPKLEUR-INSTELBAAR-1 pattern, Settings → Klanten →
+  // Weergave → Taken). Only wired for the customer embedding today — this shared tab
+  // has no equivalent per-entity settings surface yet for its other callers (contact/
+  // opportunity drawers), so default true keeps every existing embedding's
+  // always-coloured look unchanged until a tenant explicitly turns it off here.
+  const settings = useAllSettings()
+  const colorStatus = linkType === 'customer' ? getBoolSetting(settings, 'customer_task_table_color_status', true) : true
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, marginBottom: 10 }}>
-        {chip('open', labels.open)}
-        {chip('history', labels.history)}
+      {/* Toolbar mirrors the Afdelingen tab (Danny 03-08: "afdelingen is juist"):
+          search left, the Open/Historie quick-view filter in the middle slot, add right.
+          The search markup copies DepartmentsPanel's verbatim (§11 debt noted there). */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, padding: '6px 10px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
+          <Search size={13} color="var(--text-muted)" />
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder={labels.searchPlaceholder} aria-label={labels.searchPlaceholder}
+            style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
+        </div>
+        <QuickViewToggle active={view === 'open'} onToggle={() => setView('open')} label={labels.open} size="compact" />
+        <QuickViewToggle active={view === 'history'} onToggle={() => setView('history')} label={labels.history} size="compact" />
         <DrawerAddButton onClick={() => setAdding(true)} label={labels.newTask} />
       </div>
 
@@ -107,11 +125,15 @@ export default function EntityTasksTab({ linkType, id, labels, extraLinks = [] }
                   )}
                 </div>
                 {statusLabel && (
-                  <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5, flexShrink: 0,
-                    background: `color-mix(in srgb, ${statusColor} 12%, transparent)`, color: statusColor,
-                    border: `1px solid color-mix(in srgb, ${statusColor} 40%, transparent)` }}>
-                    {statusLabel}
-                  </span>
+                  colorStatus ? (
+                    <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5, flexShrink: 0,
+                      background: `color-mix(in srgb, ${statusColor} 12%, transparent)`, color: statusColor,
+                      border: `1px solid color-mix(in srgb, ${statusColor} 40%, transparent)` }}>
+                      {statusLabel}
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text)', flexShrink: 0 }}>{statusLabel}</span>
+                  )
                 )}
               </button>
             )

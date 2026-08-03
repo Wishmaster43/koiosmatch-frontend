@@ -319,7 +319,8 @@
       "empty": "Nog geen taken voor deze contactpersoon",
       "loading": "Taken laden…",
       "error": "Taken konden niet worden geladen",
-      "openTask": "Open taak"
+      "openTask": "Open taak",
+      "searchPlaceholder": "Zoek taak…"
     },
     "openContact": "Open contactpersoon",
     "backTo": "Terug naar {{name}}",
@@ -630,7 +631,8 @@
     "empty": "Nog geen taken voor deze klant",
     "loading": "Taken laden…",
     "error": "Taken konden niet worden geladen",
-    "openTask": "Open taak"
+    "openTask": "Open taak",
+    "searchPlaceholder": "Zoek taak…"
   },
   "matches": {
     "loadError": "Matches konden niet worden geladen."

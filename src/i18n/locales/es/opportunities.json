@@ -156,6 +156,7 @@
     "newTask": "Nueva tarea",
     "open": "Abiertas",
     "history": "Historial",
-    "openTask": "Abrir tarea"
+    "openTask": "Abrir tarea",
+    "searchPlaceholder": "Buscar tarea…"
   }
 }

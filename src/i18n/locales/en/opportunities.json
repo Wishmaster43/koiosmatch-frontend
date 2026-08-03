@@ -86,7 +86,8 @@
     "newTask": "New task",
     "open": "Open",
     "history": "History",
-    "openTask": "Open task"
+    "openTask": "Open task",
+    "searchPlaceholder": "Search task…"
   },
   "details": {
     "stage": "Stage",

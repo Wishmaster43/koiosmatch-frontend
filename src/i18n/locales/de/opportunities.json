@@ -156,6 +156,7 @@
     "newTask": "Neue Aufgabe",
     "open": "Offen",
     "history": "Historie",
-    "openTask": "Aufgabe öffnen"
+    "openTask": "Aufgabe öffnen",
+    "searchPlaceholder": "Aufgabe suchen…"
   }
 }

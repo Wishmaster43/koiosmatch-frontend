@@ -319,7 +319,8 @@
       "empty": "Aucune tâche pour ce contact",
       "loading": "Chargement des tâches…",
       "error": "Impossible de charger les tâches",
-      "openTask": "Ouvrir la tâche"
+      "openTask": "Ouvrir la tâche",
+      "searchPlaceholder": "Rechercher une tâche…"
     },
     "openContact": "Ouvrir le contact",
     "backTo": "Retour à {{name}}",
@@ -630,7 +631,8 @@
     "empty": "Aucune tâche pour ce client",
     "loading": "Chargement des tâches…",
     "error": "Impossible de charger les tâches",
-    "openTask": "Ouvrir la tâche"
+    "openTask": "Ouvrir la tâche",
+    "searchPlaceholder": "Rechercher une tâche…"
   },
   "matches": {
     "loadError": "Impossible de charger les matchs."
