@@ -32,12 +32,12 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
 import { useProvinces } from '@/hooks/useProvinces'
 import { notifyError } from '@/lib/notify'
-import { contactOptionLabel } from '@/lib/contactLabel'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox, row2, row3Even, row } from '@/components/ui/modalCards'
 import SubEntityImportCard from './SubEntityImportCard'
+import ContactOnSiteCard from './locationmodal/ContactOnSiteCard'
 import { useImportWizard } from '@/pages/settings/sections/importeren/useImportWizard'
 import { setLocationPrimaryContact } from './hooks/useCustomerContacts'
 import type { LocationPayload } from './hooks/useCustomerLocations'
@@ -268,13 +268,6 @@ export default function AddLocationModal({
   }
 
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
-  // CONTACT-PRIMAIR-LOCATIE-1: existing-contact options for the "contact ter plaatse"
-  // picker, CREATE only — typing a name that matches none of these is still allowed
-  // (allowCreate), it just cannot be coupled (no real contact id exists for it yet).
-  // CONTACT-LABEL-1 (Danny 02-08): "naam — functie" via the one shared label builder
-  // (mirrors RelationsSection/AddOpportunityModal/KlantTab/useCascadePickers) — never
-  // a bare name, so two "Joost"s at the same customer read apart in the list.
-  const contactOptions = existingContacts.map(c => ({ value: String(c.id), label: contactOptionLabel(c) }))
 
   return (
     <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
@@ -373,48 +366,19 @@ export default function AddLocationModal({
             </div>
           </div>
 
-          {/* Contact ter plaatse. */}
-          <div>
-            <div style={cardHead}>{t('subModal.groups.contact')}</div>
-            <div style={cardBox}>
-              {/* CONTACT-PRIMAIR-LOCATIE-1/2 (Danny: "je typt Joost de Boer in en Joost
-                  weet er niets van"): CREATE offers a real choice — pick one of this
-                  customer's existing contacts, OR type a brand-new name — both now end
-                  in a real coupling, made primary-for-this-site once the location exists
-                  (see submit()): picking an existing one couples it directly; typing a
-                  new one creates the missing contact record first, then couples it.
-                  EDIT keeps the plain text field — the real per-site primary contact is
-                  already properly editable from LocationDetail's own SectionCard, so
-                  duplicating that mechanism here would be a second, conflicting UI for
-                  the same fact. `email`/`phone` stay untouched free-text columns on the
-                  LOCATION in both modes (see this file's report for why they stay) —
-                  they also ride along into the new contact record on the typed-new path. */}
-              {isEdit ? (
-                <Field label={t('subModal.contactName')}><TextField value={form.contactName} onChange={v => set('contactName', v)} /></Field>
-              ) : (
-                <div>
-                  <Field label={t('subModal.contactName')}>
-                    {/* Controlled on the ID when a real contact is picked (so the trigger's
-                        OWN label lookup resolves the name, and reopening the list still
-                        shows the checkmark on it) — falls back to the raw typed text once
-                        pickedContactId is null (a brand-new name, no option to match). */}
-                    <CreatableSelect value={pickedContactId ? String(pickedContactId) : (form.contactName || null)}
-                      onChange={v => {
-                        const existingMatch = existingContacts.find(c => String(c.id) === v)
-                        setPickedContactId(existingMatch ? (existingMatch.id as Id) : null)
-                        set('contactName', existingMatch ? existingMatch.name : v)
-                      }}
-                      placeholder={t('subModal.contactName')} options={contactOptions} menuWidth={280} style={pickerStyle} />
-                  </Field>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{t('subModal.contactPersonHint')}</div>
-                </div>
-              )}
-              <div style={row2}>
-                <Field label={t('subModal.email')}><TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder="naam@klant.nl" /></Field>
-                <Field label={t('subModal.phone')}><TextField value={form.phone} onChange={v => set('phone', v)} /></Field>
-              </div>
-            </div>
-          </div>
+          {/* Contact ter plaatse — extracted card (§0.3 split, 2026-08-03): the
+              existing-contact picker, new-contact fields and their local render
+              logic live in ContactOnSiteCard; only pickedContactId's OWNERSHIP
+              stays here (the post-create coupling call in submit() needs it). */}
+          <ContactOnSiteCard
+            isEdit={isEdit}
+            contactName={form.contactName} email={form.email} phone={form.phone}
+            onContactNameChange={v => set('contactName', v)}
+            onEmailChange={v => set('email', v)}
+            onPhoneChange={v => set('phone', v)}
+            pickedContactId={pickedContactId} onPickedContactChange={setPickedContactId}
+            existingContacts={existingContacts}
+          />
 
           {/* Omschrijving — its own card, same convention as AddDepartmentModal's
               (Danny 02-08: "bij locatie en afdeling moeten we ook een beschrijving

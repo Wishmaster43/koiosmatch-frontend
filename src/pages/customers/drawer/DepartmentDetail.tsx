@@ -37,17 +37,17 @@
  * below intentionally keeps `title=""`, unlike the location.
  */
 import { useState } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash2, Edit2, Save, X } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
-import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
-import TitleBadge from '@/components/drawer/TitleBadge'
-import CreatableSelect from '@/components/ui/CreatableSelect'
+// JOB-STATUS-1: name + reference chip + status badge/picker, now the shared
+// SubEntityStatusTitleRow (§0.3 split, LocationDetail.tsx 2026-08-03 — this file
+// carried a near-verbatim copy of the same block, adopted here in the same pass).
+import SubEntityStatusTitleRow from './SubEntityStatusTitleRow'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
 import ContactsPanel from './ContactsPanel'
@@ -173,17 +173,6 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   }
   const saveDescription = (html: string) => onSave(department.id as Id, { description: html })
 
-  // JOB-STATUS-1: the title-row status badge's own inline edit — pencil toggles to
-  // a searchable CreatableSelect + save/cancel (same in-place-edit convention as
-  // EditableFieldTable/EditableRichTextField, §3A), independent of the general
-  // fields' own save cycle since status now lives entirely in the title row.
-  const [editingStatus, setEditingStatus] = useState(false)
-  const [statusDraft, setStatusDraft] = useState('')
-  const startEditStatus = () => { setStatusDraft(department.statusId != null ? String(department.statusId) : ''); setEditingStatus(true) }
-  const saveStatus = () => { onSave(department.id as Id, { statusId: statusDraft || null }); setEditingStatus(false) }
-  const cancelStatus = () => setEditingStatus(false)
-  const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
-
   // SUBENTITEIT-DELETE-1: the confirmed delete awaits the hook's DeleteResult —
   // only close on a real success; a 409 race opens the counts dialog instead of
   // silently closing over a delete that never happened.
@@ -217,36 +206,12 @@ export default function DepartmentDetail({ department, locations, statuses, cont
       {/* One way back per level (see LocationDetail for why this replaced the old button). */}
       <DrillBreadcrumb trail={trail} current={department.name} />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{department.name}</div>
-          {/* NUMMER-1: the human-readable reference number chip, same spot every entity shows it. */}
-          <ReferenceNumberChip value={department.referenceNumber} />
-          {editingStatus ? (
-            // Inline picker in the title row (JOB-STATUS-1, mirrors LocationDetail) —
-            // searchable, pick-only (allowCreate off, same as every tenant-lookup select).
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 170 }}>
-                <CreatableSelect value={statusDraft} onChange={setStatusDraft} options={statusOptions}
-                  placeholder={t('locations.detail.status')} allowCreate={false} menuWidth={180} />
-              </div>
-              <button onClick={saveStatus} title={t('common:save')} aria-label={t('common:save')}
-                // No --color-primary-contrast token exists yet (tracked for a later
-                // sweep); the fallback keeps this identical to the shared
-                // EditableFieldTable's own Save button today.
-                style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-primary-contrast, #fff)', border: 'none' }}><Save size={13} /></button>
-              <button onClick={cancelStatus} title={t('common:cancel')} aria-label={t('common:cancel')}
-                style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
-            </div>
-          ) : (
-            <>
-              {/* Status = colour-coded read-only badge next to the title (§3A(c)), not a
-                  select row in the field table — the pencil reopens the picker above. */}
-              <TitleBadge label={department.statusLabel} color={department.statusColor} />
-              <button onClick={startEditStatus} title={t('locations.detail.changeStatus')} aria-label={t('locations.detail.changeStatus')}
-                style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
-            </>
-          )}
-        </div>
+        {/* JOB-STATUS-1: name + reference chip + status badge/picker — the shared
+            component this file's near-verbatim copy was folded into (§0.3 split,
+            2026-08-03, see SubEntityStatusTitleRow's own docblock). */}
+        <SubEntityStatusTitleRow id={department.id as Id} name={department.name} referenceNumber={department.referenceNumber}
+          statusId={department.statusId} statusLabel={department.statusLabel} statusColor={department.statusColor}
+          statusOptions={statusOptions} onSave={onSave} />
         {/* ONE right-aligned action cluster (Danny 03-08: "de bladerpijlen moeten rechts
             uitgelijnd zijn") — pager + delete as a single flex child, otherwise the row's
             space-between parks the arrows in the middle of the title row. */}

@@ -14,23 +14,21 @@
  * the top-level tabs). Delete asks for confirmation and returns to the list.
  */
 import { useState } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash2, Edit2, Save, X } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SectionCard from '@/components/ui/SectionCard'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
-import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import { getCountryOptions } from '@/lib/countries'
 import { useProvinces } from '@/hooks/useProvinces'
 import { kvkValue, vatValue } from '@/components/drawer/contactLinks'
 // JOB-STATUS-1 (Danny 28-07: "Status van locatie moet hier!!") — the read-only
-// title-row badge (§3A(c)) + the searchable picker reused for its inline edit.
-import TitleBadge from '@/components/drawer/TitleBadge'
-import CreatableSelect from '@/components/ui/CreatableSelect'
+// title-row badge (§3A(c)) + its own inline picker, extracted into a shared
+// component (§0.3 split, 2026-08-03 — see that file's own docblock).
+import SubEntityStatusTitleRow from './SubEntityStatusTitleRow'
 import DrillPager, { type DrillPagerProps } from '@/components/drawer/DrillPager'
 import { useConfirm } from '@/hooks/useConfirm'
 import EditableRichTextField from './EditableRichTextField'
@@ -219,17 +217,6 @@ export default function LocationDetail({
   // RichTextEditor + SafeHtml) — a bare textarea is not the house pattern for prose.
   const saveDescription = (html: string) => onSave(l.id as Id, { description: html })
 
-  // JOB-STATUS-1: the title-row status badge's own inline edit — pencil toggles to
-  // a searchable CreatableSelect + save/cancel (same in-place-edit convention as
-  // EditableFieldTable/EditableRichTextField, §3A), independent of the general
-  // fields' own save cycle since status now lives entirely in the title row.
-  const [editingStatus, setEditingStatus] = useState(false)
-  const [statusDraft, setStatusDraft] = useState('')
-  const startEditStatus = () => { setStatusDraft(l.statusId != null ? String(l.statusId) : ''); setEditingStatus(true) }
-  const saveStatus = () => { onSave(l.id as Id, { statusId: statusDraft || null }); setEditingStatus(false) }
-  const cancelStatus = () => setEditingStatus(false)
-  const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
-
   // A contact opened from this location's own list takes over the whole body: it brings
   // its own breadcrumb (Locaties › deze vestiging › de persoon), so showing the location's
   // title, sub-tab bar and delete button underneath would mean two titles and two delete
@@ -264,32 +251,12 @@ export default function LocationDetail({
       {/* One way back per level: the shared trail replaces SubEntityTab's own button. */}
       <DrillBreadcrumb trail={[{ label: backLabel ?? '', onClick: close }]} current={l.name} />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{l.name}</div>
-          <ReferenceNumberChip value={l.referenceNumber} />
-          {editingStatus ? (
-            // Inline picker in the title row (Danny 28-07: "Status van locatie moet hier!!")
-            // — searchable, pick-only (allowCreate off, same as every tenant-lookup select).
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 170 }}>
-                <CreatableSelect value={statusDraft} onChange={setStatusDraft} options={statusOptions}
-                  placeholder={t('locations.detail.status')} allowCreate={false} menuWidth={180} />
-              </div>
-              <button onClick={saveStatus} title={t('common:save')} aria-label={t('common:save')}
-                style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
-              <button onClick={cancelStatus} title={t('common:cancel')} aria-label={t('common:cancel')}
-                style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
-            </div>
-          ) : (
-            <>
-              {/* Status = colour-coded read-only badge next to the title (§3A(c)), not
-                  buried as a row in Algemeen — the pencil reopens the picker above. */}
-              <TitleBadge label={l.statusLabel} color={l.statusColor} />
-              <button onClick={startEditStatus} title={t('locations.detail.changeStatus')} aria-label={t('locations.detail.changeStatus')}
-                style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
-            </>
-          )}
-        </div>
+        {/* JOB-STATUS-1: name + reference chip + status badge/picker, extracted
+            into a shared component (§0.3 split, 2026-08-03 — also adopted by
+            DepartmentDetail, which carried a near-verbatim copy of this block). */}
+        <SubEntityStatusTitleRow id={l.id as Id} name={l.name} referenceNumber={l.referenceNumber}
+          statusId={l.statusId} statusLabel={l.statusLabel} statusColor={l.statusColor}
+          statusOptions={statusOptions} onSave={onSave} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
           {/* Prev/next through the list this location was opened from (DRILL-PAGER-1) —
               before the delete action, same corner as every other detail pager. */}
