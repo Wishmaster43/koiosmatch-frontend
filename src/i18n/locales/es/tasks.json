@@ -127,6 +127,7 @@
     "cardTask": "Tarea",
     "cardPlanning": "Planificación",
     "cardLink": "Vínculo",
+    "cardAssignment": "Asignación",
     "duePlaceholder": "dd-mm-aaaa"
   },
   "bulk": {

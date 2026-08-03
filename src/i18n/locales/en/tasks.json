@@ -141,6 +141,7 @@
     "cardTask": "Task",
     "cardPlanning": "Planning",
     "cardLink": "Link",
+    "cardAssignment": "Assignment",
     "duePlaceholder": "dd-mm-yyyy"
   },
   "page": {

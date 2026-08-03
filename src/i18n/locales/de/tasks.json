@@ -127,6 +127,7 @@
     "cardTask": "Aufgabe",
     "cardPlanning": "Planung",
     "cardLink": "Verknüpfung",
+    "cardAssignment": "Zuweisung",
     "duePlaceholder": "TT-MM-JJJJ"
   },
   "bulk": {

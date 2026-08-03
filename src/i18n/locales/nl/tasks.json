@@ -141,6 +141,7 @@
     "cardTask": "Taak",
     "cardPlanning": "Planning",
     "cardLink": "Koppeling",
+    "cardAssignment": "Toewijzing",
     "duePlaceholder": "dd-mm-jjjj"
   },
   "page": {
