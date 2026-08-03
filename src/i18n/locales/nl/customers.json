@@ -229,6 +229,7 @@
       "primaryContactTitle": "Primaire contactpersoon",
       "noPrimaryContact": "Nog geen primaire contactpersoon voor deze locatie",
       "pickPrimaryContact": "Kies een primaire contactpersoon",
+      "linkNamed": "Koppel {{name}}",
       "description": "Locatietekst",
       "contactNotLinked": "Alleen tekst — nog niet gekoppeld aan een contactpersoon"
     },

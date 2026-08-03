@@ -229,6 +229,7 @@
       "primaryContactTitle": "Contact principal",
       "noPrimaryContact": "Pas encore de contact principal pour ce site",
       "pickPrimaryContact": "Choisir un contact principal",
+      "linkNamed": "Lier {{name}}",
       "description": "Texte du site",
       "contactNotLinked": "Texte seul — pas encore lié à un contact"
     },

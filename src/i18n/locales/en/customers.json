@@ -229,6 +229,7 @@
       "primaryContactTitle": "Primary contact",
       "noPrimaryContact": "No primary contact for this location yet",
       "pickPrimaryContact": "Choose a primary contact",
+      "linkNamed": "Link {{name}}",
       "description": "Location text",
       "contactNotLinked": "Text only — not yet linked to a contact person"
     },

@@ -10,11 +10,13 @@
  * assertions through the ACTIVE locale's own copy instead of guessing/hardcoding
  * a language.
  */
+import { useState, useEffect } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import LocationDetail from './LocationDetail'
+import { CONTACTS_CHANGED_EVENT } from '../hooks/useCustomerContacts'
 import type { Contact, Location } from '@/types/customer'
 import type { LookupOption } from '@/types/common'
 
@@ -31,6 +33,10 @@ vi.mock('@/lib/useCustomFields', () => ({
 // named helpers stay real. GeocodeButton hides itself without the permission, so useAuth
 // is stubbed to grant it; hasModule stays false, exactly like the unprovided context did.
 const mockPost = vi.fn()
+// ONE-CLICK-COUPLE-1: `put` backs the real (unmocked) setLocationPrimaryContact —
+// the new tests exercise the ACTUAL hook function, not a re-mock of it, so the
+// event it dispatches on a real success is the real CONTACTS_CHANGED_EVENT too.
+const mockPut = vi.fn()
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
   return {
@@ -38,6 +44,7 @@ vi.mock('@/lib/api', async () => {
     default: {
       get: vi.fn().mockResolvedValue({ data: [] }),
       post: (...args: unknown[]) => mockPost(...args),
+      put: (...args: unknown[]) => mockPut(...args),
       patch: vi.fn(), delete: vi.fn(),
     },
   }
@@ -309,6 +316,80 @@ describe('LocationDetail · one contact block, one truth (round two)', () => {
     // — none of the three belongs to the on-site contact block any more.
     expect(screen.getAllByRole('button', { name: cm('edit') })).toHaveLength(3)
     expect(onSave).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * ONE-CLICK-COUPLE-1 (Danny: "Die txt staat er nog steeds — is dat van primair contact
+ * niet opgelost?") — in almost every real case the typed legacy text already exactly
+ * matches an existing contact of this customer, so forcing a manual search on
+ * Contactpersonen is a puzzle the screen created itself. Email is the ONLY match key
+ * (never the name — that guess is exactly what round one of this section replaced, see
+ * the docblock above): a unique email hit renders a one-click "Koppel {{name}}" button
+ * that calls the SAME route the star action uses (setLocationPrimaryContact); zero or
+ * more than one hit falls back to today's unchanged generic CTA.
+ *
+ * These tests exercise the REAL (unmocked) setLocationPrimaryContact, only stubbing the
+ * underlying `api.put` — so a successful click fires the REAL CONTACTS_CHANGED_EVENT,
+ * proving the section can flip into its coupled state off that real event and not just
+ * off a locally re-mocked prop.
+ */
+describe('LocationDetail · one-click couple on a unique email match (ONE-CLICK-COUPLE-1)', () => {
+  it('renders the named button on a unique email match and calls setLocationPrimaryContact with the right ids', async () => {
+    const user = userEvent.setup()
+    mockPut.mockResolvedValue({ data: { data: { id: 'con-1', locations: [{ id: 'loc-1', name: 'Hoofdlocatie', is_primary: true }] } } })
+    render(<LocationDetail location={location({ contactName: 'Joost de Boer', email: 'joost@klant.test' })} onSave={vi.fn()} {...baseProps}
+      contacts={[contactFixture()]} />)
+
+    const btn = screen.getByRole('button', { name: ct('locations.detail.linkNamed', { name: 'Joost de Boer' }) })
+    await user.click(btn)
+
+    // Proves the exact ids (customer/contact/location) travelled through, not just that
+    // SOME callback fired (§13) — this is the same PUT route the star action's own test asserts.
+    expect(mockPut).toHaveBeenCalledWith('/customers/cust-1/contacts/con-1/locations/loc-1/primary')
+  })
+
+  it('offers only the generic CTA when the typed email matches no contact', () => {
+    render(<LocationDetail location={location({ contactName: 'Joost de Boer', email: 'unknown@example.test' })} onSave={vi.fn()} {...baseProps}
+      contacts={[contactFixture()]} />)
+
+    expect(screen.queryByRole('button', { name: ct('locations.detail.linkNamed', { name: 'Joost de Boer' }) })).toBeNull()
+    expect(screen.getByRole('button', { name: ct('locations.detail.pickPrimaryContact') })).toBeInTheDocument()
+  })
+
+  it('offers only the generic CTA when the typed email matches more than one contact — a wrong auto-couple is worse than the friction', () => {
+    render(<LocationDetail location={location({ contactName: 'Joost de Boer', email: 'joost@klant.test' })} onSave={vi.fn()} {...baseProps}
+      contacts={[contactFixture(), contactFixture({ id: 'con-2', name: 'Jan Jansen' })]} />)
+
+    expect(screen.queryByRole('button', { name: ct('locations.detail.linkNamed', { name: 'Joost de Boer' }) })).toBeNull()
+    expect(screen.getByRole('button', { name: ct('locations.detail.pickPrimaryContact') })).toBeInTheDocument()
+  })
+
+  it('flips into the coupled state after a successful one-click couple — no manual reload needed', async () => {
+    const user = userEvent.setup()
+    mockPut.mockResolvedValue({ data: { data: { id: 'con-1', locations: [{ id: 'loc-1', name: 'Hoofdlocatie', is_primary: true }] } } })
+
+    // A tiny stand-in for CustomerDrawer/useCustomerContacts: it owns the `contacts` array
+    // and reacts to CONTACTS_CHANGED_EVENT the same way that hook does, so the flip below
+    // is proven off the REAL event the real setLocationPrimaryContact dispatches.
+    function Harness() {
+      const [contacts, setContacts] = useState<Contact[]>([contactFixture()])
+      useEffect(() => {
+        const onChanged = () => setContacts([primaryAt(['loc-1'])])
+        window.addEventListener(CONTACTS_CHANGED_EVENT, onChanged)
+        return () => window.removeEventListener(CONTACTS_CHANGED_EVENT, onChanged)
+      }, [])
+      return <LocationDetail location={location({ contactName: 'Joost de Boer', email: 'joost@klant.test' })} onSave={vi.fn()} {...baseProps} contacts={contacts} />
+    }
+    render(<Harness />)
+
+    expect(screen.getByText(ct('locations.detail.contactNotLinked'))).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: ct('locations.detail.linkNamed', { name: 'Joost de Boer' }) }))
+
+    // The coupled branch renders (real link + email row), and the legacy warning is gone —
+    // all from props updated by the real event, never a manual re-render/reload.
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Joost de Boer' })).toBeInTheDocument())
+    expect(screen.queryByText(ct('locations.detail.contactNotLinked'))).not.toBeInTheDocument()
   })
 })
 

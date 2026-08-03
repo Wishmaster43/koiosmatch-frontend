@@ -316,7 +316,10 @@ export default function LocationDetail({
             primaryContact={primaryContact}
             legacyName={l.contactName ?? ''} legacyEmail={l.email ?? ''} legacyPhone={l.phone ?? ''}
             onOpenContact={id => { setSubTab('contacts'); setOpenContactId(id) }}
-            onPickContact={() => setSubTab('contacts')} />
+            onPickContact={() => setSubTab('contacts')}
+            // ONE-CLICK-COUPLE-1: the customer's full contact list (already available here)
+            // plus the ids the section needs to write the coupling itself.
+            contacts={contacts} customerId={customerId} locationId={l.id as Id} />
 
           {/* LOCATIE-OMSCHRIJVING-1 (Danny 02-08, order overruled same day): mirrors the
               Bedrijf tab exactly — OverviewTab puts its own description directly under
