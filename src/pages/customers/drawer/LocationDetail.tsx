@@ -51,14 +51,13 @@ import ScopedMatchesTab from './ScopedMatchesTab'
 // SOLLICITATIES-SCOPE-1 (Danny asked 3x at customer level, then again here): the
 // location's own Sollicitaties sub-tab — reuses the shared CustomerApplicationsList
 // (its `vacancyIds` mode) fed by this location's OWN vacancy ids.
-import CustomerApplicationsList from './CustomerApplicationsList'
 // SUBENTITEIT-DELETE-1: the honest disabled-trash + 409-race counts dialog.
 import InUseCountsDialog from './InUseCountsDialog'
 import type { Contact, Department, Location } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { LocationPayload } from '../hooks/useCustomerLocations'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
-import { useScopedVacancyIds } from '../hooks/useCustomerDrawerData'
+import ScopedSollicitatiesTab from './ScopedSollicitatiesTab'
 import { isPrimaryForLocation } from '../hooks/useCustomerContacts'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 import type { DeleteResult } from '../hooks/subEntityDelete'
@@ -391,7 +390,7 @@ export default function LocationDetail({
           resolution) — mounting it only here, not unconditionally in this component,
           keeps useScopedVacancyIds' react-query call out of every OTHER sub-tab/caller
           that never opens this one (no QueryClientProvider needed for those). */}
-      {subTab === 'applications' && <LocationSollicitatiesTab locationId={l.id as Id} />}
+      {subTab === 'applications' && <ScopedSollicitatiesTab scope="location" id={l.id as Id} />}
       {subTab === 'matches' && <ScopedMatchesTab scope="location" id={l.id as Id} customerId={customerId} />}
 
       {subTab === 'extra' && (
@@ -428,18 +427,3 @@ export default function LocationDetail({
   )
 }
 
-/**
- * LocationSollicitatiesTab — step 1 of the Sollicitaties chain (SOLLICITATIES-SCOPE-1),
- * split into its OWN component so useScopedVacancyIds (a real react-query hook) only
- * mounts once this sub-tab is actually opened: LocationDetail itself never calls a
- * react-query hook unconditionally, so every caller/test that renders it without
- * opening THIS sub-tab needs no QueryClientProvider — unaffected by this feature.
- * Resolves this location's own vacancy ids through the SAME scoped query
- * ScopedVacanciesTab uses (an already-opened Vacatures tab answers from cache), then
- * hands them — plus this step's own loading/error — to CustomerApplicationsList,
- * which owns step 2 (fetch by vacancy_id[]) and folds both into one coherent state.
- */
-function LocationSollicitatiesTab({ locationId }: { locationId: Id }) {
-  const { vacancyIds, loading, error } = useScopedVacancyIds('location', locationId)
-  return <CustomerApplicationsList vacancyIds={vacancyIds} vacancyIdsLoading={loading} vacancyIdsError={error} />
-}

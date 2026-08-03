@@ -63,7 +63,6 @@ import ScopedMatchesTab from './ScopedMatchesTab'
 // SOLLICITATIES-SCOPE-1 (Danny asked 3x at customer level, then again here): the
 // department's own Sollicitaties sub-tab — reuses the shared CustomerApplicationsList
 // (its `vacancyIds` mode) fed by this department's OWN vacancy ids.
-import CustomerApplicationsList from './CustomerApplicationsList'
 // TAKEN-OP-AFDELING-1: TaskLinkResolver already knows 'department' (task_links),
 // so this is one more <EntityTasksTab linkType="…"> line, never a new component.
 import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
@@ -71,7 +70,7 @@ import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import InUseCountsDialog from './InUseCountsDialog'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useConfirm } from '@/hooks/useConfirm'
-import { useScopedVacancyIds } from '../hooks/useCustomerDrawerData'
+import ScopedSollicitatiesTab from './ScopedSollicitatiesTab'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
@@ -294,7 +293,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           resolution) — mounting it only here, not unconditionally in this component,
           keeps useScopedVacancyIds' react-query call out of every OTHER sub-tab/caller
           that never opens this one (no QueryClientProvider needed for those). */}
-      {subTab === 'applications' && <DepartmentSollicitatiesTab departmentId={department.id as Id} />}
+      {subTab === 'applications' && <ScopedSollicitatiesTab scope="department" id={department.id as Id} />}
       {subTab === 'matches' && <ScopedMatchesTab scope="department" id={department.id as Id} customerId={customerId} />}
       {/* TAKEN-OP-AFDELING-1: own scoped label block (mirrors contacts.tasks.*) —
           the shared tab's CURRENT labels interface (newTask/searchPlaceholder/empty/
@@ -336,19 +335,3 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   )
 }
 
-/**
- * DepartmentSollicitatiesTab — step 1 of the Sollicitaties chain (SOLLICITATIES-SCOPE-1),
- * split into its OWN component (mirrors LocationDetail's LocationSollicitatiesTab) so
- * useScopedVacancyIds (a real react-query hook) only mounts once this sub-tab is
- * actually opened: DepartmentDetail itself never calls a react-query hook
- * unconditionally, so every caller/test that renders it without opening THIS sub-tab
- * needs no QueryClientProvider — unaffected by this feature.
- * Resolves this department's own vacancy ids through the SAME scoped query
- * ScopedVacanciesTab uses (an already-opened Vacatures tab answers from cache), then
- * hands them — plus this step's own loading/error — to CustomerApplicationsList,
- * which owns step 2 (fetch by vacancy_id[]) and folds both into one coherent state.
- */
-function DepartmentSollicitatiesTab({ departmentId }: { departmentId: Id }) {
-  const { vacancyIds, loading, error } = useScopedVacancyIds('department', departmentId)
-  return <CustomerApplicationsList vacancyIds={vacancyIds} vacancyIdsLoading={loading} vacancyIdsError={error} />
-}
