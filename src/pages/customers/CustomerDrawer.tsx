@@ -18,6 +18,7 @@ import PdokCard from '@/components/drawer/PdokCard'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import { useAuth } from '@/context/AuthContext'
+import { useAllSettings } from '@/lib/settings/useAllSettings'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
@@ -119,6 +120,10 @@ export default function CustomerDrawer({
   const { fields: customFieldDefs } = useCustomFields('customer')
   // KLANT-FASE-1: the lifecycle-phase lookup behind the header badge (session-cached).
   const { phases, phaseMeta } = useCustomerPhases()
+  // CUSTOMER-DEFAULT-STATUS-1: the tenant settings blob, read the same way
+  // useCandidateStatus.ts reads its own (mirrors DEFAULT-STATUS-1) — used by
+  // doConvertPhase below to apply the configured default status on convert.
+  const allSettings = useAllSettings()
   // Fallback note-author avatar = the signed-in user (mirrors the candidate tab);
   // note-type lookups now live inside CustomerNotesTab itself.
   const authorInitials = initialsOf(auth?.user?.name ?? '')
@@ -217,9 +222,23 @@ export default function CustomerDrawer({
   // into an unknown phase is worse than none).
   const targetPhase = phases.find(p => p.isCustomer)
   const isEntryPhase = !!entryPhaseValue && currentPhase === entryPhaseValue
+  // CUSTOMER-DEFAULT-STATUS-1 (Danny 2026-08-03): mirrors the candidate convert
+  // (DEFAULT-STATUS-1, useCandidateStatus.ts) — a Prospect converting to Klant
+  // gets the tenant's configured default status in the SAME patch as the phase,
+  // but ONLY when the customer has no status yet. Unlike the candidate axis, an
+  // absent setting (or one pointing at a since-deleted status) leaves the status
+  // untouched — 'none' is the honest default here (today's behaviour), never a
+  // guessed real value; the customer status lookup also carries none of the
+  // candidate's requires_match/is_blacklist flags, so no extra guard is needed.
   const doConvertPhase = () => {
     if (!targetPhase || !c) return
-    setPhase(targetPhase.value); onUpdate?.(c.id, { phase: targetPhase.value })
+    const patch: Record<string, unknown> = { phase: targetPhase.value }
+    const defRaw = (allSettings as Record<string, unknown> | null)?.['customer_default_status_on_convert']
+    const def = typeof defRaw === 'string' ? defRaw : 'none'
+    const wantsDefault = !(status ?? c.status) && def !== 'none' && statuses.some(s => s.value === def)
+    if (wantsDefault) { setStatus(def); patch.status = def }
+    setPhase(targetPhase.value)
+    onUpdate?.(c.id, patch)
   }
 
   // Owner (account manager) picker — a fallback entry ONLY when the current

@@ -202,7 +202,8 @@
     "vacancy_generation": "Stellenanzeigen-Generierung",
     "org_policy": "Organisationsrichtlinien",
     "career_site": "Karriereseite",
-    "cao": "Tarifverträge"
+    "cao": "Tarifverträge",
+    "customer_conversion": "Konvertierung"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -2524,5 +2525,11 @@
     },
     "phaseHint": "Dies wird beim Anlegen und bei einem echten Phasenwechsel geprüft. Eine normale Bearbeitung, die die Phase nicht ändert, wird nie blockiert — unabhängig davon, welche anderen Felder noch fehlen.",
     "flatHint": "Dies wird beim Anlegen vollständig geprüft. Beim Bearbeiten werden nur die Felder geprüft, die die Änderung selbst betrifft — ein bereits unvollständiger Datensatz bleibt bei den anderen Feldern frei bearbeitbar."
+  },
+  "customerConversion": {
+    "title": "Standardstatus nach Konvertierung",
+    "subtitle": "Der Status, den ein Kunde direkt nach der Konvertierung von Interessent zu Kunde erhält. Ohne Einstellung bleibt der Status leer — wählen Sie einen Status, um ihn automatisch anzuwenden.",
+    "none": "Keine (manuell setzen)",
+    "saveFailed": "Speichern fehlgeschlagen"
   }
 }

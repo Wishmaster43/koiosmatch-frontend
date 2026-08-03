@@ -202,7 +202,8 @@
     "vacancy_generation": "Vacaturegeneratie",
     "org_policy": "Organisatiebeleid",
     "career_site": "Carrière-site",
-    "cao": "CAO's"
+    "cao": "CAO's",
+    "customer_conversion": "Conversie"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -2524,5 +2525,11 @@
     },
     "phaseHint": "Dit wordt gecontroleerd bij het aanmaken en bij een echte fase-overgang. Een gewone wijziging die de fase niet aanpast, wordt nooit geblokkeerd — ongeacht welke andere velden nog ontbreken.",
     "flatHint": "Dit wordt volledig gecontroleerd bij het aanmaken. Bij bewerken wordt alleen gekeken naar de velden die de wijziging zelf aanraakt — een al onvolledig record blijft op de andere velden gewoon bewerkbaar."
+  },
+  "customerConversion": {
+    "title": "Standaardstatus na conversie",
+    "subtitle": "De status die een klant direct krijgt na conversie van Prospect naar Klant. Een ontbrekende instelling laat de status leeg — kies een status om die automatisch toe te passen.",
+    "none": "Geen (handmatig instellen)",
+    "saveFailed": "Opslaan mislukt"
   }
 }

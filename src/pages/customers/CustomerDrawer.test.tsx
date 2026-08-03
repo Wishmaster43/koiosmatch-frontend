@@ -48,6 +48,11 @@ vi.mock('@/lib/useCustomerPhases', () => ({
   useCustomerPhases: () => mockUseCustomerPhases(),
 }))
 /* eslint-enable no-restricted-syntax */
+// CUSTOMER-DEFAULT-STATUS-1: the tenant settings blob doConvertPhase reads for
+// its default-status-on-convert key. Defaults to {} (no setting configured) so
+// existing tests below are unaffected; individual tests override per case.
+const mockUseAllSettings = vi.fn((): Record<string, unknown> => ({}))
+vi.mock('@/lib/settings/useAllSettings', () => ({ useAllSettings: () => mockUseAllSettings() }))
 // Session + tenant plumbing the shell reads; no module/permission is needed by
 // default. Wrapped in vi.fn() (mirrors mockUseCustomerPhases below) so the
 // DELETE-ICON-1 tests can override hasPermission per case. Explicit return type
@@ -148,6 +153,50 @@ describe('CustomerDrawer · convert-to-customer button (KLANT-FASE-CONVERT-1)', 
     // (a convert button is the only header action that would ever render one).
     expect(screen.getByTitle(ct('drawer.edit'))).toBeInTheDocument()
     expect(screen.queryAllByRole('button').some(b => b.textContent?.includes('Interesse'))).toBe(false)
+  })
+})
+
+// CUSTOMER-DEFAULT-STATUS-1: mirrors useCandidateStatus.test.ts's DEFAULT-STATUS-1
+// coverage — convert must apply the tenant's configured default status in the SAME
+// patch as the phase, but only onto a customer with no status yet, and an absent
+// setting must leave today's phase-only behaviour untouched.
+describe('CustomerDrawer · convert default status (CUSTOMER-DEFAULT-STATUS-1)', () => {
+  const withStatuses = [{ value: 'active', label: 'Actief' }, { value: 'inactive', label: 'Inactief' }]
+
+  it('convert WITH a configured default and no current status → PATCH carries phase + status', async () => {
+    mockUseAllSettings.mockReturnValueOnce({ customer_default_status_on_convert: 'inactive' })
+    const onUpdate = vi.fn()
+    const user = userEvent.setup()
+    const entryCustomer = { ...customer, phase: 'interesse', status: null } as unknown as Customer
+    render(<CustomerDrawer customer={entryCustomer} onClose={() => {}} statuses={withStatuses} onUpdate={onUpdate} />)
+
+    await user.click(screen.getByRole('button', { name: convertLabel('Vaste klant') }))
+
+    expect(onUpdate).toHaveBeenCalledWith(1, { phase: 'vaste_klant', status: 'inactive' })
+  })
+
+  it('convert with a status ALREADY set leaves the status untouched', async () => {
+    mockUseAllSettings.mockReturnValueOnce({ customer_default_status_on_convert: 'inactive' })
+    const onUpdate = vi.fn()
+    const user = userEvent.setup()
+    const entryCustomer = { ...customer, phase: 'interesse', status: 'active' } as Customer
+    render(<CustomerDrawer customer={entryCustomer} onClose={() => {}} statuses={withStatuses} onUpdate={onUpdate} />)
+
+    await user.click(screen.getByRole('button', { name: convertLabel('Vaste klant') }))
+
+    expect(onUpdate).toHaveBeenCalledWith(1, { phase: 'vaste_klant' })
+  })
+
+  it('convert with NO setting configured → PATCH carries only the phase (today\'s behaviour)', async () => {
+    mockUseAllSettings.mockReturnValueOnce({})
+    const onUpdate = vi.fn()
+    const user = userEvent.setup()
+    const entryCustomer = { ...customer, phase: 'interesse', status: null } as unknown as Customer
+    render(<CustomerDrawer customer={entryCustomer} onClose={() => {}} statuses={withStatuses} onUpdate={onUpdate} />)
+
+    await user.click(screen.getByRole('button', { name: convertLabel('Vaste klant') }))
+
+    expect(onUpdate).toHaveBeenCalledWith(1, { phase: 'vaste_klant' })
   })
 })
 

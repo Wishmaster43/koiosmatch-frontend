@@ -202,7 +202,8 @@
     "vacancy_generation": "Génération d'annonces",
     "org_policy": "Politique d'organisation",
     "career_site": "Site carrière",
-    "cao": "Conventions"
+    "cao": "Conventions",
+    "customer_conversion": "Conversion"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -2524,5 +2525,11 @@
     },
     "phaseHint": "Ceci est vérifié à la création et lors d'une véritable transition de phase. Une modification ordinaire qui ne change pas la phase n'est jamais bloquée — quels que soient les autres champs encore manquants.",
     "flatHint": "Ceci est entièrement vérifié à la création. Lors d'une modification, seuls les champs que la modification touche réellement sont vérifiés — un enregistrement déjà incomplet reste librement modifiable sur ses autres champs."
+  },
+  "customerConversion": {
+    "title": "Statut par défaut après conversion",
+    "subtitle": "Le statut attribué à un client juste après la conversion de Prospect en Client. Sans configuration, le statut reste vide — choisissez un statut pour l'appliquer automatiquement.",
+    "none": "Aucun (définir manuellement)",
+    "saveFailed": "Échec de l'enregistrement"
   }
 }

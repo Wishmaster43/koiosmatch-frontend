@@ -202,7 +202,8 @@
     "vacancy_generation": "Generación de vacantes",
     "org_policy": "Política de organización",
     "career_site": "Sitio de empleo",
-    "cao": "Convenios"
+    "cao": "Convenios",
+    "customer_conversion": "Conversión"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -2524,5 +2525,11 @@
     },
     "phaseHint": "Esto se comprueba al crear y en una transición de fase real. Una edición normal que no cambia la fase nunca se bloquea, sin importar qué otros campos falten todavía.",
     "flatHint": "Esto se comprueba por completo al crear. Al editar, solo se comprueban los campos que la propia modificación toca — un registro ya incompleto sigue siendo editable libremente en sus otros campos."
+  },
+  "customerConversion": {
+    "title": "Estado predeterminado tras la conversión",
+    "subtitle": "El estado que recibe un cliente justo después de convertir de Prospecto a Cliente. Sin configuración, el estado queda vacío — elija un estado para aplicarlo automáticamente.",
+    "none": "Ninguno (establecer manualmente)",
+    "saveFailed": "Error al guardar"
   }
 }

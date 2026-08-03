@@ -53,6 +53,7 @@ import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
 import VacancyCandidateTabSettings from './sections/VacancyCandidateTabSettings'
 import CustomerDisplaySettings from './sections/CustomerDisplaySettings'
 import CustomerRequiredFieldsSettings from './sections/customers/CustomerRequiredFieldsSettings'
+import { CustomerConversionSettings } from './sections/CustomerConversionSettings'
 import MatchTemplatesSettings from './sections/MatchTemplatesSettings'
 import MatchRatesSettings from './sections/MatchRatesSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
@@ -225,6 +226,9 @@ export const NAV_GROUPS = [
       // KLANT-VERPLICHT-1 (Danny 02-08): required fields per klant-fase + the three
       // sub-entities — same Flag icon as the candidate's own required-fields item.
       { id: 'customer_required_fields', icon: Flag, component: CustomerRequiredFieldsSettings },
+      // Conversion behaviour: default status after Prospect → Klant (mirrors the
+      // candidate's candidate_conversion, same UserCheck icon reads as "conversion").
+      { id: 'customer_conversion', icon: UserCheck, component: CustomerConversionSettings },
       // Tenant-wide default for the customer's vacancy-visibility flags (Danny 27-07) —
       // VacancySettingsTab (customer drawer) reads these same keys for comparison.
       { id: 'customer_vacancy_defaults', icon: EyeOff, schema: customerVacancyDefaults },

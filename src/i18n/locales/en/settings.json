@@ -202,7 +202,8 @@
     "vacancy_generation": "Vacancy generation",
     "org_policy": "Organisation policy",
     "career_site": "Career site",
-    "cao": "CLAs"
+    "cao": "CLAs",
+    "customer_conversion": "Conversion"
   },
   "kpis": {
     "title": "KPI settings",
@@ -2524,5 +2525,11 @@
     },
     "phaseHint": "This is checked on create and on a genuine phase transition. An ordinary edit that doesn't change the phase is never blocked — however incomplete the record already is on other fields.",
     "flatHint": "This is checked in full on create. On edit, only the fields the change itself touches are checked — an already-incomplete record stays freely editable on its other fields."
+  },
+  "customerConversion": {
+    "title": "Default status after conversion",
+    "subtitle": "The status a customer gets right after converting from Prospect to Customer. No setting configured leaves the status empty — pick a status to apply it automatically.",
+    "none": "None (set manually)",
+    "saveFailed": "Saving failed"
   }
 }
