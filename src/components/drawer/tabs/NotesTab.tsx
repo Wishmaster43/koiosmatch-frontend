@@ -2,11 +2,21 @@
  * NotesTab — generic communication tab: notes (with a rich-text composer) +
  * timeline + conversations. Entity-agnostic; data + labels via props so it works
  * for candidates, customers, vacancies, tasks alike.
+ *
+ * SEARCH (Danny 03-08: "bij notities wil ik ook een zoekbalk hebben") — added
+ * HERE, in the shared component, so every host (candidates, customers,
+ * opportunities, applications) gets it at once. Narrows on the note body TEXT
+ * (HTML stripped first — this is a rich-text field, a raw substring match would
+ * false-positive/negative on markup) and the author name, entirely client-side
+ * over the `notes` prop. NOT a server-side search: this component receives its
+ * host's already-loaded `notes` array as-is — if a host ever paginates that list
+ * server-side, this search only ever narrows what is ALREADY loaded, same as
+ * every other client-side list filter in this app.
  */
 import { useState } from 'react'
 import type { CSSProperties, ReactNode, ComponentType } from 'react'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
-import { Edit2, Save, X, Mail, PhoneCall, MessageCircle, Building2, Video, FileText, History } from 'lucide-react'
+import { Edit2, Save, X, Mail, PhoneCall, MessageCircle, Building2, Video, FileText, History, Search } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import SafeHtml from '@/components/ui/SafeHtml'
 import RichTextEditor from '@/components/ui/RichTextEditor'
@@ -14,6 +24,10 @@ import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
 import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
 import { SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
+
+// Strip tags for search matching only (display still goes through SafeHtml) —
+// a raw substring match against the stored HTML would miss/false-match on markup.
+const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ')
 
 interface NoteType { value: string; label: string; color?: string }
 interface NoteItem { type?: string; channel?: string; title?: string; author?: string; author_name?: string; created_by?: string | { name?: string }; updated_by?: string | { name?: string }; edited_by?: string; text?: string; body?: string; ago?: string; created_at?: string; updated_at?: string; [k: string]: unknown }
@@ -25,6 +39,10 @@ interface NotesLabels {
   notePlaceholder?: (typeLabel: string) => string
   // Tooltip/aria-label for the optional "edit status event" pencil (see onEditStatusEvent below).
   editStatusEvent?: string
+  // Placeholder/aria-label for the notes search box (optional — a host that omits
+  // it still gets a working, just unlabelled, search input; every current host
+  // supplies one via its own i18n namespace).
+  searchPlaceholder?: string
 }
 interface NotePayload { type: string; title: string; body: string; channel?: string }
 
@@ -86,6 +104,8 @@ export default function NotesTab({
   // Optional contact channel — empty = internal note (no contact moment).
   const [channel, setChannel] = useState('')
   const [expanded, setExpanded] = useState(false)
+  // Notes search (Danny 03-08) — client-side over the already-loaded `notes` prop.
+  const [search, setSearch] = useState('')
   const { formatDate } = useDateFormat()
   // Note timestamp: real date+time when the note carries one, else the relative "ago".
   const noteWhen = (n: NoteItem) => n.created_at
@@ -98,6 +118,14 @@ export default function NotesTab({
   const noteEditor = (n: NoteItem) =>
     (typeof n.updated_by === 'object' ? n.updated_by?.name : n.updated_by) ?? n.edited_by ?? ''
   const noteEdited = (n: NoteItem) => Boolean(noteEditor(n) && n.updated_at && n.updated_at !== n.created_at)
+  // Search narrows on body text (HTML stripped) + author name. The original index
+  // is kept alongside each note (not just filtered away) because openEdit/
+  // onEditNote key off a note's position in the FULL `notes` array, not the
+  // filtered view — mirrors the DRILL-PAGER convention used elsewhere.
+  const q = search.trim().toLowerCase()
+  const visibleNotes = notes
+    .map((n, i) => ({ n, i }))
+    .filter(({ n }) => !q || stripHtml(String(n.text ?? n.body ?? '')).toLowerCase().includes(q) || String(noteAuthor(n)).toLowerCase().includes(q))
   // System notes (backend-written status/phase changes) render as a calm event row —
   // no avatar, no edit pencil, just the "Statuswissel" chip + who/when (N-1-FE).
   const isSystemNote = (n: NoteItem) => Boolean(n.is_system) || SYSTEM_NOTE_TYPES.has(String(n.type ?? ''))
@@ -177,11 +205,21 @@ export default function NotesTab({
       {/* Notes */}
       {showNotes && (
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, gap: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{labels.notes}</span>
-          {/* Shared reference-style add button (Danny 20-07: notitie-knop had geen
-              achtergrondkleur) — one look on every entity's notes tab. */}
-          {!adding && <DrawerAddButton onClick={() => setAdding(true)} label={labels.newNote} />}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* Notes search (Danny 03-08) — same compact search box as the Documents
+                tab's own header row (search left of the add trigger). */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)' }}>
+              <Search size={11} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder={labels.searchPlaceholder}
+                aria-label={labels.searchPlaceholder}
+                style={{ border: 'none', outline: 'none', fontSize: 11, color: 'var(--text)', background: 'none', width: 110 }} />
+            </div>
+            {/* Shared reference-style add button (Danny 20-07: notitie-knop had geen
+                achtergrondkleur) — one look on every entity's notes tab. */}
+            {!adding && <DrawerAddButton onClick={() => setAdding(true)} label={labels.newNote} />}
+          </div>
         </div>
         <div style={sectionBlock}>
         {adding && (
@@ -238,9 +276,9 @@ export default function NotesTab({
             </div>
           </div>
         )}
-        {notes.length === 0 && !adding
+        {visibleNotes.length === 0 && !adding
           ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{labels.notesEmpty}</div>
-          : notes.map((n, i) => {
+          : visibleNotes.map(({ n, i }) => {
               const who = noteAuthor(n)
               // Safety net: a stray system note still renders as an event row here.
               if (isSystemNote(n)) return systemRow(n, i)

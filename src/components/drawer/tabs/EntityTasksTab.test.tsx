@@ -1,15 +1,15 @@
 /**
  * EntityTasksTab · the shared "Taken" tab body. Labels arrive as plain strings
  * (no namespace of its own), so the test asserts on those strings directly.
- * Covers the four UI states, the Open/Historie split on `completed_at`, a row
- * click routing through NavigationContext, and the "+ Nieuwe taak" trigger.
- * AddTaskModal + TaskLookupsProvider are mocked out — mounting the real modal
- * once stalled a whole suite (see the component's own header comment).
+ * Covers the four UI states, a row click routing through NavigationContext, and
+ * the "+ Nieuwe taak" trigger. AddTaskModal is mocked out — mounting the real
+ * modal once stalled a whole suite (see the component's own header comment).
  *
- * QuickViewToggle swap (this task, §4): the Open/Historie switch used to be a
- * hand-rolled pill; two new describe blocks below prove it now renders through
- * the shared component (compact footprint) and that the status chip's colour
- * respects `customer_task_table_color_status` for the customer embedding only.
+ * TAKEN-TOOLBAR-2 (this task): the old Open/Historie QuickViewToggle switch is
+ * gone — replaced by the shared StatusFilterSelect keyed on the tenant task-status
+ * lookup (useTaskLookups, stubbed below with a controllable ref so a test can pick
+ * a status without a real /task-statuses fetch). "Alle statussen" (nothing picked)
+ * shows every task, completed included.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
@@ -24,11 +24,21 @@ const { openEntityMock } = vi.hoisted(() => ({ openEntityMock: vi.fn() }))
 // lets the colour-toggle tests below flip `customer_task_table_color_status` without
 // hitting the real /settings endpoint.
 const settingsRef = vi.hoisted(() => ({ current: {} as Record<string, unknown> }))
+// Controllable task-status lookup (mirrors settingsRef above) — lets the filter
+// tests below pick a real status option without a network round-trip.
+// eslint-disable-next-line no-restricted-syntax -- test fixture colours, mirroring the tenant seed
+const statusesRef = vi.hoisted(() => ({ current: [
+  { value: 'todo', label: 'Te doen', color: '#D98A8A', is_done: false },
+  { value: 'done', label: 'Afgerond', color: '#79B58E', is_done: true },
+] }))
 
 vi.mock('@/hooks/useEntityTasks', () => ({ useEntityTasks: vi.fn() }))
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: openEntityMock, navigate: vi.fn() }) }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => `d(${v})`, formatDateTime: (v: string) => `dt(${v})` }) }))
-vi.mock('@/context/TaskLookupsContext', () => ({ TaskLookupsProvider: ({ children }: { children: ReactNode }) => <>{children}</> }))
+vi.mock('@/context/TaskLookupsContext', () => ({
+  TaskLookupsProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+  useTaskLookups: () => ({ statuses: statusesRef.current }),
+}))
 vi.mock('@/lib/settings/useAllSettings', async () => {
   const actual = await vi.importActual('@/lib/settings/useAllSettings')
   return { ...actual, useAllSettings: () => settingsRef.current }
@@ -41,7 +51,7 @@ vi.mock('@/pages/tasks/AddTaskModal', () => ({
 }))
 
 const labels: EntityTasksLabels = {
-  newTask: 'Nieuwe taak', open: 'Open', history: 'Historie',
+  newTask: 'Nieuwe taak',
   empty: 'Geen taken', loading: 'Laden…', error: 'Fout bij laden', openTask: 'Open taak',
   searchPlaceholder: 'Zoek taak…',
 }
@@ -85,25 +95,33 @@ describe('EntityTasksTab · four UI states', () => {
   })
 })
 
-describe('EntityTasksTab · Open/Historie really split on completed_at', () => {
-  it('the default "Open" view shows only tasks without completed_at', () => {
+/** TAKEN-TOOLBAR-2 (Danny 03-08): the status filter replaces the old Open/Historie
+ *  switch — "Alle statussen" (nothing picked) shows every task, completed included;
+ *  picking a real status (from the tenant task-status lookup) narrows to it. i18n is
+ *  unmocked here, so t() echoes the raw key (mirrors OpportunitiesTab.test.tsx's own
+ *  documented convention) — the trigger's own text is the literal 'filters.allStatuses'
+ *  key until a status is picked. */
+describe('EntityTasksTab · status filter (replaces Open/Historie)', () => {
+  it('shows every task until a status is picked — nothing selected = all, completed included', () => {
     mockTasks({ items: [
-      task({ id: 1, title: 'Open Task', completed_at: null }),
-      task({ id: 2, title: 'Done Task', completed_at: '2026-07-01' }),
+      task({ id: 1, title: 'Open Task', status: 'todo', completed_at: null }),
+      task({ id: 2, title: 'Done Task', status: 'done', completed_at: '2026-07-01' }),
     ] })
     render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
     expect(screen.getByText('Open Task')).toBeInTheDocument()
-    expect(screen.queryByText('Done Task')).toBeNull()
+    expect(screen.getByText('Done Task')).toBeInTheDocument()
   })
 
-  it('switching to "Historie" shows only tasks WITH completed_at', async () => {
+  it('narrows to the picked status only', async () => {
     const user = userEvent.setup()
     mockTasks({ items: [
-      task({ id: 1, title: 'Open Task', completed_at: null }),
-      task({ id: 2, title: 'Done Task', completed_at: '2026-07-01' }),
+      task({ id: 1, title: 'Open Task', status: 'todo', completed_at: null }),
+      task({ id: 2, title: 'Done Task', status: 'done', completed_at: '2026-07-01' }),
     ] })
     render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
-    await user.click(screen.getByRole('button', { name: labels.history }))
+    // Nothing picked yet, so the trigger's own text is the "all statuses" label.
+    await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
+    await user.click(await screen.findByRole('button', { name: 'Afgerond' }))
     expect(screen.getByText('Done Task')).toBeInTheDocument()
     expect(screen.queryByText('Open Task')).toBeNull()
   })
@@ -134,28 +152,6 @@ describe('EntityTasksTab · "+ Nieuwe taak"', () => {
     expect(screen.getByTestId('add-task-modal')).toHaveAttribute(
       'data-extra-links', JSON.stringify([{ type: 'contact', id: 'c-1' }]),
     )
-  })
-})
-
-describe('EntityTasksTab · Open/Historie via the shared QuickViewToggle (§4)', () => {
-  it('renders the switch with QuickViewToggle\'s compact footprint (height 26 / borderRadius 6), not the old hand-rolled pill (borderRadius 99)', () => {
-    mockTasks()
-    render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
-    const openBtn = screen.getByRole('button', { name: labels.open })
-    expect(openBtn).toHaveStyle({ height: '26px', borderRadius: '6px' })
-  })
-
-  it('still switches the visible tasks between Open and Historie', async () => {
-    const user = userEvent.setup()
-    mockTasks({ items: [
-      task({ id: 1, title: 'Open Task', completed_at: null }),
-      task({ id: 2, title: 'Done Task', completed_at: '2026-07-01' }),
-    ] })
-    render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
-    expect(screen.getByText('Open Task')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: labels.history }))
-    expect(screen.getByText('Done Task')).toBeInTheDocument()
-    expect(screen.queryByText('Open Task')).toBeNull()
   })
 })
 

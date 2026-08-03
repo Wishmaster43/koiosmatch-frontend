@@ -12,7 +12,18 @@ vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEnti
 // lets the test assert the card prefers it over the raw backend-resolved stage.
 // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
 const metaOf = vi.fn((v?: string) => (v === 'open' ? { value: 'open', label: 'Open (lookup)', color: '#123456', is_closed: false } : undefined))
-vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => ({ statuses: [], metaOf }) }))
+// MATCHES-TOOLBAR-1 (this task): a real (non-empty, neutral-slug) status list so
+// the new StatusFilterSelect toolbar has real options. Deliberately NOT
+// 'open'/'active'/'actief' — useStatusFilter's shared guess heuristic
+// (isActiveValue) would otherwise auto-propose one of those as the DEFAULT
+// filter (same behaviour as Locations/Departments/Vacancies today), which would
+// make a "nothing picked = all" test false.
+// eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
+const statuses = [
+  { value: 'pending', label: 'In behandeling', color: '#123456', is_closed: false },
+  { value: 'confirmed', label: 'Bevestigd', color: '#789ABC', is_closed: true },
+]
+vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => ({ statuses, metaOf }) }))
 
 // vi.mock factories are hoisted above top-level const declarations, so a plain
 // `const rememberReturnTab = vi.fn()` referenced directly INSIDE the factory
@@ -88,5 +99,54 @@ describe('MatchesTab', () => {
   it('renders no pencil when the host omits onEdit (no behaviour change)', () => {
     render(<MatchesTab c={candidate([{ id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway' }])} />)
     expect(screen.queryByRole('button', { name: 'common:edit' })).toBeNull()
+  })
+})
+
+/** Toolbar (Danny 03-08: one look on both the customer's and this card's Matches
+ *  tab — "bij Matches wil ik ook een zoekbalk en statussen hebben"). */
+describe('MatchesTab · toolbar search + status filter', () => {
+  const matches = [
+    { id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway', status: 'pending' },
+    { id: 'm2', vacancyTitle: 'Verzorgende IG', client: 'Acme', status: 'confirmed' },
+  ]
+
+  it('shows every match until a status is picked (nothing selected = all)', () => {
+    render(<MatchesTab c={candidate(matches)} />)
+    expect(screen.getByText('Yesway')).toBeInTheDocument()
+    expect(screen.getByText('Acme')).toBeInTheDocument()
+  })
+
+  it('search narrows on vacancy title + client name', async () => {
+    const user = userEvent.setup()
+    render(<MatchesTab c={candidate(matches)} />)
+    await user.type(screen.getByRole('textbox'), 'acme')
+    expect(screen.getByText('Acme')).toBeInTheDocument()
+    expect(screen.queryByText('Yesway')).toBeNull()
+  })
+
+  it('the status filter narrows to the picked status only', async () => {
+    const user = userEvent.setup()
+    render(<MatchesTab c={candidate(matches)} />)
+    // i18n is unmocked in this file (no real instance loaded), so t() echoes the
+    // raw key — same convention the rest of this file already relies on.
+    await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
+    await user.click(await screen.findByRole('button', { name: 'Bevestigd' }))
+    expect(screen.getByText('Acme')).toBeInTheDocument()
+    expect(screen.queryByText('Yesway')).toBeNull()
+  })
+})
+
+/** Double open-icon fix (Danny, seeing a Verzorgende IG / EVV match card: "Waarom
+ *  heb ik op de regel twee keer een icoon met open-in-nieuw-venster?"). The
+ *  vacancy title's own EntityLink icon is now suppressed (hideIcon) — the
+ *  explicit "Open match" ⧉ stays the ONE open-in-new icon in the card header. */
+describe('MatchesTab · exactly one open-in-new icon per card header', () => {
+  it('renders a single ExternalLink glyph in the HEADER row, not two', () => {
+    render(<MatchesTab c={candidate([{ id: 'm1', vacancyTitle: 'Verzorgende IG / EVV', client: 'Yesway' }])} />)
+    // Scoped to the header row itself — a "Read-only link out to the vacancy"
+    // icon can ALSO render there (when vacancyUrl is set), which is unrelated to
+    // this fix and absent from this fixture (no vacancyUrl).
+    const header = screen.getByTitle('matchesView.openMatch').parentElement as HTMLElement
+    expect(header.querySelectorAll('svg.lucide-external-link')).toHaveLength(1)
   })
 })

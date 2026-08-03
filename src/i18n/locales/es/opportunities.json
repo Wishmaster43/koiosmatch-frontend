@@ -147,7 +147,8 @@
     "type": "Tipo",
     "empty": "Aún no hay notas.",
     "placeholder": "Escribe una nota…",
-    "loadError": "No se pudieron cargar las notas"
+    "loadError": "No se pudieron cargar las notas",
+    "searchPlaceholder": "Buscar notas…"
   },
   "tasks": {
     "loading": "Cargando tareas…",

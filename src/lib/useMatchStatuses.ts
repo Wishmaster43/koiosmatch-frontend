@@ -13,7 +13,10 @@ import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { unwrapList } from '@/lib/api'
 
-export interface MatchStatus { value: string; label: string; color?: string; is_closed: boolean }
+// Index signature added (TAKEN-TOOLBAR-2/MATCHES-TOOLBAR-1): lets this list feed
+// straight into the shared StatusFilterSelect/useStatusFilter, which takes
+// LookupOption[] — a structural-typing requirement only, no runtime change.
+export interface MatchStatus { value: string; label: string; color?: string; is_closed: boolean; [k: string]: unknown }
 
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 export const DEFAULT_MATCH_STATUSES: MatchStatus[] = [

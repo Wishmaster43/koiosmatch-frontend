@@ -37,6 +37,7 @@ export default function NotesTab({ opportunity: o }: { opportunity: Opportunity 
         cancel: t('common:cancel'),
         notesEmpty: t('notes.empty'),
         notePlaceholder: () => t('notes.placeholder'),
+        searchPlaceholder: t('notes.searchPlaceholder'),
       }}
     />
   )

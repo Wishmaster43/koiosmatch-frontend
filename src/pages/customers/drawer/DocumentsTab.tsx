@@ -2,8 +2,16 @@
  * DocumentsTab — the customer's documents with upload, type, rename, delete and
  * preview. Data + persistence live in useEntityDocuments (G-3/G-4): the list loads
  * from /customers/{id}/documents and upload/rename/delete are optimistic. Document
- * types come from the tenant /document-types lookup. Preview opens the signed
- * download_url (or the local blob for a not-yet-uploaded row).
+ * types come from the tenant /document-types lookup.
+ *
+ * PREVIEW FIX (Danny 03-08: "Preview van documenten is downloaden i.p.v.
+ * preview???"): this used to `window.open(download_url)` — a real navigation to a
+ * route the backend answers with `Content-Disposition: attachment`
+ * (Storage::download), so the browser downloaded the file instead of showing it.
+ * The shared DocPreviewModal (moved here from the candidate drawer, §2 — it now
+ * serves both entities) opens instead: it fetches the doc as a BLOB, which never
+ * triggers the attachment disposition, and renders it in-dialog. The separate
+ * "download" bulk/row actions are untouched — they still open the real download route.
  */
 import { useState, useRef } from 'react'
 import type { ChangeEvent } from 'react'
@@ -15,6 +23,7 @@ import { sectionBlock } from '@/components/ui/SectionCard'
 import { useEntityDocuments, type EntityDoc } from '@/hooks/useEntityDocuments'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
+import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 // House "+ action" trigger (Danny 27-07 consistency sweep) — replaces the bare
 // text+Plus button below; same click target (opens the hidden file input).
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -47,6 +56,8 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
   const [renamingId,  setRenamingId]  = useState<Id | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [docSearch,   setDocSearch]   = useState('')
+  // Which doc the preview dialog shows — null = closed.
+  const [previewDoc,  setPreviewDoc]  = useState<EntityDoc | null>(null)
   // Bulk-download selection, keyed by docKey — cleared once a download batch starts.
   const [selected, setSelected] = useState<Set<string>>(new Set())
   // Pending delete confirmation — a single row (doc + its resolved index) or the
@@ -106,8 +117,9 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
     rename(d.id, base.trim() + splitExt(cur).ext)
     setRenamingId(null)
   }
-  // Preview opens the signed capability URL (persisted) or the local blob (pending).
-  const preview = (d: EntityDoc) => { const url = d.download_url ?? d.objectUrl; if (url) window.open(url, '_blank', 'noopener,noreferrer') }
+  // Preview opens the shared modal (blob-fetched in-dialog) — never a raw
+  // window.open, which used to trigger a download instead of a preview.
+  const preview = (d: EntityDoc) => setPreviewDoc(d)
   // Remove a doc and prune its selection key too, so a stale key never lingers.
   const doRemove = (d: EntityDoc, i: number) => {
     setSelected(prev => { const next = new Set(prev); next.delete(docKey(d, i)); return next })
@@ -285,6 +297,9 @@ export default function DocumentsTab({ customerId }: { customerId: Id | undefine
             setPending(prev => [...prev, ...items])
             e.target.value = ''
           }} />
+        {/* The shared preview dialog — 'customer' scope so the type chip resolves
+            against THIS entity's document-type lookup, not the candidate one. */}
+        {previewDoc && <DocPreviewModal doc={previewDoc} docTypeScope="customer" onClose={() => setPreviewDoc(null)} />}
         {/* One shared destructive-confirm dialog for both single and bulk delete (never a native confirm()). */}
         <ConfirmDialog
           open={!!confirmDelete}

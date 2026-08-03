@@ -312,7 +312,8 @@
     "placeholder": "Écrire une note…",
     "save": "Enregistrer",
     "cancel": "Annuler",
-    "type": "Type"
+    "type": "Type",
+    "searchPlaceholder": "Rechercher des notes…"
   },
   "timeline": {
     "empty": "Aucune activité pour le moment."

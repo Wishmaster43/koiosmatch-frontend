@@ -532,7 +532,8 @@
     "retentionConsentExpiryNote": "Retention consent expires automatically. A workflow can ask the candidate to renew it; the expiry itself happens either way.",
     "timelinePlacedAt": "Placed at {{customer}}",
     "timelineOngoing": "present",
-    "timelineVia": "via {{name}}"
+    "timelineVia": "via {{name}}",
+    "searchPlaceholder": "Search notes…"
   },
   "statistics": {
     "placements": "Matches",
@@ -862,7 +863,8 @@
       "active": "Active",
       "ended": "Ended"
     },
-    "openMatch": "Open match"
+    "openMatch": "Open match",
+    "searchPlaceholder": "Search match…"
   },
   "map": {
     "pointCount": "{{count}} candidates on the map"

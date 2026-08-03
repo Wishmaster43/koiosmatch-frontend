@@ -29,6 +29,9 @@ interface PdfPreviewProps {
  * entirely client-side (no iframe, no dangerouslySetInnerHTML). This replaces
  * the unsandboxed <iframe> that used to preview tenant-uploaded PDFs (AUDIT-3):
  * a canvas render we fully control can live inside a sandboxed dialog safely.
+ *
+ * MOVED (Danny 03-08, DOC-PREVIEW-1) from pages/candidates/drawer/ alongside
+ * DocPreviewModal — see that component's own docblock for why.
  */
 export default function PdfPreview({ url, onError }: PdfPreviewProps) {
   const { t } = useTranslation('candidates')

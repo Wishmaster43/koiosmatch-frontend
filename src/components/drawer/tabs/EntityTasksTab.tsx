@@ -1,8 +1,14 @@
 /**
  * EntityTasksTab — the ONE "Taken" tab body for every drawer that shows the tasks
- * linked to one record (contact, opportunity, customer, …). Open/Historie switch
- * (the shared QuickViewToggle, §4), the house "+ Nieuwe taak" trigger, all four
- * UI states, and rows that click through to the task itself.
+ * linked to one record (contact, opportunity, customer, …). Toolbar mirrors the
+ * Vacatures tab (Danny 03-08: "moet eruitzien zoals Vacatures: zoeken — Alle
+ * statussen — + Nieuwe taak") — search, a status filter, the house "+ Nieuwe taak"
+ * trigger, all four UI states, and rows that click through to the task itself.
+ *
+ * TAKEN-TOOLBAR-2 (this task): the old Open/Historie QuickViewToggle switch is
+ * replaced by the shared StatusFilterSelect, keyed on the tenant's real task-status
+ * lookup (never a literal open/history split) — "Alle statussen" (nothing picked)
+ * shows every task, completed included, same as every other status-filtered list.
  *
  * The status chip's colour respects `customer_task_table_color_status` (Settings →
  * Klanten → Weergave → Taken) when this tab renders inside the customer drawer —
@@ -21,12 +27,13 @@
 import { useState } from 'react'
 import { ListChecks, AlertTriangle, Search } from 'lucide-react'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
-import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import AddTaskModal from '@/pages/tasks/AddTaskModal'
-import { TaskLookupsProvider } from '@/context/TaskLookupsContext'
+import { TaskLookupsProvider, useTaskLookups } from '@/context/TaskLookupsContext'
 import { useNavigation } from '@/context/NavigationContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useEntityTasks } from '@/hooks/useEntityTasks'
+import type { EntityTask } from '@/hooks/useEntityTasks'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import type { Id } from '@/types/common'
 
@@ -34,8 +41,6 @@ export interface EntityTasksLabels {
   newTask: string
   /** Placeholder for the toolbar search input (mirrors the Afdelingen toolbar). */
   searchPlaceholder: string
-  open: string
-  history: string
   empty: string
   loading: string
   error: string
@@ -51,18 +56,43 @@ interface Props {
   extraLinks?: Array<{ type: string; id: string }>
 }
 
-export default function EntityTasksTab({ linkType, id, labels, extraLinks = [] }: Props) {
+// A task row's own status, resolved whether the API sent a lookup OBJECT
+// ({value,label,color}) or a bare string — same tolerant read the row render below uses.
+const statusKeyOf = (t: EntityTask): string => {
+  const st = t.status as { value?: string } | string | null | undefined
+  return String((typeof st === 'object' ? st?.value : st) ?? '')
+}
+
+// Wraps the tab body in the tenant task-status lookup provider. TaskLookupsProvider
+// is only otherwise mounted around the Tasks PAGE (and, before this change, briefly
+// around the "+ Nieuwe taak" modal here) — every OTHER host this shared tab renders
+// inside (customer/contact/opportunity drawers) has no such provider above it, so
+// the status filter below would have nothing to read (mirrors VacanciesTab's own
+// workaround for the exact same problem with /vacancy-statuses).
+export default function EntityTasksTab(props: Props) {
+  return (
+    <TaskLookupsProvider>
+      <EntityTasksTabBody {...props} />
+    </TaskLookupsProvider>
+  )
+}
+
+function EntityTasksTabBody({ linkType, id, labels, extraLinks = [] }: Props) {
   const { formatDate } = useDateFormat()
   const { openEntity } = useNavigation()
   const { items, loading, error, reload } = useEntityTasks(linkType, id)
+  const { statuses } = useTaskLookups()
   const [adding, setAdding] = useState(false)
-  const [view, setView] = useState<'open' | 'history'>('open')
   const [search, setSearch] = useState('')
+
+  // Status filter — replaces the old Open/Historie switch. Nothing selected = "Alle
+  // statussen" = every task, completed included (never a hardcoded open/history split).
+  const { value: statusFilter, toggle: toggleStatus, filtered: byStatus } =
+    useStatusFilter(items, statuses, statusKeyOf)
 
   // Search narrows on title + owner, client-side — same idiom as the panel searches.
   const q = search.trim().toLowerCase()
-  const byView = items.filter(x => (view === 'open' ? !x.completed_at : !!x.completed_at))
-  const visible = q ? byView.filter(x => [x.title, x.owner_name].some(v => String(v ?? '').toLowerCase().includes(q))) : byView
+  const visible = q ? byStatus.filter(x => [x.title, x.owner_name].some(v => String(v ?? '').toLowerCase().includes(q))) : byStatus
 
   // Status-chip colour toggle (CHIPKLEUR-INSTELBAAR-1 pattern, Settings → Klanten →
   // Weergave → Taken). Only wired for the customer embedding today — this shared tab
@@ -74,9 +104,9 @@ export default function EntityTasksTab({ linkType, id, labels, extraLinks = [] }
 
   return (
     <div>
-      {/* Toolbar mirrors the Afdelingen tab (Danny 03-08: "afdelingen is juist"):
-          search left, the Open/Historie quick-view filter in the middle slot, add right.
-          The search markup copies DepartmentsPanel's verbatim (§11 debt noted there). */}
+      {/* Toolbar mirrors the Vacatures tab (Danny 03-08): search left, the status
+          filter middle, add right. The search markup copies DepartmentsPanel's
+          verbatim (§11 debt noted there). */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, padding: '6px 10px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
           <Search size={13} color="var(--text-muted)" />
@@ -84,8 +114,7 @@ export default function EntityTasksTab({ linkType, id, labels, extraLinks = [] }
             placeholder={labels.searchPlaceholder} aria-label={labels.searchPlaceholder}
             style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
         </div>
-        <QuickViewToggle active={view === 'open'} onToggle={() => setView('open')} label={labels.open} size="compact" />
-        <QuickViewToggle active={view === 'history'} onToggle={() => setView('history')} label={labels.history} size="compact" />
+        <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
         <DrawerAddButton onClick={() => setAdding(true)} label={labels.newTask} />
       </div>
 
@@ -142,16 +171,15 @@ export default function EntityTasksTab({ linkType, id, labels, extraLinks = [] }
       )}
 
       {/* New task pre-linked to this record; reload so the fresh row shows at once.
-          AddTaskModal reads useTaskLookups — outside TasksPage that provider is absent
-          (live crash, Danny 18-07), so it wraps its own here. */}
+          AddTaskModal reads useTaskLookups — the top-level wrapper above now provides
+          it for the whole tab (it used to wrap only this modal, Danny 18-07's original
+          crash fix; the status filter needs the same provider, so it moved up). */}
       {adding && id != null && (
-        <TaskLookupsProvider>
-          <AddTaskModal
-            extraLinks={[{ type: linkType, id: String(id) }, ...extraLinks]}
-            onClose={() => setAdding(false)}
-            onCreated={() => { setAdding(false); reload() }}
-          />
-        </TaskLookupsProvider>
+        <AddTaskModal
+          extraLinks={[{ type: linkType, id: String(id) }, ...extraLinks]}
+          onClose={() => setAdding(false)}
+          onCreated={() => { setAdding(false); reload() }}
+        />
       )}
     </div>
   )

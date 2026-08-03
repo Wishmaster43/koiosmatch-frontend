@@ -47,7 +47,7 @@ vi.mock('@/lib/datetime', () => ({
   useDateFormat: () => ({ formatDate: (v: string) => `d(${v})`, formatDateTime: (v: string) => `dt(${v})`, locale: 'nl-NL' }),
 }))
 // Preview modal only ever mounts on click — stub it so its own deps (pdf.js) never load here.
-vi.mock('./DocPreviewModal', () => ({ default: () => null }))
+vi.mock('@/components/drawer/DocPreviewModal', () => ({ default: () => null }))
 
 // Minimal candidate: only `id` + `documents` matter to this section.
 const candidate = (): Candidate => ({ id: 'c1', documents: [] } as unknown as Candidate)

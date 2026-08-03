@@ -510,7 +510,8 @@
     "retentionConsentExpiryNote": "El consentimiento de conservación caduca automáticamente. Un flujo de trabajo puede pedir al candidato que lo renueve; la caducidad se produce en cualquier caso.",
     "timelinePlacedAt": "Colocado en {{customer}}",
     "timelineOngoing": "hoy",
-    "timelineVia": "vía {{name}}"
+    "timelineVia": "vía {{name}}",
+    "searchPlaceholder": "Buscar notas…"
   },
   "statistics": {
     "placements": "Matches",
@@ -840,7 +841,8 @@
       "active": "Activo",
       "ended": "Finalizado"
     },
-    "openMatch": "Abrir match"
+    "openMatch": "Abrir match",
+    "searchPlaceholder": "Buscar match…"
   },
   "koios": {
     "actions": {

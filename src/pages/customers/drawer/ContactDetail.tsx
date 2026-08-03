@@ -289,7 +289,9 @@ export default function ContactDetail({ contact, locations, departments, statuse
           linkType="contact"
           id={contact.id}
           labels={{
-            newTask: t('contacts.tasks.newTask'), open: t('contacts.tasks.open'), history: t('contacts.tasks.history'),
+            // TAKEN-TOOLBAR-2: open/history dropped — the shared tab now filters by
+            // real task status (StatusFilterSelect), not a hardcoded open/history split.
+            newTask: t('contacts.tasks.newTask'),
             empty: t('contacts.tasks.empty'), loading: t('contacts.tasks.loading'), error: t('contacts.tasks.error'),
             openTask: t('contacts.tasks.openTask'), searchPlaceholder: t('contacts.tasks.searchPlaceholder'),
           }}

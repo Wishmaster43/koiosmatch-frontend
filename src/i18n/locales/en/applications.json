@@ -312,7 +312,8 @@
     "hint": "Add internal notes to keep your team aligned on this candidate.",
     "placeholder": "Write a note…",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "searchPlaceholder": "Search notes…"
   },
   "timeline": {
     "empty": "No activity yet."

@@ -510,7 +510,8 @@
     "retentionConsentExpiryNote": "Die Aufbewahrungseinwilligung läuft automatisch ab. Ein Workflow kann den Kandidaten um Verlängerung bitten; der Ablauf erfolgt in jedem Fall.",
     "timelinePlacedAt": "Platziert bei {{customer}}",
     "timelineOngoing": "heute",
-    "timelineVia": "über {{name}}"
+    "timelineVia": "über {{name}}",
+    "searchPlaceholder": "Notizen suchen…"
   },
   "statistics": {
     "placements": "Matches",
@@ -840,7 +841,8 @@
       "active": "Aktiv",
       "ended": "Beendet"
     },
-    "openMatch": "Match öffnen"
+    "openMatch": "Match öffnen",
+    "searchPlaceholder": "Match suchen…"
   },
   "koios": {
     "actions": {

@@ -77,7 +77,8 @@
     "type": "Type",
     "empty": "Nog geen notities.",
     "placeholder": "Schrijf een notitie…",
-    "loadError": "Notities laden mislukt"
+    "loadError": "Notities laden mislukt",
+    "searchPlaceholder": "Zoek notities…"
   },
   "tasks": {
     "loading": "Taken laden…",

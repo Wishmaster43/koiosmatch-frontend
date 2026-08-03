@@ -103,6 +103,31 @@ describe('OpportunitiesTab · stage filter narrows the rows (Danny: "bij Kansen 
   })
 })
 
+/** Search bar (Danny 03-08: "bij Kansen-tabblad op hoofd-drilldown mis ik ook
+ *  zoekbalk") — narrows on the opportunity title, on top of the stage filter. */
+describe('OpportunitiesTab · search narrows the rows', () => {
+  const rows: ApiOpportunity[] = [
+    { id: 'opp-a', title: 'Nieuwe zorgvraag Amsterdam', stage: { value: 'lead', label: 'Lead', color: '#94A3B8' } },
+    { id: 'opp-b', title: 'Contract getekend Utrecht', stage: { value: 'won', label: 'Gewonnen', color: '#79B58E' } },
+  ]
+
+  it('shows every opportunity until something is typed', () => {
+    mockOpportunities(rows)
+    render(<OpportunitiesTab customerId="cust-1" customerName="Acme" />)
+    expect(screen.getByText('Nieuwe zorgvraag Amsterdam')).toBeInTheDocument()
+    expect(screen.getByText('Contract getekend Utrecht')).toBeInTheDocument()
+  })
+
+  it('narrows to the matching title only', async () => {
+    const user = userEvent.setup()
+    mockOpportunities(rows)
+    render(<OpportunitiesTab customerId="cust-1" customerName="Acme" />)
+    await user.type(screen.getByPlaceholderText('opportunities.searchPlaceholder'), 'utrecht')
+    expect(screen.getByText('Contract getekend Utrecht')).toBeInTheDocument()
+    expect(screen.queryByText('Nieuwe zorgvraag Amsterdam')).toBeNull()
+  })
+})
+
 describe('OpportunitiesTab · stage colour toggle (customer_opportunity_table_color_stage)', () => {
   const oneRow: ApiOpportunity[] = [
     { id: 'opp-lead', title: 'Nieuwe zorgvraag', stage: { value: 'lead', label: 'Lead', color: '#94A3B8' } },

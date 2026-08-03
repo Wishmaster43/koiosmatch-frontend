@@ -59,6 +59,7 @@ export default function NotesTab({ application: a }: { application: ApplicationD
         cancel: t('notes.cancel'),
         notesEmpty: t('notes.empty'),
         notePlaceholder: () => t('notes.placeholder'),
+        searchPlaceholder: t('notes.searchPlaceholder'),
       }}
     />
   )

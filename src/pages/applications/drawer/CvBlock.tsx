@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, Eye } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
-import DocPreviewModal from '@/pages/candidates/drawer/DocPreviewModal'
+import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import { useCandidateCvDocument } from '../hooks/useCandidateCvDocument'
 import type { Id } from '@/types/common'
 

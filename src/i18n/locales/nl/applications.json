@@ -312,7 +312,8 @@
     "hint": "Voeg interne notities toe om je team op één lijn te houden over deze kandidaat.",
     "placeholder": "Schrijf een notitie…",
     "save": "Opslaan",
-    "cancel": "Annuleren"
+    "cancel": "Annuleren",
+    "searchPlaceholder": "Zoek notities…"
   },
   "timeline": {
     "empty": "Nog geen activiteit."

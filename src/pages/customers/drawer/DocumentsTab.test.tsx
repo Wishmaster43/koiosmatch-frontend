@@ -10,6 +10,15 @@ import userEvent from '@testing-library/user-event'
 import DocumentsTab from './DocumentsTab'
 import { useEntityDocuments } from '@/hooks/useEntityDocuments'
 
+// The real modal fetches over the network (pdf.js, blob fetch) — irrelevant here,
+// where the only thing under test is HOW the eye icon opens it. A marker stand-in
+// proves the wiring without mounting any of that.
+vi.mock('@/components/drawer/DocPreviewModal', () => ({
+  default: ({ doc, docTypeScope }: { doc?: { name?: string }; docTypeScope?: string }) => (
+    <div data-testid="doc-preview-modal" data-name={doc?.name} data-scope={docTypeScope} />
+  ),
+}))
+
 // The list + optimistic upload/rename/delete hook — stubbed so only `upload()`'s
 // call arguments matter here, not its internal optimistic-row bookkeeping.
 vi.mock('@/hooks/useEntityDocuments', () => ({
@@ -182,5 +191,43 @@ describe('DocumentsTab · delete confirmation', () => {
     expect(remove).toHaveBeenCalledTimes(2)
     expect(remove).toHaveBeenCalledWith('doc-a')
     expect(remove).toHaveBeenCalledWith('doc-b')
+  })
+})
+
+/**
+ * Preview fix (Danny 03-08: "Preview van documenten is downloaden i.p.v.
+ * preview???"). Root cause was measured at DocumentsTab.tsx:110 — `preview()` did
+ * `window.open(download_url)`, a real navigation to a route the backend answers
+ * with `Content-Disposition: attachment`, so the browser downloaded the file
+ * instead of showing it. These tests prove the eye icon now opens the shared
+ * DocPreviewModal in-dialog and never calls window.open.
+ */
+describe('DocumentsTab · preview opens the shared modal, never window.open', () => {
+  const doc = { id: 'doc-a', name: 'a.pdf', type: 'CV', size: '10 KB', download_url: '/dl/a', url: '/api/customers/1/documents/doc-a/download' }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal('URL', { createObjectURL: vi.fn(), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('does not render the modal until the eye icon is clicked', () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [doc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    render(<DocumentsTab customerId="cust-1" />)
+    expect(screen.queryByTestId('doc-preview-modal')).not.toBeInTheDocument()
+  })
+
+  it('clicking the eye icon opens DocPreviewModal (scoped to "customer") instead of calling window.open', async () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [doc], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    const user = userEvent.setup()
+    render(<DocumentsTab customerId="cust-1" />)
+
+    await user.click(screen.getByRole('button', { name: 'documents.preview' }))
+
+    expect(openSpy).not.toHaveBeenCalled()
+    const modal = screen.getByTestId('doc-preview-modal')
+    expect(modal).toHaveAttribute('data-name', 'a.pdf')
+    expect(modal).toHaveAttribute('data-scope', 'customer')
   })
 })

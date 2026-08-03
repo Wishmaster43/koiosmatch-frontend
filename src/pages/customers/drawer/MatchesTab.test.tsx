@@ -7,6 +7,7 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 // Side-effect import: the real i18next instance, so useTranslation resolves
 // actual copy (mirrors VacanciesTab.test.tsx) instead of warning/returning keys.
 import '@/i18n'
@@ -16,9 +17,21 @@ import type { CustomerMatchRow } from '../hooks/useCustomerDrawerData'
 
 // The lookup's own fetch/resolution is out of scope here (mirrors the candidate
 // test) — a controlled meta resolver proves the card prefers it over the raw row.
+// STATUSES (this task, MATCHES-TOOLBAR-1): a real (non-empty) list so the new
+// StatusFilterSelect toolbar has real options to filter/pick from.
 // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
 const metaOf = vi.fn((v?: string) => (v === 'open' ? { value: 'open', label: 'Open (lookup)', color: '#123456', is_closed: false } : undefined))
-vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => ({ statuses: [], metaOf }) }))
+// Deliberately NOT 'open'/'active'/'actief' — useStatusFilter's shared guess
+// heuristic (isActiveValue) auto-proposes a status with one of those slugs as the
+// DEFAULT filter (same behaviour as Locations/Departments/Vacancies today), which
+// would make "nothing picked = all" below false. Neutral slugs isolate the NEW
+// toolbar behaviour from that pre-existing, unrelated guess.
+// eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
+const statuses = [
+  { value: 'pending', label: 'In behandeling', color: '#123456', is_closed: false },
+  { value: 'confirmed', label: 'Bevestigd', color: '#789ABC', is_closed: true },
+]
+vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => ({ statuses, metaOf }) }))
 
 // The hook that fires GET /matches?customer_id= is proven separately
 // (useCustomerMatches.test.ts, request-shape) — this file stubs it so the
@@ -92,5 +105,58 @@ describe('CustomerDrawer · MatchesTab', () => {
     render(<MatchesTab customerId="cust-1" />)
     expect(screen.queryByRole('button', { name: 'common:edit' })).toBeNull()
     expect(screen.queryByTitle(i18n.t('common:edit'))).toBeNull()
+  })
+})
+
+/** Toolbar (Danny 03-08: "bij Matches wil ik ook een zoekbalk en statussen
+ *  hebben") — search (vacancy title + candidate name) and the shared
+ *  StatusFilterSelect keyed on the match status vocabulary. */
+describe('MatchesTab · toolbar search + status filter', () => {
+  const rows: CustomerMatchRow[] = [
+    row({ id: 'm-1', vacancy: 'Verpleegkundige', candidate: 'Jane Doe', status: 'pending' }),
+    row({ id: 'm-2', vacancy: 'Verzorgende IG', candidate: 'John Roe', status: 'confirmed' }),
+  ]
+
+  it('shows every match until a status is picked (nothing selected = all)', () => {
+    mockUseCustomerMatches.mockReturnValue({ rows, loading: false, error: false })
+    render(<MatchesTab customerId="cust-1" />)
+    expect(screen.getByText('Jane Doe')).toBeInTheDocument()
+    expect(screen.getByText('John Roe')).toBeInTheDocument()
+  })
+
+  it('search narrows on vacancy title + candidate name', async () => {
+    const user = userEvent.setup()
+    mockUseCustomerMatches.mockReturnValue({ rows, loading: false, error: false })
+    render(<MatchesTab customerId="cust-1" />)
+    await user.type(screen.getByRole('textbox'), 'jane')
+    expect(screen.getByText('Jane Doe')).toBeInTheDocument()
+    expect(screen.queryByText('John Roe')).toBeNull()
+  })
+
+  it('the status filter narrows to the picked status only', async () => {
+    const user = userEvent.setup()
+    mockUseCustomerMatches.mockReturnValue({ rows, loading: false, error: false })
+    render(<MatchesTab customerId="cust-1" />)
+    // Real i18n is loaded in this file (see the side-effect import above), so the
+    // trigger's own text is the REAL translated "all statuses" copy, not the raw key.
+    await user.click(screen.getByRole('button', { name: i18n.t('filters.allStatuses', { ns: 'customers' }) }))
+    await user.click(await screen.findByRole('button', { name: 'Bevestigd' }))
+    expect(screen.getByText('John Roe')).toBeInTheDocument()
+    expect(screen.queryByText('Jane Doe')).toBeNull()
+  })
+})
+
+/** Double open-icon fix (Danny, seeing a Verzorgende IG / EVV card: "Waarom heb
+ *  ik op de regel twee keer een icoon met open-in-nieuw-venster?"). The vacancy
+ *  title's own EntityLink icon is now suppressed (hideIcon) — the explicit "Open
+ *  match" ⧉ stays the ONE open-in-new icon in the card header. */
+describe('MatchesTab · exactly one open-in-new icon per card header', () => {
+  it('renders a single ExternalLink glyph in the HEADER row, not two', () => {
+    mockUseCustomerMatches.mockReturnValue({ rows: [row({ vacancy: 'Verzorgende IG / EVV' })], loading: false, error: false })
+    render(<MatchesTab customerId="cust-1" />)
+    // Scoped to the header row itself — the SEPARATE "Candidate" field row below
+    // legitimately carries its own EntityLink icon and must not be counted here.
+    const header = screen.getByTitle(ct('matchesView.openMatch')).parentElement as HTMLElement
+    expect(header.querySelectorAll('svg.lucide-external-link')).toHaveLength(1)
   })
 })

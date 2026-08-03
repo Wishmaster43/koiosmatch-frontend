@@ -510,7 +510,8 @@
     "retentionConsentExpiryNote": "Le consentement de conservation expire automatiquement. Un workflow peut demander au candidat de le renouveler ; l'expiration a lieu dans tous les cas.",
     "timelinePlacedAt": "Placé chez {{customer}}",
     "timelineOngoing": "aujourd'hui",
-    "timelineVia": "via {{name}}"
+    "timelineVia": "via {{name}}",
+    "searchPlaceholder": "Rechercher des notes…"
   },
   "statistics": {
     "placements": "Matchs",
@@ -840,7 +841,8 @@
       "active": "Actif",
       "ended": "Terminé"
     },
-    "openMatch": "Ouvrir le match"
+    "openMatch": "Ouvrir le match",
+    "searchPlaceholder": "Rechercher un match…"
   },
   "koios": {
     "actions": {

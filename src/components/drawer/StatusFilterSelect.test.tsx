@@ -7,6 +7,9 @@
  * override; and a stale/deleted status id falls back to "all" rather than
  * filtering to a value nothing can ever match — the same failure mode the
  * original guess-heuristic guard exists to prevent.
+ *
+ * MOVED (Danny 03-08, TAKEN-TOOLBAR-1) from pages/customers/drawer/ alongside the
+ * component itself — see StatusFilterSelect.tsx's own docblock for why.
  */
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'

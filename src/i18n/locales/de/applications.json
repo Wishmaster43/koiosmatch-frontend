@@ -312,7 +312,8 @@
     "placeholder": "Notiz schreiben…",
     "save": "Speichern",
     "cancel": "Abbrechen",
-    "type": "Typ"
+    "type": "Typ",
+    "searchPlaceholder": "Notizen suchen…"
   },
   "timeline": {
     "empty": "Noch keine Aktivität."

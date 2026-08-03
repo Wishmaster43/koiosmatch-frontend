@@ -532,7 +532,8 @@
     "retentionConsentExpiryNote": "De bewaartoestemming verloopt automatisch. Een workflow kan de kandidaat om verlenging vragen; het verlopen zelf gebeurt hoe dan ook.",
     "timelinePlacedAt": "Geplaatst bij {{customer}}",
     "timelineOngoing": "heden",
-    "timelineVia": "via {{name}}"
+    "timelineVia": "via {{name}}",
+    "searchPlaceholder": "Zoek notities…"
   },
   "statistics": {
     "placements": "Matches",
@@ -862,7 +863,8 @@
       "active": "Actief",
       "ended": "Beëindigd"
     },
-    "openMatch": "Match openen"
+    "openMatch": "Match openen",
+    "searchPlaceholder": "Zoek match…"
   },
   "map": {
     "pointCount": "{{count}} kandidaten op de kaart"

@@ -157,6 +157,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
       notePlaceholder: (typeLabel: string) => t('communication.notePlaceholder', { type: typeLabel }),
       openChangelog: t('drawer.changelog'),
       editStatusEvent: t('drawer.editStatusReason'),
+      searchPlaceholder: t('communication.searchPlaceholder'),
     },
   }
 

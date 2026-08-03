@@ -147,7 +147,8 @@
     "type": "Typ",
     "empty": "Noch keine Notizen.",
     "placeholder": "Notiz schreiben…",
-    "loadError": "Notizen konnten nicht geladen werden"
+    "loadError": "Notizen konnten nicht geladen werden",
+    "searchPlaceholder": "Notizen suchen…"
   },
   "tasks": {
     "loading": "Aufgaben werden geladen…",
