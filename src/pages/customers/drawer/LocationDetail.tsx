@@ -61,6 +61,9 @@ import type { DeleteResult } from '../hooks/subEntityDelete'
 interface Props {
   location: Location
   customerId?: Id
+  // Point 1 (Danny's ten-point round): threaded down to ScopedVacanciesTab's
+  // AddVacancyModal lock (mirrors the customer-level VacanciesTab's own lock).
+  customerName?: string
   locations: { id: Id; name: string }[]
   departments: Department[]
   contacts: Contact[]
@@ -77,7 +80,11 @@ interface Props {
   onAddDepartment: (payload: DepartmentPayload, locationName?: string) => void
   onUpdateDepartment: (id: Id, payload: Partial<DepartmentPayload>, locationName?: string) => void
   onRemoveDepartment: (id: Id) => void
-  onAddContact: (payload: ContactPayload) => void
+  // ONE-CLICK-COUPLE-2: widened from `=> void` — same widening LocationsTab's own prop
+  // already carries (§0.2 honest types, no cast) — the real `useCustomerContacts().add`
+  // resolves with the saved contact, and LocationContactSection needs that id to couple
+  // a brand-new typed name as this location's primary contact (mirrors AddLocationModal).
+  onAddContact: (payload: ContactPayload) => Promise<Contact | void> | void
   onUpdateContact: (id: Id, payload: Partial<ContactPayload>) => void
   /** Label of the list this location was opened from — the first breadcrumb. */
   backLabel?: string
@@ -89,7 +96,7 @@ interface Props {
 }
 
 export default function LocationDetail({
-  location: l, customerId, locations, departments, contacts, statuses, departmentStatuses, contactStatuses, canLinkBackoffice = false,
+  location: l, customerId, customerName, locations, departments, contacts, statuses, departmentStatuses, contactStatuses, canLinkBackoffice = false,
   onSave, onDelete, onAddDepartment, onUpdateDepartment, onRemoveDepartment, onAddContact, onUpdateContact, onRemoveContact,
   backLabel, pager, close,
 }: Props) {
@@ -225,6 +232,7 @@ export default function LocationDetail({
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <DepartmentsPanel scope="location" scopeId={l.id as Id} scopeName={l.name}
+          customerId={customerId} customerName={customerName}
           departments={departments} locations={locations} contacts={contacts}
           statuses={departmentStatuses} contactStatuses={contactStatuses}
           openId={openDepartmentId} onOpenChange={setOpenDepartmentId}
@@ -316,7 +324,9 @@ export default function LocationDetail({
             onPickContact={() => setSubTab('contacts')}
             // ONE-CLICK-COUPLE-1: the customer's full contact list (already available here)
             // plus the ids the section needs to write the coupling itself.
-            contacts={contacts} customerId={customerId} locationId={l.id as Id} />
+            // ONE-CLICK-COUPLE-2: onAddContact closes the no-match dead end (create the
+            // missing contact, then couple it) — same prop this component already receives.
+            contacts={contacts} customerId={customerId} locationId={l.id as Id} onAddContact={onAddContact} />
 
           {/* LOCATIE-OMSCHRIJVING-1 (Danny 02-08, order overruled same day): mirrors the
               Bedrijf tab exactly — OverviewTab puts its own description directly under
@@ -346,6 +356,7 @@ export default function LocationDetail({
       {/* The SAME panel the customer's Afdelingen tab renders — one department surface. */}
       {subTab === 'departments' && (
         <DepartmentsPanel scope="location" scopeId={l.id as Id} scopeName={l.name}
+          customerId={customerId} customerName={customerName}
           departments={departments} locations={locations} contacts={contacts}
           statuses={departmentStatuses} contactStatuses={contactStatuses}
           openId={openDepartmentId} onOpenChange={setOpenDepartmentId}
@@ -362,8 +373,10 @@ export default function LocationDetail({
       )}
 
       {/* SCOPED-LIST-TAB-1: read-only, opens the real vacancy/match on row-click. */}
-      {subTab === 'vacancies' && <ScopedVacanciesTab scope="location" id={l.id as Id} />}
-      {subTab === 'matches' && <ScopedMatchesTab scope="location" id={l.id as Id} />}
+      {subTab === 'vacancies' && (
+        <ScopedVacanciesTab scope="location" id={l.id as Id} customerId={customerId} customerName={customerName} scopeName={l.name} />
+      )}
+      {subTab === 'matches' && <ScopedMatchesTab scope="location" id={l.id as Id} customerId={customerId} />}
 
       {subTab === 'extra' && (
         <CustomFieldsTab entityType="customer_location" values={l.customFields ?? {}}

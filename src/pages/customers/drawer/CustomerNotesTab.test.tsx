@@ -35,7 +35,9 @@ vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 // Stubbed so a stray render would be VISIBLE as a testid rather than mounting the real
 // modal (which once hung the whole suite).
 vi.mock('@/pages/tasks/AddTaskModal', () => ({
-  default: () => <div data-testid="add-task-modal" />,
+  default: ({ extraLinks }: { extraLinks?: Array<{ type: string; id: string }> }) => (
+    <div data-testid="add-task-modal" data-extra-links={JSON.stringify(extraLinks ?? [])} />
+  ),
 }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 // The candidate/customer/contact link pickers each GET their own list; empty
@@ -73,5 +75,17 @@ describe('CustomerNotesTab · Taken sub-tab', () => {
     await user.click(screen.getByText('drawer.tabs.tasks'))
     // The shared tab's own add-trigger proves the real EntityTasksTab mounted.
     expect(await screen.findByRole('button', { name: 'tasks.newTask' })).toBeInTheDocument()
+  })
+})
+
+/** TAKEN-DOOD-1 (Danny 03-08): "+ nieuwe taak doet niets" on the moved Taken sub-tab. */
+describe('CustomerNotesTab · Taken sub-tab opens the task modal', () => {
+  it('clicking + Nieuwe taak actually opens AddTaskModal, pre-linked to the customer', async () => {
+    const user = userEvent.setup()
+    render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]} onAddNote={vi.fn()} c={customer} onSave={vi.fn()} />)
+    await user.click(screen.getByText('drawer.tabs.tasks'))
+    await user.click(await screen.findByRole('button', { name: 'tasks.newTask' }))
+    const modal = await screen.findByTestId('add-task-modal')
+    expect(JSON.parse(modal.getAttribute('data-extra-links') ?? '[]')).toEqual([{ type: 'customer', id: 'cust-1' }])
   })
 })

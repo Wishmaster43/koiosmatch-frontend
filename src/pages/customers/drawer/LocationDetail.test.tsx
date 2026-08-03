@@ -17,6 +17,9 @@ import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import LocationDetail from './LocationDetail'
 import { CONTACTS_CHANGED_EVENT } from '../hooks/useCustomerContacts'
+// ONE-CLICK-COUPLE-2: asserts the honest success/failure toasts the create-and-link
+// flow fires — same mocked module the file already stubs above.
+import { notifyError, notifySuccess } from '@/lib/notify'
 import type { Contact, Location } from '@/types/customer'
 import type { LookupOption } from '@/types/common'
 
@@ -65,10 +68,12 @@ vi.mock('@/components/ui/RichTextEditor', () => ({
 // covered by ScopedListTab.test.tsx/useScopedEntityList.test.ts. Stubbed here so
 // this file only proves LocationDetail's OWN wiring (right scope/id per sub-tab).
 vi.mock('./ScopedVacanciesTab', () => ({
-  default: ({ scope, id }: { scope: string; id?: string }) => <div data-testid="scoped-vacancies">{scope}:{id}</div>,
+  default: ({ scope, id, customerId, customerName, scopeName }: { scope: string; id?: string; customerId?: string; customerName?: string; scopeName?: string }) =>
+    <div data-testid="scoped-vacancies">{scope}:{id}:{customerId}:{customerName}:{scopeName}</div>,
 }))
 vi.mock('./ScopedMatchesTab', () => ({
-  default: ({ scope, id }: { scope: string; id?: string }) => <div data-testid="scoped-matches">{scope}:{id}</div>,
+  default: ({ scope, id, customerId }: { scope: string; id?: string; customerId?: string }) =>
+    <div data-testid="scoped-matches">{scope}:{id}:{customerId}</div>,
 }))
 
 beforeEach(() => { vi.clearAllMocks(); mockPost.mockResolvedValue({ status: 202, data: {} }) })
@@ -102,7 +107,7 @@ const location = (overrides: Partial<Location> = {}): Location => ({
 
 // Every required prop the component reads — kept minimal, only onSave is asserted.
 const baseProps = {
-  customerId: 'cust-1', locations: [], departments: [], contacts: [],
+  customerId: 'cust-1', customerName: 'Zorggroep A', locations: [], departments: [], contacts: [],
   statuses, departmentStatuses: [] as LookupOption[], contactStatuses: [] as LookupOption[],
   onDelete: vi.fn(), onAddDepartment: vi.fn(), onUpdateDepartment: vi.fn(), onRemoveDepartment: vi.fn(),
   onAddContact: vi.fn(), onUpdateContact: vi.fn(), onRemoveContact: vi.fn(), close: vi.fn(),
@@ -301,6 +306,12 @@ describe('LocationDetail · one contact block, one truth (round two)', () => {
    * ter plaatse is aangegeven als primaire contactpersoon van deze vestiging!!" Proven here:
    * with typed on-site text but no coupled contact, the screen must never claim "no contact",
    * and there must be only ONE contact heading, never two disagreeing ones.
+   *
+   * ONE-CLICK-COUPLE-2 (Danny, third escalation) updated this test's own expectation: the
+   * italic "not linked" text used to be the only next step here — now the no-match dead end
+   * offers the promoted create-and-link action instead (see the describe block below for the
+   * full create+couple behaviour), so the warning copy is gone precisely BECAUSE the button
+   * replaced it, not because the contradiction crept back in.
    */
   it('does not claim there is no contact when on-site text is filled but not yet coupled — the reported contradiction', () => {
     render(<LocationDetail location={location({ contactName: 'Sanne de Vries', email: 'locatie1@example.test', phone: '+31104811775' })}
@@ -311,7 +322,8 @@ describe('LocationDetail · one contact block, one truth (round two)', () => {
     // as not yet linked, rather than presented as a second, competing truth.
     expect(screen.getByText('Sanne de Vries')).toBeInTheDocument()
     expect(screen.getByText('locatie1@example.test')).toBeInTheDocument()
-    expect(screen.getByText(ct('locations.detail.contactNotLinked'))).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: ct('locations.detail.createAndLink') })).toBeInTheDocument()
+    expect(screen.queryByText(ct('locations.detail.contactNotLinked'))).not.toBeInTheDocument()
     // Never a second, separate "Primaire contactpersoon" heading competing with this one.
     expect(screen.queryByText(ct('locations.detail.primaryContactTitle'))).not.toBeInTheDocument()
   })
@@ -419,6 +431,97 @@ describe('LocationDetail · one-click couple on a unique email match (ONE-CLICK-
     // all from props updated by the real event, never a manual re-render/reload.
     await waitFor(() => expect(screen.getByRole('button', { name: 'Joost de Boer' })).toBeInTheDocument())
     expect(screen.queryByText(ct('locations.detail.contactNotLinked'))).not.toBeInTheDocument()
+  })
+})
+
+/**
+ * ONE-CLICK-COUPLE-2 (Danny, third escalation: "Waarom staat dit er nog steeds!!") — every
+ * seeded location shows the fallback because the one-click couple above only fires on a
+ * UNIQUE match, and most seeded/typed text matches nobody (a location mailbox email, a
+ * pool-generated name). This closes THAT dead end: the no-match branch gets a second,
+ * PROMOTED action that creates the missing contact from the typed text, then couples it the
+ * exact same way `coupleMatch` does — one click instead of a manual detour to Contactpersonen.
+ *
+ * These tests exercise the REAL (unmocked) setLocationPrimaryContact — only `api.put` is
+ * stubbed (`mockPut`) — so a successful click proves the real CONTACTS_CHANGED_EVENT chain,
+ * same discipline as the ONE-CLICK-COUPLE-1 tests above. `onAddContact` is a per-test mock —
+ * this is the container boundary LocationContactSection actually owns; the real POST body
+ * that mock stands in for is covered separately by useCustomerContacts.test.ts's own `add()` tests.
+ */
+describe('LocationDetail · create contact and link on a no-match dead end (ONE-CLICK-COUPLE-2)', () => {
+  it('(a) renders the promoted create-and-link button on a no-match dead end, with the italic warning hidden', () => {
+    render(<LocationDetail location={location({ contactName: 'Sanne de Vries', email: 'locatie1@example.test' })} onSave={vi.fn()} {...baseProps}
+      contacts={[]} />)
+
+    expect(screen.getByRole('button', { name: ct('locations.detail.createAndLink') })).toBeInTheDocument()
+    expect(screen.queryByText(ct('locations.detail.contactNotLinked'))).not.toBeInTheDocument()
+    // The manual pick stays available too — it is now the SECONDARY way to link a
+    // DIFFERENT existing person, not the only option.
+    expect(screen.getByRole('button', { name: ct('locations.detail.pickPrimaryContact') })).toBeInTheDocument()
+  })
+
+  it('(b) click: calls onAddContact with the split name/email/phone, THEN PUTs the primary coupling with the returned id, in that order', async () => {
+    const user = userEvent.setup()
+    const calls: string[] = []
+    const onAddContact = vi.fn(async () => { calls.push('contact'); return { id: 'con-new', name: 'Sanne de Vries' } as Contact })
+    mockPut.mockImplementation(async () => {
+      calls.push('couple')
+      return { data: { data: { id: 'con-new', locations: [{ id: 'loc-1', name: 'Hoofdlocatie', is_primary: true }] } } }
+    })
+    render(<LocationDetail location={location({ contactName: 'Sanne de Vries', email: 'locatie1@example.test', phone: '+31104811775' })}
+      onSave={vi.fn()} {...baseProps} contacts={[]} onAddContact={onAddContact} />)
+
+    await user.click(screen.getByRole('button', { name: ct('locations.detail.createAndLink') }))
+
+    await waitFor(() => expect(mockPut).toHaveBeenCalledWith('/customers/cust-1/contacts/con-new/locations/loc-1/primary'))
+    // The split name (first word -> firstName, rest -> lastName) plus the location's own
+    // typed email/phone ride along — the request body, not just that a callback fired (§13).
+    expect(onAddContact).toHaveBeenCalledWith(expect.objectContaining({
+      firstName: 'Sanne', lastName: 'de Vries', email: 'locatie1@example.test', phone: '+31104811775',
+    }))
+    // Order matters: the coupling PUT must never fire before the contact itself exists.
+    expect(calls).toEqual(['contact', 'couple'])
+    expect(notifySuccess).toHaveBeenCalledWith(ct('locations.detail.setPrimaryContactDone', { name: 'Sanne de Vries' }))
+  })
+
+  it('(c) contact-create failure: one honest toast, nothing lost, no coupling attempted', async () => {
+    const user = userEvent.setup()
+    const onAddContact = vi.fn().mockRejectedValue(new Error('422 required first_name'))
+    render(<LocationDetail location={location({ contactName: 'Sanne de Vries', email: 'locatie1@example.test' })}
+      onSave={vi.fn()} {...baseProps} contacts={[]} onAddContact={onAddContact} />)
+
+    await user.click(screen.getByRole('button', { name: ct('locations.detail.createAndLink') }))
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(ct('locations.detail.createContactFailed')))
+    expect(mockPut).not.toHaveBeenCalled()
+    // The block stays on the exact same fallback render — nothing to reconcile.
+    expect(screen.getByRole('button', { name: ct('locations.detail.createAndLink') })).toBeInTheDocument()
+  })
+
+  it('(c) coupling fails after a successful create: the contact stays created, one honest toast, block stays in fallback', async () => {
+    const user = userEvent.setup()
+    const onAddContact = vi.fn().mockResolvedValue({ id: 'con-new', name: 'Sanne de Vries' } as Contact)
+    mockPut.mockRejectedValue(new Error('network'))
+    render(<LocationDetail location={location({ contactName: 'Sanne de Vries', email: 'locatie1@example.test' })}
+      onSave={vi.fn()} {...baseProps} contacts={[]} onAddContact={onAddContact} />)
+
+    await user.click(screen.getByRole('button', { name: ct('locations.detail.createAndLink') }))
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(ct('locations.detail.setPrimaryContactFailed')))
+    // Never rolled back: the create call happened and stays that way — the fallback UI
+    // (still driven by the CALLER's own `contacts` prop, which this failure never updates)
+    // simply keeps showing this same render; a real reload would find the new contact via
+    // the unique-match button above once the caller's list refreshes.
+    expect(onAddContact).toHaveBeenCalledTimes(1)
+    expect(screen.queryByRole('button', { name: 'Sanne de Vries' })).toBeNull()
+  })
+
+  it('(d) unique-match case is unchanged: its own "Koppel {name}" button renders, not the create-and-link one', () => {
+    render(<LocationDetail location={location({ contactName: 'Joost de Boer', email: 'joost@klant.test' })} onSave={vi.fn()} {...baseProps}
+      contacts={[contactFixture()]} />)
+
+    expect(screen.getByRole('button', { name: ct('locations.detail.linkNamed', { name: 'Joost de Boer' }) })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: ct('locations.detail.createAndLink') })).toBeNull()
   })
 })
 
@@ -552,11 +655,29 @@ describe('LocationDetail · Vacatures/Matches sub-tabs', () => {
     expect(screen.getByTestId('scoped-vacancies')).toHaveTextContent('location:loc-1')
   })
 
+  // Point 1 (Danny's ten-point round): "+ Vacature"/"+ Match" from a scoped
+  // sub-tab need the customer too — this location knows it, so it passes it on
+  // (ScopedVacanciesTab also needs the customer NAME, for its lock display).
+  it('also threads customerId/customerName/scopeName into ScopedVacanciesTab (point 1)', async () => {
+    const user = userEvent.setup()
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.vacancies') }))
+    expect(screen.getByTestId('scoped-vacancies')).toHaveTextContent('location:loc-1:cust-1:Zorggroep A:Hoofdlocatie')
+  })
+
   it('wires the location scope + id into ScopedMatchesTab', async () => {
     const user = userEvent.setup()
     render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
     await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.matches') }))
     expect(screen.getByTestId('scoped-matches')).toHaveTextContent('location:loc-1')
+  })
+
+  // Point 1: "+ Match" needs the customer id to prefill MatchModal's cascade.
+  it('also threads customerId into ScopedMatchesTab (point 1)', async () => {
+    const user = userEvent.setup()
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.matches') }))
+    expect(screen.getByTestId('scoped-matches')).toHaveTextContent('location:loc-1:cust-1')
   })
 })
 

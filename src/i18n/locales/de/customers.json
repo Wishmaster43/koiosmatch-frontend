@@ -226,10 +226,12 @@
       "setPrimaryContactDone": "{{name}} ist jetzt der primäre Ansprechpartner dieses Standorts.",
       "setPrimaryContactFailed": "Der primäre Ansprechpartner konnte nicht gesetzt werden.",
       "setPrimaryContactUnavailable": "Der Server hat dies noch nicht übernommen. Versuchen Sie es erneut, sobald die Datenbank aktualisiert ist.",
+      "createContactFailed": "Der Kontakt konnte nicht erstellt werden.",
       "primaryContactTitle": "Primärer Ansprechpartner",
       "noPrimaryContact": "Noch kein primärer Ansprechpartner für diesen Standort",
       "pickPrimaryContact": "Primären Ansprechpartner wählen",
       "linkNamed": "{{name}} verknüpfen",
+      "createAndLink": "Kontakt erstellen und verknüpfen",
       "description": "Standorttext",
       "contactNotLinked": "Nur Text — noch nicht mit einem Ansprechpartner verknüpft",
       "changePrimaryContact": "Ansprechpartner ändern"
@@ -651,7 +653,8 @@
   },
   "matches": {
     "loadError": "Matches konnten nicht geladen werden.",
-    "searchPlaceholder": "Match suchen…"
+    "searchPlaceholder": "Match suchen…",
+    "add": "Neuer Match"
   },
   "scopedList": {
     "vacanciesEmpty": "Noch keine Stellen.",

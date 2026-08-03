@@ -226,10 +226,12 @@
       "setPrimaryContactDone": "{{name}} is nu de primaire contactpersoon van deze locatie.",
       "setPrimaryContactFailed": "Instellen van de primaire contactpersoon is niet gelukt.",
       "setPrimaryContactUnavailable": "De server heeft dit nog niet doorgevoerd. Probeer het opnieuw nadat de database is bijgewerkt.",
+      "createContactFailed": "Aanmaken van de contactpersoon is niet gelukt.",
       "primaryContactTitle": "Primaire contactpersoon",
       "noPrimaryContact": "Nog geen primaire contactpersoon voor deze locatie",
       "pickPrimaryContact": "Kies een primaire contactpersoon",
       "linkNamed": "Koppel {{name}}",
+      "createAndLink": "Maak contactpersoon en koppel",
       "description": "Locatietekst",
       "contactNotLinked": "Alleen tekst — nog niet gekoppeld aan een contactpersoon",
       "changePrimaryContact": "Wijzig contactpersoon"
@@ -651,7 +653,8 @@
   },
   "matches": {
     "loadError": "Matches konden niet worden geladen.",
-    "searchPlaceholder": "Zoek match…"
+    "searchPlaceholder": "Zoek match…",
+    "add": "Nieuwe match"
   },
   "scopedList": {
     "vacanciesEmpty": "Nog geen vacatures.",

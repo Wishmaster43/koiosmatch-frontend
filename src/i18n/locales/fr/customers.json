@@ -226,10 +226,12 @@
       "setPrimaryContactDone": "{{name}} est désormais le contact principal de ce site.",
       "setPrimaryContactFailed": "Impossible de définir le contact principal.",
       "setPrimaryContactUnavailable": "Le serveur n'a pas encore appliqué cette modification. Réessayez une fois la base de données mise à jour.",
+      "createContactFailed": "Impossible de créer le contact.",
       "primaryContactTitle": "Contact principal",
       "noPrimaryContact": "Pas encore de contact principal pour ce site",
       "pickPrimaryContact": "Choisir un contact principal",
       "linkNamed": "Lier {{name}}",
+      "createAndLink": "Créer le contact et le lier",
       "description": "Texte du site",
       "contactNotLinked": "Texte seul — pas encore lié à un contact",
       "changePrimaryContact": "Modifier le contact"
@@ -651,7 +653,8 @@
   },
   "matches": {
     "loadError": "Impossible de charger les matchs.",
-    "searchPlaceholder": "Rechercher un match…"
+    "searchPlaceholder": "Rechercher un match…",
+    "add": "Nouveau match"
   },
   "scopedList": {
     "vacanciesEmpty": "Aucun poste pour le moment.",

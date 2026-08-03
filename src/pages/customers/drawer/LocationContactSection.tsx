@@ -6,7 +6,8 @@ import SectionCard from '@/components/ui/SectionCard'
 import ContactNameLink from './ContactNameLink'
 import { emailValue, phoneValue } from '@/components/drawer/contactLinks'
 import { notifyError, notifySuccess } from '@/lib/notify'
-import { setLocationPrimaryContact } from '../hooks/useCustomerContacts'
+import { setLocationPrimaryContact, splitContactName } from '../hooks/useCustomerContacts'
+import type { ContactPayload } from '../hooks/useCustomerContacts'
 import type { Contact } from '@/types/customer'
 import type { Id } from '@/types/common'
 
@@ -26,6 +27,11 @@ interface Props {
   contacts: Contact[]
   customerId?: Id
   locationId: Id
+  // ONE-CLICK-COUPLE-2 (Danny, third escalation): the real `useCustomerContacts().add`,
+  // threaded down from CustomerDrawer via LocationsTab → LocationDetail (mirrors the
+  // identical AddLocationModal threading) — needed to create a real contact record for
+  // the no-match dead end below, before coupling it the same way `coupleMatch` does.
+  onAddContact?: (payload: ContactPayload) => Promise<Contact | void> | void
 }
 
 // One label-left/value-right row — mirrors the field-table convention this block replaces.
@@ -83,7 +89,7 @@ const LinkMatchButton = ({ label, onClick, busy }: { label: string; onClick: () 
  */
 export default function LocationContactSection({
   primaryContact, legacyName, legacyEmail, legacyPhone, onOpenContact, onPickContact,
-  contacts, customerId, locationId,
+  contacts, customerId, locationId, onAddContact,
 }: Props) {
   const { t } = useTranslation('customers')
   const typedName = legacyName.trim()
@@ -110,6 +116,13 @@ export default function LocationContactSection({
   // of offering a button that would 404 on /customers/undefined/….
   const canCouple = uniqueMatch != null && customerId != null
 
+  // ONE-CLICK-COUPLE-2 (Danny, third escalation: "Waarom staat dit er nog steeds!!") —
+  // closes the case `canCouple` above leaves dead: typed text that names NOBODY in this
+  // customer's contact list (a location mailbox email + a pool-generated name is the
+  // common seeded shape). Offered only when there is an actual name to split into a
+  // contact AND a route to create/couple it through — same shape of guard as `canCouple`.
+  const canCreateAndLink = !canCouple && customerId != null && typedName.length > 0 && typeof onAddContact === 'function'
+
   // In-flight guard so a double click cannot fire the PUT twice; calls the exact same
   // route ContactsPanel's star action does, so the owning hook's CONTACTS_CHANGED_EVENT
   // listener refetches the customer's contacts and this section re-renders into its
@@ -129,6 +142,46 @@ export default function LocationContactSection({
     } finally {
       setCoupling(false)
     }
+  }
+
+  // ONE-CLICK-COUPLE-2: the no-match dead end, closed in two sequenced steps — never
+  // bundled into one call, because each half has its own honest failure. STEP 1 creates
+  // the real contact from the typed text (same `useCustomerContacts().add` route
+  // AddLocationModal's own create-then-couple chain uses, §11 — reused, not reinvented);
+  // a create failure (e.g. a genuinely one-word name 422ing, see splitContactName) loses
+  // nothing — no location touched, no coupling attempted — and reports once. Only once
+  // step 1 actually resolves with a real id does STEP 2 run: couple that new contact as
+  // this location's primary via the exact same route `coupleMatch` above uses. A step-2
+  // failure leaves the just-created contact record intact (never rolled back) and the
+  // block stays on this same fallback render — the `canCouple` branch above will then
+  // find that new contact on the very next render (its email now matches it uniquely),
+  // so recovering needs nothing more than the unique-match button that already exists.
+  const [creating, setCreating] = useState(false)
+  const createAndLink = async () => {
+    if (!customerId || !onAddContact || creating || coupling) return
+    setCreating(true)
+    let newContact: Contact | void
+    try {
+      newContact = await onAddContact({
+        ...splitContactName(typedName), middleName: '', email: legacyEmail.trim(), phone: legacyPhone.trim(), mobile: '',
+        gender: '', role: '', locationId: null, departmentId: null, locationIds: [], departmentIds: [],
+        statusId: null, isPrimary: false, customFields: {},
+      })
+    } catch {
+      notifyError(t('locations.detail.createContactFailed'))
+      setCreating(false)
+      return
+    }
+    if (newContact?.id) {
+      try {
+        const applied = await setLocationPrimaryContact(customerId, newContact.id, locationId)
+        if (applied) notifySuccess(t('locations.detail.setPrimaryContactDone', { name: newContact.name }))
+        else notifyError(t('locations.detail.setPrimaryContactUnavailable'))
+      } catch {
+        notifyError(t('locations.detail.setPrimaryContactFailed'))
+      }
+    }
+    setCreating(false)
   }
 
   return (
@@ -160,14 +213,24 @@ export default function LocationContactSection({
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 4 }}>
             {/* One message, not two (Danny 03-08 "waarom zie ik dit?"): when the system is
                 sure enough to offer a NAMED one-click couple, the warning text is noise —
-                the button IS the message. The italic warning only remains for the
-                genuinely ambiguous case where the manual pick is the only way forward. */}
+                the button IS the message. ONE-CLICK-COUPLE-2 extends the same rule to the
+                no-match case: "create contact and link" is now the PROMOTED primary
+                action there, with the manual pick kept only as the secondary way to link
+                a DIFFERENT existing person — so the warning also hides whenever that
+                create-and-couple action is on offer. It survives only for the genuinely
+                ambiguous case (no name typed, or the customer id / add-route is missing)
+                where a manual pick is the sole way forward. */}
             {canCouple && uniqueMatch
               ? <LinkMatchButton label={t('locations.detail.linkNamed', { name: uniqueMatch.name })} onClick={() => void coupleMatch()} busy={coupling} />
-              : <>
-                  <span style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--color-warning)' }}>{t('locations.detail.contactNotLinked')}</span>
-                  <PickButton label={pickLabel} onClick={onPickContact} />
-                </>}
+              : canCreateAndLink
+                ? <>
+                    <LinkMatchButton label={t('locations.detail.createAndLink')} onClick={() => void createAndLink()} busy={creating} />
+                    <PickButton label={pickLabel} onClick={onPickContact} />
+                  </>
+                : <>
+                    <span style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--color-warning)' }}>{t('locations.detail.contactNotLinked')}</span>
+                    <PickButton label={pickLabel} onClick={onPickContact} />
+                  </>}
           </div>
         </div>
       ) : (

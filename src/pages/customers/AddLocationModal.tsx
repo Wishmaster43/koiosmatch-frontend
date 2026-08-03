@@ -39,7 +39,7 @@ import { cardHead, cardBox, row2, row3Even, row } from '@/components/ui/modalCar
 import SubEntityImportCard from './SubEntityImportCard'
 import ContactOnSiteCard from './locationmodal/ContactOnSiteCard'
 import { useImportWizard } from '@/pages/settings/sections/importeren/useImportWizard'
-import { setLocationPrimaryContact } from './hooks/useCustomerContacts'
+import { setLocationPrimaryContact, splitContactName } from './hooks/useCustomerContacts'
 import type { LocationPayload } from './hooks/useCustomerLocations'
 import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Location, Contact } from '@/types/customer'
@@ -58,22 +58,6 @@ const pickerStyle = { padding: '8px 11px', borderRadius: 8, fontSize: 13 } as co
 // one-off column split only this card needs, built from the shared `row()`.
 const rowStreet = row('2fr 1fr 1fr')
 const rowPostal = row('1fr 2fr')
-
-// CONTACT-PRIMAIR-LOCATIE-2 (Danny: closes the "you typed Joost de Boer and Joost
-// knows nothing about it" gap for a BRAND-NEW name): splits the single typed name
-// into the ContactPayload's separate first/last fields — first word -> firstName,
-// the rest -> lastName. A lone word carries no signal for which part it is, so it
-// goes wholly into lastName rather than fabricating a firstName nobody typed
-// (§0.2 "honestly"). The backend requires BOTH fields non-empty on create
-// (CustomerContactController::validateContact), so a genuinely one-word name still
-// 422s on the contact-create call below — that failure surfaces through the same
-// honest toast as any other contact-create failure, never silently swallowed.
-const splitContactName = (raw: string): Pick<ContactPayload, 'firstName' | 'lastName'> => {
-  const words = raw.trim().split(/\s+/).filter(Boolean)
-  return words.length > 1
-    ? { firstName: words[0], lastName: words.slice(1).join(' ') }
-    : { firstName: '', lastName: words[0] ?? '' }
-}
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 // No billing_email entry (Danny 2026-07-22): that field has no input here anymore

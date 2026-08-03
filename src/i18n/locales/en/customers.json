@@ -226,10 +226,12 @@
       "setPrimaryContactDone": "{{name}} is now the primary contact for this location.",
       "setPrimaryContactFailed": "Could not set the primary contact.",
       "setPrimaryContactUnavailable": "The server has not applied this yet. Try again once the database has been updated.",
+      "createContactFailed": "Could not create the contact person.",
       "primaryContactTitle": "Primary contact",
       "noPrimaryContact": "No primary contact for this location yet",
       "pickPrimaryContact": "Choose a primary contact",
       "linkNamed": "Link {{name}}",
+      "createAndLink": "Create contact and link",
       "description": "Location text",
       "contactNotLinked": "Text only — not yet linked to a contact person",
       "changePrimaryContact": "Change contact person"
@@ -651,7 +653,8 @@
   },
   "matches": {
     "loadError": "Could not load matches.",
-    "searchPlaceholder": "Search match…"
+    "searchPlaceholder": "Search match…",
+    "add": "New match"
   },
   "scopedList": {
     "vacanciesEmpty": "No vacancies yet.",
