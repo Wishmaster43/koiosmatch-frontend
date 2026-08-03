@@ -59,7 +59,10 @@ interface Props {
   onAddDepartment: (payload: DepartmentPayload, locationName?: string) => void
   onUpdateDepartment: (id: Id, payload: Partial<DepartmentPayload>, locationName?: string) => void
   onRemoveDepartment: (id: Id) => void
-  onAddContact: (payload: ContactPayload) => void
+  // CONTACT-PRIMAIR-LOCATIE-2: widened from `=> void` — the real `useCustomerContacts().add`
+  // (threaded in from CustomerDrawer) already resolves with the saved contact row; AddLocationModal
+  // needs that id to couple a brand-new typed name as the location's primary contact.
+  onAddContact: (payload: ContactPayload) => Promise<Contact | void> | void
   onUpdateContact: (id: Id, payload: Partial<ContactPayload>) => void
   onRemoveContact: (id: Id) => void
 }
@@ -164,12 +167,14 @@ export default function LocationsTab({
         <DataTable columns={columns} rows={visible} onRowClick={l => setOpenId(l.id as Id)} emptyText={t('locations.empty')} />
       </div>
       {adding && (
-        // customerId + existingContacts (CONTACT-PRIMAIR-LOCATIE-1): both already live
-        // in this component's own props, just never reached the modal — needed so the
-        // "contact ter plaatse" picker can offer this customer's real contacts and, once
-        // one is picked, couple it as this new location's primary contact after create.
+        // customerId + existingContacts (CONTACT-PRIMAIR-LOCATIE-1) and onAddContact
+        // (CONTACT-PRIMAIR-LOCATIE-2) all already live in this component's own props,
+        // just never reached the modal — needed so the "contact ter plaatse" picker can
+        // offer this customer's real contacts, couple a PICKED one as this new location's
+        // primary contact after create, or CREATE a brand-new one first when the typed
+        // name matches nobody, then couple that.
         <AddLocationModal customerName={customerName} customerId={customerId} statuses={statuses} existingContacts={contacts}
-          onCreate={onAddLocation} onClose={() => setAdding(false)} />
+          onCreate={onAddLocation} onAddContact={onAddContact} onClose={() => setAdding(false)} />
       )}
     </>
   )

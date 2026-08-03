@@ -15,6 +15,7 @@ import LocationsTab from './LocationsTab'
 import type { Location } from '@/types/customer'
 
 const cm = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
+const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
 
 // Defensive mocks — LocationsTab only renders the list (no row is clicked here), but
 // its module graph pulls in LocationDetail/AddLocationModal, which reach these hooks.
@@ -162,5 +163,39 @@ describe('LocationsTab · pager steps through the caller\'s OWN filtered rows (D
     expect(within(screen.getByRole('navigation')).getByText('Vestiging Bravo')).toBeInTheDocument()
     expect(screen.getByTitle(cm('drillPager.nextAt', { index: 2, total: 2 }))).toBeInTheDocument()
     expect(screen.getByRole('button', { name: cm('drillPager.next') })).toBeDisabled()
+  })
+})
+
+/**
+ * CONTACT-PRIMAIR-LOCATIE-2: `onAddContact` used to be threaded all the way down
+ * to LocationDetail's nested contact list but never reached AddLocationModal's own
+ * "+ Locatie toevoegen" popup — so a typed brand-new "contact ter plaatse" name had
+ * no way to become a real contact record. Proves the real handler (not just any
+ * function) actually arrives at the modal by driving the whole create flow through
+ * this component, exactly the way CustomerDrawer wires it in production.
+ */
+describe('LocationsTab · threads the real onAddContact into AddLocationModal (CONTACT-PRIMAIR-LOCATIE-2)', () => {
+  it('a typed brand-new "contact ter plaatse" name reaches the onAddContact this tab received as a prop', async () => {
+    const user = userEvent.setup()
+    const onAddLocation = vi.fn().mockResolvedValue({ id: 'loc-99', name: 'Hoofdlocatie' })
+    const onAddContact = vi.fn().mockResolvedValue(undefined)
+    render(<LocationsTab {...base} onAddLocation={onAddLocation} onAddContact={onAddContact} />)
+
+    await user.click(screen.getByRole('button', { name: ct('locations.add') }))
+    // The trigger click is scoped to the dialog: the table BEHIND it also has a
+    // sortable "Naam" column header — subModal.contactName resolves to the same
+    // word, so an unscoped query would collide with it. The picker's OWN dropdown
+    // (search input + option buttons) renders in a portal outside the dialog once
+    // open, so those later queries stay on the unscoped `screen`.
+    const dialog = within(screen.getByRole('dialog'))
+    await user.type(dialog.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
+    await user.click(dialog.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
+    const search = screen.getByPlaceholderText(ct('subModal.contactName'))
+    await user.type(search, 'Nieuwe Persoon')
+    await user.click(screen.getByRole('button', { name: /Nieuwe Persoon/ }))
+    await user.click(dialog.getByRole('button', { name: ct('subModal.create') }))
+
+    // Reached with the split-name payload — proves it is the REAL add handler, not dropped.
+    await waitFor(() => expect(onAddContact).toHaveBeenCalledWith(expect.objectContaining({ firstName: 'Nieuwe', lastName: 'Persoon' })))
   })
 })

@@ -14,6 +14,13 @@
  * `country` code, this one is a free-text string (BE `country` column, default
  * "Nederland") with no lookup behind it — turning it into an ISO-2 picker would
  * silently change what gets submitted, out of scope for a layout-only pass.
+ *
+ * CONTACT-PRIMAIR-LOCATIE-2: the "contact ter plaatse" picker's two paths now BOTH
+ * end in a real coupling. Picking an existing contact was already wired
+ * (CONTACT-PRIMAIR-LOCATIE-1); typing a brand-new name used to only write the
+ * location's own free-text column, leaving it "not linked" forever — submit() now
+ * also creates the missing CONTACT record (via `onAddContact`) before coupling it,
+ * see submit() for the sequencing/failure handling.
  */
 import { useState, useEffect } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
@@ -34,6 +41,7 @@ import SubEntityImportCard from './SubEntityImportCard'
 import { useImportWizard } from '@/pages/settings/sections/importeren/useImportWizard'
 import { setLocationPrimaryContact } from './hooks/useCustomerContacts'
 import type { LocationPayload } from './hooks/useCustomerLocations'
+import type { ContactPayload } from './hooks/useCustomerContacts'
 import type { Location, Contact } from '@/types/customer'
 import type { LookupOption, Id } from '@/types/common'
 
@@ -51,6 +59,22 @@ const pickerStyle = { padding: '8px 11px', borderRadius: 8, fontSize: 13 } as co
 const rowStreet = row('2fr 1fr 1fr')
 const rowPostal = row('1fr 2fr')
 
+// CONTACT-PRIMAIR-LOCATIE-2 (Danny: closes the "you typed Joost de Boer and Joost
+// knows nothing about it" gap for a BRAND-NEW name): splits the single typed name
+// into the ContactPayload's separate first/last fields — first word -> firstName,
+// the rest -> lastName. A lone word carries no signal for which part it is, so it
+// goes wholly into lastName rather than fabricating a firstName nobody typed
+// (§0.2 "honestly"). The backend requires BOTH fields non-empty on create
+// (CustomerContactController::validateContact), so a genuinely one-word name still
+// 422s on the contact-create call below — that failure surfaces through the same
+// honest toast as any other contact-create failure, never silently swallowed.
+const splitContactName = (raw: string): Pick<ContactPayload, 'firstName' | 'lastName'> => {
+  const words = raw.trim().split(/\s+/).filter(Boolean)
+  return words.length > 1
+    ? { firstName: words[0], lastName: words.slice(1).join(' ') }
+    : { firstName: '', lastName: words[0] ?? '' }
+}
+
 // 422 field-error keys are snake_case; map them back to this form's field names.
 // No billing_email entry (Danny 2026-07-22): that field has no input here anymore
 // (facturatie always comes from the customer), so there is nothing to blame it on.
@@ -65,7 +89,7 @@ const API_TO_FORM: Record<string, string> = {
 }
 
 export default function AddLocationModal({
-  onClose, onCreate, onImported, customerId, customerName, statuses = [], initial, existingContacts = [],
+  onClose, onCreate, onImported, onAddContact, customerId, customerName, statuses = [], initial, existingContacts = [],
 }: {
   onClose: () => void
   onCreate?: (v: LocationPayload) => Promise<Location | void> | void
@@ -80,6 +104,11 @@ export default function AddLocationModal({
   initial?: Location | null
   /** This customer's already-loaded contacts — feeds the "contact ter plaatse" picker. */
   existingContacts?: Contact[]
+  // CONTACT-PRIMAIR-LOCATIE-2: creates a REAL contact record for a typed brand-new
+  // name (as opposed to picking one of `existingContacts`) — the real
+  // `useCustomerContacts().add`, threaded down from CustomerDrawer, resolves with
+  // the saved row so its id can be coupled as this location's primary below.
+  onAddContact?: (payload: ContactPayload) => Promise<Contact | void> | void
 }) {
   const { t } = useTranslation(['customers', 'common'])
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
@@ -194,6 +223,34 @@ export default function AddLocationModal({
           if (!applied) notifyError(t('locations.detail.setPrimaryContactUnavailable'))
         } catch {
           notifyError(t('subModal.contactCouplingFailed', { name: created.name }))
+        }
+      } else if (!pickedContactId && customerId && created?.id && form.contactName.trim()) {
+        // CONTACT-PRIMAIR-LOCATIE-2: a typed name that matched no existing contact
+        // used to stay dead free text forever (LocationContactSection's "not linked"
+        // warning). Close that gap — create the missing contact record first, THEN
+        // couple it as this location's primary the same way the pick-existing branch
+        // above does. Each step is independent: a location that was created stays
+        // created regardless of what follows, and a contact that WAS created stays
+        // created even if the coupling PUT then fails — no rollback theatre, one
+        // honest toast per failure. `email`/`phone` ride along from the same "Contact
+        // ter plaatse" card so the new record is not a bare name-only shell; the free-
+        // text columns on the location itself are untouched (still written above).
+        try {
+          const newContact = await onAddContact?.({
+            ...splitContactName(form.contactName), middleName: '', email: form.email, phone: form.phone, mobile: '',
+            gender: '', role: '', locationId: null, departmentId: null, locationIds: [], departmentIds: [],
+            statusId: null, isPrimary: false, customFields: {},
+          })
+          if (newContact?.id) {
+            try {
+              const applied = await setLocationPrimaryContact(customerId, newContact.id, created.id)
+              if (!applied) notifyError(t('locations.detail.setPrimaryContactUnavailable'))
+            } catch {
+              notifyError(t('subModal.contactCouplingFailed', { name: created.name }))
+            }
+          }
+        } catch {
+          notifyError(t('subModal.contactCreateFailed', { name: created.name }))
         }
       }
       onClose()
@@ -320,16 +377,18 @@ export default function AddLocationModal({
           <div>
             <div style={cardHead}>{t('subModal.groups.contact')}</div>
             <div style={cardBox}>
-              {/* CONTACT-PRIMAIR-LOCATIE-1 (Danny: "je typt Joost de Boer in en Joost
+              {/* CONTACT-PRIMAIR-LOCATIE-1/2 (Danny: "je typt Joost de Boer in en Joost
                   weet er niets van"): CREATE offers a real choice — pick one of this
-                  customer's existing contacts (a real coupling, made primary-for-this-
-                  site once the location exists, see submit()) or type a brand-new name
-                  (kept exactly as before: a free-text label only, no contact record).
+                  customer's existing contacts, OR type a brand-new name — both now end
+                  in a real coupling, made primary-for-this-site once the location exists
+                  (see submit()): picking an existing one couples it directly; typing a
+                  new one creates the missing contact record first, then couples it.
                   EDIT keeps the plain text field — the real per-site primary contact is
                   already properly editable from LocationDetail's own SectionCard, so
                   duplicating that mechanism here would be a second, conflicting UI for
-                  the same fact. `email`/`phone` are untouched free-text columns in both
-                  modes (see this file's report for why they stay). */}
+                  the same fact. `email`/`phone` stay untouched free-text columns on the
+                  LOCATION in both modes (see this file's report for why they stay) —
+                  they also ride along into the new contact record on the typed-new path. */}
               {isEdit ? (
                 <Field label={t('subModal.contactName')}><TextField value={form.contactName} onChange={v => set('contactName', v)} /></Field>
               ) : (

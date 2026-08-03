@@ -241,22 +241,6 @@ describe('AddLocationModal · contact ter plaatse (Danny: "je typt Joost de Boer
     expect(await screen.findByRole('button', { name: 'Sanne Bakker — Teamleider' })).toBeInTheDocument()
   })
 
-  it('typing a brand-new name still works — no coupling is attempted for a name that matches nobody', async () => {
-    const onCreate = vi.fn().mockResolvedValue({ id: 'loc-99', name: 'Hoofdlocatie' } as unknown as Location)
-    const user = userEvent.setup()
-    render(<AddLocationModal onClose={() => {}} onCreate={onCreate} customerId="cust-1" statuses={statuses} existingContacts={existingContacts} />)
-
-    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
-    await user.click(screen.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
-    const search = screen.getByPlaceholderText(ct('subModal.contactName'))
-    await user.type(search, 'Piet Nieuwkomer')
-    await user.click(screen.getByRole('button', { name: /Piet Nieuwkomer/ }))
-    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
-
-    await waitFor(() => expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ contactName: 'Piet Nieuwkomer' })))
-    expect(setLocationPrimaryContact).not.toHaveBeenCalled()
-  })
-
   it('reports a failed coupling honestly instead of pretending it worked — the location stays created', async () => {
     const onClose = vi.fn()
     const onCreate = vi.fn().mockResolvedValue({ id: 'loc-99', name: 'Hoofdlocatie' } as unknown as Location)
@@ -274,6 +258,141 @@ describe('AddLocationModal · contact ter plaatse (Danny: "je typt Joost de Boer
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
     // But the failure is surfaced, never silently swallowed as a bare success.
     expect(notifyError).toHaveBeenCalledWith(ct('subModal.contactCouplingFailed', { name: 'Hoofdlocatie' }))
+  })
+})
+
+// CONTACT-PRIMAIR-LOCATIE-2: the last gap — typing a NEW name (matching no existing
+// contact) used to only write the location's free-text column, never a real record.
+describe('AddLocationModal · typing a brand-new contact now creates + couples it (CONTACT-PRIMAIR-LOCATIE-2)', () => {
+  const existingContacts = [contact({ id: 'c-1', name: 'Joost de Boer' })]
+
+  it('the request order: location, THEN the new contact, THEN the primary coupling — with the split name and carried-over email/phone', async () => {
+    // Each mock records its own call into `calls` so the ORDER (not just the fact
+    // each fired) is asserted — a contact must never be coupled before either the
+    // location or itself exists.
+    const calls: string[] = []
+    const onCreate = vi.fn(async (v: unknown) => { calls.push('location'); return { id: 'loc-99', name: 'Hoofdlocatie', ...(v as object) } as unknown as Location })
+    const onAddContact = vi.fn(async (v: unknown) => { calls.push('contact'); return contact({ id: 'c-new', name: 'Piet Nieuwkomer', ...(v as object) }) })
+    vi.mocked(setLocationPrimaryContact).mockImplementation(async () => { calls.push('couple'); return true })
+    const user = userEvent.setup()
+    render(<AddLocationModal onClose={() => {}} onCreate={onCreate} onAddContact={onAddContact}
+      customerId="cust-1" statuses={statuses} existingContacts={existingContacts} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
+    await user.click(screen.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
+    const search = screen.getByPlaceholderText(ct('subModal.contactName'))
+    await user.type(search, 'Piet Nieuwkomer')
+    await user.click(screen.getByRole('button', { name: /Piet Nieuwkomer/ }))
+    await user.type(screen.getByLabelText(ct('subModal.email')), 'piet@klant.nl')
+    await user.type(screen.getByLabelText(ct('subModal.phone')), '0612345678')
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+
+    // The free-text column on the location still carries the resolved name (legacy fallback, unchanged).
+    await waitFor(() => expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ contactName: 'Piet Nieuwkomer' })))
+    // The new contact record: first word -> firstName, rest -> lastName, email/phone ride along.
+    expect(onAddContact).toHaveBeenCalledWith(expect.objectContaining({
+      firstName: 'Piet', lastName: 'Nieuwkomer', email: 'piet@klant.nl', phone: '0612345678',
+    }))
+    // The coupling fires against the just-created location AND the just-created contact's real id.
+    expect(setLocationPrimaryContact).toHaveBeenCalledWith('cust-1', 'c-new', 'loc-99')
+    // Order matters: the contact cannot be coupled before either the location or itself exists.
+    expect(calls).toEqual(['location', 'contact', 'couple'])
+  })
+
+  it('a lone single word goes wholly into lastName (never a fabricated firstName)', async () => {
+    const onCreate = vi.fn().mockResolvedValue({ id: 'loc-99', name: 'Hoofdlocatie' } as unknown as Location)
+    const onAddContact = vi.fn().mockResolvedValue(contact({ id: 'c-new', name: 'Receptie' }))
+    const user = userEvent.setup()
+    render(<AddLocationModal onClose={() => {}} onCreate={onCreate} onAddContact={onAddContact}
+      customerId="cust-1" statuses={statuses} existingContacts={existingContacts} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
+    await user.click(screen.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
+    const search = screen.getByPlaceholderText(ct('subModal.contactName'))
+    await user.type(search, 'Receptie')
+    await user.click(screen.getByRole('button', { name: /Receptie/ }))
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+
+    await waitFor(() => expect(onAddContact).toHaveBeenCalledWith(expect.objectContaining({ firstName: '', lastName: 'Receptie' })))
+  })
+
+  it('picking an existing contact never re-attempts a create (pick-existing path stays untouched)', async () => {
+    const onCreate = vi.fn().mockResolvedValue({ id: 'loc-99', name: 'Hoofdlocatie' } as unknown as Location)
+    const onAddContact = vi.fn()
+    vi.mocked(setLocationPrimaryContact).mockResolvedValue(true)
+    const user = userEvent.setup()
+    render(<AddLocationModal onClose={() => {}} onCreate={onCreate} onAddContact={onAddContact}
+      customerId="cust-1" statuses={statuses} existingContacts={existingContacts} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
+    await user.click(screen.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
+    await user.click(await screen.findByRole('button', { name: 'Joost de Boer' }))
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+
+    await waitFor(() => expect(setLocationPrimaryContact).toHaveBeenCalledWith('cust-1', 'c-1', 'loc-99'))
+    expect(onAddContact).not.toHaveBeenCalled()
+  })
+
+  it('contact-create failure: the location AND its free text stay, one honest toast, no coupling attempted', async () => {
+    const onClose = vi.fn()
+    const onCreate = vi.fn().mockResolvedValue({ id: 'loc-99', name: 'Hoofdlocatie' } as unknown as Location)
+    const onAddContact = vi.fn().mockRejectedValue(new Error('422 required first_name'))
+    const user = userEvent.setup()
+    render(<AddLocationModal onClose={onClose} onCreate={onCreate} onAddContact={onAddContact}
+      customerId="cust-1" statuses={statuses} existingContacts={existingContacts} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
+    await user.click(screen.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
+    const search = screen.getByPlaceholderText(ct('subModal.contactName'))
+    await user.type(search, 'Piet Nieuwkomer')
+    await user.click(screen.getByRole('button', { name: /Piet Nieuwkomer/ }))
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+
+    // The location was created (and the free-text column sent) regardless of what follows.
+    await waitFor(() => expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ contactName: 'Piet Nieuwkomer' })))
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+    expect(notifyError).toHaveBeenCalledWith(ct('subModal.contactCreateFailed', { name: 'Hoofdlocatie' }))
+    expect(setLocationPrimaryContact).not.toHaveBeenCalled()
+  })
+
+  it('contact created but the coupling PUT fails: the contact stays created, one honest toast', async () => {
+    const onClose = vi.fn()
+    const onCreate = vi.fn().mockResolvedValue({ id: 'loc-99', name: 'Hoofdlocatie' } as unknown as Location)
+    const onAddContact = vi.fn().mockResolvedValue(contact({ id: 'c-new', name: 'Piet Nieuwkomer' }))
+    vi.mocked(setLocationPrimaryContact).mockRejectedValue(new Error('network'))
+    const user = userEvent.setup()
+    render(<AddLocationModal onClose={onClose} onCreate={onCreate} onAddContact={onAddContact}
+      customerId="cust-1" statuses={statuses} existingContacts={existingContacts} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
+    await user.click(screen.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
+    const search = screen.getByPlaceholderText(ct('subModal.contactName'))
+    await user.type(search, 'Piet Nieuwkomer')
+    await user.click(screen.getByRole('button', { name: /Piet Nieuwkomer/ }))
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+
+    await waitFor(() => expect(onAddContact).toHaveBeenCalled())
+    await waitFor(() => expect(setLocationPrimaryContact).toHaveBeenCalledWith('cust-1', 'c-new', 'loc-99'))
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+    expect(notifyError).toHaveBeenCalledWith(ct('subModal.contactCouplingFailed', { name: 'Hoofdlocatie' }))
+  })
+
+  it('no onAddContact wired at all: a typed-new name never throws, location still creates (graceful degradation)', async () => {
+    const onCreate = vi.fn().mockResolvedValue({ id: 'loc-99', name: 'Hoofdlocatie' } as unknown as Location)
+    const user = userEvent.setup()
+    render(<AddLocationModal onClose={() => {}} onCreate={onCreate}
+      customerId="cust-1" statuses={statuses} existingContacts={existingContacts} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.locationName'), { exact: false }), 'Hoofdlocatie')
+    await user.click(screen.getByRole('button', { name: new RegExp(ct('subModal.contactName')) }))
+    const search = screen.getByPlaceholderText(ct('subModal.contactName'))
+    await user.type(search, 'Piet Nieuwkomer')
+    await user.click(screen.getByRole('button', { name: /Piet Nieuwkomer/ }))
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+
+    await waitFor(() => expect(onCreate).toHaveBeenCalled())
+    expect(setLocationPrimaryContact).not.toHaveBeenCalled()
+    expect(notifyError).not.toHaveBeenCalled()
   })
 })
 
