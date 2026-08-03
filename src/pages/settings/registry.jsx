@@ -52,6 +52,7 @@ import { VacancyStatusSettings, VacancyPhaseSettings, VacancySenioritySettings, 
 import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
 import VacancyCandidateTabSettings from './sections/VacancyCandidateTabSettings'
 import CustomerDisplaySettings from './sections/CustomerDisplaySettings'
+import CustomerRequiredFieldsSettings from './sections/customers/CustomerRequiredFieldsSettings'
 import MatchTemplatesSettings from './sections/MatchTemplatesSettings'
 import MatchRatesSettings from './sections/MatchRatesSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
@@ -221,6 +222,9 @@ export const NAV_GROUPS = [
       // customer-table settings and the three drill-down entity tables (+ Vacatures'
       // default filter) each get their own sub-tab — see CustomerDisplaySettings.
       { id: 'customer_display', icon: Palette, component: CustomerDisplaySettings },
+      // KLANT-VERPLICHT-1 (Danny 02-08): required fields per klant-fase + the three
+      // sub-entities — same Flag icon as the candidate's own required-fields item.
+      { id: 'customer_required_fields', icon: Flag, component: CustomerRequiredFieldsSettings },
       // Tenant-wide default for the customer's vacancy-visibility flags (Danny 27-07) —
       // VacancySettingsTab (customer drawer) reads these same keys for comparison.
       { id: 'customer_vacancy_defaults', icon: EyeOff, schema: customerVacancyDefaults },
