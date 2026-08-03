@@ -48,12 +48,17 @@ import { useCustomFields } from '@/lib/useCustomFields'
 // shared config-driven tab, never a forked copy — mirrors DepartmentDetail).
 import ScopedVacanciesTab from './ScopedVacanciesTab'
 import ScopedMatchesTab from './ScopedMatchesTab'
+// SOLLICITATIES-SCOPE-1 (Danny asked 3x at customer level, then again here): the
+// location's own Sollicitaties sub-tab — reuses the shared CustomerApplicationsList
+// (its `vacancyIds` mode) fed by this location's OWN vacancy ids.
+import CustomerApplicationsList from './CustomerApplicationsList'
 // SUBENTITEIT-DELETE-1: the honest disabled-trash + 409-race counts dialog.
 import InUseCountsDialog from './InUseCountsDialog'
 import type { Contact, Department, Location } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { LocationPayload } from '../hooks/useCustomerLocations'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
+import { useScopedVacancyIds } from '../hooks/useCustomerDrawerData'
 import { isPrimaryForLocation } from '../hooks/useCustomerContacts'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 import type { DeleteResult } from '../hooks/subEntityDelete'
@@ -100,7 +105,9 @@ export default function LocationDetail({
   onSave, onDelete, onAddDepartment, onUpdateDepartment, onRemoveDepartment, onAddContact, onUpdateContact, onRemoveContact,
   backLabel, pager, close,
 }: Props) {
-  const { t, i18n } = useTranslation('customers')
+  // SOLLICITATIES-SCOPE-1: 'applications' is also declared here so the new sub-tab's
+  // `t('applications:title')` resolves without relying on cross-namespace fallback.
+  const { t, i18n } = useTranslation(['customers', 'applications'])
 
   // Country/province option lists. The province list cascades on the country ALREADY
   // SAVED on this location (the shared field table owns its own draft, so an in-edit
@@ -143,7 +150,8 @@ export default function LocationDetail({
   // EditableFieldTable below manages its own uncontrolled edit toggle (they no
   // longer share one global pencil now that they live on separate sub-tabs).
   // SCOPED-LIST-TAB-1 added vacancies/matches (no location Taken tab — see WORKLIST).
-  const [subTab, setSubTab] = useState<'address' | 'departments' | 'contacts' | 'vacancies' | 'matches' | 'extra' | 'koppelingen'>('address')
+  // SOLLICITATIES-SCOPE-1 added 'applications'.
+  const [subTab, setSubTab] = useState<'address' | 'departments' | 'contacts' | 'vacancies' | 'applications' | 'matches' | 'extra' | 'koppelingen'>('address')
 
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
   // CONTACT-LOCATION-PRIMARY-1: THIS site's own primary contact — a real record resolved
@@ -290,6 +298,9 @@ export default function LocationDetail({
           { id: 'contacts',    label: t('drawer.tabs.contacts') },
           // SCOPED-LIST-TAB-1: read-only lists scoped to this location (§3A shared tab).
           { id: 'vacancies',   label: t('drawer.tabs.vacancies') },
+          // SOLLICITATIES-SCOPE-1: reuses the applications page's own title key —
+          // already carries full five-locale parity, verified in c0e0d900.
+          { id: 'applications', label: t('applications:title') },
           { id: 'matches',     label: t('drawer.tabs.matches') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
           // EXTRACT-1: the shared Koppelingen sub-tab, always last (§3A/§11) — the
@@ -376,6 +387,11 @@ export default function LocationDetail({
       {subTab === 'vacancies' && (
         <ScopedVacanciesTab scope="location" id={l.id as Id} customerId={customerId} customerName={customerName} scopeName={l.name} />
       )}
+      {/* SOLLICITATIES-SCOPE-1: LocationSollicitatiesTab (below) owns step 1 (vacancy id
+          resolution) — mounting it only here, not unconditionally in this component,
+          keeps useScopedVacancyIds' react-query call out of every OTHER sub-tab/caller
+          that never opens this one (no QueryClientProvider needed for those). */}
+      {subTab === 'applications' && <LocationSollicitatiesTab locationId={l.id as Id} />}
       {subTab === 'matches' && <ScopedMatchesTab scope="location" id={l.id as Id} customerId={customerId} />}
 
       {subTab === 'extra' && (
@@ -410,4 +426,20 @@ export default function LocationDetail({
       <InUseCountsDialog open={blockedCounts != null} counts={blockedCounts ?? {}} onClose={() => setBlockedCounts(null)} />
     </div>
   )
+}
+
+/**
+ * LocationSollicitatiesTab — step 1 of the Sollicitaties chain (SOLLICITATIES-SCOPE-1),
+ * split into its OWN component so useScopedVacancyIds (a real react-query hook) only
+ * mounts once this sub-tab is actually opened: LocationDetail itself never calls a
+ * react-query hook unconditionally, so every caller/test that renders it without
+ * opening THIS sub-tab needs no QueryClientProvider — unaffected by this feature.
+ * Resolves this location's own vacancy ids through the SAME scoped query
+ * ScopedVacanciesTab uses (an already-opened Vacatures tab answers from cache), then
+ * hands them — plus this step's own loading/error — to CustomerApplicationsList,
+ * which owns step 2 (fetch by vacancy_id[]) and folds both into one coherent state.
+ */
+function LocationSollicitatiesTab({ locationId }: { locationId: Id }) {
+  const { vacancyIds, loading, error } = useScopedVacancyIds('location', locationId)
+  return <CustomerApplicationsList vacancyIds={vacancyIds} vacancyIdsLoading={loading} vacancyIdsError={error} />
 }

@@ -10,11 +10,13 @@
  * assertions through the ACTIVE locale's own copy instead of guessing/hardcoding
  * a language.
  */
-import { useState, useEffect } from 'react'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { useState, useEffect, type ReactElement } from 'react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, within } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
+import api from '@/lib/api'
 import LocationDetail from './LocationDetail'
 import { CONTACTS_CHANGED_EVENT } from '../hooks/useCustomerContacts'
 // ONE-CLICK-COUPLE-2: asserts the honest success/failure toasts the create-and-link
@@ -25,8 +27,7 @@ import type { LookupOption } from '@/types/common'
 
 // useCustomFields hits the API in an effect — stub it so the Extra sub-tab stays
 // hidden (no custom fields defined) and no network call happens under test.
-// useLocations is react-query-backed (the Vestiging block's option list) — mocked so
-// this test needs no QueryClientProvider, mirroring OverviewTab.test.tsx.
+// useLocations is react-query-backed (the Vestiging block's option list) — mocked away.
 vi.mock('@/lib/useLocations', () => ({ useLocations: () => [{ value: 'br-1', label: 'Vestiging Noord' }] }))
 vi.mock('@/lib/useCustomFields', () => ({
   useCustomFields: () => ({ fields: [], allFields: [], loading: false, invalidate: () => {} }),
@@ -76,7 +77,22 @@ vi.mock('./ScopedMatchesTab', () => ({
     <div data-testid="scoped-matches">{scope}:{id}:{customerId}</div>,
 }))
 
-beforeEach(() => { vi.clearAllMocks(); mockPost.mockResolvedValue({ status: 202, data: {} }) })
+// SOLLICITATIES-SCOPE-1: opening the new Sollicitaties sub-tab mounts
+// LocationSollicitatiesTab, which calls a REAL react-query hook
+// (useScopedVacancyIds) — only THOSE tests need a QueryClient in context, so
+// this wrapper is used just there (see that describe block below); every other
+// test in this file still uses plain `render`, unaffected by this feature.
+const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+const renderLocationDetail = (ui: ReactElement) =>
+  render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>)
+// CustomerApplicationsList (mounted, unstubbed, by that same sub-tab) reads the
+// tenant funnel lookup via the global LookupsContext — mocked here the same way
+// CustomerApplicationsList.test.tsx itself does, rather than mounting a real provider.
+vi.mock('@/context/LookupsContext', () => ({
+  useLookups: () => ({ funnelTypes: [{ value: 'applied', label: 'Aangemeld', color: 'var(--color-info)' }], funnelMeta: () => ({ label: '', color: 'var(--text-muted)' }) }),
+}))
+
+beforeEach(() => { vi.clearAllMocks(); mockPost.mockResolvedValue({ status: 202, data: {} }); queryClient.clear() })
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
@@ -679,6 +695,73 @@ describe('LocationDetail · Vacatures/Matches sub-tabs', () => {
     await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.matches') }))
     expect(screen.getByTestId('scoped-matches')).toHaveTextContent('location:loc-1:cust-1')
   })
+})
+
+/**
+ * SOLLICITATIES-SCOPE-1 (Danny asked 3x at customer level, then again for
+ * location/department) — the real two-step chain, unlike Vacatures/Matches
+ * above (which stub the whole sub-component): CustomerApplicationsList is NOT
+ * stubbed here, so this proves the actual honest data path end to end —
+ * useScopedVacancyIds (step 1) resolves this location's own vacancies, THEN
+ * useApplicationsByVacancyIds (step 2) filters by exactly those ids.
+ */
+describe('LocationDetail · Sollicitaties sub-tab (SOLLICITATIES-SCOPE-1)', () => {
+  it('is lazy: no /vacancies or /applications request fires before the sub-tab is opened', () => {
+    // Plain `render` here (not `renderLocationDetail`) is a deliberate part of the
+    // proof: LocationSollicitatiesTab (and its react-query hook) never mounts
+    // unless this sub-tab opens, so no QueryClientProvider is even needed yet.
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
+    const calls = vi.mocked(api.get).mock.calls.map(([url]) => url)
+    expect(calls).not.toContain('/vacancies')
+    expect(calls).not.toContain('/applications')
+  })
+
+  it('opening it resolves this location\'s own vacancies, then filters applications by EXACTLY those vacancy ids', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/vacancies') return Promise.resolve({ data: { data: [{ id: 'vac-1' }, { id: 'vac-2' }] } })
+      if (url === '/applications') {
+        return Promise.resolve({
+          data: {
+            data: [{
+              id: 'app-1', candidate: { id: 'cand-1', name: 'Jane Doe' }, vacancy: { id: 'vac-1', title: 'Verpleegkundige' },
+              phase_key: 'applied', score: 82, created_at: '2026-07-01',
+            }],
+          },
+        })
+      }
+      return Promise.resolve({ data: [] })
+    })
+    // Opening this sub-tab mounts LocationSollicitatiesTab's real react-query hook,
+    // so THIS test (only) needs the QueryClientProvider-wrapped render.
+    renderLocationDetail(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
+
+    await user.click(screen.getByRole('tab', { name: i18n.t('applications:title') }))
+    // The real row rendering proves the WHOLE chain resolved, not just a callback.
+    expect(await screen.findByText('Jane Doe')).toBeInTheDocument()
+
+    const applicationsCall = vi.mocked(api.get).mock.calls.find(([url]) => url === '/applications')
+    expect(applicationsCall?.[1]?.params).toMatchObject({ vacancy_id: ['vac-1', 'vac-2'] })
+  })
+
+  it('zero vacancies at this location: the empty state renders and /applications is never called', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/vacancies') return Promise.resolve({ data: { data: [] } })
+      return Promise.resolve({ data: [] })
+    })
+    renderLocationDetail(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
+
+    await user.click(screen.getByRole('tab', { name: i18n.t('applications:title') }))
+    expect(await screen.findByText(i18n.t('applications:empty'))).toBeInTheDocument()
+    expect(vi.mocked(api.get).mock.calls.some(([url]) => url === '/applications')).toBe(false)
+  })
+
+  // Restore the file's own default GET response — the two tests above override
+  // it per-URL, and vi.clearAllMocks() (the global beforeEach) clears CALLS but
+  // not a mocked implementation, so the next describe block would otherwise
+  // inherit this one's routing.
+  afterEach(() => { vi.mocked(api.get).mockResolvedValue({ data: [] }) })
 })
 
 /**

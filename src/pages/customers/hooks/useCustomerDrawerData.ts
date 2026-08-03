@@ -11,6 +11,10 @@ import { mapMatch } from '@/pages/matches/hooks/useMatches'
 // SOLLICITATIES-TAB-1: same reuse call as MATCHES-TAB-1 above — the applications
 // PAGE's own mapper, not a forked copy (mirrors ScopedMatchesTab's mapMatch reuse).
 import { mapApplication } from '@/pages/applications/data/mapApplication'
+// SOLLICITATIES-SCOPE-1: the generic scoped fetch (department/location Vacatures
+// sub-tab) reused below to resolve a level's OWN vacancy ids for its Sollicitaties
+// sub-tab — same hook, same queryKey shape, so the two sub-tabs share one cache entry.
+import { useScopedEntityList } from './useScopedEntityList'
 import type { RawMatch, MatchRow } from '@/types/match'
 import type { ApiApplication, Application } from '@/types/application'
 import type { LookupItem } from '@/context/LookupsContext'
@@ -162,4 +166,53 @@ export function useCustomerApplications(customerId?: Id, funnelTypes: LookupItem
         .rows.map(a => mapApplication(a, funnelTypes)),
   })
   return { rows: data, loading, error }
+}
+
+/**
+ * SOLLICITATIES-SCOPE-1 — the location/department drill-down's OWN Sollicitaties
+ * sub-tab (Danny asked three times at customer level, then again for location and
+ * department). ApplicationQuery has no direct customer_location_id/customer_
+ * department_id ARRAY filter — the single-value LOC-DEPT-TAB-1 filter
+ * (ApplicationQuery.php:88-89/148-157) narrows through the vacancy relation via a
+ * whereHas, one id at a time, not a set this hook could reuse for a whole level. So
+ * the honest path is a two-step chain: (1) useScopedVacancyIds resolves this
+ * level's OWN vacancy ids through the SAME scoped query the Vacatures sub-tab
+ * already uses; (2) this hook filters applications by those ids via `vacancy_id[]`
+ * (ApplicationQuery.php:33/76-77 — an ARRAY filter, unlike the location/department
+ * scalar one). A future direct array filter on /applications would collapse this
+ * to one request; until then this stays the honest chain, never a client-side
+ * narrowing of a wider unscoped fetch.
+ *
+ * GUARD (measured in ApplicationQuery.php:162): Laravel's `Request::filled()`
+ * treats an empty array as blank, so the `whereIn` is only applied when
+ * `vacancy_id` is non-empty — an EMPTY `vacancy_id[]` would silently return every
+ * application, unfiltered. `enabled` below refuses to fire for a zero-vacancy
+ * scope rather than trust the backend to reject it.
+ */
+export function useApplicationsByVacancyIds(vacancyIds: Id[], funnelTypes: LookupItem[] = []) {
+  const { data = [], isLoading: loading, isError: error } = useQuery({
+    queryKey: ['applications', 'by-vacancy-ids', vacancyIds],
+    enabled: vacancyIds.length > 0,
+    queryFn: async ({ signal }): Promise<Application[]> =>
+      unwrapList<ApiApplication>(await api.get('/applications', { params: { vacancy_id: vacancyIds, per_page: 100 }, signal }))
+        .rows.map(a => mapApplication(a, funnelTypes)),
+  })
+  return { rows: data, loading, error }
+}
+
+/**
+ * Step 1 of the chain above — this level's OWN vacancy ids, resolved through the
+ * EXACT same scoped query ScopedVacanciesTab uses (identical queryKey/endpoint/
+ * paramName via useScopedEntityList + the shared mapVacancyRow), so if the
+ * Vacatures sub-tab was already opened in this drawer session, react-query
+ * answers straight from cache instead of firing a second request. `id` is only
+ * ever a real value once the CALLER's own Sollicitaties sub-tab is active — an
+ * undefined id disables the underlying query, which is where the laziness lives
+ * (this hook has no "active tab" concept of its own).
+ */
+export function useScopedVacancyIds(scope: 'department' | 'location', id: Id | undefined) {
+  const paramName = scope === 'department' ? 'customer_department_id' : 'customer_location_id'
+  const { rows, loading, error } = useScopedEntityList<VacancyRow>(`${scope}-vacancies`, '/vacancies', paramName, id, mapVacancyRow)
+  const vacancyIds = rows.map(v => v.id).filter((v): v is Id => v != null)
+  return { vacancyIds, loading, error }
 }

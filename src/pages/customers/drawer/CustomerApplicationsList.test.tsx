@@ -4,8 +4,12 @@
  * rows, free-text search, the four explicit UI states, and the row click
  * opening the application (never the candidate/vacancy on either side of it).
  * The FETCH shape itself is proven separately (useCustomerApplications.test.ts,
- * mirrors MatchesTab.test.tsx deferring to useCustomerMatches.test.ts) — this
- * file stubs that hook so it only tests rendering, not the network seam.
+ * useApplicationsByVacancyIds.test.ts, mirrors MatchesTab.test.tsx deferring to
+ * useCustomerMatches.test.ts) — this file stubs both hooks so it only tests
+ * rendering, not the network seam. SOLLICITATIES-SCOPE-1 added the second entry
+ * mode (`vacancyIds`, the location/department drill-down) — both hooks are
+ * called unconditionally by the component (Rules of Hooks), so BOTH need a
+ * default return value here even in tests that only exercise one mode.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
@@ -15,8 +19,10 @@ import CustomerApplicationsList from './CustomerApplicationsList'
 import type { Application } from '@/types/application'
 
 const mockUseCustomerApplications = vi.fn()
+const mockUseApplicationsByVacancyIds = vi.fn()
 vi.mock('../hooks/useCustomerDrawerData', () => ({
   useCustomerApplications: (...args: unknown[]) => mockUseCustomerApplications(...args),
+  useApplicationsByVacancyIds: (...args: unknown[]) => mockUseApplicationsByVacancyIds(...args),
 }))
 
 // Two funnel stages so the phase filter has real options to narrow on — mirrors
@@ -46,7 +52,13 @@ const row = (over: Partial<Application> = {}): Application => ({
 })
 
 afterEach(() => cleanup())
-beforeEach(() => vi.clearAllMocks())
+beforeEach(() => {
+  vi.clearAllMocks()
+  // The customer-mode tests below only ever set up mockUseCustomerApplications —
+  // the OTHER hook still fires (Rules of Hooks) with an empty vacancyIds array,
+  // so it needs a harmless default return too.
+  mockUseApplicationsByVacancyIds.mockReturnValue({ rows: [], loading: false, error: false })
+})
 
 describe('CustomerApplicationsList', () => {
   it('shows the loading state', () => {
@@ -118,5 +130,46 @@ describe('CustomerApplicationsList', () => {
     mockUseCustomerApplications.mockReturnValue({ rows: [], loading: false, error: false })
     render(<CustomerApplicationsList customerId="cust-1" />)
     expect(mockUseCustomerApplications).toHaveBeenCalledWith('cust-1', FUNNEL_TYPES)
+  })
+})
+
+/**
+ * SOLLICITATIES-SCOPE-1 — the second entry mode: LocationDetail/DepartmentDetail
+ * pass this level's own vacancy ids (already resolved from the Vacatures sub-tab's
+ * own scoped query) plus that step's own loading/error, so the two-step chain
+ * still renders as ONE coherent state here — same columns/toolbar/row-click as
+ * the customerId mode above, only the data SOURCE differs.
+ */
+describe('CustomerApplicationsList · vacancyIds mode (location/department drill-down)', () => {
+  it('fetches through useApplicationsByVacancyIds with this level\'s ids + the tenant funnel lookup', () => {
+    mockUseCustomerApplications.mockReturnValue({ rows: [], loading: false, error: false })
+    mockUseApplicationsByVacancyIds.mockReturnValue({ rows: [], loading: false, error: false })
+    render(<CustomerApplicationsList vacancyIds={['vac-1', 'vac-2']} vacancyIdsLoading={false} />)
+    expect(mockUseApplicationsByVacancyIds).toHaveBeenCalledWith(['vac-1', 'vac-2'], FUNNEL_TYPES)
+    // The OTHER hook still runs (Rules of Hooks) but with no customer id, so it
+    // never fires its own request (useCustomerApplications.test.ts proves that).
+    expect(mockUseCustomerApplications).toHaveBeenCalledWith(undefined, FUNNEL_TYPES)
+  })
+
+  it('a still-loading step 1 (vacancy id resolution) shows the SAME loading state as step 2', () => {
+    mockUseCustomerApplications.mockReturnValue({ rows: [], loading: false, error: false })
+    mockUseApplicationsByVacancyIds.mockReturnValue({ rows: [], loading: false, error: false })
+    render(<CustomerApplicationsList vacancyIds={[]} vacancyIdsLoading={true} />)
+    expect(screen.getByText('Sollicitaties laden…')).toBeInTheDocument()
+  })
+
+  it('a step-1 failure lands in the same honest error state as a step-2 failure', () => {
+    mockUseCustomerApplications.mockReturnValue({ rows: [], loading: false, error: false })
+    mockUseApplicationsByVacancyIds.mockReturnValue({ rows: [], loading: false, error: false })
+    render(<CustomerApplicationsList vacancyIds={[]} vacancyIdsLoading={false} vacancyIdsError />)
+    expect(screen.getByRole('alert')).toHaveTextContent('Sollicitaties laden is mislukt.')
+  })
+
+  it('renders the rows step 2 resolves, once both steps are done', () => {
+    mockUseCustomerApplications.mockReturnValue({ rows: [], loading: false, error: false })
+    mockUseApplicationsByVacancyIds.mockReturnValue({ rows: [row()], loading: false, error: false })
+    render(<CustomerApplicationsList vacancyIds={['vac-1']} vacancyIdsLoading={false} />)
+    expect(screen.getByText('Jane Doe')).toBeInTheDocument()
+    expect(screen.getByText('Verpleegkundige')).toBeInTheDocument()
   })
 })

@@ -14,10 +14,13 @@
  * i18n instance — so (like LocationDetail.test.tsx) this file resolves assertions
  * through the ACTIVE locale's own copy instead of guessing/hardcoding a language.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import type { ReactElement } from 'react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, within, waitFor } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
+import api from '@/lib/api'
 import DepartmentDetail from './DepartmentDetail'
 import type { Department } from '@/types/customer'
 import type { LookupOption } from '@/types/common'
@@ -28,6 +31,14 @@ vi.mock('@/lib/useCustomFields', () => ({
   useCustomFields: () => ({ fields: [], allFields: [], loading: false, invalidate: () => {} }),
 }))
 vi.mock('@/lib/notify', () => ({ notifySuccess: vi.fn(), notifyError: vi.fn() }))
+// SOLLICITATIES-SCOPE-1: DepartmentDetail now calls a REAL react-query hook
+// (useScopedVacancyIds, step 1 of the Sollicitaties chain) — this file previously
+// needed no api mock at all (every other query-touching child was stubbed).
+// Default GET resolves empty for any URL not overridden per-test.
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
+  return { ...actual, default: { get: vi.fn().mockResolvedValue({ data: [] }), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() } }
+})
 // Tiptap needs a real browser to mount — stubbed with a plain controlled textarea,
 // mirrors LocationDetail.test.tsx's own convention (RichTextEditor's own pencil/
 // save/cancel dance is unit-tested on EditableRichTextField.test.tsx).
@@ -53,7 +64,22 @@ vi.mock('@/components/drawer/tabs/EntityTasksTab', () => ({
   default: ({ linkType, id }: { linkType: string; id?: string }) => <div data-testid="entity-tasks">{linkType}:{id}</div>,
 }))
 
-beforeEach(() => vi.clearAllMocks())
+// SOLLICITATIES-SCOPE-1: opening the new Sollicitaties sub-tab mounts
+// DepartmentSollicitatiesTab, which calls a REAL react-query hook
+// (useScopedVacancyIds) — only THOSE tests need a QueryClient in context, so
+// this wrapper is used just there (see that describe block below); every other
+// test in this file still uses plain `render`, unaffected by this feature.
+const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+const renderDepartmentDetail = (ui: ReactElement) =>
+  render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>)
+// CustomerApplicationsList (mounted, unstubbed, by that same sub-tab) reads the
+// tenant funnel lookup via the global LookupsContext — mocked here the same way
+// CustomerApplicationsList.test.tsx itself does, rather than mounting a real provider.
+vi.mock('@/context/LookupsContext', () => ({
+  useLookups: () => ({ funnelTypes: [{ value: 'applied', label: 'Aangemeld', color: 'var(--color-info)' }], funnelMeta: () => ({ label: '', color: 'var(--text-muted)' }) }),
+}))
+
+beforeEach(() => { vi.clearAllMocks(); queryClient.clear() })
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
@@ -232,6 +258,72 @@ describe('DepartmentDetail · Vacatures/Matches/Taken sub-tabs', () => {
     await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.tasks') }))
     expect(screen.getByTestId('entity-tasks')).toHaveTextContent('department:d1')
   })
+})
+
+/**
+ * SOLLICITATIES-SCOPE-1 (Danny asked 3x at customer level, then again for
+ * location/department) — the real two-step chain, unlike Vacatures/Matches/
+ * Taken above (which stub the whole sub-component): CustomerApplicationsList
+ * is NOT stubbed here, so this proves the actual honest data path end to end —
+ * useScopedVacancyIds (step 1) resolves this department's own vacancies, THEN
+ * useApplicationsByVacancyIds (step 2) filters by exactly those ids.
+ */
+describe('DepartmentDetail · Sollicitaties sub-tab (SOLLICITATIES-SCOPE-1)', () => {
+  it('is lazy: no /vacancies or /applications request fires before the sub-tab is opened', () => {
+    // Plain `render` here (not `renderDepartmentDetail`) is a deliberate part of
+    // the proof: DepartmentSollicitatiesTab (and its react-query hook) never
+    // mounts unless this sub-tab opens, so no QueryClientProvider is even needed yet.
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+    const calls = vi.mocked(api.get).mock.calls.map(([url]) => url)
+    expect(calls).not.toContain('/vacancies')
+    expect(calls).not.toContain('/applications')
+  })
+
+  it('opening it resolves this department\'s own vacancies, then filters applications by EXACTLY those vacancy ids', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/vacancies') return Promise.resolve({ data: { data: [{ id: 'vac-1' }, { id: 'vac-2' }] } })
+      if (url === '/applications') {
+        return Promise.resolve({
+          data: {
+            data: [{
+              id: 'app-1', candidate: { id: 'cand-1', name: 'Jane Doe' }, vacancy: { id: 'vac-1', title: 'Verpleegkundige' },
+              phase_key: 'applied', score: 82, created_at: '2026-07-01',
+            }],
+          },
+        })
+      }
+      return Promise.resolve({ data: [] })
+    })
+    // Opening this sub-tab mounts DepartmentSollicitatiesTab's real react-query
+    // hook, so THIS test (only) needs the QueryClientProvider-wrapped render.
+    renderDepartmentDetail(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+
+    await user.click(screen.getByRole('tab', { name: i18n.t('applications:title') }))
+    // The real row rendering proves the WHOLE chain resolved, not just a callback.
+    expect(await screen.findByText('Jane Doe')).toBeInTheDocument()
+
+    const applicationsCall = vi.mocked(api.get).mock.calls.find(([url]) => url === '/applications')
+    expect(applicationsCall?.[1]?.params).toMatchObject({ vacancy_id: ['vac-1', 'vac-2'] })
+  })
+
+  it('zero vacancies at this department: the empty state renders and /applications is never called', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/vacancies') return Promise.resolve({ data: { data: [] } })
+      return Promise.resolve({ data: [] })
+    })
+    renderDepartmentDetail(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+
+    await user.click(screen.getByRole('tab', { name: i18n.t('applications:title') }))
+    expect(await screen.findByText(i18n.t('applications:empty'))).toBeInTheDocument()
+    expect(vi.mocked(api.get).mock.calls.some(([url]) => url === '/applications')).toBe(false)
+  })
+
+  // Restore the file's own default GET response — the two tests above override
+  // it per-URL, and vi.clearAllMocks() (the global beforeEach) clears CALLS but
+  // not a mocked implementation.
+  afterEach(() => { vi.mocked(api.get).mockResolvedValue({ data: [] }) })
 })
 
 /**

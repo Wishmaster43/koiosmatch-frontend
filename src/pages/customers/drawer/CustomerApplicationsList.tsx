@@ -1,28 +1,39 @@
 /**
- * CustomerApplicationsList — the customer drawer's "Sollicitaties" sub-tab
- * (Danny, asked three times: "Tabblad Vacatures moet 2 subtabbladen hebben:
- * Vacatures en Sollicitaties"). Lists application RECORDS on this customer's
- * vacancies — one candidate can appear more than once, since a row is one
- * application, not one person ("sollicitant" is a derived person-state, §3B).
+ * CustomerApplicationsList — the "Sollicitaties" sub-tab, TWO entry modes
+ * (SOLLICITATIES-SCOPE-1, Danny asked three times at customer level, then again
+ * for location/department): Lists application RECORDS — one candidate can appear
+ * more than once, since a row is one application, not one person ("sollicitant"
+ * is a derived person-state, §3B).
  *
- * Fetched via GET /applications?customer_id[]={id} (ApplicationQuery validates
- * `customer_id` as an ARRAY of uuids — measured in ApplicationQuery.php:82-83 —
- * unlike the scoped vacancy/match filters' bare uuid). LAZY: this component only
- * mounts (and only then fires its query) once the Sollicitaties sub-tab is
- * opened — its host, VacanciesTab, renders it conditionally on the active
- * sub-tab, the same lazy-on-open pattern CustomerNotesTab uses for its own
- * sub-tabs.
+ * MODE 1 — `customerId` (original, landed c0e0d900): GET /applications?
+ * customer_id[]={id} (ApplicationQuery validates `customer_id` as an ARRAY of
+ * uuids — measured in ApplicationQuery.php:82-83). Used by the customer-level
+ * VacanciesTab.
  *
- * Reuses the applications PAGE's own row mapper (mapApplication, via the
- * useCustomerApplications hook) rather than a third copy — mirrors
- * ScopedMatchesTab's mapMatch reuse. The COLUMN SET is its own, though:
- * narrow-drawer-panel precedent (ScopedMatchesTab/ScopedVacanciesTab both stay
- * at 3-4 columns, explicitly reasoned as "no existing precedent" for more)
- * beats importing the full ApplicationsTable's 11 columns — client/interview/
- * source/task/owner are one click away in the application's own drawer, and
- * client is redundant here (every row already belongs to this customer).
- * Candidate/Vacancy/Phase/Score/Created mirror the applications table's own
- * cells and phase-chip convention (StatusPill) 1:1.
+ * MODE 2 — `vacancyIds` (this level's OWN vacancy ids, plus that step's own
+ * loading/error): GET /applications?vacancy_id[]=… over those ids. Used by
+ * LocationDetail/DepartmentDetail, which resolve the ids themselves (step 1 of
+ * the chain, via useScopedVacancyIds — the SAME scoped query the Vacatures
+ * sub-tab uses, so an already-opened Vacatures tab answers from cache) and hand
+ * them down already-loaded so the two-step chain still reads as ONE coherent
+ * state here (`vacancyIdsLoading`/`vacancyIdsError` fold into this component's
+ * own loading/error). See useApplicationsByVacancyIds for the empty-array guard
+ * (an empty `vacancy_id[]` would otherwise return every application).
+ *
+ * Both modes are LAZY: this component only mounts (and only then fires its own
+ * query) once its sub-tab is opened — the same lazy-on-open pattern
+ * CustomerNotesTab uses for its own sub-tabs.
+ *
+ * Reuses the applications PAGE's own row mapper (mapApplication, via the fetch
+ * hooks) rather than a third copy — mirrors ScopedMatchesTab's mapMatch reuse.
+ * The COLUMN SET is its own, though: narrow-drawer-panel precedent
+ * (ScopedMatchesTab/ScopedVacanciesTab both stay at 3-4 columns, explicitly
+ * reasoned as "no existing precedent" for more) beats importing the full
+ * ApplicationsTable's 11 columns — client/interview/source/task/owner are one
+ * click away in the application's own drawer, and client is redundant here
+ * (every row already belongs to this customer). Candidate/Vacancy/Phase/Score/
+ * Created mirror the applications table's own cells and phase-chip convention
+ * (StatusPill) 1:1 — identical toolbar/columns/row-click in either mode.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -36,11 +47,18 @@ import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusF
 import { useNavigation } from '@/context/NavigationContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useDateFormat } from '@/lib/datetime'
-import { useCustomerApplications } from '../hooks/useCustomerDrawerData'
+import { useCustomerApplications, useApplicationsByVacancyIds } from '../hooks/useCustomerDrawerData'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 
-export default function CustomerApplicationsList({ customerId }: { customerId?: Id }) {
+// Mode 2 additionally carries step 1's own loading/error (see the file docblock)
+// so LocationDetail/DepartmentDetail never need to render a second loading/error
+// UI of their own — this component folds both steps into one coherent state.
+type Props =
+  | { customerId?: Id }
+  | { vacancyIds: Id[]; vacancyIdsLoading: boolean; vacancyIdsError?: boolean }
+
+export default function CustomerApplicationsList(props: Props) {
   const { t } = useTranslation(['customers', 'applications'])
   const { openEntity } = useNavigation()
   const { formatDate } = useDateFormat()
@@ -49,7 +67,31 @@ export default function CustomerApplicationsList({ customerId }: { customerId?: 
   // phase pill's label/colour (mirrors ApplicationsPage's own `decorate` step) and the
   // phase filter's options.
   const { funnelTypes, funnelMeta } = useLookups()
-  const { rows, loading, error } = useCustomerApplications(customerId, funnelTypes)
+
+  // Split the union into plain locals — `vacancyIds` presence on the prop object
+  // is the mode switch (never passed alongside `customerId`, see the Props type
+  // above), so the rest of this component reads identically either way.
+  let customerId: Id | undefined
+  let vacancyIds: Id[] = []
+  let vacancyIdsLoading = false
+  let vacancyIdsError = false
+  if ('vacancyIds' in props) {
+    vacancyIds = props.vacancyIds
+    vacancyIdsLoading = props.vacancyIdsLoading
+    vacancyIdsError = Boolean(props.vacancyIdsError)
+  } else {
+    customerId = props.customerId
+  }
+
+  // Both fetch hooks are called unconditionally (Rules of Hooks) — only the
+  // active mode's own `enabled` guard (inside each hook) actually fires a
+  // request; the other mode's inputs are empty/undefined so its query stays off.
+  const byCustomer = useCustomerApplications(customerId, funnelTypes)
+  const byVacancies = useApplicationsByVacancyIds(vacancyIds, funnelTypes)
+  const scoped = 'vacancyIds' in props
+  const { rows, loading, error } = scoped
+    ? { rows: byVacancies.rows, loading: vacancyIdsLoading || byVacancies.loading, error: vacancyIdsError || byVacancies.error }
+    : byCustomer
   const [search, setSearch] = useState('')
 
   // Same decorate step as ApplicationsPage: phaseKey -> label/colour via the tenant lookup.
