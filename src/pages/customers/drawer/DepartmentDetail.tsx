@@ -219,12 +219,16 @@ export default function DepartmentDetail({ department, locations, statuses, cont
             </>
           )}
         </div>
-        {/* Browse arrows before the delete button — same slot as every sibling detail. */}
-        {pager && <DrillPager {...pager} />}
-        <button onClick={remove} title={t('common:delete')}
-          style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--color-danger)', flexShrink: 0 }}>
-          <Trash2 size={13} />
-        </button>
+        {/* ONE right-aligned action cluster (Danny 03-08: "de bladerpijlen moeten rechts
+            uitgelijnd zijn") — pager + delete as a single flex child, otherwise the row's
+            space-between parks the arrows in the middle of the title row. */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          {pager && <DrillPager {...pager} />}
+          <button onClick={remove} title={t('common:delete')}
+            style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--color-danger)', flexShrink: 0 }}>
+            <Trash2 size={13} />
+          </button>
+        </div>
       </div>
 
       {/* Sub-tab strip — same shared bar as LocationDetail / the candidate Communicatie tab. */}
