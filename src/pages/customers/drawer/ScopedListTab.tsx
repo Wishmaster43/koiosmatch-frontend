@@ -10,15 +10,23 @@
  * Point 1 (Danny's ten-point round): an optional `onAdd`/`addLabel` pair renders
  * the shared `DrawerAddButton` next to the search box — Vacatures and Matches
  * both need a "+" here, so the slot lives in the ONE shared body instead of a
- * bespoke toolbar per caller.
+ * bespoke toolbar per caller. The add trigger reads short ("Nieuw", DRAWER-ADD-
+ * SHORT-1, Danny 05-08) — it lives in a drawer sub-tab, not a full page.
+ *
+ * STATUS FILTER (Danny 05-08: "ik mis de status naast het zoekveld?"): an optional
+ * `statuses`/`statusOf` pair renders the shared StatusFilterSelect between the
+ * search box and the add trigger, exactly like every other sub-entity list
+ * (VacanciesTab.tsx). Absent (or empty, e.g. while the caller's own lookup is
+ * still resolving) keeps today's toolbar unchanged — no filter pill at all.
  */
 import { useState, useMemo } from 'react'
 import { Search } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { useScopedEntityList } from '../hooks/useScopedEntityList'
-import type { Id } from '@/types/common'
+import type { Id, LookupOption } from '@/types/common'
 
 interface ScopedListTabProps<T> {
   /** React-query cache key prefix — unique per entity type (e.g. 'department-vacancies'). */
@@ -38,21 +46,36 @@ interface ScopedListTabProps<T> {
   /** Point 1: renders a "+ …" button next to the search box when both are given. */
   onAdd?: () => void
   addLabel?: string
+  /** Optional status filter (see file header) — the caller's own tenant lookup,
+   * handed in once resolved. Omitted/empty renders no filter at all. */
+  statuses?: LookupOption[]
+  /** Where a row carries its status slug/id — required together with `statuses`. */
+  statusOf?: (row: T) => string
+  /** Tenant-configured default filter (+ its loaded flag) — parity with VacanciesTab. */
+  defaultStatus?: string | null
+  defaultStatusLoaded?: boolean
 }
 
 export default function ScopedListTab<T>({
   queryKey, endpoint, paramName, id, mapRow, columns, searchKeys,
   searchPlaceholder, emptyText, loadingText, errorText, onRowClick, onAdd, addLabel,
+  statuses, statusOf, defaultStatus, defaultStatusLoaded = true,
 }: ScopedListTabProps<T>) {
   const [search, setSearch] = useState('')
   const { rows, loading, error } = useScopedEntityList<T>(queryKey, endpoint, paramName, id, mapRow)
 
-  // Free-text search over the caller-chosen keys, client-side (mirrors VacanciesTab).
+  // Status filter — same shared hook every other sub-entity list uses. A no-op
+  // (statusRows === rows) when the caller passes no statuses at all.
+  const { value: statusFilter, toggle: toggleStatus, filtered: statusRows } =
+    useStatusFilter(rows, statuses ?? [], statusOf ?? (() => ''), defaultStatus, defaultStatusLoaded)
+
+  // Free-text search over the caller-chosen keys, client-side (mirrors VacanciesTab),
+  // applied ON TOP of the status filter.
   const filteredRows = useMemo(() => {
     const q = search.trim().toLowerCase()
-    if (!q) return rows
-    return rows.filter(row => searchKeys.some(k => String(row[k] ?? '').toLowerCase().includes(q)))
-  }, [rows, search, searchKeys])
+    if (!q) return statusRows
+    return statusRows.filter(row => searchKeys.some(k => String(row[k] ?? '').toLowerCase().includes(q)))
+  }, [statusRows, search, searchKeys])
 
   // ERROR state: an id outside the caller's branch grant 404s (LOC-DEPT-TAB-1) —
   // an honest message, never a table that silently renders as "empty".
@@ -70,7 +93,10 @@ export default function ScopedListTab<T>({
             placeholder={searchPlaceholder} aria-label={searchPlaceholder}
             style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
         </div>
-        {onAdd && addLabel && <DrawerAddButton onClick={onAdd} label={addLabel} />}
+        {statuses && statuses.length > 0 && (
+          <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
+        )}
+        {onAdd && addLabel && <DrawerAddButton onClick={onAdd} label={addLabel} short />}
       </div>
       <DataTable columns={columns} rows={filteredRows} loading={loading} loadingText={loadingText}
         emptyText={emptyText} onRowClick={onRowClick} />

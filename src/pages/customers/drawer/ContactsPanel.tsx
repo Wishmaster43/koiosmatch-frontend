@@ -206,7 +206,9 @@ export default function ContactsPanel({
           <DrawerAddButton onClick={() => setModal('couple')} icon={Link2} iconOnly
             label={t(scope === 'location' ? 'locations.detail.coupleAction' : 'departments.detail.coupleAction')} />
         )}
-        <DrawerAddButton onClick={() => setModal('add')} label={t('contacts.add')} />
+        {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short in this drawer sub-tab's toolbar —
+            the couple button above stays icon-only/full (a link action, not "new"). */}
+        <DrawerAddButton onClick={() => setModal('add')} label={t('contacts.add')} short />
       </div>
 
       {/* Horizontal scroll owned here: neither DataTable nor the drawer shell wraps the

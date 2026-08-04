@@ -115,7 +115,9 @@ function EntityTasksTabBody({ linkType, id, labels, extraLinks = [] }: Props) {
             style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
         </div>
         <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
-        <DrawerAddButton onClick={() => setAdding(true)} label={labels.newTask} />
+        {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short — this tab always lives inside a
+            drawer sub-tab, never a full page. */}
+        <DrawerAddButton onClick={() => setAdding(true)} label={labels.newTask} short />
       </div>
 
       {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{labels.loading}</div>}

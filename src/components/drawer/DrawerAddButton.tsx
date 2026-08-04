@@ -13,6 +13,13 @@ interface DrawerAddButtonProps {
    * rule still holds for the primary add button — never pass this on the main
    * "+ …" action; the full label stays the accessible name and hover title. */
   iconOnly?: boolean
+  /** Short visible text (Danny 05-08, DRAWER-ADD-SHORT-1): in a drawer SUB-TAB the
+   * "+ Nieuwe <entiteit>" wording is redundant — the sub-tab bar already names the
+   * entity — so the visible label collapses to the shared t('common:new') ("Nieuw").
+   * The FULL `label` still becomes the title/aria-label, so a caller's own
+   * getByRole('button', { name: fullLabel }) test keeps passing unchanged. Only for
+   * drawer SUB-TABS — a full entity PAGE's own "+ Add" button stays spelled out. */
+  short?: boolean
 }
 
 /**
@@ -25,11 +32,19 @@ interface DrawerAddButtonProps {
  * buttons — the reference for Danny's consistency sweep, 2026-07). Mirrors §4's
  * QuickViewToggle lesson: one shared component, never a per-section restyle.
  * Reuse this everywhere a tab needs a right-aligned add-trigger.
+ *
+ * DRAWER-ADD-SHORT-1 (Danny 05-08): the 28-07 "always the full label" rule above is
+ * SUPERSEDED for drawer SUB-TABS only — there the visible text may shorten to "Nieuw"
+ * via `short` (see that prop). A full entity PAGE's own add button keeps the full
+ * label, unchanged. Either way "readable text without hovering" still holds — this
+ * never goes icon-only for the primary add action.
  */
-export default function DrawerAddButton({ onClick, label, icon: Icon = Plus, disabled, title, iconOnly }: DrawerAddButtonProps) {
+export default function DrawerAddButton({ onClick, label, icon: Icon = Plus, disabled, title, iconOnly, short }: DrawerAddButtonProps) {
   const { t } = useTranslation('common')
   // The accessible name: the caller's label when it is plain text, else the shared "add".
   const name = typeof label === 'string' ? label : t('add')
+  // Visible text: the short house word when requested, else the caller's own label.
+  const visibleText = short ? t('new') : (label ?? t('add'))
   return (
     <button onClick={onClick} disabled={disabled} title={title ?? name} aria-label={name}
       style={{
@@ -41,7 +56,7 @@ export default function DrawerAddButton({ onClick, label, icon: Icon = Plus, dis
         border: `1px solid ${disabled ? 'var(--border)' : 'color-mix(in srgb, var(--color-primary) 30%, transparent)'}`,
         opacity: disabled ? 0.7 : 1,
       }}>
-      <Icon size={12} /> {iconOnly ? null : (label ?? t('add'))}
+      <Icon size={12} /> {iconOnly ? null : visibleText}
     </button>
   )
 }

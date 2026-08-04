@@ -12,8 +12,15 @@
  * VacancyLookupsProvider wraps the modal here too: it is only mounted around
  * the Vacancies PAGE, so opening the modal from any drawer without it throws
  * (caught live 28-07 on the customer-level tab this mirrors).
+ *
+ * STATUS FILTER (Danny 05-08 "ik mis de status naast het zoekveld?"): fetches
+ * GET /vacancy-statuses directly, same as the customer-level VacanciesTab
+ * (VacancyLookupsProvider is only mounted around the Vacancies PAGE) —
+ * `resolved` gates handing the list to ScopedListTab so its shared
+ * useStatusFilter never guesses a default off the seed slugs before the real
+ * lookup answers (mirrors VacanciesTab's own id/name bugfix comment).
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import StatusPill from '@/components/ui/StatusPill'
@@ -22,10 +29,24 @@ import { useNavigation } from '@/context/NavigationContext'
 import { VacancyLookupsProvider } from '@/context/VacancyLookupsContext'
 import AddVacancyModal from '@/pages/vacancies/AddVacancyModal'
 import ScopedListTab from './ScopedListTab'
+import { useAllSettings, getStringSetting, useSettingsLoaded } from '@/lib/settings/useAllSettings'
+import api, { unwrapList } from '@/lib/api'
 import { mapVacancyRow } from '../hooks/useCustomerDrawerData'
 import type { VacancyRow } from '../hooks/useCustomerDrawerData'
 import type { Id } from '@/types/common'
 import type { Column } from '@/components/ui/DataTable'
+
+// Index signature (mirrors MatchStatus in useMatchStatuses.ts): lets this list feed
+// straight into ScopedListTab's `statuses` prop, typed LookupOption[] — structural
+// typing only, no runtime change.
+interface StatusOpt { value: string; label: string; [k: string]: unknown }
+
+// Seed fallback (mirrors VacanciesTab's own SEED_STATUSES) — used only until
+// GET /vacancy-statuses answers, or if it's unavailable.
+const SEED_STATUSES: StatusOpt[] = [
+  { value: 'open', label: 'Open' }, { value: 'online', label: 'Online' },
+  { value: 'concept', label: 'Concept' }, { value: 'paused', label: 'Gepauzeerd' }, { value: 'closed', label: 'Gesloten' },
+]
 
 export default function ScopedVacanciesTab({ scope, id, customerId, customerName, scopeName }: {
   scope: 'department' | 'location'; id: Id | undefined
@@ -41,6 +62,26 @@ export default function ScopedVacanciesTab({ scope, id, customerId, customerName
   const queryClient = useQueryClient()
   const paramName = scope === 'department' ? 'customer_department_id' : 'customer_location_id'
   const [adding, setAdding] = useState(false)
+  const [statusOptions, setStatusOptions] = useState<StatusOpt[]>(SEED_STATUSES)
+  // Has the REAL lookup answered? The seed list must never decide the default
+  // selection — mirrors VacanciesTab's own guard (uuid vs seed-slug mismatch).
+  const [resolved, setResolved] = useState(false)
+  // Tenant default for this filter — the same setting the customer-level tab reads.
+  const settings = useAllSettings()
+  const settingsLoaded = useSettingsLoaded()
+  const defaultStatusFilter = getStringSetting(settings, 'customer_vacancy_default_status_filter')
+
+  // Load the tenant vacancy-status lookup once — same endpoint/shape VacanciesTab reads.
+  useEffect(() => {
+    api.get('/vacancy-statuses').then(r => {
+      const raw = (unwrapList(r).rows) as Array<{ id?: string; value?: string; label?: string; name?: string; active?: boolean }>
+      const opts = raw.filter(o => o.active !== false)
+        .map(o => ({ value: String(o.id ?? o.value ?? o.name ?? ''), label: String(o.label ?? o.name ?? '') }))
+        .filter(o => o.value)
+      if (opts.length) setStatusOptions(opts)
+      setResolved(true)
+    }).catch(() => setResolved(true))
+  }, [])
 
   const columns: Column<VacancyRow>[] = [
     { key: 'title', header: t('vacancies.col.title'), sortable: true, sortValue: v => v.title,
@@ -63,6 +104,13 @@ export default function ScopedVacanciesTab({ scope, id, customerId, customerName
         // otherwise there is nothing to lock the create form to (§3).
         onAdd={customerId ? () => setAdding(true) : undefined}
         addLabel={t('vacancies.add')}
+        // STATUS FILTER: empty until the real lookup resolves (never the seed).
+        statuses={resolved ? statusOptions : []}
+        statusOf={v => String(v.status.value ?? '')}
+        // Parity with the customer-level VacanciesTab: the tenant-configured default
+        // filter applies here too (flagged gap, closed 05-08).
+        defaultStatus={defaultStatusFilter}
+        defaultStatusLoaded={settingsLoaded}
       />
       {adding && (
         <VacancyLookupsProvider>

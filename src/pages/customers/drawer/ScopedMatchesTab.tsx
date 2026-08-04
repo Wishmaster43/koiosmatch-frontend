@@ -19,6 +19,14 @@
  * Point 1: "+ Match" — a DIRECT match already scoped to this location/department
  * (and its customer, threaded down from LocationDetail/DepartmentDetail) via
  * MatchModal's candidate-less mode, prefilling the Relaties cascade.
+ *
+ * STATUS FILTER (Danny 05-08 live review): the same match-status lookup the
+ * customer-level MatchesTab filters on (useMatchStatuses, seeded so it is never
+ * empty — no `resolved` guard needed, unlike the vacancy status fetch above in
+ * ScopedVacanciesTab), keyed on the row's own status slug. No separate "Status"
+ * column is added: the vacancy cell already renders "{vacature} — {fase}" in the
+ * status's own colour (Point 2 above) — the exact same story the customer-level
+ * MatchesTab tells via MatchCard's title, never a StatusPill column there either.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -58,7 +66,7 @@ export default function ScopedMatchesTab({ scope, id, customerId }: {
 }) {
   const { t } = useTranslation(['customers', 'matches', 'candidates'])
   const { openEntity } = useNavigation()
-  const { metaOf: matchStatusMeta } = useMatchStatuses()
+  const { statuses: matchStatuses, metaOf: matchStatusMeta } = useMatchStatuses()
   const { formatDate } = useDateFormat()
   const queryClient = useQueryClient()
   const paramName = scope === 'department' ? 'customer_department_id' : 'customer_location_id'
@@ -125,6 +133,9 @@ export default function ScopedMatchesTab({ scope, id, customerId }: {
         // otherwise the modal would have nothing to prefill (§3, no fake affordance).
         onAdd={customerId ? () => setAdding(true) : undefined}
         addLabel={t('customers:matches.add')}
+        // STATUS FILTER: mirrors the customer-level MatchesTab's own useStatusFilter call.
+        statuses={matchStatuses}
+        statusOf={m => m.status ?? ''}
       />
       {adding && (
         <MatchModal

@@ -200,7 +200,8 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
         </div>
         <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={derivedStatuses} />
         {!adding && (
-          <DrawerAddButton onClick={() => { setDraft(emptyDraft()); setAdding(true) }} label={t('priceAgreements.add')} />
+          // DRAWER-ADD-SHORT-1 (Danny 05-08): short in this drawer sub-tab's toolbar.
+          <DrawerAddButton onClick={() => { setDraft(emptyDraft()); setAdding(true) }} label={t('priceAgreements.add')} short />
         )}
       </div>
 

@@ -218,7 +218,8 @@ export default function DepartmentsPanel({
         {/* ARCHIVE-SUBENTITY-1: the shared quick-view toggle (§4) — never hand-rolled. */}
         <QuickViewToggle iconOnly active={showArchived} onToggle={() => setShowArchived(v => !v)}
           label={t('departments.archivedView')} color="var(--color-archive)" icon={Archive} />
-        <DrawerAddButton onClick={() => setAdding(true)} label={t('departments.add')} />
+        {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short in this drawer sub-tab's toolbar. */}
+        <DrawerAddButton onClick={() => setAdding(true)} label={t('departments.add')} short />
       </div>
 
       {/* Horizontal scroll owned here, same as ContactsPanel — neither DataTable nor the

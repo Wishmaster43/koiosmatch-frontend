@@ -82,7 +82,10 @@ export default function MatchesTab({ customerId }: { customerId?: Id }) {
             style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
         </div>
         <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={matchStatuses} />
-        <DrawerAddButton onClick={() => setAdding(true)} label={t('customers:matches.add')} />
+        {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short — this is "Nieuwe match" (new
+            record), unlike WorkTab's bare "Match" named-action button which stays
+            full (see DrawerAddButton's own docblock). */}
+        <DrawerAddButton onClick={() => setAdding(true)} label={t('customers:matches.add')} short />
       </div>
       <SectionCard>
       {matches.length === 0 ? (

@@ -68,3 +68,12 @@ describe('ScopedListTab · client-side search', () => {
     expect(screen.queryByText('Verzorgende')).not.toBeInTheDocument()
   })
 })
+
+describe('ScopedListTab · optional status filter (Danny 05-08)', () => {
+  it('renders no filter pill at all when the caller passes no statuses (today\'s toolbar unchanged)', () => {
+    vi.mocked(useScopedEntityList).mockReturnValue({ rows: [], loading: false, error: false })
+    render(<ScopedListTab {...baseProps} />)
+    // No `statuses`/`onAdd` in baseProps — the toolbar is search-only, zero buttons.
+    expect(screen.queryAllByRole('button')).toHaveLength(0)
+  })
+})

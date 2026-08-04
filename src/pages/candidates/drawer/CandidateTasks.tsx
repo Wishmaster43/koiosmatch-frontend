@@ -96,9 +96,11 @@ export default function CandidateTasks({ candidateId }: { candidateId: Id }) {
         <QuickViewToggle active={view === 'open'} onToggle={() => setView('open')} label={t('drawer.tasksOpen')} size="compact" />
         <QuickViewToggle active={view === 'history'} onToggle={() => setView('history')} label={t('drawer.tasksHistory')} size="compact" />
       </span>
+      {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short — always inside the Communicatie →
+          Taken sub-tab, never a full page. */}
       <DrawerAddButton onClick={() => setAdding(true)} disabled={taskRuleBlocked}
         title={taskRuleBlocked ? taskRuleDecision?.message ?? undefined : undefined}
-        label={t('drawer.newTask')} />
+        label={t('drawer.newTask')} short />
     </span>
   )
 

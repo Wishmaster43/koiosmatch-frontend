@@ -27,7 +27,11 @@ const mt = (key: string) => i18n.t(key, { ns: 'matches' })
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: vi.fn(), navigate: vi.fn() }) }))
 // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
 const metaOf = vi.fn((v?: string) => (v === 'open' ? { value: 'open', label: 'Open (lookup)', color: '#123456', is_closed: false } : undefined))
-vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => ({ statuses: [], metaOf }) }))
+// STATUS FILTER (Danny 05-08): mutable per-test so the filter tests below can
+// exercise a real status list while every other test keeps today's empty-list
+// behaviour (ScopedListTab renders no filter pill at all when statuses is empty).
+let mockMatchStatuses: Array<{ value: string; label: string; color?: string; is_closed: boolean }> = []
+vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => ({ statuses: mockMatchStatuses, metaOf }) }))
 
 // The generic fetch is ScopedListTab/useScopedEntityList's own concern —
 // stubbed here so this test is about the COLUMN shape, not the network seam.
@@ -125,5 +129,33 @@ describe('ScopedMatchesTab · "+ Match" (point 1)', () => {
     const { onCreated } = matchModalProps.mock.calls.at(-1)?.[0] as { onCreated: () => void }
     onCreated()
     await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ['location-matches', '/matches', 'customer_location_id', 'loc-1'] }))
+  })
+})
+
+describe('ScopedMatchesTab · status filter (Danny 05-08 live review)', () => {
+  afterEach(() => { mockMatchStatuses = [] })
+
+  it('renders no filter pill when the match-status lookup is empty (today\'s toolbar unchanged)', () => {
+    mockUseScopedEntityList.mockReturnValue({ rows: [raw({ status: 'open' })], loading: false, error: false })
+    render(<ScopedMatchesTab scope="location" id="loc-1" />, { wrapper })
+    expect(screen.queryByRole('button', { name: cust('filters.allStatuses') })).toBeNull()
+  })
+
+  it('narrows rows once a real match-status list is available, keyed on the row\'s own status slug', () => {
+    // Same shared useStatusFilter guess every other list uses (no tenantDefault
+    // wired here, mirrors the customer-level MatchesTab): 'open' matches the
+    // active-only heuristic, so it proposes itself the moment statuses+rows
+    // are both ready — no click needed to prove the filter actually narrows.
+    mockMatchStatuses = [
+      { value: 'open', label: 'Open', is_closed: false },
+      { value: 'closed', label: 'Afgesloten', is_closed: true },
+    ]
+    mockUseScopedEntityList.mockReturnValue({
+      rows: [raw({ id: 'm-open', vacancy: 'Open match', status: 'open' }), raw({ id: 'm-closed', vacancy: 'Closed match', status: 'closed' })],
+      loading: false, error: false,
+    })
+    render(<ScopedMatchesTab scope="location" id="loc-1" />, { wrapper })
+    expect(screen.getByText('Open match')).toBeInTheDocument()
+    expect(screen.queryByText('Closed match')).toBeNull()
   })
 })

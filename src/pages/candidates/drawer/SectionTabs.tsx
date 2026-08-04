@@ -25,8 +25,10 @@ import type { Id } from '@/types/common'
 
 // One shared render-prop: the "+ Toevoegen" trigger for every Achtergrond
 // sub-tab, styled like the WorkTab "+ Match" reference (2026-07 sweep) instead
-// of AddableSection's plain left-aligned link.
-const renderAddButton = (onClick: () => void) => <DrawerAddButton onClick={onClick} />
+// of AddableSection's plain left-aligned link. Short text (DRAWER-ADD-SHORT-1,
+// Danny 05-08): every caller below renders inside its own Achtergrond sub-tab,
+// never a full page.
+const renderAddButton = (onClick: () => void) => <DrawerAddButton onClick={onClick} short />
 
 // Relation items vary by backend version — kept loose at the prop boundary and
 // cast to the concrete per-row shape inside each renderItem.

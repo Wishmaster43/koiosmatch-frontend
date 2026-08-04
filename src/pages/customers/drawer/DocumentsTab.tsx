@@ -212,7 +212,8 @@ export default function DocumentsTab({ customerId, locations = [], departments =
               </button>
             </>
           )}
-          <DrawerAddButton onClick={() => fileRef.current?.click()} label={t('documents.add')} />
+          {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short in this drawer sub-tab's toolbar. */}
+          <DrawerAddButton onClick={() => fileRef.current?.click()} label={t('documents.add')} short />
         </div>
       </div>
       <div style={sectionBlock}>

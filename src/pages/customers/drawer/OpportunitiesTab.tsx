@@ -162,7 +162,8 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
               row only ever carries `stageValue`, never a stage id (§3B, no invented axis). */}
           <StatusFilterSelect value={stageFilter} onToggle={toggleStage} statuses={stages}
             optionKey={s => String(s.value ?? s.id ?? '')} />
-          <DrawerAddButton onClick={() => setAdding(true)} label={t('opportunities.newOpportunity')} />
+          {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short in this drawer sub-tab's toolbar. */}
+          <DrawerAddButton onClick={() => setAdding(true)} label={t('opportunities.newOpportunity')} short />
         </div>
       }>
         {error && <Muted text={t('opportunities.loadError')} />}

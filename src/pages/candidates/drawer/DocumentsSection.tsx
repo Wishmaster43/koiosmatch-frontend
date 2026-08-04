@@ -224,7 +224,9 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
               </button>
             </>
           )}
-          <DrawerAddButton onClick={() => fileRef.current?.click()} label={t('common:add')} />
+          {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short — always inside a candidate
+              drawer sub-tab, never a full page. */}
+          <DrawerAddButton onClick={() => fileRef.current?.click()} label={t('common:add')} short />
         </div>
       </div>
       <div style={sectionBlock}>

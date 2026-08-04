@@ -45,8 +45,10 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6, marginBottom: 6 }}>
         {/* "+ Taal" top-right, same reference style as + Match / Ervaring — ALWAYS
             visible (Danny 20-07: net als de andere secties): outside edit mode a
-            click enters edit AND adds the fresh row in one go. Save/✕ stay put. */}
-        <DrawerAddButton label={t('addFields.language')}
+            click enters edit AND adds the fresh row in one go. Save/✕ stay put.
+            Short text (DRAWER-ADD-SHORT-1, Danny 05-08): always inside the
+            Achtergrond → Talen sub-tab, never a full page. */}
+        <DrawerAddButton label={t('addFields.language')} short
           onClick={() => { if (!editing) { setRows([...initial(), { language: '', spoken: '', written: '' }]); setEditing(true) } else addRow() }} />
         {editing ? (
           <div style={{ display: 'flex', gap: 4 }}>

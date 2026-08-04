@@ -11,12 +11,13 @@
  * `@/lib/datetime` (its locale map lives in `@/i18n`) — a raw-key stub would
  * assert against text that never actually renders.
  */
-import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createElement, type ReactNode } from 'react'
 import i18n from '@/i18n'
+import api from '@/lib/api'
 import ScopedVacanciesTab from './ScopedVacanciesTab'
 
 const cust = (key: string) => i18n.t(key, { ns: 'customers' })
@@ -32,16 +33,41 @@ vi.mock('@/pages/vacancies/AddVacancyModal', () => ({
   default: (props: Record<string, unknown>) => { addVacancyModalProps(props); return <div data-testid="add-vacancy-modal" /> },
 }))
 
+// STATUS FILTER (Danny 05-08): this tab now fetches GET /vacancy-statuses directly,
+// same as the customer-level VacanciesTab (mirrors that file's own mock/fixture —
+// the 'open' id deliberately ALSO matches the guess-heuristic's slug list).
+vi.mock('@/lib/api', () => ({
+  default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
+  unwrapList: (r: { data?: { data?: unknown[] } }) => ({ rows: r?.data?.data ?? [], total: 0 }),
+}))
+const VACANCY_STATUSES = [
+  { id: 'open', name: 'Open', active: true },
+  { id: 'closed', name: 'Gesloten', active: true },
+]
+
 const wrapper = ({ children }: { children: ReactNode }) =>
   createElement(QueryClientProvider, { client: new QueryClient({ defaultOptions: { queries: { retry: false } } }) }, children)
 
 afterEach(() => { addVacancyModalProps.mockClear() })
 
+// Every test gets a sane default: the /vacancy-statuses lookup resolves with both
+// seed statuses unless a specific test overrides it (mirrors VacanciesTab.test.tsx).
+beforeEach(() => {
+  vi.mocked(api.get).mockImplementation((url: string) => {
+    if (url === '/vacancy-statuses') return Promise.resolve({ data: { data: VACANCY_STATUSES } })
+    return Promise.resolve({ data: { data: [] } })
+  })
+})
+
 describe('ScopedVacanciesTab · "+ Vacature" (point 1)', () => {
-  it('does not render the add trigger when the customer is unknown', () => {
+  it('does not render the add trigger when the customer is unknown', async () => {
     mockUseScopedEntityList.mockReturnValue({ rows: [], loading: false, error: false })
     render(<ScopedVacanciesTab scope="location" id="loc-1" />, { wrapper })
     expect(screen.queryByRole('button', { name: cust('vacancies.add') })).toBeNull()
+    // Flush the /vacancy-statuses fetch this component now fires on mount — waits for
+    // the status filter itself to mount (only happens once `resolved` flips true), so
+    // its state update never lands after the test body (unwrapped act() warning).
+    await screen.findByRole('button', { name: cust('filters.allStatuses') })
   })
 
   it('locks the customer and pre-sets the location id/name on click', async () => {
@@ -80,9 +106,33 @@ describe('ScopedVacanciesTab · "+ Vacature" (point 1)', () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     const invalidate = vi.spyOn(client, 'invalidateQueries')
     render(createElement(QueryClientProvider, { client }, createElement(ScopedVacanciesTab, { scope: 'location', id: 'loc-1', customerId: 'cust-1' })))
+    // Flush the /vacancy-statuses fetch this component fires on mount first (waits
+    // for the status filter to actually mount), so its resolution never lands after
+    // this test body (unwrapped act() warning).
+    await screen.findByRole('button', { name: cust('filters.allStatuses') })
     await user.click(screen.getByRole('button', { name: cust('vacancies.add') }))
     const { onCreated } = addVacancyModalProps.mock.calls.at(-1)?.[0] as { onCreated: () => void }
-    onCreated()
+    // Wrapped in act(): a plain call (unlike a user-event interaction) is the
+    // classic unwrapped-state-update trigger React warns about.
+    act(() => { onCreated() })
     await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ['location-vacancies', '/vacancies', 'customer_location_id', 'loc-1'] }))
+  })
+})
+
+describe('ScopedVacanciesTab · status filter (Danny 05-08 "ik mis de status naast het zoekveld?")', () => {
+  it('narrows rows once the real /vacancy-statuses lookup resolves (same active-only guess as VacanciesTab)', async () => {
+    mockUseScopedEntityList.mockReturnValue({
+      rows: [
+        { id: 'v-open', title: 'Openstaande vacature', status: { value: 'open', label: 'Open' }, applications: 0 },
+        { id: 'v-closed', title: 'Gesloten vacature', status: { value: 'closed', label: 'Gesloten' }, applications: 0 },
+      ], loading: false, error: false,
+    })
+    render(<ScopedVacanciesTab scope="location" id="loc-1" customerId="cust-1" />, { wrapper })
+    // Both checks in ONE waitFor: the lookup resolves a tick after mount, so an
+    // earlier unfiltered render transiently shows both rows (mirrors VacanciesTab.test.tsx).
+    await waitFor(() => {
+      expect(screen.getByText('Openstaande vacature')).toBeInTheDocument()
+      expect(screen.queryByText('Gesloten vacature')).toBeNull()
+    })
   })
 })

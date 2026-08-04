@@ -258,8 +258,10 @@ export default function NotesTab({
               style={{ border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none', flex: 1, minWidth: 0 }} />
           </div>
           {/* Shared reference-style add button (Danny 20-07: notitie-knop had geen
-              achtergrondkleur) — one look on every entity's notes tab. */}
-          {!adding && <DrawerAddButton onClick={() => setAdding(true)} label={labels.newNote} />}
+              achtergrondkleur) — one look on every entity's notes tab. Short text
+              (DRAWER-ADD-SHORT-1, Danny 05-08): this always renders inside a
+              drawer sub-tab, never a full page. */}
+          {!adding && <DrawerAddButton onClick={() => setAdding(true)} label={labels.newNote} short />}
         </div>
         <div style={sectionBlock}>
         {adding && (

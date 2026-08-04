@@ -285,5 +285,6 @@
     "next": "Next",
     "prevAt": "Previous ({{index}} of {{total}})",
     "nextAt": "Next ({{index}} of {{total}})"
-  }
+  },
+  "new": "New"
 }
