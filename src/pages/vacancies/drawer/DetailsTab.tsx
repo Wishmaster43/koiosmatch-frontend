@@ -44,11 +44,11 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
       <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
       {subTab === 'general' && (
         <>
-          {/* V11 (Danny vacatures-ronde): Koios advisory only on Algemeen, ABOVE
-              the fields card (was rendered unconditionally below every sub-tab). */}
-          <KoiosAdviceBlock namespace="vacancies" insights={buildVacancyAdviceInsights(v, t)} />
+          {/* V11 + Danny 05-08 "Koios moet eronder komen": advisory only on Algemeen,
+              BELOW the fields cards — the same bottom placement as the customer tab. */}
           <DetailsGeneralTab vacancy={v} general={general} candidateTypes={candidateTypes} typeMeta={typeMeta}
             industries={industries} fnOptions={fnOptions} formatDate={formatDate} />
+          <KoiosAdviceBlock namespace="vacancies" insights={buildVacancyAdviceInsights(v, t)} />
         </>
       )}
       {subTab === 'location' && <DetailsLocationTab vacancy={v} location={location} />}
