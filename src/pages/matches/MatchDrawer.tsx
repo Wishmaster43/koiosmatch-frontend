@@ -3,23 +3,26 @@
  * EntityHeader shell (§3A blueprint). The match facts (candidate/vacancy/client/
  * score/stage) stay read-only — a match is the continuation of a Hired
  * application (§3B) and those are derived — but the match's contract/financial
- * layer IS editable in-place. Three real tabs (Danny, 2026-07-14: "ook tabjes maken
- * voor de drill down" — one tab used to wear the summary + the whole contract form
- * at once): Overzicht (facts/score/status), Contract & financieel
- * (MatchContractSection, moved as-is), Relaties (candidate/vacancy/klant, each a
- * cross-entity hyperlink — RelationsTab). A Notities tab is NOT added: the
- * backend has no /matches/{id}/notes route yet (grepped
- * routes/api/tenant/applications-matches.php — only CRUD + approve/reject/contract
- * exist), so ChangelogTab stays the icon-popover it already was rather than a fake
- * tab. Header meta row (DRAWER-STD-1, 2026-07-14): a standard Status picker (the
- * same /match-statuses lookup the board/table use, ~160) + a real Eigenaar picker
+ * layer IS editable in-place. Content tabs: Overzicht (facts/score/status),
+ * Contract & financieel (MatchContractSection, moved as-is), Relaties
+ * (candidate/vacancy/klant, each a cross-entity hyperlink — RelationsTab) and
+ * Notities (NT-MATCH-1, 2026-08-04 — MatchNoteController now exists, so the
+ * placeholder note above about "no /matches/{id}/notes route yet" no longer
+ * applies). ChangelogTab stays the icon-popover, never a tab (§3A(d)). Header
+ * meta row (DRAWER-STD-1, 2026-07-14): a standard Status picker (the same
+ * /match-statuses lookup the board/table use, ~160) + a real Eigenaar picker
  * (MATCH-OWNER-1, 2026-07-31) — PATCH /matches/{id} accepts `owner_id`
  * (UpdateMatchRequest → PlacementRules trait, tenant-validated), so reassigning
- * persists like every other entity. Thin container: header config + tab list + the
+ * persists like every other entity. A "Beëindigen" header action
+ * (MATCH-TERMINATE-1, 2026-08-04) opens TerminateMatchModal, which POSTs
+ * /matches/{id}/terminate and hands the updated match back through onUpdate —
+ * hidden once the match's status already carries the tenant's is_closed flag,
+ * or once archived. Thin container: header config + tab list + the
  * useMatchApproval wiring; all body markup lives in the tab/header components.
  */
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Ban } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import type { EntityTab } from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
@@ -36,6 +39,8 @@ import ScorePill from './ScorePill'
 import OverviewTab from './drawer/OverviewTab'
 import RelationsTab from './drawer/RelationsTab'
 import MatchContractSection from './drawer/MatchContractSection'
+import NotesTab from './drawer/NotesTab'
+import TerminateMatchModal from './drawer/TerminateMatchModal'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ChangelogTab from './drawer/ChangelogTab'
 import MatchApprovalBadge from './drawer/MatchApprovalBadge'
@@ -71,24 +76,39 @@ interface MatchDrawerProps {
   // EXTRACT-1: the caller's own matches.update permission check for the
   // Koppelingen tab's "Koppelen" buttons (§7 — UI gate, backend re-checks).
   canLinkBackoffice?: boolean
+  // MATCH-TERMINATE-1: same matches.update gate as the sibling actions (§7 —
+  // UI-only; POST /matches/{id}/terminate re-checks server-side).
+  canTerminate?: boolean
 }
 
 export default function MatchDrawer({
   match, onClose, expanded = false, onToggleExpand, onSetStatus, onSetOwner, canApprove = false, onApprovalChange, onUpdate, onUpdateCustomFields,
-  onArchive, onRestore, canLinkBackoffice = false,
+  onArchive, onRestore, canLinkBackoffice = false, canTerminate: canTerminatePermission = false,
 }: MatchDrawerProps) {
   const { t } = useTranslation('matches')
   const { formatDate, formatDateTime } = useDateFormat()
   // Approval data/actions live in one hook here (thin container, §3) — the header
   // pieces below stay presentational.
   const { reason, busy, rejectOpen, setRejectOpen, approve, reject } = useMatchApproval(match, onApprovalChange)
-  // R-1b lifecycle status — the same tenant lookup the board/table use.
-  const { statuses: matchStatuses } = useMatchStatuses()
+  // R-1b lifecycle status — the same tenant lookup the board/table use. metaOf
+  // also drives the terminate button's is_closed gate below (MATCH-TERMINATE-1).
+  const { statuses: matchStatuses, metaOf: matchStatusMeta } = useMatchStatuses()
   // The Extra tab only shows when the tenant has defined match custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('match')
   // MATCH-OWNER-1: the tenant's users, the owner picker's options (cached app-wide).
   const { data: users = [] } = useUsers() as { data?: OwnerCandidate[] }
+  // MATCH-TERMINATE-1: the "Beëindigen" confirm modal, opened from the header action below.
+  const [terminateOpen, setTerminateOpen] = useState(false)
   if (!match) return null
+
+  // The button hides once the match is already closed (its status carries the
+  // is_closed flag — R-1b) or already archived (soft-deleted, restore first —
+  // mirrors every other header action in this drawer). The list row itself
+  // never carries an is_closed flag (only the status slug does), so this
+  // derives it from the same /match-statuses lookup the header's own Status
+  // picker already loads, rather than a second fetch.
+  const matchIsClosed = Boolean(matchStatusMeta(match.status)?.is_closed)
+  const canTerminate = canTerminatePermission && !match.archived && !matchIsClosed
 
   // Owner picker options, mirroring CandidateDrawer: a synthetic entry for the
   // CURRENT owner only when that user is missing from /users (a deactivated or
@@ -119,6 +139,9 @@ export default function MatchDrawer({
     { id: 'overview',  label: t('drawer.tabs.overview'), render: () => <OverviewTab match={match} onSetStatus={onSetStatus} /> },
     { id: 'contract',  label: t('drawer.contract.title'), render: () => <MatchContractSection matchId={match.id} onUpdate={onUpdate} /> },
     { id: 'relations', label: t('drawer.tabs.relations'), render: () => <RelationsTab match={match} /> },
+    // NT-MATCH-1: notes, after the content tabs above and before Extra/Koppelingen
+    // (there is no Changelog TAB — record history stays the icon-popover, §3A(d)).
+    { id: 'notes', label: t('notes.title'), render: () => <NotesTab match={match} /> },
     ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra'), render: () => (
       <CustomFieldsTab entityType="match" values={match.customFieldValues ?? {}}
         onSave={patch => onUpdateCustomFields?.(match.id, patch)} />
@@ -131,6 +154,7 @@ export default function MatchDrawer({
   ]
 
   return (
+    <>
     <EntityDrawer
       entity={{ id: match.id }}
       expanded={expanded}
@@ -185,9 +209,21 @@ export default function MatchDrawer({
           // MatchApprovalActions moves into the header actions slot (was the body headerChips row).
           // ARCHIVED: no review action on a soft-deleted match — restore first.
           actions={
-            <MatchApprovalActions status={match.approval_status} reason={reason} canUpdate={canApprove && !match.archived} busy={busy}
-              rejectOpen={rejectOpen} onOpenReject={() => setRejectOpen(true)} onCancelReject={() => setRejectOpen(false)}
-              onApprove={approve} onReject={reject} />
+            <>
+              <MatchApprovalActions status={match.approval_status} reason={reason} canUpdate={canApprove && !match.archived} busy={busy}
+                rejectOpen={rejectOpen} onOpenReject={() => setRejectOpen(true)} onCancelReject={() => setRejectOpen(false)}
+                onApprove={approve} onReject={reject} />
+              {/* MATCH-TERMINATE-1: one calm danger-tint button (§4 soft-tint, never a
+                  solid fill) — hidden once the match is already closed or archived. */}
+              {canTerminate && (
+                <button onClick={() => setTerminateOpen(true)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, height: 26, padding: '0 9px', fontSize: 11, fontWeight: 600,
+                    borderRadius: 7, cursor: 'pointer', border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
+                    background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)', color: 'var(--color-danger)' }}>
+                  <Ban size={11} />{t('drawer.terminate.button')}
+                </button>
+              )}
+            </>
           }
           // Standard meta-picker row (§3A(c)): Status (~160, tenant lookup) + Eigenaar
           // (MATCH-OWNER-1 — a real picker now that PATCH /matches/{id} takes owner_id).
@@ -228,5 +264,11 @@ export default function MatchDrawer({
       }
       tabs={tabs}
     />
+    {/* MATCH-TERMINATE-1: mounted only while open — mirrors the reject-reason
+        prompt pattern (a fresh mount per open keeps useFocusTrap correct). */}
+    {terminateOpen && (
+      <TerminateMatchModal match={match} onClose={() => setTerminateOpen(false)} onUpdate={onUpdate} />
+    )}
+    </>
   )
 }

@@ -89,7 +89,21 @@
       "saveError": "Wijziging kon niet worden opgeslagen.",
       "saved": "Contractgegevens opgeslagen."
     },
-    "ownerUnassigned": "Geen eigenaar"
+    "ownerUnassigned": "Geen eigenaar",
+    "terminate": {
+      "button": "Beëindigen",
+      "modalTitle": "Match beëindigen",
+      "reasonLabel": "Reden",
+      "reasonPlaceholder": "Kies een reden…",
+      "noReasonsConfigured": "Nog geen beëindigingsredenen ingesteld.",
+      "effectiveDateLabel": "Einddatum",
+      "noteLabel": "Notitie (optioneel)",
+      "notePlaceholder": "Toelichting…",
+      "noteCounter": "{{count}}/{{max}}",
+      "confirm": "Beëindiging bevestigen",
+      "success": "Match beëindigd.",
+      "error": "Match kon niet worden beëindigd."
+    }
   },
   "approval": {
     "status": {
@@ -144,5 +158,17 @@
   },
   "add": {
     "button": "Nieuwe match"
+  },
+  "notes": {
+    "title": "Notities",
+    "type": "Type",
+    "new": "Nieuwe notitie",
+    "empty": "Nog geen notities.",
+    "placeholder": "Schrijf een notitie…",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "searchPlaceholder": "Zoek notities…",
+    "loading": "Notities laden…",
+    "loadError": "Notities konden niet geladen worden."
   }
 }

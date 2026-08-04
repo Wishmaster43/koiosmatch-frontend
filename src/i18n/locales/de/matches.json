@@ -89,7 +89,21 @@
       "saveError": "Änderung konnte nicht gespeichert werden.",
       "saved": "Vertragsdetails gespeichert."
     },
-    "ownerUnassigned": "Kein Inhaber"
+    "ownerUnassigned": "Kein Inhaber",
+    "terminate": {
+      "button": "Beenden",
+      "modalTitle": "Match beenden",
+      "reasonLabel": "Grund",
+      "reasonPlaceholder": "Grund auswählen…",
+      "noReasonsConfigured": "Noch keine Beendigungsgründe konfiguriert.",
+      "effectiveDateLabel": "Wirksam ab",
+      "noteLabel": "Notiz (optional)",
+      "notePlaceholder": "Anmerkung hinzufügen…",
+      "noteCounter": "{{count}}/{{max}}",
+      "confirm": "Beendigung bestätigen",
+      "success": "Match beendet.",
+      "error": "Der Match konnte nicht beendet werden."
+    }
   },
   "approval": {
     "status": {
@@ -144,5 +158,17 @@
   },
   "add": {
     "button": "Neuer Match"
+  },
+  "notes": {
+    "title": "Notizen",
+    "type": "Typ",
+    "new": "Neue Notiz",
+    "empty": "Noch keine Notizen.",
+    "placeholder": "Notiz schreiben…",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "searchPlaceholder": "Notizen durchsuchen…",
+    "loading": "Notizen werden geladen…",
+    "loadError": "Notizen konnten nicht geladen werden."
   }
 }

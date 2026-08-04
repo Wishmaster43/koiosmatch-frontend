@@ -89,7 +89,21 @@
       "saveError": "No se pudo guardar el cambio.",
       "saved": "Detalles del contrato guardados."
     },
-    "ownerUnassigned": "Sin responsable"
+    "ownerUnassigned": "Sin responsable",
+    "terminate": {
+      "button": "Finalizar",
+      "modalTitle": "Finalizar match",
+      "reasonLabel": "Motivo",
+      "reasonPlaceholder": "Elige un motivo…",
+      "noReasonsConfigured": "Aún no hay motivos de finalización configurados.",
+      "effectiveDateLabel": "Fecha de efecto",
+      "noteLabel": "Nota (opcional)",
+      "notePlaceholder": "Añadir una nota…",
+      "noteCounter": "{{count}}/{{max}}",
+      "confirm": "Confirmar finalización",
+      "success": "Match finalizado.",
+      "error": "No se pudo finalizar el match."
+    }
   },
   "approval": {
     "status": {
@@ -144,5 +158,17 @@
   },
   "add": {
     "button": "Nuevo match"
+  },
+  "notes": {
+    "title": "Notas",
+    "type": "Tipo",
+    "new": "Nueva nota",
+    "empty": "Aún no hay notas.",
+    "placeholder": "Escribe una nota…",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "searchPlaceholder": "Buscar notas…",
+    "loading": "Cargando notas…",
+    "loadError": "No se pudieron cargar las notas."
   }
 }

@@ -89,7 +89,21 @@
       "saveError": "Impossible d'enregistrer la modification.",
       "saved": "Détails du contrat enregistrés."
     },
-    "ownerUnassigned": "Aucun responsable"
+    "ownerUnassigned": "Aucun responsable",
+    "terminate": {
+      "button": "Résilier",
+      "modalTitle": "Résilier le match",
+      "reasonLabel": "Motif",
+      "reasonPlaceholder": "Choisir un motif…",
+      "noReasonsConfigured": "Aucun motif de résiliation configuré pour le moment.",
+      "effectiveDateLabel": "Date d'effet",
+      "noteLabel": "Note (facultatif)",
+      "notePlaceholder": "Ajouter une note…",
+      "noteCounter": "{{count}}/{{max}}",
+      "confirm": "Confirmer la résiliation",
+      "success": "Match résilié.",
+      "error": "Le match n'a pas pu être résilié."
+    }
   },
   "approval": {
     "status": {
@@ -144,5 +158,17 @@
   },
   "add": {
     "button": "Nouveau match"
+  },
+  "notes": {
+    "title": "Notes",
+    "type": "Type",
+    "new": "Nouvelle note",
+    "empty": "Pas encore de notes.",
+    "placeholder": "Rédiger une note…",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "searchPlaceholder": "Rechercher des notes…",
+    "loading": "Chargement des notes…",
+    "loadError": "Les notes n'ont pas pu être chargées."
   }
 }

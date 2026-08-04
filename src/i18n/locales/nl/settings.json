@@ -221,7 +221,8 @@
     "nationalities": "Nationaliteiten",
     "blacklist_reasons": "Blacklistredenen",
     "escalation_reasons": "Escalatieredenen",
-    "opportunity_lookups": "Fasen & typen"
+    "opportunity_lookups": "Fasen & typen",
+    "nt_match": "Matches"
   },
   "kpis": {
     "title": "KPI-instellingen",

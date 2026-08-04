@@ -89,7 +89,21 @@
       "saveError": "Couldn't save the change.",
       "saved": "Contract details saved."
     },
-    "ownerUnassigned": "No owner"
+    "ownerUnassigned": "No owner",
+    "terminate": {
+      "button": "Terminate",
+      "modalTitle": "Terminate match",
+      "reasonLabel": "Reason",
+      "reasonPlaceholder": "Choose a reason…",
+      "noReasonsConfigured": "No termination reasons configured yet.",
+      "effectiveDateLabel": "Effective date",
+      "noteLabel": "Note (optional)",
+      "notePlaceholder": "Add a note…",
+      "noteCounter": "{{count}}/{{max}}",
+      "confirm": "Confirm termination",
+      "success": "Match terminated.",
+      "error": "The match could not be terminated."
+    }
   },
   "approval": {
     "status": {
@@ -144,5 +158,17 @@
   },
   "add": {
     "button": "New match"
+  },
+  "notes": {
+    "title": "Notes",
+    "type": "Type",
+    "new": "New note",
+    "empty": "No notes yet.",
+    "placeholder": "Write a note…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "searchPlaceholder": "Search notes…",
+    "loading": "Loading notes…",
+    "loadError": "Notes could not be loaded."
   }
 }

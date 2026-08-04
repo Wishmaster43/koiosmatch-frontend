@@ -375,12 +375,10 @@ export const NAV_GROUPS = [
     //                 vacancy drawer's Notes tab (pages/vacancies/drawer/NotesTab.tsx) was
     //                 rewritten onto the shared SharedNotesTab + useNoteTypes('vacancy') —
     //                 same picker/chip treatment as applications/opportunities.
-    //   • match     — STILL withheld. MatchNoteController + /matches/{id}/notes now exist
-    //                 and validate `type` scoped to entity=match (MATCH-NOTES-1), but no FE
-    //                 screen calls useNoteTypes('match') — MatchDrawer ships no Notities tab
-    //                 at all (see its own header comment). Needs a MatchNotesTab + fetch
-    //                 hook (mirror opportunities/drawer/NotesTab.tsx + useOpportunityNotes)
-    //                 wired into MatchDrawer's tab list before this tab can turn on.
+    //   • match     — NOW offered (NT-MATCH-1, 2026-08-04). MatchDrawer grew a Notities
+    //                 tab (pages/matches/drawer/NotesTab.tsx on the shared SharedNotesTab +
+    //                 useNoteTypes('match')) against MatchNoteController's entity-scoped
+    //                 `type` validation — the reader is real, so the editor turns on.
     //   • task      — STILL withheld. TaskCommentController + /tasks/{id}/notes validate
     //                 `type` scoped to entity=task the same way, but the Reacties tab was
     //                 deliberately removed (Danny 2026-07-14, TaskDrawer TAB_IDS = ['details',
@@ -410,6 +408,7 @@ export const NAV_GROUPS = [
       { id: 'nt_contact', icon: Users, render: () => <NoteTypesSettings entity="contact" /> },
       { id: 'nt_opportunity', icon: Target, render: () => <NoteTypesSettings entity="opportunity" /> },
       { id: 'nt_vacancy', icon: Briefcase, render: () => <NoteTypesSettings entity="vacancy" /> },
+      { id: 'nt_match', icon: Sparkles, render: () => <NoteTypesSettings entity="match" /> },
     ],
   },
   {

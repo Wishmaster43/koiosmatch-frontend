@@ -221,7 +221,8 @@
     "nationalities": "Nationalités",
     "blacklist_reasons": "Motifs de liste noire",
     "escalation_reasons": "Motifs d'escalade",
-    "opportunity_lookups": "Étapes et types"
+    "opportunity_lookups": "Étapes et types",
+    "nt_match": "Matchs"
   },
   "kpis": {
     "title": "Paramètres KPI",

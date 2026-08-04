@@ -367,7 +367,9 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
         onArchive={canArchive ? archiveMatch : undefined}
         onRestore={canArchive ? restoreMatch : undefined}
         // EXTRACT-1: same matches.update gate as canApprove/canArchive above.
-        canLinkBackoffice={hasPermission('matches.update')} />
+        canLinkBackoffice={hasPermission('matches.update')}
+        // MATCH-TERMINATE-1: same gate — the backend re-checks on POST /terminate.
+        canTerminate={hasPermission('matches.update')} />
 
       {/* Direct-match creation: the full match form (rate proposal, contract,
           cost center) with a candidate picker; refetch so server-derived fields land. */}
