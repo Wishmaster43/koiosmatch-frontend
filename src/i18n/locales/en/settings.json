@@ -904,7 +904,8 @@
   "notifications": {
     "email": {
       "label": "Email notifications",
-      "desc": "Receive notifications by email"
+      "desc": "Receive notifications by email",
+      "notYetDelivered": "Email delivery does not exist yet — this preference becomes active once the email channel ships."
     },
     "inApp": {
       "label": "In-app notifications",

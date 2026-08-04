@@ -679,7 +679,8 @@
   "notifications": {
     "email": {
       "label": "Notifications e-mail",
-      "desc": "Recevoir des notifications par e-mail"
+      "desc": "Recevoir des notifications par e-mail",
+      "notYetDelivered": "L'envoi par e-mail n'existe pas encore — cette préférence s'activera dès que le canal e-mail sera disponible."
     },
     "inApp": {
       "label": "Notifications in-app",

@@ -904,7 +904,8 @@
   "notifications": {
     "email": {
       "label": "E-mail notificaties",
-      "desc": "Ontvang meldingen via e-mail"
+      "desc": "Ontvang meldingen via e-mail",
+      "notYetDelivered": "E-mailbezorging bestaat nog niet — deze voorkeur wordt actief zodra het e-mailkanaal er is."
     },
     "inApp": {
       "label": "In-app notificaties",

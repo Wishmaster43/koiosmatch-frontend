@@ -679,7 +679,8 @@
   "notifications": {
     "email": {
       "label": "E-Mail-Benachrichtigungen",
-      "desc": "Benachrichtigungen per E-Mail erhalten"
+      "desc": "Benachrichtigungen per E-Mail erhalten",
+      "notYetDelivered": "E-Mail-Zustellung existiert noch nicht — diese Einstellung wird aktiv, sobald der E-Mail-Kanal verfügbar ist."
     },
     "inApp": {
       "label": "In-App-Benachrichtigungen",

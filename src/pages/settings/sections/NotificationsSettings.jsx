@@ -14,8 +14,12 @@ export default function NotificationsSettings({ context }) {
   const defaults = useMemo(() => ({ [emailKey]: true, [inAppKey]: true }), [emailKey, inAppKey])
   const form = useSettingsForm(defaults)
 
+  // Honest gate (§3, verified 05-08 against api Notifier.php:24-35): the backend gate
+  // reads ONLY `notif_<context>_in_app`; the `_email` twin has no delivery mechanism yet
+  // ("intentionally not consulted"). The email row renders DISABLED with a notice until
+  // an email channel exists — a live toggle here would promise mail that never comes.
   const options = [
-    { key: emailKey, label: t('notifications.email.label'), desc: t('notifications.email.desc') },
+    { key: emailKey, label: t('notifications.email.label'), desc: t('notifications.email.notYetDelivered'), disabled: true },
     { key: inAppKey, label: t('notifications.inApp.label'), desc: t('notifications.inApp.desc') },
   ]
 
@@ -27,7 +31,7 @@ export default function NotificationsSettings({ context }) {
       <SettingCardList>
         {options.map(opt => (
           <SettingRow key={opt.key} label={opt.label} description={opt.desc}>
-            <Toggle checked={!!form.values[opt.key]} onChange={v => form.set(opt.key, v)} />
+            <Toggle checked={!!form.values[opt.key]} onChange={v => form.set(opt.key, v)} disabled={opt.disabled} />
           </SettingRow>
         ))}
       </SettingCardList>
