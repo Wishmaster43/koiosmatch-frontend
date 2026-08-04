@@ -91,10 +91,10 @@ describe('CustomerNotesTab · "gekoppeld aan" picker (composer)', () => {
       onAddNote={onAddNote} c={customerWithLinks} onSave={vi.fn()} />)
 
     // The picker defaults to "Klant" (no link) — open it and pick the contact.
+    // Picker lives INSIDE the composer since 05-08 — open it first.
+    await user.click(screen.getByRole('button', { name: ct('notes.newNote') }))
     await user.click(screen.getByRole('button', { name: ct('notes.linkLevelOptions.customer') }))
     await user.click(screen.getByRole('button', { name: 'Joost de Boer — Teamleider' }))
-
-    await user.click(screen.getByRole('button', { name: ct('notes.newNote') }))
     await user.click(screen.getByTitle(ct('notes.save')))
 
     expect(onAddNote).toHaveBeenCalledWith(expect.objectContaining({
@@ -108,10 +108,10 @@ describe('CustomerNotesTab · "gekoppeld aan" picker (composer)', () => {
     render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]}
       onAddNote={onAddNote} c={customerWithLinks} onSave={vi.fn()} />)
 
+    // Picker lives INSIDE the composer since 05-08 — open it first.
+    await user.click(screen.getByRole('button', { name: ct('notes.newNote') }))
     await user.click(screen.getByRole('button', { name: ct('notes.linkLevelOptions.customer') }))
     await user.click(screen.getByRole('button', { name: 'Hoofdlocatie' }))
-
-    await user.click(screen.getByRole('button', { name: ct('notes.newNote') }))
     await user.click(screen.getByTitle(ct('notes.save')))
 
     expect(onAddNote).toHaveBeenCalledWith(expect.objectContaining({
@@ -125,10 +125,10 @@ describe('CustomerNotesTab · "gekoppeld aan" picker (composer)', () => {
     render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]}
       onAddNote={onAddNote} c={customerWithLinks} onSave={vi.fn()} />)
 
+    // Picker lives INSIDE the composer since 05-08 — open it first.
+    await user.click(screen.getByRole('button', { name: ct('notes.newNote') }))
     await user.click(screen.getByRole('button', { name: ct('notes.linkLevelOptions.customer') }))
     await user.click(screen.getByRole('button', { name: 'Verpleging — Hoofdlocatie' }))
-
-    await user.click(screen.getByRole('button', { name: ct('notes.newNote') }))
     await user.click(screen.getByTitle(ct('notes.save')))
 
     expect(onAddNote).toHaveBeenCalledWith(expect.objectContaining({

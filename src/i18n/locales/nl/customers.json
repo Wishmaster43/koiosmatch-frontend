@@ -314,7 +314,10 @@
       "archiveDepartment": "Afdeling archiveren",
       "confirmArchive": "{{name}} archiveren? Je kunt dit later terugzetten via 'Gearchiveerd'.",
       "archiveFailed": "Archiveren is mislukt.",
-      "restoreFailed": "Herstellen is mislukt."
+      "restoreFailed": "Herstellen is mislukt.",
+      "isPrimaryContact": "Primaire contactpersoon van deze afdeling",
+      "setPrimaryContact": "Maak primaire contactpersoon van deze afdeling",
+      "setPrimaryContactDone": "{{name}} is nu de primaire contactpersoon van deze afdeling."
     },
     "deleteConfirm": "Deze afdeling verwijderen?",
     "saveFailed": "Opslaan is mislukt.",
@@ -533,7 +536,10 @@
     "loading": "Prijsafspraken laden…",
     "loadError": "Prijsafspraken laden is mislukt.",
     "retry": "Opnieuw proberen",
-    "empty": "Nog geen prijsafspraken."
+    "empty": "Nog geen prijsafspraken.",
+    "searchPlaceholder": "Zoek prijsafspraken…",
+    "statusActive": "Actief",
+    "statusExpired": "Verlopen"
   },
   "notes": {
     "notes": "Notities",

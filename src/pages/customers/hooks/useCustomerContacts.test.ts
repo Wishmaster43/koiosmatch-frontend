@@ -12,6 +12,8 @@ import {
   useCustomerContacts, CONTACTS_CHANGED_EVENT, setLocationPrimaryContact,
   primaryLocationIdsOf, isPrimaryForLocation, archiveContact, restoreContact,
   useArchivedCustomerContacts, type ContactPayload,
+  // CONTACT-DEPARTMENT-PRIMARY-1: the exact department twin under test below.
+  setDepartmentPrimaryContact, primaryDepartmentIdsOf, isPrimaryForDepartment,
 } from './useCustomerContacts'
 import type { Contact } from '@/types/customer'
 
@@ -374,6 +376,104 @@ describe('useCustomerContacts · per-location primary (CONTACT-LOCATION-PRIMARY-
     // The flags ride ALONG the row; a Contact built elsewhere simply has none.
     expect(primaryLocationIdsOf({ id: 'x' } as Contact)).toEqual([])
     expect(isPrimaryForLocation({ id: 'x' } as Contact, 'loc-1')).toBe(false)
+  })
+})
+
+/**
+ * CONTACT-DEPARTMENT-PRIMARY-1 — the exact department twin of the per-location suite
+ * above. Measured against the backend before this was written:
+ *   route    PUT /customers/{customerId}/contacts/{id}/departments/{departmentId}/primary
+ *            (routes/api/tenant/customers.php:181, permission:customers.update)
+ *   handler  CustomerContactController::primaryDepartment → mirrors primaryLocation
+ *   read     CustomerContactResource → departments[].is_primary (the pivot flag)
+ * Same three failure modes as CONTACT-LOCATION-PRIMARY-1: wrong/no request, assuming a
+ * 200 always means the write landed, and blurring this axis with the other two.
+ */
+describe('useCustomerContacts · per-department primary (CONTACT-DEPARTMENT-PRIMARY-1)', () => {
+  it('PUTs the measured per-department route — never the location or customer-level ones', async () => {
+    mockPut.mockResolvedValue({ data: { data: { id: 'c1', departments: [{ id: 'dep-1', name: 'Zorg', is_primary: true }] } } })
+
+    await setDepartmentPrimaryContact('cust1', 'c1', 'dep-1')
+
+    expect(mockPut).toHaveBeenCalledTimes(1)
+    expect(mockPut).toHaveBeenCalledWith('/customers/cust1/contacts/c1/departments/dep-1/primary')
+    // Neither sibling axis has its own route touched by this call.
+    expect(mockPatch).not.toHaveBeenCalled()
+  })
+
+  it('reports success and tells the list to refetch when the flag actually landed', async () => {
+    mockPut.mockResolvedValue({ data: { data: { id: 'c1', departments: [{ id: 'dep-1', name: 'Zorg', is_primary: true }] } } })
+    const onChanged = vi.fn()
+    window.addEventListener(CONTACTS_CHANGED_EVENT, onChanged)
+
+    await expect(setDepartmentPrimaryContact('cust1', 'c1', 'dep-1')).resolves.toBe(true)
+
+    expect(onChanged).toHaveBeenCalledTimes(1)
+    window.removeEventListener(CONTACTS_CHANGED_EVENT, onChanged)
+  })
+
+  /**
+   * Same documented no-op as the location route while the pivot column is missing on a
+   * tenant database — a 200 with the flag unchanged is still a failure for the user.
+   */
+  it('reports failure and fires no refetch when the 200 came back with the flag unchanged', async () => {
+    mockPut.mockResolvedValue({ data: { data: { id: 'c1', departments: [{ id: 'dep-1', name: 'Zorg', is_primary: false }] } } })
+    const onChanged = vi.fn()
+    window.addEventListener(CONTACTS_CHANGED_EVENT, onChanged)
+
+    await expect(setDepartmentPrimaryContact('cust1', 'c1', 'dep-1')).resolves.toBe(false)
+
+    expect(onChanged).not.toHaveBeenCalled()
+    window.removeEventListener(CONTACTS_CHANGED_EVENT, onChanged)
+  })
+
+  it('reports failure when the response omits the pivot flag entirely (older resource)', async () => {
+    mockPut.mockResolvedValue({ data: { data: { id: 'c1', departments: [{ id: 'dep-1', name: 'Zorg' }] } } })
+    await expect(setDepartmentPrimaryContact('cust1', 'c1', 'dep-1')).resolves.toBe(false)
+  })
+
+  it('maps departments[].is_primary onto the row — only the flagged departments', async () => {
+    mockGet.mockResolvedValue({ data: { data: [{
+      id: 'c1', first_name: 'Joost', last_name: 'de Boer',
+      departments: [
+        { id: 'dep-1', name: 'Zorg', is_primary: true },
+        { id: 'dep-2', name: 'Techniek', is_primary: false },
+        { id: 'dep-3', name: 'HR' },
+      ],
+    }] } })
+    const { result } = renderHook(() => useCustomerContacts('cust1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    expect(primaryDepartmentIdsOf(result.current.contacts[0])).toEqual(['dep-1'])
+    expect(isPrimaryForDepartment(result.current.contacts[0], 'dep-1')).toBe(true)
+    expect(isPrimaryForDepartment(result.current.contacts[0], 'dep-2')).toBe(false)
+  })
+
+  it('keeps this axis apart from the location and customer axes', async () => {
+    mockGet.mockResolvedValue({ data: { data: [
+      // Primary at dep-1, primary at loc-1, and the customer's one main contact — three
+      // different flags on one row, none of which imply another.
+      { id: 'c1', first_name: 'Anna', last_name: 'Bakker', is_primary: true,
+        locations: [{ id: 'loc-1', name: 'Noord', is_primary: false }],
+        departments: [{ id: 'dep-1', name: 'Zorg', is_primary: false }] },
+      { id: 'c2', first_name: 'Joost', last_name: 'de Boer', is_primary: false,
+        locations: [{ id: 'loc-1', name: 'Noord', is_primary: false }],
+        departments: [{ id: 'dep-1', name: 'Zorg', is_primary: true }] },
+    ] } })
+    const { result } = renderHook(() => useCustomerContacts('cust1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    const [anna, joost] = result.current.contacts
+    expect(anna.isPrimary).toBe(true)
+    expect(isPrimaryForDepartment(anna, 'dep-1')).toBe(false)
+    expect(joost.isPrimary).toBe(false)
+    expect(isPrimaryForDepartment(joost, 'dep-1')).toBe(true)
+  })
+
+  it('degrades to no department-primary for a row that never came from this hook', () => {
+    // The flags ride ALONG the row; a Contact built elsewhere simply has none.
+    expect(primaryDepartmentIdsOf({ id: 'x' } as Contact)).toEqual([])
+    expect(isPrimaryForDepartment({ id: 'x' } as Contact, 'dep-1')).toBe(false)
   })
 })
 

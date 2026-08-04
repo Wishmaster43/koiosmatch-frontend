@@ -510,3 +510,59 @@ describe('DepartmentDetail · merge (AFDELING-SAMENVOEGEN-1)', () => {
     await waitFor(() => expect(onMerged).toHaveBeenCalledWith('d1'))
   })
 })
+
+/**
+ * CONTACT-DEPARTMENT-PRIMARY-1 — the department half of the primary-contact flow (the
+ * location half already works via ContactsPanel/ContactsPanelColumns). Verifies
+ * DepartmentDetail actually renders the real ContactsPanel in `scope="department"` on
+ * its Contacts sub-tab, so the "make primary here" star shows and PUTs the verified
+ * route (routes/api/tenant/customers.php:181, CustomerContactController::primaryDepartment
+ * — the exact mirror of the location route this component already exercised at :178).
+ */
+describe('DepartmentDetail · Contacts sub-tab renders the department-scoped primary control (CONTACT-DEPARTMENT-PRIMARY-1)', () => {
+  // A contact linked to this department, carrying the shape useCustomerContacts'
+  // mapContactRow produces (locations/departments arrays; the id passthrough is what
+  // ContactsPanel's `inScope` and the star column key off).
+  const deptContact = {
+    id: 'c1', helloflexLink: null, shiftmanagerLink: null,
+    firstName: 'Eva', middleName: '', lastName: 'Bos', name: 'Eva Bos', role: 'HR Manager',
+    email: 'eva@klant.test', phone: '', mobile: '', isPrimary: false,
+    locationId: null, locationName: '', departmentId: 'd1', departmentName: 'Zorg',
+    locations: [], departments: [{ id: 'd1', name: 'Zorg' }], statusId: null, status: '', statusLabel: '', statusColor: '',
+    customerId: 'cust-1', gender: '',
+    lastContactAt: null, lastContactType: null, customFields: {},
+  }
+
+  it('shows the "Contacts" sub-tab with the primary-here star for a contact in this department', async () => {
+    const user = userEvent.setup()
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} contacts={[deptContact] as never} />)
+
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.contacts') }))
+
+    expect(screen.getByText('Eva Bos')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: ct('departments.detail.setPrimaryContact') })).toBeInTheDocument()
+  })
+
+  it('PUTs the measured per-department route when the star is clicked', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.put).mockResolvedValue({ data: { id: 'c1', departments: [{ id: 'd1', name: 'Zorg', is_primary: true }] } })
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} contacts={[deptContact] as never} />)
+
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.contacts') }))
+    await user.click(screen.getByRole('button', { name: ct('departments.detail.setPrimaryContact') }))
+
+    expect(api.put).toHaveBeenCalledTimes(1)
+    expect(api.put).toHaveBeenCalledWith('/customers/cust-1/contacts/c1/departments/d1/primary')
+  })
+
+  it('marks the department primary and offers no un-set once the flag is set', async () => {
+    const user = userEvent.setup()
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps}
+      contacts={[{ ...deptContact, primaryDepartmentIds: ['d1'] }] as never} />)
+
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.contacts') }))
+
+    expect(screen.getByLabelText(ct('departments.detail.isPrimaryContact'))).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: ct('departments.detail.setPrimaryContact') })).toBeNull()
+  })
+})

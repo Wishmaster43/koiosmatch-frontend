@@ -183,13 +183,16 @@ export default function DocumentsTab({ customerId, locations = [], departments =
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('drawer.tabs.documents')}</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)' }}>
-            <Search size={11} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+      {/* No section title (Danny 05-08 "documenten naam weg — tabblad heet al zo"): the
+          toolbar starts with the search bar on the LEFT, growing, at the drill-down's
+          standard toolbar footprint (6/10 padding, radius 8, fontSize 12 — mirrors the
+          Locaties/Kansen search bars). */}
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)' }}>
+            <Search size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             <input value={docSearch} onChange={e => setDocSearch(e.target.value)} placeholder={t('documents.search')}
-              style={{ border: 'none', outline: 'none', fontSize: 11, color: 'var(--text)', background: 'none', width: 110 }} />
+              style={{ border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none', flex: 1, minWidth: 0 }} />
             {docSearch && <button onClick={() => setDocSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={11} /></button>}
           </div>
           {/* Soft-tint bulk-download + bulk-delete actions (§4) — only shown once something is selected. */}

@@ -214,26 +214,26 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
         active={subTab}
         onChange={setSubTab}
       />
-      {/* NOTES-LOC-DEPT-1: optional "link the next note to" picker over all four
-          levels (Klant · Locatie · Afdeling · Contactpersoon) — only where it
-          applies (the composer lives on this sub-tab) and only when there is
-          anything below Klant to link to. Positioned above the composer rather
-          than inside it: the composer itself belongs to the shared NotesTab
-          component, out of scope for this change (see the chip comment above). */}
-      {active === 'notes' && hasLinkChoices && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{t('notes.linkContactLabel')}</span>
-          <div style={{ width: 240 }}>
-            <SelectMenu value={pendingLink} onChange={setPendingLink}
-              options={linkOptions}
-              placeholder={t('notes.linkLevelOptions.customer')} />
-          </div>
-        </div>
+      {/* No `key` remount on link change (that would CLOSE the open composer now the
+          picker lives inside it) — the shared NotesTab resyncs its picked type itself
+          when the scoped noteTypes list swaps, so a stale type can't 422 on save. */}
+      {active === 'notes' && (
+        <NotesTab {...notesProps} showTimeline={false} showConversations={false}
+          // NOTES-LOC-DEPT-1 → composer (Danny 05-08 "koppelen aan klant weg, dat moet
+          // komen als je doet + notitie"): the four-level link picker (Klant · Locatie ·
+          // Afdeling · Contactpersoon) lives INSIDE the compose flow now, only when
+          // there is anything below Klant to link to.
+          composerExtra={hasLinkChoices ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{t('notes.linkContactLabel')}</span>
+              <div style={{ width: 240 }}>
+                <SelectMenu value={pendingLink} onChange={setPendingLink}
+                  options={linkOptions}
+                  placeholder={t('notes.linkLevelOptions.customer')} />
+              </div>
+            </div>
+          ) : undefined} />
       )}
-      {/* `key` remounts the composer when the picked link changes — its writable
-          note-type list switches scope (see noteTypes above), and a stale type
-          picked under the OTHER scope would otherwise 422 on save. */}
-      {active === 'notes'    && <NotesTab key={pendingLink} {...notesProps} showTimeline={false} showConversations={false} />}
       {/* The customer's Taken surface — moved here from the top-level drawer tab
           (Danny 03-08); the shared tab brings its own search/status-filter/add toolbar. */}
       {active === 'tasks' && (

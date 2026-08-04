@@ -144,16 +144,19 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <SectionCard title={t('opportunities.title')} action={
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      {/* No section title (Danny 05-08 "woord kansen links kan weg"): the tab bar already
+          names this section, and the freed width goes to the search bar — mirrors how the
+          Locaties/Afdelingen toolbars start straight with search. */}
+      <SectionCard action={
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
           {/* Toolbar in the house order (mirrors Vacatures/Locaties/…): search
-              left, stage filter middle, add trigger last. */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 160, padding: '6px 10px',
+              left (growing), stage filter middle, add trigger last. */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, padding: '6px 10px',
             background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
             <Search size={13} color="var(--text-muted)" />
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder={t('opportunities.searchPlaceholder')} aria-label={t('opportunities.searchPlaceholder')}
-              style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)', width: 120 }} />
+              style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)', minWidth: 0 }} />
           </div>
           {/* Options key on the stage VALUE slug (not the lookup's id) — an opportunity
               row only ever carries `stageValue`, never a stage id (§3B, no invented axis). */}

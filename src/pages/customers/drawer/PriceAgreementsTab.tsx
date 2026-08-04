@@ -14,11 +14,15 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RefreshCw, AlertTriangle } from 'lucide-react'
+import { RefreshCw, AlertTriangle, Search } from 'lucide-react'
 // House "+ action" trigger (Danny 27-07: "+ Prijsafspraak toevoegen moet ook
 // knopje zijn!!! zoals in kandidaat drill down") — replaces the bare text button below.
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+// TOOLBAR-4 (Danny, live 04-08: "ook zoek venster en status!!") — the same shared
+// filter trigger every other sub-entity list uses (see its own docblock).
+import StatusFilterSelect, { useStatusFilter, STATUS_FILTER_ALL } from '@/components/drawer/StatusFilterSelect'
 import { usePriceAgreements } from '../hooks/usePriceAgreements'
+import type { PriceAgreement } from '../hooks/usePriceAgreements'
 import AddPriceAgreementModal from '../AddPriceAgreementModal'
 import { emptyDraft, draftToPayload } from './PriceAgreementForm'
 import type { PriceAgreementDraft } from './PriceAgreementForm'
@@ -30,7 +34,16 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 import { getCountryOptions } from '@/lib/countries'
 import { resolveCustomerBillingAddress } from '../hooks/customerBillingAddress'
 import type { Customer } from '@/types/customer'
-import type { Id } from '@/types/common'
+import type { Id, LookupOption } from '@/types/common'
+
+// TOOLBAR-4 — the search box's own footprint, byte-identical to every other
+// sub-entity list (Locaties/Afdelingen/Contactpersonen/Matches): flex-growing,
+// '6px 10px' padding, radius 8, fontSize 12, icon 13.
+const searchWrap = {
+  display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, padding: '6px 10px',
+  background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8,
+} as const
+const searchInput = { flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' } as const
 
 export default function PriceAgreementsTab({ customerId, c, onSave }: { customerId?: Id; c?: Customer; onSave?: (values: Record<string, unknown>) => void }) {
   const { t, i18n } = useTranslation('customers')
@@ -46,6 +59,30 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
 
   // Submit the add-form, then close it and reset for the next entry.
   const saveNew = () => { add(draftToPayload(draft)); setAdding(false); setDraft(emptyDraft()) }
+
+  // TOOLBAR-4 (Danny, live 04-08: "ook zoek venster en status!!") — a price
+  // agreement carries NO status field at all (see usePriceAgreements/PriceAgreement:
+  // only function/cao/scale/step/rates/validFrom/validUntil), so there is no tenant
+  // lookup to filter on. `validUntil` vs today is the closest honest read of the
+  // "active/expired" axis Danny anticipated — DERIVED client-side, never a Settings
+  // lookup, never sent to the backend. `STATUS_FILTER_ALL` is passed as the tenant
+  // default so this starts showing EVERY row (no silent guess hiding expired ones);
+  // the recruiter opts into narrowing, same as every StatusFilterSelect caller can.
+  const todayIso = new Date().toISOString().slice(0, 10)
+  const isExpired = (a: PriceAgreement) => !!a.validUntil && a.validUntil.slice(0, 10) < todayIso
+  const derivedStatuses: LookupOption[] = [
+    { id: 'active', value: 'active', label: t('priceAgreements.statusActive') },
+    { id: 'expired', value: 'expired', label: t('priceAgreements.statusExpired') },
+  ]
+  const { value: statusFilter, toggle: toggleStatus, filtered: statusFiltered } =
+    useStatusFilter(agreements, derivedStatuses, a => (isExpired(a) ? 'expired' : 'active'), STATUS_FILTER_ALL)
+  // Free-text search on top of the derived filter — function/CAO/scale, the row's
+  // own match criteria (§ MATCH-PLC), same client-side pattern every other list uses.
+  const [search, setSearch] = useState('')
+  const q = search.trim().toLowerCase()
+  const visible = q
+    ? statusFiltered.filter(a => [a.functionTitle, a.cao, a.scale].some(v => String(v ?? '').toLowerCase().includes(q)))
+    : statusFiltered
 
   // FACTUURADRES-1 — which address an invoice goes to, resolved client-side so the block
   // flips the instant an optimistic PATCH lands (see the hook for the full reasoning).
@@ -145,10 +182,23 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
       )}
       {subTab === 'prices' && (
       <>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '14px 0 6px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', margin: '14px 0 6px' }}>
         <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
           {t('drawer.tabs.priceAgreements')} <span style={{ fontWeight: 400 }}>{agreements.length}</span>
         </span>
+      </div>
+
+      {/* TOOLBAR-4 — house order (Danny, live 04-08): search left, status filter
+          middle (derived active/expired, see the const above), "+" trigger last —
+          mirrors Locaties/Afdelingen/Contactpersonen/Matches. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <div style={searchWrap}>
+          <Search size={13} color="var(--text-muted)" />
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder={t('priceAgreements.searchPlaceholder')} aria-label={t('priceAgreements.searchPlaceholder')}
+            style={searchInput} />
+        </div>
+        <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={derivedStatuses} />
         {!adding && (
           <DrawerAddButton onClick={() => { setDraft(emptyDraft()); setAdding(true) }} label={t('priceAgreements.add')} />
         )}
@@ -179,13 +229,14 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
         </div>
       )}
 
-      {/* Empty state. */}
-      {!loading && !error && agreements.length === 0 && !adding && (
+      {/* Empty state — reflects the filtered/searched set, same convention every
+          other sub-entity list uses (a filter narrowing to zero shows this too). */}
+      {!loading && !error && visible.length === 0 && !adding && (
         <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '8px 0' }}>{t('priceAgreements.empty')}</div>
       )}
 
       {/* Success state — the list. */}
-      {!loading && !error && agreements.map(a => (
+      {!loading && !error && visible.map(a => (
         <PriceAgreementRow key={String(a.id)} agreement={a} onSave={update} onDelete={remove} />
       ))}
       </>

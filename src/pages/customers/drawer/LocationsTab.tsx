@@ -40,8 +40,14 @@ const SoftChip = SoftChipJs as unknown as ComponentType<AnyProps>
 const plainCell = { color: 'var(--text)', fontSize: 12 }
 
 // Mirrors SubEntityTab's search box, now owned directly here (see file header).
+// TOOLBAR-WIDTH-1 (Danny, live 04-08: "zelfde breedte houden" across Locaties/
+// Afdelingen/Contactpersonen) — minWidth 0, not 120: a flex child's implicit
+// min-width:auto would otherwise keep this box from shrinking to the SAME
+// footprint DepartmentsPanel/ContactsPanel already use, so the three toolbars
+// would drift out of lockstep the moment the panel got tight (mirrors the
+// ContactsPanel comment this now matches byte-for-byte).
 const searchWrap = {
-  display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 120, padding: '6px 10px',
+  display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, padding: '6px 10px',
   background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8,
 } as const
 const searchInput = { flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' } as const
@@ -179,7 +185,7 @@ export default function LocationsTab({
           </div>
           <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
           {/* ARCHIVE-SUBENTITY-1: the shared quick-view toggle (§4) — never hand-rolled. */}
-          <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+          <QuickViewToggle iconOnly active={showArchived} onToggle={() => setShowArchived(v => !v)}
             label={t('locations.archivedView')} color="var(--color-archive)" icon={Archive} />
           <DrawerAddButton onClick={() => setAdding(true)} label={t('locations.add')} />
         </div>

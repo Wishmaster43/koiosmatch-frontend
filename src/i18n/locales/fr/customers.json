@@ -314,7 +314,10 @@
       "archiveDepartment": "Archiver le service",
       "confirmArchive": "Archiver {{name}} ? Vous pourrez le restaurer plus tard via « Archivé ».",
       "archiveFailed": "L'archivage a échoué.",
-      "restoreFailed": "La restauration a échoué."
+      "restoreFailed": "La restauration a échoué.",
+      "isPrimaryContact": "Contact principal de ce service",
+      "setPrimaryContact": "Définir comme contact principal de ce service",
+      "setPrimaryContactDone": "{{name}} est désormais le contact principal de ce service."
     },
     "deleteConfirm": "Supprimer ce service ?",
     "saveFailed": "L'enregistrement a échoué.",
@@ -533,7 +536,10 @@
     "loading": "Chargement des accords tarifaires…",
     "loadError": "Le chargement des accords tarifaires a échoué.",
     "retry": "Réessayer",
-    "empty": "Aucun accord tarifaire pour le moment."
+    "empty": "Aucun accord tarifaire pour le moment.",
+    "searchPlaceholder": "Rechercher des accords tarifaires…",
+    "statusActive": "Actif",
+    "statusExpired": "Expiré"
   },
   "notes": {
     "notes": "Notes",

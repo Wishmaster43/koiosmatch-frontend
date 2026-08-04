@@ -22,7 +22,9 @@ const app = (over: Partial<ApplicationDetail> = {}) => ({
 describe('applications NotesTab (shared reuse)', () => {
   it('shows the notes section and the empty state', () => {
     render(<NotesTab application={app()} />)
-    expect(screen.getByText('notes.title')).toBeInTheDocument()
+    // The section title is gone (Danny 05-08 — the tab already names the section);
+    // the toolbar's search input is the section's stable landmark now.
+    expect(screen.getByPlaceholderText('notes.searchPlaceholder')).toBeInTheDocument()
     expect(screen.getByText('notes.empty')).toBeInTheDocument()
   })
 

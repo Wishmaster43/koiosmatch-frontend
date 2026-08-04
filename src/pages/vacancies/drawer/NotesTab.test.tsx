@@ -23,7 +23,8 @@ const vacancy = (over: Partial<VacancyDetail> = {}) => ({
 describe('vacancies NotesTab (VACANCY-NOTE-TYPE-1, shared reuse)', () => {
   it('shows the notes section and the empty state', () => {
     render(<NotesTab vacancy={vacancy()} />)
-    expect(screen.getByText('notes.title')).toBeInTheDocument()
+    // The section title is gone (Danny 05-08) — the search input is the stable landmark.
+    expect(screen.getByPlaceholderText('notes.searchPlaceholder')).toBeInTheDocument()
     expect(screen.getByText('notes.empty')).toBeInTheDocument()
   })
 

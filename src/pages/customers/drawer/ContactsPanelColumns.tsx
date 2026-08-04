@@ -18,7 +18,7 @@ import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import { useDateFormat } from '@/lib/datetime'
 import { useChipColors } from '@/lib/settings/useChipColors'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
-import { isPrimaryForLocation } from '../hooks/useCustomerContacts'
+import { isPrimaryForLocation, isPrimaryForDepartment } from '../hooks/useCustomerContacts'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 import { useContactPrimaryPromotion } from './useContactPrimaryPromotion'
 import type { ContactScope } from './ContactsPanel'
@@ -63,9 +63,16 @@ export function useContactsPanelColumns({ scope, scopeId, locationScope, locatio
   // SettingController validates this family by PATTERN (`str_contains(key,
   // '_table_color_')`), not against a fixed list, so the key is accepted as-is.
   const colorStatusCol = getBoolSetting(settings, 'customer_contact_table_color_status', true)
-  // CONTACT-LOCATION-PRIMARY-1: which row's "make primary here" PUT is in flight — one
-  // at a time, so a double click cannot race two promotions at the same site.
-  const { promoting, promote } = useContactPrimaryPromotion(locationScope, scopeId)
+  // CONTACT-LOCATION-PRIMARY-1/CONTACT-DEPARTMENT-PRIMARY-1: which row's "make primary
+  // here" PUT is in flight — one at a time, so a double click cannot race two promotions
+  // at the same site. The hook picks location vs. department off `scope` itself.
+  const { promoting, promote } = useContactPrimaryPromotion(scope, scopeId)
+  // CONTACT-DEPARTMENT-PRIMARY-1: the star column/chip pair now also applies inside a
+  // department. `locationScope` (computed by ContactsPanel.tsx, out of scope for this
+  // change) only covers the location half, so the department half is widened in here.
+  const scopedPrimary = locationScope || (scope === 'department' && scopeId != null)
+  // Reads the right pivot flag for whichever of the two nested scopes is active.
+  const isPrimaryHere = (p: Contact) => scope === 'department' ? isPrimaryForDepartment(p, scopeId as Id) : isPrimaryForLocation(p, scopeId as Id)
 
   // Fallback resolver — the plural locations[]/departments[] arrays come back EMPTY for
   // every seeded contact; resolve the singular id against the customer-wide lists so the
@@ -91,14 +98,14 @@ export function useContactsPanelColumns({ scope, scopeId, locationScope, locatio
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Users size={14} color="var(--color-primary)" style={{ flexShrink: 0 }} />
           <span style={{ color: 'var(--text)' }}>{p.name}</span>
-          {/* TWO different primaries can sit on the SAME row inside a location: the
-              customer's one main contact and this site's own. Where both can appear, each
-              chip names its scope — an unqualified "Primair" twice would be a lie about
-              what either means. Outside a location only the customer axis exists, so the
-              short label stays there. */}
-          {p.isPrimary && <SoftChip label={locationScope ? t('contacts.primaryCustomerChip') : t('contacts.primaryChip')}
+          {/* TWO different primaries can sit on the SAME row inside a location/department:
+              the customer's one main contact and this site's own. Where both can appear,
+              each chip names its scope — an unqualified "Primair" twice would be a lie
+              about what either means. Outside those two scopes only the customer axis
+              exists, so the short label stays there. */}
+          {p.isPrimary && <SoftChip label={scopedPrimary ? t('contacts.primaryCustomerChip') : t('contacts.primaryChip')}
             color="var(--color-success)" round size={10} />}
-          {locationScope && isPrimaryForLocation(p, scopeId as Id) &&
+          {scopedPrimary && isPrimaryHere(p) &&
             <SoftChip label={t('contacts.primaryLocationChip')} color="var(--color-primary)" round size={10} />}
         </div>
       ) },
@@ -131,18 +138,24 @@ export function useContactsPanelColumns({ scope, scopeId, locationScope, locatio
           </span>
         )
       } },
-    // CONTACT-LOCATION-PRIMARY-1: who to call AT THIS SITE. Only inside a location — the
-    // flag lives on the contact↔location coupling and exists nowhere else.
-    ...(locationScope ? [{
+    // CONTACT-LOCATION-PRIMARY-1/CONTACT-DEPARTMENT-PRIMARY-1: who to call AT THIS SITE
+    // or department. Only inside those two scopes — the flag lives on the contact↔
+    // location / contact↔department coupling and exists nowhere else.
+    ...(scopedPrimary ? [{
       key: 'locationPrimary', header: t('contacts.col.locationPrimary'), align: 'center' as const,
       render: (p: Contact) => {
-        const isHere = isPrimaryForLocation(p, scopeId as Id)
+        const isHere = isPrimaryHere(p)
         const busy = String(promoting) === String(p.id)
+        // The department twin says "department" instead of "location" — same string
+        // shape, different noun (departments.detail.* is a genuinely new i18n key; the
+        // location.* strings are reused verbatim wherever the copy has no scope word).
+        const isPrimaryLabel = t(scope === 'department' ? 'departments.detail.isPrimaryContact' : 'locations.detail.isPrimaryContact')
+        const setPrimaryLabel = t(scope === 'department' ? 'departments.detail.setPrimaryContact' : 'locations.detail.setPrimaryContact')
         // Already primary here: a state, not a switch. The backend has no "unset" route,
         // so an off-toggle would be an affordance with nothing behind it (§3) — the flag
         // moves when someone else is promoted.
         if (isHere) return (
-          <span title={t('locations.detail.isPrimaryContact')} role="img" aria-label={t('locations.detail.isPrimaryContact')}
+          <span title={isPrimaryLabel} role="img" aria-label={isPrimaryLabel}
             style={{ display: 'inline-flex', color: 'var(--color-primary)' }}>
             <Star size={13} fill="currentColor" />
           </span>
@@ -153,7 +166,7 @@ export function useContactsPanelColumns({ scope, scopeId, locationScope, locatio
         return (
           <button type="button" onClick={e => { e.stopPropagation(); void promote(p) }}
             disabled={busy || blocked || promoting != null}
-            title={t('locations.detail.setPrimaryContact')} aria-label={t('locations.detail.setPrimaryContact')}
+            title={setPrimaryLabel} aria-label={setPrimaryLabel}
             style={{ ...iconBtn, cursor: busy || blocked || promoting != null ? 'not-allowed' : 'pointer',
               opacity: blocked ? 0.4 : 1 }}>
             {busy ? <Loader2 size={12} className="animate-spin" /> : <Star size={12} />}

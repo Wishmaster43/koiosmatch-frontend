@@ -28,22 +28,30 @@ interface QuickViewToggleProps {
   // borderRadius 6) for a drawer sub-tab toolbar sitting next to one; the soft-tint
   // colouring is identical in both sizes.
   size?: 'default' | 'compact'
+  // iconOnly (Danny 05-08, customer drill-down sub-tabs): render just the icon in a
+  // square footprint — the label moves to title + aria-label so a11y keeps the name.
+  // Requires an icon; without one the label renders as usual (never a blank button).
+  iconOnly?: boolean
 }
 
-export default function QuickViewToggle({ active, onToggle, label, color = 'var(--color-primary)', icon: Icon, title, size = 'default' }: QuickViewToggleProps) {
+export default function QuickViewToggle({ active, onToggle, label, color = 'var(--color-primary)', icon: Icon, title, size = 'default', iconOnly = false }: QuickViewToggleProps) {
   const compact = size === 'compact'
+  const squished = iconOnly && Boolean(Icon)
   return (
     <button type="button" onClick={onToggle} title={title ?? label} aria-pressed={active}
+      aria-label={squished ? label : undefined}
       style={{
-        display: 'inline-flex', alignItems: 'center', gap: 5,
-        ...(compact ? { height: 26, padding: '0 10px' } : { padding: '6px 12px' }),
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+        ...(squished
+          ? { height: compact ? 26 : 30, width: compact ? 26 : 30, padding: 0 }
+          : compact ? { height: 26, padding: '0 10px' } : { padding: '6px 12px' }),
         fontSize: compact ? 11.5 : 12,
         fontWeight: active ? 600 : 500, borderRadius: compact ? 6 : 8, cursor: 'pointer', color,
         background: `color-mix(in srgb, ${color} ${active ? 16 : 8}%, transparent)`,
         border: `1px solid color-mix(in srgb, ${color} ${active ? 50 : 28}%, transparent)`,
       }}>
       {Icon && <Icon size={13} />}
-      {label}
+      {!squished && label}
     </button>
   )
 }

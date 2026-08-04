@@ -196,7 +196,7 @@ export default function ContactsPanel({
         </div>
         <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
         {/* ARCHIVE-SUBENTITY-1: the shared quick-view toggle (§4) — never hand-rolled. */}
-        <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+        <QuickViewToggle iconOnly active={showArchived} onToggle={() => setShowArchived(v => !v)}
           label={t('contacts.archivedView')} color="var(--color-archive)" icon={Archive} />
         {/* Coupling only exists inside a scope; at customer level a contact is already "here".
             Icon-only (Danny 03-08): with search + filter + two buttons the scoped row

@@ -191,6 +191,21 @@ describe('MatchesTab · toolbar search + status filter', () => {
     expect(screen.getByText('John Roe')).toBeInTheDocument()
     expect(screen.queryByText('Jane Doe')).toBeNull()
   })
+
+  // TOOLBAR-ORDER-1 (Danny, live 04-08: "Nieuwe Match is rechts!!! en status in
+  // het midden") — the house order is search -> status filter -> "+ Match",
+  // never the add button before the filter. Asserted via DOM position, not just
+  // presence, since the earlier layout had all three elements present too.
+  it('renders the toolbar in house order: search, then status filter, then "+ Match"', () => {
+    mockUseCustomerMatches.mockReturnValue({ rows, loading: false, error: false, reload: vi.fn() })
+    render(<MatchesTab customerId="cust-1" />)
+    const searchInput = screen.getByRole('textbox')
+    const statusTrigger = screen.getByTitle(i18n.t('filters.statusFilter', { ns: 'customers' }))
+    const addButton = screen.getByRole('button', { name: cust('matches.add') })
+    const FOLLOWING = Node.DOCUMENT_POSITION_FOLLOWING
+    expect(Boolean(searchInput.compareDocumentPosition(statusTrigger) & FOLLOWING)).toBe(true)
+    expect(Boolean(statusTrigger.compareDocumentPosition(addButton) & FOLLOWING)).toBe(true)
+  })
 })
 
 /** Double open-icon fix (Danny, seeing a Verzorgende IG / EVV card: "Waarom heb

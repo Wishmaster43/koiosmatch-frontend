@@ -467,10 +467,14 @@ describe('ContactsPanel · primary contact per location', () => {
     expect(screen.getByText(ct('contacts.primaryChip'))).toBeInTheDocument()
   })
 
-  it('does not exist inside a department either — the flag hangs on the location coupling', () => {
+  // DEPT-PRIMARY-1 (05-08): department scope grew its OWN primary flag (pivot +
+  // PUT …/departments/{id}/primary) — the star now exists here too, reading the
+  // department axis, with department-specific copy.
+  it('exists inside a department with its own axis — promotable via the department star', () => {
     render(<Host {...base} scope="department" scopeId="dep-1" scopeName="Zorg" contacts={[primaryAt(['loc-1'])]} />)
 
-    expect(screen.queryByText(ct('contacts.col.locationPrimary'))).toBeNull()
+    expect(screen.queryByRole('button', { name: ct('departments.detail.setPrimaryContact') })).toBeInTheDocument()
+    // The location-scope star label does NOT leak into department scope.
     expect(primaryStar()).toBeNull()
   })
 

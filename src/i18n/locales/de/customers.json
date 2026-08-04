@@ -314,7 +314,10 @@
       "archiveDepartment": "Abteilung archivieren",
       "confirmArchive": "{{name}} archivieren? Sie können dies später über 'Archiviert' rückgängig machen.",
       "archiveFailed": "Archivieren fehlgeschlagen.",
-      "restoreFailed": "Wiederherstellen fehlgeschlagen."
+      "restoreFailed": "Wiederherstellen fehlgeschlagen.",
+      "isPrimaryContact": "Primärer Ansprechpartner dieser Abteilung",
+      "setPrimaryContact": "Zum primären Ansprechpartner dieser Abteilung machen",
+      "setPrimaryContactDone": "{{name}} ist jetzt der primäre Ansprechpartner dieser Abteilung."
     },
     "deleteConfirm": "Diese Abteilung löschen?",
     "saveFailed": "Speichern fehlgeschlagen.",
@@ -533,7 +536,10 @@
     "loading": "Preisvereinbarungen werden geladen…",
     "loadError": "Laden der Preisvereinbarungen fehlgeschlagen.",
     "retry": "Erneut versuchen",
-    "empty": "Noch keine Preisvereinbarungen."
+    "empty": "Noch keine Preisvereinbarungen.",
+    "searchPlaceholder": "Preisvereinbarungen suchen…",
+    "statusActive": "Aktiv",
+    "statusExpired": "Abgelaufen"
   },
   "notes": {
     "notes": "Notizen",

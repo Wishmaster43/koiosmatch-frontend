@@ -27,6 +27,15 @@ import type { Customer } from '@/types/customer'
 vi.mock('@/lib/useLocations', () => ({ useLocations: () => [{ value: 'loc-1', label: 'Vestiging Noord' }] }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v }) }))
 vi.mock('../hooks/usePriceAgreements', () => ({ usePriceAgreements: vi.fn() }))
+// TOOLBAR-4: the toolbar tests below render a real (populated) row list, which
+// mounts the real PriceAgreementRow -> useCao() -> useCachedLookup's own GET /cao.
+// `unwrapList` stays the REAL implementation (importActual, mirrors MatchModal.test.tsx)
+// so that parsing is untouched; only the network call itself is stubbed to an empty
+// list, so useCao keeps its own DEFAULT_CAO seed fallback — no extra mock needed.
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual('@/lib/api')
+  return { ...actual, default: { get: vi.fn(() => Promise.resolve({ data: { data: [] } })) } }
+})
 vi.mock('./PriceAgreementForm', () => ({
   default: ({ onSave, onCancel, saveLabel }: { onSave: () => void; onCancel: () => void; saveLabel: string }) => (
     <div data-testid="price-agreement-form">
@@ -36,6 +45,10 @@ vi.mock('./PriceAgreementForm', () => ({
   ),
   emptyDraft: () => ({ functionTitle: '', cao: '', scale: '', step: '', purchaseRate: '', saleRate: '', validFrom: '', validUntil: '', remarks: '' }),
   draftToPayload: (d: unknown) => d,
+  // TOOLBAR-4: the read-only row (PriceAgreementRow, unmocked below) seeds its OWN
+  // edit-toggle draft from this on mount — needed once the toolbar tests render a
+  // real (populated) row list, not just the empty-list tests above.
+  draftFromAgreement: (a: unknown) => a,
 }))
 
 const baseHook = { agreements: [], loading: false, error: false, reload: vi.fn(), add: vi.fn(), update: vi.fn(), remove: vi.fn() }
@@ -94,6 +107,74 @@ describe('PriceAgreementsTab · "+ Prijsafspraak toevoegen" opens AddPriceAgreem
     await user.click(screen.getByRole('button', { name: 'cancel-form' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(add).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * TOOLBAR-4 (Danny, live 04-08: "ook zoek venster en status!!") — the search box
+ * (function/CAO/scale) and the DERIVED active/expired filter (a price agreement
+ * carries no real status field, only validFrom/validUntil — see the tab's own
+ * docblock), plus the house toolbar ORDER: search, then status, then "+".
+ */
+describe('PriceAgreementsTab · toolbar search + derived active/expired filter (TOOLBAR-4)', () => {
+  const agreementRow = (over: Partial<{
+    id: string; functionTitle: string | null; cao: string | null; scale: string | null
+    validUntil: string | null
+  }> = {}) => ({
+    id: 'pa-1', functionTitle: 'Verpleegkundige', cao: null, scale: null, step: null,
+    purchaseRate: 20, saleRate: 28, validFrom: '2020-01-01', validUntil: null, remarks: null,
+    ...over,
+  })
+
+  it('shows every agreement until a status is picked (nothing selected = all)', () => {
+    vi.mocked(usePriceAgreements).mockReturnValue({
+      ...baseHook,
+      agreements: [agreementRow({ id: 'pa-1', functionTitle: 'Verpleegkundige' }), agreementRow({ id: 'pa-2', functionTitle: 'Verzorgende', validUntil: '2020-01-01' })],
+    })
+    render(<PriceAgreementsTab customerId="cust-1" />)
+    expect(screen.getByText('Verpleegkundige')).toBeInTheDocument()
+    expect(screen.getByText('Verzorgende')).toBeInTheDocument()
+  })
+
+  it('search narrows on function/CAO/scale', async () => {
+    const user = userEvent.setup()
+    vi.mocked(usePriceAgreements).mockReturnValue({
+      ...baseHook,
+      agreements: [agreementRow({ id: 'pa-1', functionTitle: 'Verpleegkundige' }), agreementRow({ id: 'pa-2', functionTitle: 'Verzorgende' })],
+    })
+    render(<PriceAgreementsTab customerId="cust-1" />)
+    await user.type(screen.getByPlaceholderText('priceAgreements.searchPlaceholder'), 'pleeg')
+    expect(screen.getByText('Verpleegkundige')).toBeInTheDocument()
+    expect(screen.queryByText('Verzorgende')).toBeNull()
+  })
+
+  it('the derived status filter narrows to "expired" (validUntil in the past) only', async () => {
+    const user = userEvent.setup()
+    vi.mocked(usePriceAgreements).mockReturnValue({
+      ...baseHook,
+      agreements: [
+        agreementRow({ id: 'pa-1', functionTitle: 'Verpleegkundige', validUntil: null }), // active (no end date)
+        agreementRow({ id: 'pa-2', functionTitle: 'Verzorgende', validUntil: '2020-01-01' }), // expired
+      ],
+    })
+    render(<PriceAgreementsTab customerId="cust-1" />)
+    // No real i18n instance in this file (see the top-of-file comment) — t() returns
+    // the raw key, same as every other assertion here ('priceAgreements.add' etc.).
+    await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
+    await user.click(await screen.findByRole('button', { name: 'priceAgreements.statusExpired' }))
+    expect(screen.getByText('Verzorgende')).toBeInTheDocument()
+    expect(screen.queryByText('Verpleegkundige')).toBeNull()
+  })
+
+  it('renders the toolbar in house order: search, then status filter, then "+"', () => {
+    vi.mocked(usePriceAgreements).mockReturnValue({ ...baseHook, agreements: [agreementRow()] })
+    render(<PriceAgreementsTab customerId="cust-1" />)
+    const searchInput = screen.getByPlaceholderText('priceAgreements.searchPlaceholder')
+    const statusTrigger = screen.getByTitle('filters.statusFilter')
+    const addButton = screen.getByRole('button', { name: 'priceAgreements.add' })
+    const FOLLOWING = Node.DOCUMENT_POSITION_FOLLOWING
+    expect(Boolean(searchInput.compareDocumentPosition(statusTrigger) & FOLLOWING)).toBe(true)
+    expect(Boolean(statusTrigger.compareDocumentPosition(addButton) & FOLLOWING)).toBe(true)
   })
 })
 

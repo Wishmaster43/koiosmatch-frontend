@@ -314,7 +314,10 @@
       "archiveDepartment": "Archivar departamento",
       "confirmArchive": "¿Archivar {{name}}? Podrás restaurarlo más tarde mediante «Archivado».",
       "archiveFailed": "Error al archivar.",
-      "restoreFailed": "Error al restaurar."
+      "restoreFailed": "Error al restaurar.",
+      "isPrimaryContact": "Contacto principal de este departamento",
+      "setPrimaryContact": "Convertir en contacto principal de este departamento",
+      "setPrimaryContactDone": "{{name}} es ahora el contacto principal de este departamento."
     },
     "deleteConfirm": "¿Eliminar este departamento?",
     "saveFailed": "Error al guardar.",
@@ -533,7 +536,10 @@
     "loading": "Cargando acuerdos de tarifas…",
     "loadError": "Error al cargar los acuerdos de tarifas.",
     "retry": "Reintentar",
-    "empty": "Todavía no hay acuerdos de tarifas."
+    "empty": "Todavía no hay acuerdos de tarifas.",
+    "searchPlaceholder": "Buscar acuerdos de precios…",
+    "statusActive": "Activo",
+    "statusExpired": "Caducado"
   },
   "notes": {
     "notes": "Notas",

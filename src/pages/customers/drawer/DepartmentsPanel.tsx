@@ -216,7 +216,7 @@ export default function DepartmentsPanel({
         </div>
         <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statuses} />
         {/* ARCHIVE-SUBENTITY-1: the shared quick-view toggle (§4) — never hand-rolled. */}
-        <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+        <QuickViewToggle iconOnly active={showArchived} onToggle={() => setShowArchived(v => !v)}
           label={t('departments.archivedView')} color="var(--color-archive)" icon={Archive} />
         <DrawerAddButton onClick={() => setAdding(true)} label={t('departments.add')} />
       </div>

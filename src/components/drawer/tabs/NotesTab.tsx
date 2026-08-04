@@ -13,7 +13,7 @@
  * server-side, this search only ever narrows what is ALREADY loaded, same as
  * every other client-side list filter in this app.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { CSSProperties, ReactNode, ComponentType } from 'react'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { Edit2, Save, X, Mail, PhoneCall, MessageCircle, Building2, Video, FileText, History, Search } from 'lucide-react'
@@ -78,6 +78,10 @@ interface NotesTabProps {
   onEditNote?: (i: number, payload: NotePayload) => void
   // Optional section toggles — hosts with their own sub-tabs render one section at a time.
   showNotes?: boolean
+  // Optional host-supplied row rendered at the TOP of the composer (Danny 05-08:
+  // the customer tab's "link this note to …" picker belongs in the compose flow,
+  // not as a standing toolbar row). Rendered only while composing a NEW note.
+  composerExtra?: ReactNode
   showTimeline?: boolean
   showConversations?: boolean
   // Optional (Danny 2026-07-20, job A "potlood op de statuswissel"): when the host
@@ -109,13 +113,21 @@ export default function NotesTab({
   notes = [], systemNotes = [], timeline = [], noteTypes = [], chipTypes, channels = [], labels = {}, editorLabels,
   authorInitials, timelineName, timelineInitials, onAddNote, onEditNote,
   showNotes = true, showTimeline = true, showConversations = true, onEditStatusEvent, renderTimelineContent,
-  error, onRetry,
+  error, onRetry, composerExtra,
 }: NotesTabProps) {
   const [adding, setAdding]   = useState(false)
   const [editingIdx, setEditingIdx] = useState<number | null>(null)   // null = new; index = editing
   const [body, setBody]       = useState('')
   const [title, setTitle]     = useState('')
   const [type, setType]       = useState(noteTypes[0]?.value ?? '')
+  // Resync when the host swaps the writable type list mid-compose (the customer tab's
+  // link-level picker switches scope INSIDE the composer since 05-08 — a stale type
+  // from the previous scope would 422 on save). Loop-safe: after the reset the guard
+  // no-ops; mirrors usePlanIntakeForm's default-resync pattern.
+  useEffect(() => {
+    if (noteTypes.length === 0 || noteTypes.some(nt => nt.value === type)) return
+    setType(noteTypes[0].value)
+  }, [noteTypes, type])
   // Optional contact channel — empty = internal note (no contact moment).
   const [channel, setChannel] = useState('')
   const [expanded, setExpanded] = useState(false)
@@ -235,25 +247,26 @@ export default function NotesTab({
       {/* Notes */}
       {showNotes && (
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, gap: 8 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{labels.notes}</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* Notes search (Danny 03-08) — same compact search box as the Documents
-                tab's own header row (search left of the add trigger). */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)' }}>
-              <Search size={11} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-              <input value={search} onChange={e => setSearch(e.target.value)} placeholder={labels.searchPlaceholder}
-                aria-label={labels.searchPlaceholder}
-                style={{ border: 'none', outline: 'none', fontSize: 11, color: 'var(--text)', background: 'none', width: 110 }} />
-            </div>
-            {/* Shared reference-style add button (Danny 20-07: notitie-knop had geen
-                achtergrondkleur) — one look on every entity's notes tab. */}
-            {!adding && <DrawerAddButton onClick={() => setAdding(true)} label={labels.newNote} />}
+        {/* No section title (Danny 05-08 "zelfde bij notities" — the tab already names
+            the section): the toolbar starts with the search bar on the LEFT, growing,
+            at the drill-down's standard footprint (6/10, radius 8, fontSize 12). */}
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6, gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)' }}>
+            <Search size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder={labels.searchPlaceholder}
+              aria-label={labels.searchPlaceholder}
+              style={{ border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none', flex: 1, minWidth: 0 }} />
           </div>
+          {/* Shared reference-style add button (Danny 20-07: notitie-knop had geen
+              achtergrondkleur) — one look on every entity's notes tab. */}
+          {!adding && <DrawerAddButton onClick={() => setAdding(true)} label={labels.newNote} />}
         </div>
         <div style={sectionBlock}>
         {adding && (
           <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 14, marginBottom: 14, background: 'var(--bg)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {/* Host-supplied composer row (e.g. the customer tab's link-level picker) —
+                sits ABOVE the type row because the picked scope drives the type list. */}
+            {editingIdx === null && composerExtra}
             <div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{labels.type}</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>

@@ -155,7 +155,12 @@ export default function StatusFilterSelect({ value, onToggle, statuses, optionKe
       : t('common:filters.selectedCount', { count: value.length })
 
   return (
-    <div style={{ width: 170, flexShrink: 0 }}>
+    // TOOLBAR-WIDTH-1 (Danny, live 04-08: "status dropdown kan wat smaller zodat
+    // alles wat meer ruimte heeft") — trigger footprint only, narrowed from 170 so
+    // the search box beside it (flex: 1) gains the room. The dropdown MENU keeps
+    // its own wider `width` below so long tenant labels stay legible; only the
+    // closed trigger needed to shrink.
+    <div style={{ width: 140, flexShrink: 0 }}>
       <SearchSelect options={options} selected={value} onToggle={onToggle} menuAlign="right" width={190}
         triggerLabel={label}
         renderTrigger={(toggleOpen: () => void) => (

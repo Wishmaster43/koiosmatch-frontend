@@ -30,7 +30,8 @@ describe('match NotesTab (NT-MATCH-1, shared reuse)', () => {
   it('fetches this match\'s notes and shows the empty state', async () => {
     render(<NotesTab match={match()} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/matches/1/notes'))
-    expect(await screen.findByText('notes.title')).toBeInTheDocument()
+    // The section title is gone (Danny 05-08) — the search input is the stable landmark.
+    expect(await screen.findByPlaceholderText('notes.searchPlaceholder')).toBeInTheDocument()
     expect(await screen.findByText('notes.empty')).toBeInTheDocument()
   })
 

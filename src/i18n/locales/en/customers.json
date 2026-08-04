@@ -314,7 +314,10 @@
       "archiveDepartment": "Archive department",
       "confirmArchive": "Archive {{name}}? You can restore it later via 'Archived'.",
       "archiveFailed": "Archiving failed.",
-      "restoreFailed": "Restoring failed."
+      "restoreFailed": "Restoring failed.",
+      "isPrimaryContact": "Primary contact for this department",
+      "setPrimaryContact": "Make primary contact for this department",
+      "setPrimaryContactDone": "{{name}} is now the primary contact for this department."
     },
     "deleteConfirm": "Delete this department?",
     "saveFailed": "Saving failed.",
@@ -533,7 +536,10 @@
     "loading": "Loading price agreements…",
     "loadError": "Loading price agreements failed.",
     "retry": "Retry",
-    "empty": "No price agreements yet."
+    "empty": "No price agreements yet.",
+    "searchPlaceholder": "Search price agreements…",
+    "statusActive": "Active",
+    "statusExpired": "Expired"
   },
   "notes": {
     "notes": "Notes",

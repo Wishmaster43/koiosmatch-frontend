@@ -32,7 +32,10 @@ import type { Id } from '@/types/common'
  * TOOLBAR (Danny 03-08: "bij Matches wil ik ook een zoekbalk en statussen
  * hebben"): search (vacancy title + candidate name) + the shared
  * StatusFilterSelect keyed on the SAME match-status vocabulary the title's own
- * fase already resolves via useMatchStatuses.
+ * fase already resolves via useMatchStatuses. House order (Danny, live 04-08:
+ * "Nieuwe Match is rechts!!! en status in het midden"): search left, status
+ * filter middle, "+ Match" last — same left-to-right reading as every other
+ * sub-entity list (Locaties/Afdelingen/Contactpersonen).
  *
  * Lazily fetched (§9): only mounts — and only then fires GET /matches?customer_id=
  * — when this tab is the active one, same as every other customer drawer tab.
@@ -67,18 +70,19 @@ export default function MatchesTab({ customerId }: { customerId?: Id }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {/* Toolbar mirrors the other sub-entity lists: search left, add + status
-          filter right (point 1: a match CAN now be created from this list). */}
+      {/* Toolbar in the house order (Danny, live 04-08): search left, status
+          filter middle, "+ Match" right (point 1: a match CAN now be created
+          from this list) — mirrors Locaties/Afdelingen/Contactpersonen. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 120, padding: '6px 10px',
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, padding: '6px 10px',
           background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
           <Search size={13} color="var(--text-muted)" />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder={t('customers:matches.searchPlaceholder')} aria-label={t('customers:matches.searchPlaceholder')}
             style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
         </div>
-        <DrawerAddButton onClick={() => setAdding(true)} label={t('customers:matches.add')} />
         <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={matchStatuses} />
+        <DrawerAddButton onClick={() => setAdding(true)} label={t('customers:matches.add')} />
       </div>
       <SectionCard>
       {matches.length === 0 ? (
