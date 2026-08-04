@@ -37,10 +37,13 @@ export function useListPageSize(memoryKey: string, serverCap: number = PAGE_SIZE
 
   // Sticky across the shell's unmount-on-navigate (mirrors every other page-level
   // `usePageMemory` field); seeded once from the user's clamped preference.
-  const [pageSize, setPageSizeRaw] = usePageMemory<number>(
+  const [pageSizeStored, setPageSizeRaw] = usePageMemory<number>(
     `${memoryKey}.pageSize`,
     () => Math.min(rawDefault, serverCap),
   )
+  // A value STORED before this hook existed (e.g. a remembered 500 on a 200-cap
+  // page) must clamp on READ too — the seed only runs when nothing is stored.
+  const pageSize = Math.min(pageSizeStored, serverCap)
   // Defensive re-clamp on every explicit change too — a caller can never push the
   // state above the endpoint's real ceiling, whatever the dropdown offered.
   const setPageSize = (n: number) => setPageSizeRaw(Math.min(n, serverCap))

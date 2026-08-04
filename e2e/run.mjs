@@ -10,6 +10,9 @@ import { pagesRender, drillDowns } from './flows/nav.mjs'
 import { boardsDrag } from './flows/boards.mjs'
 import { statusWithReason, archiveAndFindBack, noteWithChannel, superSearch } from './flows/candidates.mjs'
 import { mfaLifecycle } from './flows/mfa.mjs'
+import { paginering } from './flows/paginering.mjs'
+import { drilldownRender } from './flows/drilldown-render.mjs'
+import { naadContract } from './flows/naad-contract.mjs'
 
 const FLOWS = [
   ['pages-render', pagesRender],
@@ -19,6 +22,9 @@ const FLOWS = [
   ['notitie-met-kanaal', noteWithChannel],
   ['super-search', superSearch],
   ['mfa-lifecycle', mfaLifecycle],
+  ['paginering', paginering],
+  ['drilldown-render', drilldownRender],
+  ['naad-contract', naadContract],
   ['archiveren-terugvinden', archiveAndFindBack], // last: it mutates the list
 ]
 

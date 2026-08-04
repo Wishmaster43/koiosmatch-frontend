@@ -70,6 +70,41 @@ export async function hasNav(page, navLabel) {
   return (await page.locator('button', { hasText: new RegExp(`^\\s*${navLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`) }).count()) > 0
 }
 
+// Force TABLE view before checking table-only chrome (pagination footer, drill-down
+// rows). Several list pages persist their table/board pick in-memory across nav
+// (usePageMemory) — if an earlier flow (e.g. boards-drag) left a page in board mode,
+// a later flow must not silently skip its table chrome. Structural selector (the
+// LayoutList lucide icon every table/board toggle uses for its "table" option, see
+// ViewModeToggle call sites) so this works regardless of the button's i18n label,
+// which differs per entity namespace. No-op on pages with no board toggle at all
+// (candidates/vacancies/customers) or already on table view.
+export async function ensureTableView(page, ms = 800) {
+  const tableBtn = page.locator('button:has(svg.lucide-layout-list)').first()
+  if (await tableBtn.count()) { await tableBtn.click(); await sleep(ms) }
+}
+
+// Content-leak scan for a drawer/tab's rendered text — the exact classes Danny
+// keeps finding by hand and a static audit misses: an untranslated i18n key
+// rendered as literal text (dotted `a.b.c` or namespaced `ns:key`), a raw ISO
+// timestamp instead of a locale-formatted date, or a stray "undefined"/"NaN".
+// Regexes match the CLASS definitions given for this harness; i18n checks run
+// per whitespace-token (the dotted-key pattern anchors ^...$, so it must be
+// tested against individual words, not the whole multi-line blob).
+const RAW_I18N_DOTTED = /^[a-z][a-zA-Z]*(\.[a-zA-Z_]+){2,}$/
+const RAW_I18N_NS = /^[a-zA-Z][a-zA-Z0-9_]*:[a-zA-Z][a-zA-Z0-9_.]*$/
+const RAW_ISO = /\d{4}-\d{2}-\d{2}T\d{2}:/
+const RAW_UNDEFINED_NAN = /\b(undefined|NaN)\b/
+export function scanForLeaks(text) {
+  const findings = []
+  const iso = text.match(RAW_ISO)
+  if (iso) findings.push(`raw ISO-timestamp zichtbaar (${iso[0]}…)`)
+  const bad = text.match(RAW_UNDEFINED_NAN)
+  if (bad) findings.push(`letterlijke "${bad[0]}" zichtbaar`)
+  const badTokens = new Set(text.split(/\s+/).filter(tok => RAW_I18N_DOTTED.test(tok) || RAW_I18N_NS.test(tok)))
+  if (badTokens.size) findings.push(`onvertaalde i18n-key(s) zichtbaar: ${[...badTokens].slice(0, 5).join(', ')}`)
+  return findings
+}
+
 // Assert helper that throws with a readable message (runner catches per flow).
 export function expect(cond, msg) { if (!cond) throw new Error(msg) }
 

@@ -132,7 +132,7 @@ export async function noteWithChannel({ page, errors }) {
   await openFirstCandidate(page)
   await page.locator('button:has-text("Communicatie"), [role="tab"]:has-text("Communicatie")').first().click()
   await sleep(800)
-  await page.locator('text=Nieuwe notitie').first().click()
+  await page.locator('[aria-label="Nieuwe notitie"]').first().click()
   await sleep(400)
   // Pick a channel chip (WhatsApp) then write + save.
   const chip = page.locator('button:has-text("WhatsApp")').last()
