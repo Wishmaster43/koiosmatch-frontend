@@ -153,7 +153,7 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
   const values = c as unknown as Record<string, unknown>
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {/* CANON-DIVIDER-1 (Danny 05-08): no line between rows, 11px labels — matches
           the candidate ProfileTab's Persoonlijk/Adres/Contact cards exactly. */}
       <EditableFieldTable title={gDetails} fields={block(gDetails)} value={values} onSave={onSave} />

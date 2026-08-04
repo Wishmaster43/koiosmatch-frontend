@@ -152,7 +152,7 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
           label width now the EditableFieldTable default (fieldRowCanon). */}
       <EditableFieldTable key={`${matchId}-${revertTick}`} fields={fields} value={values} onSave={handleSave} />
       {/* Derived margin — read-only, sits right under the rate fields. */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, padding: '7px 11px', borderRadius: 8, marginTop: -4,
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, padding: '7px 11px', borderRadius: 8, marginTop: 8,
         background: 'var(--surface)', border: '1px solid var(--border)',
         color: margin != null ? (margin >= 0 ? 'var(--color-success)' : 'var(--color-danger)') : 'var(--text-muted)' }}>
         <span style={{ color: 'var(--text-muted)' }}>{t('drawer.contract.margin')}</span>

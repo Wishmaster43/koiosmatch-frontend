@@ -24,7 +24,7 @@ export const dash = <span style={{ color: 'var(--text-muted)' }}>-</span>
 // card can never flip another card's rows into edit mode.
 export function row(label: ReactNode, read: ReactNode, edit: ReactNode, editing: boolean) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26, padding: '5px 0' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
       {/* Canon label style (fieldRowCanon, 05-08): was width:130, aligned to candidate ProfileTab's 120. */}
       <span style={CANON_LABEL_STYLE}>{label}</span>
       <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)' }}>{editing ? edit : read}</div>
@@ -42,7 +42,8 @@ export function card(title: ReactNode, children: ReactNode, actions?: ReactNode)
         <span style={groupTitleText}>{title}</span>
         {actions}
       </div>
-      <div style={{ ...blockStyle, padding: '2px 12px' }}>{children}</div>
+      {/* CANON-BOX (05-08): the card pads once (6/12) and stacks bare rows with gap 2 — 28px pitch. */}
+      <div style={{ ...blockStyle, padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>{children}</div>
     </div>
   )
 }

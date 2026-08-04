@@ -199,7 +199,7 @@ export default function LocationDetail({
   // buttons with different blast radii on one narrow panel.
   if (departmentOpen) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <DepartmentsPanel scope="location" scopeId={l.id as Id} scopeName={l.name}
           customerId={customerId} customerName={customerName}
           departments={departments} locations={locations} contacts={contacts}
@@ -214,7 +214,7 @@ export default function LocationDetail({
 
   if (contactOpen) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <ContactsPanel scope="location" scopeId={l.id as Id} scopeName={l.name} customerId={customerId} contacts={contacts} locations={locations}
           openId={openContactId} onOpenChange={setOpenContactId} trail={[{ label: backLabel ?? '', onClick: close }]}
           onRemove={onRemoveContact}

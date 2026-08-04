@@ -230,7 +230,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   // department steps aside — one title, one delete button, one way back.
   if (contactOpen) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {/* `trail` carries only the ANCESTORS: ContactsPanel appends this department itself
             as its own list crumb (its scopeName IS department.name), so passing it here too
             printed "Dagbesteding › Dagbesteding" — measured live 28-07. */}
@@ -244,7 +244,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {/* One way back per level (see LocationDetail for why this replaced the old button). */}
       <DrillBreadcrumb trail={trail} current={department.name} />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>

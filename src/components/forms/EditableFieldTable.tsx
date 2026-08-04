@@ -83,16 +83,21 @@ const compact: CSSProperties = {
 // that wants that calmer look passes `dividers={false}` — default stays `true`
 // (unchanged) so every EXISTING caller (candidate Preferences/ZZP, matches,
 // opportunities) keeps its exact current look, byte for byte.
-const rowStyle = (dividers: boolean): CSSProperties => ({
-  // minHeight 26 = the candidate canon's row height (CANON-SPEC, DOM-gemeten 05-08).
-  display: 'flex', alignItems: 'center', gap: 12, minHeight: 26, padding: dividers ? '7px 12px' : '6px 12px',
-  background: 'var(--surface)',
-})
+// CANON-BOX (Danny 05-08, DOM-diff kandidaat vs klant): in the calm default the
+// CARD carries the padding + a 2px column gap and the rows stay bare (row pitch
+// 28px, exactly the candidate ProfileTab). Divider mode keeps the original
+// full-bleed rows that own their padding/background.
+const rowStyle = (dividers: boolean): CSSProperties => dividers
+  ? { display: 'flex', alignItems: 'center', gap: 12, minHeight: 26, padding: '7px 12px', background: 'var(--surface)' }
+  : { display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }
 
+// Canon pencil (05-08): the candidate ProfileTab's bordered 26×26 icon button —
+// one pencil look on every card header, never the old borderless glyph.
 function EditPencil({ onClick, title, style }: { onClick: () => void; title: string; style?: CSSProperties }) {
   return (
-    <button onClick={onClick} title={title} style={{ background: 'none', border: 'none',
-      cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex', ...style }}>
+    <button onClick={onClick} title={title} style={{ width: 26, height: 26, display: 'flex',
+      alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer',
+      background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)', ...style }}>
       <Edit2 size={13} />
     </button>
   )
@@ -317,15 +322,20 @@ export default function EditableFieldTable({
   // knobs the candidate ProfileTab canon changes; both fall back to this table's
   // original look when the caller doesn't pass them.
   const renderRow = (f: FieldRow, last: boolean) => (f.type === 'textarea' || f.type === 'chips' || f.type === 'richtext') ? (
-    <div key={f.key} style={{ padding: '7px 12px', background: 'var(--surface)', borderBottom: (dividers && !last) ? '1px solid var(--border)' : 'none' }}>
+    <div key={f.key} style={dividers
+      ? { padding: '7px 12px', background: 'var(--surface)', borderBottom: !last ? '1px solid var(--border)' : 'none' }
+      : { padding: '4px 0' }}>
       <span style={{ fontSize: labelFontSize, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>{f.label}</span>
       {editing ? renderControl(f) : renderValue(f)}
     </div>
   ) : (
-    <div key={f.key} style={{ ...rowStyle(dividers), borderBottom: (dividers && !last) ? '1px solid var(--border)' : 'none' }}>
-      <span style={{ fontSize: labelFontSize, color: 'var(--text-muted)', width: labelWidth, flexShrink: 0 }}>{f.label}</span>
-      {/* Read value reserves the control's height → no row growth when editing starts. */}
-      {editing ? <div style={{ flex: 1, minWidth: 0 }}>{renderControl(f)}</div> : <div style={{ flex: 1, minWidth: 0, minHeight: 26, display: 'flex', alignItems: 'center' }}>{renderValue(f)}</div>}
+    <div key={f.key} style={dividers
+      ? { ...rowStyle(dividers), borderBottom: !last ? '1px solid var(--border)' : 'none' }
+      : rowStyle(dividers)}>
+      {/* Canon label span — the same flex/gap-5 anatomy as the candidate's FieldRow. */}
+      <span style={{ fontSize: labelFontSize, color: 'var(--text-muted)', width: labelWidth, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5 }}>{f.label}</span>
+      {/* Canon value wrapper (flex 1 / minWidth 0); the row's own minHeight centres it. */}
+      {editing ? <div style={{ flex: 1, minWidth: 0 }}>{renderControl(f)}</div> : <div style={{ flex: 1, minWidth: 0 }}>{renderValue(f)}</div>}
     </div>
   )
 
@@ -351,7 +361,12 @@ export default function EditableFieldTable({
         return acc
       }, [])
     : null
-  const cardStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }
+  // CANON-BOX: calm cards pad once (6/12) and stack rows with gap 2 — the 28px row
+  // pitch of the candidate canon. Divider cards stay bare shells around full-bleed rows.
+  const cardStyle: CSSProperties = dividers
+    ? { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }
+    : { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)',
+        padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 2 }
   const groupTitleStyle: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 6 }
 
   return (
@@ -364,7 +379,8 @@ export default function EditableFieldTable({
       )}
 
       {hasGroups && groups ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 12 }}>
+        // Canon card pitch: pure gap-10 stacking, no extra margins (candidate ProfileTab).
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: dividers ? 12 : 0 }}>
           {groups.map(g => (
             <div key={g.group}>
               {g.group && <div style={groupTitleStyle}>{g.group}</div>}
@@ -373,7 +389,7 @@ export default function EditableFieldTable({
           ))}
         </div>
       ) : (
-        <div style={{ ...cardStyle, marginBottom: 12, position: 'relative' }}>
+        <div style={{ ...cardStyle, marginBottom: dividers ? 12 : 0, position: 'relative' }}>
           {editButton === 'inside' && (
             <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}>
               {editing ? editControls() : <EditPencil onClick={startEdit} title={t('edit')} />}

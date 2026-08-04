@@ -27,7 +27,7 @@ const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].fi
 function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
   // Canon (05-08): clean cards — no row dividers, shared label style (fieldRowCanon).
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26, padding: '6px 12px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
       <span style={CANON_LABEL_STYLE}>{label}</span>
       <span style={{ flex: 1, minWidth: 0 }}>{children}</span>
     </div>
@@ -102,7 +102,7 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
   const assigneeOpts = [{ value: '', label: t('bureau') }, ...users.map(u => ({ value: String(u.id), label: userName(u) }))]
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div>
         {/* Header with the edit toggle for the classification/scheduling/assignee block */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -114,14 +114,14 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
             // is now withTrashed, so the PATCH no longer 404s) — the gating stays anyway:
             // restore first is a deliberate product choice (mirrors the header gating).
             <button onClick={startEdit} title={t('details.title')} aria-label={t('details.title')}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
+              style={{ ...iconBtnBase, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
               <Edit2 size={13} />
             </button>
           )}
         </div>
 
         {editing ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <Field label={t('details.type')}><SelectField value={draft.typeKey as string} onChange={v => setD('typeKey', v)} options={opts(types)} /></Field>
             <Field label={t('details.status')}><SelectField value={draft.statusKey as string} onChange={v => setD('statusKey', v)} options={opts(statuses)} /></Field>
             <Field label={t('details.priority')}><SelectField value={draft.priorityKey as string} onChange={v => setD('priorityKey', v)} options={opts(priorities)} /></Field>
@@ -133,7 +133,7 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
             <Field label={t('details.assignee')}><SelectField value={String(draft.assigneeId)} onChange={v => setD('assigneeId', v)} options={assigneeOpts} /></Field>
           </div>
         ) : (
-          <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
+          <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)', padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Row label={t('details.type')}>{task.typeLabel ? <SoftChip label={task.typeLabel} color={task.typeColor} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
             <Row label={t('details.status')}>{task.statusLabel ? <SoftChip label={task.statusLabel} color={task.statusColor} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
             <Row label={t('details.priority')}>{task.priorityLabel ? <SoftChip label={task.priorityLabel} color={task.priorityColor} dot /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>

@@ -141,7 +141,7 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
           match form reads, and the billing e-mail is the ONE address invoicing uses
           regardless of which location or department a match picks. */}
       {subTab === 'billing' && c && (
-        <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
           {/* CANON-DIVIDER-1 (Danny 05-08): candidate ProfileTab canon — no line
               between rows, 11px labels. */}
           <EditableFieldTable

@@ -38,7 +38,7 @@ export default function VacancySettingsTab({ c, onSave }: Props) {
   const values = c as unknown as Record<string, unknown>
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div>
         <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
           {t('vacancySettings.title')}

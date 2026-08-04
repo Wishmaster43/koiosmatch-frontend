@@ -92,7 +92,7 @@ export default function LocationAddressTab({
   const saveDescription = (html: string) => onSave(l.id as Id, { description: html })
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {/* CANON-DIVIDER-1 (Danny 05-08): candidate ProfileTab canon — no line
           between rows, 11px labels. */}
       {/* Canon width (fieldRowCanon, 05-08): EditableFieldTable's own default now matches. */}

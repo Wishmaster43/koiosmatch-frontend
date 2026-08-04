@@ -261,7 +261,7 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
   const blockFields = (group: string) => fields.filter(f => f.group === group).map(f => ({ ...f, group: undefined }))
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <EditableFieldTable title={t('zzp.groupCompany')}   fields={blockFields(t('zzp.groupCompany'))}   value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSave} />
       <EditableFieldTable title={t('zzp.groupAddress')}   fields={blockFields(t('zzp.groupAddress'))}   value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSave} />
       <EditableFieldTable title={t('zzp.groupInvoicing')} fields={blockFields(t('zzp.groupInvoicing'))} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSave} />

@@ -234,7 +234,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
     : (contact.departmentId != null ? [contact.departmentId] : [])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {/* Title row, same anatomy as a customer and a location (§3A(c)): name, the
           copyable reference number, then the STATUS as a read-only colour badge with its
           own pencil. Status is not a field-table row here — Danny 28-07: "bij de
