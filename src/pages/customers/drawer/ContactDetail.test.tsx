@@ -281,10 +281,13 @@ describe('ContactDetail · name composite (NAME-COMPOSITE-1)', () => {
  * view links out to https://www.linkedin.com/in/{slug}.
  */
 describe('ContactDetail · LinkedIn (CONTACT-LINKEDIN-1)', () => {
-  it('renders an em dash when no LinkedIn slug is stored', () => {
+  it('renders the standard hyphen when no LinkedIn slug is stored', () => {
     render(<ContactDetail contact={baseContact({ linkedin: '' })} locations={locations} departments={departments} statuses={statuses}
       onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
-    expect(screen.getByText('—')).toBeInTheDocument()
+    // Other empty fields render the same hyphen — assert the one in the LinkedIn row.
+    const row = screen.getByText('LinkedIn').closest('div')!.parentElement!
+    expect(row.textContent).toContain('-')
+    expect(row.querySelector('a')).toBeNull()
   })
 
   it('renders the slug as a link to the canonical LinkedIn profile URL', () => {

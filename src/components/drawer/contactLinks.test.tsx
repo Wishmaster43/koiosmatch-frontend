@@ -26,15 +26,15 @@ describe('linkedinValue', () => {
     )
   })
 
-  it('falls back to an em dash when the slug is empty — not this file\'s usual hyphen', () => {
+  it('falls back to the same hyphen as every other contact field (candidate canon)', () => {
     render(<div>{linkedinValue('', 'Open LinkedIn profile')}</div>)
-    expect(screen.getByText('—')).toBeInTheDocument()
+    expect(screen.getByText('-')).toBeInTheDocument()
     expect(screen.queryByRole('link')).toBeNull()
   })
 
   it('trims whitespace and treats a blank string as empty', () => {
     render(<div>{linkedinValue('   ', 'Open LinkedIn profile')}</div>)
-    expect(screen.getByText('—')).toBeInTheDocument()
+    expect(screen.getByText('-')).toBeInTheDocument()
   })
 })
 

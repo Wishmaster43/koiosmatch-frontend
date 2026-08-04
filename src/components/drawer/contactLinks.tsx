@@ -154,13 +154,12 @@ export function LinkedinMark({ size = 13 }: { size?: number }) {
  * so it never depends on a caller having stripped a pasted full URL first (see
  * toLinkedinSlug below, applied once at the save boundary instead).
  *
- * Empty state is an EM dash here, not the `dash()` hyphen this file uses for
- * every other field — matching ContactDetail's own neighbouring gender row
- * rather than this file's generic convention (Danny's explicit spec, 05-08).
+ * Empty state is the same `-` hyphen as every other contact field — the
+ * candidate's own LinkedIn row is the canon (Danny 05-08: both dashes identical).
  */
 export function linkedinValue(v: unknown, openLabel: string): ReactNode {
   const slug = typeof v === 'string' ? v.trim() : ''
-  if (!slug) return <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>
+  if (!slug) return dash()
   const href = `https://www.linkedin.com/in/${slug}`
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
