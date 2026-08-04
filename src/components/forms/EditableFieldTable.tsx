@@ -84,7 +84,8 @@ const compact: CSSProperties = {
 // (unchanged) so every EXISTING caller (candidate Preferences/ZZP, matches,
 // opportunities) keeps its exact current look, byte for byte.
 const rowStyle = (dividers: boolean): CSSProperties => ({
-  display: 'flex', alignItems: 'center', gap: 12, padding: dividers ? '7px 12px' : '6px 12px',
+  // minHeight 26 = the candidate canon's row height (CANON-SPEC, DOM-gemeten 05-08).
+  display: 'flex', alignItems: 'center', gap: 12, minHeight: 26, padding: dividers ? '7px 12px' : '6px 12px',
   background: 'var(--surface)',
 })
 

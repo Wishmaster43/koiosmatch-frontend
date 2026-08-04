@@ -27,7 +27,7 @@ const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].fi
 function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
   // Canon (05-08): clean cards — no row dividers, shared label style (fieldRowCanon).
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '9px 12px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26, padding: '6px 12px' }}>
       <span style={CANON_LABEL_STYLE}>{label}</span>
       <span style={{ flex: 1, minWidth: 0 }}>{children}</span>
     </div>
