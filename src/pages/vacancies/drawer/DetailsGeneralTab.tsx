@@ -50,7 +50,9 @@ export default function DetailsGeneralTab({ vacancy: v, general, candidateTypes,
           )
         })}
       </div>, editing)}
-    {row(t('details.id'), <span style={{ color: 'var(--text-muted)' }}>{v.code || '—'}</span>, <span style={{ color: 'var(--text-muted)' }}>{v.code || '—'}</span>, editing)}
+    {/* V7 (Danny vacatures-ronde): the Vacature-ID row (`v.code`) is removed —
+        it duplicated the reference number, which already renders in the drawer
+        title row (VacancyDrawer.tsx's ReferenceNumberChip) and stays there. */}
     {/* VAC-DATES-1: the vacancy's own runtime window — start_date AND end_date
         (validated after_or_equal:start_date server-side), paired half-row. */}
     {row(`${t('details.startDate')} / ${t('details.endDate')}`, dateRange(formatDate, v.startDate, v.endDate) || dash, twoDates('startDate', 'endDate'), editing)}
@@ -63,10 +65,25 @@ export default function DetailsGeneralTab({ vacancy: v, general, candidateTypes,
     {/* V4-V6: locatie → afdeling → contactpersoon — optional, searchable cascade.
         VAC-CASCADE-1: the backend persists customer_location_id/customer_department_id/
         contact_id, so read-mode shows the saved name (or a dash) and the edit
-        survives a reload instead of silently evaporating. */}
-    {row(t('details.customerLocation'), cascade.locationName || dash, locationPicker, editing)}
-    {row(t('details.customerDepartment'), cascade.departmentName || dash, departmentPicker, editing)}
-    {row(t('details.contactPerson'), cascade.contactName || dash, contactPicker, editing)}
+        survives a reload instead of silently evaporating.
+        Relatie-links cluster: each name links via EntityLink to the OWNING customer
+        (page="customers", id=v.clientId) — same click-name/click-icon pattern as V3.
+        Locations/departments/contacts have no top-level page/route of their own (they
+        only live nested inside the customer drawer), so — same as the customers
+        drawer's own ContactNameLink for this exact situation — the link cannot deep-jump
+        to the specific sub-tab/record; it opens the correct customer record that holds
+        it. Landing on the exact Locaties/Contactpersonen sub-tab needs NavigationContext/
+        useDrawerUrl to carry a sub-tab + sub-id intent, which is out of this cluster's
+        scope (tracked as a follow-up, not a backend gap — see build notes). */}
+    {row(t('details.customerLocation'),
+      cascade.locationName ? <EntityLink page="customers" id={v.clientId}>{cascade.locationName}</EntityLink> : dash,
+      locationPicker, editing)}
+    {row(t('details.customerDepartment'),
+      cascade.departmentName ? <EntityLink page="customers" id={v.clientId}>{cascade.departmentName}</EntityLink> : dash,
+      departmentPicker, editing)}
+    {row(t('details.contactPerson'),
+      cascade.contactName ? <EntityLink page="customers" id={v.clientId}>{cascade.contactName}</EntityLink> : dash,
+      contactPicker, editing)}
     {row(t('details.function'), v.category || dash, select('category', fnOptions), editing)}
     {row(t('details.preferredIndustry'), v.industry || dash, select('industry', industries.map(i => ({ value: i, label: i }))), editing)}
   </>, controls(t, editing, save, cancel, () => setEditing(true)))

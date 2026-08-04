@@ -84,5 +84,16 @@ export function makeFieldHelpers<K extends string>(form: Record<K, string>, setF
   const dateInput = (k: K) => <input type="date" value={form[k]} onChange={e => setF(k, e.target.value)} style={inputStyle} />
   const twoInputs = (a: K, b: K, pa: string, pb: string) => <div style={{ display: 'flex', gap: 6 }}>{text(a, pa)}{text(b, pb)}</div>
   const twoDates = (a: K, b: K) => <div style={{ display: 'flex', gap: 6 }}>{dateInput(a)}{dateInput(b)}</div>
-  return { select, text, dateInput, twoInputs, twoDates }
+  // V12/V13 (Danny vacatures-ronde): the backend validates these as `integer`/
+  // `numeric` (experience_min/max_years, hours_min/max, salary_min/max — see
+  // StoreVacancyRequest) — a number input, never free text, so the browser and
+  // the form itself reject non-numeric keystrokes instead of relying only on
+  // the server 422.
+  const number = (k: K, placeholder?: string, opts?: { min?: number; max?: number; step?: number }) => (
+    <input type="number" value={form[k]} onChange={e => setF(k, e.target.value)} placeholder={placeholder}
+      min={opts?.min} max={opts?.max} step={opts?.step ?? 1} style={inputStyle} />
+  )
+  const twoNumbers = (a: K, b: K, pa: string, pb: string, opts?: { min?: number; max?: number; step?: number }) =>
+    <div style={{ display: 'flex', gap: 6 }}>{number(a, pa, opts)}{number(b, pb, opts)}</div>
+  return { select, text, dateInput, twoInputs, twoDates, number, twoNumbers }
 }

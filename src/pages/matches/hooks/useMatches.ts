@@ -38,6 +38,10 @@ export function mapMatch(m: RawMatch): MatchRow {
     candidateId: m.candidate_id ?? m.candidate?.id ?? null,
     vacancyId:   m.vacancy_id ?? m.vacancy?.id ?? null,
     clientId:    m.customer_id ?? m.client?.id ?? m.customer?.id ?? null,
+    // MATCH-ORDINAL-1 (M14/M15): the location/department ids ride along on every
+    // list row (MatchListResource.php) — only the mapper was dropping them.
+    customerLocationId:   m.customer_location_id ?? null,
+    customerDepartmentId: m.customer_department_id ?? null,
     score:      m.score ?? m.match_score ?? null,
     // Funnel stage only — the old `?? m.status` fallback painted "open" into the
     // stage axis once the R-1b resource replaced stage with status (broken board).
@@ -74,6 +78,10 @@ export function mapMatch(m: RawMatch): MatchRow {
     branchName:    m.branch?.name ?? null,
     startDate:     m.start_date ?? null,
     endDate:       m.end_date ?? null,
+    // M1 (overzicht-data cluster): contract form/type — MatchListResource.php
+    // already serialises `contract_type` on every list row; only the mapper
+    // never picked it up, so Overview had no way to show it without a second fetch.
+    contractType:  m.contract_type ?? null,
   }
 }
 

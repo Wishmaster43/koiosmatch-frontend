@@ -61,7 +61,8 @@
       "score": "Score",
       "stage": "Fase",
       "created": "Aangemaakt",
-      "status": "Status"
+      "status": "Status",
+      "lastSynced": "Laatst gesynchroniseerd"
     },
     "openCandidate": "Kandidaat openen",
     "openVacancy": "Vacature openen",
@@ -87,7 +88,9 @@
       "error": "Contractgegevens konden niet geladen worden.",
       "unavailable": "Contractgegevens zijn nog niet beschikbaar (koppeling niet geconfigureerd).",
       "saveError": "Wijziging kon niet worden opgeslagen.",
-      "saved": "Contractgegevens opgeslagen."
+      "saved": "Contractgegevens opgeslagen.",
+      "functionTitle": "Functietitel",
+      "surcharge": "Toeslag"
     },
     "ownerUnassigned": "Geen eigenaar",
     "terminate": {
@@ -103,6 +106,27 @@
       "confirm": "Beëindiging bevestigen",
       "success": "Match beëindigd.",
       "error": "Match kon niet worden beëindigd."
+    },
+    "detailSection": "Details",
+    "remarks": {
+      "title": "Opmerkingen",
+      "saved": "Opmerkingen opgeslagen.",
+      "saveError": "Opslaan van de opmerkingen is mislukt."
+    },
+    "duration": {
+      "unit": {
+        "days": "{{count}} dag",
+        "weeks": "{{count}} week",
+        "months": "{{count}} maand"
+      },
+      "remaining": "nog {{pct}}% te gaan",
+      "progressLabel": "Contractvoortgang"
+    },
+    "ordinal": {
+      "candidate": "Match {{position}} van {{total}} bij deze kandidaat",
+      "client": "Match {{position}} van {{total}} bij deze klant",
+      "location": "Match {{position}} van {{total}} op deze locatie",
+      "department": "Match {{position}} van {{total}} bij deze afdeling"
     }
   },
   "approval": {
@@ -170,5 +194,21 @@
     "searchPlaceholder": "Zoek notities…",
     "loading": "Notities laden…",
     "loadError": "Notities konden niet geladen worden."
+  },
+  "ai": {
+    "title": "Koios AI adviseert",
+    "beta": "Beta",
+    "refresh": "Vernieuwen",
+    "analyzing": "Koios AI analyseert de match…",
+    "scoreLabel": "Score",
+    "scoreGood": "Sterke match ({{score}}).",
+    "scoreAverage": "Gemiddelde match ({{score}}) — check de fit.",
+    "scorePoor": "Zwakke match ({{score}}) — extra aandacht nodig.",
+    "scoreUnknown": "Nog geen score bekend.",
+    "windowLabel": "Contractperiode",
+    "windowExpired": "De einddatum is al {{days}} dag(en) gepasseerd.",
+    "windowWarning": "Nog {{days}} dag(en) tot de einddatum — tijdig verlengen of afronden.",
+    "windowFine": "Contractperiode loopt goed.",
+    "windowUnknown": "Geen einddatum bekend."
   }
 }

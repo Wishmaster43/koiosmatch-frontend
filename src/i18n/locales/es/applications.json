@@ -302,7 +302,15 @@
     "save": "Guardar",
     "cancel": "Cancelar",
     "durationMin": "{{count}} min",
-    "loadError": "Error al cargar las citas."
+    "loadError": "Error al cargar las citas.",
+    "searchPlaceholder": "Buscar...",
+    "statuses": {
+      "planned": "Programada",
+      "completed": "Completada",
+      "noShow": "No presentado",
+      "cancelled": "Cancelada"
+    },
+    "noMatches": "Ninguna cita coincide con este filtro."
   },
   "notes": {
     "title": "Notas",

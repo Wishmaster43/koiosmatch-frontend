@@ -211,11 +211,6 @@
     "dt_customer": "Klanten",
     "dt_customer_location": "Locaties",
     "dt_customer_department": "Afdelingen",
-    "dt_contact": "Contactpersonen",
-    "dt_opportunity": "Kansen",
-    "dt_task": "Taken",
-    "dt_call_list": "Bellijsten",
-    "dt_match": "Matches",
     "dt_vacancy": "Vacatures",
     "vacancy_default_status": "Standaardstatus",
     "nationalities": "Nationaliteiten",
@@ -820,7 +815,6 @@
     "regionHeaderHint": "Deze sectie staat in de koptekst boven de naam en heeft geen eigen kolom.",
     "moveSectionUp": "Verplaats '{{section}}' omhoog",
     "moveSectionDown": "Verplaats '{{section}}' omlaag",
-    "moveSectionToRegion": "Zet '{{section}}' in {{region}}",
     "preview": "Voorvertoning",
     "previewHint": "A4 — met voorbeeldkandidaat"
   },
@@ -2582,7 +2576,8 @@
   "nationalities": {
     "title": "Nationaliteiten",
     "subtitle": "Beheer de nationaliteiten die kandidaten kunnen kiezen.",
-    "add": "Nationaliteit toevoegen"
+    "add": "Nationaliteit toevoegen",
+    "countryCode": "Land"
   },
   "escalationReasons": {
     "title": "Escalatieredenen",

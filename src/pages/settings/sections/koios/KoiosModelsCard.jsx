@@ -16,10 +16,13 @@ const cardTitle = { fontSize: 13, fontWeight: 600, color: 'var(--text)', marginB
 // Icon/colour per tier — presentation only. The id→tier MATCH itself lives in the
 // shared lib/koiosModelTiers (K-37) so this card and the floating Koios panel's
 // model picker never drift into two hand-maintained id→tier maps (CLAUDE.md §11).
+// Colours are design tokens (§4), not ad-hoc hex (audit finding, 05-08) — snel/slim
+// map onto the existing success/info tokens, and max onto --color-violet, which is
+// an exact match for the previous #7C3AED so nothing here shifts visually.
 const TIER_STYLE = {
-  snel: { Icon: Zap, color: '#059669' },
-  slim: { Icon: Sparkles, color: '#2563EB' },
-  max:  { Icon: Crown, color: '#7C3AED' },
+  snel: { Icon: Zap, color: 'var(--color-success)' },
+  slim: { Icon: Sparkles, color: 'var(--color-info)' },
+  max:  { Icon: Crown, color: 'var(--color-violet)' },
 }
 const tierFor = (id) => {
   const key = tierKeyForModel(id)

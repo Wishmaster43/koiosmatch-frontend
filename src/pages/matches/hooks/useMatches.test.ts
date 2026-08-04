@@ -75,6 +75,25 @@ describe('useMatches', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.rows[0]).toMatchObject({ candidateId: null, vacancyId: null, clientId: null })
   })
+
+  // M1 (overzicht-data cluster): MatchListResource already ships `contract_type`
+  // on every list row — the mapper was dropping it, so Overview had no way to
+  // show it without a second detail fetch.
+  it('maps contract_type onto contractType', async () => {
+    mockedGet.mockResolvedValue({
+      data: { data: [{ id: 'm6', contract_type: 'detachering' }], meta: { last_page: 1 } },
+    })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.rows[0]).toMatchObject({ contractType: 'detachering' })
+  })
+
+  it('leaves contractType null when the row carries none', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'm7' }], meta: { last_page: 1 } } })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.rows[0].contractType).toBeNull()
+  })
 })
 
 describe('useMatches · MATCH-ARCHIVED-LIST-1', () => {

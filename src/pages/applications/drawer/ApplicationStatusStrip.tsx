@@ -47,6 +47,26 @@ function nextFutureAppointment(appointments: Appointment[], now: number = Date.n
 
 interface ApplicationStatusStripProps {
   application: ApplicationDetail
+  // S2/S3: jump the drawer to its OWN "appointments"/"interviews" tab. Not the
+  // EntityLink pattern (that deep-links to a DIFFERENT entity's own page) —
+  // appointments/interviews have no page of their own, they are tabs of THIS
+  // same drawer, so there is nowhere to "open in a new tab" to; a plain
+  // clickable link-styled text that switches tabs is the honest equivalent.
+  onNavigateTab?: (id: string) => void
+}
+
+// A clickable, EntityLink-styled piece of text that switches the drawer's own
+// active tab (no separate page to deep-link to, see the prop comment above).
+function TabLink({ onClick, children }: { onClick: () => void; children: ReactNode }) {
+  return (
+    <button type="button" onClick={onClick}
+      style={{ padding: 0, background: 'none', border: 'none', font: 'inherit', textAlign: 'left',
+        color: 'var(--color-primary)', cursor: 'pointer', textDecoration: 'none' }}
+      onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
+      onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
+      {children}
+    </button>
+  )
 }
 
 /**
@@ -55,7 +75,7 @@ interface ApplicationStatusStripProps {
  * next appointment and interview progress. Every cell honest-gates on its own data
  * and shows a muted italic fallback rather than a blank cell.
  */
-export default function ApplicationStatusStrip({ application: a }: ApplicationStatusStripProps) {
+export default function ApplicationStatusStrip({ application: a, onNavigateTab }: ApplicationStatusStripProps) {
   const { t } = useTranslation(['applications', 'common'])
   const { formatDate, formatDateTime } = useDateFormat()
 
@@ -100,11 +120,21 @@ export default function ApplicationStatusStrip({ application: a }: ApplicationSt
             : <span style={mutedItalic}>{t('status.notScored')}</span>}
         </Cell>
 
-        {/* Next appointment — the first upcoming one, owner on a muted second line. */}
+        {/* Next appointment — the first upcoming one, owner on a muted second
+            line. S2: clickable when a drawer tab-switch is wired AND there is
+            something to jump to — a "no appointment" line has nothing to open. */}
         <Cell label={t('status.nextAppointment')}>
           {nextAppointment ? (
             <>
-              <div>{(nextAppointment.title || nextAppointment.type) ?? '—'} · {formatDateTime(nextAppointment.when)}</div>
+              <div>
+                {onNavigateTab ? (
+                  <TabLink onClick={() => onNavigateTab('appointments')}>
+                    {(nextAppointment.title || nextAppointment.type) ?? '—'} · {formatDateTime(nextAppointment.when)}
+                  </TabLink>
+                ) : (
+                  <>{(nextAppointment.title || nextAppointment.type) ?? '—'} · {formatDateTime(nextAppointment.when)}</>
+                )}
+              </div>
               {nextAppointment.with && <div style={mutedLine}>{nextAppointment.with}</div>}
             </>
           ) : (
@@ -112,11 +142,20 @@ export default function ApplicationStatusStrip({ application: a }: ApplicationSt
           )}
         </Cell>
 
-        {/* Interview — current status + step progress when a session exists. */}
+        {/* Interview — current status + step progress when a session exists.
+            S3: same tab-switch pattern as the appointment cell above. */}
         <Cell label={t('status.interview')}>
           {a.interview ? (
             <>
-              <div>{a.interview.currentStatus ?? t(`interview.category.${a.interview.category}`)}</div>
+              <div>
+                {onNavigateTab ? (
+                  <TabLink onClick={() => onNavigateTab('interviews')}>
+                    {a.interview.currentStatus ?? t(`interview.category.${a.interview.category}`)}
+                  </TabLink>
+                ) : (
+                  a.interview.currentStatus ?? t(`interview.category.${a.interview.category}`)
+                )}
+              </div>
               {a.interview.step != null && a.interview.total > 0 && (
                 <div style={mutedLine}>{t('interview.stepOf', { step: a.interview.step, total: a.interview.total })}</div>
               )}

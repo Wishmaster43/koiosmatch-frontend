@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
+import EntityLink from '@/components/ui/EntityLink'
 import { useLookups } from '@/context/LookupsContext'
 import { useApplicationVacancy } from '../hooks/useApplicationVacancy'
 import type { ApplicationDetail } from '@/types/application'
@@ -50,7 +51,18 @@ export default function CompetitionBlock({ application: a }: CompetitionBlockPro
   return (
     <SectionCard title={t('competition.title')}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <div style={{ fontSize: 13, color: 'var(--text)' }}>{t('competition.total', { count: total })}</div>
+        {/* S7: the count text becomes a real link to the vacancy record — PRIVACY
+            (§8) still holds, this only opens the vacancy itself (which already
+            carries its own applicant list + access checks), never the other
+            applicants' data inline here. Lands on the vacancy's default tab, not
+            its Sollicitaties sub-tab directly — targeting a specific sub-tab
+            needs the cross-entity `{ open, tab }` intent extended on the
+            VACANCIES page (out of this cluster's territory, see CLAUDE.md §3A). */}
+        <div style={{ fontSize: 13, color: 'var(--text)' }}>
+          <EntityLink page="vacancies" id={a.vacancyId} title={t('drawer.openVacancy')}>
+            {t('competition.total', { count: total })}
+          </EntityLink>
+        </div>
 
         {total > 1 && chips.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>

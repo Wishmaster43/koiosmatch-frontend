@@ -21,7 +21,10 @@ import { useCascadePickers } from './useCascadePickers'
 // pick/clear/reset logic is under test (no fetch, no QueryClient).
 vi.mock('./useCustomerCascade', () => ({
   useCustomerCascade: () => ({
-    locations: [{ id: 'loc-1', name: 'Amsterdam', departments: [{ id: 'dep-1', name: 'ICU' }] }],
+    locations: [{
+      id: 'loc-1', name: 'Amsterdam', departments: [{ id: 'dep-1', name: 'ICU' }],
+      street: 'Damstraat', house_number: '1', house_number_suffix: 'A', postcode: '1012AB', city: 'Amsterdam', province: 'Noord-Holland', country: 'NL',
+    }],
     contacts: [{ id: 'con-1', name: 'Jan Jansen' }],
   }),
 }))
@@ -50,8 +53,11 @@ describe('useCascadePickers · clearing a picked level', () => {
     const user = userEvent.setup()
     render(<Harness which="location" locationId="loc-1" />)
     await user.click(screen.getByRole('button', { name: 'clearField' }))
-    // Empty id + empty name — the caller turns that into `null` in the PATCH body.
-    expect(onLocationChange).toHaveBeenCalledWith({ id: '', name: '' })
+    // Empty id + empty name (+ empty address fields, V9 takeover payload) — the
+    // caller turns the id/name into `null` in the PATCH body.
+    expect(onLocationChange).toHaveBeenCalledWith({
+      id: '', name: '', street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', city: '', province: '', country: '',
+    })
     // A department belongs to a location; dropping the location must drop it too
     // (the same dependant reset a location SWITCH already performs).
     expect(onDepartmentChange).toHaveBeenCalledWith({ id: '', name: '' })
@@ -77,5 +83,23 @@ describe('useCascadePickers · clearing a picked level', () => {
   it('offers no clear control on a level that is still empty', () => {
     render(<Harness which="department" />)
     expect(screen.queryByRole('button', { name: 'clearField' })).not.toBeInTheDocument()
+  })
+})
+
+// V9 (Danny vacatures-ronde): picking a customer location must forward its
+// own address alongside id/name, so a caller can take it over onto a
+// dependent form (vacancy Locatie tab) — asserted on the actual onLocationChange
+// call payload, not just that a callback fired (§13).
+describe('useCascadePickers · V9 address takeover payload', () => {
+  it('forwards the picked location\'s address fields to onLocationChange', async () => {
+    const user = userEvent.setup()
+    render(<Harness which="location" />)
+    await user.click(screen.getByRole('button', { name: 'common:select' }))
+    await user.click(screen.getByText('Amsterdam'))
+    expect(onLocationChange).toHaveBeenCalledWith({
+      id: 'loc-1', name: 'Amsterdam',
+      street: 'Damstraat', houseNumber: '1', houseNumberSuffix: 'A',
+      postalCode: '1012AB', city: 'Amsterdam', province: 'Noord-Holland', country: 'NL',
+    })
   })
 })

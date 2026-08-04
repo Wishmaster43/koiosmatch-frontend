@@ -4,11 +4,13 @@ import { DOC_TYPE_ICON_NAMES, resolveDocTypeIcon } from '@/lib/useDocumentTypes'
 
 // entity → the nav.<id> label already registered for this tab (registry.jsx dt_*
 // items), reused so each entity name is translated once (mirrors NoteTypesSettings'
-// own ENTITY_NAV_ID pattern, one map per lookup family).
+// own ENTITY_NAV_ID pattern, one map per lookup family). Only the entities the
+// registry's document_types group actually offers today (DOCTYPE-READERS-1,
+// 2026-08-05) — contact/opportunity/task/call_list/match are withheld there (no
+// real FE reader yet, see registry.jsx's own comment) and have no entry here either.
 const ENTITY_NAV_ID = {
   candidate: 'dt_candidate', customer: 'dt_customer', customer_location: 'dt_customer_location',
-  customer_department: 'dt_customer_department', contact: 'dt_contact', opportunity: 'dt_opportunity',
-  task: 'dt_task', call_list: 'dt_call_list', match: 'dt_match', vacancy: 'dt_vacancy',
+  customer_department: 'dt_customer_department', vacancy: 'dt_vacancy',
 }
 
 /**

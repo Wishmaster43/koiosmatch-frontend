@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { COUNTRY_CODES, getCountryName, getCountryOptions } from './countries'
+import { COUNTRY_CODES, getCountryName, getCountryOptions, getFlagEmoji } from './countries'
 
 // COUNTRY-1: the code list is fixed DATA, names resolve per-locale via Intl —
 // covers the resolution, the NL/BE/DE priority ordering, and a graceful fallback.
@@ -26,5 +26,26 @@ describe('countries', () => {
     const options = getCountryOptions('en')
     expect(options).toHaveLength(COUNTRY_CODES.length)
     expect(new Set(options.map(o => o.value)).size).toBe(COUNTRY_CODES.length)
+  })
+})
+
+// NATION-FLAG-1: the flag emoji is derived FROM the code, never a second stored value.
+describe('getFlagEmoji', () => {
+  it('derives the flag from two regional-indicator characters', () => {
+    expect(getFlagEmoji('NL')).toBe('🇳🇱')
+    expect(getFlagEmoji('DE')).toBe('🇩🇪')
+  })
+
+  it('is case-insensitive', () => {
+    expect(getFlagEmoji('be')).toBe(getFlagEmoji('BE'))
+  })
+
+  it('returns an empty string for a missing or malformed code, never a broken glyph', () => {
+    expect(getFlagEmoji(undefined)).toBe('')
+    expect(getFlagEmoji(null)).toBe('')
+    expect(getFlagEmoji('')).toBe('')
+    expect(getFlagEmoji('A')).toBe('')
+    expect(getFlagEmoji('ABC')).toBe('')
+    expect(getFlagEmoji('12')).toBe('')
   })
 })

@@ -31,7 +31,9 @@
     "leadsStale": "Wordt opnieuw berekend — getal van {{date}}",
     "leadsGeoMissing": "Zonder coördinaten kon de straal niet worden toegepast",
     "leadsPartial": "Gedeeltelijk geteld — er is een limiet geraakt",
-    "leadsComputedAt": "Bijgewerkt op {{date}}"
+    "leadsComputedAt": "Bijgewerkt op {{date}}",
+    "age": "Leeftijd",
+    "applicationsOpen": "Open sollicitaties"
   },
   "publishedState": {
     "yes": "Gepubliceerd",
@@ -287,7 +289,11 @@
     "publishedOn": "Gepubliceerd",
     "notPublished": "Niet gepubliceerd",
     "queuedOn": "Klaargezet",
-    "notLiveYet": "De publieke carrièresite en de kanaal-feeds (Google Jobs, Indeed, Werkzoeken) zijn in aanbouw. Deze schakelaars bepalen alvast wat er live gaat zodra de site en feeds actief zijn."
+    "notLiveYet": "De publieke carrièresite en de kanaal-feeds (Google Jobs, Indeed, Werkzoeken) zijn in aanbouw. Deze schakelaars bepalen alvast wat er live gaat zodra de site en feeds actief zijn.",
+    "tabs": {
+      "settings": "Instellingen",
+      "sites": "Vacaturesites"
+    }
   },
   "applicants": {
     "title": "Sollicitaties",
@@ -298,7 +304,9 @@
     "byPhase": "Per fase",
     "candidate": "Kandidaat",
     "planIntake": "Intake plannen",
-    "addApplication": "Sollicitatie"
+    "addApplication": "Sollicitatie",
+    "searchPlaceholder": "Zoek op kandidaatnaam…",
+    "noMatch": "Geen sollicitaties gevonden binnen deze filters."
   },
   "candidateSearch": {
     "noLocation": "Deze vacature heeft nog geen locatie(-coördinaten) — werk eerst het adres bij, dan verschijnt hier de kaart.",
@@ -429,5 +437,14 @@
       "match_weights": "AI-matchweging",
       "tags": "Tags"
     }
+  },
+  "documents": {
+    "docType": "Documenttype"
+  },
+  "age": {
+    "days": "{{count}}d",
+    "weeks": "{{count}}w",
+    "months": "{{count}}mnd",
+    "years": "{{count}}jr"
   }
 }

@@ -29,12 +29,15 @@ interface Props {
 export default function DetailsRequirementsTab({ vacancy: v, requirements, seniorityLevels, educationLevels }: Props) {
   const { t } = useTranslation('vacancies')
   const { editing, setEditing, form, setF, save, cancel, skills, newSkill, setNewSkill, addSkill, removeSkill } = requirements
-  const { select, twoInputs } = makeFieldHelpers(form, setF, t)
+  const { select, twoNumbers } = makeFieldHelpers(form, setF, t)
 
   return (
     <>
       {card(t('details.groups.requirements'), <>
-        {row(t('details.experience'), pair(v.experienceMin, v.experienceMax, t('details.years')) || dash, twoInputs('experienceMin', 'experienceMax', t('details.experienceFrom'), t('details.experienceTo')), editing)}
+        {/* V12: experience-in-years is a NUMBER field — backend validates
+            experience_min/max_years as `integer, between:0,60` (StoreVacancyRequest). */}
+        {row(t('details.experience'), pair(v.experienceMin, v.experienceMax, t('details.years')) || dash,
+          twoNumbers('experienceMin', 'experienceMax', t('details.experienceFrom'), t('details.experienceTo'), { min: 0, max: 60, step: 1 }), editing)}
         {row(t('details.seniority'), v.seniority || dash, select('seniority', seniorityLevels.map(s => ({ value: s.value, label: s.label }))), editing)}
         {row(t('details.education'), v.education || dash, select('education', educationLevels.map(e => ({ value: e.value, label: e.label }))), editing)}
       </>, controls(t, editing, save, cancel, () => setEditing(true)))}

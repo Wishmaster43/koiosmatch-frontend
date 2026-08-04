@@ -9,6 +9,11 @@
  * as one line/comma-separated text field and mapped back to the array the
  * backend expects (the match-form multi-input list was judged out of scope
  * for the shared table component — see the Self-Audit note).
+ *
+ * M29 (overzicht-layout cluster): `remarks` moved OUT of this shared-pencil
+ * table onto the Overview tab as its own block with its own pencil
+ * (MatchRemarksBlock) — editing it here too would be two truths for one
+ * field (§11). This table no longer carries it.
  */
 import { useTranslation } from 'react-i18next'
 import { Unplug } from 'lucide-react'
@@ -44,6 +49,7 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
 
   // Editable schema — two titled cards (Contract / Financieel) in one table.
   const fields: FieldRow[] = [
+    { key: 'function_title', label: t('drawer.contract.functionTitle'), group: t('drawer.contract.groupContract') },
     { key: 'contract_type', label: t('drawer.contract.contractType'), type: 'select',
       options: contractTypes.map(c => ({ value: c, label: c })), group: t('drawer.contract.groupContract') },
     { key: 'cao', label: t('drawer.contract.cao'), type: 'select',
@@ -54,15 +60,16 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
 
     { key: 'scale', label: t('drawer.contract.scale'), group: t('drawer.contract.groupFinancial') },
     { key: 'step', label: t('drawer.contract.step'), group: t('drawer.contract.groupFinancial') },
+    { key: 'surcharge', label: t('drawer.contract.surcharge'), inputType: 'number', mono: true, group: t('drawer.contract.groupFinancial') },
     { key: 'purchase_rate', label: t('drawer.contract.purchaseRate'), inputType: 'number', mono: true, group: t('drawer.contract.groupFinancial') },
     { key: 'sell_rate', label: t('drawer.contract.sellRate'), inputType: 'number', mono: true, group: t('drawer.contract.groupFinancial') },
     { key: 'cost_center', label: t('drawer.contract.costCenter'), group: t('drawer.contract.groupFinancial') },
     { key: 'billing_emails_text', label: t('drawer.contract.billingEmails'), type: 'textarea', group: t('drawer.contract.groupFinancial') },
-    { key: 'remarks', label: t('drawer.contract.remarks'), type: 'richtext', group: t('drawer.contract.groupFinancial') },
   ]
 
   // Current values, mapped to the schema's UI keys (billing_emails → newline text).
   const values: Record<string, unknown> = {
+    function_title: data.function_title ?? '',
     contract_type: data.contract_type ?? '',
     cao: data.cao ?? '',
     start_date: data.start_date ?? '',
@@ -70,17 +77,18 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
     hours_per_week: data.hours_per_week ?? '',
     scale: data.scale ?? '',
     step: data.step ?? '',
+    surcharge: data.surcharge ?? '',
     purchase_rate: data.purchase_rate ?? '',
     sell_rate: data.sell_rate ?? '',
     cost_center: data.cost_center ?? '',
     billing_emails_text: data.billing_emails.join('\n'),
-    remarks: data.remarks ?? '',
   }
 
   // Map the UI draft back to the PATCH body, then persist through the hook
   // (optimistic; the hook reverts on failure — we just surface the message).
   const handleSave = async (v: Record<string, unknown>) => {
     const patch: Partial<MatchContract> = {
+      function_title: (v.function_title as string) || null,
       contract_type:  (v.contract_type as string) || null,
       cao:            (v.cao as string) || null,
       start_date:     (v.start_date as string) || null,
@@ -88,11 +96,11 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
       hours_per_week: numOrNull(v.hours_per_week),
       scale:          (v.scale as string) || null,
       step:           (v.step as string) || null,
+      surcharge:      numOrNull(v.surcharge),
       purchase_rate:  numOrNull(v.purchase_rate),
       sell_rate:      numOrNull(v.sell_rate),
       cost_center:    (v.cost_center as string) || null,
       billing_emails: parseEmails(String(v.billing_emails_text ?? '')),
-      remarks:        (v.remarks as string) || null,
     }
     try {
       await save(patch)

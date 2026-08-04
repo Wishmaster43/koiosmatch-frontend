@@ -302,7 +302,15 @@
     "save": "Speichern",
     "cancel": "Abbrechen",
     "durationMin": "{{count}} Min.",
-    "loadError": "Termine laden ist fehlgeschlagen."
+    "loadError": "Termine laden ist fehlgeschlagen.",
+    "searchPlaceholder": "Suchen...",
+    "statuses": {
+      "planned": "Geplant",
+      "completed": "Abgeschlossen",
+      "noShow": "Nicht erschienen",
+      "cancelled": "Abgesagt"
+    },
+    "noMatches": "Keine Termine entsprechen diesem Filter."
   },
   "notes": {
     "title": "Notizen",

@@ -302,7 +302,15 @@
     "save": "Enregistrer",
     "cancel": "Annuler",
     "durationMin": "{{count}} min",
-    "loadError": "Échec du chargement des rendez-vous."
+    "loadError": "Échec du chargement des rendez-vous.",
+    "searchPlaceholder": "Rechercher...",
+    "statuses": {
+      "planned": "Planifié",
+      "completed": "Terminé",
+      "noShow": "Absence",
+      "cancelled": "Annulé"
+    },
+    "noMatches": "Aucun rendez-vous ne correspond à ce filtre."
   },
   "notes": {
     "title": "Notes",

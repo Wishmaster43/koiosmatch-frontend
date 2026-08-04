@@ -31,7 +31,9 @@
     "leadsStale": "Recalculando — cifra del {{date}}",
     "leadsGeoMissing": "Sin coordenadas no se pudo aplicar el radio",
     "leadsPartial": "Contado parcialmente — se alcanzó un límite",
-    "leadsComputedAt": "Actualizado el {{date}}"
+    "leadsComputedAt": "Actualizado el {{date}}",
+    "age": "Antigüedad",
+    "applicationsOpen": "Abrir solicitudes"
   },
   "publishedState": {
     "yes": "Publicada",
@@ -287,7 +289,11 @@
     "publishedOn": "Publicada",
     "notPublished": "No publicada",
     "queuedOn": "Preparado",
-    "notLiveYet": "El sitio público de empleo y los feeds (Google Jobs, Indeed, Werkzoeken) están en construcción. Estos interruptores ya determinan qué se publicará cuando estén activos."
+    "notLiveYet": "El sitio público de empleo y los feeds (Google Jobs, Indeed, Werkzoeken) están en construcción. Estos interruptores ya determinan qué se publicará cuando estén activos.",
+    "tabs": {
+      "settings": "Ajustes",
+      "sites": "Portales de empleo"
+    }
   },
   "applicants": {
     "title": "Candidaturas",
@@ -298,7 +304,9 @@
     "byPhase": "Por fase",
     "candidate": "Candidato",
     "planIntake": "Planificar intake",
-    "addApplication": "Candidatura"
+    "addApplication": "Candidatura",
+    "searchPlaceholder": "Buscar por nombre de candidato…",
+    "noMatch": "No se encontraron solicitudes con estos filtros."
   },
   "candidateSearch": {
     "noLocation": "Esta vacante aún no tiene coordenadas de ubicación — actualiza primero la dirección, luego aparecerá el mapa aquí.",
@@ -429,5 +437,14 @@
       "match_weights": "Ponderación del matching IA",
       "tags": "Tags"
     }
+  },
+  "documents": {
+    "docType": "Tipo de documento"
+  },
+  "age": {
+    "days": "{{count}}d",
+    "weeks": "{{count}}sem",
+    "months": "{{count}}mes",
+    "years": "{{count}}a"
   }
 }

@@ -7,7 +7,7 @@ import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import StatusPill from '@/components/ui/StatusPill'
 import SoftChip from '@/components/ui/SoftChip'
 import AiAgentAvatar from '@/components/ui/AiAgentAvatar'
-import { useDateFormat } from '@/lib/datetime'
+import { useDateFormat, relativeAge } from '@/lib/datetime'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import type { Vacancy } from '@/types/vacancy'
@@ -30,6 +30,9 @@ interface VacanciesTableProps {
   // this vacancy's "Kandidaten zoeken" tab — a plain number when the caller
   // doesn't wire this (mirrors the candidates/customers count-cell deep-links).
   onOpenCandidateSearch?: (id: Id) => void
+  // V4 (vacatures-tabel-cluster): the Sollicitaties count deep-links to the
+  // drawer's "applicants" tab — mirrors onOpenCandidateSearch's leads deep-link.
+  onOpenApplicants?: (id: Id) => void
   selectable?: boolean
   selectedIds?: Set<Id>
   onToggleRow?: (id: Id) => void
@@ -43,10 +46,17 @@ interface VacanciesTableProps {
  * sorting, selection and the loading/empty states live in the shared DataTable.
  * Mirrors CandidatesTable / ApplicationsTable.
  */
-export default function VacanciesTable({ rows, loading, selectedId, onSelect, onOpenCandidateSearch, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: VacanciesTableProps) {
+export default function VacanciesTable({ rows, loading, selectedId, onSelect, onOpenCandidateSearch, onOpenApplicants, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: VacanciesTableProps) {
   const { t } = useTranslation('vacancies')
   const { formatDate } = useDateFormat()
-  const { statusMeta } = useVacancyLookups()
+  const { statuses = [], statusMeta } = useVacancyLookups()
+  // V1 (vacatures-tabel-cluster): status sort follows the TENANT's configured
+  // lookup order (Settings → sort_order), not an alphabetical label sort — the
+  // sortActiveRows() call inside VacancyLookupsContext already orders `statuses`,
+  // so its array INDEX is the tenant's intended order. Published becomes a clear
+  // secondary key (published-first) encoded into one numeric value, since the
+  // shared DataTable only compares a single sortValue per row (no compound key).
+  const statusOrderIndex = new Map(statuses.map((s, i) => [s.value, i]))
   // Tenant display settings (mirror the candidate table). Coloured chips carry
   // meaning (status/published/owner), so they default ON; a tenant can flatten them.
   const settings = useAllSettings()
@@ -81,7 +91,11 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       ) : <span style={{ color: 'var(--text-muted)' }}>—</span>,
     },
     {
-      key: 'status', header: t('columns.status'), sortable: true, sortValue: r => r.statusLabel || (r.statusValue ?? ''),
+      key: 'status', header: t('columns.status'), sortable: true,
+      sortValue: r => {
+        const idx = statusOrderIndex.get(r.statusValue != null ? String(r.statusValue) : '') ?? statuses.length
+        return idx * 2 + (r.published ? 0 : 1)
+      },
       render: r => {
         // Archive state wins over the status pill (mirrors CandidatesTable): a soft-
         // deleted row shown via include_archived=1 reads as "Archived", not its stale status.
@@ -145,7 +159,18 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
     {
       key: 'applications', header: t('columns.applications'), sortable: true, sortValue: r => r.applicationsCount,
       cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text)' },
-      render: r => r.applicationsCount ?? 0,
+      // V4 (vacatures-tabel-cluster): same ghost-button deep-link treatment as the
+      // Leads column — clicking the count opens the drawer on the Sollicitaties
+      // (applicants) tab instead of the default tab. stopPropagation so it never
+      // double-fires the row's own onSelect.
+      render: r => onOpenApplicants ? (
+        <button type="button" style={leadsBtn} aria-label={t('columns.applicationsOpen')}
+          onClick={e => { e.stopPropagation(); onOpenApplicants(r.id as Id) }}
+          onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
+          onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
+          {r.applicationsCount ?? 0}
+        </button>
+      ) : (r.applicationsCount ?? 0),
     },
     {
       key: 'published', header: t('columns.published'), nowrap: true, sortable: true, sortValue: r => (r.published ? 1 : 0),
@@ -173,6 +198,18 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
     {
       key: 'createdAt', header: t('columns.createdAt'), nowrap: true, cellStyle: mutedCell,
       sortable: true, sortValue: r => r.createdSort ?? r.created, render: r => formatDate(r.created),
+    },
+    {
+      // V2 (vacatures-tabel-cluster): relative age since creation ("3w") — cheap,
+      // no backend dependency (created_at already ships on the list). Tooltip
+      // carries the exact date so the compact token never loses precision.
+      key: 'age', header: t('columns.age'), nowrap: true, cellStyle: mutedCell,
+      sortable: true, sortValue: r => r.createdSort ?? r.created,
+      render: r => {
+        const age = relativeAge(r.created)
+        if (!age) return <span style={{ color: 'var(--text-muted)' }}>—</span>
+        return <span title={formatDate(r.created)}>{t(`age.${age.unit}`, { count: age.value })}</span>
+      },
     },
     {
       key: 'owner', header: t('columns.owner'), sortable: true, sortValue: r => r.owner?.name ?? '',

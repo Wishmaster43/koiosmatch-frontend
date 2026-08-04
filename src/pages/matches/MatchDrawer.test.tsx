@@ -47,7 +47,6 @@ vi.mock('@/lib/queries', async importOriginal => ({
 // to this tab-bar guard — stub them (mirrors VacancyDrawer.test.tsx).
 vi.mock('./drawer/OverviewTab', () => ({ default: () => null }))
 vi.mock('./drawer/MatchContractSection', () => ({ default: () => null }))
-vi.mock('./drawer/RelationsTab', () => ({ default: () => null }))
 vi.mock('./drawer/ChangelogTab', () => ({ default: () => null }))
 vi.mock('./drawer/NotesTab', () => ({ default: () => null }))
 
@@ -74,9 +73,10 @@ const match = {
 } as unknown as MatchRow
 
 describe('MatchDrawer · Koppelingen tab (EXTRACT-1)', () => {
-  it('renders "Koppelingen" as the LAST tab, after Overzicht/Contract & financieel/Relaties', () => {
+  // M9 (overzicht-layout): Relaties folded into Overzicht and removed — one fewer tab.
+  it('renders "Koppelingen" as the LAST tab, after Overzicht/Contract & financieel', () => {
     render(<MatchDrawer match={match} onClose={vi.fn()} />)
-    const tabLabels = ['Overzicht', 'Contract & financieel', 'Relaties', 'Koppelingen']
+    const tabLabels = ['Overzicht', 'Contract & financieel', 'Koppelingen']
     const tabButtons = screen.getAllByRole('tab').filter(b => tabLabels.includes(b.textContent ?? ''))
     expect(tabButtons.map(b => b.textContent)).toEqual(tabLabels)
   })
@@ -156,22 +156,23 @@ describe('MatchDrawer · owner picker (MATCH-OWNER-1)', () => {
 
 /**
  * NT-MATCH-1: the Notities tab is wired in after the content tabs (Overzicht/
- * Contract & financieel/Relaties) and before Extra/Koppelingen — never a
- * Changelog TAB (record history stays the icon-popover, §3A(d)).
+ * Contract & financieel — M9: Relaties folded into Overzicht and removed) and
+ * before Extra/Koppelingen — never a Changelog TAB (record history stays the
+ * icon-popover, §3A(d)).
  */
 describe('MatchDrawer · Notities tab (NT-MATCH-1)', () => {
-  it('renders "Notities" after Relaties and before Koppelingen', () => {
+  it('renders "Notities" after Contract & financieel and before Koppelingen', () => {
     render(<MatchDrawer match={match} onClose={vi.fn()} />)
     // Read the SAME i18n instance the component renders through — correct whether
     // the reported nl copy for this key has landed in matches.json yet or not.
     const notesLabel = i18n.t('matches:notes.title')
     const labels = screen.getAllByRole('tab').map(b => b.textContent)
-    const relIdx = labels.indexOf('Relaties')
+    const contractIdx = labels.indexOf('Contract & financieel')
     const koppIdx = labels.indexOf('Koppelingen')
     const notesIdx = labels.indexOf(notesLabel)
-    expect(relIdx).toBeGreaterThan(-1)
+    expect(contractIdx).toBeGreaterThan(-1)
     expect(koppIdx).toBeGreaterThan(-1)
-    expect(notesIdx).toBeGreaterThan(relIdx)
+    expect(notesIdx).toBeGreaterThan(contractIdx)
     expect(notesIdx).toBeLessThan(koppIdx)
   })
 })

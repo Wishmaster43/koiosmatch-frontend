@@ -61,7 +61,8 @@
       "score": "Score",
       "stage": "Stage",
       "created": "Created",
-      "status": "Status"
+      "status": "Status",
+      "lastSynced": "Last synced"
     },
     "openCandidate": "Open candidate",
     "openVacancy": "Open vacancy",
@@ -87,7 +88,9 @@
       "error": "Couldn't load the contract details.",
       "unavailable": "Contract details aren't available yet (integration not configured).",
       "saveError": "Couldn't save the change.",
-      "saved": "Contract details saved."
+      "saved": "Contract details saved.",
+      "functionTitle": "Function title",
+      "surcharge": "Surcharge"
     },
     "ownerUnassigned": "No owner",
     "terminate": {
@@ -103,6 +106,27 @@
       "confirm": "Confirm termination",
       "success": "Match terminated.",
       "error": "The match could not be terminated."
+    },
+    "detailSection": "Details",
+    "remarks": {
+      "title": "Remarks",
+      "saved": "Remarks saved.",
+      "saveError": "Couldn't save the remarks."
+    },
+    "duration": {
+      "unit": {
+        "days": "{{count}} day",
+        "weeks": "{{count}} week",
+        "months": "{{count}} month"
+      },
+      "remaining": "{{pct}}% remaining",
+      "progressLabel": "Contract progress"
+    },
+    "ordinal": {
+      "candidate": "Match {{position}} of {{total}} for this candidate",
+      "client": "Match {{position}} of {{total}} for this client",
+      "location": "Match {{position}} of {{total}} at this location",
+      "department": "Match {{position}} of {{total}} in this department"
     }
   },
   "approval": {
@@ -170,5 +194,21 @@
     "searchPlaceholder": "Search notes…",
     "loading": "Loading notes…",
     "loadError": "Notes could not be loaded."
+  },
+  "ai": {
+    "title": "Koios AI advises",
+    "beta": "Beta",
+    "refresh": "Refresh",
+    "analyzing": "Koios AI is analysing the match…",
+    "scoreLabel": "Score",
+    "scoreGood": "Strong match ({{score}}).",
+    "scoreAverage": "Average match ({{score}}) — check the fit.",
+    "scorePoor": "Weak match ({{score}}) — needs attention.",
+    "scoreUnknown": "No score yet.",
+    "windowLabel": "Contract window",
+    "windowExpired": "The end date passed {{days}} day(s) ago.",
+    "windowWarning": "{{days}} day(s) left until the end date — renew or wrap up in time.",
+    "windowFine": "Contract window is on track.",
+    "windowUnknown": "No end date known."
   }
 }

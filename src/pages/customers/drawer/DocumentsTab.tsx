@@ -22,6 +22,11 @@
  * being passed at all is what enables the picker — ScopedDocumentsTab (the
  * location/department drill-down) instead passes `lockedLevelFields` + `listUrl`
  * and no picker shows: the level is already fixed by which tab you are on.
+ *
+ * DOCTYPE-SCOPE-1 (audit finding, 05-08): `docTypeScope` (default 'customer') picks
+ * WHICH entity-scoped document-type lookup the type chips/picker read — a location/
+ * department drill-down now consults its OWN 'customer_location'/'customer_department'
+ * lookup (ScopedDocumentsTab passes it) instead of silently reusing the customer's.
  */
 import { useState, useRef } from 'react'
 import type { ChangeEvent } from 'react'
@@ -69,14 +74,17 @@ interface DocumentsTabProps {
   // and fixes every upload to this level — no picker is offered when this is set.
   listUrl?: string
   lockedLevelFields?: Record<string, string>
+  // DOCTYPE-SCOPE-1: which entity-scoped document-type lookup to read — defaults to
+  // 'customer' (unchanged behaviour); ScopedDocumentsTab overrides this per level.
+  docTypeScope?: string
 }
 
-export default function DocumentsTab({ customerId, locations = [], departments = [], listUrl, lockedLevelFields }: DocumentsTabProps) {
+export default function DocumentsTab({ customerId, locations = [], departments = [], listUrl, lockedLevelFields, docTypeScope = 'customer' }: DocumentsTabProps) {
   const { t } = useTranslation('customers')
   const { formatDate } = useDateFormat()
   // Customer documents offer the customer's own types PLUS the global ones — the backend
-  // adds the globals to `?entity=customer` itself (null = applies everywhere).
-  const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes('customer')
+  // adds the globals to `?entity=<scope>` itself (null = applies everywhere).
+  const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes(docTypeScope)
   // List + optimistic upload/rename/delete against /customers/{id}/documents —
   // DOCS-LOC-DEPT-1: `listUrl` overrides the GET endpoint for a scoped drill-down.
   const { docs, upload, rename, remove } = useEntityDocuments('customers', customerId, listUrl)
@@ -366,9 +374,10 @@ export default function DocumentsTab({ customerId, locations = [], departments =
             setPending(prev => [...prev, ...items])
             e.target.value = ''
           }} />
-        {/* The shared preview dialog — 'customer' scope so the type chip resolves
-            against THIS entity's document-type lookup, not the candidate one. */}
-        {previewDoc && <DocPreviewModal doc={previewDoc} docTypeScope="customer" onClose={() => setPreviewDoc(null)} />}
+        {/* The shared preview dialog reads the SAME docTypeScope so the type chip
+            resolves against this level's own document-type lookup, never a
+            hardcoded 'customer' once a location/department has its own scope. */}
+        {previewDoc && <DocPreviewModal doc={previewDoc} docTypeScope={docTypeScope} onClose={() => setPreviewDoc(null)} />}
         {/* One shared destructive-confirm dialog for both single and bulk delete (never a native confirm()). */}
         <ConfirmDialog
           open={!!confirmDelete}

@@ -302,7 +302,15 @@
     "save": "Save",
     "cancel": "Cancel",
     "durationMin": "{{count}} min",
-    "loadError": "Loading appointments failed."
+    "loadError": "Loading appointments failed.",
+    "searchPlaceholder": "Search...",
+    "statuses": {
+      "planned": "Planned",
+      "completed": "Completed",
+      "noShow": "No-show",
+      "cancelled": "Cancelled"
+    },
+    "noMatches": "No appointments match this filter."
   },
   "notes": {
     "title": "Notes",

@@ -59,3 +59,22 @@ export function daysUntilBirthday(dob: DateInput, now: Date = new Date()): numbe
   if (next < today) next = new Date(today.getFullYear() + 1, d.getMonth(), d.getDate())
   return Math.round((next.getTime() - today.getTime()) / 86400000)
 }
+
+export type RelativeAgeUnit = 'days' | 'weeks' | 'months' | 'years'
+
+// V2 (vacatures-tabel-cluster): compact relative age (days → weeks → months →
+// years), e.g. for "how old is this vacancy" columns. Pure + `now`-injectable
+// for deterministic tests, mirrors calcAge/daysUntilBirthday above. Returns null
+// for a missing/unparseable value or a future date (never a negative age).
+export function relativeAge(value: DateInput, now: Date = new Date()): { value: number; unit: RelativeAgeUnit } | null {
+  if (!value) return null
+  const d = new Date(value)
+  if (isNaN(d.getTime())) return null
+  const diffMs = now.getTime() - d.getTime()
+  if (diffMs < 0) return null
+  const days = Math.floor(diffMs / 86400000)
+  if (days < 7) return { value: days, unit: 'days' }
+  if (days < 30) return { value: Math.floor(days / 7), unit: 'weeks' }
+  if (days < 365) return { value: Math.floor(days / 30), unit: 'months' }
+  return { value: Math.floor(days / 365), unit: 'years' }
+}

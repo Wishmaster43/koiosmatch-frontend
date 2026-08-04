@@ -9,6 +9,7 @@ import { render, screen, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import DocumentsTab from './DocumentsTab'
 import { useEntityDocuments } from '@/hooks/useEntityDocuments'
+import { useDocumentTypes } from '@/lib/useDocumentTypes'
 
 // The real modal fetches over the network (pdf.js, blob fetch) — irrelevant here,
 // where the only thing under test is HOW the eye icon opens it. A marker stand-in
@@ -27,19 +28,21 @@ vi.mock('@/hooks/useEntityDocuments', () => ({
 // A fixed 2-type tenant lookup — the real hook's fetch/cache plumbing is irrelevant
 // here. Keeps the real resolveDocTypeIcon/DOC_TYPE_ICON_MAP (importOriginal) since
 // DocumentsTab renders the row tile through it — only the hook itself is stubbed.
+// vi.fn() (not a plain arrow) so DOCTYPE-SCOPE-1's tests below can assert WHICH
+// scope string DocumentsTab actually passed through, not just that types loaded.
 /* eslint-disable no-restricted-syntax -- mock fixture DATA, not UI styling */
 vi.mock('@/lib/useDocumentTypes', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/useDocumentTypes')>()
   return {
     ...actual,
-    useDocumentTypes: () => ({
+    useDocumentTypes: vi.fn(() => ({
       types: [
         { value: 'CV', label: 'CV', color: '#4F46E5' },
         { value: 'Diploma', label: 'Diploma', color: '#F59E0B' },
       ],
       labelOf: (v?: string) => v ?? '',
       colorOf: () => '#4F46E5',
-    }),
+    })),
   }
 })
 /* eslint-enable no-restricted-syntax */
@@ -229,6 +232,34 @@ describe('DocumentsTab · preview opens the shared modal, never window.open', ()
     const modal = screen.getByTestId('doc-preview-modal')
     expect(modal).toHaveAttribute('data-name', 'a.pdf')
     expect(modal).toHaveAttribute('data-scope', 'customer')
+  })
+})
+
+/**
+ * DOCTYPE-SCOPE-1 (audit finding, 05-08) — `docTypeScope` picks WHICH entity-scoped
+ * document-type lookup the tab reads, so a location/department drill-down
+ * (ScopedDocumentsTab) can consult its OWN vocabulary instead of silently reusing
+ * the customer's. Default omitted = 'customer', byte-identical to before this prop existed.
+ */
+describe('DocumentsTab · docTypeScope (DOCTYPE-SCOPE-1)', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('defaults to the "customer" lookup when no scope is given', () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    render(<DocumentsTab customerId="cust-1" />)
+    expect(vi.mocked(useDocumentTypes)).toHaveBeenCalledWith('customer')
+  })
+
+  it('reads the location-scoped lookup and threads it into the preview modal', () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    render(<DocumentsTab customerId="cust-1" docTypeScope="customer_location" />)
+    expect(vi.mocked(useDocumentTypes)).toHaveBeenCalledWith('customer_location')
+  })
+
+  it('reads the department-scoped lookup', () => {
+    vi.mocked(useEntityDocuments).mockReturnValue({ docs: [], upload: vi.fn(), rename: vi.fn(), remove: vi.fn() })
+    render(<DocumentsTab customerId="cust-1" docTypeScope="customer_department" />)
+    expect(vi.mocked(useDocumentTypes)).toHaveBeenCalledWith('customer_department')
   })
 })
 

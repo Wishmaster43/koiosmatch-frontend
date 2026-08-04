@@ -18,6 +18,10 @@ export interface RawMatch {
   candidate_id?: string | number
   vacancy_id?: string | number
   customer_id?: string | number
+  // MATCH-ORDINAL-1 (M14/M15): the customer site the match sits at — already
+  // serialized by MatchListResource.php but previously dropped by mapMatch.
+  customer_location_id?: string | number | null
+  customer_department_id?: string | number | null
   vacancy_title?: string
   vacancy?: { id?: string | number; title?: string }
   client_name?: string
@@ -40,6 +44,9 @@ export interface RawMatch {
   // MATCH-CARD-INFO-1 (Danny points 4/5): the contract window + function title —
   // MatchListResource.php:43-46 already ships all three on every list row.
   function_title?: string | null
+  // M1 (overzicht-data cluster): the list resource already serialises this
+  // (MatchListResource.php `contract_type`) — the mapper just never picked it up.
+  contract_type?: string | null
   start_date?: string | null
   end_date?: string | null
   // MATCH-ARCHIVED-LIST-1: soft-delete state (both list + detail rows now carry it —
@@ -71,6 +78,12 @@ export interface MatchRow {
   candidateId: Id | null
   vacancyId: Id | null
   clientId: Id | null
+  // MATCH-ORDINAL-1 (M14/M15): the customer site axes — id-only (no name yet,
+  // see the location/department ticket), used to compute "Nth match at this
+  // location/department" without a second round-trip. Optional: older row
+  // fixtures/tests that predate this axis simply read as "no site" (null).
+  customerLocationId?: Id | null
+  customerDepartmentId?: Id | null
   score: number | null
   stage: string
   // Lifecycle status slug (R-1b /match-statuses; the is_closed flag ends the match).
@@ -105,5 +118,7 @@ export interface MatchRow {
   branchName?: string | null
   startDate?: string | null
   endDate?: string | null
+  // M1 (overzicht-data cluster): contract form/type, straight off the list resource.
+  contractType?: string | null
   [k: string]: unknown
 }

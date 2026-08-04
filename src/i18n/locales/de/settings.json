@@ -211,11 +211,6 @@
     "dt_customer": "Kunden",
     "dt_customer_location": "Standorte",
     "dt_customer_department": "Abteilungen",
-    "dt_contact": "Kontakte",
-    "dt_opportunity": "Chancen",
-    "dt_task": "Aufgaben",
-    "dt_call_list": "Anruflisten",
-    "dt_match": "Matches",
     "dt_vacancy": "Stellen",
     "vacancy_default_status": "Standardstatus",
     "nationalities": "Nationalitäten",
@@ -592,7 +587,6 @@
     "regionHeaderHint": "Dieser Abschnitt steht in der Kopfzeile über dem Namen und hat keine eigene Spalte.",
     "moveSectionUp": "'{{section}}' nach oben verschieben",
     "moveSectionDown": "'{{section}}' nach unten verschieben",
-    "moveSectionToRegion": "'{{section}}' in {{region}} platzieren",
     "preview": "Vorschau",
     "previewHint": "A4 — mit Beispielkandidat"
   },
@@ -2582,7 +2576,8 @@
   "nationalities": {
     "title": "Nationalitäten",
     "subtitle": "Verwalten Sie die Nationalitäten, die Kandidaten auswählen können.",
-    "add": "Nationalität hinzufügen"
+    "add": "Nationalität hinzufügen",
+    "countryCode": "Land"
   },
   "escalationReasons": {
     "title": "Eskalationsgründe",

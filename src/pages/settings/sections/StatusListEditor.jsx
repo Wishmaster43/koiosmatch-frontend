@@ -54,8 +54,17 @@ const slugify = (s) => {
 // CustomerLookupController) validate `value` as REQUIRED on create — this editor only
 // ever sent name/label, so their "+ toevoegen" 422'd. Opt in and the create POST
 // carries a slug derived from the typed name; name-shaped lookups stay untouched.
+// extraField.hideRowBadge (optioneel): suppresses extraField's own generic text
+// badge in the row — for a lookup that renders its extraField value a DIFFERENT
+// way (rowPrefix below), so the row never shows the same value twice (NATION-FLAG-1:
+// the flag prefix already conveys the country, a trailing "Netherlands" text chip
+// would be redundant clutter).
+// rowPrefix (optioneel): (item) => ReactNode, rendered right before the name/
+// ColorBadge — a small row-adornment hook for a lookup whose "extra" value needs
+// a bespoke glyph rather than the generic extraField/flagField/numberField badges
+// (NATION-FLAG-1: a flag emoji derived from item.country_code).
 
-export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, compact = false, extraField = null, flagField = null, flagFields = null, numberField = null, defaultField = null, defaultFields = null, withIcon = false, iconPicker = null, allowAdd = true, showRank = false, entity = null, notFoundNotice = null, withValueSlug = false, reorderable = true }) {
+export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, compact = false, extraField = null, flagField = null, flagFields = null, numberField = null, defaultField = null, defaultFields = null, withIcon = false, iconPicker = null, allowAdd = true, showRank = false, entity = null, notFoundNotice = null, withValueSlug = false, reorderable = true, rowPrefix = null }) {
   const { t } = useTranslation('settings')
   // defaultField (singular) is sugar for a one-element defaultFields array — both
   // props stay supported so existing callers are untouched (DEFAULT-UNDO, 04-08).
@@ -315,6 +324,9 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                 <IconPickerControl icons={resolvedIconPicker.icons} resolve={resolvedIconPicker.resolve} value={item.icon}
                   color={item.color ?? FALLBACK_SWATCH} label={labelOf(item)} onPick={icon => updateIcon(item, icon)} />
               )}
+              {/* Bespoke row adornment (NATION-FLAG-1: a flag emoji) — before the name,
+                  same slot a colour swatch would otherwise occupy. */}
+              {rowPrefix && rowPrefix(item)}
               {withColor
                 ? <ColorBadge label={labelOf(item)} color={item.color ?? FALLBACK_SWATCH} />
                 : <span style={{ fontSize: 13, color: 'var(--text)' }}>{labelOf(item)}</span>}
@@ -330,7 +342,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                   {item[numberField.key]}{numberField.suffix ? ` ${numberField.suffix}` : ''}
                 </span>
               )}
-              {extraField && item[extraField.key] && (
+              {extraField && !extraField.hideRowBadge && item[extraField.key] && (
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--border)', padding: '2px 8px', borderRadius: 99, whiteSpace: 'nowrap' }}>
                   {extraField.options.find(o => o.value === item[extraField.key])?.label ?? item[extraField.key]}
                 </span>

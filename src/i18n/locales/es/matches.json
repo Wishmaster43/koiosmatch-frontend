@@ -61,7 +61,8 @@
       "score": "Puntuación",
       "stage": "Fase",
       "created": "Creado",
-      "status": "Estado"
+      "status": "Estado",
+      "lastSynced": "Última sincronización"
     },
     "openCandidate": "Abrir candidato",
     "openVacancy": "Abrir vacante",
@@ -87,7 +88,9 @@
       "error": "No se pudieron cargar los detalles del contrato.",
       "unavailable": "Los detalles del contrato aún no están disponibles (integración no configurada).",
       "saveError": "No se pudo guardar el cambio.",
-      "saved": "Detalles del contrato guardados."
+      "saved": "Detalles del contrato guardados.",
+      "functionTitle": "Titulo de funcion",
+      "surcharge": "Recargo"
     },
     "ownerUnassigned": "Sin responsable",
     "terminate": {
@@ -103,6 +106,27 @@
       "confirm": "Confirmar finalización",
       "success": "Match finalizado.",
       "error": "No se pudo finalizar el match."
+    },
+    "detailSection": "Detalles",
+    "remarks": {
+      "title": "Observaciones",
+      "saved": "Observaciones guardadas.",
+      "saveError": "No se pudieron guardar las observaciones."
+    },
+    "duration": {
+      "unit": {
+        "days": "{{count}} día",
+        "weeks": "{{count}} semana",
+        "months": "{{count}} mes"
+      },
+      "remaining": "{{pct}}% restante",
+      "progressLabel": "Progreso del contrato"
+    },
+    "ordinal": {
+      "candidate": "Match {{position}} de {{total}} para este candidato",
+      "client": "Match {{position}} de {{total}} para este cliente",
+      "location": "Match {{position}} de {{total}} en esta ubicación",
+      "department": "Match {{position}} de {{total}} en este departamento"
     }
   },
   "approval": {
@@ -170,5 +194,21 @@
     "searchPlaceholder": "Buscar notas…",
     "loading": "Cargando notas…",
     "loadError": "No se pudieron cargar las notas."
+  },
+  "ai": {
+    "title": "Koios AI recomienda",
+    "beta": "Beta",
+    "refresh": "Actualizar",
+    "analyzing": "Koios AI está analizando el match…",
+    "scoreLabel": "Puntuación",
+    "scoreGood": "Coincidencia sólida ({{score}}).",
+    "scoreAverage": "Coincidencia media ({{score}}) — revise la idoneidad.",
+    "scorePoor": "Coincidencia débil ({{score}}) — requiere atención.",
+    "scoreUnknown": "Aún sin puntuación.",
+    "windowLabel": "Periodo de contrato",
+    "windowExpired": "La fecha de fin ya pasó hace {{days}} día(s).",
+    "windowWarning": "Quedan {{days}} día(s) hasta la fecha de fin — renueva o cierra a tiempo.",
+    "windowFine": "El periodo de contrato va bien.",
+    "windowUnknown": "No se conoce fecha de fin."
   }
 }

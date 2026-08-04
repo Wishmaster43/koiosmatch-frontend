@@ -302,7 +302,15 @@
     "save": "Opslaan",
     "cancel": "Annuleren",
     "durationMin": "{{count}} min",
-    "loadError": "Afspraken laden is mislukt."
+    "loadError": "Afspraken laden is mislukt.",
+    "searchPlaceholder": "Zoeken...",
+    "statuses": {
+      "planned": "Gepland",
+      "completed": "Afgerond",
+      "noShow": "Niet verschenen",
+      "cancelled": "Geannuleerd"
+    },
+    "noMatches": "Geen afspraken gevonden voor dit filter."
   },
   "notes": {
     "title": "Notities",

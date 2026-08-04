@@ -118,14 +118,15 @@ describe('CvTemplateSettings — moving a section between regions', () => {
     expect(within(screen.getByTestId('cv-section-group-sidebar')).getByText(ct('cv.languages'))).toBeInTheDocument()
     expect(within(screen.getByTestId('cv-preview-sidebar')).getByText('Nederlands')).toBeInTheDocument()
 
-    // Click the "main column" region button next to the Languages row (scoped
-    // to the sidebar group so it can't accidentally match the preview's own
-    // "Talen"/"Languages" section heading, which uses the same translation key).
+    // Click the "main column" region radio next to the Languages row (scoped to the
+    // sidebar group so it can't accidentally match the preview's own "Talen"/
+    // "Languages" section heading, which uses the same translation key). The
+    // region switch is now the shared SegmentedControl (audit finding 05-08): a
+    // radiogroup named after the section itself, with each option's own visible
+    // text ("Zijbalk"/"Hoofdkolom") as its accessible name.
     const languagesLabel = within(screen.getByTestId('cv-section-group-sidebar')).getByText(ct('cv.languages'))
     const languagesRow = languagesLabel.closest('div')
-    const moveToMainBtn = within(languagesRow).getByRole('button', {
-      name: st('cvTemplate.moveSectionToRegion', { section: ct('cv.languages'), region: st('cvTemplate.regionMain') }),
-    })
+    const moveToMainBtn = within(languagesRow).getByRole('radio', { name: st('cvTemplate.regionMain') })
     fireEvent.click(moveToMainBtn)
 
     // Assert the REQUEST (§13): the persisted blob actually carries the new placement.
@@ -151,10 +152,9 @@ describe('CvTemplateSettings — moving a section between regions', () => {
   it('does not offer a region picker for experience/education (structurally fixed to main)', () => {
     render(<CvTemplateSettings />)
     const mainGroup = screen.getByTestId('cv-section-group-main')
-    // No "move to sidebar" control exists anywhere for these ids.
-    expect(screen.queryByRole('button', {
-      name: st('cvTemplate.moveSectionToRegion', { section: ct('cv.experience'), region: st('cvTemplate.regionSidebar') }),
-    })).not.toBeInTheDocument()
+    // No region radiogroup exists anywhere in the Experience row.
+    const experienceRow = within(mainGroup).getByText(ct('cv.experience')).closest('div')
+    expect(within(experienceRow).queryByRole('radiogroup')).not.toBeInTheDocument()
     // Instead a plain, non-interactive region badge is shown.
     expect(within(mainGroup).getAllByText(st('cvTemplate.regionMain')).length).toBeGreaterThan(0)
   })

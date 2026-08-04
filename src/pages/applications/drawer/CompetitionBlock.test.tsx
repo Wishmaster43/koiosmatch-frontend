@@ -101,4 +101,13 @@ describe('CompetitionBlock', () => {
     render(<CompetitionBlock application={app()} />)
     expect(screen.queryByText(/Jansen|Bakker|@/)).toBeNull()
   })
+
+  // S7: "2 sollicitanten op deze vacature" is now a real EntityLink to the
+  // vacancy record, not plain text.
+  it('renders the applicant count as a clickable link to the vacancy', () => {
+    mockUseApplicationVacancy.mockReturnValue({ vacancy: vac(), loading: false, error: false })
+    render(<CompetitionBlock application={app({ vacancyId: 'v1' })} />)
+    const link = screen.getByText(/competition\.total/)
+    expect(link.closest('button')).not.toBeNull()
+  })
 })

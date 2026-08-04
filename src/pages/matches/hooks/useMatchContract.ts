@@ -17,6 +17,7 @@ import type { Id } from '@/types/common'
 
 // The editable contract/financial fields — flat, mirrors the PATCH body shape.
 export interface MatchContract {
+  function_title: string | null
   contract_type: string | null
   start_date: string | null
   end_date: string | null
@@ -24,6 +25,7 @@ export interface MatchContract {
   cao: string | null
   scale: string | null
   step: string | null
+  surcharge: number | null
   purchase_rate: number | null
   sell_rate: number | null
   cost_center: string | null
@@ -34,8 +36,8 @@ export interface MatchContract {
 }
 
 const EMPTY: MatchContract = {
-  contract_type: null, start_date: null, end_date: null, hours_per_week: null,
-  cao: null, scale: null, step: null, purchase_rate: null, sell_rate: null,
+  function_title: null, contract_type: null, start_date: null, end_date: null, hours_per_week: null,
+  cao: null, scale: null, step: null, surcharge: null, purchase_rate: null, sell_rate: null,
   cost_center: null, billing_emails: [], remarks: null, margin: null,
 }
 
@@ -43,6 +45,7 @@ const EMPTY: MatchContract = {
 function pick(d: Record<string, unknown>): MatchContract {
   const num = (v: unknown): number | null => (v === null || v === undefined || v === '' ? null : Number(v))
   return {
+    function_title: (d.function_title as string) ?? null,
     contract_type:  (d.contract_type as string) ?? null,
     start_date:     (d.start_date as string) ?? null,
     end_date:       (d.end_date as string) ?? null,
@@ -50,6 +53,7 @@ function pick(d: Record<string, unknown>): MatchContract {
     cao:            (d.cao as string) ?? null,
     scale:          (d.scale as string) ?? null,
     step:           (d.step as string) ?? null,
+    surcharge:      num(d.surcharge),
     purchase_rate:  num(d.purchase_rate),
     sell_rate:      num(d.sell_rate),
     cost_center:    (d.cost_center as string) ?? null,

@@ -7,6 +7,7 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import ApplicationStatusStrip from './ApplicationStatusStrip'
 import type { ApplicationDetail } from '@/types/application'
 
@@ -104,5 +105,36 @@ describe('ApplicationStatusStrip', () => {
     })} />)
     expect(screen.getByText('Question 3')).toBeInTheDocument()
     expect(screen.getByText('interview.stepOf')).toBeInTheDocument()
+  })
+
+  // S2/S3: the appointment/interview cells become clickable tab-switches, but
+  // only once a real target exists AND onNavigateTab is actually wired.
+  it('switches to the appointments tab when the next-appointment cell is clicked', async () => {
+    const user = userEvent.setup()
+    const onNavigateTab = vi.fn()
+    const future = new Date(Date.now() + 86400000).toISOString()
+    render(<ApplicationStatusStrip onNavigateTab={onNavigateTab} application={app({
+      appointments: [{ id: 1, type: 'Intake', title: 'Intake gesprek', when: future, with: 'Bram', status: 'planned', durationMin: null, modality: '', ownerId: null, locationName: '' }],
+    })} />)
+    await user.click(screen.getByText(/Intake gesprek/))
+    expect(onNavigateTab).toHaveBeenCalledWith('appointments')
+  })
+
+  it('switches to the interviews tab when the interview cell is clicked', async () => {
+    const user = userEvent.setup()
+    const onNavigateTab = vi.fn()
+    render(<ApplicationStatusStrip onNavigateTab={onNavigateTab} application={app({
+      interview: { category: 'busy', currentStatus: 'Question 3', step: 3, total: 5, id: null, agent: null, flowName: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null },
+    })} />)
+    await user.click(screen.getByText('Question 3'))
+    expect(onNavigateTab).toHaveBeenCalledWith('interviews')
+  })
+
+  it('renders plain (non-clickable) text when onNavigateTab is not wired', () => {
+    const future = new Date(Date.now() + 86400000).toISOString()
+    render(<ApplicationStatusStrip application={app({
+      appointments: [{ id: 1, type: 'Intake', title: 'Intake gesprek', when: future, with: 'Bram', status: 'planned', durationMin: null, modality: '', ownerId: null, locationName: '' }],
+    })} />)
+    expect(screen.getByText(/Intake gesprek/).closest('button')).toBeNull()
   })
 })

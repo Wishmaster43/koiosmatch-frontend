@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import SelectMenuJs from '@/components/ui/SelectMenu'
+import SubTabBar from '@/components/drawer/SubTabBar'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS } from '../data/applicationSettingsDefaults'
@@ -31,7 +32,9 @@ const APP_FIELDS = ['cv', 'cover_letter', 'photo', 'remarks', 'interview_consent
  * PublishingTab — job-board channels (publish toggle per channel), the per-vacancy
  * application settings (required/optional/hidden) and the custom fields. All values
  * flow back through onUpdate so the table/record stay in sync. Channel list +
- * defaults come from the tenant lookups (never hardcoded).
+ * defaults come from the tenant lookups (never hardcoded). Split into two
+ * sub-tabs (Instellingen / Vacaturesites) via the shared SubTabBar (V15),
+ * mirroring DetailsTab's sub-tab convention — no behaviour change, render only.
  */
 export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void }) {
   const { t } = useTranslation('vacancies')
@@ -67,44 +70,61 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
     { value: 'hidden',   label: t('publishing.values.hidden') },
   ]
 
+  // Sub-tab strip — Instellingen (application settings) / Vacaturesites (channels).
+  const SUB_TABS = [
+    { id: 'settings', label: t('publishing.tabs.settings') },
+    { id: 'sites', label: t('publishing.tabs.sites') },
+  ]
+  const [subTab, setSubTab] = useState('settings')
+
   return (
     <div>
-      {/* Application settings */}
-      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('publishing.applicationSettings')}</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
-        {APP_FIELDS.map(field => (
-          <div key={field} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-            <span style={{ fontSize: 12, color: 'var(--text)' }}>{t(`publishing.fields.${field}`)}</span>
-            <div style={{ width: 150 }}>
-              <SelectMenu value={settings[field] ?? 'optional'} options={valueOptions} onChange={(v2: unknown) => setField(field, v2)} menuWidth={150} />
-            </div>
-          </div>
-        ))}
-      </div>
+      <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
 
-      {/* Job boards */}
-      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('publishing.channels')}</div>
-      {/* Honest state (Danny 13/7): the toggles record WHAT will be published; the
-          public career site + channel feeds (CAREER-1/PUBLISH-1) are not live yet,
-          so never claim "Gepubliceerd" as if something is already out there. */}
-      <div style={{ fontSize: 11.5, color: 'var(--text-muted)', border: '1px solid var(--border)',
-        borderRadius: 8, padding: '8px 10px', marginBottom: 10, background: 'var(--bg)' }}>
-        {t('publishing.notLiveYet')}
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
-        {channels.map(c => (
-          <div key={c.value} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-            padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)' }}>
-            <span style={{ fontSize: 13, color: 'var(--text)' }}>{c.label}</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 11, color: c.published ? 'var(--color-success)' : 'var(--text-muted)' }}>
-                {c.published ? t('publishing.queuedOn') : t('publishing.notPublished')}
-              </span>
-              <Toggle on={c.published} onChange={next => toggleChannel(c.value, next)} label={c.label} />
-            </div>
+      {subTab === 'settings' && (
+        <div style={{ marginTop: 12 }}>
+          {/* Application settings */}
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('publishing.applicationSettings')}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+            {APP_FIELDS.map(field => (
+              <div key={field} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <span style={{ fontSize: 12, color: 'var(--text)' }}>{t(`publishing.fields.${field}`)}</span>
+                <div style={{ width: 150 }}>
+                  <SelectMenu value={settings[field] ?? 'optional'} options={valueOptions} onChange={(v2: unknown) => setField(field, v2)} menuWidth={150} />
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
+
+      {subTab === 'sites' && (
+        <div style={{ marginTop: 12 }}>
+          {/* Job boards */}
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('publishing.channels')}</div>
+          {/* Honest state (Danny 13/7): the toggles record WHAT will be published; the
+              public career site + channel feeds (CAREER-1/PUBLISH-1) are not live yet,
+              so never claim "Gepubliceerd" as if something is already out there. */}
+          <div style={{ fontSize: 11.5, color: 'var(--text-muted)', border: '1px solid var(--border)',
+            borderRadius: 8, padding: '8px 10px', marginBottom: 10, background: 'var(--bg)' }}>
+            {t('publishing.notLiveYet')}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+            {channels.map(c => (
+              <div key={c.value} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)' }}>
+                <span style={{ fontSize: 13, color: 'var(--text)' }}>{c.label}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 11, color: c.published ? 'var(--color-success)' : 'var(--text-muted)' }}>
+                    {c.published ? t('publishing.queuedOn') : t('publishing.notPublished')}
+                  </span>
+                  <Toggle on={c.published} onChange={next => toggleChannel(c.value, next)} label={c.label} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {/* Custom fields moved to their own conditional "Extra" tab (mirror candidate). */}
     </div>
   )

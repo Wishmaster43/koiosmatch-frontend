@@ -10,6 +10,11 @@
  * The location scope rolls up its departments' documents too (?rollup=1,
  * mirrors CustomerLocationController::notes' own rollup) — a department is a
  * leaf, so its own listing never adds the param.
+ *
+ * DOCTYPE-SCOPE-1 (audit finding, 05-08): a location/department's own uploads now
+ * consult the MATCHING entity-scoped document-type lookup ('customer_location' /
+ * 'customer_department', DOCTYPE-ENTITY-1's own vocabulary), not the customer's —
+ * DocumentsTab used to hardcode `useDocumentTypes('customer')` regardless of scope.
  */
 import DocumentsTab from './DocumentsTab'
 import type { Id } from '@/types/common'
@@ -27,6 +32,8 @@ export default function ScopedDocumentsTab({ scope, id, customerId }: {
   const lockedLevelFields: Record<string, string> = scope === 'location'
     ? { customer_location_id: String(id) }
     : { customer_department_id: String(id) }
+  // DOCTYPE-SCOPE-1: this level's OWN document-type lookup, not the customer's.
+  const docTypeScope = scope === 'location' ? 'customer_location' : 'customer_department'
 
-  return <DocumentsTab customerId={customerId} listUrl={listUrl} lockedLevelFields={lockedLevelFields} />
+  return <DocumentsTab customerId={customerId} listUrl={listUrl} lockedLevelFields={lockedLevelFields} docTypeScope={docTypeScope} />
 }

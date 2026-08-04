@@ -36,6 +36,17 @@ export interface CascadeLocation extends CascadeOption {
   departments?: CascadeDepartment[]
   cost_center?: string | null
   billing_email?: string | null
+  // V9 (Danny vacatures-ronde): the location's own address, so a caller can
+  // take it over onto a dependent form (vacancy Locatie tab) when picked.
+  // CustomerLocationResource always serialises these (never behind a
+  // whenLoaded), so they are present whenever a location appears in this list.
+  street?: string | null
+  house_number?: string | null
+  house_number_suffix?: string | null
+  postcode?: string | null
+  city?: string | null
+  province?: string | null
+  country?: string | null
 }
 
 export interface CustomerCascadeDetail {

@@ -31,7 +31,9 @@
     "leadsStale": "Wird neu berechnet — Zahl vom {{date}}",
     "leadsGeoMissing": "Ohne Koordinaten konnte der Radius nicht angewendet werden",
     "leadsPartial": "Teilweise gezählt — ein Limit wurde erreicht",
-    "leadsComputedAt": "Aktualisiert am {{date}}"
+    "leadsComputedAt": "Aktualisiert am {{date}}",
+    "age": "Alter",
+    "applicationsOpen": "Bewerbungen öffnen"
   },
   "publishedState": {
     "yes": "Veröffentlicht",
@@ -287,7 +289,11 @@
     "publishedOn": "Veröffentlicht",
     "notPublished": "Nicht veröffentlicht",
     "queuedOn": "Vorgemerkt",
-    "notLiveYet": "Die öffentliche Karriereseite und die Kanal-Feeds (Google Jobs, Indeed, Werkzoeken) sind im Aufbau. Diese Schalter legen bereits fest, was live geht, sobald Seite und Feeds aktiv sind."
+    "notLiveYet": "Die öffentliche Karriereseite und die Kanal-Feeds (Google Jobs, Indeed, Werkzoeken) sind im Aufbau. Diese Schalter legen bereits fest, was live geht, sobald Seite und Feeds aktiv sind.",
+    "tabs": {
+      "settings": "Einstellungen",
+      "sites": "Stellenbörsen"
+    }
   },
   "applicants": {
     "title": "Bewerbungen",
@@ -298,7 +304,9 @@
     "byPhase": "Nach Phase",
     "candidate": "Kandidat",
     "planIntake": "Intake planen",
-    "addApplication": "Bewerbung"
+    "addApplication": "Bewerbung",
+    "searchPlaceholder": "Nach Kandidatenname suchen…",
+    "noMatch": "Keine Bewerbungen innerhalb dieser Filter gefunden."
   },
   "candidateSearch": {
     "noLocation": "Diese Vakanz hat noch keine Standortkoordinaten — aktualisieren Sie zuerst die Adresse, dann erscheint hier die Karte.",
@@ -429,5 +437,14 @@
       "match_weights": "KI-Matching-Gewichtung",
       "tags": "Tags"
     }
+  },
+  "documents": {
+    "docType": "Dokumenttyp"
+  },
+  "age": {
+    "days": "{{count}}T",
+    "weeks": "{{count}}W",
+    "months": "{{count}}Mon",
+    "years": "{{count}}J"
   }
 }

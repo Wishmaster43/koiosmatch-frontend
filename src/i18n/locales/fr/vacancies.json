@@ -31,7 +31,9 @@
     "leadsStale": "Recalcul en cours — chiffre du {{date}}",
     "leadsGeoMissing": "Sans coordonnées, le rayon n'a pas pu être appliqué",
     "leadsPartial": "Compté partiellement — une limite a été atteinte",
-    "leadsComputedAt": "Mis à jour le {{date}}"
+    "leadsComputedAt": "Mis à jour le {{date}}",
+    "age": "Âge",
+    "applicationsOpen": "Ouvrir les candidatures"
   },
   "publishedState": {
     "yes": "Publié",
@@ -287,7 +289,11 @@
     "publishedOn": "Publié",
     "notPublished": "Non publié",
     "queuedOn": "Préparé",
-    "notLiveYet": "Le site carrière public et les flux (Google Jobs, Indeed, Werkzoeken) sont en construction. Ces interrupteurs déterminent déjà ce qui sera publié dès leur activation."
+    "notLiveYet": "Le site carrière public et les flux (Google Jobs, Indeed, Werkzoeken) sont en construction. Ces interrupteurs déterminent déjà ce qui sera publié dès leur activation.",
+    "tabs": {
+      "settings": "Paramètres",
+      "sites": "Sites d'emploi"
+    }
   },
   "applicants": {
     "title": "Candidatures",
@@ -298,7 +304,9 @@
     "byPhase": "Par phase",
     "candidate": "Candidat",
     "planIntake": "Planifier un entretien",
-    "addApplication": "Candidature"
+    "addApplication": "Candidature",
+    "searchPlaceholder": "Rechercher par nom de candidat…",
+    "noMatch": "Aucune candidature trouvée avec ces filtres."
   },
   "candidateSearch": {
     "noLocation": "Cette vacance n'a pas encore de coordonnées de localisation — mettez d'abord à jour l'adresse, la carte apparaîtra ensuite ici.",
@@ -429,5 +437,14 @@
       "match_weights": "Pondération du matching IA",
       "tags": "Tags"
     }
+  },
+  "documents": {
+    "docType": "Type de document"
+  },
+  "age": {
+    "days": "{{count}}j",
+    "weeks": "{{count}}sem",
+    "months": "{{count}}mois",
+    "years": "{{count}}an"
   }
 }

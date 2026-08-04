@@ -103,6 +103,14 @@ interface MatchScoreBlockProps {
   onSave?: (payload: { score: number | null; criteria: Criterion[] }) => void
   source?: string
   aiScore?: number | null
+  // V17 (Danny 25-07): the plain overall %+bar is a DUPLICATE of
+  // ApplicationStatusStrip's own match-score cell on the Sollicitatie tab —
+  // default true keeps every OTHER caller (VacancySearchTab, CandidateSearchTab)
+  // unchanged; only ApplicationTab passes false, since the strip cell already
+  // shows that number. The edit affordance (pencil/save/✕) and, once editing,
+  // the full slider UI still render regardless — only the passive %+bar readout
+  // is suppressed, so adjusting the score is never lost.
+  showOverall?: boolean
 }
 
 /**
@@ -112,7 +120,7 @@ interface MatchScoreBlockProps {
  * via sliders (a manual override), saved through onSave → PATCH /applications/{id}.
  * The AI's own score (aiScore) is kept and shown when overridden.
  */
-export default function MatchScoreBlock({ score, criteria = [], summary, onSave, source, aiScore }: MatchScoreBlockProps) {
+export default function MatchScoreBlock({ score, criteria = [], summary, onSave, source, aiScore, showOverall = true }: MatchScoreBlockProps) {
   const { t } = useTranslation('applications')
   const [editing, setEditing]   = useState(false)
   const [draftScore, setDraftScore]       = useState(0)
@@ -143,7 +151,7 @@ export default function MatchScoreBlock({ score, criteria = [], summary, onSave,
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('matchScore.overall')}</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: scoreColor(overall) }}>{overall}%</span>
+            {(showOverall || editing) && <span style={{ fontSize: 12, fontWeight: 700, color: scoreColor(overall) }}>{overall}%</span>}
             {onSave && (editing ? (
               <>
                 <button onClick={save} title={t('matchScore.save')} style={{ display: 'flex', width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer' }}><Save size={13} /></button>
@@ -154,9 +162,11 @@ export default function MatchScoreBlock({ score, criteria = [], summary, onSave,
             ))}
           </span>
         </div>
-        <div style={{ height: 8, borderRadius: 99, background: 'var(--border)', overflow: 'hidden' }}>
-          <div style={{ width: `${overall ?? 0}%`, height: '100%', background: scoreColor(overall ?? 0) }} />
-        </div>
+        {(showOverall || editing) && (
+          <div style={{ height: 8, borderRadius: 99, background: 'var(--border)', overflow: 'hidden' }}>
+            <div style={{ width: `${overall ?? 0}%`, height: '100%', background: scoreColor(overall ?? 0) }} />
+          </div>
+        )}
         {/* Overall slider when there are no criteria to derive from. */}
         {editing && shownCriteria.length === 0 && (
           <div style={{ marginTop: 8 }}>

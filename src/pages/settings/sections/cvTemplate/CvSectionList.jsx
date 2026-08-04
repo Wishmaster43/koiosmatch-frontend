@@ -10,35 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { ChevronUp, ChevronDown } from 'lucide-react'
 import { CV_MOVABLE_SECTION_IDS } from '@/lib/useCvSettings'
 import { Toggle } from '@/pages/settings/components/SettingsKit'
-
-// Two-button region switch for a MOVABLE section (Danny 28-07: "ik wil ook de
-// locatie van elke sectie kunnen bepalen") — soft-tint per §4: both options
-// stay tinted, the active one gets the stronger tint + weight 600.
-function RegionToggle({ value, onChange, sectionLabel, t }) {
-  const options = [
-    { key: 'sidebar', label: t('cvTemplate.regionSidebar') },
-    { key: 'main',    label: t('cvTemplate.regionMain') },
-  ]
-  return (
-    <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-      {options.map(o => {
-        const active = value === o.key
-        return (
-          <button key={o.key} type="button" onClick={() => onChange(o.key)} aria-pressed={active}
-            aria-label={t('cvTemplate.moveSectionToRegion', { section: sectionLabel, region: o.label })}
-            style={{
-              padding: '3px 9px', fontSize: 10.5, fontWeight: active ? 600 : 500, borderRadius: 999, cursor: 'pointer',
-              border: `1px solid color-mix(in srgb, var(--color-primary) ${active ? 45 : 20}%, transparent)`,
-              background: `color-mix(in srgb, var(--color-primary) ${active ? 14 : 6}%, transparent)`,
-              color: active ? 'var(--color-primary)' : 'var(--text-muted)',
-            }}>
-            {o.label}
-          </button>
-        )
-      })}
-    </div>
-  )
-}
+import SegmentedControl from '@/components/ui/SegmentedControl'
 
 // `sections` is the normalized list from useCvSettings; `onSave` its partial-save fn.
 export default function CvSectionList({ sections, onSave }) {
@@ -110,7 +82,18 @@ export default function CvSectionList({ sections, onSave }) {
                   {label}
                 </span>
                 {movable ? (
-                  <RegionToggle value={sec.placement} onChange={p => handleSectionPlacement(sec.id, p)} sectionLabel={label} t={t} />
+                  // Shared SegmentedControl (audit finding 05-08, compact size — the
+                  // spot is a single row, not the default vertical option-card layout)
+                  // replaces the hand-rolled two-button RegionToggle fork. The
+                  // radiogroup's own accessible name is the section's label (e.g.
+                  // "Talen") — each option's name comes from its own visible text
+                  // ("Zijbalk"/"Hoofdkolom"), so no separate i18n key is needed.
+                  <SegmentedControl size="compact" ariaLabel={label} value={sec.placement}
+                    onChange={p => handleSectionPlacement(sec.id, p)}
+                    options={[
+                      { value: 'sidebar', label: t('cvTemplate.regionSidebar') },
+                      { value: 'main', label: t('cvTemplate.regionMain') },
+                    ]} />
                 ) : (
                   // Structural placement (§ CV_FIXED_PLACEMENT): no picker offered —
                   // moving it would either not exist as a region (header) or break

@@ -31,7 +31,9 @@
     "leadsStale": "Being recomputed — number as of {{date}}",
     "leadsGeoMissing": "Without coordinates the radius could not be applied",
     "leadsPartial": "Partially counted — a limit was hit",
-    "leadsComputedAt": "Updated on {{date}}"
+    "leadsComputedAt": "Updated on {{date}}",
+    "age": "Age",
+    "applicationsOpen": "Open applications"
   },
   "publishedState": {
     "yes": "Published",
@@ -287,7 +289,11 @@
     "publishedOn": "Published",
     "notPublished": "Not published",
     "queuedOn": "Queued",
-    "notLiveYet": "The public career site and the channel feeds (Google Jobs, Indeed, Werkzoeken) are under construction. These toggles already determine what goes live once the site and feeds are active."
+    "notLiveYet": "The public career site and the channel feeds (Google Jobs, Indeed, Werkzoeken) are under construction. These toggles already determine what goes live once the site and feeds are active.",
+    "tabs": {
+      "settings": "Settings",
+      "sites": "Job boards"
+    }
   },
   "applicants": {
     "title": "Applications",
@@ -298,7 +304,9 @@
     "byPhase": "By phase",
     "candidate": "Candidate",
     "planIntake": "Plan intake",
-    "addApplication": "Application"
+    "addApplication": "Application",
+    "searchPlaceholder": "Search by candidate name…",
+    "noMatch": "No applications found within these filters."
   },
   "candidateSearch": {
     "noLocation": "This vacancy has no location (coordinates) yet — update the address first, then the map appears here.",
@@ -429,5 +437,14 @@
       "match_weights": "AI matching weights",
       "tags": "Tags"
     }
+  },
+  "documents": {
+    "docType": "Document type"
+  },
+  "age": {
+    "days": "{{count}}d",
+    "weeks": "{{count}}w",
+    "months": "{{count}}mo",
+    "years": "{{count}}y"
   }
 }

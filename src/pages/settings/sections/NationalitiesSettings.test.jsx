@@ -45,4 +45,40 @@ describe('NationalitiesSettings', () => {
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/nationalities', expect.objectContaining({ name: 'Belgische' })))
   })
+
+  // NATION-FLAG-1: the row's flag is the ONE adornment (colour stays off) —
+  // derived from the ISO-2 country_code, never a second stored value.
+  it('renders the flag emoji before the name when the row carries a country_code', async () => {
+    api.get.mockResolvedValue({ data: [row({ country_code: 'NL' })] })
+    render(<NationalitiesSettings />)
+
+    await screen.findByText('Nederlandse')
+    expect(screen.getByText('🇳🇱')).toBeInTheDocument()
+  })
+
+  it('renders no flag when the row has no country_code yet', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    render(<NationalitiesSettings />)
+
+    await screen.findByText('Nederlandse')
+    expect(screen.queryByText('🇳🇱')).not.toBeInTheDocument()
+  })
+
+  // NATION-FLAG-1: picking a country in the create modal sends its ISO-2 code —
+  // asserts the actual REQUEST body (§13), not just that the picker "did something".
+  it('picking a country in the create modal sends its ISO-2 code as country_code', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    api.post.mockResolvedValue({ data: row({ id: 'n3', name: 'Duitse', country_code: 'DE' }) })
+    const user = userEvent.setup()
+    render(<NationalitiesSettings />)
+
+    await screen.findByText('Nederlandse')
+    await user.click(screen.getByRole('button', { name: st('nationalities.add') }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'Duitse')
+    await user.click(screen.getByRole('button', { name: st('nationalities.countryCode') }))
+    await user.click(await screen.findByText('Duitsland'))
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/nationalities', expect.objectContaining({ name: 'Duitse', country_code: 'DE' })))
+  })
 })

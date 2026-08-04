@@ -278,6 +278,20 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    // WITHHELD (offered-iff-read registry rule, mirrors the note_types/document_types
+    // comments above): the backend ships full tenant CRUD + reorder for
+    // vacancy_employment_types (VacancyEmploymentTypeController extends LookupController,
+    // routes/api/tenant/vacancies.php) — a value/label vocabulary for a vacancy's
+    // employment type (permanent/temp/…). There is ZERO frontend consumer today:
+    // MatchTemplatesSettings.jsx explicitly rejected wiring its own employment-type
+    // filter to this single-value lookup in favour of a different multi-select, the
+    // vacancy create/edit forms and VacancyDetailResource's employment_type field
+    // still carry the FREE-TEXT column, and no picker anywhere reads
+    // `/vacancy-employment-types`. Per §3 (no fake affordances) this does NOT get a
+    // settings screen yet — a tenant would curate a vocabulary nothing ever applies.
+    // No tenant data is at risk: the endpoint keeps serving vacancy_employment_types,
+    // and re-adding a `vacancy_employment_types` item becomes a one-line change the
+    // day a real vacancy-employment-type picker/reader lands (ticket VAC-EMPLOYMENT-1).
     key: 'vacancies', icon: Briefcase,
     items: [
       { id: 'vacancy_statuses', icon: Briefcase, component: VacancyStatusSettings },
@@ -422,28 +436,51 @@ export const NAV_GROUPS = [
   },
   {
     // Document types (DOCTYPE-ENTITY-1, mirrors the note_types group above) — own
-    // top-level group, one DocumentTypesSettings(entity) sub-tab per entity the
-    // backend's CandidateDocumentType::ENTITIES lookup supports today (Danny's full
-    // list: kandidaat/klant/locatie/afdeling/contactpersoon/kans/taak/bellijst/match
-    // + vacature — every one of them is already a valid, tenant-configurable entity
-    // value on the backend, ahead of some of their own document-upload surfaces
-    // landing — same "entity precedes its own reader" order as note_types' history).
+    // top-level group, one DocumentTypesSettings(entity) sub-tab per entity.
     // Replaces the old candidate-only `document_types` entry (a bespoke multi-tab
     // wrapper with its own internal SubTabBar + a "Global row" cross-entity fallback):
     // the backend's `?entity=` scope is now STRICT (mirrors NoteTypeController::
     // scopeIndex() exactly, no orWhereNull fallback), so that protection was guarding
     // a behaviour the backend no longer serves — see DocumentTypesSettings.jsx.
+    //
+    // ONLY entities with a real reader get a tab (§3 no fake affordances, mirrors
+    // the note_types group's "offered-iff-read" rule; guarded by
+    // registry.deadScreens.test.jsx). Re-measured 2026-08-05 against the backend's
+    // full CandidateDocumentType::ENTITIES list (kandidaat/klant/locatie/afdeling/
+    // contactpersoon/kans/taak/bellijst/match/vacature) — per-entity result:
+    //   • candidate, customer — real readers since the wave that built this group
+    //                 (candidate/customer DocumentsTab.tsx both call useDocumentTypes(entity)).
+    //   • customer_location, customer_department — NOW offered (DOCTYPE-SCOPE-1,
+    //                 2026-08-05). ScopedDocumentsTab used to hand the customer's
+    //                 DocumentsTab no scope at all, so a location/department upload
+    //                 silently read the CUSTOMER's document-type lookup — it now
+    //                 passes its own docTypeScope ('customer_location'/
+    //                 'customer_department') through to useDocumentTypes(), a real,
+    //                 distinct reader per level.
+    //   • vacancy   — NOW offered (DOCTYPE-VACANCY-1, 2026-08-05). The vacancy
+    //                 drawer's DocumentsTab.tsx used to upload with a hardcoded
+    //                 empty `type` — it now reads useDocumentTypes('vacancy') for a
+    //                 real type picker + row chip, same treatment as candidate/customer.
+    //   • contact   — STILL withheld. `customer_documents` has no
+    //                 `customer_contact_id` column at all (measured:
+    //                 EntityDocumentController::store/update only validate
+    //                 customer_location_id/customer_department_id) — there is no
+    //                 contact-level document concept to scope a lookup to yet.
+    //   • opportunity, task, call_list, match — STILL withheld. No entity-scoped
+    //                 documents route exists for any of them (no
+    //                 /opportunities/{id}/documents, /tasks/{id}/documents,
+    //                 /outreach-campaigns/{id}/documents or /matches/{id}/documents),
+    //                 so no FE tab reads a document-type lookup scoped to them —
+    //                 a backend-first gap, not just a missing FE tab.
+    // No tenant data is deleted for a withheld entity: the rows stay in
+    // document_types and the endpoint keeps serving them, so re-adding one line here
+    // restores the editor the day that entity grows a real FE reader.
     key: 'document_types', icon: FileText,
     items: [
       { id: 'dt_candidate', icon: Users, render: () => <DocumentTypesSettings entity="candidate" /> },
       { id: 'dt_customer', icon: Building2, render: () => <DocumentTypesSettings entity="customer" /> },
       { id: 'dt_customer_location', icon: MapPin, render: () => <DocumentTypesSettings entity="customer_location" /> },
       { id: 'dt_customer_department', icon: Building2, render: () => <DocumentTypesSettings entity="customer_department" /> },
-      { id: 'dt_contact', icon: Users, render: () => <DocumentTypesSettings entity="contact" /> },
-      { id: 'dt_opportunity', icon: Target, render: () => <DocumentTypesSettings entity="opportunity" /> },
-      { id: 'dt_task', icon: ListChecks, render: () => <DocumentTypesSettings entity="task" /> },
-      { id: 'dt_call_list', icon: Phone, render: () => <DocumentTypesSettings entity="call_list" /> },
-      { id: 'dt_match', icon: Sparkles, render: () => <DocumentTypesSettings entity="match" /> },
       { id: 'dt_vacancy', icon: Briefcase, render: () => <DocumentTypesSettings entity="vacancy" /> },
     ],
   },

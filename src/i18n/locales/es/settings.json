@@ -211,11 +211,6 @@
     "dt_customer": "Clientes",
     "dt_customer_location": "Ubicaciones",
     "dt_customer_department": "Departamentos",
-    "dt_contact": "Contactos",
-    "dt_opportunity": "Oportunidades",
-    "dt_task": "Tareas",
-    "dt_call_list": "Listas de llamadas",
-    "dt_match": "Coincidencias",
     "dt_vacancy": "Vacantes",
     "vacancy_default_status": "Estado predeterminado",
     "nationalities": "Nacionalidades",
@@ -592,7 +587,6 @@
     "regionHeaderHint": "Esta sección está en el encabezado, encima del nombre, y no tiene columna propia.",
     "moveSectionUp": "Mover «{{section}}» hacia arriba",
     "moveSectionDown": "Mover «{{section}}» hacia abajo",
-    "moveSectionToRegion": "Colocar «{{section}}» en {{region}}",
     "preview": "Vista previa",
     "previewHint": "A4 — con candidato de ejemplo"
   },
@@ -2582,7 +2576,8 @@
   "nationalities": {
     "title": "Nacionalidades",
     "subtitle": "Gestiona las nacionalidades que los candidatos pueden elegir.",
-    "add": "Añadir nacionalidad"
+    "add": "Añadir nacionalidad",
+    "countryCode": "País"
   },
   "escalationReasons": {
     "title": "Motivos de escalada",

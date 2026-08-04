@@ -5,6 +5,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { GripVertical, Check } from 'lucide-react'
 import { COLOR_PRESETS } from '@/lib/colorPresets'
+import Toggle from '@/components/ui/Toggle'
 
 function ColorPickerPopup({ color, onChange, onClose }) {
   const [hex, setHex] = useState(color)
@@ -42,21 +43,16 @@ export function ColorSwatch({ color, onChange }) {
 }
 
 // Small pill toggle (used by Roles permissions and notification preferences).
-// Forwards aria-label/title/rest props straight onto the button so callers can
-// give it an accessible name (e.g. the permission matrix's "<group> — <action>")
-// without a wrapping element — additive, existing callers without these props
-// are unaffected.
-export function PermissionToggle({ checked, onChange, ...rest }) {
-  return (
-    <button {...rest} onClick={onChange}
-      style={{ width: 32, height: 18, borderRadius: 999, border: 'none', cursor: 'pointer',
-               background: checked ? 'var(--color-primary)' : 'var(--border)', position: 'relative',
-               transition: 'background 0.15s', flexShrink: 0 }}>
-      <div style={{ position: 'absolute', top: 2, left: checked ? 16 : 2, width: 14, height: 14,
-                    borderRadius: '50%', background: 'white', transition: 'left 0.15s',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
-    </button>
-  )
+// Thin alias over the shared Toggle (Toggle.tsx, "the ONE toggle-switch
+// implementation in the app") — this used to hand-roll its own <button> markup,
+// duplicating role=switch/aria-checked/type=button/disabled that Toggle already
+// implements (audit finding, 05-08). The 7 call sites (RolesPermissionMatrix,
+// CandidateRequiredFieldsSettings, FlatRequiredFieldsToggleList,
+// CustomerPhaseRequiredFieldsMatrix, EventCatalog) keep their exact API —
+// `checked` + a no-argument `onChange`, plus the HTML `aria-label`/`title`
+// attributes some of them pass — so none of them need to change.
+export function PermissionToggle({ checked, onChange, 'aria-label': ariaLabel, ...rest }) {
+  return <Toggle checked={checked} onChange={() => onChange()} ariaLabel={ariaLabel} {...rest} />
 }
 
 export function ColorBadge({ label, color }) {

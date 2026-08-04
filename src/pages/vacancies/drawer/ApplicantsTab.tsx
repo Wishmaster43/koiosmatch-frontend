@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CalendarPlus, Plus } from 'lucide-react'
+import { CalendarPlus, Search } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import EntityLink from '@/components/ui/EntityLink'
+import StatusPill from '@/components/ui/StatusPill'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import api, { unwrap } from '@/lib/api'
 import PlanIntakeModal from '@/pages/candidates/drawer/PlanIntakeModal'
 import AddApplicationModal from '@/pages/applications/AddApplicationModal'
@@ -12,17 +14,8 @@ import { mapVacancyDetail } from '../data/mapVacancy'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
-// Soft phase chip in the funnel-phase colour (shared soft-chip convention).
-function PhaseChip({ label, color }: { label: ReactNode; color?: string | null }) {
-  // Fallback swatch colour, consumed below via hex+alpha string concatenation
-  // (soft-chip convention) — cannot become a CSS var without restructuring that.
-  // eslint-disable-next-line no-restricted-syntax -- fallback swatch hex, consumed as hex+alpha string concat below
-  const c = color ?? '#9CA3AF'
-  return (
-    <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99,
-      background: `${c}1A`, color: c, border: `1px solid ${c}55` }}>{label}</span>
-  )
-}
+// One coupled application row, as shaped by mapVacancy.ts.
+interface AppRow { id?: Id; candidateId?: Id | null; candidateName?: string; candidateInitials?: string; phaseValue?: string | number | null; phaseLabel?: string | null; phaseColor?: string | null; source?: string; created?: string }
 
 /**
  * ApplicantsTab — mostly read-only: total leads, the per-phase breakdown and the
@@ -35,6 +28,14 @@ function PhaseChip({ label, color }: { label: ReactNode; color?: string | null }
  * receives the vacancy detail as a read prop (VacancyDrawer passes no setter down
  * this far), so a freshly created application refetches THIS vacancy's detail
  * locally — the list/counters update without reopening the drawer.
+ *
+ * TOOLBAR (V14, 04-08-house-order): mirrors WorkTab's Sollicitaties toolbar —
+ * search (grows) → phase/status filter → "+ Sollicitatie" (short label, the
+ * sub-tab already names the entity). Unlike WorkTab's candidate-embed, this
+ * side of the coupling carries the REAL tenant phase lookup (`useVacancyLookups`)
+ * with a stable `value` per row (`phaseValue`) — so the filter is wired directly
+ * to that lookup rather than WorkTab's honest label-derived fallback, which only
+ * exists there because of a data gap this side does not have.
  */
 export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
@@ -58,7 +59,14 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
   }
 
   const byPhase = (live.applicationsByPhase ?? {}) as Record<string, number>
-  const applications = live.applications ?? []
+  const applications = (live.applications ?? []) as AppRow[]
+
+  // House toolbar: free-text search on the candidate's name, on top of the phase filter.
+  const [search, setSearch] = useState('')
+  const { value: phaseFilter, toggle: togglePhase, filtered: phaseFiltered } =
+    useStatusFilter(applications, phases, a => String(a.phaseValue ?? ''))
+  const q = search.trim().toLowerCase()
+  const filteredApplications = q ? phaseFiltered.filter(a => (a.candidateName ?? '').toLowerCase().includes(q)) : phaseFiltered
 
   return (
     <div>
@@ -77,24 +85,29 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
         ))}
       </div>
 
-      {/* Applications list — "+ Sollicitatie" sits at the section header (§3A
-          blueprint: the "+ Add" affordance in the same place/style everywhere). */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>{t('applicants.title')}</div>
+      {/* Applications list header + house toolbar: search (grows) → phase filter →
+          "+ Sollicitatie" (short — the sub-tab already names the entity, DRAWER-ADD-SHORT-1). */}
+      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('applicants.title')}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 120, padding: '6px 10px',
+          background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
+          <Search size={13} color="var(--text-muted)" />
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder={t('applicants.searchPlaceholder')} aria-label={t('applicants.searchPlaceholder')}
+            style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
+        </div>
+        <StatusFilterSelect value={phaseFilter} onToggle={togglePhase} statuses={phases} optionKey={s => s.value} />
         {v.id != null && (
-          <button onClick={() => setAddOpen(true)}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 500,
-              padding: '4px 10px', borderRadius: 7, border: '1px solid var(--color-primary)',
-              background: 'none', color: 'var(--color-primary)', cursor: 'pointer' }}>
-            <Plus size={12} /> {t('applicants.addApplication')}
-          </button>
+          <DrawerAddButton onClick={() => setAddOpen(true)} label={t('applicants.addApplication')} short />
         )}
       </div>
       {applications.length === 0 ? (
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('applicants.empty')}</div>
+      ) : filteredApplications.length === 0 ? (
+        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('applicants.noMatch')}</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {applications.map(a => {
+          {filteredApplications.map(a => {
             const m = a.phaseLabel ? { label: a.phaseLabel, color: a.phaseColor } : phaseMeta(a.phaseValue != null ? String(a.phaseValue) : null)
             return (
               <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px',
@@ -106,7 +119,7 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
                   </div>
                   {a.source && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{a.source}</div>}
                 </div>
-                {m.label && <PhaseChip label={m.label} color={m.color} />}
+                {m.label && <StatusPill label={m.label} color={m.color} />}
                 {/* Book an intake for this applicant — matches candidate + vacancy + application. */}
                 {a.candidateId != null && (
                   <button onClick={() => setIntakeFor({ applicationId: a.id ?? null, candidateId: a.candidateId as Id })}

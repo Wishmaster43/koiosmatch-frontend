@@ -144,6 +144,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const [drawerInitialTab, setDrawerInitialTab] = useState<string | undefined>(undefined)
   const openVacancy = (v: Parameters<typeof selectVacancy>[0]) => { setDrawerInitialTab(undefined); selectVacancy(v) }
   const openCandidateSearch = (id: Id) => { setDrawerInitialTab('candidateSearch'); selectVacancy({ id } as Parameters<typeof selectVacancy>[0], { forceOpen: true }) }
+  // V4 (vacatures-tabel-cluster): the Sollicitaties count deep-links to the
+  // drawer's "applicants" tab (already registered in VacancyDrawer's TABS).
+  const openApplicants = (id: Id) => { setDrawerInitialTab('applicants'); selectVacancy({ id } as Parameters<typeof selectVacancy>[0], { forceOpen: true }) }
 
   // Open a vacancy drawer when arriving via a cross-entity link (intent).
   useOpenFromIntent(intent, (id) => openVacancy({ id } as Parameters<typeof selectVacancy>[0]))
@@ -317,7 +320,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                     <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
                   )}
                   <VacanciesTable rows={vacancies} loading={loading} selectedId={selected?.id} onSelect={openVacancy}
-                    onOpenCandidateSearch={openCandidateSearch} />
+                    onOpenCandidateSearch={openCandidateSearch} onOpenApplicants={openApplicants} />
                 </div>
                 <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
                   onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
@@ -336,6 +339,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                   selectedId={selected?.id}
                   onSelect={openVacancy}
                   onOpenCandidateSearch={openCandidateSearch}
+                  onOpenApplicants={openApplicants}
                   selectable
                   selectedIds={selectedIds}
                   onToggleRow={toggleRow}

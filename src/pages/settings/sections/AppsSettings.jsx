@@ -8,6 +8,7 @@ import { extractApiError } from '@/lib/extractApiError'
 import { useAuth } from '@/context/AuthContext'
 import { useApps, AVAILABLE_APPS } from '@/context/AppsContext'
 import { canAccessPage } from '@/lib/access'
+import Toggle from '@/components/ui/Toggle'
 
 export default function AppsSettings() {
   const { t } = useTranslation('settings')
@@ -137,23 +138,11 @@ export default function AppsSettings() {
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{app.description}</div>
               </div>
-              <button
-                onClick={() => !soon && toggle(app.id)}
+              {/* Shared house Toggle (audit finding, 05-08) — replaces the hand-rolled
+                  44x24 success-green pill so every on/off control looks the same. */}
+              <Toggle checked={on && !soon} onChange={() => { if (!soon) toggle(app.id) }}
                 disabled={!canEdit || isSaving || soon}
-                title={soon ? t('apps.comingSoon') : !canEdit ? t('apps.noRights') : on ? t('apps.disable') : t('apps.enable')}
-                style={{
-                  width: 44, height: 24, borderRadius: 999, border: 'none', flexShrink: 0,
-                  background: on && !soon ? 'var(--color-success)' : 'var(--border)',
-                  cursor: canEdit && !soon ? 'pointer' : 'not-allowed',
-                  position: 'relative', transition: 'background 0.2s',
-                  opacity: isSaving ? 0.6 : 1,
-                }}>
-                <div style={{
-                  position: 'absolute', top: 3, width: 18, height: 18, borderRadius: '50%',
-                  background: 'var(--surface)', transition: 'left 0.2s',
-                  left: on ? 22 : 3, boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                }} />
-              </button>
+                title={soon ? t('apps.comingSoon') : !canEdit ? t('apps.noRights') : on ? t('apps.disable') : t('apps.enable')} />
               {isSaved && <Check size={14} color="var(--color-success)" style={{ flexShrink: 0 }} />}
             </div>
           )

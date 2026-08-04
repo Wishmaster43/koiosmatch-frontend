@@ -211,11 +211,6 @@
     "dt_customer": "Customers",
     "dt_customer_location": "Locations",
     "dt_customer_department": "Departments",
-    "dt_contact": "Contacts",
-    "dt_opportunity": "Opportunities",
-    "dt_task": "Tasks",
-    "dt_call_list": "Call lists",
-    "dt_match": "Matches",
     "dt_vacancy": "Vacancies",
     "vacancy_default_status": "Default status",
     "nationalities": "Nationalities",
@@ -820,7 +815,6 @@
     "regionHeaderHint": "This section sits in the header above the name and has no column of its own.",
     "moveSectionUp": "Move '{{section}}' up",
     "moveSectionDown": "Move '{{section}}' down",
-    "moveSectionToRegion": "Place '{{section}}' in {{region}}",
     "preview": "Preview",
     "previewHint": "A4 — with sample candidate"
   },
@@ -2582,7 +2576,8 @@
   "nationalities": {
     "title": "Nationalities",
     "subtitle": "Manage the nationalities candidates can pick.",
-    "add": "Add nationality"
+    "add": "Add nationality",
+    "countryCode": "Country"
   },
   "escalationReasons": {
     "title": "Escalation reasons",

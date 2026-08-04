@@ -75,7 +75,8 @@ describe('PermissionMatrix — CRUD grid + Other column', () => {
 
     // The toggle itself carries the accessible name now (a11y fix: aria-label/title
     // moved off the wrapper div straight onto the button) — select it by role/name.
-    const toggle = screen.getByRole('button', { name: `${st('roles.groups.candidates')} — ${st('roles.actions.create')}` })
+    // PermissionToggle renders the shared Toggle (role=switch, audit finding 05-08).
+    const toggle = screen.getByRole('switch', { name: `${st('roles.groups.candidates')} — ${st('roles.actions.create')}` })
     expect(toggle).toHaveAttribute('aria-label')
     await user.click(toggle)
     expect(onToggle).toHaveBeenCalledWith('candidates.create')
@@ -87,7 +88,7 @@ describe('PermissionMatrix — CRUD grid + Other column', () => {
     const user = userEvent.setup()
     render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={onToggle} />)
 
-    const toggle = screen.getByRole('button', { name: `${st('roles.groups.shifts')} — ${st('roles.actions.offer')}` })
+    const toggle = screen.getByRole('switch', { name: `${st('roles.groups.shifts')} — ${st('roles.actions.offer')}` })
     await user.click(toggle)
     expect(onToggle).toHaveBeenCalledWith('shifts.offer')
   })

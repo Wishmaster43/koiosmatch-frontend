@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Calendar, Plus, Clock, User, MapPin, Pencil } from 'lucide-react'
+import { Calendar, Clock, User, MapPin, Pencil, Search } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
 import { useAppointmentTypes } from '@/lib/useAppointmentTypes'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import PlanIntakeModal from '@/pages/candidates/drawer/PlanIntakeModal'
 import type { ExistingAppointment } from '@/pages/candidates/drawer/PlanIntakeModal'
 import type { ApplicationDetail } from '@/types/application'
@@ -54,15 +56,46 @@ export default function AppointmentsTab({ application: a }: { application: Appli
   }, [a.candidateId, a.id])
   useEffect(() => { load() }, [load])
 
-  // New-appointment button; disabled when the application has no candidate link.
+  // Search narrows on type label + owner + location, client-side (no BE filter param today).
+  const [search, setSearch] = useState('')
+
+  // Appointment status is a FIXED backend enum (App\Models\Appointment::STATUSES),
+  // never a tenant lookup — so a local static option list drives the shared
+  // presentational StatusFilterSelect instead of the tenant-lookup useStatusFilter path.
+  const statusOptions = [
+    { id: 'planned', value: 'planned', label: t('appointments.statuses.planned') },
+    { id: 'completed', value: 'completed', label: t('appointments.statuses.completed') },
+    { id: 'no_show', value: 'no_show', label: t('appointments.statuses.noShow') },
+    { id: 'cancelled', value: 'cancelled', label: t('appointments.statuses.cancelled') },
+  ]
+  const { value: statusFilter, toggle: toggleStatus, filtered: byStatus } =
+    useStatusFilter(appointments, statusOptions, ap => String(ap.status ?? ''))
+
+  const q = search.trim().toLowerCase()
+  const visible = q
+    ? byStatus.filter(ap => [metaOf(ap.type)?.label ?? ap.type, ap.owner?.name, ap.location_name]
+        .some(v => String(v ?? '').toLowerCase().includes(q)))
+    : byStatus
+
+  // New-appointment button — the house DrawerAddButton short (soft-tint primary),
+  // disabled when the application has no candidate link.
   const newButton = (
-    <button onClick={() => setCreating(true)} disabled={a.candidateId == null}
-      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px',
-        fontSize: 12, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
-        background: 'none', color: 'var(--text)', cursor: a.candidateId == null ? 'not-allowed' : 'pointer',
-        opacity: a.candidateId == null ? 0.5 : 1 }}>
-      <Plus size={13} /> {t('appointments.new')}
-    </button>
+    <DrawerAddButton onClick={() => setCreating(true)} disabled={a.candidateId == null}
+      label={t('appointments.new')} short />
+  )
+
+  // Toolbar: search (left, growing) → status filter → add (right) — the house order (§4).
+  const toolbar = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, padding: '6px 10px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
+        <Search size={13} color="var(--text-muted)" />
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder={t('appointments.searchPlaceholder')} aria-label={t('appointments.searchPlaceholder')}
+          style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
+      </div>
+      <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={statusOptions} />
+      {newButton}
+    </div>
   )
 
   // Loading state.
@@ -82,17 +115,20 @@ export default function AppointmentsTab({ application: a }: { application: Appli
     )
   }
 
-  // Empty state (no appointments, not creating) — calm state with the CTA.
+  // Empty state (no appointments at all, not creating) — calm state with the CTA.
+  // The toolbar still shows so search/filter stay reachable once appointments arrive.
   if (!appointments.length && !creating) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 64, textAlign: 'center', color: 'var(--text-muted)' }}>
-        <span style={{ width: 56, height: 56, borderRadius: '50%', border: '1px solid var(--border)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
-          <Calendar size={22} style={{ opacity: 0.6 }} />
-        </span>
-        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t('appointments.empty')}</div>
-        <div style={{ fontSize: 12, marginTop: 4, maxWidth: 260 }}>{t('appointments.hint')}</div>
-        <div style={{ marginTop: 14 }}>{newButton}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {toolbar}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 52, textAlign: 'center', color: 'var(--text-muted)' }}>
+          <span style={{ width: 56, height: 56, borderRadius: '50%', border: '1px solid var(--border)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+            <Calendar size={22} style={{ opacity: 0.6 }} />
+          </span>
+          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t('appointments.empty')}</div>
+          <div style={{ fontSize: 12, marginTop: 4, maxWidth: 260 }}>{t('appointments.hint')}</div>
+        </div>
         {creating && a.candidateId != null && (
           <PlanIntakeModal candidateId={a.candidateId} applicationId={a.id ?? null} defaultVacancyId={a.vacancyId} mode="appointment"
             onClose={() => setCreating(false)} onCreated={load} />
@@ -103,10 +139,13 @@ export default function AppointmentsTab({ application: a }: { application: Appli
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>{newButton}</div>
-      {appointments.map(ap => {
+      {toolbar}
+      {visible.length === 0 && (
+        <div style={{ padding: '28px 0', textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>{t('appointments.noMatches')}</div>
+      )}
+      {visible.map(ap => {
         const typeLabel = metaOf(ap.type)?.label ?? ap.type
-        const statusLabel = ap.status === 'planned' ? t('appointments.statusPlanned') : (ap.status || '—')
+        const statusLabel = statusOptions.find(s => s.value === ap.status)?.label ?? (ap.status || '—')
         return (
           <div key={ap.id} style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px', background: 'var(--surface)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>

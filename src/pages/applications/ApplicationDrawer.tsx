@@ -136,10 +136,12 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   // already rejected.
   const canPropose = canManage && a.candidateId != null && a.customerId != null && !a.archived && a.bucket !== 'rejected'
 
-  // Map a tab id to its content component.
-  const renderTab = (id: string): ReactNode => {
+  // Map a tab id to its content component. `setActiveTab` (from EntityDrawer's
+  // own render callback, S2/S3) lets the Sollicitatie tab's status strip jump
+  // straight to the Afspraken/Interviews tabs of THIS SAME drawer.
+  const renderTab = (id: string, setActiveTab?: (id: string) => void): ReactNode => {
     switch (id) {
-      case 'application':  return <ApplicationTab application={a} onAdjustScore={onAdjustScore} onLinkVacancy={onLinkVacancy} onUpdateSource={onUpdateSource} />
+      case 'application':  return <ApplicationTab application={a} onAdjustScore={onAdjustScore} onLinkVacancy={onLinkVacancy} onUpdateSource={onUpdateSource} onNavigateTab={setActiveTab} />
       case 'candidate':    return <CandidateTab application={a} />
       case 'vacancy':      return <VacancyTab application={a} onLinkVacancy={onLinkVacancy} />
       case 'interviews':   return <InterviewsTab application={a} />
@@ -210,7 +212,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
           </div>
         </div>
       )}
-      tabs={tabIds.map(id => ({ id, label: t(`drawer.tabs.${id}`), render: () => renderTab(id) }))}
+      tabs={tabIds.map(id => ({ id, label: t(`drawer.tabs.${id}`), render: (setActiveTab?: (id: string) => void) => renderTab(id, setActiveTab) }))}
       header={() => (
         <EntityHeader
           label={t('drawer.label')}

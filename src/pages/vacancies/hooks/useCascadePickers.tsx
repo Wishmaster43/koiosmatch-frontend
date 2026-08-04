@@ -4,10 +4,17 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useCustomerCascade} from './useCustomerCascade'
 
 interface Picked { id: string; name: string }
+// V9 (Danny vacatures-ronde): the location pick also carries its own address,
+// so the caller (useVacancyDetailsForm) can take it over onto the Locatie
+// section's form the moment a customer location is chosen.
+export interface PickedLocation extends Picked {
+  street?: string; houseNumber?: string; houseNumberSuffix?: string
+  postalCode?: string; city?: string; province?: string; country?: string
+}
 interface Args {
   clientId: string
   customerLocationId: string
-  onLocationChange: (v: Picked) => void
+  onLocationChange: (v: PickedLocation) => void
   customerDepartmentId: string
   onDepartmentChange: (v: Picked) => void
   contactId: string
@@ -51,7 +58,14 @@ export function useCascadePickers({
   const placeholder = clientId ? t('common:select') : t('details.pickClientFirst')
 
   const handleLocationChange = (id: string) => {
-    onLocationChange({ id, name: locations.find(l => String(l.id) === id)?.name ?? '' })
+    const loc = locations.find(l => String(l.id) === id)
+    // V9: forward the picked location's own address alongside id/name — the
+    // caller decides whether/how to take it over onto the vacancy's address form.
+    onLocationChange({
+      id, name: loc?.name ?? '',
+      street: loc?.street ?? '', houseNumber: loc?.house_number ?? '', houseNumberSuffix: loc?.house_number_suffix ?? '',
+      postalCode: loc?.postcode ?? '', city: loc?.city ?? '', province: loc?.province ?? '', country: loc?.country ?? '',
+    })
     onDepartmentChange({ id: '', name: '' })
   }
   // Picking a department directly (before its parent location) auto-fills the

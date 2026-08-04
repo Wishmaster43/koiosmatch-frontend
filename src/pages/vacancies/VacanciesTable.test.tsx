@@ -10,8 +10,13 @@ import nlVacancies from '@/i18n/locales/nl/vacancies.json'
 
 // Lookups arrive via a mocked hook — statusMeta only matters for rows without a
 // resolved statusLabel, which these fixtures don't exercise.
+// V1: a fixed tenant ORDER — 'open' before 'concept' — the opposite of their
+// alphabetical order, so a sort test can prove the tenant order wins.
 vi.mock('@/context/VacancyLookupsContext', () => ({
-  useVacancyLookups: () => ({ statusMeta: () => ({ label: '', color: '' }) }),
+  useVacancyLookups: () => ({
+    statuses: [{ value: 'open', label: 'Open' }, { value: 'concept', label: 'Concept' }],
+    statusMeta: () => ({ label: '', color: '' }),
+  }),
 }))
 // Real getBoolSetting (pure) stays wired; only the API-backed loader is stubbed
 // so the table renders without a live /settings fetch.
@@ -19,14 +24,19 @@ vi.mock('@/lib/settings/useAllSettings', async importOriginal => {
   const actual = await importOriginal<typeof import('@/lib/settings/useAllSettings')>()
   return { ...actual, useAllSettings: () => ({}) }
 })
-// Identity date formatter — this test doesn't cover date rendering.
-vi.mock('@/lib/datetime', () => ({
-  useDateFormat: () => ({
-    locale: 'nl-NL',
-    formatDate: (d: unknown) => (d == null ? '—' : String(d)),
-    formatDateTime: (d: unknown) => (d == null ? '—' : String(d)),
-  }),
-}))
+// Identity date formatter — this test doesn't cover date rendering. Keep the
+// REAL relativeAge (pure, no i18n) so the new age column can be exercised.
+vi.mock('@/lib/datetime', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/lib/datetime')>()
+  return {
+    ...actual,
+    useDateFormat: () => ({
+      locale: 'nl-NL',
+      formatDate: (d: unknown) => (d == null ? '—' : String(d)),
+      formatDateTime: (d: unknown) => (d == null ? '—' : String(d)),
+    }),
+  }
+})
 
 // Minimal rows — only the fields the table's columns actually read; cast past the
 // full Vacancy shape (mirrors DetailsTab.test.tsx's VacancyDetail cast). Explicit
@@ -203,6 +213,97 @@ describe('VacanciesTable · reference number column (JOB1)', () => {
     const tableRows = container.querySelectorAll('tbody tr')
     const values = Array.from(tableRows).map(r => r.children[colIndex].textContent)
     expect(values).toEqual(['V-00001', 'V-00002', 'V-00003'])
+  })
+})
+
+// V4 (vacatures-tabel-cluster): the Sollicitaties count deep-links to the
+// drawer's "applicants" tab — mirrors the Leads column's deep-link mechanics.
+describe('VacanciesTable · Applications count deep-link (V4)', () => {
+  it('renders a plain number when onOpenApplicants is not wired', () => {
+    const plainRows = [{ id: 'v1', title: 'A', applicationsCount: 4, created: '2024-01-01', createdSort: '2024-01-01' }] as unknown as Vacancy[]
+    const { container } = render(<VacanciesTable rows={plainRows} />)
+    const headerCell = screen.getByText(nlVacancies.columns.applications).closest('th') as HTMLElement
+    const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    const cell = container.querySelectorAll('tbody tr')[0].children[colIndex]
+    expect(cell.querySelector('button')).not.toBeInTheDocument()
+    expect(cell.textContent).toBe('4')
+  })
+
+  it('clicking the applications count calls onOpenApplicants with the row id and does not open the row', async () => {
+    const user = userEvent.setup()
+    const onOpenApplicants = vi.fn()
+    const onSelect = vi.fn()
+    const appRows = [{ id: 'v7', title: 'A', applicationsCount: 6, created: '2024-01-01', createdSort: '2024-01-01' }] as unknown as Vacancy[]
+    render(<VacanciesTable rows={appRows} onSelect={onSelect} onOpenApplicants={onOpenApplicants} />)
+
+    const headerCell = screen.getByText(nlVacancies.columns.applications).closest('th') as HTMLElement
+    const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    const btn = within(screen.getAllByRole('row')[1].children[colIndex] as HTMLElement).getByRole('button')
+    expect(btn).toHaveTextContent('6')
+    await user.click(btn)
+
+    expect(onOpenApplicants).toHaveBeenCalledWith('v7')
+    expect(onSelect).not.toHaveBeenCalled()
+  })
+})
+
+// V2 (vacatures-tabel-cluster): a compact relative-age column derived from
+// created_at — no backend dependency, so this is exercisable with pure dates.
+describe('VacanciesTable · Age column (V2)', () => {
+  it('renders an em-dash for a missing created date', () => {
+    const rowsNoDate = [{ id: 'v1', title: 'A', created: '', createdSort: '' }] as unknown as Vacancy[]
+    const { container } = render(<VacanciesTable rows={rowsNoDate} />)
+    // Missing i18n key (columns.age — report the key to CMFE for locale addition)
+    // falls back to the raw key string; this proves the COLUMN exists and works,
+    // independent of the eventual translated label.
+    const headerCell = screen.getByText('columns.age').closest('th') as HTMLElement
+    const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    expect(container.querySelectorAll('tbody tr')[0].children[colIndex].textContent).toBe('—')
+  })
+
+  it('carries the exact formatted date as a tooltip for a known created date', () => {
+    const rowsWithDate = [{ id: 'v1', title: 'A', created: '2024-01-01', createdSort: '2024-01-01' }] as unknown as Vacancy[]
+    const { container } = render(<VacanciesTable rows={rowsWithDate} />)
+    const headerCell = screen.getByText('columns.age').closest('th') as HTMLElement
+    const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    const cell = container.querySelectorAll('tbody tr')[0].children[colIndex]
+    expect(cell.querySelector('span')?.getAttribute('title')).toBe('2024-01-01')
+  })
+})
+
+// V1 (vacatures-tabel-cluster): status column sort follows the tenant's
+// configured lookup ORDER (array index), not the alphabetical label — with
+// published-first as the secondary key within the same status.
+describe('VacanciesTable · Status sort follows tenant order (V1)', () => {
+  it('sorts by the tenant lookup order (open before concept), not alphabetically by label', async () => {
+    // Alphabetically "Concept" < "Open", but the mocked tenant order above puts Open FIRST.
+    const user = userEvent.setup()
+    const mixedRows = [
+      { id: 'v1', title: 'A', statusValue: 'concept', statusLabel: 'Concept', published: true, created: '2024-01-01', createdSort: '2024-01-01' },
+      { id: 'v2', title: 'B', statusValue: 'open', statusLabel: 'Open', published: true, created: '2024-01-01', createdSort: '2024-01-01' },
+    ] as unknown as Vacancy[]
+    const { container } = render(<VacanciesTable rows={mixedRows} />)
+
+    const headerCell = screen.getByText(nlVacancies.columns.status).closest('th') as HTMLElement
+    await user.click(within(headerCell).getByRole('button'))
+
+    const titles = Array.from(container.querySelectorAll('tbody tr')).map(tr => tr.children[0].textContent)
+    expect(titles).toEqual(['B', 'A'])
+  })
+
+  it('uses published as a secondary key within the same status (published first)', async () => {
+    const user = userEvent.setup()
+    const mixedRows = [
+      { id: 'v1', title: 'A', statusValue: 'open', statusLabel: 'Open', published: false, created: '2024-01-01', createdSort: '2024-01-01' },
+      { id: 'v2', title: 'B', statusValue: 'open', statusLabel: 'Open', published: true, created: '2024-01-01', createdSort: '2024-01-01' },
+    ] as unknown as Vacancy[]
+    const { container } = render(<VacanciesTable rows={mixedRows} />)
+
+    const headerCell = screen.getByText(nlVacancies.columns.status).closest('th') as HTMLElement
+    await user.click(within(headerCell).getByRole('button'))
+
+    const titles = Array.from(container.querySelectorAll('tbody tr')).map(tr => tr.children[0].textContent)
+    expect(titles).toEqual(['B', 'A'])
   })
 })
 

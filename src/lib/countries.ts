@@ -50,6 +50,11 @@ export const COUNTRY_CODES: string[] = [
 // NL/BE/DE surface first — Koios Match's home market — the rest sorts alphabetically.
 const PRIORITY_CODES = ['NL', 'BE', 'DE']
 
+// Each Regional Indicator Symbol letter sits at a fixed offset from 'A' in the
+// Unicode block starting at U+1F1E6 — combining two of them (e.g. N + L) renders
+// as the country's flag emoji in every modern font/renderer, no image asset needed.
+const REGIONAL_INDICATOR_BASE = 0x1F1E6 - 'A'.charCodeAt(0)
+
 // Resolve one ISO-2 code to its display name in the given app language. Falls back
 // to the bare code if Intl.DisplayNames can't resolve it (unknown code, old browser).
 export function getCountryName(code: string, lang: string): string {
@@ -73,4 +78,14 @@ export function getCountryOptions(lang: string): Array<{ value: string; label: s
     .filter(o => !PRIORITY_CODES.includes(o.value))
     .sort((a, b) => a.label.localeCompare(b.label, lang))
   return [...priority, ...rest]
+}
+
+// NATION-FLAG-1: an ISO-2 code's flag emoji (two Regional Indicator Symbols) — a
+// real Unicode glyph, never an image asset, so it renders anywhere text does and
+// needs no asset pipeline. A malformed/missing code returns '' so a caller can
+// render nothing rather than a broken glyph (never crashes on bad tenant data).
+export function getFlagEmoji(code?: string | null): string {
+  const upper = (code ?? '').trim().toUpperCase()
+  if (!/^[A-Z]{2}$/.test(upper)) return ''
+  return String.fromCodePoint(...[...upper].map(ch => REGIONAL_INDICATOR_BASE + ch.charCodeAt(0)))
 }

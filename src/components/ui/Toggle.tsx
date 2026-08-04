@@ -16,12 +16,16 @@ export interface ToggleProps {
   // right below it as part of the SAME announcement. Additive — every existing
   // consumer that never passes it keeps the exact same markup, unchanged.
   describedBy?: string
+  // Optional native tooltip (PermissionToggle/AppsSettings, 05-08): forwarded
+  // straight onto the button's `title` attribute — additive, unused by every
+  // other existing consumer.
+  title?: string
 }
 
-export default function Toggle({ checked, onChange, ariaLabel, disabled, describedBy }: ToggleProps) {
+export default function Toggle({ checked, onChange, ariaLabel, disabled, describedBy, title }: ToggleProps) {
   return (
     <button type="button" role="switch" aria-checked={checked} aria-label={ariaLabel} aria-describedby={describedBy}
-      disabled={disabled} onClick={() => onChange(!checked)}
+      title={title} disabled={disabled} onClick={() => onChange(!checked)}
       style={{ width: 32, height: 18, borderRadius: 999, border: 'none',
                cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1,
                background: checked ? 'var(--color-primary)' : 'var(--border)', position: 'relative',

@@ -3,9 +3,12 @@
  * EntityHeader shell (§3A blueprint). The match facts (candidate/vacancy/client/
  * score/stage) stay read-only — a match is the continuation of a Hired
  * application (§3B) and those are derived — but the match's contract/financial
- * layer IS editable in-place. Content tabs: Overzicht (facts/score/status),
- * Contract & financieel (MatchContractSection, moved as-is), Relaties
- * (candidate/vacancy/klant, each a cross-entity hyperlink — RelationsTab) and
+ * layer IS editable in-place. Content tabs: Overzicht (facts/score/status,
+ * PLUS the candidate/vacancy/klant relation hyperlinks and the MATCH-ORDINAL-1
+ * footnote that used to live on their own Relaties tab — M9 of the
+ * overzicht-layout cluster folded that tab's whole content into Overview and
+ * removed it, so ALL match information now lives on one tab), Contract &
+ * financieel (MatchContractSection, moved as-is) and
  * Notities (NT-MATCH-1, 2026-08-04 — MatchNoteController now exists, so the
  * placeholder note above about "no /matches/{id}/notes route yet" no longer
  * applies). ChangelogTab stays the icon-popover, never a tab (§3A(d)). Header
@@ -20,7 +23,7 @@
  * or once archived. Thin container: header config + tab list + the
  * useMatchApproval wiring; all body markup lives in the tab/header components.
  */
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Trash2, Ban } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
@@ -37,7 +40,6 @@ import { useUsers } from '@/lib/queries'
 import { initialsOf } from '@/lib/initials'
 import ScorePill from './ScorePill'
 import OverviewTab from './drawer/OverviewTab'
-import RelationsTab from './drawer/RelationsTab'
 import MatchContractSection from './drawer/MatchContractSection'
 import NotesTab from './drawer/NotesTab'
 import TerminateMatchModal from './drawer/TerminateMatchModal'
@@ -46,12 +48,17 @@ import ChangelogTab from './drawer/ChangelogTab'
 import MatchApprovalBadge from './drawer/MatchApprovalBadge'
 import MatchApprovalActions from './drawer/MatchApprovalActions'
 import { useMatchApproval } from './hooks/useMatchApproval'
+import { computeMatchOrdinals } from './matchOrdinals'
 import type { OwnerCandidate } from './hooks/useMatchMutations'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 
 interface MatchDrawerProps {
   match: MatchRow | null
+  // MATCH-ORDINAL-1 (M14/M15): the full tenant match set (useMatches' `rows`),
+  // used only to compute this match's ordinal position per axis — never rendered
+  // as a list. Omitting it just hides the ordinal footnote (now on OverviewTab, M9).
+  allRows?: MatchRow[]
   onClose: () => void
   expanded?: boolean
   onToggleExpand?: () => void
@@ -82,7 +89,7 @@ interface MatchDrawerProps {
 }
 
 export default function MatchDrawer({
-  match, onClose, expanded = false, onToggleExpand, onSetStatus, onSetOwner, canApprove = false, onApprovalChange, onUpdate, onUpdateCustomFields,
+  match, allRows = [], onClose, expanded = false, onToggleExpand, onSetStatus, onSetOwner, canApprove = false, onApprovalChange, onUpdate, onUpdateCustomFields,
   onArchive, onRestore, canLinkBackoffice = false, canTerminate: canTerminatePermission = false,
 }: MatchDrawerProps) {
   const { t } = useTranslation('matches')
@@ -99,6 +106,9 @@ export default function MatchDrawer({
   const { data: users = [] } = useUsers() as { data?: OwnerCandidate[] }
   // MATCH-TERMINATE-1: the "Beëindigen" confirm modal, opened from the header action below.
   const [terminateOpen, setTerminateOpen] = useState(false)
+  // MATCH-ORDINAL-1 (M14/M15): this match's position among the tenant's other
+  // matches per axis — computed once per (match, allRows) change, not per render.
+  const ordinals = useMemo(() => computeMatchOrdinals(allRows, match), [allRows, match])
   if (!match) return null
 
   // The button hides once the match is already closed (its status carries the
@@ -136,9 +146,10 @@ export default function MatchDrawer({
   // (never a tab) — see titleActions below. Contract/financial reuses drawer.contract.title
   // as its tab label (already translated ×5) instead of a duplicate key.
   const tabs: EntityTab[] = [
-    { id: 'overview',  label: t('drawer.tabs.overview'), render: () => <OverviewTab match={match} onSetStatus={onSetStatus} /> },
+    // M9 (overzicht-layout): Overview now carries the relation hyperlinks + the
+    // ordinal footnote too — the whole match, one tab.
+    { id: 'overview',  label: t('drawer.tabs.overview'), render: () => <OverviewTab match={match} onSetStatus={onSetStatus} onUpdate={onUpdate} ordinals={ordinals} /> },
     { id: 'contract',  label: t('drawer.contract.title'), render: () => <MatchContractSection matchId={match.id} onUpdate={onUpdate} /> },
-    { id: 'relations', label: t('drawer.tabs.relations'), render: () => <RelationsTab match={match} /> },
     // NT-MATCH-1: notes, after the content tabs above and before Extra/Koppelingen
     // (there is no Changelog TAB — record history stays the icon-popover, §3A(d)).
     { id: 'notes', label: t('notes.title'), render: () => <NotesTab match={match} /> },

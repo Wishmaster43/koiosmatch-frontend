@@ -129,7 +129,22 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
   const { locationPicker, departmentPicker, contactPicker } = useCascadePickers({
     clientId,
     customerLocationId: cascade.locationId,
-    onLocationChange: p => setCascade(c => ({ ...c, locationId: p.id, locationName: p.name })),
+    onLocationChange: p => {
+      setCascade(c => ({ ...c, locationId: p.id, locationName: p.name }))
+      // V9 (Danny vacatures-ronde): picking a customer location takes over its
+      // address onto the Locatie sub-tab's OWN draft — only on a real pick (not
+      // a clear), and only into the form state, so the recruiter still reviews/
+      // Saves the Locatie card themselves (never a silent cross-section write).
+      if (p.id) {
+        locationForm.setF('street', p.street ?? '')
+        locationForm.setF('houseNumber', p.houseNumber ?? '')
+        locationForm.setF('houseNumberSuffix', p.houseNumberSuffix ?? '')
+        locationForm.setF('postalCode', p.postalCode ?? '')
+        locationForm.setF('city', p.city ?? '')
+        locationForm.setF('province', p.province ?? '')
+        locationForm.setF('country', p.country ?? '')
+      }
+    },
     customerDepartmentId: cascade.departmentId,
     onDepartmentChange: p => setCascade(c => ({ ...c, departmentId: p.id, departmentName: p.name })),
     contactId: cascade.contactId,

@@ -56,23 +56,50 @@ describe('AppointmentsTab', () => {
     mockGet.mockResolvedValue({ data: { data: [] } })
     render(<AppointmentsTab application={app()} />)
     await waitFor(() => expect(screen.getByText('appointments.empty')).toBeInTheDocument())
-    expect(screen.getByText('appointments.new')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'appointments.new' })).toBeInTheDocument()
+  })
+
+  // Toolbar-2: search + status filter reachable even before any appointment exists.
+  it('shows the search box and status filter alongside the empty state', async () => {
+    mockGet.mockResolvedValue({ data: { data: [] } })
+    render(<AppointmentsTab application={app()} />)
+    await waitFor(() => screen.getByText('appointments.empty'))
+    expect(screen.getByLabelText('appointments.searchPlaceholder')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'filters.allStatuses' })).toBeInTheDocument()
   })
 
   it('disables the new-appointment button without a candidate link', async () => {
     mockGet.mockResolvedValue({ data: { data: [] } })
     render(<AppointmentsTab application={app({ candidateId: null })} />)
-    await waitFor(() => expect(screen.getByText('appointments.new').closest('button')).toBeDisabled())
+    await waitFor(() => expect(screen.getByRole('button', { name: 'appointments.new' })).toBeDisabled())
   })
 
   it('opens the shared modal in create mode with applicationId + defaultVacancyId wired', async () => {
     mockGet.mockResolvedValue({ data: { data: [] } })
     const user = userEvent.setup()
     render(<AppointmentsTab application={app()} />)
-    await waitFor(() => screen.getByText('appointments.new'))
-    await user.click(screen.getByText('appointments.new'))
+    await waitFor(() => screen.getByRole('button', { name: 'appointments.new' }))
+    await user.click(screen.getByRole('button', { name: 'appointments.new' }))
     const shown = JSON.parse(screen.getByTestId('modal-props').textContent || '{}')
     expect(shown).toEqual({ candidateId: 'c1', applicationId: 5, defaultVacancyId: 'v9', mode: 'appointment', existingId: null })
+  })
+
+  // Toolbar-2: typing in the search box narrows the list client-side.
+  it('filters the visible rows by search text', async () => {
+    mockGet.mockResolvedValue({
+      data: {
+        data: [
+          { id: 'a1', application_id: 5, type: 'intake_flex', scheduled_at: '2026-07-15T10:45:00+00:00', location_name: 'HQ Amsterdam', status: 'planned' },
+          { id: 'a2', application_id: 5, type: 'call', scheduled_at: '2026-07-16T10:45:00+00:00', location_name: 'Rotterdam office', status: 'planned' },
+        ],
+      },
+    })
+    const user = userEvent.setup()
+    render(<AppointmentsTab application={app()} />)
+    await waitFor(() => screen.getByText('HQ Amsterdam'))
+    await user.type(screen.getByLabelText('appointments.searchPlaceholder'), 'rotterdam')
+    expect(screen.queryByText('HQ Amsterdam')).not.toBeInTheDocument()
+    expect(screen.getByText('Rotterdam office')).toBeInTheDocument()
   })
 
   it('filters the candidate-wide list to this application and renders formatted rows', async () => {
@@ -86,7 +113,7 @@ describe('AppointmentsTab', () => {
     })
     render(<AppointmentsTab application={app()} />)
     await waitFor(() => expect(screen.getAllByText('Type:intake_flex')).toHaveLength(1))
-    expect(screen.getByText('appointments.statusPlanned')).toBeInTheDocument()
+    expect(screen.getByText('appointments.statuses.planned')).toBeInTheDocument()
     expect(screen.getByText('HQ Amsterdam')).toBeInTheDocument()
   })
 

@@ -22,8 +22,8 @@ const mockedPatch = vi.mocked(api.patch)
 afterEach(() => vi.clearAllMocks())
 
 const detailRow = {
-  contract_type: 'ZZP Flex', start_date: '2026-01-01', end_date: null, hours_per_week: 32,
-  cao: 'vvt', scale: '', step: '', purchase_rate: 28.5, sell_rate: 41.75,
+  function_title: 'Verpleegkundige', contract_type: 'ZZP Flex', start_date: '2026-01-01', end_date: null, hours_per_week: 32,
+  cao: 'vvt', scale: '', step: '', surcharge: 15, purchase_rate: 28.5, sell_rate: 41.75,
   cost_center: 'KP-1', billing_emails: ['a@example.org'], remarks: '', margin: 13.25,
 }
 
@@ -36,6 +36,8 @@ describe('useMatchContract', () => {
     expect(mockedGet).toHaveBeenCalledWith('/matches/m1')
     expect(result.current.data.purchase_rate).toBe(28.5)
     expect(result.current.data.billing_emails).toEqual(['a@example.org'])
+    expect(result.current.data.function_title).toBe('Verpleegkundige')
+    expect(result.current.data.surcharge).toBe(15)
     expect(result.current.error).toBe(false)
   })
 

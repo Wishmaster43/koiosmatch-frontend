@@ -29,6 +29,10 @@ interface ApplicationTabProps {
   // Details block's edit mode/pencil with onLinkVacancy. Undefined hides the
   // pencil (read-only caller, mirrors onLinkVacancy).
   onUpdateSource?: (id: Id | undefined, source: string) => void
+  // S2/S3: switch the drawer to another of ITS OWN tabs (Afspraken/Interviews) —
+  // threaded down from ApplicationDrawer's EntityDrawer render callback. Undefined
+  // (e.g. no drawer context) makes the strip's cells render as plain text.
+  onNavigateTab?: (id: string) => void
 }
 
 // True when the sanitised motivation carries no markup at all. The careersite posts
@@ -51,12 +55,12 @@ const isPlainText = (html: string) => !/<[a-z][\s\S]*?>/i.test(html)
  * candidate-owned data (PATCH /candidates/{id}), not the application's own
  * fields — that edit lives on the candidate record itself.
  */
-export default function ApplicationTab({ application: a, onAdjustScore, onLinkVacancy, onUpdateSource }: ApplicationTabProps) {
+export default function ApplicationTab({ application: a, onAdjustScore, onLinkVacancy, onUpdateSource, onNavigateTab }: ApplicationTabProps) {
   const { t } = useTranslation(['applications', 'common'])
   const { formatDateTime } = useDateFormat()
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Rejection outcome — read-only, shown on the FIRST drill-down screen
           (Danny 25-07); the reject FORM itself moved to a footer button +
           confirm modal (RejectionModal), opened from the drawer. */}
@@ -64,8 +68,9 @@ export default function ApplicationTab({ application: a, onAdjustScore, onLinkVa
 
       {/* Status at a glance — phase, next appointment, interview and match
           score in one calm strip (Danny 25-07: "ik wil zoveel mogelijk
-          relevante informatie kunnen zien"). */}
-      <ApplicationStatusStrip application={a} />
+          relevante informatie kunnen zien"). S2/S3: appointment/interview
+          cells jump straight to their own tabs. */}
+      <ApplicationStatusStrip application={a} onNavigateTab={onNavigateTab} />
 
       {/* Details — Bron/Klant/Locatie/Vacature/Contactpersoon, now framed in the
           shared SectionCard like every other block on this tab (Danny 25-07 c). */}
@@ -122,11 +127,14 @@ export default function ApplicationTab({ application: a, onAdjustScore, onLinkVa
           AI-branded block (no more standalone "Taak" block next to it). */}
       <KoiosAdviceBlock namespace="applications" insights={buildApplicationAdviceInsights(a, t)} />
 
-      {/* Match score — overall + configured criteria breakdown. */}
+      {/* Match score — criteria breakdown only (V17): the plain overall %+bar
+          duplicated ApplicationStatusStrip's own match-score cell above, so
+          this call suppresses it (showOverall=false) while keeping the
+          edit/save affordance and, once editing, the sliders. */}
       <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('matchScore.title')}</div>
         <MatchScoreBlock score={a.score} criteria={a.matchCriteria as Criterion[]} summary={a.matchSummary}
-          source={a.matchSource} aiScore={a.aiScore}
+          source={a.matchSource} aiScore={a.aiScore} showOverall={false}
           onSave={onAdjustScore ? payload => onAdjustScore(a.id, payload) : undefined} />
       </div>
     </div>

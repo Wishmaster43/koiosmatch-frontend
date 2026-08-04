@@ -43,18 +43,19 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
       {subTab === 'general' && (
-        <DetailsGeneralTab vacancy={v} general={general} candidateTypes={candidateTypes} typeMeta={typeMeta}
-          industries={industries} fnOptions={fnOptions} formatDate={formatDate} />
+        <>
+          {/* V11 (Danny vacatures-ronde): Koios advisory only on Algemeen, ABOVE
+              the fields card (was rendered unconditionally below every sub-tab). */}
+          <KoiosAdviceBlock namespace="vacancies" insights={buildVacancyAdviceInsights(v, t)} />
+          <DetailsGeneralTab vacancy={v} general={general} candidateTypes={candidateTypes} typeMeta={typeMeta}
+            industries={industries} fnOptions={fnOptions} formatDate={formatDate} />
+        </>
       )}
       {subTab === 'location' && <DetailsLocationTab vacancy={v} location={location} />}
       {subTab === 'requirements' && (
         <DetailsRequirementsTab vacancy={v} requirements={requirements} seniorityLevels={seniorityLevels} educationLevels={educationLevels} />
       )}
       {subTab === 'conditions' && <DetailsConditionsTab vacancy={v} conditions={conditions} />}
-
-      {/* Koios AI advisory — field completeness + open/applications flow (§3A
-          blueprint); stays visible regardless of the active sub-tab. */}
-      <KoiosAdviceBlock namespace="vacancies" insights={buildVacancyAdviceInsights(v, t)} />
     </div>
   )
 }

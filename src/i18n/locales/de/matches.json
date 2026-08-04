@@ -61,7 +61,8 @@
       "score": "Score",
       "stage": "Phase",
       "created": "Erstellt",
-      "status": "Status"
+      "status": "Status",
+      "lastSynced": "Zuletzt synchronisiert"
     },
     "openCandidate": "Kandidat öffnen",
     "openVacancy": "Stelle öffnen",
@@ -87,7 +88,9 @@
       "error": "Vertragsdetails konnten nicht geladen werden.",
       "unavailable": "Vertragsdetails sind noch nicht verfügbar (Integration nicht konfiguriert).",
       "saveError": "Änderung konnte nicht gespeichert werden.",
-      "saved": "Vertragsdetails gespeichert."
+      "saved": "Vertragsdetails gespeichert.",
+      "functionTitle": "Funktionstitel",
+      "surcharge": "Zuschlag"
     },
     "ownerUnassigned": "Kein Inhaber",
     "terminate": {
@@ -103,6 +106,27 @@
       "confirm": "Beendigung bestätigen",
       "success": "Match beendet.",
       "error": "Der Match konnte nicht beendet werden."
+    },
+    "detailSection": "Details",
+    "remarks": {
+      "title": "Anmerkungen",
+      "saved": "Anmerkungen gespeichert.",
+      "saveError": "Anmerkungen konnten nicht gespeichert werden."
+    },
+    "duration": {
+      "unit": {
+        "days": "{{count}} Tag",
+        "weeks": "{{count}} Woche",
+        "months": "{{count}} Monat"
+      },
+      "remaining": "noch {{pct}}%",
+      "progressLabel": "Vertragsfortschritt"
+    },
+    "ordinal": {
+      "candidate": "Match {{position}} von {{total}} für diesen Kandidaten",
+      "client": "Match {{position}} von {{total}} für diesen Kunden",
+      "location": "Match {{position}} von {{total}} an diesem Standort",
+      "department": "Match {{position}} von {{total}} in dieser Abteilung"
     }
   },
   "approval": {
@@ -170,5 +194,21 @@
     "searchPlaceholder": "Notizen durchsuchen…",
     "loading": "Notizen werden geladen…",
     "loadError": "Notizen konnten nicht geladen werden."
+  },
+  "ai": {
+    "title": "Koios AI empfiehlt",
+    "beta": "Beta",
+    "refresh": "Aktualisieren",
+    "analyzing": "Koios AI analysiert das Match…",
+    "scoreLabel": "Score",
+    "scoreGood": "Starkes Match ({{score}}).",
+    "scoreAverage": "Durchschnittliches Match ({{score}}) — Passung prüfen.",
+    "scorePoor": "Schwaches Match ({{score}}) — braucht Aufmerksamkeit.",
+    "scoreUnknown": "Noch keine Bewertung.",
+    "windowLabel": "Vertragszeitraum",
+    "windowExpired": "Das Enddatum liegt bereits {{days}} Tag(e) zurück.",
+    "windowWarning": "Noch {{days}} Tag(e) bis zum Enddatum — rechtzeitig verlängern oder abschließen.",
+    "windowFine": "Vertragszeitraum verläuft planmäßig.",
+    "windowUnknown": "Kein Enddatum bekannt."
   }
 }

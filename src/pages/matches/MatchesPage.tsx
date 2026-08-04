@@ -351,7 +351,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       </div>
 
       {/* Read-only drill-down drawer */}
-      <MatchDrawer match={selected} onClose={() => setSelected(null)}
+      <MatchDrawer match={selected} allRows={rows} onClose={() => setSelected(null)}
         expanded={drawerExpanded} onToggleExpand={() => setDrawerExpanded(v => !v)}
         onSetStatus={(status) => { if (selected?.id != null) setStatus(selected.id, status) }}
         // MATCH-OWNER-1: reassign the owner (PATCH owner_id) — same optimistic-revert

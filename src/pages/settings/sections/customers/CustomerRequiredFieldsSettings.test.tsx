@@ -59,7 +59,9 @@ describe('CustomerRequiredFieldsSettings — Klant tab (phase matrix)', () => {
     const user = userEvent.setup()
     render(<CustomerRequiredFieldsSettings />)
     const nameRow = screen.getByText('Naam').closest('tr')!
-    const cells = within(nameRow).getAllByRole('button')
+    // PermissionToggle renders the shared Toggle (role=switch, audit finding 05-08) —
+    // was a plain <button> before that fix.
+    const cells = within(nameRow).getAllByRole('switch')
     await user.click(cells[0]) // first phase column = Lead-fase
     expect(postMock).toHaveBeenCalledWith('/settings', { customer_required_fields: JSON.stringify({ lead_fase: ['name'] }) })
   })
@@ -67,7 +69,7 @@ describe('CustomerRequiredFieldsSettings — Klant tab (phase matrix)', () => {
   it('a stored required field renders its toggle as ON (round trip)', () => {
     blobRef.current = { customer_required_fields: { klant_fase: ['name'] } }
     render(<CustomerRequiredFieldsSettings />)
-    expect(screen.getByRole('button', { name: 'Naam — Klant-fase' })).toHaveStyle({ background: 'var(--color-primary)' })
+    expect(screen.getByRole('switch', { name: 'Naam — Klant-fase' })).toHaveStyle({ background: 'var(--color-primary)' })
   })
 })
 
@@ -76,7 +78,7 @@ describe('CustomerRequiredFieldsSettings — flat sub-entity tabs', () => {
     const user = userEvent.setup()
     render(<CustomerRequiredFieldsSettings />)
     await user.click(screen.getByRole('tab', { name: st('customerRequiredFields.tabs.location') }))
-    await user.click(screen.getByRole('button', { name: 'Naam' }))
+    await user.click(screen.getByRole('switch', { name: 'Naam' }))
     expect(postMock).toHaveBeenCalledWith('/settings', { customer_location_required_fields: JSON.stringify(['name']) })
   })
 
@@ -84,7 +86,7 @@ describe('CustomerRequiredFieldsSettings — flat sub-entity tabs', () => {
     const user = userEvent.setup()
     render(<CustomerRequiredFieldsSettings />)
     await user.click(screen.getByRole('tab', { name: st('customerRequiredFields.tabs.department') }))
-    await user.click(screen.getByRole('button', { name: 'Naam' }))
+    await user.click(screen.getByRole('switch', { name: 'Naam' }))
     expect(postMock).toHaveBeenCalledWith('/settings', { customer_department_required_fields: JSON.stringify(['name']) })
   })
 
@@ -92,7 +94,7 @@ describe('CustomerRequiredFieldsSettings — flat sub-entity tabs', () => {
     const user = userEvent.setup()
     render(<CustomerRequiredFieldsSettings />)
     await user.click(screen.getByRole('tab', { name: st('customerRequiredFields.tabs.contact') }))
-    await user.click(screen.getByRole('button', { name: 'Voornaam' }))
+    await user.click(screen.getByRole('switch', { name: 'Voornaam' }))
     expect(postMock).toHaveBeenCalledWith('/settings', { customer_contact_required_fields: JSON.stringify(['first_name']) })
   })
 
@@ -101,6 +103,6 @@ describe('CustomerRequiredFieldsSettings — flat sub-entity tabs', () => {
     blobRef.current = { customer_location_required_fields: ['name'] }
     render(<CustomerRequiredFieldsSettings />)
     await user.click(screen.getByRole('tab', { name: st('customerRequiredFields.tabs.location') }))
-    expect(screen.getByRole('button', { name: 'Naam' })).toHaveStyle({ background: 'var(--color-primary)' })
+    expect(screen.getByRole('switch', { name: 'Naam' })).toHaveStyle({ background: 'var(--color-primary)' })
   })
 })
