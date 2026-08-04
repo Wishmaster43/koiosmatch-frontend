@@ -52,9 +52,9 @@
     "tabs": {
       "details": "Details",
       "links": "Links",
-      "comments": "Comments",
       "activity": "Activity",
-      "extra": "Extra"
+      "extra": "Extra",
+      "notes": "Notes"
     }
   },
   "bulk": {
@@ -83,9 +83,6 @@
     "description": "Description"
   },
   "comments": {
-    "title": "Comments",
-    "empty": "No comments yet.",
-    "placeholder": "Write a comment…",
     "send": "Post"
   },
   "links": {
@@ -153,5 +150,17 @@
     "open": "Open",
     "history": "History",
     "empty": "No tasks in this view."
+  },
+  "notes": {
+    "title": "Notes",
+    "type": "Type",
+    "new": "New note",
+    "empty": "No notes yet.",
+    "placeholder": "Write a note…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "searchPlaceholder": "Search notes…",
+    "loading": "Loading notes…",
+    "loadError": "Notes could not be loaded."
   }
 }

@@ -50,9 +50,9 @@
     "tabs": {
       "details": "Détails",
       "links": "Liens",
-      "comments": "Commentaires",
       "activity": "Activité",
-      "extra": "Extra"
+      "extra": "Extra",
+      "notes": "Notes"
     },
     "markDone": "Marquer comme terminé",
     "tags": "Tags"
@@ -69,9 +69,6 @@
     "description": "Description"
   },
   "comments": {
-    "title": "Commentaires",
-    "empty": "Aucun commentaire pour le moment.",
-    "placeholder": "Écrire un commentaire…",
     "send": "Publier"
   },
   "links": {
@@ -153,5 +150,17 @@
     "open": "Ouvertes",
     "history": "Historique",
     "empty": "Aucune tâche dans cette vue."
+  },
+  "notes": {
+    "title": "Notes",
+    "type": "Type",
+    "new": "Nouvelle note",
+    "empty": "Pas encore de notes.",
+    "placeholder": "Rédiger une note…",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "searchPlaceholder": "Rechercher des notes…",
+    "loading": "Chargement des notes…",
+    "loadError": "Les notes n'ont pas pu être chargées."
   }
 }

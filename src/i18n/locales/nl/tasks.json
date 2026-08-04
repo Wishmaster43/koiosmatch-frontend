@@ -52,9 +52,9 @@
     "tabs": {
       "details": "Details",
       "links": "Koppelingen",
-      "comments": "Reacties",
       "activity": "Activiteit",
-      "extra": "Extra"
+      "extra": "Extra",
+      "notes": "Notities"
     }
   },
   "bulk": {
@@ -83,9 +83,6 @@
     "description": "Omschrijving"
   },
   "comments": {
-    "title": "Reacties",
-    "empty": "Nog geen reacties.",
-    "placeholder": "Schrijf een reactie…",
     "send": "Plaatsen"
   },
   "links": {
@@ -153,5 +150,17 @@
     "open": "Open",
     "history": "Historie",
     "empty": "Geen taken in deze weergave."
+  },
+  "notes": {
+    "title": "Notities",
+    "type": "Type",
+    "new": "Nieuwe notitie",
+    "empty": "Nog geen notities.",
+    "placeholder": "Schrijf een notitie…",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "searchPlaceholder": "Zoek notities…",
+    "loading": "Notities laden…",
+    "loadError": "Notities konden niet geladen worden."
   }
 }

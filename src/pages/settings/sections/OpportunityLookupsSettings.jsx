@@ -8,8 +8,9 @@ import StatusListEditor from './StatusListEditor'
  * separate tenant-configurable list backed by the shared value/label/color/sort_order
  * shape (backend OpportunityStageController + OpportunityLookupController subclasses,
  * routes/api/tenant/opportunities.php): stages, service types, agreement types and
- * deal types. All four support reorder (their `reorder` route exists) so `showRank`
- * is on for all. FE consumers: useOpportunityStages / useOpportunityLookups.
+ * deal types. All four reorder by drag (their `reorder` route exists); the typed-rank
+ * input (showRank) stays OFF — no other lookup editor shows it (Danny 04-08), drag is
+ * the one ordering idiom. FE consumers: useOpportunityStages / useOpportunityLookups.
  *
  * Registry note (registry.jsx:252 already flags this move): stage/service/agreement
  * lookups previously had no editor at all; deal types are new here too. One
@@ -38,22 +39,22 @@ export default function OpportunityLookupsSettings() {
       <SubTabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
       <div style={{ marginTop: 14 }}>
         {activeTab === 'stages' && (
-          <StatusListEditor showRank withColor withValueSlug
+          <StatusListEditor withColor withValueSlug
             title={t('opportunityLookups.stages.title')} subtitle={t('opportunityLookups.stages.subtitle')}
             endpoint="/opportunity-stages" addLabel={t('opportunityLookups.add')} />
         )}
         {activeTab === 'serviceTypes' && (
-          <StatusListEditor showRank withColor withValueSlug
+          <StatusListEditor withColor withValueSlug
             title={t('opportunityLookups.serviceTypes.title')} subtitle={t('opportunityLookups.serviceTypes.subtitle')}
             endpoint="/opportunity-service-types" addLabel={t('opportunityLookups.add')} />
         )}
         {activeTab === 'agreementTypes' && (
-          <StatusListEditor showRank withColor withValueSlug
+          <StatusListEditor withColor withValueSlug
             title={t('opportunityLookups.agreementTypes.title')} subtitle={t('opportunityLookups.agreementTypes.subtitle')}
             endpoint="/opportunity-agreement-types" addLabel={t('opportunityLookups.add')} />
         )}
         {activeTab === 'dealTypes' && (
-          <StatusListEditor showRank withColor withValueSlug
+          <StatusListEditor withColor withValueSlug
             title={t('opportunityLookups.dealTypes.title')} subtitle={t('opportunityLookups.dealTypes.subtitle')}
             endpoint="/opportunity-deal-types" addLabel={t('opportunityLookups.add')}
             extraField={{ key: 'unit', label: t('opportunityLookups.dealTypes.unit'), default: 'euro',

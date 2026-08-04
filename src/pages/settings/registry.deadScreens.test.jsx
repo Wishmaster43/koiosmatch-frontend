@@ -18,10 +18,10 @@
  * useNoteTypes('contact') (only the tab was missing) and the vacancy drawer's
  * NotesTab now calls useNoteTypes('vacancy') (VACANCY-NOTE-TYPE-1 gave it a real
  * backend-validated `type`). Both moved off the "stays gone" list below.
- * nt_match graduated the same day (NT-MATCH-1: MatchDrawer's Notities tab reads
- * useNoteTypes('match')). nt_task stays withheld: TaskCommentController validates
- * `type`, but TaskDrawer's Reacties tab was deliberately removed (2026-07-14) —
- * see registry.jsx's note_types comment for what it needs.
+ * nt_match and nt_task graduated the same day (NT-MATCH-1 / NT-TASK-1: the match
+ * drawer's Notities tab and the task drawer's reinstated notes tab both read
+ * useNoteTypes(<entity>)) — the whole note-types wish list is now live except
+ * bellijsten, which waits on its backend token/route (NOTE-CALLLIST-1).
  */
 import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
@@ -79,9 +79,8 @@ describe('settings registry offers no screen without a consumer', () => {
 
   it('the screens still missing a consumer stay gone until one lands', () => {
     const all = NAV_GROUPS.flatMap(g => g.items.map(i => i.id))
-    // nt_contact/nt_vacancy graduated 2026-08-04; nt_match followed the same day
-    // (NT-MATCH-1 — MatchDrawer's Notities tab reads useNoteTypes('match')).
-    expect(all).not.toContain('nt_task')
+    // The whole nt_* family graduated 2026-08-04 (contact/vacancy/match/task) —
+    // only screens with a still-missing consumer remain below.
     expect(all).not.toContain('view_planning')
     expect(all).not.toContain('view_sales')
     expect(all).not.toContain('view_candidates')

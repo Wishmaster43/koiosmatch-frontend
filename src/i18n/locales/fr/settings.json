@@ -222,7 +222,8 @@
     "blacklist_reasons": "Motifs de liste noire",
     "escalation_reasons": "Motifs d'escalade",
     "opportunity_lookups": "Étapes et types",
-    "nt_match": "Matchs"
+    "nt_match": "Matchs",
+    "nt_task": "Tâches"
   },
   "kpis": {
     "title": "Paramètres KPI",

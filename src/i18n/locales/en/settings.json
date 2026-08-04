@@ -222,7 +222,8 @@
     "blacklist_reasons": "Blacklist reasons",
     "escalation_reasons": "Escalation reasons",
     "opportunity_lookups": "Stages & types",
-    "nt_match": "Matches"
+    "nt_match": "Matches",
+    "nt_task": "Tasks"
   },
   "kpis": {
     "title": "KPI settings",

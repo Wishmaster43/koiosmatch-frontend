@@ -9,8 +9,11 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-// Real i18n (nl) side-effect init so t() resolves genuine Dutch text.
-import '@/i18n'
+// Real i18n (nl) instance so t() resolves genuine Dutch text — kept as a binding
+// (not just the side-effect import) so the NT-TASK-1 block below can read the
+// SAME resolved string the component renders, whether or not the reported nl
+// copy for the new 'notes' tab key has landed in tasks.json yet.
+import i18n from '@/i18n'
 import TaskDrawer from './TaskDrawer'
 import type { TaskDetail } from '@/types/task'
 
@@ -87,5 +90,27 @@ describe('TaskDrawer — reference number chip', () => {
   it('renders nothing when referenceNumber is absent', () => {
     mount(task(false))
     expect(screen.queryByText(/^T-/)).toBeNull()
+  })
+})
+
+/**
+ * NT-TASK-1: the Notes tab is wired in after Details/Links — the old plain
+ * "Reacties" thread removed 2026-07-14 returns as a proper type-aware notes tab
+ * (mirrors matches' MatchDrawer NT-MATCH-1 wiring guard). The Changelog stays
+ * the header icon-popover, never a tab (§3A(d)).
+ */
+describe('TaskDrawer · Notes tab (NT-TASK-1)', () => {
+  it('renders "notes" after Details and Links, in the tab bar', () => {
+    mount(task(false))
+    // Read the SAME i18n instance the component renders through — correct whether
+    // or not the reported nl copy for this new key has landed in tasks.json yet.
+    const notesLabel = i18n.t('tasks:drawer.tabs.notes')
+    const labels = screen.getAllByRole('tab').map(b => b.textContent)
+    const detailsIdx = labels.indexOf(i18n.t('tasks:drawer.tabs.details'))
+    const linksIdx = labels.indexOf(i18n.t('tasks:drawer.tabs.links'))
+    const notesIdx = labels.indexOf(notesLabel)
+    expect(detailsIdx).toBeGreaterThan(-1)
+    expect(linksIdx).toBeGreaterThan(detailsIdx)
+    expect(notesIdx).toBeGreaterThan(linksIdx)
   })
 })

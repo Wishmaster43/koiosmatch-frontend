@@ -50,9 +50,9 @@
     "tabs": {
       "details": "Detalles",
       "links": "Vínculos",
-      "comments": "Comentarios",
       "activity": "Actividad",
-      "extra": "Extra"
+      "extra": "Extra",
+      "notes": "Notas"
     },
     "markDone": "Marcar como hecho",
     "tags": "Etiquetas"
@@ -69,9 +69,6 @@
     "description": "Descripción"
   },
   "comments": {
-    "title": "Comentarios",
-    "empty": "Aún no hay comentarios.",
-    "placeholder": "Escribe un comentario…",
     "send": "Publicar"
   },
   "links": {
@@ -153,5 +150,17 @@
     "open": "Abiertas",
     "history": "Historial",
     "empty": "No hay tareas en esta vista."
+  },
+  "notes": {
+    "title": "Notas",
+    "type": "Tipo",
+    "new": "Nueva nota",
+    "empty": "Aún no hay notas.",
+    "placeholder": "Escribe una nota…",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "searchPlaceholder": "Buscar notas…",
+    "loading": "Cargando notas…",
+    "loadError": "No se pudieron cargar las notas."
   }
 }

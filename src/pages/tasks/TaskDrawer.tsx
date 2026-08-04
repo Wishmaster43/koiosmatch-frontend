@@ -14,6 +14,7 @@ import { useUsers } from '@/lib/queries'
 import DetailsTab from './drawer/DetailsTab'
 import RelatedTasks from './drawer/RelatedTasks'
 import LinksTab from './drawer/LinksTab'
+import NotesTab from './drawer/NotesTab'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ActivityTab from './drawer/ActivityTab'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
@@ -27,10 +28,11 @@ interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: stri
 const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || '—'
 
 // The tab order. The changelog is a header popover (not a tab), mirroring candidate.
-// Reacties removed again (Danny 2026-07-14): the empty thread was clutter; task
-// comments live on in the record notes API but get no tab until asked for.
+// NT-TASK-1 (Danny, reinstated): the old plain "Reacties" thread removed 2026-07-14
+// returns as a proper type-aware NOTES tab (mirrors matches' NotesTab onto the same
+// shared NotesTab family) instead of the empty comments stub.
 // 'extra' (§3A(f)) is appended below only when the tenant has ≥1 active custom field.
-const TAB_IDS = ['details', 'links']
+const TAB_IDS = ['details', 'links', 'notes']
 
 interface TaskDrawerProps {
   task: TaskDetail | null
@@ -64,6 +66,7 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
     switch (id) {
       case 'details':  return <><DetailsTab task={task} onUpdate={patch => onUpdate(task.id, patch)} /><RelatedTasks task={task} /></>
       case 'links':    return <LinksTab task={task} onAddLink={link => onAddLink(task.id, link)} onRemoveLink={link => onRemoveLink(task.id, link)} />
+      case 'notes':    return <NotesTab task={task} />
       case 'extra':    return <CustomFieldsTab entityType="task" values={task.customFields ?? {}}
                           onSave={patch => onUpdate(task.id, { customFields: { ...task.customFields, ...patch } })} />
       default:         return null

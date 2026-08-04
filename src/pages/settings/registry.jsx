@@ -379,12 +379,10 @@ export const NAV_GROUPS = [
     //                 tab (pages/matches/drawer/NotesTab.tsx on the shared SharedNotesTab +
     //                 useNoteTypes('match')) against MatchNoteController's entity-scoped
     //                 `type` validation — the reader is real, so the editor turns on.
-    //   • task      — STILL withheld. TaskCommentController + /tasks/{id}/notes validate
-    //                 `type` scoped to entity=task the same way, but the Reacties tab was
-    //                 deliberately removed (Danny 2026-07-14, TaskDrawer TAB_IDS = ['details',
-    //                 'links']) — "task comments live on in the record notes API but get no
-    //                 tab until asked for". Needs that tab reinstated (with a type picker)
-    //                 before this turns on.
+    //   • task      — NOW offered (NT-TASK-1, 2026-08-04). The Reacties tab (removed
+    //                 2026-07-14) returned as a Notities tab on the shared SharedNotesTab +
+    //                 useNoteTypes('task') against TaskCommentController's entity-scoped
+    //                 `type` validation — Danny's note-type coverage list asked for it.
     //   • call_list (bellijsten) — STILL withheld, one step earlier than match/task: no
     //                 'call_list' token in the backend's NoteType::ENTITIES, no notes route
     //                 on outreach-campaigns, and no FE notes surface on OutreachDrawer either.
@@ -409,6 +407,7 @@ export const NAV_GROUPS = [
       { id: 'nt_opportunity', icon: Target, render: () => <NoteTypesSettings entity="opportunity" /> },
       { id: 'nt_vacancy', icon: Briefcase, render: () => <NoteTypesSettings entity="vacancy" /> },
       { id: 'nt_match', icon: Sparkles, render: () => <NoteTypesSettings entity="match" /> },
+      { id: 'nt_task', icon: ListChecks, render: () => <NoteTypesSettings entity="task" /> },
     ],
   },
   {
