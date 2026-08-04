@@ -26,6 +26,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { toLinkedinSlug } from '@/components/drawer/contactLinks'
 import { mapContact } from '../data/mapCustomer'
 import type { Contact, ApiContact } from '@/types/customer'
 import type { Id } from '@/types/common'
@@ -40,6 +41,9 @@ export interface ContactPayload {
   phone: string
   // Split from `phone` (BE 2026-07-20): the separate mobile number (WhatsApp shortcut).
   mobile: string
+  // CONTACT-LINKEDIN-1 (Danny 05-08): whatever the field holds (a bare slug or a
+  // pasted full URL) — toApi below strips it to the clean slug before it is sent.
+  linkedin: string
   // CONTACT-GESLACHT-1: the candidate_genders VALUE SLUG (male|female|other). The
   // backend validates it with `exists:candidate_genders,value` — sending an id 422s.
   gender: string
@@ -225,6 +229,10 @@ const toApi = (p: Partial<ContactPayload>) => ({
   ...(p.email !== undefined ? { email: p.email } : {}),
   ...(p.phone !== undefined ? { phone: p.phone } : {}),
   ...(p.mobile !== undefined ? { mobile: p.mobile } : {}),
+  // CONTACT-LINKEDIN-1: strip a pasted full URL down to the bare slug the backend
+  // column expects (toLinkedinSlug) — empty string → null, mirroring gender below
+  // (the backend test proves null is a legitimate "cleared" value, not a 422).
+  ...(p.linkedin !== undefined ? { linkedin_slug: toLinkedinSlug(p.linkedin) || null } : {}),
   // Empty string → null: the column is nullable, but '' fails the exists: rule.
   ...(p.gender !== undefined ? { gender: p.gender || null } : {}),
   ...(p.role !== undefined ? { function: p.role } : {}),

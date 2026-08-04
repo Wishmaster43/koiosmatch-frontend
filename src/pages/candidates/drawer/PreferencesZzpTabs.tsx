@@ -23,6 +23,14 @@ import { useIndustries } from '@/lib/useIndustries'
 import { useDriverLicenses } from '@/lib/useDriverLicenses'
 import type { Candidate } from '@/types/candidate'
 
+// Documented exception to the fieldRowCanon 120px label width (Danny 05-08 unify pass):
+// this tab's labels include "Max. reisafstand (km)" / "Zakelijk e-mailadres" (~20+
+// chars), which visibly wrap at 120px — kept wider, and unified to ONE value here
+// (was inconsistently 160 on availability/travel/financial/other, 180 on the ZZP
+// company/address/invoicing blocks in the same file — that internal drift is fixed
+// even though the canon width itself is not adopted for this one tab).
+const WIDE_LABEL_WIDTH = 150
+
 type AnyProps = Record<string, unknown>
 // EditableFieldTable is still untyped JS — accept any props at the boundary.
 const EditableFieldTable = EditableFieldTableJs as unknown as ComponentType<AnyProps>
@@ -178,14 +186,14 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
       <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
       {/* One EditableFieldTable per sub-tab, all fed the SAME full value/onSave (see
           file comment) — on Save, Contractvorm → candidateTypes, the rest → preferences. */}
-      {subTab === 'availability' && <EditableFieldTable key={c.id} fields={availabilityFields} value={value} labelWidth={160} onSave={handleSave} />}
-      {subTab === 'travel'       && <EditableFieldTable key={c.id} fields={travelFields}       value={value} labelWidth={160} onSave={handleSave} />}
+      {subTab === 'availability' && <EditableFieldTable key={c.id} fields={availabilityFields} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSave} />}
+      {subTab === 'travel'       && <EditableFieldTable key={c.id} fields={travelFields}       value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSave} />}
       {subTab === 'financial' && (
         <>
-          <EditableFieldTable key={c.id} fields={financialFields} value={value} labelWidth={160} onSave={handleSave} />
+          <EditableFieldTable key={c.id} fields={financialFields} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSave} />
         </>
       )}
-      {subTab === 'other'        && <EditableFieldTable key={c.id} fields={otherFields}        value={value} labelWidth={160} onSave={handleSave} />}
+      {subTab === 'other'        && <EditableFieldTable key={c.id} fields={otherFields}        value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSave} />}
     </>
   )
 }
@@ -254,9 +262,9 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <EditableFieldTable title={t('zzp.groupCompany')}   fields={blockFields(t('zzp.groupCompany'))}   value={value} labelWidth={180} onSave={handleSave} />
-      <EditableFieldTable title={t('zzp.groupAddress')}   fields={blockFields(t('zzp.groupAddress'))}   value={value} labelWidth={180} onSave={handleSave} />
-      <EditableFieldTable title={t('zzp.groupInvoicing')} fields={blockFields(t('zzp.groupInvoicing'))} value={value} labelWidth={180} onSave={handleSave} />
+      <EditableFieldTable title={t('zzp.groupCompany')}   fields={blockFields(t('zzp.groupCompany'))}   value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSave} />
+      <EditableFieldTable title={t('zzp.groupAddress')}   fields={blockFields(t('zzp.groupAddress'))}   value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSave} />
+      <EditableFieldTable title={t('zzp.groupInvoicing')} fields={blockFields(t('zzp.groupInvoicing'))} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSave} />
     </div>
   )
 }

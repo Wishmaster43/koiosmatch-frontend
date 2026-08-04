@@ -388,7 +388,9 @@
       "archiveContact": "Archive contact",
       "confirmArchive": "Archive {{name}}? You can restore it later via 'Archived'.",
       "archiveFailed": "Archiving failed.",
-      "restoreFailed": "Restoring failed."
+      "restoreFailed": "Restoring failed.",
+      "linkedin": "LinkedIn",
+      "openLinkedin": "Open on LinkedIn"
     },
     "deleteConfirm": "Delete this contact?",
     "saveFailed": "Saving failed.",
@@ -704,7 +706,9 @@
     },
     "contactPersonHint": "Pick an existing contact of this customer, or type a new name.",
     "contactCouplingFailed": "Location \"{{name}}\" was created, but linking the contact failed. Link it manually from the location later.",
-    "contactCreateFailed": "Location \"{{name}}\" was created, but creating the new contact failed. Add it manually and link it from the location later."
+    "contactCreateFailed": "Location \"{{name}}\" was created, but creating the new contact failed. Add it manually and link it from the location later.",
+    "linkedin": "LinkedIn",
+    "linkedinPlaceholder": "linkedin.com/in/username"
   },
   "changelog": {
     "empty": "No changes yet."

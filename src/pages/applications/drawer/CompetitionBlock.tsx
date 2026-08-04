@@ -58,7 +58,8 @@ export default function CompetitionBlock({ application: a }: CompetitionBlockPro
             its Sollicitaties sub-tab directly — targeting a specific sub-tab
             needs the cross-entity `{ open, tab }` intent extended on the
             VACANCIES page (out of this cluster's territory, see CLAUDE.md §3A). */}
-        <div style={{ fontSize: 13, color: 'var(--text)' }}>
+        {/* Canon (05-08): body text 12px, matching the muted lines below in this card. */}
+        <div style={{ fontSize: 12, color: 'var(--text)' }}>
           <EntityLink page="vacancies" id={a.vacancyId} title={t('drawer.openVacancy')}>
             {t('competition.total', { count: total })}
           </EntityLink>

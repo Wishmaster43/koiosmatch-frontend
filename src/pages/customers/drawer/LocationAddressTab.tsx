@@ -95,10 +95,10 @@ export default function LocationAddressTab({
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* CANON-DIVIDER-1 (Danny 05-08): candidate ProfileTab canon — no line
           between rows, 11px labels. */}
+      {/* Canon width (fieldRowCanon, 05-08): EditableFieldTable's own default now matches. */}
       {[t('overview.details'), t('subModal.groups.address')].map(group => (
-        <EditableFieldTable key={group} title={group} labelWidth={140} value={values} onSave={save}
-          fields={generalFields.filter(f => f.group === group).map(f => ({ ...f, group: undefined }))}
-          dividers={false} labelFontSize={11} />
+        <EditableFieldTable key={group} title={group} value={values} onSave={save}
+          fields={generalFields.filter(f => f.group === group).map(f => ({ ...f, group: undefined }))} />
       ))}
 
       {/* CONTACT-LOCATION-PRIMARY-1, round two (Danny 02-08) — ONE contact block, and the

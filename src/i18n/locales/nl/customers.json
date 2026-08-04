@@ -388,7 +388,9 @@
       "archiveContact": "Contactpersoon archiveren",
       "confirmArchive": "{{name}} archiveren? Je kunt dit later terugzetten via 'Gearchiveerd'.",
       "archiveFailed": "Archiveren is mislukt.",
-      "restoreFailed": "Herstellen is mislukt."
+      "restoreFailed": "Herstellen is mislukt.",
+      "linkedin": "LinkedIn",
+      "openLinkedin": "Openen op LinkedIn"
     },
     "deleteConfirm": "Deze contactpersoon verwijderen?",
     "saveFailed": "Opslaan is mislukt.",
@@ -704,7 +706,9 @@
     },
     "contactPersonHint": "Kies een bestaand contact van deze klant, of typ een nieuwe naam.",
     "contactCouplingFailed": "Locatie \"{{name}}\" is aangemaakt, maar het koppelen van de contactpersoon is mislukt. Koppel deze later handmatig via de locatie.",
-    "contactCreateFailed": "Locatie \"{{name}}\" is aangemaakt, maar het aanmaken van de nieuwe contactpersoon is mislukt. Voeg deze later handmatig toe en koppel via de locatie."
+    "contactCreateFailed": "Locatie \"{{name}}\" is aangemaakt, maar het aanmaken van de nieuwe contactpersoon is mislukt. Voeg deze later handmatig toe en koppel via de locatie.",
+    "linkedin": "LinkedIn",
+    "linkedinPlaceholder": "linkedin.com/in/gebruikersnaam"
   },
   "changelog": {
     "empty": "Nog geen wijzigingen."

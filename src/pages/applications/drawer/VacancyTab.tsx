@@ -105,7 +105,8 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
     })
   }
 
-  const muted: CSSProperties = { fontSize: 13, color: 'var(--text-muted)', padding: '24px 0', textAlign: 'center' }
+  // Canon (05-08): 12px muted body text, matching the sibling tabs' loading/error copy.
+  const muted: CSSProperties = { fontSize: 12, color: 'var(--text-muted)', padding: '24px 0', textAlign: 'center' }
   if (state === 'loading') return <div style={muted}>{t('vacancyDetail.loading')}</div>
   if (state === 'error') return <div style={muted}>{t('vacancyDetail.error')}</div>
 
@@ -114,7 +115,7 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
   if (state === 'empty' || !vac) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '24px 0' }}>
-        <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('vacancyDetail.empty')}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('vacancyDetail.empty')}</div>
         {onLinkVacancy && (linking ? (
           <div style={{ display: 'flex', gap: 6, alignItems: 'center', width: '100%', maxWidth: 340 }}>
             <div style={{ flex: 1 }}>

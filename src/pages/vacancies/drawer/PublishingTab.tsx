@@ -3,6 +3,7 @@ import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import SelectMenuJs from '@/components/ui/SelectMenu'
 import SubTabBar from '@/components/drawer/SubTabBar'
+import { sectionTitle } from '@/components/ui/SectionCard'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS } from '../data/applicationSettingsDefaults'
@@ -97,8 +98,9 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
 
       {subTab === 'settings' && (
         <div style={{ marginTop: 12 }}>
-          {/* Application settings */}
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('publishing.applicationSettings')}</div>
+          {/* Application settings — canon (05-08): the shared sectionTitle, reused
+              instead of a hand-rolled heading. */}
+          <div style={{ ...sectionTitle, marginBottom: 8 }}>{t('publishing.applicationSettings')}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
             {APP_FIELDS.map(field => (
               <div key={field} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
@@ -114,8 +116,8 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
 
       {subTab === 'sites' && (
         <div style={{ marginTop: 12 }}>
-          {/* Job boards */}
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('publishing.channels')}</div>
+          {/* Job boards — canon (05-08): the shared sectionTitle. */}
+          <div style={{ ...sectionTitle, marginBottom: 8 }}>{t('publishing.channels')}</div>
           {/* Honest state (Danny 13/7): the toggles record WHAT will be published; the
               public career site + channel feeds (CAREER-1/PUBLISH-1) are not live yet,
               so never claim "Gepubliceerd" as if something is already out there. */}
@@ -127,7 +129,8 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
             {channels.map(c => (
               <div key={c.value} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
                 padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)' }}>
-                <span style={{ fontSize: 13, color: 'var(--text)' }}>{c.label}</span>
+                {/* Canon (05-08): 12px, matching the identical APP_FIELDS row above. */}
+                <span style={{ fontSize: 12, color: 'var(--text)' }}>{c.label}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 11, color: c.published ? 'var(--color-success)' : 'var(--text-muted)' }}>
                     {c.published ? t('publishing.queuedOn') : t('publishing.notPublished')}

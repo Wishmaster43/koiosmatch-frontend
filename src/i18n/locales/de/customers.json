@@ -388,7 +388,9 @@
       "archiveContact": "Kontakt archivieren",
       "confirmArchive": "{{name}} archivieren? Sie können dies später über 'Archiviert' rückgängig machen.",
       "archiveFailed": "Archivieren fehlgeschlagen.",
-      "restoreFailed": "Wiederherstellen fehlgeschlagen."
+      "restoreFailed": "Wiederherstellen fehlgeschlagen.",
+      "linkedin": "LinkedIn",
+      "openLinkedin": "Auf LinkedIn öffnen"
     },
     "deleteConfirm": "Diesen Kontakt löschen?",
     "saveFailed": "Speichern fehlgeschlagen.",
@@ -704,7 +706,9 @@
     },
     "contactPersonHint": "Wählen Sie einen bestehenden Kontakt dieses Kunden oder geben Sie einen neuen Namen ein.",
     "contactCouplingFailed": "Standort „{{name}}\" wurde angelegt, aber die Verknüpfung mit der Kontaktperson ist fehlgeschlagen. Verknüpfen Sie sie später manuell über den Standort.",
-    "contactCreateFailed": "Standort „{{name}}\" wurde angelegt, aber das Anlegen der neuen Kontaktperson ist fehlgeschlagen. Fügen Sie sie später manuell hinzu und verknüpfen Sie sie über den Standort."
+    "contactCreateFailed": "Standort „{{name}}\" wurde angelegt, aber das Anlegen der neuen Kontaktperson ist fehlgeschlagen. Fügen Sie sie später manuell hinzu und verknüpfen Sie sie über den Standort.",
+    "linkedin": "LinkedIn",
+    "linkedinPlaceholder": "linkedin.com/in/benutzername"
   },
   "changelog": {
     "empty": "Noch keine Änderungen."

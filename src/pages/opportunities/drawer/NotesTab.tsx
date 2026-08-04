@@ -17,7 +17,8 @@ export default function NotesTab({ opportunity: o }: { opportunity: Opportunity 
 
   // §3 (audit r4): loading/error render explicitly — a failed fetch must never
   // look like "no notes yet" (SharedNotesTab has no state props of its own).
-  const muted = { fontSize: 13, color: 'var(--text-muted)', padding: '24px 0', textAlign: 'center' as const }
+  // Canon (05-08): 12px muted body text, matching the sibling drawers' loading/error copy.
+  const muted = { fontSize: 12, color: 'var(--text-muted)', padding: '24px 0', textAlign: 'center' as const }
   if (loading) return <div style={muted}>{t('common:loading')}</div>
   if (error) return <div style={{ ...muted, color: 'var(--color-danger)' }}>{t('notes.loadError')}</div>
 

@@ -49,11 +49,12 @@ import type { MatchRow } from '@/types/match'
 import type { MatchOrdinals } from '../matchOrdinals'
 
 // One read-only field: label above, value below (§3B field layout).
+// Canon (05-08): label 11px muted, value 12px (candidate FieldRow convention).
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div style={{ minWidth: 0 }}>
       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 13, color: 'var(--text)', wordBreak: 'break-word' }}>{children}</div>
+      <div style={{ fontSize: 12, color: 'var(--text)', wordBreak: 'break-word' }}>{children}</div>
     </div>
   )
 }

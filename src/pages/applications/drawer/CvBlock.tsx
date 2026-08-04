@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Download, Eye } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
+import { sectionTitle } from '@/components/ui/SectionCard'
 import { useCandidateCvDocument } from '../hooks/useCandidateCvDocument'
 import type { Id } from '@/types/common'
 
@@ -40,7 +41,8 @@ export default function CvBlock({ candidateId }: { candidateId: Id | null | unde
 
   return (
     <div>
-      <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 6 }}>
+      {/* Canon (05-08): the shared sectionTitle, reused instead of a hand-rolled copy. */}
+      <div style={{ ...sectionTitle, marginBottom: 6 }}>
         {t('drawer.cv.title')}
       </div>
       {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.cv.loading')}</div>}
@@ -50,7 +52,8 @@ export default function CvBlock({ candidateId }: { candidateId: Id | null | unde
           {cv ? (
             <>
               <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: 13, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                {/* Canon (05-08): 12px value, matching the ApplicationDetailsCard Field convention. */}
+                <div style={{ fontSize: 12, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
                   title={cv.name}>
                   {cv.name || t('drawer.cv.title')}
                 </div>
@@ -76,7 +79,7 @@ export default function CvBlock({ candidateId }: { candidateId: Id | null | unde
               </button>
             </>
           ) : (
-            <span style={{ fontSize: 13, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('drawer.cv.none')}</span>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('drawer.cv.none')}</span>
           )}
         </div>
       )}

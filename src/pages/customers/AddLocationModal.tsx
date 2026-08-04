@@ -217,6 +217,8 @@ export default function AddLocationModal({
         try {
           const newContact = await onAddContact?.({
             ...splitContactName(form.contactName), middleName: '', email: form.email, phone: form.phone, mobile: '',
+            // CONTACT-LINKEDIN-1: no LinkedIn field on this quick-create path.
+            linkedin: '',
             gender: '', role: '', locationId: null, departmentId: null, locationIds: [], departmentIds: [],
             statusId: null, isPrimary: false, customFields: {},
           })

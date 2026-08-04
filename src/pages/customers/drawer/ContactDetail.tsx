@@ -38,7 +38,7 @@ import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import TitleBadge from '@/components/drawer/TitleBadge'
 import DrillPager, { type DrillPagerProps } from '@/components/drawer/DrillPager'
 import ContactLinkSection from './ContactLinkSection'
-import { emailValue, phoneValue } from '@/components/drawer/contactLinks'
+import { emailValue, phoneValue, linkedinValue } from '@/components/drawer/contactLinks'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
@@ -114,10 +114,17 @@ export default function ContactDetail({ contact, locations, departments, statuse
   // here and the second card is gone. Status is NOT a row: it is the title-row badge
   // below, exactly like a location (§3A(c) — the header shows state, the card shows data).
   const fields: FieldRow[] = [
-    { key: 'firstName', label: t('subModal.firstName'), type: 'text' },
-    // CONTACT-TUSSENVOEGSEL-1: editing a contact used to drop this silently.
-    { key: 'middleName', label: t('contacts.detail.middleName'), type: 'text' },
-    { key: 'lastName', label: t('subModal.lastName'), type: 'text' },
+    // NAME-COMPOSITE-1 (Danny 05-08: "voornaam, tussenvoegsel en achternaam tonen
+    // als 1 regel; alleen bij het potloodje zijn het er 3") — one composed line in
+    // read mode, the three loose fields only while editing. Mirrors the shared
+    // EditableFieldTable 'address' composite (see its own doc comment).
+    { key: 'name', label: t('contacts.detail.name'), type: 'name',
+      nameFields: [
+        { key: 'firstName', label: t('subModal.firstName'), type: 'text' },
+        // CONTACT-TUSSENVOEGSEL-1: editing a contact used to drop this silently.
+        { key: 'middleName', label: t('contacts.detail.middleName'), type: 'text' },
+        { key: 'lastName', label: t('subModal.lastName'), type: 'text' },
+      ] },
     // Gender stores the lookup VALUE SLUG; the read view resolves its label below.
     { key: 'gender', label: t('contacts.detail.gender'), type: 'creatable', allowCreate: false,
       options: genders.map(g => ({ value: g.value, label: g.label })),
@@ -135,6 +142,10 @@ export default function ContactDetail({ contact, locations, departments, statuse
       renderValue: v => phoneValue(v, t('contacts.detail.callPhone'), { label: t('contacts.detail.whatsapp') }) },
     { key: 'phone', label: t('contacts.detail.phone'), type: 'text',
       renderValue: v => phoneValue(v, t('contacts.detail.callPhone')) },
+    // CONTACT-LINKEDIN-1 (Danny 05-08): the backend stores only the slug; the read
+    // view links out to linkedin.com/in/{slug} (mirrors email/phone above).
+    { key: 'linkedin', label: t('contacts.detail.linkedin'), type: 'text',
+      renderValue: v => linkedinValue(v, t('contacts.detail.openLinkedin')) },
     { key: 'isPrimary', label: t('contacts.detail.primary'), type: 'checkbox' },
   ]
 
@@ -147,6 +158,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
     email: contact.email,
     mobile: contact.mobile,
     phone: contact.phone,
+    linkedin: contact.linkedin ?? '',
     isPrimary: contact.isPrimary,
   }
 
@@ -161,6 +173,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
         gender: v.gender as string,
         role: v.role as string, email: v.email as string,
         mobile: v.mobile as string, phone: v.phone as string,
+        linkedin: v.linkedin as string,
         isPrimary,
       })
       setEditing(false)
@@ -312,9 +325,9 @@ export default function ContactDetail({ contact, locations, departments, statuse
         <>
           {/* CANON-DIVIDER-1 (Danny 05-08): candidate ProfileTab canon — no line
               between rows, 11px labels. */}
+          {/* Canon width (fieldRowCanon, 05-08): EditableFieldTable's own default now matches. */}
           <EditableFieldTable key={tableEpoch} title={t('contacts.detail.infoTitle')} fields={fields} value={values} onSave={save}
-            editing={editing} onStartEdit={() => setEditing(true)} onCancel={() => setEditing(false)} labelWidth={130}
-            dividers={false} labelFontSize={11} />
+            editing={editing} onStartEdit={() => setEditing(true)} onCancel={() => setEditing(false)} />
 
           {/* Koppeling — same shape and behaviour as "+ Vestiging" (Danny 28-07). */}
           <ContactLinkSection locationIds={linkedLocationIds} departmentIds={linkedDepartmentIds}

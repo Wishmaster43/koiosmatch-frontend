@@ -85,6 +85,8 @@ const API_TO_FORM: Record<string, string> = {
   first_name: 'firstName', middle_name: 'middleName', last_name: 'lastName', email: 'email', phone: 'phone', mobile: 'mobile', gender: 'gender',
   function: 'role', customer_location_id: 'locationId', customer_department_id: 'departmentId',
   status_id: 'statusId', is_primary: 'isPrimary',
+  // CONTACT-LINKEDIN-1: the backend validation rule/column is `linkedin_slug`.
+  linkedin_slug: 'linkedin',
 }
 
 export default function AddContactPersonModal({
@@ -137,6 +139,9 @@ export default function AddContactPersonModal({
     email: initial?.email ?? '',
     phone: initial?.phone ?? '',
     mobile: initial?.mobile ?? '',
+    // CONTACT-LINKEDIN-1 (Danny 05-08): whatever the field holds — a bare slug or a
+    // pasted full URL — gets stripped to the clean slug at the save boundary.
+    linkedin: initial?.linkedin ?? '',
     gender: initial?.gender ?? '',
     role: initial?.role ?? '',
     locationId: initial?.locationId ?? lockLocationId ?? null,
@@ -309,13 +314,16 @@ export default function AddContactPersonModal({
             gender={form.gender} onGenderChange={v => set('gender', v)} genders={genderOptions}
           />
 
-          {/* Contact — e-mail/telefoon/mobiel (Danny 27-07: exact card the request named). */}
+          {/* Contact — e-mail/telefoon/mobiel (Danny 27-07: exact card the request named)
+              + LinkedIn (CONTACT-LINKEDIN-1, 05-08). */}
           <ContactDetailsCard
             cardLabel={t('subModal.groups.contactInfo')}
             emailLabel={t('subModal.email')} phoneLabel={t('subModal.phone')} mobileLabel={t('subModal.mobile')}
             email={form.email} onEmailChange={v => set('email', v)} emailError={!!emailDup || errors.email} emailMessage={emailMessage}
             phone={form.phone} onPhoneChange={v => set('phone', v)} phoneError={!!phoneDup || errors.phone} phoneMessage={phoneMessage}
             mobile={form.mobile} onMobileChange={v => set('mobile', v)} mobileError={!!mobileDup || errors.mobile} mobileMessage={mobileMessage}
+            linkedinLabel={t('subModal.linkedin')} linkedinPlaceholder={t('subModal.linkedinPlaceholder')}
+            linkedin={form.linkedin} onLinkedinChange={v => set('linkedin', v)}
           />
 
           {/* Koppeling — locatie/afdeling (searchable, allowCreate=false: real relational

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { MessageCircle, CheckCircle2, FileText } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import { sectionTitle } from '@/components/ui/SectionCard'
 import { useAuth } from '@/context/AuthContext'
 import api, { unwrap } from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
@@ -38,7 +39,8 @@ function Message({ msg }: { msg: TranscriptMsg }) {
         <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{msg.author}</span>
         <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{msg.time}</span>
       </div>
-      <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.45, paddingLeft: 30 }}>{msg.text}</div>
+      {/* Canon (05-08): body text 12px, matching the candidate profile/notes prose convention. */}
+      <div style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.45, paddingLeft: 30 }}>{msg.text}</div>
     </div>
   )
 }
@@ -187,18 +189,19 @@ export default function InterviewsTab({ application: a }: { application: Applica
             )}
           </div>
 
-          {/* Summary */}
+          {/* Summary — canon (05-08): shared sectionTitle (11px muted uppercase), reused
+              rather than a hand-rolled 13px heading; body text 12px prose convention. */}
           {iv.summary && (
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('interview.summary')}</div>
-              <p style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.55, margin: 0 }}>{iv.summary}</p>
+              <div style={{ ...sectionTitle, marginBottom: 8 }}>{t('interview.summary')}</div>
+              <p style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.55, margin: 0 }}>{iv.summary}</p>
             </div>
           )}
 
           {/* Transcript */}
           {iv.transcript.length > 0 && (
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('interview.transcript')}</div>
+              <div style={{ ...sectionTitle, marginBottom: 8 }}>{t('interview.transcript')}</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {iv.transcript.map((m, i) => <Message key={i} msg={m} />)}
               </div>

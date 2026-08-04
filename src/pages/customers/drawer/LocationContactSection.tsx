@@ -164,6 +164,8 @@ export default function LocationContactSection({
     try {
       newContact = await onAddContact({
         ...splitContactName(typedName), middleName: '', email: legacyEmail.trim(), phone: legacyPhone.trim(), mobile: '',
+        // CONTACT-LINKEDIN-1: no LinkedIn field on this quick-create path.
+        linkedin: '',
         gender: '', role: '', locationId: null, departmentId: null, locationIds: [], departmentIds: [],
         statusId: null, isPrimary: false, customFields: {},
       })

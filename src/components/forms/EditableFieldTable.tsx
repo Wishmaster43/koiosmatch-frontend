@@ -21,11 +21,12 @@ import type { ChipOption } from '@/components/ui/ChipMultiSelect'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
+import { CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
 
 export interface FieldRow {
   key: string
   label?: ReactNode
-  type?: 'text' | 'select' | 'checkbox' | 'date' | 'textarea' | 'chips' | 'richtext' | 'creatable' | 'chip-select' | 'address'
+  type?: 'text' | 'select' | 'checkbox' | 'date' | 'textarea' | 'chips' | 'richtext' | 'creatable' | 'chip-select' | 'address' | 'name'
   options?: Array<string | { value: string; label?: ReactNode }>
   chipOptions?: ChipOption[]
   prefix?: string
@@ -45,6 +46,13 @@ export interface FieldRow {
   // expands to these loose child fields instead. Child keys are read straight off
   // the shared `values` object (street/houseNumber/houseNumberSuffix/postalCode/city).
   addressFields?: FieldRow[]
+  // 'name' composite — the sibling of 'address' above (Danny 05-08: "voornaam,
+  // tussenvoegsel en achternaam tonen als 1 regel; alleen bij het potloodje zijn
+  // het er 3"). Read mode composes ONE line ("Voornaam tussenvoegsel Achternaam",
+  // skipping empty parts); editing expands to these loose child fields instead.
+  // Same mechanism as 'address': child keys are read straight off the shared
+  // `values` object (firstName/middleName/lastName), never a nested 'name' key.
+  nameFields?: FieldRow[]
 }
 
 type Values = Record<string, unknown>
@@ -58,6 +66,12 @@ export const composeAddressLine = (v: Values): string => {
   const line2 = [v.postalCode, v.city].filter(Boolean).join(' ')
   return [line1, line2].filter(s => s && String(s).trim()).join(', ')
 }
+
+// Compose the standard "Voornaam tussenvoegsel Achternaam" one-line name — the
+// 'name' composite's sibling of composeAddressLine above. Skips empty parts;
+// fixed key names (firstName/middleName/lastName), same convention as address.
+export const composeNameLine = (v: Values): string =>
+  [v.firstName, v.middleName, v.lastName].filter(Boolean).map(String).join(' ')
 
 const compact: CSSProperties = {
   width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6,
@@ -125,10 +139,15 @@ function sameValues(a: Record<string, unknown>, b: Record<string, unknown>): boo
 }
 
 export default function EditableFieldTable({
-  title, fields, value = {}, onSave, labelWidth = 130, editButton = 'header',
+  // CANON default (fieldRowCanon, Danny 05-08): was 130, drifted from the
+  // candidate ProfileTab's 120 — callers that genuinely need more document why.
+  title, fields, value = {}, onSave, labelWidth = CANON_LABEL_WIDTH, editButton = 'header',
   editing: editingProp, onStartEdit, onCancel,
-  // CANON-DIVIDER-1: unset callers get the ORIGINAL look untouched.
-  dividers = true, labelFontSize = 12,
+  // CANON-DEFAULT-FLIP (Danny 05-08, "we hebben gezegd geen streepjes toch?"):
+  // the calm candidate canon IS the default now — no dividers, 11px labels —
+  // so no tab can ever forget to opt in again. True list rows that want a
+  // separator opt in explicitly with dividers={true} + a written reason.
+  dividers = false, labelFontSize = 11,
 }: EditableFieldTableProps) {
   const { t } = useTranslation('common')
   const { formatDate } = useDateFormat()
@@ -227,6 +246,10 @@ export default function EditableFieldTable({
 
   const renderValue = (f: FieldRow) => {
     const v = saved[f.key]
+    // Canon guard (Danny 05-08, "Geslacht: Man" rendered huge): a caller-supplied
+    // renderValue inherits the page's base font unless wrapped — force every custom
+    // render into the standard 12px value footprint so no field can drift again.
+    if (f.renderValue) return <span style={{ fontSize: 12 }}>{f.renderValue(v)}</span>
     if (f.type === 'checkbox') return <Toggle checked={Boolean(v)} disabled onChange={() => {}} ariaLabel={typeof f.label === 'string' ? f.label : undefined} />
     // Dates render as DD-MM-YYYY in read mode (the edit control already is).
     if (f.type === 'date') return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{v ? formatDate(v as string) : '-'}</span>
@@ -271,14 +294,20 @@ export default function EditableFieldTable({
       const line = composeAddressLine(saved)
       return <span style={{ fontSize: 12, color: line ? 'var(--text)' : 'var(--text-muted)' }}>{line || '-'}</span>
     }
+    // Name composite reads as ONE composed line (only reached in read mode —
+    // editing expands this row into its nameFields instead, see renderRows). An
+    // en dash marks a fully empty name (Danny 05-08) — distinct from the plain
+    // hyphen the 'address' composite falls back to above.
+    if (f.type === 'name') {
+      const line = composeNameLine(saved)
+      return <span style={{ fontSize: 12, color: line ? 'var(--text)' : 'var(--text-muted)' }}>{line || '–'}</span>
+    }
     // Richtext reads as sanitised HTML (same as notes / profile text).
     if (f.type === 'richtext') {
       return (v as string)
         ? <SafeHtml html={v as string} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
         : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>
     }
-    // A field may own its read rendering (e.g. e-mail/phone as real links, §3A).
-    if (f.renderValue) return f.renderValue(v)
     return <span style={{ fontSize: 12, color: 'var(--text)', ...(f.mono ? { fontFamily: 'JetBrains Mono, monospace' } : {}) }}>{f.prefix ? `${f.prefix} ` : ''}{(v as ReactNode) || '-'}</span>
   }
 
@@ -301,10 +330,13 @@ export default function EditableFieldTable({
 
   // Render one list of fields as rows — an 'address' row expands into its loose
   // addressFields while editing (so street/no/postcode/city become editable), and
-  // collapses back to its single composed-line row once editing stops. Border
-  // placement (`last`) follows the FLATTENED position, not the declared field list.
+  // collapses back to its single composed-line row once editing stops. The 'name'
+  // composite mirrors the exact same flatten-on-edit mechanism via nameFields.
+  // Border placement (`last`) follows the FLATTENED position, not the declared field list.
   const renderFieldRows = (list: FieldRow[]) => {
-    const flat = list.flatMap(f => (f.type === 'address' && editing) ? (f.addressFields ?? []) : [f])
+    const flat = list.flatMap(f => (f.type === 'address' && editing) ? (f.addressFields ?? [])
+      : (f.type === 'name' && editing) ? (f.nameFields ?? [])
+      : [f])
     return flat.map((f, i) => renderRow(f, i === flat.length - 1))
   }
 

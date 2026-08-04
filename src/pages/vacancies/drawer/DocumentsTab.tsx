@@ -105,9 +105,10 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
             return (
               <div key={String(d.id ?? i)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)' }}>
                 <FileText size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                {/* Canon (05-08): 12px, matching the customer DocumentsTab's own file-name convention. */}
                 {href
-                  ? <a href={href} target="_blank" rel="noopener noreferrer" style={{ flex: 1, fontSize: 13, color: 'var(--color-primary)', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name}</a>
-                  : <span style={{ flex: 1, fontSize: 13, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name}</span>}
+                  ? <a href={href} target="_blank" rel="noopener noreferrer" style={{ flex: 1, fontSize: 12, color: 'var(--color-primary)', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name}</a>
+                  : <span style={{ flex: 1, fontSize: 12, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name}</span>}
                 {/* Soft-tint type chip (§4) — same convention as the customer tab's row badge. */}
                 {d.type && (
                   <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 99, whiteSpace: 'nowrap', background: docColor(d.type) + '18', color: docColor(d.type) }}>

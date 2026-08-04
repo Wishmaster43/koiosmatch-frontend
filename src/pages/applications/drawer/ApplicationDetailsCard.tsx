@@ -13,19 +13,20 @@ import { rememberReturnTab } from './constants'
 import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
 
-// A small label-above-value field.
+// A small label-above-value field. Canon (05-08): label 11px muted, value 12px
+// (candidate FieldRow convention).
 function Field({ label, children }: { label: ReactNode; children: ReactNode }) {
   return (
     <div style={{ minWidth: 0 }}>
       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 3 }}>{label}</div>
-      <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.4 }}>{children}</div>
+      <div style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.4 }}>{children}</div>
     </div>
   )
 }
 
 const iconBtn = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' } as const
 // S7: the Bron input shares the Details block's edit mode (same pencil/save/✕).
-const inputStyle = { width: '100%', padding: '7px 10px', fontSize: 13, borderRadius: 6,
+const inputStyle = { width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6,
   border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box' as const, outline: 'none' } as const
 
 interface ApplicationDetailsCardProps {
@@ -112,7 +113,7 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
           {editing ? (
             <input value={source} onChange={e => setSource(e.target.value)} style={inputStyle} placeholder={t('drawer.source')} />
           ) : (
-            <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.4 }}>{a.source || '—'}</div>
+            <div style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.4 }}>{a.source || '—'}</div>
           )}
         </div>
         {/* S12/13: the customer is a real linkable entity (customer_id, the

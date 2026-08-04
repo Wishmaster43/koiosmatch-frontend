@@ -106,6 +106,9 @@ export function mapContact(p: ApiContact = {}): Contact {
     // is the new separate mobile number the WhatsApp shortcut uses.
     phone: p.phone ?? '',
     mobile: p.mobile ?? '',
+    // CONTACT-LINKEDIN-1 (Danny 05-08): the profile slug, read straight off the
+    // resource — the FE builds https://www.linkedin.com/in/{slug} from it.
+    linkedin: p.linkedin_slug ?? '',
     // CONTACT-GESLACHT-1: the gender VALUE SLUG (male|female|other) straight off the
     // resource — never an id, so the /genders lookup resolves label+colour from it.
     gender: p.gender ?? '',

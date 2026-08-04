@@ -58,6 +58,8 @@ const baseContact = (overrides: Partial<Contact> = {}): Contact => ({
   // CONTACT-GESLACHT-1 + the merge scope id — both required on Contact now.
   customerId: 'cust-1', gender: '',
   firstName: 'Jan', middleName: '', lastName: 'Jansen', name: 'Jan Jansen',
+  // CONTACT-LINKEDIN-1: optional on Contact, defaulted here like every other field.
+  linkedin: '',
   role: '', email: '', phone: '', mobile: '', isPrimary: false,
   locationId: null, locationName: '', departmentId: null, departmentName: '',
   locations: [], departments: [], statusId: null, status: '', statusLabel: '', statusColor: '', customFields: {},
@@ -224,6 +226,85 @@ describe('ContactDetail · gender', () => {
     await user.click(screen.getByTitle(cm('save')))
 
     expect(onSave).toHaveBeenCalledWith('c1', expect.objectContaining({ gender: 'male' }))
+  })
+})
+
+/**
+ * NAME-COMPOSITE-1 (Danny 05-08: "voornaam, tussenvoegsel en achternaam tonen als
+ * 1 regel; alleen bij het potloodje zijn het er 3") — one composed line in read
+ * mode, the three loose fields only while editing.
+ */
+describe('ContactDetail · name composite (NAME-COMPOSITE-1)', () => {
+  it('shows the full name as ONE line in read mode, not three separate rows', () => {
+    // The title row above the field table always shows contact.name too — give it a
+    // DISTINCT value here so the field-row assertion below can only match the
+    // composite, proving it composes from firstName/middleName/lastName, not `name`.
+    render(<ContactDetail contact={baseContact({ firstName: 'Jan', middleName: 'de', lastName: 'Vries', name: 'Titelweergave' })}
+      locations={locations} departments={departments} statuses={statuses} onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    expect(screen.getByText('Titelweergave')).toBeInTheDocument()
+    expect(screen.getByText('Jan de Vries')).toBeInTheDocument()
+    expect(screen.queryByText(ct('subModal.firstName'))).not.toBeInTheDocument()
+    expect(screen.queryByText(ct('contacts.detail.middleName'))).not.toBeInTheDocument()
+  })
+
+  it('expands to the three loose fields once editing starts, pre-filled from the record', async () => {
+    const user = userEvent.setup()
+    render(<ContactDetail contact={baseContact({ firstName: 'Jan', middleName: 'de', lastName: 'Vries', name: 'Jan de Vries' })}
+      locations={locations} departments={departments} statuses={statuses} onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+
+    await user.click(screen.getAllByTitle(cm('edit'))[0])
+
+    expect(screen.getByText(ct('subModal.firstName'))).toBeInTheDocument()
+    expect(screen.getByText(ct('contacts.detail.middleName'))).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Jan')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('de')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Vries')).toBeInTheDocument()
+  })
+
+  it('saves an edited tussenvoegsel as part of the flat payload, no nested "name" key', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ContactDetail contact={baseContact({ firstName: 'Jan', middleName: '', lastName: 'Vries', name: 'Jan Vries' })}
+      locations={locations} departments={departments} statuses={statuses} onSave={onSave} onDelete={vi.fn()} close={vi.fn()} />)
+
+    await user.click(screen.getAllByTitle(cm('edit'))[0])
+    const middleNameRow = screen.getByText(ct('contacts.detail.middleName')).parentElement as HTMLElement
+    await user.type(within(middleNameRow).getByRole('textbox'), 'de')
+    await user.click(screen.getByTitle(cm('save')))
+
+    expect(onSave).toHaveBeenCalledWith('c1', expect.objectContaining({ firstName: 'Jan', middleName: 'de', lastName: 'Vries' }))
+  })
+})
+
+/**
+ * CONTACT-LINKEDIN-1 (Danny 05-08) — the backend stores only the slug; the read
+ * view links out to https://www.linkedin.com/in/{slug}.
+ */
+describe('ContactDetail · LinkedIn (CONTACT-LINKEDIN-1)', () => {
+  it('renders an em dash when no LinkedIn slug is stored', () => {
+    render(<ContactDetail contact={baseContact({ linkedin: '' })} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    expect(screen.getByText('—')).toBeInTheDocument()
+  })
+
+  it('renders the slug as a link to the canonical LinkedIn profile URL', () => {
+    render(<ContactDetail contact={baseContact({ linkedin: 'jan-vries-1' })} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    expect(screen.getByRole('link', { name: 'jan-vries-1' })).toHaveAttribute('href', 'https://www.linkedin.com/in/jan-vries-1')
+  })
+
+  it('saves an edited LinkedIn value as part of the flat payload', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ContactDetail contact={baseContact({ linkedin: '' })} locations={locations} departments={departments} statuses={statuses}
+      onSave={onSave} onDelete={vi.fn()} close={vi.fn()} />)
+
+    await user.click(screen.getAllByTitle(cm('edit'))[0])
+    const linkedinRow = screen.getByText(ct('contacts.detail.linkedin')).parentElement as HTMLElement
+    await user.type(within(linkedinRow).getByRole('textbox'), 'jan-vries-1')
+    await user.click(screen.getByTitle(cm('save')))
+
+    expect(onSave).toHaveBeenCalledWith('c1', expect.objectContaining({ linkedin: 'jan-vries-1' }))
   })
 })
 

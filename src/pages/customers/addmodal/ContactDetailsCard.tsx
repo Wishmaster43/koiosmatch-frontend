@@ -7,7 +7,7 @@
  * error flag and message string per field.
  */
 import { Field, TextField } from '@/components/forms/fields'
-import { cardHead, cardBox, row3Even } from '@/components/ui/modalCards'
+import { cardHead, cardBox, row3Even, row } from '@/components/ui/modalCards'
 
 // Duplicate/server message line under email·phone·mobile — the client-side
 // duplicate message wins over the server's own message when both exist (same collision).
@@ -22,6 +22,11 @@ interface ContactDetailsCardProps {
   email: string; onEmailChange: (v: string) => void; emailError?: boolean; emailMessage?: string
   phone: string; onPhoneChange: (v: string) => void; phoneError?: boolean; phoneMessage?: string
   mobile: string; onMobileChange: (v: string) => void; mobileError?: boolean; mobileMessage?: string
+  // CONTACT-LINKEDIN-1 (Danny 05-08): the profile SLUG only — a pasted full URL is
+  // stripped down to it at the save boundary (useCustomerContacts' toApi), so this
+  // stays a plain, unopinionated text input.
+  linkedinLabel: string; linkedinPlaceholder: string
+  linkedin: string; onLinkedinChange: (v: string) => void
 }
 
 export default function ContactDetailsCard({
@@ -29,6 +34,7 @@ export default function ContactDetailsCard({
   email, onEmailChange, emailError, emailMessage,
   phone, onPhoneChange, phoneError, phoneMessage,
   mobile, onMobileChange, mobileError, mobileMessage,
+  linkedinLabel, linkedinPlaceholder, linkedin, onLinkedinChange,
 }: ContactDetailsCardProps) {
   return (
     <div>
@@ -53,6 +59,12 @@ export default function ContactDetailsCard({
             </Field>
             <FieldError text={mobileMessage} />
           </div>
+        </div>
+        {/* LinkedIn gets its own row — a 4th field doesn't fit the row3Even grid above. */}
+        <div style={row('1fr')}>
+          <Field label={linkedinLabel}>
+            <TextField value={linkedin} onChange={onLinkedinChange} placeholder={linkedinPlaceholder} />
+          </Field>
         </div>
       </div>
     </div>

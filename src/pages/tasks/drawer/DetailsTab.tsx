@@ -6,6 +6,7 @@ import Avatar from '@/components/ui/Avatar'
 import SoftChip from '@/components/ui/SoftChip'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
+import { sectionTitle } from '@/components/ui/SectionCard'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
 import type { TaskLookupItem } from '@/context/TaskLookupsContext'
 import { useUsers } from '@/lib/queries'
@@ -15,6 +16,7 @@ import { isTaskOverdue, dueDateTime } from '../data/mapTask'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
 import type { CSSProperties, ReactNode } from 'react'
+import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 
 interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: string; email?: string; avatar_color?: string | null }
 
@@ -23,10 +25,10 @@ const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].fi
 
 // One read-mode row: muted label left, value right.
 function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
-  // Canon (05-08): clean cards — no row dividers, 11px labels (candidate = leading).
+  // Canon (05-08): clean cards — no row dividers, shared label style (fieldRowCanon).
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '9px 12px' }}>
-      <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 120, flexShrink: 0 }}>{label}</span>
+      <span style={CANON_LABEL_STYLE}>{label}</span>
       <span style={{ flex: 1, minWidth: 0 }}>{children}</span>
     </div>
   )
@@ -104,7 +106,7 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
       <div>
         {/* Header with the edit toggle for the classification/scheduling/assignee block */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('details.title')}</span>
+          <span style={sectionTitle}>{t('details.title')}</span>
           {editing ? (
             <EditControls onSave={save} onCancel={() => setEditing(false)} saveLabel={t('comments.send')} cancelLabel={t('modal.cancel')} />
           ) : !task.archived && (
@@ -158,7 +160,7 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
         {/* Description — free-text rich block, own pencil (§3A: every prose field gets
             its own save/cancel, never bundled with the short fields above). */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('details.description')}</span>
+          <span style={sectionTitle}>{t('details.description')}</span>
           {descEditing ? (
             <EditControls onSave={saveDesc} onCancel={cancelDesc} saveLabel={t('comments.send')} cancelLabel={t('modal.cancel')} />
           ) : !task.archived && (

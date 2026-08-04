@@ -6,6 +6,7 @@ import EntityLink from '@/components/ui/EntityLink'
 import StatusPill from '@/components/ui/StatusPill'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
+import { sectionTitle } from '@/components/ui/SectionCard'
 import api, { unwrap } from '@/lib/api'
 import PlanIntakeModal from '@/pages/candidates/drawer/PlanIntakeModal'
 import AddApplicationModal from '@/pages/applications/AddApplicationModal'
@@ -70,8 +71,9 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
 
   return (
     <div>
-      {/* Per-phase breakdown — only phases with a count, in the configured order. */}
-      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('applicants.byPhase')}</div>
+      {/* Per-phase breakdown — only phases with a count, in the configured order.
+          Canon (05-08): the shared sectionTitle, reused instead of a hand-rolled heading. */}
+      <div style={{ ...sectionTitle, marginBottom: 8 }}>{t('applicants.byPhase')}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
         {phases.filter(p => (byPhase[p.value] ?? 0) > 0).length === 0 ? (
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>
@@ -87,7 +89,7 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
 
       {/* Applications list header + house toolbar: search (grows) → phase filter →
           "+ Sollicitatie" (short — the sub-tab already names the entity, DRAWER-ADD-SHORT-1). */}
-      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('applicants.title')}</div>
+      <div style={{ ...sectionTitle, marginBottom: 8 }}>{t('applicants.title')}</div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 120, padding: '6px 10px',
           background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>

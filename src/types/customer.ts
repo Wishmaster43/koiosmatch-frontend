@@ -32,6 +32,11 @@ export interface Contact {
   // Split from `phone` (BE 2026-07-20): phone stays the landline/"vast" number,
   // mobile is the separate mobile number the WhatsApp shortcut uses.
   mobile: string
+  // CONTACT-LINKEDIN-1 (Danny 05-08): the profile SLUG only (`linkedin_slug` on the
+  // backend, mirrors candidates.linkedin_slug) — the FE builds linkedin.com/in/{slug}.
+  // Optional so the many existing test fixtures across this entity need no update;
+  // mapContact below always sets it to a real string (possibly '') at runtime.
+  linkedin?: string
   // CONTACT-GESLACHT-1: the candidate_genders VALUE SLUG (male|female|other) — a plain
   // column, NOT a gender_id. Label/colour resolve through the shared /genders lookup
   // exactly like a candidate, so the option list is never hardcoded here.
@@ -274,6 +279,9 @@ export interface ApiContact {
   id?: Id; reference_number?: string; first_name?: string; middle_name?: string; last_name?: string; name?: string; function?: string; role?: string; email?: string; phone?: string
   // Split from `phone` (BE 2026-07-20): the mobile number (CustomerContactResource `mobile`).
   mobile?: string
+  // CONTACT-LINKEDIN-1: symmetric on both read and write (unlike the candidate's
+  // linkedin/linkedin_slug asymmetry) — CustomerContactResource sends this exact key.
+  linkedin_slug?: string | null
   // CONTACT-GESLACHT-1: the candidate_genders value slug (male|female|other), NOT an id.
   gender?: string | null
   // The owning customer (CustomerContactResource `customer_id`) — scopes the merge route.

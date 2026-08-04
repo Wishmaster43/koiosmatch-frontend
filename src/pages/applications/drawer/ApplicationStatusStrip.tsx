@@ -7,11 +7,12 @@ import type { ApplicationDetail } from '@/types/application'
 
 // One label-above cell in the strip; every cell renders something calm even
 // when its own data is missing (§0.3, four UI states — never a blank cell).
+// Canon (05-08): label 11px muted, value 12px (candidate FieldRow convention).
 function Cell({ label, children }: { label: ReactNode; children: ReactNode }) {
   return (
     <div style={{ minWidth: 0 }}>
       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.4 }}>{children}</div>
+      <div style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.4 }}>{children}</div>
     </div>
   )
 }

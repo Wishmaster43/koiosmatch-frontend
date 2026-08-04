@@ -11,6 +11,7 @@ import { sectionBlock, sectionTitle } from './constants'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 import type { OpenShift, RosterShift, ScheduleFavorites } from './planningTypes'
+import { CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
 
 interface PlanningSchedulingProps {
   c: Candidate
@@ -131,7 +132,8 @@ export default function PlanningScheduling({
               [t('planning.workedBefore'), d.workedBefore > 0 ? t('planning.workedBeforeYes', { count: d.workedBefore, client: d.client }) : t('planning.workedBeforeNo', { client: d.client })],
             ].map(([l, v]) => (
               <div key={l} style={{ display: 'flex', padding: '8px 14px', borderBottom: '1px solid var(--border)', gap: 10 }}>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 100, flexShrink: 0 }}>{l}</span>
+                {/* Canon width (fieldRowCanon, 05-08): was width:100, aligned to candidate ProfileTab's 120. */}
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', width: CANON_LABEL_WIDTH, flexShrink: 0 }}>{l}</span>
                 <span style={{ fontSize: 11, color: 'var(--text)', fontWeight: 500 }}>{v}</span>
               </div>
             ))}

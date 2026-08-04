@@ -76,6 +76,7 @@ export default function DetailsTab({ opportunity: o, onUpdate }: DetailsTabProps
 
   return (
     <div>
+      {/* Canon (05-08): no row dividers, 11px labels (candidate ProfileTab convention). */}
       <EditableFieldTable title={t('details.groups.deal')} fields={dealFields} value={dealValue}
         onSave={onUpdate ? saveDeal : undefined} />
       {/* Organisation card dropped (Danny 2026-07-13): fase/eigenaar/aangemaakt all live in the drawer header already. */}

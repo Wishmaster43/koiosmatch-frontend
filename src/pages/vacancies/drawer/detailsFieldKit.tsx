@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react'
 import type { TFunction } from 'i18next'
 import { Edit2, Save, X } from 'lucide-react'
+import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 
 /**
  * detailsFieldKit — shared row/card/control-button building blocks for the
@@ -24,7 +25,8 @@ export const dash = <span style={{ color: 'var(--text-muted)' }}>-</span>
 export function row(label: ReactNode, read: ReactNode, edit: ReactNode, editing: boolean) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26, padding: '5px 0' }}>
-      <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{label}</span>
+      {/* Canon label style (fieldRowCanon, 05-08): was width:130, aligned to candidate ProfileTab's 120. */}
+      <span style={CANON_LABEL_STYLE}>{label}</span>
       <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)' }}>{editing ? edit : read}</div>
     </div>
   )

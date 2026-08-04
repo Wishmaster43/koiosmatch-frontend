@@ -7,6 +7,7 @@ import DetailTableJs from '@/components/ui/DetailTable'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import SelectMenu from '@/components/ui/SelectMenu'
 import EntityLink from '@/components/ui/EntityLink'
+import { sectionTitle } from '@/components/ui/SectionCard'
 import { useCustomerCascade} from '../hooks/useCustomerCascade'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
@@ -21,11 +22,12 @@ type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 // read-only DetailTable (its full-bleed row background needs the corner clip), but
 // MUST be false in edit mode — the overflow:hidden clipped the SelectMenu/
 // CreatableSelect dropdown against the card edge (Danny: "dropdown werkt niet goed").
+// Canon (05-08): the shared sectionTitle, reused instead of a hand-rolled heading.
 function Card({ title, children, clip = true }: { title: ReactNode; children: ReactNode; clip?: boolean }) {
   return (
     <div style={{ marginBottom: 16 }}>
-      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>{title}</div>
-      <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: clip ? 'hidden' : 'visible' }}>{children}</div>
+      <div style={{ ...sectionTitle, marginBottom: 6 }}>{title}</div>
+      <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: clip ? 'hidden' : 'visible' }}>{children}</div>
     </div>
   )
 }
@@ -177,6 +179,7 @@ export default function KlantTab({ opportunity: o, customers = [], onUpdate }: {
             </F>
           </div>
         ) : (
+          // Canon (05-08): no row dividers, 11px labels (candidate ProfileTab convention).
           <DetailTable rows={rows} lastBorder={false} />
         )}
       </Card>

@@ -9,6 +9,7 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
+import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 
 // Shared input styling for text/date/combobox controls across all three tabs.
 export const inputStyle: CSSProperties = {
@@ -52,7 +53,8 @@ export function FieldRow({ label, required, errorText, labelIcon, children }: {
 }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
-      <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 120, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
+      {/* Canon width/color/size (fieldRowCanon) + the flex/gap this row alone needs to seat an optional labelIcon next to the label text. */}
+      <span style={{ ...CANON_LABEL_STYLE, display: 'flex', alignItems: 'center', gap: 5 }}>
         {labelIcon}
         {label}{required && <span style={{ color: 'var(--color-danger)' }}> *</span>}
       </span>

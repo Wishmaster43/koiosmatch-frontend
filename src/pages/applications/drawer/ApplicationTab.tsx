@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { ShieldCheck } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
-import SectionCard from '@/components/ui/SectionCard'
+import SectionCard, { sectionTitle } from '@/components/ui/SectionCard'
 import SafeHtml from '@/components/ui/SafeHtml'
 import { buildApplicationAdviceInsights } from './applicationAiInsights'
 import MatchScoreBlock from '@/components/match/MatchScoreBlock'
@@ -103,7 +103,8 @@ export default function ApplicationTab({ application: a, onAdjustScore, onLinkVa
           Untrusted public input: always through SafeHtml/DOMPurify (§7), never raw. */}
       {a.coverLetter && (
         <SectionCard title={t('motivation.title')}>
-          <SafeHtml html={a.coverLetter} style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.5,
+          {/* Canon (05-08): 12px prose, matching the candidate profile summary/notes convention. */}
+          <SafeHtml html={a.coverLetter} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5,
             whiteSpace: isPlainText(a.coverLetter) ? 'pre-wrap' : undefined }} />
         </SectionCard>
       )}
@@ -132,7 +133,8 @@ export default function ApplicationTab({ application: a, onAdjustScore, onLinkVa
           this call suppresses it (showOverall=false) while keeping the
           edit/save affordance and, once editing, the sliders. */}
       <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('matchScore.title')}</div>
+        {/* Canon (05-08): shared sectionTitle (11px muted uppercase), reused rather than a hand-rolled heading. */}
+        <div style={{ ...sectionTitle, marginBottom: 12 }}>{t('matchScore.title')}</div>
         <MatchScoreBlock score={a.score} criteria={a.matchCriteria as Criterion[]} summary={a.matchSummary}
           source={a.matchSource} aiScore={a.aiScore} showOverall={false}
           onSave={onAdjustScore ? payload => onAdjustScore(a.id, payload) : undefined} />

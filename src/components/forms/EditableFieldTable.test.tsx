@@ -118,6 +118,92 @@ describe('EditableFieldTable · address composite (edit mode)', () => {
   })
 })
 
+// The 'name' composite — sibling of 'address' above (Danny 05-08): read mode
+// composes ONE line ("Voornaam tussenvoegsel Achternaam"), editing expands the
+// declared `nameFields` loose child rows, and saving hands back a flat object
+// (no nested 'name' key).
+const nameFields: FieldRow[] = [
+  { key: 'firstName', label: 'First name' },
+  { key: 'middleName', label: 'Middle name' },
+  { key: 'lastName', label: 'Last name' },
+]
+const nameTableFields: FieldRow[] = [
+  { key: 'name', label: 'Name', type: 'name', nameFields },
+  { key: 'phone', label: 'Phone' },
+]
+const nameValue = { firstName: 'Jan', middleName: 'de', lastName: 'Vries', phone: '0612345678' }
+
+describe('EditableFieldTable · name composite (read mode)', () => {
+  it('composes one line: "firstName middleName lastName"', () => {
+    render(<EditableFieldTable fields={nameTableFields} value={nameValue} />)
+    expect(screen.getByText('Jan de Vries')).toBeInTheDocument()
+  })
+
+  it('skips an empty middle name without a double space', () => {
+    render(<EditableFieldTable fields={nameTableFields} value={{ ...nameValue, middleName: '' }} />)
+    expect(screen.getByText('Jan Vries')).toBeInTheDocument()
+  })
+
+  it('does not render the loose child field labels in read mode', () => {
+    render(<EditableFieldTable fields={nameTableFields} value={nameValue} />)
+    expect(screen.queryByText('First name')).toBeNull()
+    expect(screen.queryByText('Middle name')).toBeNull()
+  })
+
+  it('falls back to an en dash when the whole name is empty', () => {
+    render(<EditableFieldTable fields={nameTableFields} value={{ phone: '0612345678' }} />)
+    expect(screen.getByText('–')).toBeInTheDocument()
+  })
+})
+
+describe('EditableFieldTable · name composite (edit mode)', () => {
+  it('expands into the loose nameFields once editing starts', async () => {
+    const user = userEvent.setup()
+    render(<EditableFieldTable fields={nameTableFields} value={nameValue} />)
+    await user.click(screen.getByTitle('edit'))
+    // The composed line is gone; each declared child field is now its own row.
+    expect(screen.queryByText('Jan de Vries')).toBeNull()
+    expect(screen.getByText('First name')).toBeInTheDocument()
+    expect(screen.getByText('Middle name')).toBeInTheDocument()
+    expect(screen.getByText('Last name')).toBeInTheDocument()
+    // Loose inputs are pre-filled from the shared values object.
+    expect(screen.getByDisplayValue('Jan')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('de')).toBeInTheDocument()
+  })
+
+  it('collapses back to one composed line and does not carry a nested "name" key on save', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<EditableFieldTable fields={nameTableFields} value={nameValue} onSave={onSave} />)
+    await user.click(screen.getByTitle('edit'))
+    const first = screen.getByDisplayValue('Jan')
+    await user.clear(first)
+    await user.type(first, 'Piet')
+    await user.click(screen.getByTitle('save'))
+
+    // Back to read mode: one composed line, using the edited first name.
+    expect(screen.getByText('Piet de Vries')).toBeInTheDocument()
+    // The saved payload is flat — the child keys changed, no 'name' key was introduced.
+    const saved = onSave.mock.calls[0][0]
+    expect(saved.firstName).toBe('Piet')
+    expect(saved.name).toBeUndefined()
+    expect(saved.lastName).toBe('Vries')
+  })
+
+  it('cancel restores the original composed line without saving', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<EditableFieldTable fields={nameTableFields} value={nameValue} onSave={onSave} />)
+    await user.click(screen.getByTitle('edit'))
+    const first = screen.getByDisplayValue('Jan')
+    await user.clear(first)
+    await user.type(first, 'Piet')
+    await user.click(screen.getByTitle('cancel'))
+    expect(onSave).not.toHaveBeenCalled()
+    expect(screen.getByText('Jan de Vries')).toBeInTheDocument()
+  })
+})
+
 // Regression (Danny 28-07, found by an adversarial verification pass): the read view
 // used to follow the last DRAFT, not the source of truth. If the parent stored something
 // different from what was typed — declining "replace the primary contact?" saves

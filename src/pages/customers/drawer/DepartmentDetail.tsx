@@ -314,7 +314,8 @@ export default function DepartmentDetail({ department, locations, statuses, cont
               getByText on that sub-tab label. */}
           {/* CANON-DIVIDER-1 (Danny 05-08): candidate ProfileTab canon — no line
               between rows, 11px labels. */}
-          <EditableFieldTable title="" fields={fields} value={values} onSave={save} labelWidth={130} dividers={false} labelFontSize={11} />
+          {/* Canon width (fieldRowCanon, 05-08): EditableFieldTable's own default now matches. */}
+          <EditableFieldTable title="" fields={fields} value={values} onSave={save} />
 
           {/* Omschrijving AFTER the data blocks — Danny 02-08: every entity's prose block
               follows the customer Bedrijf-tab order (fields → text → Koios), so the

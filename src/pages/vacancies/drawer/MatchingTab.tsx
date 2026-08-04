@@ -103,7 +103,8 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
       {DIMENSIONS.map(d => (
         <div key={d}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-            <span style={{ fontSize: 13, color: 'var(--text)' }}>{t(`matching.dim.${d}`)}</span>
+            {/* Canon (05-08): 12px, matching the identical row-label convention on the Publiceren tab. */}
+            <span style={{ fontSize: 12, color: 'var(--text)' }}>{t(`matching.dim.${d}`)}</span>
             {/* Danny 22-07: the concrete 1..5 weight next to the word labels below the slider.
                 No %-of-total: on a 6-way split it can't be both equal for equal sliders AND
                 total 100 (100÷6=16,66…), so it read as "wrong" — the weight is the clean number;

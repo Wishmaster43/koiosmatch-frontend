@@ -135,7 +135,8 @@ export default function ApiKeyGeneralTab({ apiKey, onSave }) {
         </div>
       ) : (
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-          <DetailTable rows={rows} labelWidth={150} lastBorder={false} />
+          {/* Canon width (fieldRowCanon, 05-08): DetailTable's own default now matches. */}
+          <DetailTable rows={rows} lastBorder={false} />
         </div>
       )}
 

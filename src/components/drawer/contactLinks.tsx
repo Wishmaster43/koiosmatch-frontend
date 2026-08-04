@@ -130,3 +130,63 @@ export function vatValue(v: unknown, openLabel: string): ReactNode {
     </span>
   )
 }
+
+// LinkedIn's official brand blue — not a themeable UI colour, so it is exempt from
+// the token-only rule (mirrors the identical exception already taken in the
+// candidate ProfileContactTab's own LinkedIn icon; the two are not shared today —
+// a follow-up should promote one of them into the other, CONTACT-LINKEDIN-1).
+// eslint-disable-next-line no-restricted-syntax -- LinkedIn's official brand blue, not a themeable UI colour
+const LINKEDIN_BLUE = '#0A66C2'
+
+// lucide-react ships no brand/logo icons, so this is a minimal inline LinkedIn
+// glyph — same shape as the candidate profile's own copy.
+function LinkedinMark({ size = 13 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={LINKEDIN_BLUE} xmlns="http://www.w3.org/2000/svg">
+      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+      <rect x="2" y="9" width="4" height="12" />
+      <circle cx="4" cy="4" r="2" />
+    </svg>
+  )
+}
+
+/**
+ * CONTACT-LINKEDIN-1 (Danny 05-08): the backend stores only the profile SLUG
+ * (`linkedin_slug`) — the link always builds https://www.linkedin.com/in/{slug},
+ * so it never depends on a caller having stripped a pasted full URL first (see
+ * toLinkedinSlug below, applied once at the save boundary instead).
+ *
+ * Empty state is an EM dash here, not the `dash()` hyphen this file uses for
+ * every other field — matching ContactDetail's own neighbouring gender row
+ * rather than this file's generic convention (Danny's explicit spec, 05-08).
+ */
+export function linkedinValue(v: unknown, openLabel: string): ReactNode {
+  const slug = typeof v === 'string' ? v.trim() : ''
+  if (!slug) return <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>
+  const href = `https://www.linkedin.com/in/${slug}`
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      <a href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>{slug}</a>
+      <a href={href} target="_blank" rel="noopener noreferrer" title={openLabel} aria-label={openLabel}
+        style={iconStyle} {...hover(LINKEDIN_BLUE)}>
+        <LinkedinMark size={13} />
+      </a>
+    </span>
+  )
+}
+
+/**
+ * Strip a pasted LinkedIn URL down to the bare profile slug the backend column
+ * expects — so pasting the full address (with/without scheme, www, a trailing
+ * query string) still saves the clean slug rather than the whole URL. A value
+ * that is already a bare slug passes through unchanged (only stray leading/
+ * trailing slashes are trimmed). Applied once at the save boundary (toApi), not
+ * per input keystroke, so the field stays a plain, unopinionated text input.
+ */
+export function toLinkedinSlug(input: string): string {
+  const trimmed = (input ?? '').trim()
+  if (!trimmed) return ''
+  const match = trimmed.match(/^(?:https?:\/\/)?(?:[\w-]+\.)?linkedin\.com\/in\/([^/?#]+)/i)
+  if (match) return match[1]
+  return trimmed.replace(/^\/+|\/+$/g, '')
+}

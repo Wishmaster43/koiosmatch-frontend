@@ -448,6 +448,44 @@ describe('AddContactPersonModal · geslacht', () => {
   })
 })
 
+/**
+ * CONTACT-LINKEDIN-1 (Danny 05-08) — the field submits verbatim in the create
+ * payload; the URL-to-slug stripping happens once at the save boundary
+ * (useCustomerContacts' toApi, covered by its own hook test), not in this form.
+ */
+describe('AddContactPersonModal · LinkedIn (CONTACT-LINKEDIN-1)', () => {
+  it('sends the typed LinkedIn value with the create payload', async () => {
+    const user = userEvent.setup()
+    const onCreate = vi.fn()
+    render(<AddContactPersonModal onCreate={onCreate} onClose={vi.fn()} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText(ct('subModal.lastName'), { exact: false }), 'Jansen')
+    await user.type(screen.getByLabelText(ct('subModal.linkedin'), { exact: false }), 'jan-jansen-123')
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+
+    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ linkedin: 'jan-jansen-123' }))
+  })
+
+  it('leaves LinkedIn empty when it is not filled in — the field is optional', async () => {
+    const user = userEvent.setup()
+    const onCreate = vi.fn()
+    render(<AddContactPersonModal onCreate={onCreate} onClose={vi.fn()} />)
+
+    await user.type(screen.getByLabelText(ct('subModal.firstName'), { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText(ct('subModal.lastName'), { exact: false }), 'Jansen')
+    await user.click(screen.getByRole('button', { name: ct('subModal.create') }))
+
+    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ linkedin: '' }))
+  })
+
+  it('prefills the stored LinkedIn slug when an existing contact is edited', () => {
+    render(<AddContactPersonModal onClose={() => {}} onCreate={vi.fn()} locations={locations} statuses={statuses}
+      initial={contact({ linkedin: 'jan-jansen-123' })} />)
+    expect(screen.getByLabelText(ct('subModal.linkedin'), { exact: false })).toHaveValue('jan-jansen-123')
+  })
+})
+
 describe('AddContactPersonModal · import card (Danny 02-08: "+ nieuwe contactpersoon ... moeten ook een CSV-upload hebben")', () => {
   const csvFile = new File(['klant_naam,voornaam,achternaam\nZorggroep Middenland,Marieke,de Vries'], 'contacten.csv', { type: 'text/csv' })
   const xlsxFile = new File(['binary'], 'contacten.xlsx', {

@@ -36,7 +36,8 @@ export default function StatsTab({ kpis = [], kpisTitle, overview, activity }: {
 
       {overview && (
         <SectionCard title={overview.title}>
-          <DetailTable rows={overview.rows} labelWidth={130} />
+          {/* Canon width (fieldRowCanon, 05-08): DetailTable's own default now matches. */}
+          <DetailTable rows={overview.rows} />
         </SectionCard>
       )}
 

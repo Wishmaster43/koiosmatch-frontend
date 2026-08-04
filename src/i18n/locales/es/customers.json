@@ -388,7 +388,9 @@
       "archiveContact": "Archivar contacto",
       "confirmArchive": "¿Archivar {{name}}? Podrás restaurarlo más tarde mediante «Archivado».",
       "archiveFailed": "Error al archivar.",
-      "restoreFailed": "Error al restaurar."
+      "restoreFailed": "Error al restaurar.",
+      "linkedin": "LinkedIn",
+      "openLinkedin": "Abrir en LinkedIn"
     },
     "deleteConfirm": "¿Eliminar este contacto?",
     "saveFailed": "Error al guardar.",
@@ -704,7 +706,9 @@
     },
     "contactPersonHint": "Elige un contacto existente de este cliente, o escribe un nombre nuevo.",
     "contactCouplingFailed": "La sede \"{{name}}\" se creó, pero no se pudo vincular el contacto. Vincúlalo manualmente más tarde desde la sede.",
-    "contactCreateFailed": "La sede \"{{name}}\" se creó, pero no se pudo crear el nuevo contacto. Añádelo manualmente y vincúlalo desde la sede más tarde."
+    "contactCreateFailed": "La sede \"{{name}}\" se creó, pero no se pudo crear el nuevo contacto. Añádelo manualmente y vincúlalo desde la sede más tarde.",
+    "linkedin": "LinkedIn",
+    "linkedinPlaceholder": "linkedin.com/in/usuario"
   },
   "changelog": {
     "empty": "Aún no hay cambios."

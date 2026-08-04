@@ -388,7 +388,9 @@
       "archiveContact": "Archiver le contact",
       "confirmArchive": "Archiver {{name}} ? Vous pourrez le restaurer plus tard via « Archivé ».",
       "archiveFailed": "L'archivage a échoué.",
-      "restoreFailed": "La restauration a échoué."
+      "restoreFailed": "La restauration a échoué.",
+      "linkedin": "LinkedIn",
+      "openLinkedin": "Ouvrir sur LinkedIn"
     },
     "deleteConfirm": "Supprimer ce contact ?",
     "saveFailed": "L'enregistrement a échoué.",
@@ -704,7 +706,9 @@
     },
     "contactPersonHint": "Choisissez un contact existant de ce client, ou saisissez un nouveau nom.",
     "contactCouplingFailed": "L'établissement « {{name}} » a été créé, mais la liaison avec le contact a échoué. Liez-le manuellement plus tard depuis l'établissement.",
-    "contactCreateFailed": "L'établissement « {{name}} » a été créé, mais la création du nouveau contact a échoué. Ajoutez-le manuellement et liez-le depuis l'établissement plus tard."
+    "contactCreateFailed": "L'établissement « {{name}} » a été créé, mais la création du nouveau contact a échoué. Ajoutez-le manuellement et liez-le depuis l'établissement plus tard.",
+    "linkedin": "LinkedIn",
+    "linkedinPlaceholder": "linkedin.com/in/nomdutilisateur"
   },
   "changelog": {
     "empty": "Aucun changement pour le moment."

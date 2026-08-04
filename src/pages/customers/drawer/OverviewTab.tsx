@@ -156,9 +156,9 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* CANON-DIVIDER-1 (Danny 05-08): no line between rows, 11px labels — matches
           the candidate ProfileTab's Persoonlijk/Adres/Contact cards exactly. */}
-      <EditableFieldTable title={gDetails} fields={block(gDetails)} value={values} onSave={onSave} dividers={false} labelFontSize={11} />
-      <EditableFieldTable title={gAddress} fields={block(gAddress)} value={values} onSave={onSave} dividers={false} labelFontSize={11} />
-      <EditableFieldTable title={gContact} fields={block(gContact)} value={values} onSave={onSave} dividers={false} labelFontSize={11} />
+      <EditableFieldTable title={gDetails} fields={block(gDetails)} value={values} onSave={onSave} />
+      <EditableFieldTable title={gAddress} fields={block(gAddress)} value={values} onSave={onSave} />
+      <EditableFieldTable title={gContact} fields={block(gContact)} value={values} onSave={onSave} />
 
       {/* BEDRIJFSTEKST — one free-text block for company info AND recruitment issues
           (Danny 28-07: "1 txt blok"), directly under Contact. It edits `description`.

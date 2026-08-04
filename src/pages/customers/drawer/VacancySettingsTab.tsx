@@ -55,7 +55,6 @@ export default function VacancySettingsTab({ c, onSave }: Props) {
         fields={[{ key: 'privacyPolicyUrl', label: t('overview.privacyPolicyUrl') }]}
         value={values}
         onSave={onSave}
-        dividers={false} labelFontSize={11}
       />
 
       {/* CANON-DIVIDER-1 (Danny 05-08): candidate ProfileTab canon — no line between
