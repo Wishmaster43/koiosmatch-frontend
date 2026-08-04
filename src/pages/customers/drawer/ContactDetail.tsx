@@ -38,7 +38,7 @@ import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import TitleBadge from '@/components/drawer/TitleBadge'
 import DrillPager, { type DrillPagerProps } from '@/components/drawer/DrillPager'
 import ContactLinkSection from './ContactLinkSection'
-import { emailValue, phoneValue, linkedinValue } from '@/components/drawer/contactLinks'
+import { emailValue, phoneValue, linkedinValue, LinkedinMark } from '@/components/drawer/contactLinks'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
@@ -143,8 +143,9 @@ export default function ContactDetail({ contact, locations, departments, statuse
     { key: 'phone', label: t('contacts.detail.phone'), type: 'text',
       renderValue: v => phoneValue(v, t('contacts.detail.callPhone')) },
     // CONTACT-LINKEDIN-1 (Danny 05-08): the backend stores only the slug; the read
-    // view links out to linkedin.com/in/{slug} (mirrors email/phone above).
-    { key: 'linkedin', label: t('contacts.detail.linkedin'), type: 'text',
+    // view links out to linkedin.com/in/{slug} (mirrors email/phone above). Label
+    // carries the brand mark, exactly like the candidate's own LinkedIn row.
+    { key: 'linkedin', label: <><LinkedinMark size={12} />{t('contacts.detail.linkedin')}</>, type: 'text',
       renderValue: v => linkedinValue(v, t('contacts.detail.openLinkedin')) },
     { key: 'isPrimary', label: t('contacts.detail.primary'), type: 'checkbox' },
   ]

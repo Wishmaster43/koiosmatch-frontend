@@ -132,15 +132,13 @@ export function vatValue(v: unknown, openLabel: string): ReactNode {
 }
 
 // LinkedIn's official brand blue — not a themeable UI colour, so it is exempt from
-// the token-only rule (mirrors the identical exception already taken in the
-// candidate ProfileContactTab's own LinkedIn icon; the two are not shared today —
-// a follow-up should promote one of them into the other, CONTACT-LINKEDIN-1).
+// the token-only rule.
 // eslint-disable-next-line no-restricted-syntax -- LinkedIn's official brand blue, not a themeable UI colour
 const LINKEDIN_BLUE = '#0A66C2'
 
 // lucide-react ships no brand/logo icons, so this is a minimal inline LinkedIn
-// glyph — same shape as the candidate profile's own copy.
-function LinkedinMark({ size = 13 }: { size?: number }) {
+// glyph. THE one shared copy (§11) — candidate + customer both import it.
+export function LinkedinMark({ size = 13 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill={LINKEDIN_BLUE} xmlns="http://www.w3.org/2000/svg">
       <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />

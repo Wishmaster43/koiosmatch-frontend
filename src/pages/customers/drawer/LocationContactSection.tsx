@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { Star, Loader2 } from 'lucide-react'
 import SectionCard from '@/components/ui/SectionCard'
 import ContactNameLink from './ContactNameLink'
-import { emailValue, phoneValue } from '@/components/drawer/contactLinks'
+import { emailValue, phoneValue, linkedinValue, LinkedinMark } from '@/components/drawer/contactLinks'
+import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { setLocationPrimaryContact, splitContactName } from '../hooks/useCustomerContacts'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
@@ -34,10 +35,11 @@ interface Props {
   onAddContact?: (payload: ContactPayload) => Promise<Contact | void> | void
 }
 
-// One label-left/value-right row — mirrors the field-table convention this block replaces.
-const Row = ({ label, children }: { label: string; children: ReactNode }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: 8, minHeight: 22 }}>
-    <span style={{ width: 140, flexShrink: 0, fontSize: 12, color: 'var(--text-muted)' }}>{label}</span>
+// One label-left/value-right row — the candidate canon anatomy (fieldRowCanon):
+// 11px/120px label with the flex/gap-5 seat for an optional brand mark, 26px row.
+const Row = ({ label, children }: { label: ReactNode; children: ReactNode }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
+    <span style={{ ...CANON_LABEL_STYLE, display: 'flex', alignItems: 'center', gap: 5 }}>{label}</span>
     <div style={{ minWidth: 0, flex: 1 }}>{children}</div>
   </div>
 )
@@ -190,7 +192,7 @@ export default function LocationContactSection({
     <SectionCard title={t('locations.detail.contactTitle')}>
       {primaryContact ? (
         // The real coupling — full identity, rendered as a link (mirrors Contactpersonen).
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Row label={t('locations.detail.contactName')}>
             <ContactNameLink name={primaryContact.name} id={primaryContact.id} onOpen={onOpenContact} title={t('contacts.openContact')} />
           </Row>
@@ -199,6 +201,13 @@ export default function LocationContactSection({
           {primaryContact.role && <Row label={t('contacts.detail.role')}><span style={{ fontSize: 12, color: 'var(--text)' }}>{primaryContact.role}</span></Row>}
           <Row label={t('locations.detail.email')}>{emailValue(primaryContact.email, t('overview.sendEmail'))}</Row>
           <Row label={t('locations.detail.phone')}>{phoneValue(primaryContact.phone || primaryContact.mobile, t('overview.callPhone'))}</Row>
+          {/* CONTACT-LINKEDIN-1 (Danny 05-08: "gewoon in het blok van de contactpersoon"):
+              the coupled contact's LinkedIn, only when set — no empty-dash row here. */}
+          {primaryContact.linkedin && (
+            <Row label={<><LinkedinMark size={12} />{t('contacts.detail.linkedin')}</>}>
+              {linkedinValue(primaryContact.linkedin, t('contacts.detail.openLinkedin'))}
+            </Row>
+          )}
           {/* Coupled = the action reads as CHANGE; "kies een…" here implied nothing was
               coupled yet and read as still-broken (Danny 03-08). */}
           <div style={{ marginTop: 4 }}><PickButton label={t('locations.detail.changePrimaryContact')} onClick={onPickContact} /></div>
@@ -206,7 +215,7 @@ export default function LocationContactSection({
       ) : hasLegacy ? (
         // No coupling yet, but the location still carries typed contact text — show it
         // honestly (not as a link: there is no record behind it) and offer the real fix.
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Row label={t('locations.detail.contactName')}>
             <span style={{ fontSize: 12, color: 'var(--text)' }}>{typedName || '-'}</span>
           </Row>

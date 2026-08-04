@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, Mail, Phone } from 'lucide-react'
 import { waDigits } from '@/lib/waDigits'
+import { LinkedinMark } from '@/components/drawer/contactLinks'
 import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import type { Candidate } from '@/types/candidate'
@@ -16,14 +17,6 @@ type ContactForm = Record<ContactKey, string>
 // the old PROFILE_REQ_MAP — mobile/linkedin are never required).
 const REQ_MAP: Partial<Record<ContactKey, string>> = { email: 'email', phone: 'phone' }
 
-// eslint-disable-next-line no-restricted-syntax -- LinkedIn's official brand blue, not a themeable UI colour
-function LinkedinIcon({ size = 12, color = '#0A66C2' }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} xmlns="http://www.w3.org/2000/svg">
-      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
-    </svg>
-  )
-}
 
 /** Contact sub-tab — e-mail, mobiel, telefoon, LinkedIn. Own pencil, own
  *  draft/error state; cancelling here never discards an in-progress edit in
@@ -139,8 +132,7 @@ export default function ProfileContactTab({ c, onSave, autoEditSignal }: {
         {field('email', t('profile.email'))}
         {field('mobile', t('profile.mobile'))}
         {field('phone', t('profile.phone'))}
-        {/* eslint-disable-next-line no-restricted-syntax -- LinkedIn's official brand blue, not a themeable UI colour */}
-        {field('linkedin', t('profile.linkedin'), <LinkedinIcon size={12} color="#0A66C2" />)}
+        {field('linkedin', t('profile.linkedin'), <LinkedinMark size={12} />)}
       </GroupCard>
     </div>
   )
