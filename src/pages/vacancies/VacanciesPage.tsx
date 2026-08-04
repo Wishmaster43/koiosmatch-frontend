@@ -30,7 +30,8 @@ import { buildVacancyInsightsConfig } from './data/vacancyInsightsConfig'
 import { useNavigation } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
-import { useVacanciesData } from './hooks/useVacanciesData'
+import { useListPageSize } from '@/hooks/useListPageSize'
+import { useVacanciesData, VACANCIES_MAX_PER_PAGE } from './hooks/useVacanciesData'
 import { useVacancyFilterParams } from './hooks/useVacancyFilterParams'
 import { useAiAgents } from './hooks/useAiAgents'
 import { useVacancyRecord } from './hooks/useVacancyRecord'
@@ -64,7 +65,12 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const branchOptions = useBranchOptions()
 
   const [page,      setPage]      = usePageMemory('vac.page', 1)
-  const [pageSize,  setPageSize]  = useState(50)
+  // Shared page-size hook (§ audit 2026-08-05): seeds from the user's
+  // default_per_page, clamps to VacancyQuery's real per_page ceiling (200) so a
+  // 500 preference never 422s ("klapt eruit"), and stays sticky across the
+  // shell's unmount-on-navigate — this page used to hardcode 50, ignoring the
+  // tenant preference entirely.
+  const { pageSize, setPageSize, options: pageSizeOptions } = useListPageSize('vac', VACANCIES_MAX_PER_PAGE)
   const [addOpen,        setAddOpen]        = useState(false)
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
   const [actionMsg,      setActionMsg]      = useState<{ type: string; text: string } | null>(null)
@@ -323,7 +329,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                     onOpenCandidateSearch={openCandidateSearch} onOpenApplicants={openApplicants} />
                 </div>
                 <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
-                  onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
+                  onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={pageSizeOptions} />
               </div>
             </div>
           ) : (
@@ -350,7 +356,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
               </div>
 
               <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
-                onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
+                onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={pageSizeOptions} />
             </>
           )}
         </div>

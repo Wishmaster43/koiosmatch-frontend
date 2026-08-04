@@ -220,7 +220,8 @@
     "nt_match": "Matches",
     "nt_task": "Tasks",
     "customer_blacklist_reasons": "Blacklist reasons",
-    "match_stop_reasons": "Termination reasons"
+    "match_stop_reasons": "Termination reasons",
+    "outreach_outcomes": "Outcomes"
   },
   "kpis": {
     "title": "KPI settings",
@@ -617,7 +618,15 @@
     "channelsSubtitle": "Manage the job boards you can publish vacancies on.",
     "channelsAdd": "Add job board",
     "appDefaultsTitle": "Application settings",
-    "appDefaultsSubtitle": "The default a new vacancy inherits. Override it per vacancy in the drawer."
+    "appDefaultsSubtitle": "The default a new vacancy inherits. Override it per vacancy in the drawer.",
+    "flagOpen": "Marks as open",
+    "flagOpenDesc": "The status of a live, actively open vacancy.",
+    "flagClosed": "Stops intake",
+    "flagClosedDesc": "A vacancy in this status no longer accepts new applications (career site and partner API).",
+    "channelActive": "Active",
+    "channelActiveDesc": "Available to publish on. Turn off to hide a discontinued job board without deleting it.",
+    "channelDefaultEnabled": "Pre-checked for new vacancies",
+    "channelDefaultEnabledDesc": "New vacancies start with this job board toggled on in the publish panel; still adjustable per vacancy."
   },
   "matches": {
     "statusTitle": "Statuses",
@@ -660,7 +669,9 @@
     "priorityTitle": "Priorities",
     "prioritySubtitle": "Manage the priorities of your tasks (low, normal, high).",
     "priorityAdd": "Add priority",
-    "priorityDefault": "Default"
+    "priorityDefault": "Default",
+    "flagDone": "Counts as completed",
+    "flagDoneDesc": "Tasks in this status count toward the completed KPI and no longer show as open or overdue."
   },
   "taskDisplay": {
     "title": "Table display",

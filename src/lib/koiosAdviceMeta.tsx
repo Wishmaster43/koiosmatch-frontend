@@ -1,5 +1,5 @@
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
-import { Target, Phone, CalendarPlus, Sparkles } from 'lucide-react'
+import { Target, Phone, CalendarPlus, Sparkles, AlertTriangle, RefreshCw, Clock } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
 
 type LucideIcon = ComponentType<{ size?: number; style?: CSSProperties }>
@@ -7,18 +7,27 @@ type LucideIcon = ComponentType<{ size?: number; style?: CSSProperties }>
 interface AdviceMeta { icon: LucideIcon; color: string }
 
 // Icon + colour per Koios advice action — shared by every entity table's "Koios"
-// column (was duplicated near-verbatim in CandidatesTable and CustomersTable).
-// Colours are the existing §4 semantic tokens (SoftChip's color-mix works for
-// both hex and CSS-var tokens, so tokenizing here costs nothing over the old
-// hardcoded hex — this is exactly the ADVICE_META values converted 1:1):
-//   add_to_pool #19A5CA === --color-primary · contact #D97706 === --color-warning
-//   plan_intake #2563EB === --color-map      · default #6B7280 === --text-muted
+// column (Danny 05-08: candidates, applications, vacancies, matches, opportunities,
+// tasks, outreach, customers all render this ONE identity). Colours are the
+// existing §4 semantic tokens (SoftChip's color-mix works for both hex and
+// CSS-var tokens):
+//   add_to_pool --color-primary · contact/attention --color-warning
+//   plan_intake/follow_up --color-map · renew --color-info · overdue --color-danger
+//   default --text-muted (also the fallback for the free-text 'task' action —
+//   applications' raw AI-suggested text has no dedicated meta, see koiosColumn rollout)
 export const ADVICE_META: Record<string, AdviceMeta> = {
   add_to_pool: { icon: Target,       color: 'var(--color-primary)' },
   contact:     { icon: Phone,        color: 'var(--color-warning)' },
   plan_intake: { icon: CalendarPlus, color: 'var(--color-map)' },
-  // Customers-only action slug — same visual family as plan_intake (a scheduled follow-up).
+  // Customers + opportunities: a stalled relationship needs a scheduled follow-up.
   follow_up:   { icon: CalendarPlus, color: 'var(--color-map)' },
+  // Vacancies + outreach: something needs a human look (stale/misconfigured), not
+  // yet urgent enough for the danger colour.
+  attention:   { icon: AlertTriangle, color: 'var(--color-warning)' },
+  // Matches: the contract end date is approaching or passed while still open.
+  renew:       { icon: RefreshCw,     color: 'var(--color-info)' },
+  // Tasks: past its due date — mirrors the due-column's own overdue colour.
+  overdue:     { icon: Clock,         color: 'var(--color-danger)' },
   default:     { icon: Sparkles,     color: 'var(--text-muted)' },
 }
 

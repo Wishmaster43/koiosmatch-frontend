@@ -210,5 +210,10 @@
     "windowWarning": "Nog {{days}} dag(en) tot de einddatum — tijdig verlengen of afronden.",
     "windowFine": "Contractperiode loopt goed.",
     "windowUnknown": "Geen einddatum bekend."
+  },
+  "koios": {
+    "reasons": {
+      "endDateApproaching": "De einddatum van het contract nadert of is verstreken — overweeg verlenging."
+    }
   }
 }

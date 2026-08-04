@@ -44,6 +44,7 @@ const apiGet = api.get as unknown as ReturnType<typeof vi.fn>
 const useCustomersDataMock = vi.fn()
 vi.mock('./hooks/useCustomersData', () => ({
   useCustomersData: (...args: unknown[]) => useCustomersDataMock(...args),
+  CUSTOMERS_MAX_PER_PAGE: 200,
 }))
 vi.mock('./hooks/useCustomerRecord', () => ({
   useCustomerRecord: () => ({

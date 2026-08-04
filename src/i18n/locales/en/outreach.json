@@ -139,5 +139,11 @@
       "custom_fields": "Custom fields",
       "reference_number": "Reference number"
     }
+  },
+  "koios": {
+    "reasons": {
+      "noTargets": "This active campaign has no targets loaded yet.",
+      "staleDraft": "This draft campaign has targets loaded but was never activated."
+    }
   }
 }

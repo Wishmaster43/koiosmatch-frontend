@@ -12,13 +12,22 @@ import { resolveGenericLookupIcon } from './lookupIcons'
 // most of it already), scoped so the picker grid isn't the full 24-icon set.
 const TASK_TYPE_ICON_NAMES = ['phone', 'mail', 'message-circle', 'clipboard-list', 'users', 'calendar', 'briefcase', 'check-circle']
 
-/** Task statuses — the board columns. Backend /task-statuses (name + colour + is_done). */
+/**
+ * Task statuses — the board columns. Backend /task-statuses (name + colour +
+ * is_done). `is_done` (round-4 audit finding #4) marks the "completed" column so
+ * TaskLookupsContext.doneStatusValues (§3, open/overdue/completed KPIs) never
+ * matches the editable label by hand — TaskStatusController validates it on both
+ * create and update, and it is NOT a HasSingletonFlag (several statuses, e.g.
+ * "Done" and "Cancelled", can each count as completed), so it is wired as a plain
+ * flagField, not a defaultField singleton.
+ */
 export function TaskStatusSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
       <StatusListEditor compact withColor title={t('tasks.statusTitle')} subtitle={t('tasks.statusSubtitle')}
-        endpoint="/task-statuses" addLabel={t('tasks.statusAdd')} />
+        endpoint="/task-statuses" addLabel={t('tasks.statusAdd')}
+        flagField={{ key: 'is_done', label: t('tasks.flagDone'), description: t('tasks.flagDoneDesc') }} />
     </div>
   )
 }

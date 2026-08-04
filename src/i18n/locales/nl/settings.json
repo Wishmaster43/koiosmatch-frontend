@@ -220,7 +220,8 @@
     "nt_match": "Matches",
     "nt_task": "Taken",
     "customer_blacklist_reasons": "Blacklistredenen",
-    "match_stop_reasons": "Beëindigingsredenen"
+    "match_stop_reasons": "Beëindigingsredenen",
+    "outreach_outcomes": "Uitkomsten"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -617,7 +618,15 @@
     "channelsSubtitle": "Beheer de vacaturesites waarop je vacatures kunt publiceren.",
     "channelsAdd": "Vacaturesite toevoegen",
     "appDefaultsTitle": "Sollicitatie-instellingen",
-    "appDefaultsSubtitle": "De standaard die een nieuwe vacature overneemt. Per vacature aanpasbaar in de drawer."
+    "appDefaultsSubtitle": "De standaard die een nieuwe vacature overneemt. Per vacature aanpasbaar in de drawer.",
+    "flagOpen": "Markeert als open",
+    "flagOpenDesc": "De status van een actieve, openstaande vacature.",
+    "flagClosed": "Stopt de instroom",
+    "flagClosedDesc": "Een vacature in deze status accepteert geen nieuwe sollicitaties meer (carrièrepagina en partner-API).",
+    "channelActive": "Actief",
+    "channelActiveDesc": "Beschikbaar om op te publiceren. Zet uit om een gestopte vacaturesite te verbergen zonder te verwijderen.",
+    "channelDefaultEnabled": "Vooraf aangevinkt voor nieuwe vacatures",
+    "channelDefaultEnabledDesc": "Nieuwe vacatures starten met deze vacaturesite aangevinkt in het publicatiepaneel; per vacature nog aan te passen."
   },
   "matches": {
     "statusTitle": "Statussen",
@@ -660,7 +669,9 @@
     "priorityTitle": "Prioriteiten",
     "prioritySubtitle": "Beheer de prioriteiten van je taken (laag, normaal, hoog).",
     "priorityAdd": "Prioriteit toevoegen",
-    "priorityDefault": "Standaard"
+    "priorityDefault": "Standaard",
+    "flagDone": "Telt als afgerond",
+    "flagDoneDesc": "Taken in deze status tellen mee voor de KPI 'afgerond' en tonen niet meer als open of te laat."
   },
   "taskDisplay": {
     "title": "Tabelweergave",

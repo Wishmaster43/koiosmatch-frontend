@@ -162,5 +162,10 @@
     "searchPlaceholder": "Buscar notas…",
     "loading": "Cargando notas…",
     "loadError": "No se pudieron cargar las notas."
+  },
+  "koios": {
+    "reasons": {
+      "overdue": "Esta tarea está atrasada."
+    }
   }
 }

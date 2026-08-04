@@ -162,5 +162,10 @@
     "searchPlaceholder": "Search notes…",
     "loading": "Loading notes…",
     "loadError": "Notes could not be loaded."
+  },
+  "koios": {
+    "reasons": {
+      "overdue": "This task is past its due date."
+    }
   }
 }

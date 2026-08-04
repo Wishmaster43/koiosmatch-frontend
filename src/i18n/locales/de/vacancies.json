@@ -446,5 +446,10 @@
     "weeks": "{{count}}W",
     "months": "{{count}}Mon",
     "years": "{{count}}J"
+  },
+  "koios": {
+    "reasons": {
+      "staleNoApplications": "Noch keine Bewerbungen, vor {{days}} Tagen veröffentlicht."
+    }
   }
 }

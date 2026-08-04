@@ -62,13 +62,21 @@ const cardStyle: CSSProperties = {
   background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
 }
 
-const actionBtnStyle = (active: boolean, danger: boolean): CSSProperties => ({
-  display: 'inline-flex', alignItems: 'center', gap: 5,
-  fontSize: 12, fontWeight: 500, height: BTN_H, padding: '0 12px', borderRadius: 8,
-  border: `1px solid ${active ? (danger ? 'var(--color-danger)' : 'var(--color-primary)') : 'var(--border)'}`,
-  background: 'none', color: active ? (danger ? 'var(--color-danger)' : 'var(--color-primary)') : 'var(--text-muted)',
-  cursor: active ? 'pointer' : 'not-allowed', opacity: active ? 1 : 0.6,
-})
+// BUTTON-SOFT-TINT-1 (Danny 05-08): the active state was a white/transparent
+// outline button — now the house soft-tint recipe (§4, mirrors DrawerAddButton/
+// QuickViewToggle). The inactive/disabled state stays a neutral, unfilled ghost
+// (§3 honest gate — it carries no colour meaning while disabled).
+const actionBtnStyle = (active: boolean, danger: boolean): CSSProperties => {
+  const token = danger ? 'var(--color-danger)' : 'var(--color-primary)'
+  return {
+    display: 'inline-flex', alignItems: 'center', gap: 5,
+    fontSize: 12, fontWeight: 500, height: BTN_H, padding: '0 12px', borderRadius: 8,
+    border: active ? `1px solid color-mix(in srgb, ${token} 30%, transparent)` : '1px solid var(--border)',
+    background: active ? `color-mix(in srgb, ${token} 10%, transparent)` : 'none',
+    color: active ? token : 'var(--text-muted)',
+    cursor: active ? 'pointer' : 'not-allowed', opacity: active ? 1 : 0.6,
+  }
+}
 
 /**
  * InterviewStatusCard — the compact "who's talking to whom, right now" summary

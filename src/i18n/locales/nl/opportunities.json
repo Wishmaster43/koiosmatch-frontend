@@ -159,5 +159,10 @@
     "table": "Lijstweergave",
     "board": "Kanbanbord",
     "archived": "Gearchiveerd"
+  },
+  "koios": {
+    "reasons": {
+      "expectedCloseOverdue": "De verwachte sluitingsdatum is verstreken — volg deze kans op."
+    }
   }
 }

@@ -139,5 +139,11 @@
       "custom_fields": "Champs supplémentaires",
       "reference_number": "Numéro de référence"
     }
+  },
+  "koios": {
+    "reasons": {
+      "noTargets": "Cette campagne active n'a aucun contact chargé.",
+      "staleDraft": "Ce brouillon a des contacts chargés mais n'a jamais été activé."
+    }
   }
 }

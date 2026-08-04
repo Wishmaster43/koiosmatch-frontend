@@ -40,6 +40,17 @@ interface PageCustomer { id: Id; name: string }
 // (see useCandidatesData for the full note).
 const EMPTY_OPPORTUNITIES: Opportunity[] = []
 
+// OpportunityQuery::rules() caps per_page at `between:1,200`. Fixed 2026-08-05 (audit:
+// "rows per page niet overal toegepast"): this hook used to call GET /opportunities
+// with NO per_page/page at all, so the controller's own default (25) silently capped
+// EVERY consumer of `rows` — the table, the board, the donuts and the KPI cards —
+// to at most 25 opportunities total, regardless of the page's own pageSize picker
+// (mirrors the "84 vs 25" bug useMatches.ts already fixed for matches). Now fetches
+// the FULL set via a page loop, safety-capped at 5 pages (1000 rows), same scale as
+// useMatches.ts's fetch-all.
+export const OPPORTUNITIES_MAX_PER_PAGE = 200
+const OPPORTUNITIES_MAX_PAGES = 5
+
 // includeArchived (ARCHIVE-1): reveal soft-deleted opportunities alongside the
 // active set (?include_archived=1) — off by default; the page owns the toggle state.
 // branchIds (VESTIGING-2): explicit branch filter, off (empty) by default.
@@ -69,10 +80,26 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
         const params: Record<string, unknown> = {}
         if (includeArchived)  params.include_archived = 1
         if (branchIds.length) params.branch_id = branchIds
-        // NUMMER-1: exact reference-number lookup — takes precedence server-side.
-        if (ref)              params.ref = ref
-        const r = await api.get('/opportunities', { signal, params: Object.keys(params).length ? params : undefined })
-        return ((unwrapList(r).rows) as ApiOpportunity[]).map(mapOpportunity)
+        // NUMMER-1: exact reference-number lookup — takes precedence server-side, an
+        // exact match returned in one request; no pagination loop needed (mirrors
+        // useMatches.ts's identical `ref` shortcut).
+        if (ref) {
+          const r = await api.get('/opportunities', { signal, params: { ...params, ref } })
+          return ((unwrapList(r).rows) as ApiOpportunity[]).map(mapOpportunity)
+        }
+        // Fetch the FULL set (OPPORTUNITIES_MAX_PER_PAGE per request, looped) — see
+        // the constant's comment above for why a single unpaginated call used to
+        // silently truncate every consumer of `rows` to 25.
+        const all: ApiOpportunity[] = []
+        for (let pageNo = 1; pageNo <= OPPORTUNITIES_MAX_PAGES; pageNo++) {
+          const r = await api.get('/opportunities', {
+            signal, params: { ...params, per_page: OPPORTUNITIES_MAX_PER_PAGE, page: pageNo },
+          })
+          const { rows, lastPage } = unwrapList<ApiOpportunity>(r)
+          all.push(...rows)
+          if (pageNo >= lastPage) break
+        }
+        return all.map(mapOpportunity)
       } catch (e) {
         if ((e as { response?: { status?: number } })?.response?.status === 404) return [] as Opportunity[]
         throw e

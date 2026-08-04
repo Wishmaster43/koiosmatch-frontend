@@ -5,13 +5,13 @@ import type { Column } from '@/components/ui/DataTable'
 import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import SoftChip from '@/components/ui/SoftChip'
 import CustomerStatusChip from '@/components/ui/CustomerStatusChip'
-import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import BackofficeCouplingIndicator from '@/components/ui/BackofficeCouplingIndicator'
+import { makeKoiosColumn } from '@/components/ui/koiosColumn'
 import { useDateFormat } from '@/lib/datetime'
 import { useApps } from '@/context/AppsContext'
-import { KoiosAdvicePill } from '@/lib/koiosAdviceMeta'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
+import { useCustomerAdvice } from '@/lib/useCustomerAdvice'
 import type { Customer } from '@/types/customer'
 import type { Id } from '@/types/common'
 
@@ -70,6 +70,8 @@ export default function CustomersTable({
   // KLANT-FASE-1: the lifecycle-phase lookup (session-cached, one GET). Fetched here
   // rather than passed in, so the phase chip needs no new page-level plumbing.
   const { phaseMeta, phases } = useCustomerPhases()
+  // Shared Koios advice resolver (honest gate + FE rule engine, mirrors candidates).
+  const adviceOf = useCustomerAdvice()
   // Entry (default) phase — a Prospect has no status yet (Danny 02-08, mirrors the
   // candidate Lead rule). Resolved via the `is_default` FLAG, never an array
   // position, so reordering the phase lookup in Settings never silently misfires.
@@ -135,13 +137,9 @@ export default function CustomersTable({
       render: c => <button style={countBtn} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'contacts') }}>{c.contactsCount}</button> },
     { key: 'openVacancies', header: t('cols.openVacancies'), nowrap: true, align: 'right', cellStyle: mutedCell, sortable: true, sortValue: c => c.openVacanciesCount,
       render: c => <button style={countBtn} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'vacancies') }}>{c.openVacanciesCount}</button> },
-    {
-      key: 'koios', nowrap: true, sortable: true, sortValue: c => c.koiosAdvice?.action ?? '',
-      header: <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><KoiosAiMark size={16} />{t('cols.koios')}</span>,
-      // Shared pill renderer (lib/koiosAdviceMeta) — identical to the candidates
-      // koios pill and the vacancies "published" pill (Danny 2026-07-14 unification).
-      render: c => <KoiosAdvicePill advice={c.koiosAdvice} colored={colorKoios} />,
-    },
+    // Shared Koios column factory (Danny 05-08 consistency pass) — same header,
+    // sort and cell as every other entity table; only the resolver differs.
+    makeKoiosColumn({ adviceOf, colored: colorKoios, label: t('cols.koios') }),
     { key: 'created',     header: t('cols.createdAt'),   nowrap: true, cellStyle: plainCell, sortable: true, sortValue: c => c.created, render: c => c.created ? formatDate(c.created) : '—' },
     {
       // Backoffice coupling scanning aid (JOB2) — not sortable: a compound

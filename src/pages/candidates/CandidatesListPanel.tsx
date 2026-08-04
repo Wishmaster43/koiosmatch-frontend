@@ -65,6 +65,9 @@ interface CandidatesListPanelProps {
   page: number
   lastPage: number
   pageSize: number
+  // Per-endpoint dropdown options (useListPageSize) — falls back to PaginationBar's
+  // own full shared list when a caller doesn't pass one.
+  pageSizeOptions?: number[]
   onPageChange: (page: number) => void
   onPageSizeChange: (size: number) => void
   // Map view (STRAAL-1)
@@ -83,7 +86,7 @@ export default function CandidatesListPanel({
   anyFilterActive, onClearFilters, blacklistActive, onToggleBlacklist,
   showArchived, onToggleArchived, showTrash, onToggleTrash, view, onToggleView,
   tableScrollRef, error, filtered, loading, selectedId, onSelectCandidate,
-  selectedIds, onToggleRow, onToggleAll, page, lastPage, pageSize, onPageChange, onPageSizeChange,
+  selectedIds, onToggleRow, onToggleAll, page, lastPage, pageSize, pageSizeOptions, onPageChange, onPageSizeChange,
   mapCenter, mapRadius, mapStraalActive, onMapCenterChange, onMapRadiusChange, onMapClearRadius,
 }: CandidatesListPanelProps) {
   const { t } = useTranslation(['candidates', 'common'])
@@ -147,6 +150,7 @@ export default function CandidatesListPanel({
                 totalPages={lastPage}
                 totalRows={total}
                 pageSize={pageSize}
+                pageSizeOptions={pageSizeOptions}
                 onPageChange={onPageChange}
                 onPageSizeChange={onPageSizeChange}
               />
@@ -173,7 +177,7 @@ export default function CandidatesListPanel({
                     onSelect={onSelectCandidate} onOpenTab={onSelectCandidate} />
                 </div>
                 <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
-                  onPageChange={onPageChange} onPageSizeChange={onPageSizeChange} />
+                  pageSizeOptions={pageSizeOptions} onPageChange={onPageChange} onPageSizeChange={onPageSizeChange} />
               </div>
             </div>
           ),

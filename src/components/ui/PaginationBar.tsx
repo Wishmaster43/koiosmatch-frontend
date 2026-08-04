@@ -17,9 +17,13 @@ interface PaginationBarProps {
   pageSize: number
   onPageChange: (page: number) => void
   onPageSizeChange: (size: number) => void
+  // Per-page override (useListPageSize's `options`) — some endpoints cap per_page
+  // below the shared max (e.g. 200), so the dropdown must never offer a size the
+  // server would reject. Defaults to the full shared list for unclamped callers.
+  pageSizeOptions?: number[]
 }
 
-export default function PaginationBar({ page, totalPages, totalRows, pageSize, onPageChange, onPageSizeChange }: PaginationBarProps) {
+export default function PaginationBar({ page, totalPages, totalRows, pageSize, onPageChange, onPageSizeChange, pageSizeOptions = PAGE_SIZE_OPTIONS }: PaginationBarProps) {
   const { t } = useTranslation('common')
   // Locale-aware grouping (§ FMT-GETAL-1) — "1.501–2.000 van 99.968", never bare digits.
   const { formatNumber } = useNumberFormat()
@@ -72,7 +76,7 @@ export default function PaginationBar({ page, totalPages, totalRows, pageSize, o
             border: '1px solid var(--border)', background: 'var(--surface)',
             color: 'var(--text)', cursor: 'pointer', outline: 'none',
           }}>
-          {PAGE_SIZE_OPTIONS.map(n => <option key={n} value={n}>{n}</option>)}
+          {pageSizeOptions.map(n => <option key={n} value={n}>{n}</option>)}
         </select>
       </div>
     </div>

@@ -64,10 +64,15 @@ const compact: CSSProperties = {
   border: '1px solid var(--border)', background: 'white', color: 'var(--text)',
   boxSizing: 'border-box', outline: 'none',
 }
-const rowStyle: CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 12, padding: '7px 12px',
-  borderBottom: '1px solid var(--border)', background: 'var(--surface)',
-}
+// Row base style, parameterised on `dividers` (CANON-DIVIDER-1, 2026-08-05): the
+// candidate ProfileTab's GroupCard never draws a line between rows, so a caller
+// that wants that calmer look passes `dividers={false}` — default stays `true`
+// (unchanged) so every EXISTING caller (candidate Preferences/ZZP, matches,
+// opportunities) keeps its exact current look, byte for byte.
+const rowStyle = (dividers: boolean): CSSProperties => ({
+  display: 'flex', alignItems: 'center', gap: 12, padding: dividers ? '7px 12px' : '6px 12px',
+  background: 'var(--surface)',
+})
 
 function EditPencil({ onClick, title, style }: { onClick: () => void; title: string; style?: CSSProperties }) {
   return (
@@ -88,6 +93,12 @@ interface EditableFieldTableProps {
   editing?: boolean
   onStartEdit?: () => void
   onCancel?: () => void
+  // CANON-DIVIDER-1 (2026-08-05): opt into the candidate ProfileTab's calmer card
+  // look — no line between rows, an 11px label — instead of this table's original
+  // dense, line-per-row look. Both default to the ORIGINAL values so every existing
+  // caller is pixel-identical unless it explicitly opts in.
+  dividers?: boolean
+  labelFontSize?: number
 }
 
 // Normalise FieldRow options for the searchable picker: it matches on text, so a
@@ -116,6 +127,8 @@ function sameValues(a: Record<string, unknown>, b: Record<string, unknown>): boo
 export default function EditableFieldTable({
   title, fields, value = {}, onSave, labelWidth = 130, editButton = 'header',
   editing: editingProp, onStartEdit, onCancel,
+  // CANON-DIVIDER-1: unset callers get the ORIGINAL look untouched.
+  dividers = true, labelFontSize = 12,
 }: EditableFieldTableProps) {
   const { t } = useTranslation('common')
   const { formatDate } = useDateFormat()
@@ -270,14 +283,17 @@ export default function EditableFieldTable({
   }
 
   // One row — full-width for textarea/chips/richtext (they need the width), label-left otherwise.
+  // CANON-DIVIDER-1: the line between rows (and the row label's font size) are the two
+  // knobs the candidate ProfileTab canon changes; both fall back to this table's
+  // original look when the caller doesn't pass them.
   const renderRow = (f: FieldRow, last: boolean) => (f.type === 'textarea' || f.type === 'chips' || f.type === 'richtext') ? (
-    <div key={f.key} style={{ padding: '7px 12px', background: 'var(--surface)', borderBottom: last ? 'none' : '1px solid var(--border)' }}>
-      <span style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>{f.label}</span>
+    <div key={f.key} style={{ padding: '7px 12px', background: 'var(--surface)', borderBottom: (dividers && !last) ? '1px solid var(--border)' : 'none' }}>
+      <span style={{ fontSize: labelFontSize, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>{f.label}</span>
       {editing ? renderControl(f) : renderValue(f)}
     </div>
   ) : (
-    <div key={f.key} style={{ ...rowStyle, borderBottom: last ? 'none' : '1px solid var(--border)' }}>
-      <span style={{ fontSize: 12, color: 'var(--text-muted)', width: labelWidth, flexShrink: 0 }}>{f.label}</span>
+    <div key={f.key} style={{ ...rowStyle(dividers), borderBottom: (dividers && !last) ? '1px solid var(--border)' : 'none' }}>
+      <span style={{ fontSize: labelFontSize, color: 'var(--text-muted)', width: labelWidth, flexShrink: 0 }}>{f.label}</span>
       {/* Read value reserves the control's height → no row growth when editing starts. */}
       {editing ? <div style={{ flex: 1, minWidth: 0 }}>{renderControl(f)}</div> : <div style={{ flex: 1, minWidth: 0, minHeight: 26, display: 'flex', alignItems: 'center' }}>{renderValue(f)}</div>}
     </div>

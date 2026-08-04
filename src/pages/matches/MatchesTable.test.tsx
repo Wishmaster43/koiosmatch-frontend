@@ -15,6 +15,7 @@ vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => ({ metaOf: ()
 vi.mock('@/lib/settings/useAllSettings', () => ({
   useAllSettings: () => ({}),
   getBoolSetting: (_s: unknown, _key: string, fallback: boolean) => fallback,
+  getNumberSetting: (_s: unknown, _key: string, fallback: number) => fallback,
 }))
 // Identity date formatter — this file doesn't cover date rendering itself.
 vi.mock('@/lib/datetime', () => ({
@@ -94,5 +95,27 @@ describe('MatchesTable · backoffice coupling indicator (JOB2)', () => {
     rerender(<MatchesTable rows={[row]} />)
     expect(screen.queryByRole('img', { name: /HelloFlex/ })).toBeNull()
     expect(screen.queryByRole('img', { name: /Shiftmanager/ })).toBeNull()
+  })
+})
+
+// Danny 05-08: the "Koios" column now rolls out to every entity table — this is
+// the smoke test proving the header renders here too (the honest per-row rule
+// lives in matchAdvice.test.ts).
+describe('MatchesTable · Koios column (Danny 05-08)', () => {
+  it('renders the header with the Koios mark, and flags an open match whose end date already passed', () => {
+    const approaching = { ...baseRow, id: 60, endDate: '2000-01-01' }
+    const openEnded = { ...baseRow, id: 61, endDate: null }
+    render(<MatchesTable rows={[approaching, openEnded]} />)
+
+    expect(screen.getByRole('img', { name: 'Koios AI' })).toBeInTheDocument()
+    expect(screen.getByText('Verlengen?')).toBeInTheDocument()
+  })
+
+  it('renders an honest dash for an open-ended match (no end date)', () => {
+    const openEnded = { ...baseRow, id: 62, endDate: null }
+    const { container } = render(<MatchesTable rows={[openEnded]} />)
+    const headerCell = screen.getByRole('img', { name: 'Koios AI' }).closest('th') as HTMLElement
+    const col = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    expect(container.querySelectorAll('tbody tr')[0].children[col].textContent).toBe('—')
   })
 })

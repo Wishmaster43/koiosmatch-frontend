@@ -210,5 +210,10 @@
     "windowWarning": "{{days}} day(s) left until the end date — renew or wrap up in time.",
     "windowFine": "Contract window is on track.",
     "windowUnknown": "No end date known."
+  },
+  "koios": {
+    "reasons": {
+      "endDateApproaching": "The contract end date is approaching or has passed — consider renewing."
+    }
   }
 }

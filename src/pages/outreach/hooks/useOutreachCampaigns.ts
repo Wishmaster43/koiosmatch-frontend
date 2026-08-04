@@ -27,6 +27,16 @@ export interface Campaign {
   [key: string]: unknown
 }
 
+// OutreachCampaignController's filterRules() caps per_page at `between:1,200`. Fixed
+// 2026-08-05 (audit: "Bellijsten heeft niet eens een footer?? ... rows per page niet
+// overal toegepast"): this hook used to call GET /outreach-campaigns with NO per_page/
+// page at all, so the controller's own default (25) silently capped the whole list —
+// and OutreachPage had no PaginationBar at all to reveal the truncation (mirrors the
+// "84 vs 25" bug useMatches.ts already fixed for matches). Now fetches the FULL set
+// via a page loop, safety-capped at 5 pages (1000 rows), same scale as useMatches.
+export const OUTREACH_MAX_PER_PAGE = 200
+const OUTREACH_MAX_PAGES = 5
+
 export function useOutreachCampaigns() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading]     = useState(true)
@@ -36,8 +46,17 @@ export function useOutreachCampaigns() {
   const load = useCallback(() => {
     setLoading(true)
     setError(false)
-    listCampaigns()
-      .then((res) => setCampaigns((res.rows as Campaign[]) ?? []))
+    const loadAll = async () => {
+      const all: Campaign[] = []
+      for (let pageNo = 1; pageNo <= OUTREACH_MAX_PAGES; pageNo++) {
+        const res = await listCampaigns({ per_page: OUTREACH_MAX_PER_PAGE, page: pageNo })
+        all.push(...((res.rows as Campaign[]) ?? []))
+        if (pageNo >= (res.lastPage ?? 1)) break
+      }
+      return all
+    }
+    loadAll()
+      .then(setCampaigns)
       .catch(() => setError(true))
       .finally(() => setLoading(false))
   }, [])

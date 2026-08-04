@@ -146,7 +146,8 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>{t('drawer.contract.title')}</div>
       {/* Remount only on a failed save (revertTick) or a match switch, so the
           uncontrolled table re-seeds its draft from the reverted/fresh data. */}
-      <EditableFieldTable key={`${matchId}-${revertTick}`} fields={fields} value={values} onSave={handleSave} labelWidth={150} />
+      {/* Canon (05-08): clean cards — no row dividers, 11px labels (candidate = leading). */}
+      <EditableFieldTable key={`${matchId}-${revertTick}`} fields={fields} value={values} onSave={handleSave} labelWidth={150} dividers={false} labelFontSize={11} />
       {/* Derived margin — read-only, sits right under the rate fields. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, padding: '7px 11px', borderRadius: 8, marginTop: -4,
         background: 'var(--surface)', border: '1px solid var(--border)',

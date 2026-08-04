@@ -165,7 +165,14 @@
       "expired": "Esta propuesta ha caducado — vuelve a pedirlo.",
       "error": "Algo salió mal. Inténtalo de nuevo."
     },
-    "resizeHandle": "Ajustar el ancho del panel"
+    "resizeHandle": "Ajustar el ancho del panel",
+    "column": "Koios",
+    "actions": {
+      "follow_up": "Dar seguimiento",
+      "attention": "Atención",
+      "renew": "¿Renovar?",
+      "overdue": "Atrasado"
+    }
   },
   "actionRules": {
     "title": "Verificación de acción",

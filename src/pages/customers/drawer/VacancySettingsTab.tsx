@@ -47,25 +47,29 @@ export default function VacancySettingsTab({ c, onSave }: Props) {
       </div>
 
       {/* The privacy-policy link belongs with the career-site settings, not on the
-          company tab (Danny 28-07). It is the URL an applicant is shown. */}
+          company tab (Danny 28-07). It is the URL an applicant is shown.
+          CANON-DIVIDER-1 (Danny 05-08): candidate ProfileTab canon — no line
+          between rows, 11px labels. */}
       <EditableFieldTable
         title={t('overview.online')}
         fields={[{ key: 'privacyPolicyUrl', label: t('overview.privacyPolicyUrl') }]}
         value={values}
         onSave={onSave}
+        dividers={false} labelFontSize={11}
       />
 
+      {/* CANON-DIVIDER-1 (Danny 05-08): candidate ProfileTab canon — no line between
+          rows, and the row's primary text drops from 13px to the canon's 12px body size. */}
       <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-        {FIELDS.map((f, i) => {
+        {FIELDS.map(f => {
           const current = Boolean(values[f.key])
           const tenantDefault = getBoolSetting(settings, f.settingKey, f.fallback)
           const followsDefault = current === tenantDefault
           return (
-            <div key={f.key} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px',
-              borderBottom: i < FIELDS.length - 1 ? '1px solid var(--border)' : 'none', background: 'var(--surface)' }}>
+            <div key={f.key} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '9px 12px', background: 'var(--surface)' }}>
               <Toggle checked={current} onChange={v => onSave?.({ [f.key]: v })} ariaLabel={t(`vacancySettings.fields.${f.key}`)} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, color: 'var(--text)' }}>{t(`vacancySettings.fields.${f.key}`)}</div>
+                <div style={{ fontSize: 12, color: 'var(--text)' }}>{t(`vacancySettings.fields.${f.key}`)}</div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
                   {t('vacancySettings.tenantDefault', { value: tenantDefault ? t('vacancySettings.on') : t('vacancySettings.off') })}
                   {' · '}

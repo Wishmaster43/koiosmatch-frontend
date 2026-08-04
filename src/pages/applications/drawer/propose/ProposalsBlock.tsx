@@ -18,10 +18,13 @@ interface ProposalsBlockProps {
 
 // Shared button styling for the two link actions — same footprint as the
 // existing revoke button, just tinted with the primary token instead of danger.
+// BUTTON-SOFT-TINT-1 (Danny 05-08): was a white/transparent outline — now the
+// house soft-tint recipe (§4, mirrors DrawerAddButton/QuickViewToggle).
 const linkButtonStyle: CSSProperties = {
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4,
   height: 26, minWidth: 26, padding: '0 8px', fontSize: 11, borderRadius: 6,
-  border: '1px solid var(--color-primary)', background: 'none', color: 'var(--color-primary)',
+  border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
+  background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary)',
   cursor: 'pointer', textDecoration: 'none',
 }
 
@@ -123,10 +126,13 @@ export default function ProposalsBlock({ application }: ProposalsBlockProps) {
                   </a>
                 </div>
               )}
+              {/* BUTTON-SOFT-TINT-1 (Danny 05-08): was a white/transparent outline
+                  button — now the house soft-tint recipe (§4). */}
               {!p.revoked_at && p.is_valid && (
                 <button onClick={() => handleRevoke(p.id)} disabled={revoking} aria-label={t('propose.revoke')}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 4, height: 26, padding: '0 8px', fontSize: 11,
-                    borderRadius: 6, border: '1px solid var(--color-danger)', background: 'none', color: 'var(--color-danger)',
+                    borderRadius: 6, border: '1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)',
+                    background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)', color: 'var(--color-danger)',
                     cursor: revoking ? 'not-allowed' : 'pointer', opacity: revoking ? 0.6 : 1 }}>
                   <X size={11} /> {t('propose.revoke')}
                 </button>

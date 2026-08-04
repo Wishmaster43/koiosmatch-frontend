@@ -160,3 +160,15 @@ describe('CandidatesTable · backoffice coupling indicator (JOB2)', () => {
     expect(screen.queryByRole('img', { name: /Shiftmanager/ })).toBeNull()
   })
 })
+
+// Danny 05-08: the "Koios" column now rolls out to every entity table via the
+// shared makeKoiosColumn factory — this is the smoke test proving the header
+// still renders here (useCandidateAdvice is stubbed to null above, so the rule
+// itself stays covered by candidateAdvice.test.ts/useCandidateAdvice.test.ts).
+describe('CandidatesTable · Koios column (Danny 05-08)', () => {
+  it('renders the header with the Koios mark + label', () => {
+    render(<CandidatesTable rows={[baseCandidate]} />)
+    expect(screen.getByRole('img', { name: 'Koios AI' })).toBeInTheDocument()
+    expect(screen.getByText('Koios')).toBeInTheDocument()
+  })
+})

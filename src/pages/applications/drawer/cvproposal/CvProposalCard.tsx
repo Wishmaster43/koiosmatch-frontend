@@ -137,8 +137,11 @@ export default function CvProposalCard({
                   opacity: canAccept ? 1 : 0.6 }}>
                 <Check size={13} /> {t('cvProposal.accept')}
               </button>
+              {/* BUTTON-SOFT-TINT-1 (Danny 05-08): was a white/transparent outline
+                  button — now the house soft-tint recipe (§4). */}
               <button type="button" onClick={() => askDecide('reject')} disabled={deciding}
-                style={{ ...btnBase, border: '1px solid var(--color-danger)', background: 'none',
+                style={{ ...btnBase, border: '1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)',
+                  background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)',
                   color: 'var(--color-danger)', cursor: deciding ? 'not-allowed' : 'pointer',
                   opacity: deciding ? 0.6 : 1 }}>
                 <X size={13} /> {t('cvProposal.reject')}

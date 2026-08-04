@@ -34,6 +34,13 @@ interface UseCandidatesDataParams {
 const EMPTY_CANDIDATES: Candidate[] = []
 const EMPTY_LOCATIONS: LocationOption[] = []
 
+// CandidateProfileController::index caps per_page at `between:1,500` — matches the
+// shared PAGE_SIZE_OPTIONS ceiling, so no clamp is actually needed today. Exported
+// anyway (mirrors useApplicationsData/useVacanciesData/useCustomersData) so
+// CandidatesPage documents the real measured backend rule instead of re-deriving
+// a magic 500 — one source of truth if either ceiling ever moves independently.
+export const CANDIDATES_MAX_PER_PAGE = 500
+
 export function useCandidatesData({ filterParams, page, pageSize, t, setActionMsg }: UseCandidatesDataParams) {
   const queryClient = useQueryClient()
 

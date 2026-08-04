@@ -259,7 +259,9 @@ export interface Customer {
   activeMatchesCount: number
   created: string
   logo: string | null
-  koiosAdvice: { action?: string; label?: string; reason?: string } | null
+  // `source` tags WHO produced this advice (mirrors CandidateAdvice) — the honest
+  // gate in useCustomerAdvice only trusts a backend value once it declares one.
+  koiosAdvice: { action?: string; label?: string; reason?: string; source?: string } | null
   // Tenant custom-field values (§3B "Eigen velden" — the drawer's gated Extra tab).
   customFields: Record<string, unknown>
 }
@@ -380,8 +382,8 @@ export interface ApiCustomer {
   active_matches_count?: number; activeMatchesCount?: number
   created_at?: string; created?: string
   logo?: string | null; logo_url?: string | null
-  koios_advice?: { action?: string; label?: string; reason?: string } | null
-  koiosAdvice?: { action?: string; label?: string; reason?: string } | null
+  koios_advice?: { action?: string; label?: string; reason?: string; source?: string } | null
+  koiosAdvice?: { action?: string; label?: string; reason?: string; source?: string } | null
   // Tenant custom-field values (§3B "Eigen velden").
   custom_fields?: Record<string, unknown>
   // EXTRACT-1: the shared raw shape (src/lib/backofficeLink).

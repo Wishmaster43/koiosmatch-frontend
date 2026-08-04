@@ -33,7 +33,9 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
       <Field label={t('profile.defaultPageSize')}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {PAGE_SIZE_OPTIONS.map(n => {
-            const active = (form.default_per_page ?? 500) === n
+            // Unset preference highlights the CANONICAL list fallback (50) — every
+            // list page seeds 50 when nothing is saved, so the pill must agree.
+            const active = (form.default_per_page ?? 50) === n
             return (
               <button key={n}
                 onClick={() => setForm(f => ({ ...f, default_per_page: n }))}

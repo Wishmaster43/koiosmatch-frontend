@@ -220,7 +220,8 @@
     "nt_match": "Matchs",
     "nt_task": "Tâches",
     "customer_blacklist_reasons": "Motifs de liste noire",
-    "match_stop_reasons": "Motifs de résiliation"
+    "match_stop_reasons": "Motifs de résiliation",
+    "outreach_outcomes": "Résultats"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -532,7 +533,15 @@
     "channelsSubtitle": "Gérez les sites d'emploi où publier vos postes.",
     "channelsAdd": "Ajouter un site d'emploi",
     "appDefaultsTitle": "Paramètres de candidature",
-    "appDefaultsSubtitle": "La valeur par défaut héritée par une nouvelle offre. Ajustable par offre dans le tiroir."
+    "appDefaultsSubtitle": "La valeur par défaut héritée par une nouvelle offre. Ajustable par offre dans le tiroir.",
+    "flagOpen": "Marque comme ouvert",
+    "flagOpenDesc": "Le statut d'un poste actif et ouvert.",
+    "flagClosed": "Arrête les candidatures",
+    "flagClosedDesc": "Un poste dans ce statut n'accepte plus de nouvelles candidatures (page carrière et API partenaire).",
+    "channelActive": "Actif",
+    "channelActiveDesc": "Disponible pour publier. Désactivez pour masquer un site d'emploi abandonné sans le supprimer.",
+    "channelDefaultEnabled": "Précoché pour les nouveaux postes",
+    "channelDefaultEnabledDesc": "Les nouveaux postes démarrent avec ce site d'emploi activé dans le panneau de publication ; toujours ajustable par poste."
   },
   "rejection": {
     "title": "Motifs de refus",
@@ -1698,7 +1707,9 @@
     "priorityTitle": "Priorités",
     "prioritySubtitle": "Gérez les priorités de vos tâches (basse, normale, haute).",
     "priorityAdd": "Ajouter une priorité",
-    "priorityDefault": "Par défaut"
+    "priorityDefault": "Par défaut",
+    "flagDone": "Compte comme terminée",
+    "flagDoneDesc": "Les tâches dans ce statut comptent pour le KPI « terminées » et n'apparaissent plus comme ouvertes ou en retard."
   },
   "taskDisplay": {
     "title": "Affichage tableau",

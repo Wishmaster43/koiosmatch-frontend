@@ -165,7 +165,14 @@
       "expired": "This proposal has expired — ask again.",
       "error": "Something went wrong. Please try again."
     },
-    "resizeHandle": "Resize panel"
+    "resizeHandle": "Resize panel",
+    "column": "Koios",
+    "actions": {
+      "follow_up": "Follow up",
+      "attention": "Attention",
+      "renew": "Renew?",
+      "overdue": "Overdue"
+    }
   },
   "actionRules": {
     "title": "Action check",

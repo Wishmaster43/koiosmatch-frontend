@@ -28,6 +28,33 @@ interface UseTasksDataParams {
   doneStatusValues: string[]
 }
 
+// TaskQuery::rules() caps per_page at `between:1,200`. Fixed 2026-08-05 (audit: "rows
+// per page niet overal toegepast"): both fetches below used to call GET /tasks with NO
+// per_page/page at all, so the controller's own default (25) silently capped the
+// active list AND the archived list — and everything derived from them (donuts, KPIs,
+// TasksPage's own client-side pageSize slicing) — to at most 25 tasks total (mirrors
+// the "84 vs 25" bug useMatches.ts already fixed for matches). Now fetches the FULL
+// set via a page loop, safety-capped at 5 pages (1000 rows), same scale as useMatches.
+export const TASKS_MAX_PER_PAGE = 200
+const TASKS_MAX_PAGES = 5
+
+// Shared page-loop fetch for both the active and archived lists below — an exact
+// ?ref= lookup (NUMMER-1) short-circuits to one request (mirrors useMatches.ts).
+async function fetchAllTaskPages(baseParams: Record<string, unknown>, ref: string | null, signal: AbortSignal): Promise<ApiTask[]> {
+  if (ref) {
+    const res = await api.get('/tasks', { params: { ...baseParams, ref }, signal })
+    return unwrapList<ApiTask>(res).rows
+  }
+  const all: ApiTask[] = []
+  for (let pageNo = 1; pageNo <= TASKS_MAX_PAGES; pageNo++) {
+    const res = await api.get('/tasks', { params: { ...baseParams, per_page: TASKS_MAX_PER_PAGE, page: pageNo }, signal })
+    const { rows, lastPage } = unwrapList<ApiTask>(res)
+    all.push(...rows)
+    if (pageNo >= lastPage) break
+  }
+  return all
+}
+
 export function useTasksData({
   showArchived, refQuery = null, statuses, priorities, types, statusMeta, priorityMeta, typeMeta, doneStatusValues,
 }: UseTasksDataParams) {
@@ -55,10 +82,10 @@ export function useTasksData({
   useEffect(() => {
     const ctrl = new AbortController()
     setLoading(true); setError(false)
-    // NUMMER-1: `?ref=` narrows the fetch to the one task carrying that number;
-    // without it the request shape stays exactly as before (no params at all).
-    api.get('/tasks', { signal: ctrl.signal, params: refQuery ? { ref: refQuery } : undefined })
-      .then(res => setTasks(unwrapList<ApiTask>(res).rows.map(mapTask)))
+    // NUMMER-1: `?ref=` narrows the fetch to the one task carrying that number
+    // (single request); otherwise the full set (page loop, see above).
+    fetchAllTaskPages({}, refQuery, ctrl.signal)
+      .then(rows => setTasks(rows.map(mapTask)))
       .catch(err => {
         if (isAbortError(err)) return
         if (err?.response?.status !== 404) setError(true)
@@ -77,8 +104,8 @@ export function useTasksData({
     if (!showArchived) return
     const ctrl = new AbortController()
     setArchivedError(false)
-    api.get('/tasks', { params: refQuery ? { archived: 1, ref: refQuery } : { archived: 1 }, signal: ctrl.signal })
-      .then(res => setArchivedTasks(unwrapList<ApiTask>(res).rows.map(mapTask).map(x => ({ ...x, archived: true }))))
+    fetchAllTaskPages({ archived: 1 }, refQuery, ctrl.signal)
+      .then(rows => setArchivedTasks(rows.map(mapTask).map(x => ({ ...x, archived: true }))))
       .catch(err => {
         if (isAbortError(err)) return
         setArchivedTasks([])

@@ -27,6 +27,13 @@ interface ListResult { customers: Customer[]; total: number; lastPage: number }
 // (see useCandidatesData for the full note).
 const EMPTY_CUSTOMERS: Customer[] = []
 
+// CustomerController::index caps per_page at `between:1,200` — measured 2026-08-05
+// (Danny: "op 500 zetten geeft 'Klanten laden is mislukt'", reproduced as a real
+// 422; per_page=200 succeeds). Exported so CustomersPage can clamp the pageSize
+// picker to the SAME ceiling — mirrors useApplicationsData/useVacanciesData's
+// identical constant + defensive re-clamp below.
+export const CUSTOMERS_MAX_PER_PAGE = 200
+
 export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
   const queryClient = useQueryClient()
 
@@ -35,7 +42,11 @@ export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
     queryKey: ['customers', filterParams, page, pageSize],
     queryFn: async ({ signal }): Promise<ListResult> => {
       try {
-        const res = await api.get('/customers', { params: { ...filterParams, page, per_page: pageSize }, signal })
+        // Defensive re-clamp (belt-and-braces): the page already clamps pageSize to
+        // CUSTOMERS_MAX_PER_PAGE via useListPageSize, but this hook never trusts a
+        // caller to have done it — a 422 here is expensive to diagnose (mirrors
+        // useApplicationsData/useVacanciesData's identical guard).
+        const res = await api.get('/customers', { params: { ...filterParams, page, per_page: Math.min(pageSize, CUSTOMERS_MAX_PER_PAGE) }, signal })
         const { rows, total, lastPage } = unwrapList<ApiCustomer>(res)
         return { customers: rows.map(mapCustomer), total, lastPage }
       } catch (err) {

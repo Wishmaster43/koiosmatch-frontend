@@ -139,5 +139,11 @@
       "custom_fields": "Extra velden",
       "reference_number": "Nummer"
     }
+  },
+  "koios": {
+    "reasons": {
+      "noTargets": "Deze actieve bellijst heeft nog geen contacten geladen.",
+      "staleDraft": "Dit concept heeft contacten geladen maar is nooit geactiveerd."
+    }
   }
 }

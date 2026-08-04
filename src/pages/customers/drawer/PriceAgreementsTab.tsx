@@ -142,6 +142,8 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
           regardless of which location or department a match picks. */}
       {subTab === 'billing' && c && (
         <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* CANON-DIVIDER-1 (Danny 05-08): candidate ProfileTab canon — no line
+              between rows, 11px labels. */}
           <EditableFieldTable
             title={t('overview.billing')}
             fields={[
@@ -154,6 +156,7 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
             ]}
             value={c as unknown as Record<string, unknown>}
             onSave={onSave}
+            dividers={false} labelFontSize={11}
           />
 
           {/* FACTUURADRES-1 — the customer's own invoice address, right where the other
@@ -169,6 +172,7 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
               editing={editingBillingAddress}
               onStartEdit={() => setEditingBillingAddress(true)}
               onCancel={() => setEditingBillingAddress(false)}
+              dividers={false} labelFontSize={11}
             />
             {/* Only while editing: the emptying rule is a property of the FORM, and
                 repeating it in read mode would just restate the fallback line above. */}

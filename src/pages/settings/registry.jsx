@@ -20,7 +20,7 @@ import {
   ClipboardList, Clock, CreditCard, Download, EyeOff, Factory, FileText, Flag, Hash, Key, LayoutGrid,
   ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Megaphone, Package, Palette, Percent, Phone, Scale, Shield, SlidersHorizontal, Sparkles, Star,
   Boxes, Globe, Store, Tags, Target, Upload, UserCheck, Users, Webhook, XCircle,
-  ShieldOff, AlertTriangle, ListTree,
+  ShieldOff, AlertTriangle, ListTree, CheckCircle,
 } from 'lucide-react'
 import CustomFieldsSettings from './sections/CustomFieldsSettings'
 import VacancyGenerationSettings from './sections/VacancyGenerationSettings'
@@ -63,7 +63,7 @@ import { MatchStatusSettings, ContractTypesSettings, MatchStopReasonSettings } f
 import { AppointmentTypeSettings } from './sections/AppointmentTypeSettings'
 import { AppointmentLocationSettings } from './sections/AppointmentLocationSettings'
 import { SkillLevelSettings } from './sections/SkillLevelSettings'
-import { OutreachStatusSettings } from './sections/OutreachSettings'
+import { OutreachStatusSettings, OutreachOutcomeSettings } from './sections/OutreachSettings'
 import RejectionSettings from './sections/RejectionSettings'
 import ProposalSettings from './sections/ProposalSettings'
 import CandidateRequiredFieldsSettings from './sections/CandidateRequiredFieldsSettings'
@@ -350,6 +350,11 @@ export const NAV_GROUPS = [
     key: 'outreach', icon: Phone,
     items: [
       { id: 'outreach_statuses', icon: Tags, component: OutreachStatusSettings },
+      // Outreach outcomes (OUTREACH-2, round-4 audit finding #6) — the RESULT of one
+      // call attempt, a separate dimension from the pipeline status above.
+      // OutreachOutcomeSettings was fully built + tested (OutreachOutcomeSettings.test.jsx)
+      // but never registered here, so the /outreach-outcomes lookup had no editor at all.
+      { id: 'outreach_outcomes', icon: CheckCircle, component: OutreachOutcomeSettings },
       // Escalation reason lookup (audit finding ESCALATION-REASON-1) — call-list
       // escalation had no tenant-managed reason vocabulary.
       { id: 'escalation_reasons', icon: AlertTriangle, component: EscalationReasonsSettings },

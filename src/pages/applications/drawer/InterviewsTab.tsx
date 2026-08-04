@@ -112,9 +112,13 @@ function StartInterviewAction({ applicationId, onStarted }: { applicationId: Id 
         <CreatableSelect value={agentId || null} onChange={setAgentId} allowCreate={false}
           placeholder={loading ? t('common:loading') : t('interview.start.agentPlaceholder')}
           options={options.map(o => ({ value: String(o.value), label: o.label }))} />
+        {/* BUTTON-SOFT-TINT-1 (Danny 05-08): was a white/transparent outline button
+            ("een andere stijl als onze standaard") — now the house soft-tint recipe
+            (§4, mirrors DrawerAddButton/QuickViewToggle). */}
         <button type="button" onClick={onStart} disabled={busy || unavailable}
           style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, borderRadius: 8,
-            border: '1px solid var(--color-primary)', background: 'none', color: 'var(--color-primary)',
+            border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
+            background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary)',
             cursor: busy || unavailable ? 'not-allowed' : 'pointer', opacity: busy || unavailable ? 0.6 : 1 }}>
           {t('interview.start.label')}
         </button>

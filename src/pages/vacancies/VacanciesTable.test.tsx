@@ -155,7 +155,13 @@ describe('VacanciesTable · match count state caveats (VACANCY-LEADS-COUNT-1)', 
       { id: 'v1', title: 'Verpleegkundige', leadsCount: 5, created: '2024-02-01', createdSort: '2024-02-01', matchCountState: null },
     ] as unknown as Vacancy[]
     const { container } = render(<VacanciesTable rows={plainRows} />)
-    expect(container.querySelector('[role="img"]')).not.toBeInTheDocument()
+    // Scoped to the Leads cell (not the whole table): the Koios column's own
+    // brand mark is ALSO `role="img"` (Danny 05-08 rollout) — a page-wide query
+    // would false-fail on that, unrelated mark.
+    const headerCell = screen.getByText('Leads').closest('th') as HTMLElement
+    const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    const leadsCell = container.querySelectorAll('tbody tr')[0].children[colIndex]
+    expect(leadsCell.querySelector('[role="img"]')).not.toBeInTheDocument()
   })
 
   it('shows the geo-missing caveat when coordinates were unavailable', () => {
@@ -253,10 +259,9 @@ describe('VacanciesTable · Age column (V2)', () => {
   it('renders an em-dash for a missing created date', () => {
     const rowsNoDate = [{ id: 'v1', title: 'A', created: '', createdSort: '' }] as unknown as Vacancy[]
     const { container } = render(<VacanciesTable rows={rowsNoDate} />)
-    // Missing i18n key (columns.age — report the key to CMFE for locale addition)
     // falls back to the raw key string; this proves the COLUMN exists and works,
     // independent of the eventual translated label.
-    const headerCell = screen.getByText('columns.age').closest('th') as HTMLElement
+    const headerCell = screen.getByText('Leeftijd').closest('th') as HTMLElement
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     expect(container.querySelectorAll('tbody tr')[0].children[colIndex].textContent).toBe('—')
   })
@@ -264,7 +269,7 @@ describe('VacanciesTable · Age column (V2)', () => {
   it('carries the exact formatted date as a tooltip for a known created date', () => {
     const rowsWithDate = [{ id: 'v1', title: 'A', created: '2024-01-01', createdSort: '2024-01-01' }] as unknown as Vacancy[]
     const { container } = render(<VacanciesTable rows={rowsWithDate} />)
-    const headerCell = screen.getByText('columns.age').closest('th') as HTMLElement
+    const headerCell = screen.getByText('Leeftijd').closest('th') as HTMLElement
     const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     const cell = container.querySelectorAll('tbody tr')[0].children[colIndex]
     expect(cell.querySelector('span')?.getAttribute('title')).toBe('2024-01-01')
@@ -319,5 +324,33 @@ describe('VacanciesTable · default sort (VAC-KPI-REDESIGN 22-07 meelift-fix)', 
     const { container } = render(<VacanciesTable rows={unsortedRows} />)
     const titleCells = Array.from(container.querySelectorAll('tbody tr')).map(tr => tr.children[0].textContent)
     expect(titleCells).toEqual(['Nieuw', 'Oud'])
+  })
+})
+
+// Danny 05-08: the "Koios" column now rolls out to every entity table — this is
+// the smoke test proving the header renders here too (the honest per-row rule
+// lives in vacancyAdvice.test.ts).
+describe('VacanciesTable · Koios column (Danny 05-08)', () => {
+  it('renders the header with the Koios mark, and flags a published vacancy with zero applications past the stale threshold', () => {
+    const stale = {
+      id: 'v1', title: 'Verpleegkundige', published: true, archived: false, applicationsCount: 0,
+      created: '2000-01-01', createdSort: '2000-01-01',
+    } as unknown as Vacancy
+    const fresh = {
+      id: 'v2', title: 'Doktersassistent', published: true, archived: false, applicationsCount: 0,
+      created: new Date().toISOString(), createdSort: new Date().toISOString(),
+    } as unknown as Vacancy
+    render(<VacanciesTable rows={[stale, fresh]} />)
+
+    expect(screen.getByRole('img', { name: 'Koios AI' })).toBeInTheDocument()
+    expect(screen.getByText('Aandacht')).toBeInTheDocument()
+  })
+
+  it('renders an honest dash for an unpublished vacancy, even with zero applications', () => {
+    const draft = { id: 'v3', title: 'Concept', published: false, archived: false, applicationsCount: 0, created: '2000-01-01', createdSort: '2000-01-01' } as unknown as Vacancy
+    const { container } = render(<VacanciesTable rows={[draft]} />)
+    const headerCell = screen.getByRole('img', { name: 'Koios AI' }).closest('th') as HTMLElement
+    const col = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    expect(container.querySelectorAll('tbody tr')[0].children[col].textContent).toBe('—')
   })
 })

@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
+import { useListPageSize } from '@/hooks/useListPageSize'
 import { geocodeNL } from '@/lib/geocode'
 import { isReferenceQuery } from '@/lib/referenceNumber'
 import ErrorBanner from '@/components/ui/ErrorBanner'
@@ -27,7 +28,7 @@ import CustomersTable from './CustomersTable'
 import CustomersBulkBar from './CustomersBulkBar'
 import CustomerDrawer from './CustomerDrawer'
 import AddCustomerModal from './AddCustomerModal'
-import { useCustomersData } from './hooks/useCustomersData'
+import { useCustomersData, CUSTOMERS_MAX_PER_PAGE } from './hooks/useCustomersData'
 import { useCustomerRecord } from './hooks/useCustomerRecord'
 import { BTN_H } from '@/config/buttonMetrics'
 import { useCustomerBulkActions } from './hooks/useCustomerBulkActions'
@@ -77,8 +78,12 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
 
   // ── UI state ──
   const [page,      setPage]      = usePageMemory('cust.page', 1)
-  // TODO C-33: use user.default_per_page once the backend accepts per_page > 100 on this endpoint.
-  const [pageSize,  setPageSize]  = useState(50)
+  // C-33 resolved (§ audit 2026-08-05): CustomerController caps per_page at 200
+  // (measured: 500 → 422 "Klanten laden is mislukt", 200 → OK) — the shared hook
+  // seeds from the user's default_per_page, clamps to that real ceiling instead of
+  // the hardcoded 50 this used to sit at, and stays sticky across the shell's
+  // unmount-on-navigate like every other page-level field here.
+  const { pageSize, setPageSize, options: pageSizeOptions } = useListPageSize('cust', CUSTOMERS_MAX_PER_PAGE)
   const [addOpen,   setAddOpen]   = useState(false)
   // Archived (soft-deleted) view toggle — opts the list into ?include_archived=1.
   const [showArchived, setShowArchived] = usePageMemory('cust.archived', false)
@@ -354,7 +359,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
                   </div>
 
                   <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
-                    onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }} />
+                    onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }} pageSizeOptions={pageSizeOptions} />
                 </>
               ),
             },
@@ -380,7 +385,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
                         onSelect={selectCustomer} onOpenTab={selectCustomer} statusMeta={statusMeta} />
                     </div>
                     <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
-                      onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }} />
+                      onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }} pageSizeOptions={pageSizeOptions} />
                   </div>
                 </div>
               ),

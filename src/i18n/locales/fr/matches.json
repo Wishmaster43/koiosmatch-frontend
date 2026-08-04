@@ -210,5 +210,10 @@
     "windowWarning": "Encore {{days}} jour(s) avant la date de fin — à renouveler ou clôturer à temps.",
     "windowFine": "La période du contrat se déroule bien.",
     "windowUnknown": "Aucune date de fin connue."
+  },
+  "koios": {
+    "reasons": {
+      "endDateApproaching": "La date de fin de contrat approche ou est dépassée — envisagez un renouvellement."
+    }
   }
 }

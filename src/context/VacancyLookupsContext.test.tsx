@@ -71,3 +71,40 @@ describe('VacancyLookupsContext defaults', () => {
     expect(result.current.defaultEducation).toBe('')
   })
 })
+
+/**
+ * CHANNEL-FLAGS-1 (round-4 audit finding #3) — normalize() used to keep only
+ * value/label/color/is_default and DROPPED active/default_enabled, so
+ * PublishingTab had no way to hide a deactivated channel or pre-check the
+ * tenant's default ones on a new vacancy.
+ */
+describe('VacancyLookupsContext channel flags', () => {
+  it('carries active/default_enabled through, and default_enabled tolerates the tinyint shape', async () => {
+    mockLookups({
+      '/vacancy-channels': [
+        { id: 'c1', name: 'Career page', active: true, default_enabled: true },
+        { id: 'c2', name: 'Indeed', active: true, default_enabled: 0 },
+      ],
+    })
+    const { result } = renderHook(() => useVacancyLookups(), { wrapper })
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.channels.map(c => ({ value: c.value, default_enabled: c.default_enabled }))).toEqual([
+      { value: 'c1', default_enabled: true },
+      { value: 'c2', default_enabled: false },
+    ])
+  })
+
+  it('drops a deactivated channel from the list entirely (sortActiveRows filters it before mapping)', async () => {
+    mockLookups({
+      '/vacancy-channels': [
+        { id: 'c1', name: 'Career page', active: true },
+        { id: 'c2', name: 'Old board', active: false },
+      ],
+    })
+    const { result } = renderHook(() => useVacancyLookups(), { wrapper })
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.channels.map(c => c.value)).toEqual(['c1'])
+  })
+})

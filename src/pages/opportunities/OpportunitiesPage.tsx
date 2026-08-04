@@ -17,10 +17,11 @@ import OpportunitiesBoard from './OpportunitiesBoard'
 import OpportunityDrawer from './OpportunityDrawer'
 import AddOpportunityModal from './AddOpportunityModal'
 import PaginationBar from '@/components/ui/PaginationBar'
-import { useOpportunitiesData } from './hooks/useOpportunitiesData'
+import { useOpportunitiesData, OPPORTUNITIES_MAX_PER_PAGE } from './hooks/useOpportunitiesData'
 import { useOpportunityArchive } from './hooks/useOpportunityArchive'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
+import { useListPageSize } from '@/hooks/useListPageSize'
 import { isReferenceQuery } from '@/lib/referenceNumber'
 import { BTN_H } from '@/config/buttonMetrics'
 
@@ -42,7 +43,6 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   // Scroll container for row virtualization (F-11): DataTable virtualizes against it.
   const tableScrollRef = useRef<HTMLDivElement>(null)
   const auth = useAuth()
-  const user = auth?.user as { default_per_page?: number; branch_ids?: Array<string | number> } | null | undefined
   // Archive/restore is authorization-gated in the UI; the backend re-checks (§7).
   const hasPermission = auth?.hasPermission ?? (() => false)
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -84,7 +84,10 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
 
   const [view,     setView]     = usePageMemory('opps.view', 'table')  // 'table' | 'board'
   const [page,     setPage]     = usePageMemory('opps.page', 1)
-  const [pageSize, setPageSize] = useState(() => user?.default_per_page ?? 50)
+  // Shared page-size hook (§ audit 2026-08-05): seeds from user.default_per_page,
+  // clamps to OpportunityQuery's real per_page ceiling (200) and stays sticky
+  // across the shell's unmount-on-navigate — mirrors every other list page.
+  const { pageSize, setPageSize, options: pageSizeOptions } = useListPageSize('opps', OPPORTUNITIES_MAX_PER_PAGE)
   const [stage,    setStage]    = usePageMemory<string[]>('opps.stage', []) // selected stage labels (donut + panel)
   const [owner,    setOwner]    = usePageMemory<string[]>('opps.owner', []) // selected owner names (donut + panel)
   const [client,   setClient]   = usePageMemory<string[]>('opps.client', []) // selected client names (panel)
@@ -242,7 +245,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
                       selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
                   </div>
                   <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
-                    pageSize={pageSize} onPageChange={setPage}
+                    pageSize={pageSize} onPageChange={setPage} pageSizeOptions={pageSizeOptions}
                     onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
                 </>
               ),

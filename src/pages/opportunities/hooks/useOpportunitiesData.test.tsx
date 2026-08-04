@@ -15,7 +15,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
-import { useOpportunitiesData } from './useOpportunitiesData'
+import { useOpportunitiesData, OPPORTUNITIES_MAX_PER_PAGE } from './useOpportunitiesData'
 
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
@@ -56,7 +56,11 @@ describe('useOpportunitiesData · ARCHIVE-1', () => {
     const { result } = renderHook(() => useOpportunitiesData(), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
     const oppCall = mockedGet.mock.calls.find(c => c[0] === '/opportunities')
-    expect(oppCall?.[1]?.params).toBeUndefined()
+    // Fixed 2026-08-05 (audit: "rows per page niet overal toegepast") — every
+    // request now carries page/per_page (fetch-all loop, see the hook's header
+    // comment): the OLD unpaginated call silently truncated to the backend's
+    // default 25. `include_archived` still stays absent by default.
+    expect(oppCall?.[1]?.params).toEqual({ per_page: OPPORTUNITIES_MAX_PER_PAGE, page: 1 })
   })
 
   it('sends include_archived: 1 (numeric, not a JS boolean) when the toggle is on', async () => {
@@ -64,7 +68,7 @@ describe('useOpportunitiesData · ARCHIVE-1', () => {
     const { result } = renderHook(() => useOpportunitiesData(true), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
     const oppCall = mockedGet.mock.calls.find(c => c[0] === '/opportunities')
-    expect(oppCall?.[1]?.params).toEqual({ include_archived: 1 })
+    expect(oppCall?.[1]?.params).toEqual({ include_archived: 1, per_page: OPPORTUNITIES_MAX_PER_PAGE, page: 1 })
   })
 
   it('maps archived + deleted_at rows through so the table can chip them', async () => {
@@ -91,7 +95,7 @@ describe('useOpportunitiesData · branch filter (VESTIGING-2)', () => {
     const { result } = renderHook(() => useOpportunitiesData(), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
     const oppCall = mockedGet.mock.calls.find(c => c[0] === '/opportunities')
-    expect(oppCall?.[1]?.params).toBeUndefined()
+    expect(oppCall?.[1]?.params).toEqual({ per_page: OPPORTUNITIES_MAX_PER_PAGE, page: 1 })
   })
 
   it('sends branch_id as an array of the picked ids', async () => {
@@ -99,7 +103,7 @@ describe('useOpportunitiesData · branch filter (VESTIGING-2)', () => {
     const { result } = renderHook(() => useOpportunitiesData(false, ['b1', 'b2']), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
     const oppCall = mockedGet.mock.calls.find(c => c[0] === '/opportunities')
-    expect(oppCall?.[1]?.params).toEqual({ branch_id: ['b1', 'b2'] })
+    expect(oppCall?.[1]?.params).toEqual({ branch_id: ['b1', 'b2'], per_page: OPPORTUNITIES_MAX_PER_PAGE, page: 1 })
   })
 
   it('combines include_archived and branch_id when both are active', async () => {
@@ -107,7 +111,7 @@ describe('useOpportunitiesData · branch filter (VESTIGING-2)', () => {
     const { result } = renderHook(() => useOpportunitiesData(true, ['b1']), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
     const oppCall = mockedGet.mock.calls.find(c => c[0] === '/opportunities')
-    expect(oppCall?.[1]?.params).toEqual({ include_archived: 1, branch_id: ['b1'] })
+    expect(oppCall?.[1]?.params).toEqual({ include_archived: 1, branch_id: ['b1'], per_page: OPPORTUNITIES_MAX_PER_PAGE, page: 1 })
   })
 })
 
@@ -118,12 +122,12 @@ describe('useOpportunitiesData · branch filter (VESTIGING-2)', () => {
  * so a dropped param silently degrades to "search whatever happens to be loaded".
  */
 describe('useOpportunitiesData · reference-number lookup (NUMMER-1)', () => {
-  it('sends no ref by default — the request shape is unchanged for a normal list', async () => {
+  it('sends no ref by default — the plain list request carries no ref key', async () => {
     mockedGet.mockResolvedValue({ data: { data: [] } })
     const { result } = renderHook(() => useOpportunitiesData(), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
     const oppCall = mockedGet.mock.calls.find(c => c[0] === '/opportunities')
-    expect(oppCall?.[1]?.params).toBeUndefined()
+    expect((oppCall?.[1]?.params as Record<string, unknown>)?.ref).toBeUndefined()
   })
 
   it('sends ?ref= when the search box holds a reference number', async () => {

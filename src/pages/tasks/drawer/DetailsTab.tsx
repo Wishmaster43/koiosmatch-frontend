@@ -23,9 +23,10 @@ const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].fi
 
 // One read-mode row: muted label left, value right.
 function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
+  // Canon (05-08): clean cards — no row dividers, 11px labels (candidate = leading).
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '9px 12px', borderBottom: '1px solid var(--border)' }}>
-      <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 120, flexShrink: 0 }}>{label}</span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '9px 12px' }}>
+      <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 120, flexShrink: 0 }}>{label}</span>
       <span style={{ flex: 1, minWidth: 0 }}>{children}</span>
     </div>
   )

@@ -8,8 +8,11 @@ import SoftChip from '@/components/ui/SoftChip'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import EntityNameCell from '@/components/ui/EntityNameCell'
+import { makeKoiosColumn } from '@/components/ui/koiosColumn'
+import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import { initialsOf } from '@/lib/initials'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { deriveOpportunityAdvice, isExpectedCloseOverdue } from './data/opportunityAdvice'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -46,6 +49,7 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
   const settings = useAllSettings()
   const colorStage = getBoolSetting(settings, 'opportunity_table_color_stage', true)
   const colorOwner = getBoolSetting(settings, 'opportunity_table_color_owner', true)
+  const colorKoios = getBoolSetting(settings, 'opportunity_table_color_koios', false)
 
   // Locale-aware EUR formatter (no decimals) for the value column.
   const money = useMemo(
@@ -53,9 +57,19 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
     [locale],
   )
 
-  // A stage flagged isWon/isLost is terminal — a closed deal's expected-close date
-  // is never "overdue" (§4: red/bold is a live-state signal, not a permanent mark).
-  const isTerminalStage = (r: Opportunity) => stages.some(s => (s.isWon || s.isLost) && String(s.value) === String(r.stageValue))
+  // Shared Koios advice resolver (opportunityAdvice.ts) — same overdue check the
+  // expectedClose cell below uses for its red/bold styling (§11: one computation,
+  // two consumers, never a second copy).
+  const adviceOf = (r: Opportunity): KoiosAdvice | null => {
+    const rule = deriveOpportunityAdvice(r, stages)
+    if (rule.action === 'none') return null
+    return {
+      action: rule.action,
+      label: t('common:koios.actions.follow_up', { defaultValue: 'Follow up' }),
+      reason: t(rule.reasonKey, { defaultValue: 'The expected close date has passed.' }),
+      source: 'rules',
+    }
+  }
 
   const columns: Column<Opportunity>[] = [
     { key: 'title', header: t('cols.title'), sortable: true, sticky: true, width: 300, nowrap: true,
@@ -106,11 +120,14 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
     { key: 'expectedClose', header: t('cols.expectedClose'), sortable: true, sortValue: r => r.expectedCloseAt || '',
       render: r => {
         if (!r.expectedCloseAt) return <span style={{ color: 'var(--text-muted)' }}>—</span>
-        const overdue = !isTerminalStage(r) && new Date(r.expectedCloseAt) < new Date(new Date().toDateString())
+        const overdue = isExpectedCloseOverdue(r, stages)
         return <span style={{ fontSize: 12, color: overdue ? 'var(--color-danger)' : 'var(--text-muted)', fontWeight: overdue ? 600 : 400 }}>{formatDate(r.expectedCloseAt)}</span>
       } },
     { key: 'date',   header: t('cols.date'),  sortable: true, sortValue: r => r.date || '',
       render: r => <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{formatDate(r.date)}</span> },
+    // Shared Koios column factory (Danny 05-08 consistency pass) — same header,
+    // sort and cell as every other entity table; sits right before owner (§3A).
+    makeKoiosColumn({ adviceOf, colored: colorKoios, label: t('common:koios.column', { defaultValue: 'Koios' }) }),
     // Owner — avatar + name. LAST column (§3A convention). The /opportunities
     // resource's owner is `{id, name}` only, no per-user colour field yet (verified
     // against OpportunityResource.php — BE gap, not a frontend bug), so `colorOwner`

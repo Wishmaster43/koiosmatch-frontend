@@ -23,8 +23,9 @@ import { mapTask } from './data/mapTask'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
+import { useListPageSize } from '@/hooks/useListPageSize'
 import { useTaskFilters } from './hooks/useTaskFilters'
-import { useTasksData } from './hooks/useTasksData'
+import { useTasksData, TASKS_MAX_PER_PAGE } from './hooks/useTasksData'
 import { useTaskOptions } from './hooks/useTaskOptions'
 import { useTaskDrawerActions } from './hooks/useTaskDrawerActions'
 import { useTaskBulkActions } from './hooks/useTaskBulkActions'
@@ -50,7 +51,6 @@ export default function TasksPage({ intent }: { intent?: unknown } = {}) {
 
 function TasksPageInner({ intent }: { intent?: unknown }) {
   const auth = useAuth()
-  const user = auth?.user as { default_per_page?: number } | null | undefined
   // Bulk archive (soft-delete, reversible → update-class gating; the backend re-checks).
   const canArchive = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('tasks.update') ?? false
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
@@ -63,7 +63,10 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
 
   const [view,     setView]     = usePageMemory('tasks.view', 'table')   // 'table' | 'board'
   const [page,     setPage]     = usePageMemory('tasks.page', 1)
-  const [pageSize, setPageSize] = useState(() => user?.default_per_page ?? 50)
+  // Shared page-size hook (§ audit 2026-08-05): seeds from user.default_per_page,
+  // clamps to TaskQuery's real per_page ceiling (200) and stays sticky across the
+  // shell's unmount-on-navigate — mirrors every other list page.
+  const { pageSize, setPageSize, options: pageSizeOptions } = useListPageSize('tasks', TASKS_MAX_PER_PAGE)
   const [addOpen,  setAddOpen]  = useState(false)
   // Bulk-selection (checkboxes) — id-set, cleared on filter/page change.
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
@@ -207,6 +210,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
                 </div>
                 <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
                   pageSize={pageSize} onPageChange={p => { setPage(p); setSelectedIds(new Set()) }}
+                  pageSizeOptions={pageSizeOptions}
                   onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
               </>
             ),

@@ -21,6 +21,7 @@ import Avatar from '@/components/ui/Avatar'
 import SafeHtml from '@/components/ui/SafeHtml'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
+import TimelineRail from '@/components/ui/TimelineRail'
 import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
 import { SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
@@ -133,7 +134,7 @@ export default function NotesTab({
   const [expanded, setExpanded] = useState(false)
   // Notes search (Danny 03-08) — client-side over the already-loaded `notes` prop.
   const [search, setSearch] = useState('')
-  const { formatDate } = useDateFormat()
+  const { formatDate, formatDateTime } = useDateFormat()
 
   // Load-error state (see NotesTabProps.error) — a calm danger row replaces the
   // whole tab body, same shape as MatchContractSection's error+retry; no button
@@ -371,13 +372,16 @@ export default function NotesTab({
           .map((n, i) => systemRow(n, `sys-${i}`))}
         {(timeline.length > 0 || systemNotes.length > 0)
           ? timeline.map((ev, i) => (
-              <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 12, alignItems: 'flex-start' }}>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-primary)', flexShrink: 0, marginTop: 6 }} />
+              // paddingBottom (not marginBottom) keeps the spacing INSIDE the row's own
+              // box, so TimelineRail's connector line reaches all the way to the next dot.
+              <div key={i} style={{ display: 'flex', gap: 10, paddingBottom: 12, alignItems: 'flex-start' }}>
+                <TimelineRail isLast={i === timeline.length - 1} />
                 <Avatar initials={timelineInitials} size={28} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
                     <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{timelineName}</span>
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{ev.time ?? ev.created_at}</span>
+                    {/* House date+time format — never the raw ISO string (Danny 05-08). */}
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatDateTime(ev.time ?? ev.created_at)}</span>
                   </div>
                   <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: 'var(--text)' }}>{renderTimelineContent?.(ev) ?? (ev.text ?? ev.description)}</div>
                 </div>

@@ -16,7 +16,9 @@ import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
-import { useOutreachCampaigns } from './hooks/useOutreachCampaigns'
+import { usePageMemory } from '@/lib/usePageMemory'
+import { useListPageSize } from '@/hooks/useListPageSize'
+import { useOutreachCampaigns, OUTREACH_MAX_PER_PAGE } from './hooks/useOutreachCampaigns'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 import { listCampaigns, updateCampaign, deleteCampaign, restoreCampaign } from './data/outreachApi'
 import OutreachList from './OutreachList'
@@ -24,6 +26,7 @@ import OutreachBoard from './OutreachBoard'
 import OutreachBulkBar from './OutreachBulkBar'
 import OutreachCreate from './OutreachCreate'
 import OutreachDrawer from './OutreachDrawer'
+import PaginationBar from '@/components/ui/PaginationBar'
 import { BTN_H } from '@/config/buttonMetrics'
 
 // Fixed status enum (not a tenant lookup) → board columns, donut + colours (hex for the chart).
@@ -53,6 +56,13 @@ export default function OutreachPage() {
   const { campaigns, loading, error, reload, add, patch, drop } = useOutreachCampaigns()
 
   const [view, setView] = useState<'table' | 'board'>('table')
+  // Pagination (audit 2026-08-05: "Bellijsten heeft niet eens een footer??") —
+  // mirrors MatchesPage's wiring: useOutreachCampaigns already fetches the FULL
+  // set client-side (page loop, see the hook), so this page only slices it for
+  // display. Shared page-size hook seeds from user.default_per_page, clamps to
+  // the endpoint's real per_page ceiling and stays sticky across navigation.
+  const [page, setPage] = usePageMemory('outreach.page', 1)
+  const { pageSize, setPageSize, options: pageSizeOptions } = useListPageSize('outreach', OUTREACH_MAX_PER_PAGE)
   // Drill-down: the opened bellijst (campaign) — row click opens the drawer.
   const [openId, setOpenId] = useState<string | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
@@ -114,6 +124,14 @@ export default function OutreachPage() {
     const q = query.trim().toLowerCase()
     return byStatus.filter((c) => `${(c as { name?: string }).name ?? ''}`.toLowerCase().includes(q))
   }, [baseRows, selectedStatus, selectedChannel, kpiTargets, query])
+
+  // Pagination — the table view only; the board shows the whole filtered set
+  // (mirrors MatchesPage/TasksPage/OpportunitiesPage's identical split).
+  const totalRows = filtered.length
+  const lastPage   = Math.max(1, Math.ceil(totalRows / pageSize))
+  const paged      = useMemo(() => filtered.slice((page - 1) * pageSize, page * pageSize), [filtered, page, pageSize])
+  // Reset to the first page whenever the filtered set's shape changes.
+  useEffect(() => { setPage(1) }, [selectedStatus, selectedChannel, kpiTargets, query, showArchived]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Donut/KPI click = set exactly one status value (or clear when clicked again).
   const pickStatus  = (v?: string) => { if (v != null) setSelectedStatus((p) => (p.length === 1 && p[0] === v) ? [] : [v]) }
@@ -228,9 +246,10 @@ export default function OutreachPage() {
           {view === 'board' ? (
             <OutreachBoard rows={filtered} columns={columns} onMove={handleMove} />
           ) : (
+            <>
             <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
               <OutreachList
-                campaigns={filtered}
+                campaigns={paged}
                 loading={showArchived ? archLoading : loading}
                 error={showArchived ? archError : error}
                 onReload={showArchived ? () => setShowArchived(true) : reload}
@@ -242,6 +261,10 @@ export default function OutreachPage() {
                 onOpen={setOpenId}
               />
             </div>
+            <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
+              pageSize={pageSize} onPageChange={setPage} pageSizeOptions={pageSizeOptions}
+              onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
+            </>
           )}
         </div>
         {/* Per-bellijst drill-down (the call list itself) — row click opens it. An

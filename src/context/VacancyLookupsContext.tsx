@@ -18,10 +18,13 @@ import { sortActiveRows, makeMetaResolver } from '../lib/lookupUtils'
  *   channels        — job boards to publish on (career page/Google Jobs/Indeed/…).
  */
 
-// One configurable vacancy lookup row (channels carry no colour).
+// One configurable vacancy lookup row.
 // `is_default` is the backend's singleton flag (DEFAULTS-1, V11/V19) on the
 // seniority + education lookups — the tenant's proposed value for an empty field.
-export interface VacancyLookupItem { value: string; label: string; color?: string; is_default?: boolean; [k: string]: unknown }
+// `active`/`default_enabled` (CHANNEL-FLAGS-1, round-4 audit finding #3) are
+// channel-only: whether the job board is still offered, and whether a new
+// vacancy's publish panel pre-checks it (PublishingTab reads both).
+export interface VacancyLookupItem { value: string; label: string; color?: string; is_default?: boolean; active?: boolean; default_enabled?: boolean; [k: string]: unknown }
 
 interface VacancyLookupsValue {
   statuses: VacancyLookupItem[]
@@ -100,7 +103,18 @@ const truthy = (v: unknown) => v === true || v === 1 || v === '1' || v === 'true
 // server-side and the generic `value ?? key ?? id` chain would silently flip
 // stored references from uuid to key the moment that merges (CMBE 15-07).
 // `is_default` is carried through (DEFAULTS-1): dropping it here is what made the
-// Settings default-toggle unreadable by any consumer.
+// Settings default-toggle unreadable by any consumer. `active`/`default_enabled`
+// (CHANNEL-FLAGS-1, round-4 audit finding #3) are carried through the same way —
+// PublishingTab needs both to filter a deactivated channel off the publish panel
+// and pre-check the tenant's default_enabled ones on a new vacancy. `active` is
+// backend boolean-cast (VacancyChannel::$casts) so a plain `!== false` reads it
+// correctly; `sortActiveRows` above already dropped any row with active===false,
+// so every mapped item's `active` is true here — kept explicit (not hardcoded) so
+// the shape stays honest if that upstream filter ever changes, and harmless for
+// the non-channel lookups that share this same normalize() (they carry neither
+// flag on the wire, so both default to their backend-side defaults). No cast
+// exists for `default_enabled` on the backend, so it needs the tolerant `truthy()`
+// helper (Laravel may serialise the uncast tinyint as 1/0).
 function normalize(raw: unknown, fallback: VacancyLookupItem[], pinId = false): VacancyLookupItem[] {
   if (!Array.isArray(raw) || raw.length === 0) return fallback
   return sortActiveRows(raw)
@@ -110,6 +124,8 @@ function normalize(raw: unknown, fallback: VacancyLookupItem[], pinId = false): 
       // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
       color: (it.color as string) ?? '#6B7280',
       is_default: truthy(it.is_default),
+      active: it.active !== false,
+      default_enabled: truthy(it.default_enabled ?? true),
     }))
 }
 

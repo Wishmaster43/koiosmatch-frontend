@@ -165,7 +165,14 @@
       "expired": "Dit voorstel is verlopen — vraag het opnieuw.",
       "error": "Er ging iets mis. Probeer het opnieuw."
     },
-    "resizeHandle": "Paneelbreedte aanpassen"
+    "resizeHandle": "Paneelbreedte aanpassen",
+    "column": "Koios",
+    "actions": {
+      "follow_up": "Opvolgen",
+      "attention": "Aandacht",
+      "renew": "Verlengen?",
+      "overdue": "Te laat"
+    }
   },
   "actionRules": {
     "title": "Actiecontrole",

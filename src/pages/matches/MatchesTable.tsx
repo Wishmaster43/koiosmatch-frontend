@@ -8,9 +8,12 @@ import EntityNameCell from '@/components/ui/EntityNameCell'
 import StatusPill from '@/components/ui/StatusPill'
 import SoftChip from '@/components/ui/SoftChip'
 import BackofficeCouplingIndicator from '@/components/ui/BackofficeCouplingIndicator'
+import { makeKoiosColumn } from '@/components/ui/koiosColumn'
+import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useApps } from '@/context/AppsContext'
-import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings, getBoolSetting, getNumberSetting } from '@/lib/settings/useAllSettings'
+import { deriveMatchAdvice } from './data/matchAdvice'
 import ScorePill from './ScorePill'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
@@ -50,6 +53,23 @@ export default function MatchesTable({
   const settings = useAllSettings()
   const colorStatus = getBoolSetting(settings, 'match_table_color_status', true)
   const colorOwner  = getBoolSetting(settings, 'match_table_color_owner', true)
+  const colorKoios  = getBoolSetting(settings, 'match_table_color_koios', false)
+  // How many days before (or past) the end date counts as "approaching" — tenant-
+  // configurable, mirrors vacancies' staleDays.
+  const renewWithinDays = getNumberSetting(settings, 'match_advice_renew_days', 30)
+  // Shared Koios advice resolver (matchAdvice.ts) — honest: an open match whose
+  // end date is approaching or passed, an em-dash for everything else (closed,
+  // open-ended, or a comfortable runway).
+  const adviceOf = (m: MatchRow): KoiosAdvice | null => {
+    const rule = deriveMatchAdvice(m, { isClosed: Boolean(statusMeta(m.status)?.is_closed), renewWithinDays })
+    if (rule.action === 'none') return null
+    return {
+      action: rule.action,
+      label: t('common:koios.actions.renew', { defaultValue: 'Renew?' }),
+      reason: t(rule.reasonKey, { ...rule.reasonParams, defaultValue: 'The contract end date is approaching.' }),
+      source: 'rules',
+    }
+  }
   // Backoffice coupling column (JOB2): only shown for systems the tenant actually
   // enabled — mirrors BackofficeLinksTab's own isAppEnabled('hf'/'shiftmanager') gate.
   const apps = useApps()
@@ -106,6 +126,9 @@ export default function MatchesTable({
     // Raw ISO from the API → locale format (Danny 2026-07-13: "datum staat raar").
     { key: 'date',    header: t('cols.date'),  sortable: true, sortValue: r => r.date,
       cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => r.date ? formatDate(r.date) : '—' },
+    // Shared Koios column factory (Danny 05-08 consistency pass) — same header,
+    // sort and cell as every other entity table; sits right before coupling/owner (§3A).
+    makeKoiosColumn({ adviceOf, colored: colorKoios, label: t('common:koios.column', { defaultValue: 'Koios' }) }),
     {
       // Backoffice coupling scanning aid (JOB2) — not sortable: a compound
       // two-system state has no single clean sort order, it's a glance aid.

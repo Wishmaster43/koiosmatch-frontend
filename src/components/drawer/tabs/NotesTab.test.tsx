@@ -10,7 +10,12 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import NotesTab from './NotesTab'
 
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => `d(${v})` }) }))
+// formatDateTime added alongside the existing formatDate mock (distinguishable
+// transform, not identity) — proves the Tijdlijn section routes `time` through
+// the house formatter instead of rendering the raw ISO field (Danny 05-08).
+vi.mock('@/lib/datetime', () => ({
+  useDateFormat: () => ({ formatDate: (v: string) => `d(${v})`, formatDateTime: (v?: string | null) => (v ? `dt(${v})` : '—') }),
+}))
 
 const labels = {
   notes: 'Notities', newNote: 'Nieuwe notitie', notesEmpty: 'Geen notities',
@@ -94,5 +99,37 @@ describe('NotesTab · load-error retry', () => {
   it('does not render the notes body while in the error state', () => {
     render(<NotesTab error notes={[note()]} labels={{ ...labels, loadError: 'Notes could not be loaded.' }} />)
     expect(screen.queryByText('Hello world')).toBeNull()
+  })
+})
+
+// Timeline section (candidates' + customers' Tijdlijn sub-tab, Danny 05-08): raw
+// ISO strings rendered and the dots had no connecting line. Regression-guarded here
+// since both hosts render THIS shared block, not their own fork.
+describe('NotesTab · timeline', () => {
+  const timelineItem = (over: Record<string, unknown> = {}) => ({ time: '2026-08-04T17:30:00+00:00', text: 'Fase gewijzigd', ...over })
+
+  it('routes the event time through formatDateTime — never the raw ISO field', () => {
+    render(<NotesTab timeline={[timelineItem()]} showNotes={false} showConversations={false} labels={labels} />)
+    expect(screen.getByText('dt(2026-08-04T17:30:00+00:00)')).toBeInTheDocument()
+    expect(screen.queryByText('2026-08-04T17:30:00+00:00')).toBeNull()
+  })
+
+  it('falls back to created_at when the event carries no `time`', () => {
+    render(<NotesTab timeline={[timelineItem({ time: undefined, created_at: '2026-08-01' })]} showNotes={false} showConversations={false} labels={labels} />)
+    expect(screen.getByText('dt(2026-08-01)')).toBeInTheDocument()
+  })
+
+  it('draws no dangling connector after a single event', () => {
+    render(<NotesTab timeline={[timelineItem()]} showNotes={false} showConversations={false} labels={labels} />)
+    expect(screen.getByTestId('timeline-dot')).toBeInTheDocument()
+    expect(screen.queryByTestId('timeline-connector')).toBeNull()
+  })
+
+  it('connects every event except the last', () => {
+    render(<NotesTab
+      timeline={[timelineItem({ text: 'a' }), timelineItem({ text: 'b' }), timelineItem({ text: 'c' })]}
+      showNotes={false} showConversations={false} labels={labels} />)
+    expect(screen.getAllByTestId('timeline-dot')).toHaveLength(3)
+    expect(screen.getAllByTestId('timeline-connector')).toHaveLength(2)
   })
 })

@@ -770,5 +770,10 @@
     "done": "Cliente fusionado.",
     "errForbidden": "No tienes permiso para fusionar clientes.",
     "errFailed": "Error al fusionar. Inténtalo de nuevo."
+  },
+  "koios": {
+    "reasons": {
+      "noOpenVacancies": "Sin vacantes abiertas — haz seguimiento a este cliente."
+    }
   }
 }

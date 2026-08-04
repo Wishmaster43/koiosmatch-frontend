@@ -310,8 +310,11 @@ export default function ContactDetail({ contact, locations, departments, statuse
 
       {subTab === 'data' && (
         <>
+          {/* CANON-DIVIDER-1 (Danny 05-08): candidate ProfileTab canon — no line
+              between rows, 11px labels. */}
           <EditableFieldTable key={tableEpoch} title={t('contacts.detail.infoTitle')} fields={fields} value={values} onSave={save}
-            editing={editing} onStartEdit={() => setEditing(true)} onCancel={() => setEditing(false)} labelWidth={130} />
+            editing={editing} onStartEdit={() => setEditing(true)} onCancel={() => setEditing(false)} labelWidth={130}
+            dividers={false} labelFontSize={11} />
 
           {/* Koppeling — same shape and behaviour as "+ Vestiging" (Danny 28-07). */}
           <ContactLinkSection locationIds={linkedLocationIds} departmentIds={linkedDepartmentIds}

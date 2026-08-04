@@ -159,5 +159,10 @@
     "history": "Historie",
     "openTask": "Aufgabe öffnen",
     "searchPlaceholder": "Aufgabe suchen…"
+  },
+  "koios": {
+    "reasons": {
+      "expectedCloseOverdue": "Das erwartete Abschlussdatum ist verstrichen — bei dieser Chance nachfassen."
+    }
   }
 }

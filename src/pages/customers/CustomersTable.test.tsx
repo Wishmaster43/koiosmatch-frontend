@@ -187,3 +187,24 @@ describe('CustomersTable · status chip suppressed in the entry phase (Danny 02-
     expect(cells[statusIdx].textContent).toBe('Actief')
   })
 })
+
+// Danny 05-08: the "Koios" column now rolls out to every entity table — this is
+// the smoke test proving the header renders here too (the honest per-row rule
+// lives in customerAdvice.test.ts/useCustomerAdvice.test.ts).
+describe('CustomersTable · Koios column (Danny 05-08)', () => {
+  it('renders the header with the Koios mark, and flags a customer with zero open vacancies', () => {
+    const row = { ...baseCustomer, id: 60, openVacanciesCount: 0 } as Customer
+    render(<CustomersTable rows={[row]} statusMeta={statusMeta} />)
+
+    expect(screen.getByRole('img', { name: 'Koios AI' })).toBeInTheDocument()
+    expect(screen.getByText('Opvolgen')).toBeInTheDocument()
+  })
+
+  it('renders an honest dash for a customer with an open vacancy', () => {
+    const row = { ...baseCustomer, id: 61, openVacanciesCount: 2 } as Customer
+    const { container } = render(<CustomersTable rows={[row]} statusMeta={statusMeta} />)
+    const headerCell = screen.getByRole('img', { name: 'Koios AI' }).closest('th') as HTMLElement
+    const col = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    expect(container.querySelectorAll('tbody tr')[0].children[col].textContent).toBe('—')
+  })
+})

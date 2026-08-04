@@ -22,6 +22,30 @@ describe('useDateFormat', () => {
   })
 })
 
+// Regression guard (Danny 05-08): every Tijdlijn/changelog drill-down renders the
+// raw ISO string ("2026-08-04T17:30:00+00:00") instead of a formatted date+time —
+// formatDateTime is the ONE house formatter fixing that everywhere.
+describe('useDateFormat · formatDateTime', () => {
+  it('formats a date+time as DD-MM-YYYY, HH:mm', () => {
+    const { result } = renderHook(() => useDateFormat())
+    // Local (no offset) ISO input so the expected wall-clock time is timezone-stable.
+    expect(result.current.formatDateTime('2026-06-30T14:15:00')).toBe('30-06-2026, 14:15')
+  })
+
+  it('never renders the raw ISO string verbatim', () => {
+    const { result } = renderHook(() => useDateFormat())
+    const raw = '2026-08-04T17:30:00+00:00'
+    expect(result.current.formatDateTime(raw)).not.toBe(raw)
+    expect(result.current.formatDateTime(raw)).not.toContain('T17:30:00')
+  })
+
+  it('shows an em-dash for empty input', () => {
+    const { result } = renderHook(() => useDateFormat())
+    expect(result.current.formatDateTime(null)).toBe('—')
+    expect(result.current.formatDateTime(undefined)).toBe('—')
+  })
+})
+
 describe('calcAge', () => {
   const now = new Date('2026-06-08T12:00:00') // reference "today"
   it('counts whole years, birthday already passed this year', () => {

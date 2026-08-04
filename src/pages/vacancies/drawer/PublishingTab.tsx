@@ -43,10 +43,24 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
   const allSettings = useAllSettings()
   const tenantDefaults = getJsonSetting<Record<string, unknown>>(allSettings, VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS)
 
-  // Merge the configured channels with this vacancy's published state.
+  // Merge the configured channels with this vacancy's published state. A channel
+  // the tenant deactivated in Settings (CHANNEL-FLAGS-1, round-4 audit finding #3)
+  // drops off the publish panel entirely — a retired job board must not leave a
+  // dead toggle a recruiter can still flip. An empty `v.channels` means the
+  // backend has no publish rows yet (a brand-new vacancy) — pre-check the
+  // tenant's default_enabled channels instead of defaulting everything to off;
+  // once ANY channel state has been saved, the vacancy's own record wins for
+  // every channel (untouched ones stay off, never silently re-enabled).
+  const hasSavedChannelState = (v.channels ?? []).length > 0
   const publishedMap: Record<string, unknown> = Object.fromEntries((v.channels ?? []).map(c => [c.value, c.published]))
   const [channels, setChannels] = useState<ChannelState[]>(
-    channelLookup.map(c => ({ value: c.value, label: c.label, published: Boolean(publishedMap[c.value]) }))
+    channelLookup
+      .filter(c => c.active !== false)
+      .map(c => ({
+        value: c.value,
+        label: c.label,
+        published: hasSavedChannelState ? Boolean(publishedMap[c.value]) : Boolean(c.default_enabled),
+      }))
   )
   // Vacancy's own settings win; the tenant default fills any gap.
   const [settings, setSettings] = useState<Record<string, unknown>>({ ...tenantDefaults, ...((v.applicationSettings ?? {}) as Record<string, unknown>) })

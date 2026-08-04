@@ -7,15 +7,14 @@ import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 import SoftChip from '@/components/ui/SoftChip'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
-import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import BackofficeCouplingIndicator from '@/components/ui/BackofficeCouplingIndicator'
+import { makeKoiosColumn } from '@/components/ui/koiosColumn'
 import { useDateFormat } from '@/lib/datetime'
 import { useLookups } from '@/context/LookupsContext'
 import { useApps } from '@/context/AppsContext'
 import { useGenders } from '@/lib/useGenders'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import LookupIcon from '@/components/ui/LookupIcon'
-import { KoiosAdvicePill } from '@/lib/koiosAdviceMeta'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useCandidateAdvice } from '@/lib/useCandidateAdvice'
 import { contactTarget, funnelTarget, statusTarget, TARGET_CONVERSATIONS, TARGET_MATCHES, TARGET_POOLS, TARGET_PREFERENCES } from './data/candidateCellTargets'
@@ -261,19 +260,13 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
           return <button type="button" onClick={jump} aria-label={t('cellLinks.pools')} style={cellButton}>{content}</button>
         },
       },
-      {
-        key: 'koios', nowrap: true, sortable: true, sortValue: c => adviceOf(c)?.action ?? '',
-        header: (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <KoiosAiMark size={16} />{t('columns.koios')}
-          </span>
-        ),
-        // Shared pill renderer (lib/koiosAdviceMeta) — identical to the customers koios
-        // pill and the vacancies "published" pill (Danny 2026-07-14 unification). Reads the
-        // shared useCandidateAdvice() resolver, same source the drawer's advice block uses.
-        render: c => <KoiosAdvicePill advice={adviceOf(c)} colored={colorKoios}
-          fallbackLabel={action => t(`koios.actions.${action}`, { defaultValue: action })} />,
-      },
+      // Shared Koios column factory (Danny 05-08 consistency pass) — same header,
+      // sort and cell as every other entity table. Reads the shared
+      // useCandidateAdvice() resolver, same source the drawer's advice block uses.
+      makeKoiosColumn({
+        adviceOf, colored: colorKoios, label: t('columns.koios'),
+        fallbackLabel: action => t(`koios.actions.${action}`, { defaultValue: action }),
+      }),
       {
         // Backoffice coupling scanning aid (JOB2) — not sortable: a compound
         // two-system state has no single clean sort order, and this is a glance

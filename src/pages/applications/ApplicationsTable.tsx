@@ -6,12 +6,21 @@ import Avatar from '@/components/ui/Avatar'
 import EntityNameCell from '@/components/ui/EntityNameCell'
 import StatusPill from '@/components/ui/StatusPill'
 import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
-import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import { makeKoiosColumn } from '@/components/ui/koiosColumn'
+import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useDateFormat } from '@/lib/datetime'
 import { interviewCategoryColor } from './data/applicationsShared'
+
+// The list resource's own AI-suggested next action (raw free text, `a.task` /
+// `a.ai_task` / `a.ai.task` — see mapApplication.ts) IS the advice; there is no
+// separate action/reason structure to derive here, unlike the other entities'
+// rule engines. `action: 'task'` has no dedicated ADVICE_META entry, so it
+// renders with the neutral default icon (honest: we don't know WHAT kind of
+// task this is, only that the backend suggested one).
+const adviceOfTask = (r: Application): KoiosAdvice | null => (r.task ? { action: 'task', label: r.task } : null)
 
 // Plain-text cell style (used when a colour toggle is off).
 const plainCell = { color: 'var(--text)', fontSize: 12 }
@@ -56,6 +65,7 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
   const colorPhase  = getBoolSetting(settings, 'application_table_color_phase', true)
   const colorStatus = getBoolSetting(settings, 'application_table_color_status', true)
   const colorOwner  = getBoolSetting(settings, 'application_table_color_owner', true)
+  const colorKoios  = getBoolSetting(settings, 'application_table_color_koios', false)
 
   // Column template mirrors the candidates blueprint (§3A): identity → phase/status →
   // dates → qualification → Koios → owner LAST (Danny 2026-07-14 table standardization).
@@ -111,16 +121,12 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
     { key: 'created', header: t('cols.created'), nowrap: true, sortable: true, sortValue: r => r.created ?? '',
       cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => r.created ? formatDate(r.created) : '—' },
     { key: 'source', header: t('cols.source'), sortable: true, cellStyle: { color: 'var(--text-muted)', fontSize: 12 } },
-    // AI task — Koios mark + clamped text.
-    { key: 'task', header: t('cols.task'),
-      render: r => r.task ? (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, maxWidth: 220 }}>
-          <KoiosAiMark size={16} />
-          <span style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontSize: 12, color: 'var(--text-muted)' }}>
-            {r.task}
-          </span>
-        </span>
-      ) : <span style={{ color: 'var(--text-muted)' }}>—</span> },
+    // Shared Koios column factory (Danny 05-08 consistency pass) — was a
+    // hand-rolled mark+text cell (no dash/sort/colour-toggle support); now the
+    // same header/sort/cell as every other entity table. `cols.task` already
+    // holds the "Koios" header label (legacy key name, correct value — reused
+    // as-is rather than adding a duplicate key).
+    makeKoiosColumn({ adviceOf: adviceOfTask, colored: colorKoios, label: t('cols.task') }),
     // Owner — avatar + name. LAST column (§3A convention).
     { key: 'owner', header: t('cols.owner'), sortable: true, sortValue: r => r.owner?.name,
       render: r => (

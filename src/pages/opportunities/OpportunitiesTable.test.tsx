@@ -59,3 +59,25 @@ describe('OpportunitiesTable · reference number column (NUMMER-1)', () => {
     expect(values).toEqual(['KA-00001', 'KA-00002', 'KA-00003'])
   })
 })
+
+// Danny 05-08: the "Koios" column now rolls out to every entity table — this is
+// the smoke test proving the header renders here too (the honest per-row rule
+// lives in opportunityAdvice.test.ts).
+describe('OpportunitiesTable · Koios column (Danny 05-08)', () => {
+  it('renders the header with the Koios mark, and flags an overdue, still-open deal', () => {
+    const overdue = { ...baseRow, id: 'o30', stageValue: 'lead', expectedCloseAt: '2000-01-01' }
+    const onTrack = { ...baseRow, id: 'o31', stageValue: 'lead', expectedCloseAt: null }
+    render(<OpportunitiesTable rows={[overdue, onTrack]} />)
+
+    expect(screen.getByRole('img', { name: 'Koios AI' })).toBeInTheDocument()
+    expect(screen.getByText('Opvolgen')).toBeInTheDocument()
+  })
+
+  it('renders an honest dash for a deal with no expected-close date', () => {
+    const onTrack = { ...baseRow, id: 'o32', stageValue: 'lead', expectedCloseAt: null }
+    const { container } = render(<OpportunitiesTable rows={[onTrack]} />)
+    const headerCell = screen.getByRole('img', { name: 'Koios AI' }).closest('th') as HTMLElement
+    const col = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    expect(container.querySelectorAll('tbody tr')[0].children[col].textContent).toBe('—')
+  })
+})

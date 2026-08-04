@@ -7,9 +7,12 @@ import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import StatusPill from '@/components/ui/StatusPill'
 import SoftChip from '@/components/ui/SoftChip'
 import AiAgentAvatar from '@/components/ui/AiAgentAvatar'
+import { makeKoiosColumn } from '@/components/ui/koiosColumn'
+import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import { useDateFormat, relativeAge } from '@/lib/datetime'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
-import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings, getBoolSetting, getNumberSetting } from '@/lib/settings/useAllSettings'
+import { deriveVacancyAdvice } from './data/vacancyAdvice'
 import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -63,6 +66,22 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
   const colorStatus    = getBoolSetting(settings, 'vacancy_table_color_status', true)
   const colorPublished = getBoolSetting(settings, 'vacancy_table_color_published', true)
   const colorOwner     = getBoolSetting(settings, 'vacancy_table_color_owner', true)
+  const colorKoios     = getBoolSetting(settings, 'vacancy_table_color_koios', false)
+  // How many days without an application counts as "stale" (mirrors candidates'
+  // no_contact_alert_months threshold) — tenant-configurable, sensible default.
+  const staleDays = getNumberSetting(settings, 'vacancy_advice_stale_days', 14)
+  // Shared Koios advice resolver (vacancyAdvice.ts) — honest: published + zero
+  // applications + past the stale threshold, an em-dash for everything else.
+  const adviceOf = (v: Vacancy): KoiosAdvice | null => {
+    const rule = deriveVacancyAdvice(v, { staleDays })
+    if (rule.action === 'none') return null
+    return {
+      action: rule.action,
+      label: t('common:koios.actions.attention', { defaultValue: 'Attention' }),
+      reason: t(rule.reasonKey, { ...rule.reasonParams, defaultValue: 'No applications yet, posted {{days}} days ago.' }),
+      source: 'rules',
+    }
+  }
 
   // Column order mirrors the candidates blueprint (§3A): identity → client → status
   // → counts → dates → owner LAST (Danny 2026-07-14 table standardization).
@@ -211,6 +230,9 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
         return <span title={formatDate(r.created)}>{t(`age.${age.unit}`, { count: age.value })}</span>
       },
     },
+    // Shared Koios column factory (Danny 05-08 consistency pass) — same header,
+    // sort and cell as every other entity table; sits right before owner (§3A).
+    makeKoiosColumn({ adviceOf, colored: colorKoios, label: t('common:koios.column', { defaultValue: 'Koios' }) }),
     {
       key: 'owner', header: t('columns.owner'), sortable: true, sortValue: r => r.owner?.name ?? '',
       render: r => (

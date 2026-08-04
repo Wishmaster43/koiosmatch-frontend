@@ -770,5 +770,10 @@
     "done": "Customer merged.",
     "errForbidden": "You are not allowed to merge customers.",
     "errFailed": "Merge failed. Please try again."
+  },
+  "koios": {
+    "reasons": {
+      "noOpenVacancies": "No open vacancies — follow up with this customer."
+    }
   }
 }

@@ -139,5 +139,11 @@
       "custom_fields": "Campos personalizados",
       "reference_number": "Número de referencia"
     }
+  },
+  "koios": {
+    "reasons": {
+      "noTargets": "Esta campaña activa aún no tiene contactos cargados.",
+      "staleDraft": "Este borrador tiene contactos cargados pero nunca se activó."
+    }
   }
 }

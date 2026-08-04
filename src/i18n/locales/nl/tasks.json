@@ -162,5 +162,10 @@
     "searchPlaceholder": "Zoek notities…",
     "loading": "Notities laden…",
     "loadError": "Notities konden niet geladen worden."
+  },
+  "koios": {
+    "reasons": {
+      "overdue": "Deze taak is over de deadline."
+    }
   }
 }

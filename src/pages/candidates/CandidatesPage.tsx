@@ -21,10 +21,11 @@ import type { ActionMessage } from '@/components/ui/ActionMessageBanner'
 import { toggleOneValue, isStale, isNeverContacted, optsFrom } from './data/candidatesShared'
 import { usePools } from '@/lib/usePools'
 import { usePageMemory } from '@/lib/usePageMemory'
+import { useListPageSize } from '@/hooks/useListPageSize'
 import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
 import { useCandidateFilters } from './hooks/useCandidateFilters'
 import { buildCandidateFilterGroups } from './data/candidateFilterGroups'
-import { useCandidatesData } from './hooks/useCandidatesData'
+import { useCandidatesData, CANDIDATES_MAX_PER_PAGE } from './hooks/useCandidatesData'
 import { useCandidateOptions } from './hooks/useCandidateOptions'
 import { useCandidateBulkActions } from './hooks/useCandidateBulkActions'
 import { useCandidateDrawerActions } from './hooks/useCandidateDrawerActions'
@@ -59,8 +60,7 @@ const CandidateDrawer = CandidateDrawerJs as ComponentType<{
 }>
 
 export default function CandidatesPage({ intent }: { intent?: CandidateIntent } = {}) {
-  // Auth/user must come first — pageSize initial value reads user.default_per_page.
-  const { hasPermission, user } = useAuth() as unknown as { hasPermission: (p: string) => boolean; user: { default_per_page?: number } | null }
+  const { hasPermission } = useAuth() as unknown as { hasPermission: (p: string) => boolean }
   const { t } = useTranslation(['candidates', 'common'])
   const { candidateTypes, funnelTypes, statuses, phases } = useLookups()
   const { genders } = useGenders()
@@ -68,8 +68,10 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const { registerFilters, unregisterFilters } = useRightPanel() as { registerFilters: (id: string, groups: unknown) => void; unregisterFilters: (id: string) => void }
 
   const [page,           setPage]           = usePageMemory('cand.page', 1)
-  // Initialise from the user's profile preference (Profile → Records per page).
-  const [pageSize,       setPageSize]       = useState<number>(() => user?.default_per_page ?? 50)
+  // Shared page-size hook (§ audit 2026-08-05): seeds from the user's profile
+  // preference (Profile → Records per page), clamps to CANDIDATES_MAX_PER_PAGE and
+  // stays sticky across the shell's unmount-on-navigate — mirrors every other page.
+  const { pageSize, setPageSize, options: pageSizeOptions } = useListPageSize('cand', CANDIDATES_MAX_PER_PAGE)
   const [addOpen,        setAddOpen]        = useState(false)
   // STRAAL-1: table ⇄ map view; the map searches server-side within centre+radius.
   const [view,           setView]           = usePageMemory<'table' | 'map'>('cand.viewMode', 'table')
@@ -325,7 +327,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
           tableScrollRef={tableScrollRef} error={error} filtered={filtered} loading={loading}
           selectedId={selected?.id} onSelectCandidate={selectCandidate}
           selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
-          page={page} lastPage={lastPage} pageSize={pageSize}
+          page={page} lastPage={lastPage} pageSize={pageSize} pageSizeOptions={pageSizeOptions}
           onPageChange={setPage} onPageSizeChange={handlePageSizeChange}
           mapCenter={mapCenter} mapRadius={mapRadius} mapStraalActive={mapStraalActive}
           onMapCenterChange={(lat, lng) => { setMapCenter({ lat, lng }); setMapStraalActive(true) }}

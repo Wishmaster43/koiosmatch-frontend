@@ -162,5 +162,10 @@
     "searchPlaceholder": "Rechercher des notes…",
     "loading": "Chargement des notes…",
     "loadError": "Les notes n'ont pas pu être chargées."
+  },
+  "koios": {
+    "reasons": {
+      "overdue": "Cette tâche a dépassé son échéance."
+    }
   }
 }

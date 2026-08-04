@@ -39,7 +39,9 @@ vi.mock('@/components/insights/InsightsRow', () => ({ default: () => null }))
 vi.mock('./MatchesTable', () => ({ default: () => null }))
 vi.mock('./MatchesBoard', () => ({ default: () => null }))
 vi.mock('./MatchesBulkBar', () => ({ default: () => null }))
-vi.mock('@/components/ui/PaginationBar', () => ({ default: () => null }))
+// useListPageSize (MatchesPage's shared page-size hook) imports PAGE_SIZE_OPTIONS
+// from this module, so the wholesale mock must still carry that named export.
+vi.mock('@/components/ui/PaginationBar', () => ({ default: () => null, PAGE_SIZE_OPTIONS: [50, 100, 200, 300, 400, 500] }))
 vi.mock('@/components/ui/HeaderSearch', () => ({ default: () => null }))
 vi.mock('@/components/ui/ClearFiltersButton', () => ({ default: () => null }))
 vi.mock('@/components/ui/QuickViewToggle', () => ({ default: () => null }))

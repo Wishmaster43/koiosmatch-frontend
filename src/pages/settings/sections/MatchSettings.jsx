@@ -32,9 +32,12 @@ export function MatchStatusSettings() {
  * same is_default singleton toggle as appointment-types/-locations/funnel
  * stages (LOOKUP-DEFAULT-1) — StatusListEditor's DefaultToggle promotes one
  * row and clears the rest; the +Match form preselects whichever type is
- * marked default (useMatchForm), into an empty field only. Contract
- * types were NOT one of the three lookups the backend shipped is_default for
- * yet — honest-gated like numberField above until a BE follow-up adds it.
+ * marked default (useMatchForm), into an empty field only. Contract types ARE
+ * backend-validated for is_default (CONTRACT-TYPE-DEFAULT-1,
+ * ContractTypeController::extraRules — HasSingletonFlag on the model) and wired
+ * below like the other three (round-4 audit correction: this comment used to
+ * claim it was still honest-gated pending a BE follow-up that had, in fact,
+ * already shipped).
  */
 export function ContractTypesSettings() {
   const { t } = useTranslation('settings')

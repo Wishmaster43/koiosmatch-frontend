@@ -8,6 +8,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
 import VacancyLinkField from './VacancyLinkField'
 import { useVacancyLinkOptions } from '../hooks/useVacancyLinkOptions'
+import { useApplicationVacancy } from '../hooks/useApplicationVacancy'
 import { rememberReturnTab } from './constants'
 import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
@@ -44,9 +45,24 @@ interface ApplicationDetailsCardProps {
  * in the drawer header instead). The Contactpersoon row (CONTACT-PERSON-1) is
  * read-only by derivation, not by omission: it comes from the linked vacancy's
  * contact_id and is editable only on the vacancy — see the comment at that row.
+ *
+ * VAC-CASCADE-MIRROR-1 (Danny 05-08): Klantlocatie/Afdeling/Contactpersoon are
+ * NOT an application-owned axis — the Application model has no
+ * customer_location_id/customer_department_id/contact_id columns of its own
+ * (verified in koiosmatch-api's Application model), so these three rows are
+ * entirely derived from the LINKED VACANCY's own klant→locatie→afdeling→
+ * contactpersoon cascade. ApplicationDetailResource's nested `vacancy`/`contact`
+ * blocks only carry the vacancy's own work-site `city` + a name-only contact —
+ * they never included customer_location/customer_department at all. Rather than
+ * wait on a backend resource change, this block fetches the SAME full vacancy
+ * detail the Vacature tab already reads (useApplicationVacancy — shared React
+ * Query cache entry, §11: no duplicate fetch when both tabs are open across a
+ * session) and sources all three rows from there, mirroring DetailsGeneralTab's
+ * own EntityLink treatment byte-for-byte (customers page — locations/
+ * departments/contacts have no page of their own).
  */
 export default function ApplicationDetailsCard({ application: a, onLinkVacancy, onUpdateSource }: ApplicationDetailsCardProps) {
-  const { t } = useTranslation(['applications', 'common'])
+  const { t } = useTranslation(['applications', 'common', 'vacancies'])
   const { formatDate } = useDateFormat()
   // In-place edit of the vacancy link + Bron (S7) — one shared pencil → picker/
   // input → diskette/✕ (§3A house pattern, mirrors KlantTab). Vacancy options
@@ -55,6 +71,10 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
   const [vacancyId, setVacancyId] = useState('')
   const [source, setSource] = useState('')
   const vacancyOptions = useVacancyLinkOptions(editing)
+  // VAC-CASCADE-MIRROR-1: the linked vacancy's full detail (customer location/
+  // department/contact) — null while loading or when no vacancy is linked; the
+  // three rows below fall back to a dash rather than fabricate a value.
+  const { vacancy: vac } = useApplicationVacancy(a.vacancyId)
 
   const startEdit = () => {
     setVacancyId(a.vacancyId != null ? String(a.vacancyId) : '')
@@ -103,34 +123,48 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
         <Field label={t('drawer.client')}>
           <EntityLink page="customers" id={a.customerId} title={t('drawer.openCustomer')}>{a.client || '—'}</EntityLink>
         </Field>
-        {/* Locatie (S6) — the vacancy's own work-site city when the backend sends
-            one; dash otherwise. Klant/locatie/afdeling/contactpersoon in full
-            live on the Vacature tab — this summary deliberately stays light.
-            Optional chaining: the drawer shows a LIGHT `Application` row cast as
-            `ApplicationDetail` before the full GET /applications/{id} resolves —
-            `vacancy` only exists once that fetch lands. */}
-        <Field label={t('drawer.location')}>{a.vacancy?.location || '—'}</Field>
-        {/* CONTACT-PERSON-1: the vacancy's customer contact, LIVE on
-            ApplicationDetailResource — phone/email as a muted second line when
-            present, dash when there is none. Deliberately outside the pencil's edit
-            mode: the field is derived from the vacancy's contact_id, and
-            UpdateApplicationRequest has no contact field, so a picker here would
-            PATCH nothing. Changing it happens on the vacancy (Vacature tab →
-            Details → Contactpersoon, PATCH /vacancies/{id}), which is also where the
-            vacancies.update permission is checked. email/phone are nullable, so this
-            gates on truthiness (`a.contact?.name`), never on `!== null`. */}
-        <Field label={t('drawer.contactPerson')}>
-          {a.contact?.name ? (
-            <>
-              <div>{a.contact.name}</div>
-              {(a.contact.phone || a.contact.email) && (
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                  {[a.contact.phone, a.contact.email].filter(Boolean).join(' · ')}
-                </div>
-              )}
-            </>
-          ) : '—'}
+        {/* Klantlocatie (VAC-CASCADE-MIRROR-1) — the linked vacancy's own
+            customer_location, sourced from the shared vacancy-detail fetch (see the
+            file comment above), never the application's own fields (it has none).
+            EntityLink opens the OWNING CUSTOMER (locations have no page of their
+            own), same as DetailsGeneralTab's row for this exact field. Dash while
+            the vacancy detail is loading, absent, or has no location picked. */}
+        <Field label={t('vacancies:details.customerLocation')}>
+          {vac?.customerLocationName ? <EntityLink page="customers" id={vac.clientId}>{vac.customerLocationName}</EntityLink> : '—'}
         </Field>
+        {/* Afdeling — was missing entirely from this summary; the vacancy carries
+            it (customer_department), so it is added here mirroring Klantlocatie. */}
+        <Field label={t('vacancies:details.customerDepartment')}>
+          {vac?.customerDepartmentName ? <EntityLink page="customers" id={vac.clientId}>{vac.customerDepartmentName}</EntityLink> : '—'}
+        </Field>
+        {/* Contactpersoon (CONTACT-PERSON-1 + VAC-CASCADE-MIRROR-1) — the name +
+            EntityLink come from the same shared vacancy-detail fetch as the two
+            rows above (guaranteed to match the Vacature tab); phone/email ride
+            along from ApplicationDetailResource's own `contact` block as a
+            best-effort second line (that contract carries them, the vacancy
+            detail's contact does not) — shown only when present, never fabricated.
+            Deliberately outside the pencil's edit mode: the field is derived from
+            the vacancy's contact_id, and UpdateApplicationRequest has no contact
+            field, so a picker here would PATCH nothing — changing it happens on
+            the vacancy (Vacature tab → Details → Contactpersoon), which is also
+            where the vacancies.update permission is checked. */}
+        {/* Full-width (§ layout): a 5th field would otherwise leave a dangling
+            empty half-row in the 2-column grid — spanning it reads cleanly and
+            matches the Vacature/Match rows below, which are already full-width. */}
+        <div style={{ gridColumn: '1 / -1' }}>
+          <Field label={t('vacancies:details.contactPerson')}>
+            {vac?.contactName ? (
+              <>
+                <EntityLink page="customers" id={vac.clientId}>{vac.contactName}</EntityLink>
+                {(a.contact?.phone || a.contact?.email) && (
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                    {[a.contact.phone, a.contact.email].filter(Boolean).join(' · ')}
+                  </div>
+                )}
+              </>
+            ) : '—'}
+          </Field>
+        </div>
         <div style={{ gridColumn: '1 / -1' }}>
           {editing ? (
             <div>

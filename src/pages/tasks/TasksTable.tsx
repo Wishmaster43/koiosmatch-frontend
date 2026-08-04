@@ -7,6 +7,8 @@ import type { ReactNode } from 'react'
 import Avatar from '@/components/ui/Avatar'
 import EntityNameCell from '@/components/ui/EntityNameCell'
 import SoftChip from '@/components/ui/SoftChip'
+import { makeKoiosColumn } from '@/components/ui/koiosColumn'
+import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import { useDateFormat } from '@/lib/datetime'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { isTaskOverdue, dueDateTime } from './data/mapTask'
@@ -59,6 +61,15 @@ export default function TasksTable({
   const colorPriority = getBoolSetting(settings, 'task_table_color_priority', true)
   const colorType     = getBoolSetting(settings, 'task_table_color_type', true)
   const colorAssignee = getBoolSetting(settings, 'task_table_color_assignee', true)
+  const colorKoios     = getBoolSetting(settings, 'task_table_color_koios', false)
+  // Shared Koios advice resolver — reuses the SAME isTaskOverdue() the due-date
+  // cell already colours red, so the two can never disagree (Danny's own example
+  // rule: "taak: over tijd → Te laat").
+  const adviceOf = (r: Task): KoiosAdvice | null => {
+    if (!isTaskOverdue(r)) return null
+    return { action: 'overdue', label: t('common:koios.actions.overdue', { defaultValue: 'Overdue' }),
+      reason: t('koios.reasons.overdue', { defaultValue: 'This task is past its due date.' }), source: 'rules' }
+  }
   // Coloured chip vs. plain text, driven by the per-column flag. `round` — the
   // status axis reads as a round pill; type/priority stay square (Danny 2026-07-14).
   const chip = (label: string, color: string | null, on: boolean, dot = false, round = false): ReactNode =>
@@ -106,6 +117,9 @@ export default function TasksTable({
         : dash },
     { key: 'createdAt', header: t('cols.created'), nowrap: true, sortable: true, sortValue: r => r.createdAt || '',
       cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => formatDate(r.createdAt) },
+    // Shared Koios column factory (Danny 05-08 consistency pass) — same header,
+    // sort and cell as every other entity table; sits right before assignee (§3A).
+    makeKoiosColumn({ adviceOf, colored: colorKoios, label: t('common:koios.column', { defaultValue: 'Koios' }) }),
     // Assignee — avatar + name (neutral grey fallback when uncoloured), or a
     // building-icon bubble + "Bureau" when nobody is assigned (same avatar-shaped
     // footprint either way — BE gap: the task resource carries no branch/location

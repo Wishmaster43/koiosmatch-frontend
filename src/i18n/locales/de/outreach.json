@@ -139,5 +139,11 @@
       "custom_fields": "Zusatzfelder",
       "reference_number": "Referenznummer"
     }
+  },
+  "koios": {
+    "reasons": {
+      "noTargets": "Diese aktive Kampagne hat noch keine Kontakte geladen.",
+      "staleDraft": "Dieser Entwurf hat geladene Kontakte, wurde aber nie aktiviert."
+    }
   }
 }

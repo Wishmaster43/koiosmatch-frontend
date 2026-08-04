@@ -165,7 +165,14 @@
       "expired": "Dieser Vorschlag ist abgelaufen — bitte erneut fragen.",
       "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
     },
-    "resizeHandle": "Panelbreite anpassen"
+    "resizeHandle": "Panelbreite anpassen",
+    "column": "Koios",
+    "actions": {
+      "follow_up": "Nachfassen",
+      "attention": "Achtung",
+      "renew": "Verlängern?",
+      "overdue": "Überfällig"
+    }
   },
   "actionRules": {
     "title": "Aktionsprüfung",

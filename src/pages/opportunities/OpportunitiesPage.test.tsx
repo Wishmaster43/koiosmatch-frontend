@@ -44,6 +44,7 @@ const apiGet = api.get as unknown as ReturnType<typeof vi.fn>
 const useOpportunitiesDataMock = vi.fn()
 vi.mock('./hooks/useOpportunitiesData', () => ({
   useOpportunitiesData: (...args: unknown[]) => useOpportunitiesDataMock(...args),
+  OPPORTUNITIES_MAX_PER_PAGE: 200,
 }))
 vi.mock('./hooks/useOpportunityArchive', () => ({
   useOpportunityArchive: () => ({ archiveOpportunity: vi.fn(), restoreOpportunity: vi.fn(), dialog: null }),

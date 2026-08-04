@@ -165,7 +165,14 @@
       "expired": "Cette proposition a expiré — redemandez-la.",
       "error": "Une erreur s'est produite. Veuillez réessayer."
     },
-    "resizeHandle": "Ajuster la largeur du panneau"
+    "resizeHandle": "Ajuster la largeur du panneau",
+    "column": "Koios",
+    "actions": {
+      "follow_up": "Relancer",
+      "attention": "Attention",
+      "renew": "Renouveler ?",
+      "overdue": "En retard"
+    }
   },
   "actionRules": {
     "title": "Vérification de l'action",

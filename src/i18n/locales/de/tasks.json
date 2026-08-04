@@ -162,5 +162,10 @@
     "searchPlaceholder": "Notizen durchsuchen…",
     "loading": "Notizen werden geladen…",
     "loadError": "Notizen konnten nicht geladen werden."
+  },
+  "koios": {
+    "reasons": {
+      "overdue": "Diese Aufgabe ist überfällig."
+    }
   }
 }

@@ -220,7 +220,8 @@
     "nt_match": "Coincidencias",
     "nt_task": "Tareas",
     "customer_blacklist_reasons": "Motivos de lista negra",
-    "match_stop_reasons": "Motivos de finalización"
+    "match_stop_reasons": "Motivos de finalización",
+    "outreach_outcomes": "Resultados"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -532,7 +533,15 @@
     "channelsSubtitle": "Gestiona los portales de empleo donde publicar tus vacantes.",
     "channelsAdd": "Añadir portal de empleo",
     "appDefaultsTitle": "Ajustes de candidatura",
-    "appDefaultsSubtitle": "El valor predeterminado que hereda una nueva vacante. Ajustable por vacante en el panel."
+    "appDefaultsSubtitle": "El valor predeterminado que hereda una nueva vacante. Ajustable por vacante en el panel.",
+    "flagOpen": "Marca como abierta",
+    "flagOpenDesc": "El estado de una vacante activa y abierta.",
+    "flagClosed": "Detiene la recepción de candidaturas",
+    "flagClosedDesc": "Una vacante en este estado ya no acepta nuevas candidaturas (página de empleo y API de socios).",
+    "channelActive": "Activo",
+    "channelActiveDesc": "Disponible para publicar. Desactívalo para ocultar un portal de empleo descontinuado sin eliminarlo.",
+    "channelDefaultEnabled": "Preseleccionado para vacantes nuevas",
+    "channelDefaultEnabledDesc": "Las vacantes nuevas empiezan con este portal activado en el panel de publicación; sigue siendo ajustable por vacante."
   },
   "rejection": {
     "title": "Motivos de rechazo",
@@ -1698,7 +1707,9 @@
     "priorityTitle": "Prioridades",
     "prioritySubtitle": "Gestiona las prioridades de tus tareas (baja, normal, alta).",
     "priorityAdd": "Añadir prioridad",
-    "priorityDefault": "Predeterminado"
+    "priorityDefault": "Predeterminado",
+    "flagDone": "Cuenta como completada",
+    "flagDoneDesc": "Las tareas en este estado cuentan para el KPI de completadas y ya no aparecen como abiertas o vencidas."
   },
   "taskDisplay": {
     "title": "Vista de tabla",

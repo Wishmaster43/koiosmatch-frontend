@@ -446,5 +446,10 @@
     "weeks": "{{count}}w",
     "months": "{{count}}mnd",
     "years": "{{count}}jr"
+  },
+  "koios": {
+    "reasons": {
+      "staleNoApplications": "Nog geen sollicitaties, {{days}} dagen geleden geplaatst."
+    }
   }
 }

@@ -4,6 +4,12 @@ import { Check, Save } from 'lucide-react'
 import SelectMenu from '@/components/ui/SelectMenu'
 import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import StatusListEditor from './StatusListEditor'
+import { resolveGenericLookupIcon } from './lookupIcons'
+
+// Curated icon subset for job boards — channels are web portals/career listings,
+// so scope the picker to web/portal-ish glyphs instead of the full generic set
+// (mirrors TaskSettings' TASK_TYPE_ICON_NAMES curation).
+const VACANCY_CHANNEL_ICON_NAMES = ['globe', 'briefcase', 'building', 'star', 'smartphone', 'mail']
 
 // Tenant default application settings — the fields + their 3-state values.
 const APP_FIELDS = ['cv', 'cover_letter', 'photo', 'remarks', 'interview_consent']
@@ -50,13 +56,28 @@ export function VacancyApplicationDefaultsSettings() {
   )
 }
 
-/** Vacancy statuses — backend /vacancy-statuses (name + colour), own sub-tab. */
+/**
+ * Vacancy statuses — backend /vacancy-statuses (name + colour), own sub-tab.
+ * VACSTATUS-OPEN-1 (C.5, round-4 audit finding #1): `is_open`/`is_closed` are the
+ * semantic flags the intake gate binds on (VacancyStatusController::lookupExtraRules,
+ * both `sometimes|boolean`) — wired here as flagFields (checkbox + row badge), same
+ * shape as CustomerPhasesSettings' `is_customer` flagField, even though the backend
+ * also enforces both as a HasSingletonFlag singleton: the model clears the losing
+ * row server-side on every save, so the truth is always correct after a refresh.
+ * `is_default` (VACSTATUS-DEFAULT-1) reuses the same DefaultToggle singleton pill
+ * as seniority/education above.
+ */
 export function VacancyStatusSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
       <StatusListEditor compact withColor title={t('vacancy.title')} subtitle={t('vacancy.subtitle')}
-        endpoint="/vacancy-statuses" addLabel={t('vacancy.add')} />
+        endpoint="/vacancy-statuses" addLabel={t('vacancy.add')}
+        flagFields={[
+          { key: 'is_open', label: t('vacancy.flagOpen'), description: t('vacancy.flagOpenDesc') },
+          { key: 'is_closed', label: t('vacancy.flagClosed'), description: t('vacancy.flagClosedDesc') },
+        ]}
+        defaultField={{ key: 'is_default' }} />
     </div>
   )
 }
@@ -106,13 +127,31 @@ export function VacancyEducationSettings() {
   )
 }
 
-/** Job boards — tenant publish channels, backend /vacancy-channels (name only). */
+/**
+ * Job boards — tenant publish channels, backend /vacancy-channels (round-4 audit
+ * finding #2). The 2026-06-15 create_vacancy_table migration DOES carry a `color`
+ * column on vacancy_channels (nullable, default swatch grey) — `withColor={false}`
+ * was stale, dropping a field the backend already persists. `active` and
+ * `default_enabled` (VacancyChannelController::lookupExtraRules, both
+ * `sometimes|boolean`) are wired as flagFields, NOT defaultField: the migration's
+ * own comment marks `default_enabled` explicitly "multi — no singleton" (several
+ * job boards can each be pre-checked) and the model carries no HasSingletonFlag,
+ * so StatusListEditor's DefaultToggle (which optimistically clears every sibling
+ * row locally) would misrepresent it as a single-select — flagFields' independent
+ * checkbox+badge is the correct shape (mirrors OpportunityLookupsSettings' is_won/
+ * is_lost: "never a DefaultToggle-style singleton").
+ */
 export function VacancyChannelSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      <StatusListEditor compact withColor={false} title={t('vacancy.channelsTitle')} subtitle={t('vacancy.channelsSubtitle')}
-        endpoint="/vacancy-channels" addLabel={t('vacancy.channelsAdd')} />
+      <StatusListEditor compact withColor title={t('vacancy.channelsTitle')} subtitle={t('vacancy.channelsSubtitle')}
+        endpoint="/vacancy-channels" addLabel={t('vacancy.channelsAdd')}
+        iconPicker={{ icons: VACANCY_CHANNEL_ICON_NAMES, resolve: resolveGenericLookupIcon }}
+        flagFields={[
+          { key: 'active', label: t('vacancy.channelActive'), description: t('vacancy.channelActiveDesc') },
+          { key: 'default_enabled', label: t('vacancy.channelDefaultEnabled'), description: t('vacancy.channelDefaultEnabledDesc') },
+        ]} />
     </div>
   )
 }

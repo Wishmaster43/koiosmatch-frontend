@@ -159,5 +159,10 @@
     "history": "Historial",
     "openTask": "Abrir tarea",
     "searchPlaceholder": "Buscar tarea…"
+  },
+  "koios": {
+    "reasons": {
+      "expectedCloseOverdue": "La fecha de cierre prevista ya pasó — da seguimiento a esta oportunidad."
+    }
   }
 }

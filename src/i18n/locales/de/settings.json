@@ -220,7 +220,8 @@
     "nt_match": "Matches",
     "nt_task": "Aufgaben",
     "customer_blacklist_reasons": "Blacklist-Gründe",
-    "match_stop_reasons": "Beendigungsgründe"
+    "match_stop_reasons": "Beendigungsgründe",
+    "outreach_outcomes": "Ergebnisse"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -532,7 +533,15 @@
     "channelsSubtitle": "Verwalten Sie die Jobbörsen, auf denen Sie Ihre Stellen veröffentlichen können.",
     "channelsAdd": "Jobbörse hinzufügen",
     "appDefaultsTitle": "Bewerbungseinstellungen",
-    "appDefaultsSubtitle": "Der Standard, den eine neue Stelle übernimmt. Pro Stelle im Drawer anpassbar."
+    "appDefaultsSubtitle": "Der Standard, den eine neue Stelle übernimmt. Pro Stelle im Drawer anpassbar.",
+    "flagOpen": "Markiert als offen",
+    "flagOpenDesc": "Der Status einer aktiven, offenen Stelle.",
+    "flagClosed": "Stoppt die Bewerbungsannahme",
+    "flagClosedDesc": "Eine Stelle mit diesem Status akzeptiert keine neuen Bewerbungen mehr (Karriereseite und Partner-API).",
+    "channelActive": "Aktiv",
+    "channelActiveDesc": "Verfügbar zum Veröffentlichen. Ausschalten, um eine eingestellte Jobbörse zu verbergen, ohne sie zu löschen.",
+    "channelDefaultEnabled": "Vorab angehakt für neue Stellen",
+    "channelDefaultEnabledDesc": "Neue Stellen starten mit dieser Jobbörse aktiviert im Veröffentlichungspanel; pro Stelle weiterhin anpassbar."
   },
   "rejection": {
     "title": "Ablehnungsgründe",
@@ -1698,7 +1707,9 @@
     "priorityTitle": "Prioritäten",
     "prioritySubtitle": "Verwalten Sie die Prioritäten Ihrer Aufgaben (niedrig, normal, hoch).",
     "priorityAdd": "Priorität hinzufügen",
-    "priorityDefault": "Standard"
+    "priorityDefault": "Standard",
+    "flagDone": "Zählt als erledigt",
+    "flagDoneDesc": "Aufgaben mit diesem Status zählen zur Kennzahl „Erledigt\" und werden nicht mehr als offen oder überfällig angezeigt."
   },
   "taskDisplay": {
     "title": "Tabellenansicht",

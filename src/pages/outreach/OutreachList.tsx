@@ -9,9 +9,12 @@ import DataTable, { type Column } from '@/components/ui/DataTable'
 import StatusBadge from '@/components/ui/StatusBadge'
 import SoftChip from '@/components/ui/SoftChip'
 import Avatar from '@/components/ui/Avatar'
+import { makeKoiosColumn } from '@/components/ui/koiosColumn'
+import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import { initialsOf } from '@/lib/initials'
 import { useDateFormat } from '@/lib/datetime'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { deriveCampaignAdvice } from './data/campaignAdvice'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 
 // Icon + colour per outreach channel (soft-chip convention) — fixed channel enum,
@@ -51,6 +54,19 @@ export default function OutreachList({ campaigns, loading, error, onReload, onOp
   const colorChannel = getBoolSetting(settings, 'outreach_table_color_channel', true)
   const colorStatus  = getBoolSetting(settings, 'outreach_table_color_status', true)
   const colorOwner   = getBoolSetting(settings, 'outreach_table_color_owner', true)
+  const colorKoios   = getBoolSetting(settings, 'outreach_table_color_koios', false)
+  // Shared Koios advice resolver (campaignAdvice.ts) — honest: an active campaign
+  // with nothing to call/mail/message, or a stale draft that never activated.
+  const adviceOf = (c: Campaign): KoiosAdvice | null => {
+    const rule = deriveCampaignAdvice(c)
+    if (rule.action === 'none') return null
+    return {
+      action: rule.action,
+      label: t('common:koios.actions.attention', { defaultValue: 'Attention' }),
+      reason: t(rule.reasonKey, { defaultValue: 'This campaign needs a look.' }),
+      source: 'rules',
+    }
+  }
 
   // Status pill colours for draft / active / done.
   const statusMap = {
@@ -81,6 +97,9 @@ export default function OutreachList({ campaigns, loading, error, onReload, onOp
       render: (r: Campaign) => r.targets_count ?? r.target_count ?? '—' },
     { key: 'created_at', header: t('col.created'), nowrap: true, sortable: true,
       sortValue: (r: Campaign) => r.created_at ?? '', render: (r: Campaign) => formatDate(r.created_at) },
+    // Shared Koios column factory (Danny 05-08 consistency pass) — same header,
+    // sort and cell as every other entity table; sits right before owner (§3A).
+    makeKoiosColumn<Campaign>({ adviceOf, colored: colorKoios, label: t('common:koios.column', { defaultValue: 'Koios' }) }),
     // Owner — avatar + name. LAST column (§3A convention). The campaign resource's
     // owner is `{id, name}` only, no per-user colour field yet (verified against
     // OutreachCampaignResource.php — BE gap), so `colorOwner` toggles between

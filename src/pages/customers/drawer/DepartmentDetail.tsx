@@ -312,7 +312,9 @@ export default function DepartmentDetail({ department, locations, statuses, cont
               three of five locales, identical to the group title, so a card title
               here would duplicate it AND collide with DepartmentsPanel.test.tsx's
               getByText on that sub-tab label. */}
-          <EditableFieldTable title="" fields={fields} value={values} onSave={save} labelWidth={130} />
+          {/* CANON-DIVIDER-1 (Danny 05-08): candidate ProfileTab canon — no line
+              between rows, 11px labels. */}
+          <EditableFieldTable title="" fields={fields} value={values} onSave={save} labelWidth={130} dividers={false} labelFontSize={11} />
 
           {/* Omschrijving AFTER the data blocks — Danny 02-08: every entity's prose block
               follows the customer Bedrijf-tab order (fields → text → Koios), so the

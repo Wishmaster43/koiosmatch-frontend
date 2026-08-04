@@ -20,6 +20,7 @@ import MatchesBulkBar from './MatchesBulkBar'
 // The full match form (§3B "direct match" path) — shared with the candidate
 // drawer; without a fixed candidateId it shows its own candidate picker.
 import MatchModal from '@/pages/candidates/drawer/MatchModal'
+import { useListPageSize } from '@/hooks/useListPageSize'
 import PaginationBar from '@/components/ui/PaginationBar'
 import ViewSwitch from '@/components/ui/ViewSwitch'
 import HeaderSearch from '@/components/ui/HeaderSearch'
@@ -39,7 +40,6 @@ import type { Id } from '@/types/common'
 export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation('matches')
   const auth = useAuth()
-  const user = auth?.user
   // Coupling is authorization-gated in the UI; the backend re-checks (§7).
   const hasPermission = auth?.hasPermission ?? (() => false)
   const [query,       setQuery]       = usePageMemory('matches.search', '')
@@ -56,7 +56,12 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // an APPLICATION axis — the match resource no longer carries a stage).
   const { statuses: matchStatuses, metaOf: matchStatusMeta } = useMatchStatuses()
   const [page,        setPage]        = useState(1)
-  const [pageSize,    setPageSize]    = useState(() => user?.default_per_page ?? 50)
+  // Shared page-size hook (§ audit 2026-08-05): no serverCap needed here — useMatches
+  // already fetches the FULL set client-side (loop, safety-capped at 1000 rows) and
+  // `pageSize` only slices that in-memory array for display, so it never round-trips
+  // to the server as `per_page` and can't 422 (unlike Vacancies/Customers, which sent
+  // pageSize straight through). Still adopts the hook for the session-sticky pick.
+  const { pageSize, setPageSize } = useListPageSize('matches')
   const [stageFilter, setStageFilter] = usePageMemory<string[]>('matches.stage', [])
   // KPI attention toggle (Gem. score → only scored matches).
   const [kpiScored, setKpiScored] = usePageMemory('matches.scored', false)

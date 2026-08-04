@@ -770,5 +770,10 @@
     "done": "Kunde zusammengeführt.",
     "errForbidden": "Sie sind nicht berechtigt, Kunden zusammenzuführen.",
     "errFailed": "Zusammenführen fehlgeschlagen. Bitte erneut versuchen."
+  },
+  "koios": {
+    "reasons": {
+      "noOpenVacancies": "Keine offenen Stellen — bei diesem Kunden nachfassen."
+    }
   }
 }

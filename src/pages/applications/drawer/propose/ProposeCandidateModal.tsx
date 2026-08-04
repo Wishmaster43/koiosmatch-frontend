@@ -184,8 +184,12 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
             borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
             {t('common:cancel')}
           </button>
+          {/* BUTTON-SOFT-TINT-1 (Danny 05-08): was a white/transparent outline
+              button — now the house soft-tint recipe (§4, mirrors DrawerAddButton/
+              QuickViewToggle). */}
           <button onClick={form.copyMessage} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500,
-            border: '1px solid var(--color-primary)', borderRadius: 8, background: 'none', color: 'var(--color-primary)', cursor: 'pointer' }}>
+            border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)', borderRadius: 8,
+            background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary)', cursor: 'pointer' }}>
             {form.copied ? t('propose.copied') : t('propose.copyMessage')}
           </button>
           <button onClick={handleSubmit} disabled={!!form.disabledReason || form.submitting}

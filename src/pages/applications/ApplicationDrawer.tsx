@@ -185,24 +185,32 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
               <>
               {/* Afwijzen (Danny 25-07): the reject FORM moved out of the tab into
                   this footer button + confirm modal — hidden once already rejected
-                  or matched (a match can no longer be rejected). */}
+                  or matched (a match can no longer be rejected). BUTTON-SOFT-TINT-1
+                  (Danny 05-08): was a white/transparent outline button — the house
+                  recipe (§4, mirrors DrawerAddButton/QuickViewToggle) is a
+                  color-mix soft tint, never a plain outline. */}
               {a.bucket !== 'rejected' && a.bucket !== 'matched' && (
                 <button onClick={() => setRejectModalOpen(true)}
                   style={{ display: 'flex', alignItems: 'center', gap: 5,
                     fontSize: 12, fontWeight: 500, height: BTN_H, padding: '0 12px', borderRadius: 8,
-                    border: '1px solid var(--color-danger)', background: 'none',
+                    border: '1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)',
+                    background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)',
                     color: 'var(--color-danger)', cursor: 'pointer' }}>
                   <XCircle size={12} /> {t('rejection.action')}
                 </button>
               )}
               {/* No vacancy linked = nothing to detach — grey + disabled (Danny 13/7).
                   S15: opens the reason-required confirm modal instead of detaching
-                  straight away (the BE 422s a bare DELETE now). */}
+                  straight away (the BE 422s a bare DELETE now). BUTTON-SOFT-TINT-1:
+                  the enabled state gets the same soft tint as Afwijzen above; the
+                  disabled state stays a neutral, unfilled ghost (§3 honest gate —
+                  it is not a colour-carrying action while disabled). */}
               <button onClick={() => a.vacancyId != null && setDetachModalOpen(true)} disabled={a.vacancyId == null}
                 title={a.vacancyId == null ? t('detach.nothingLinked') : undefined}
                 style={{ display: 'flex', alignItems: 'center', gap: 5,
                   fontSize: 12, fontWeight: 500, height: BTN_H, padding: '0 12px', borderRadius: 8,
-                  border: `1px solid ${a.vacancyId == null ? 'var(--border)' : 'var(--color-danger)'}`, background: 'none',
+                  border: a.vacancyId == null ? '1px solid var(--border)' : '1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)',
+                  background: a.vacancyId == null ? 'none' : 'color-mix(in srgb, var(--color-danger) 10%, transparent)',
                   color: a.vacancyId == null ? 'var(--text-muted)' : 'var(--color-danger)',
                   cursor: a.vacancyId == null ? 'not-allowed' : 'pointer', opacity: a.vacancyId == null ? 0.6 : 1 }}>
                 <Unlink size={12} /> {t('detach.button')}
@@ -238,14 +246,17 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
             <>
               {/* "Voorstellen aan klant" — prepares the house-style CV + a drafted
                   message and records it (no send capability yet, see the modal's
-                  own honest line). Outline style: sits next to the filled Save
-                  pencil toggle without competing for attention (§4 calm header). */}
+                  own honest line). BUTTON-SOFT-TINT-1 (Danny 05-08): was a white/
+                  transparent outline button ("een andere stijl als onze standaard")
+                  — now the house soft-tint recipe (§4, mirrors DrawerAddButton/
+                  QuickViewToggle), still calm next to the filled Save pencil toggle. */}
               {canPropose && (
                 <button type="button" onClick={() => setProposeModalOpen(true)}
                   title={t('propose.trigger')} aria-label={t('propose.trigger')}
                   style={{ display: 'flex', alignItems: 'center', gap: 5, height: BTN_H, padding: '0 10px',
                     fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer',
-                    border: '1px solid var(--color-primary)', background: 'none', color: 'var(--color-primary)' }}>
+                    border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
+                    background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary)' }}>
                   <Send size={12} /> {t('propose.trigger')}
                 </button>
               )}

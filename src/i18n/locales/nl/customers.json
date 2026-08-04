@@ -770,5 +770,10 @@
     "done": "Klant samengevoegd.",
     "errForbidden": "Je hebt geen rechten om klanten samen te voegen.",
     "errFailed": "Samenvoegen mislukt. Probeer het opnieuw."
+  },
+  "koios": {
+    "reasons": {
+      "noOpenVacancies": "Geen openstaande vacatures — neem contact op met deze klant."
+    }
   }
 }

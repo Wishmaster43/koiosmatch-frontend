@@ -159,5 +159,10 @@
     "table": "List view",
     "board": "Board view",
     "archived": "Archived"
+  },
+  "koios": {
+    "reasons": {
+      "expectedCloseOverdue": "The expected close date has passed — follow up on this deal."
+    }
   }
 }

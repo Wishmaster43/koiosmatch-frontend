@@ -35,6 +35,13 @@ interface ListResult { vacancies: Vacancy[]; total: number; lastPage: number }
 const EMPTY_VACANCIES: Vacancy[] = []
 const EMPTY_CUSTOMERS: VacancyCustomer[] = []
 
+// VacancyQuery::rules() caps per_page at `between:1,200` — measured 2026-08-05 (the
+// "zet ik hem op 500, klapt deze eruit" bug: the page sent the tenant's raw
+// default_per_page straight through with no clamp, so a 500 preference 422'd).
+// Exported so VacanciesPage can clamp the pageSize picker to the SAME ceiling —
+// one source of truth for both the table's page size and this defensive re-clamp.
+export const VACANCIES_MAX_PER_PAGE = 200
+
 export function useVacanciesData({ filterParams, page, pageSize, t }: UseVacanciesDataArgs): UseVacanciesDataResult {
   const queryClient = useQueryClient()
 
@@ -52,7 +59,11 @@ export function useVacanciesData({ filterParams, page, pageSize, t }: UseVacanci
     queryKey: ['vacancies', filterParams, page, pageSize],
     queryFn: async ({ signal }): Promise<ListResult> => {
       try {
-        const res = await api.get('/vacancies', { params: { ...filterParams, page, per_page: pageSize }, signal })
+        // Defensive re-clamp (belt-and-braces): the page already clamps pageSize to
+        // VACANCIES_MAX_PER_PAGE via useListPageSize, but this hook never trusts a
+        // caller to have done it — a 422 here is expensive to diagnose (mirrors
+        // useApplicationsData's identical guard).
+        const res = await api.get('/vacancies', { params: { ...filterParams, page, per_page: Math.min(pageSize, VACANCIES_MAX_PER_PAGE) }, signal })
         const { rows, total, lastPage } = unwrapList<ApiVacancy>(res)
         return { vacancies: rows.map(mapVacancy), total, lastPage }
       } catch (err) {

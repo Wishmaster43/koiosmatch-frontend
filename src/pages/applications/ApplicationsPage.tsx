@@ -11,6 +11,7 @@ import { useBranchOptions } from '@/lib/useBranchOptions'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
+import { useListPageSize } from '@/hooks/useListPageSize'
 import { useApplicationFilters, OWNER_NONE } from './hooks/useApplicationFilters'
 import { useApplicationsData, APPLICATIONS_MAX_PER_PAGE } from './hooks/useApplicationsData'
 import { useApplicationDrawerActions } from './hooks/useApplicationDrawerActions'
@@ -49,7 +50,6 @@ const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p =>
 export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation('applications')
   const auth = useAuth()
-  const user = auth?.user as { default_per_page?: number; branch_ids?: Array<string | number> } | null | undefined
   // Detach/restore are destructive → gate in the UI (backend re-checks the perm).
   const canManage = auth?.hasPermission?.('applications.update') ?? false
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -63,12 +63,15 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
 
   const [view,         setView]         = usePageMemory('apps.view', 'table')   // 'table' | 'board'
   const [page,         setPage]         = usePageMemory('apps.page', 1)
-  // Clamped to the backend's ApplicationQuery ceiling (`between:1,200`) — the
-  // user's `default_per_page` profile setting is shared across entities and is
-  // NOT capped for e.g. candidates, so a tenant with a higher preference would
-  // otherwise 422 here (measured: a WIP request with per_page=500 broke the
-  // pages-render/drill-downs/boards-drag smoke flows, 2026-07-15).
-  const [pageSize,     setPageSize]     = useState(() => Math.min(user?.default_per_page ?? 50, APPLICATIONS_MAX_PER_PAGE))
+  // Shared page-size hook (§ audit 2026-08-05): clamped to the backend's
+  // ApplicationQuery ceiling (APPLICATIONS_MAX_PER_PAGE) so a tenant preference
+  // above it never 422s, AND kept sticky across the shell's unmount-on-navigate
+  // like every other bit of page state here — this used to be the one `useState`
+  // NOT behind usePageMemory, so an explicit pick reverted to the seeded default
+  // on the next visit (measured root cause of "rows-per-page kan niet op 50
+  // gezet worden", Danny 2026-08-05).
+  const { pageSize, setPageSize: setPageSizeClamped, options: pageSizeOptions } =
+    useListPageSize('apps', APPLICATIONS_MAX_PER_PAGE)
   // Virtualization (F-7): the vertical scroll container the table body lives in.
   const tableScrollRef = useRef<HTMLDivElement>(null)
   // KPI-card attention toggle: null | 'new' | 'scored' | 'aiTasks' (one at a time).
@@ -297,11 +300,9 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
                 scrollParentRef={tableScrollRef} />
             </div>
             <PaginationBar page={page} totalPages={lastPage} totalRows={total}
-              pageSize={pageSize} onPageChange={setPage}
-              // Clamp: PaginationBar's shared PAGE_SIZE_OPTIONS offers up to 500 (other
-              // entities allow it) but ApplicationQuery caps per_page at 200 — see the
-              // pageSize state comment above.
-              onPageSizeChange={n => { setPageSize(Math.min(n, APPLICATIONS_MAX_PER_PAGE)); setPage(1) }} />
+              pageSize={pageSize} onPageChange={setPage} pageSizeOptions={pageSizeOptions}
+              // useListPageSize's setPageSize already clamps to APPLICATIONS_MAX_PER_PAGE.
+              onPageSizeChange={n => { setPageSizeClamped(n); setPage(1) }} />
         </div>
         {view === 'board' && (
           <ApplicationsBoard rows={boardRows} phases={phases} onMove={handleMove}

@@ -43,15 +43,18 @@ interface UseApplicationsDataParams {
 // Stable empty defaults (module-level so a loading/errored query never hands the
 // memo chain a fresh-identity array every render — see useCandidatesData's note).
 const EMPTY_APPLICATIONS: Application[] = []
-// ApplicationQuery::rules() caps per_page at `between:1,200` — measured 2026-07-15
-// after a WIP request with per_page=500 (the user's `default_per_page` profile
-// setting, uncapped for other entities) 422'd. Exported so ApplicationsPage can
-// clamp the pageSize picker to the SAME ceiling — one source of truth for both
-// the table's page size and the wide sample's cap. A tenant with more than 200
-// matching applications loses cards off the board / precision on the four
-// page-scope figures above. A dedicated unpaginated board endpoint (or raising
-// the cap) would remove this; filed as a BE gap, not fixable from the frontend.
-export const APPLICATIONS_MAX_PER_PAGE = 200
+// ApplicationQuery::rules() caps per_page at `between:1,500` — corrected 2026-08-05:
+// the backend raised this ceiling (it was `between:1,200` when first measured
+// 2026-07-15, after a WIP request with per_page=500 422'd); the frontend constant
+// had gone stale and kept clamping the tenant's 500 preference down to 200 for no
+// reason. Re-verified against the current ApplicationQuery.php before changing this
+// number — never adjust this constant without re-checking the live backend rule.
+// Exported so ApplicationsPage can clamp the pageSize picker to the SAME ceiling —
+// one source of truth for both the table's page size and the wide sample's cap. A
+// tenant with more than 500 matching applications still loses cards off the board /
+// precision on the four page-scope figures above; filed as a BE gap, not fixable
+// from the frontend short of a dedicated unpaginated board endpoint.
+export const APPLICATIONS_MAX_PER_PAGE = 500
 const WIDE_MAX_ROWS = APPLICATIONS_MAX_PER_PAGE
 
 // A 404 means the endpoint isn't live yet on this tenant → treat as an empty

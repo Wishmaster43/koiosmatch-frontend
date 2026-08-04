@@ -63,3 +63,24 @@ describe('TasksTable · reference number column (NUMMER-1)', () => {
     expect(values).toEqual(['T-00001', 'T-00002', 'T-00003'])
   })
 })
+
+// Danny 05-08: the "Koios" column now rolls out to every entity table — reuses
+// the SAME isTaskOverdue() the due-date cell already colours red.
+describe('TasksTable · Koios column (Danny 05-08)', () => {
+  it('renders the header with the Koios mark, and flags an overdue task', () => {
+    const overdue = { ...baseRow, id: 't30', due: '2000-01-01' } as unknown as Task
+    const onTime = { ...baseRow, id: 't31', due: null } as unknown as Task
+    render(<TasksTable rows={[overdue, onTime]} />)
+
+    expect(screen.getByRole('img', { name: 'Koios AI' })).toBeInTheDocument()
+    expect(screen.getByText('Te laat')).toBeInTheDocument()
+  })
+
+  it('renders an honest dash for a task without a due date', () => {
+    const onTime = { ...baseRow, id: 't32', due: null } as unknown as Task
+    const { container } = render(<TasksTable rows={[onTime]} />)
+    const headerCell = screen.getByRole('img', { name: 'Koios AI' }).closest('th') as HTMLElement
+    const col = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    expect(container.querySelectorAll('tbody tr')[0].children[col].textContent).toBe('—')
+  })
+})

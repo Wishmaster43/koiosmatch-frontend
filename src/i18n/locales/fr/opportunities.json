@@ -159,5 +159,10 @@
     "history": "Historique",
     "openTask": "Ouvrir la tâche",
     "searchPlaceholder": "Rechercher une tâche…"
+  },
+  "koios": {
+    "reasons": {
+      "expectedCloseOverdue": "La date de clôture prévue est dépassée — relancez cette opportunité."
+    }
   }
 }

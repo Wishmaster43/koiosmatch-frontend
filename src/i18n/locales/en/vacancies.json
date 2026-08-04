@@ -446,5 +446,10 @@
     "weeks": "{{count}}w",
     "months": "{{count}}mo",
     "years": "{{count}}y"
+  },
+  "koios": {
+    "reasons": {
+      "staleNoApplications": "No applications yet, posted {{days}} days ago."
+    }
   }
 }
