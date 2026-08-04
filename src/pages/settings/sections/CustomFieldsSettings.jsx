@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { Plus, Trash2, ChevronDown, ChevronUp, Eye, EyeOff, Monitor, MonitorOff } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { useCustomFields } from '@/lib/useCustomFields'
+import SearchSelect from '@/components/ui/SearchSelect'
 import { DragList } from '../components/SettingsControls'
 
 // Field types the backend supports.
@@ -236,10 +237,19 @@ export default function CustomFieldsSettings({ entityType }) {
                   {/* Type — disabled if has_data */}
                   <div>
                     <label style={labelStyle}>{t('customFieldsSettings.type')} {field.has_data && <span style={{ color: 'var(--color-warning)', fontWeight: 400 }}>({t('customFieldsSettings.hasData')})</span>}</label>
-                    <select value={currentType} onChange={e => setEF(field.id, 'type', e.target.value)}
-                      disabled={field.has_data} style={{ ...inputStyle, cursor: field.has_data ? 'not-allowed' : 'pointer', opacity: field.has_data ? 0.5 : 1 }}>
-                      {FIELD_TYPES.map(tp => <option key={tp} value={tp}>{t(`customFieldsSettings.types.${tp}`)}</option>)}
-                    </select>
+                    <SearchSelect
+                      options={FIELD_TYPES.map(tp => ({ value: tp, label: t(`customFieldsSettings.types.${tp}`) }))}
+                      selected={[currentType]}
+                      onToggle={v => setEF(field.id, 'type', v)}
+                      closeOnToggle
+                      searchable={false}
+                      renderTrigger={toggle => (
+                        <button type="button" onClick={() => !field.has_data && toggle()} disabled={field.has_data}
+                          style={{ ...inputStyle, textAlign: 'left', cursor: field.has_data ? 'not-allowed' : 'pointer', opacity: field.has_data ? 0.5 : 1 }}>
+                          {t(`customFieldsSettings.types.${currentType}`)}
+                        </button>
+                      )}
+                    />
                   </div>
 
                   {/* Options — only for select type */}
@@ -297,10 +307,18 @@ export default function CustomFieldsSettings({ entityType }) {
             </div>
             <div>
               <label style={labelStyle}>{t('customFieldsSettings.type')}</label>
-              <select value={newForm.type} onChange={e => setNewForm(p => ({ ...p, type: e.target.value }))}
-                style={{ ...inputStyle, cursor: 'pointer' }}>
-                {FIELD_TYPES.map(tp => <option key={tp} value={tp}>{t(`customFieldsSettings.types.${tp}`)}</option>)}
-              </select>
+              <SearchSelect
+                options={FIELD_TYPES.map(tp => ({ value: tp, label: t(`customFieldsSettings.types.${tp}`) }))}
+                selected={[newForm.type]}
+                onToggle={v => setNewForm(p => ({ ...p, type: v }))}
+                closeOnToggle
+                searchable={false}
+                renderTrigger={toggle => (
+                  <button type="button" onClick={toggle} style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
+                    {t(`customFieldsSettings.types.${newForm.type}`)}
+                  </button>
+                )}
+              />
             </div>
             {newForm.type === 'select' && (
               <div>

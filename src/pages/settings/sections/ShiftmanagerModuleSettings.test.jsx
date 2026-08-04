@@ -1,12 +1,13 @@
 /**
- * ShiftmanagerModuleSettings — the merged KPI+Display view (Danny 2026-07-20:
- * "KPI en weergave moeten 1 worden"): with the 'sm' module on, BOTH schema
- * sections render stacked with no sub-tab bar (the Sync tab is retired,
- * SYNC-RETIRE-1); with the module off the calm empty state shows (deep-link
- * guard — the registry normally hides the tab entirely).
+ * ShiftmanagerModuleSettings — the KPI + Display view (Danny 04-08: "moeten
+ * dan onder Shiftmanager 2 subtabjes worden"): with the 'sm' module on, the
+ * two schema sections render as sub-tabs (one visible at a time), switching
+ * via the shared underline SubTabBar; with the module off the calm empty
+ * state shows (deep-link guard — the registry normally hides the tab entirely).
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import ShiftmanagerModuleSettings from './ShiftmanagerModuleSettings'
 
@@ -19,14 +20,25 @@ vi.mock('../components/SchemaSection', () => ({ default: ({ schema }) => <div>sc
 
 afterEach(() => vi.clearAllMocks())
 
-describe('ShiftmanagerModuleSettings — merged KPI + Display view', () => {
-  it('module on: renders both schema sections stacked, without a sub-tab bar', () => {
+describe('ShiftmanagerModuleSettings — KPI + Display sub-tabs', () => {
+  it('module on: renders a sub-tab bar, showing only the KPI schema first', () => {
     mockAuth.mockReturnValue({ hasModule: (k) => k === 'sm' })
     render(<ShiftmanagerModuleSettings />)
 
-    const sections = screen.getAllByText(/^schema:/)
-    expect(sections).toHaveLength(2)
-    expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
+    expect(screen.getByRole('tablist')).toBeInTheDocument()
+    expect(screen.getAllByText(/^schema:/)).toHaveLength(1)
+    expect(screen.getByText('schema:smKpis')).toBeInTheDocument()
+    expect(screen.queryByText('schema:display')).not.toBeInTheDocument()
+  })
+
+  it('module on: switching to the Display sub-tab shows that schema and hides the KPI one', async () => {
+    mockAuth.mockReturnValue({ hasModule: (k) => k === 'sm' })
+    render(<ShiftmanagerModuleSettings />)
+
+    await userEvent.click(screen.getByRole('tab', { name: st('display.title') }))
+
+    expect(screen.getByText('schema:display')).toBeInTheDocument()
+    expect(screen.queryByText('schema:smKpis')).not.toBeInTheDocument()
   })
 
   it('module off: shows the calm empty state instead of a blank screen', () => {
@@ -35,5 +47,6 @@ describe('ShiftmanagerModuleSettings — merged KPI + Display view', () => {
 
     expect(screen.getByText(st('shell.empty'))).toBeInTheDocument()
     expect(screen.queryByText(/^schema:/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
   })
 })

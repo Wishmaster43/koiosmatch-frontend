@@ -12,6 +12,7 @@ import { ArrowLeft, Check, Copy, Key } from 'lucide-react'
 import { createApiKey } from './apiKeysApi'
 import { KEY_TYPES } from './constants'
 import ScopeEditor from './ScopeEditor'
+import SearchSelect from '@/components/ui/SearchSelect'
 import { BTN_H } from '@/config/buttonMetrics'
 
 export default function ApiKeyCreate({ onBack, onCreated }) {
@@ -103,9 +104,18 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
             <div style={fieldGrid}>
               <div>
                 <label style={labelStyle} htmlFor="ak-type">{t('apiKeys.field.type')}</label>
-                <select id="ak-type" value={form.type} onChange={set('type')} style={{ ...inputStyle, cursor: 'pointer' }}>
-                  {KEY_TYPES.map((ty) => <option key={ty} value={ty}>{t(`apiKeys.type.${ty}`)}</option>)}
-                </select>
+                <SearchSelect
+                  options={KEY_TYPES.map(ty => ({ value: ty, label: t(`apiKeys.type.${ty}`) }))}
+                  selected={[form.type]}
+                  onToggle={v => set('type')({ target: { value: v } })}
+                  closeOnToggle
+                  searchable={false}
+                  renderTrigger={toggle => (
+                    <button type="button" id="ak-type" onClick={toggle} style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
+                      {t(`apiKeys.type.${form.type}`)}
+                    </button>
+                  )}
+                />
               </div>
               <div>
                 <label style={labelStyle} htmlFor="ak-org">{t('apiKeys.field.organisation')}</label>

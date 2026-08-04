@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Check, RefreshCw, Save } from 'lucide-react'
 import { SettingsDirtyContext } from '../lib/settingsDirty'
 import ToggleUi from '@/components/ui/Toggle'
+import SearchSelect from '@/components/ui/SearchSelect'
 // PRE-EXISTING BUG FIX (found while verifying this task, unrelated to SUB-TABS-1/
 // TENANT-DEFAULT-1 itself): ColorField's palette-swatch rebuild (Danny 02-08) called
 // <ColorSwatch> without ever importing it, so EVERY `type: 'color'` schema field threw
@@ -144,12 +145,29 @@ export function TextareaField({ value, onChange, placeholder, minHeight = 220 })
   )
 }
 
-export function SelectField({ value, onChange, options }) {
+// Rewired onto the shared SearchSelect (searchable single-select dropdown) instead of
+// a bare native <select> — every SchemaSection screen upgrades at once (SchemaSection
+// routes type 'select' here). External props are unchanged so callers need no edit.
+// Single-select: `closeOnToggle` closes the menu on pick, `selected=[value]` marks the
+// current choice, and onToggle only fires onChange for an actual change (mirrors the
+// ProvincesSettings country-picker reference usage).
+export function SelectField({ value, onChange, options, ariaLabel }) {
+  const current = options.find(o => o.value === value)
   return (
-    <select value={value} onChange={e => onChange(e.target.value)}
-      style={{ ...inputStyle, paddingRight: 28, cursor: 'pointer', background: 'var(--surface)' }}>
-      {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-    </select>
+    <SearchSelect
+      closeOnToggle
+      options={options}
+      selected={[value]}
+      onToggle={next => { if (next !== value) onChange(next) }}
+      triggerLabel={current?.label ?? value}
+      renderTrigger={toggle => (
+        <button type="button" onClick={toggle} aria-label={ariaLabel}
+          style={{ ...inputStyle, paddingRight: 28, cursor: 'pointer', background: 'var(--surface)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: 160 }}>
+          {current?.label ?? value}
+        </button>
+      )}
+    />
   )
 }
 

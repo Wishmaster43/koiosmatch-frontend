@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Info, Save } from 'lucide-react'
 import { useAllSettings, getJsonSetting, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import RichTextEditor from '@/components/ui/RichTextEditor'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 import { Toggle } from '../components/SettingsKit'
 import { notifyError } from '@/lib/notify'
 
@@ -134,18 +135,16 @@ export default function ProposalSettings() {
       {/* Default CV variant */}
       <div style={cardStyle}>
         <label style={labelStyle}>{t('proposal.defaultVariantLabel')}</label>
-        <div style={{ display: 'flex', gap: 16 }}>
-          {[
-            { id: 'proposal', label: t('proposal.variantProposal') },
-            { id: 'full', label: t('proposal.variantFull') },
-          ].map(opt => (
-            <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--text)', cursor: 'pointer' }}>
-              <input type="radio" name="default_cv_variant" checked={persisted.default_cv_variant === opt.id}
-                onChange={() => chooseVariant(opt.id)} style={{ accentColor: 'var(--color-primary)' }} />
-              {opt.label}
-            </label>
-          ))}
-        </div>
+        {/* Replaces bare radio inputs — shared SegmentedControl, identical values/onChange */}
+        <SegmentedControl
+          ariaLabel={t('proposal.defaultVariantLabel')}
+          value={persisted.default_cv_variant}
+          onChange={chooseVariant}
+          options={[
+            { value: 'proposal', label: t('proposal.variantProposal') },
+            { value: 'full', label: t('proposal.variantFull') },
+          ]}
+        />
       </div>
     </div>
   )

@@ -1,33 +1,44 @@
 /**
- * ChipMultiSelect — a row of toggle chips for a multi-value field (preferred days,
- * industries, driving licences, …). Styled like the candidate-type chips but with
- * the neutral primary accent (these options carry no per-item colour). Selecting
- * toggles membership. Generic dumb UI — no feature logic.
+ * ChipMultiSelect — soft-chip multiselect (decision Danny 04-08), replacing raw
+ * checkbox lookup-selection (preferred days, industries, driving licences, locations, …).
+ * Each chip uses the exact QuickViewToggle §4 soft-tint recipe (color-mix on the chip's
+ * own colour — works for both hex AND `var(--color-*)` tokens, unlike the old hex-suffix
+ * trick this replaces): inactive still carries an 8% tint, active is a 16% tint +
+ * fontWeight 600. Generic dumb UI — no feature logic, no i18n inside.
+ *
+ * `values`/`onValuesToggle` is the current prop API (task spec); `selected` is kept as
+ * an accepted alias so the existing call sites (RolesSettings, EditUserModal, AgentForm,
+ * EditableFieldTable, …) keep working unchanged — pass either.
  */
 export interface ChipOption { value: string; label: string; color?: string }
 
 interface ChipMultiSelectProps {
   options: ChipOption[]
-  selected: string[]
+  // Preferred prop name (task spec). `selected` is the legacy alias, still accepted.
+  values?: string[]
+  selected?: string[]
   onToggle: (value: string) => void
+  color?: string
   emptyText?: string
+  ariaLabel?: string
 }
 
-export default function ChipMultiSelect({ options, selected, onToggle, emptyText }: ChipMultiSelectProps) {
+export default function ChipMultiSelect({ options, values, selected, onToggle, color = 'var(--color-primary)', emptyText, ariaLabel }: ChipMultiSelectProps) {
+  const active = values ?? selected ?? []
   if (options.length === 0) return <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{emptyText ?? '—'}</span>
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+    <div role="group" aria-label={ariaLabel} style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
       {options.map(o => {
-        const active = selected.includes(o.value)
-        const col = o.color
-        // Active chip: per-value colour when set (e.g. contract forms), else primary accent.
-        const activeStyle = col
-          ? { background: col + '1A', color: col, border: `1px solid ${col}55` }
-          : { background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }
+        const isActive = active.includes(o.value)
+        const tint = o.color ?? color
         return (
-          <button key={o.value} type="button" onClick={() => onToggle(o.value)} aria-pressed={active}
-            style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', fontWeight: active ? 600 : 400, transition: 'all 0.12s',
-              ...(active ? activeStyle : { background: 'var(--surface)', color: 'var(--text-muted)', border: '1px solid var(--border)' }) }}>
+          <button key={o.value} type="button" onClick={() => onToggle(o.value)} aria-pressed={isActive}
+            style={{
+              padding: '3px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer',
+              fontWeight: isActive ? 600 : 500, color: tint,
+              background: `color-mix(in srgb, ${tint} ${isActive ? 16 : 8}%, transparent)`,
+              border: `1px solid color-mix(in srgb, ${tint} ${isActive ? 50 : 28}%, transparent)`,
+            }}>
             {o.label}
           </button>
         )

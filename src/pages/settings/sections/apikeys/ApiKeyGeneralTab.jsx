@@ -10,6 +10,7 @@ import { Pencil, Plus, RefreshCw, Save, X } from 'lucide-react'
 import DetailTable from '@/components/ui/DetailTable'
 import { useDateFormat } from '@/lib/datetime'
 import { KEY_TYPES, isValidIpOrCidr } from './constants'
+import SearchSelect from '@/components/ui/SearchSelect'
 import { BTN_H } from '@/config/buttonMetrics'
 
 export default function ApiKeyGeneralTab({ apiKey, onSave }) {
@@ -97,9 +98,18 @@ export default function ApiKeyGeneralTab({ apiKey, onSave }) {
             </div>
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>{t('apiKeys.field.type')}</label>
-              <select value={form.type ?? 'additional'} onChange={set('type')} style={{ ...inputStyle, cursor: 'pointer' }}>
-                {KEY_TYPES.map((ty) => <option key={ty} value={ty}>{t(`apiKeys.type.${ty}`)}</option>)}
-              </select>
+              <SearchSelect
+                options={KEY_TYPES.map(ty => ({ value: ty, label: t(`apiKeys.type.${ty}`) }))}
+                selected={[form.type ?? 'additional']}
+                onToggle={v => set('type')({ target: { value: v } })}
+                closeOnToggle
+                searchable={false}
+                renderTrigger={toggle => (
+                  <button type="button" onClick={toggle} style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
+                    {t(`apiKeys.type.${form.type ?? 'additional'}`)}
+                  </button>
+                )}
+              />
             </div>
           </div>
           <div style={{ display: 'flex', gap: 12 }}>

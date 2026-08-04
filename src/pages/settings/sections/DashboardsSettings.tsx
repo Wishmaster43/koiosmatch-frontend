@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { Shield, BarChart2, Users, ClipboardList, Target, Clock, Eye, Check } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import SubTabBar from '@/components/drawer/SubTabBar'
 import {
   DASHBOARD_TYPES, KPI_ROWS, DASHBOARD_TEMPLATES, KPI_LABEL_KEY, BLOCK_LABEL_KEY, canSwitchViews,
   type DashboardType,
@@ -59,6 +60,11 @@ export default function DashboardsSettings() {
     })
   }
 
+  // DASH-SUBTABS-1 (Danny 04-08 "lijst is te lang met 2 tabellen dus moet
+  // Grafieken & lijsten subtabje worden"): the two stacked matrices become two
+  // sub-tabs — one table on screen at a time, same shared underline SubTabBar.
+  const [activeTab, setActiveTab] = useState<'kpis' | 'blocks'>('kpis')
+
   // DASH-MATRIX-1 (Danny 24-07 "een tabel of iets?"): the 7 stacked chip-cards became
   // TWO matrix tables — rows = items, columns = dashboard types, cells = toggles.
   // Same visual language as the roles/action-rule matrices Danny already uses.
@@ -93,10 +99,12 @@ export default function DashboardsSettings() {
     )
   }
 
+  // aria-label makes each matrix a named region (§6) — disambiguating it from the
+  // identically-labelled sub-tab for assistive tech and the tests.
   const Matrix = ({ kind, rows, title, labelKey }: {
     kind: 'kpis' | 'blocks'; rows: string[]; title: string; labelKey: Record<string, string>
   }) => (
-    <section style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'var(--surface)', overflow: 'hidden' }}>
+    <section aria-label={title} style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'var(--surface)', overflow: 'hidden' }}>
       <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{title}</div>
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -149,8 +157,21 @@ export default function DashboardsSettings() {
         <p style={{ margin: '2px 0 0' }}>· {t('dashboardsRoleHint')}</p>
       </div>
 
-      <Matrix kind="kpis" rows={allKpis} title={t('dashboardsKpis')} labelKey={KPI_LABEL_KEY} />
-      <Matrix kind="blocks" rows={allBlocks} title={t('dashboardsBlocks')} labelKey={BLOCK_LABEL_KEY} />
+      <SubTabBar
+        tabs={[
+          { id: 'kpis', label: t('dashboards.tabs.kpis') },
+          { id: 'blocks', label: t('dashboards.tabs.blocks') },
+        ]}
+        active={activeTab}
+        onChange={(id) => setActiveTab(id as 'kpis' | 'blocks')}
+      />
+
+      {activeTab === 'kpis' && (
+        <Matrix kind="kpis" rows={allKpis} title={t('dashboardsKpis')} labelKey={KPI_LABEL_KEY} />
+      )}
+      {activeTab === 'blocks' && (
+        <Matrix kind="blocks" rows={allBlocks} title={t('dashboardsBlocks')} labelKey={BLOCK_LABEL_KEY} />
+      )}
     </div>
   )
 }

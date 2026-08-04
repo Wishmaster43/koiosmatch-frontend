@@ -24,9 +24,9 @@ export function MatchStatusSettings() {
  * Contract types — the match form's "Contractsoort" dropdown (Backend
  * /contract-types). The numberField (7.1, MATCH-CONTRACT-DURATION-1) lets a
  * tenant set each type's default duration in days, feeding the match
- * form's end-date PROPOSAL (useEndDateProposal). Honest-gate: the backend
- * doesn't persist this column yet, so saved values are silently dropped until
- * it ships — same gate the field's own hook already documents.
+ * form's end-date PROPOSAL (useEndDateProposal). Both color and
+ * default_duration_days are validated and persisted by
+ * ContractTypeController — nothing here is silently dropped.
  *
  * `defaultField` (Danny 24-07 point 4, "voorstel waarde") reuses the exact
  * same is_default singleton toggle as appointment-types/-locations/funnel
@@ -44,6 +44,22 @@ export function ContractTypesSettings() {
         endpoint="/contract-types" addLabel={t('matches.contractTypeAdd')}
         numberField={{ key: 'default_duration_days', label: t('matches.contractTypeDurationLabel'), default: null }}
         defaultField={{ key: 'is_default' }} />
+    </div>
+  )
+}
+
+/**
+ * Match stop reasons — the mandatory reason recorded on
+ * POST /matches/{id}/terminate (MATCH-TERMINATE-1). Same value/label/color/order
+ * shape as MatchStatus (SlugLookupController base) — no extra flags, in-use guarded
+ * by match_terminations.stop_reason.
+ */
+export function MatchStopReasonSettings() {
+  const { t } = useTranslation('settings')
+  return (
+    <div style={{ maxWidth: 640 }}>
+      <StatusListEditor compact withColor title={t('matches.stopReasonTitle')} subtitle={t('matches.stopReasonSubtitle')}
+        endpoint="/match-stop-reasons" addLabel={t('matches.stopReasonAdd')} />
     </div>
   )
 }

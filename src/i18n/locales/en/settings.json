@@ -59,7 +59,8 @@
     "action_rules": "Action rules",
     "ai": "Koios AI",
     "import_export": "Import & Export",
-    "document_types": "Document types"
+    "document_types": "Document types",
+    "appointments": "Appointments"
   },
   "nav": {
     "candidate_display": "Table display",
@@ -155,7 +156,7 @@
     "location_statuses": "Location statuses",
     "department_statuses": "Department statuses",
     "contact_statuses": "Statuses",
-    "last_contact_types": "Contact type",
+    "last_contact_types": "Last contact",
     "candidate_phases": "Phase",
     "candidate_required_fields": "Required fields",
     "customer_required_fields": "Required fields",
@@ -216,7 +217,11 @@
     "dt_call_list": "Call lists",
     "dt_match": "Matches",
     "dt_vacancy": "Vacancies",
-    "vacancy_default_status": "Default status"
+    "vacancy_default_status": "Default status",
+    "nationalities": "Nationalities",
+    "blacklist_reasons": "Blacklist reasons",
+    "escalation_reasons": "Escalation reasons",
+    "opportunity_lookups": "Stages & types"
   },
   "kpis": {
     "title": "KPI settings",
@@ -517,7 +522,8 @@
     "iconPlaceholder": "e.g. 📞",
     "loadError": "Could not load the list.",
     "saveFailed": "Saving failed.",
-    "deleteFailed": "Deleting failed."
+    "deleteFailed": "Deleting failed.",
+    "clearDefault": "Click to clear default"
   },
   "phases": {
     "title": "Phases",
@@ -583,7 +589,11 @@
     "requiresMatch": "Requires a Match",
     "requiresMatchHint": "This status may only be set with a linked Match (e.g. Placed).",
     "expectsReturnDate": "Asks for a return date",
-    "expectsReturnDateHint": "Asks for an \"available again from\" date (e.g. Unavailable/Sick)."
+    "expectsReturnDateHint": "Asks for an \"available again from\" date (e.g. Unavailable/Sick).",
+    "isBlacklist": "Blacklist",
+    "isBlacklistHint": "This status marks a candidate as blocked for deployment; a reason will be requested.",
+    "isProposal": "Is a proposal",
+    "isProposalHint": "This stage means the candidate has been proposed to the customer."
   },
   "vacancy": {
     "title": "Statuses",
@@ -616,7 +626,10 @@
     "contractTypeTitle": "Contract types",
     "contractTypeSubtitle": "Manage the contract types and their default duration.",
     "contractTypeAdd": "Add contract type",
-    "contractTypeDurationLabel": "Duration (days)"
+    "contractTypeDurationLabel": "Duration (days)",
+    "stopReasonTitle": "Stop reasons",
+    "stopReasonSubtitle": "Mandatory reason when ending a match early.",
+    "stopReasonAdd": "Add reason"
   },
   "matchRates": {
     "title": "Purchase→sale conversion factor",
@@ -630,7 +643,10 @@
     "statusSubtitle": "Manage the call-list statuses (status + colour).",
     "statusAdd": "Add status",
     "flagReached": "Counts as reached",
-    "flagReachedDesc": "This status stamps the contact moment on the call-list entry."
+    "flagReachedDesc": "This status stamps the contact moment on the call-list entry.",
+    "outcomeTitle": "Outcomes",
+    "outcomeSubtitle": "The result of one call attempt, separate from the call-list status.",
+    "outcomeAdd": "Add outcome"
   },
   "tasks": {
     "statusTitle": "Statuses",
@@ -641,7 +657,8 @@
     "typeAdd": "Add type",
     "priorityTitle": "Priorities",
     "prioritySubtitle": "Manage the priorities of your tasks (low, normal, high).",
-    "priorityAdd": "Add priority"
+    "priorityAdd": "Add priority",
+    "priorityDefault": "Default"
   },
   "taskDisplay": {
     "title": "Table display",
@@ -1821,7 +1838,7 @@
     }
   },
   "lastContactTypes": {
-    "title": "Contact types",
+    "title": "Last-contact types",
     "subtitle": "Channels for 'last contact' (Email, Phone, WhatsApp).",
     "add": "Add type"
   },
@@ -2112,7 +2129,9 @@
     "remote": "Remote",
     "phone": "Phone",
     "isIntake": "Is an intake",
-    "isIntakeDesc": "Types with this flag count as an intake (drives \"intake planned\")."
+    "isIntakeDesc": "Types with this flag count as an intake (drives \"intake planned\").",
+    "isDefault": "Default",
+    "isDefaultForApplication": "Default for application"
   },
   "appointmentLocations": {
     "title": "Appointment locations",
@@ -2549,5 +2568,65 @@
     "subtitle": "The status a new vacancy gets when none is specified. No setting configured leaves the status empty — pick a status to apply it automatically.",
     "none": "None (set manually)",
     "saveFailed": "Saving failed"
+  },
+  "nationalities": {
+    "title": "Nationalities",
+    "subtitle": "Manage the nationalities candidates can pick.",
+    "add": "Add nationality"
+  },
+  "escalationReasons": {
+    "title": "Escalation reasons",
+    "subtitle": "Reasons a WhatsApp conversation gets handed off to a human.",
+    "add": "Add reason"
+  },
+  "blacklistReasons": {
+    "tabs": {
+      "candidate": "Candidate",
+      "customer": "Customer"
+    },
+    "candidate": {
+      "title": "Blacklist reasons — candidate",
+      "subtitle": "Reasons for putting a candidate on the blacklist."
+    },
+    "customer": {
+      "title": "Blacklist reasons — customer",
+      "subtitle": "Reasons for putting a customer on the blacklist."
+    },
+    "add": "Add reason"
+  },
+  "opportunityLookups": {
+    "tabs": {
+      "stages": "Stages",
+      "serviceTypes": "Service types",
+      "agreementTypes": "Agreement types",
+      "dealTypes": "Deal types"
+    },
+    "add": "Add value",
+    "stages": {
+      "title": "Pipeline stages",
+      "subtitle": "The stages an opportunity moves through."
+    },
+    "serviceTypes": {
+      "title": "Service types",
+      "subtitle": "The kind of service an opportunity offers."
+    },
+    "agreementTypes": {
+      "title": "Agreement types",
+      "subtitle": "The contract form an opportunity is closed under."
+    },
+    "dealTypes": {
+      "title": "Deal types",
+      "subtitle": "The deal type, with a unit (euro/hours/quote) driving how its value is measured.",
+      "unit": "Unit",
+      "unitEuro": "Euro",
+      "unitHours": "Hours",
+      "unitQuote": "Quote"
+    }
+  },
+  "dashboards": {
+    "tabs": {
+      "kpis": "KPIs",
+      "blocks": "Charts & lists"
+    }
   }
 }

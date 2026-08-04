@@ -1,11 +1,16 @@
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
+import { resolveGenericLookupIcon } from './lookupIcons'
 
 /**
  * Task (activity) lookups — three tenant-managed lists behind the Tasks feature,
  * each its own Settings sub-tab. All reuse the shared StatusListEditor (name +
  * colour + reorder + 409 in-use), so nothing in the Tasks UI is hardcoded.
  */
+
+// Curated icon subset for activity types — the generic set (task-ish glyphs are
+// most of it already), scoped so the picker grid isn't the full 24-icon set.
+const TASK_TYPE_ICON_NAMES = ['phone', 'mail', 'message-circle', 'clipboard-list', 'users', 'calendar', 'briefcase', 'check-circle']
 
 /** Task statuses — the board columns. Backend /task-statuses (name + colour + is_done). */
 export function TaskStatusSettings() {
@@ -24,18 +29,22 @@ export function TaskTypeSettings() {
   return (
     <div style={{ maxWidth: 640 }}>
       <StatusListEditor compact withColor title={t('tasks.typeTitle')} subtitle={t('tasks.typeSubtitle')}
-        endpoint="/task-types" addLabel={t('tasks.typeAdd')} withIcon />
+        endpoint="/task-types" addLabel={t('tasks.typeAdd')}
+        iconPicker={{ icons: TASK_TYPE_ICON_NAMES, resolve: resolveGenericLookupIcon }} />
     </div>
   )
 }
 
-/** Priorities — Laag/Normaal/Hoog with a colour. Backend /task-priorities. */
+/** Priorities — Laag/Normaal/Hoog with a colour, and a single default priority
+ * (backend TaskPriorityController validates + consumes `is_default`; TaskController
+ * assigns it to newly created tasks that don't specify one). */
 export function TaskPrioritySettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
       <StatusListEditor compact withColor title={t('tasks.priorityTitle')} subtitle={t('tasks.prioritySubtitle')}
-        endpoint="/task-priorities" addLabel={t('tasks.priorityAdd')} />
+        endpoint="/task-priorities" addLabel={t('tasks.priorityAdd')}
+        defaultField={{ key: 'is_default', labelKey: 'tasks.priorityDefault' }} />
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { Save, Check } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import Slider from '@/components/ui/Slider'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 
 /**
  * VacancyMatchingSettings — the GLOBAL matching strictness (how critical the AI
@@ -87,32 +88,20 @@ export default function VacancyMatchingSettings() {
 
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 22 }}>{t('matching.perVacancyHint')}</p>
 
-      {/* Match approval — three-option radio; native inputs keep keyboard support. */}
+      {/* Match approval — three-option segmented control (house idiom for option cards). */}
       <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
         <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('matching.approval.title')}</h3>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('matching.approval.subtitle')}</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
-          {MODES.map(({ value, key }) => {
-            const active = approval === value
-            return (
-              <label key={value} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px',
-                borderRadius: 8, cursor: 'pointer',
-                border: `1px solid ${active ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}`,
-                background: active ? 'color-mix(in srgb, var(--color-primary) 8%, transparent)' : 'var(--bg)' }}>
-                <input type="radio" name="approval_mode" value={value} checked={active}
-                  onChange={() => setApprovalMode(value)} style={{ marginTop: 2, accentColor: 'var(--color-primary)' }} />
-                <span style={{ minWidth: 0 }}>
-                  <span style={{ display: 'block', fontSize: 12.5, fontWeight: active ? 600 : 500, color: 'var(--text)' }}>
-                    {t(`matching.approval.${key}`)}
-                  </span>
-                  <span style={{ display: 'block', fontSize: 11.5, color: 'var(--text-muted)', marginTop: 1 }}>
-                    {t(`matching.approval.${key}Desc`)}
-                  </span>
-                </span>
-              </label>
-            )
-          })}
-        </div>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 12 }}>{t('matching.approval.subtitle')}</p>
+        <SegmentedControl
+          ariaLabel={t('matching.approval.title')}
+          value={approval}
+          onChange={setApprovalMode}
+          options={MODES.map(({ value, key }) => ({
+            value,
+            label: t(`matching.approval.${key}`),
+            description: t(`matching.approval.${key}Desc`),
+          }))}
+        />
       </div>
     </div>
   )

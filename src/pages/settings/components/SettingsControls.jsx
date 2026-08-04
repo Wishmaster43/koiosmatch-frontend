@@ -91,7 +91,10 @@ export function DefaultToggle({ active, onClick, busy, activeLabel, inactiveLabe
   )
 }
 
-export function DragList({ items, onReorder, renderItem }) {
+// sortable=false renders the same rows without drag affordances — for lookup
+// families whose backend has no /reorder route (SimpleLookupController): a drag
+// would PUT a nonexistent endpoint and 404-toast on every drop.
+export function DragList({ items, onReorder, renderItem, sortable = true }) {
   const [dragIdx, setDragIdx] = useState(null)
   const [overIdx, setOverIdx] = useState(null)
 
@@ -108,11 +111,11 @@ export function DragList({ items, onReorder, renderItem }) {
     <div>
       {items.map((item, i) => (
         <div key={item.id ?? i}
-          draggable
-          onDragStart={() => setDragIdx(i)}
-          onDragOver={e => { e.preventDefault(); setOverIdx(i) }}
-          onDrop={handleDrop}
-          onDragEnd={() => { setDragIdx(null); setOverIdx(null) }}
+          draggable={sortable}
+          onDragStart={sortable ? () => setDragIdx(i) : undefined}
+          onDragOver={sortable ? e => { e.preventDefault(); setOverIdx(i) } : undefined}
+          onDrop={sortable ? handleDrop : undefined}
+          onDragEnd={sortable ? () => { setDragIdx(null); setOverIdx(null) } : undefined}
           style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0',
                    // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this row divider/drag-over tint; kept literal to avoid changing the rendered tone
                    borderBottom: '1px solid #F3F4F6', opacity: dragIdx === i ? 0.4 : 1,
@@ -120,7 +123,7 @@ export function DragList({ items, onReorder, renderItem }) {
                    background: overIdx === i && dragIdx !== i ? '#F0F9FF' : 'transparent',
                    borderRadius: 6, transition: 'background 0.1s' }}>
           {/* eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this grip-icon grey; kept literal to avoid changing the rendered tone */}
-          <GripVertical size={14} style={{ color: '#D1D5DB', cursor: 'grab', flexShrink: 0 }} />
+          {sortable && <GripVertical size={14} style={{ color: '#D1D5DB', cursor: 'grab', flexShrink: 0 }} />}
           {renderItem(item, i)}
         </div>
       ))}

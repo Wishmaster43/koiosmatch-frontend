@@ -28,15 +28,18 @@ export interface AppointmentType {
   default_modality: Modality
   is_intake: boolean
   is_default: boolean
+  // Second singleton (APPT-1): the tenant's preferred type when planning FROM an
+  // application — read by usePlanIntakeForm, configured in Settings → Afspraken.
+  is_default_for_application: boolean
 }
 
 // Seed defaults — mirror the intended backend seed; slugs stable, labels tenant-facing.
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 export const DEFAULT_APPOINTMENT_TYPES: AppointmentType[] = [
-  { value: 'intake_flex', label: 'Intake Flex',       color: '#6E8FD6', icon: '📋', default_duration_min: 30, default_modality: 'office', is_intake: true, is_default: true },
-  { value: 'intake_deta', label: 'Intake Detachering', color: '#8B5CF6', icon: '📋', default_duration_min: 45, default_modality: 'office', is_intake: true, is_default: false },
-  { value: 'intake_online', label: 'Intake online',    color: '#19A5CA', icon: '💻', default_duration_min: 30, default_modality: 'remote', is_intake: true, is_default: false },
-  { value: 'followup',    label: 'Vervolggesprek',     color: '#79B58E', icon: '🔁', default_duration_min: 30, default_modality: 'office', is_intake: false, is_default: false },
+  { value: 'intake_flex', label: 'Intake Flex',       color: '#6E8FD6', icon: '📋', default_duration_min: 30, default_modality: 'office', is_intake: true, is_default: true, is_default_for_application: false },
+  { value: 'intake_deta', label: 'Intake Detachering', color: '#8B5CF6', icon: '📋', default_duration_min: 45, default_modality: 'office', is_intake: true, is_default: false, is_default_for_application: false },
+  { value: 'intake_online', label: 'Intake online',    color: '#19A5CA', icon: '💻', default_duration_min: 30, default_modality: 'remote', is_intake: true, is_default: false, is_default_for_application: false },
+  { value: 'followup',    label: 'Vervolggesprek',     color: '#79B58E', icon: '🔁', default_duration_min: 30, default_modality: 'office', is_intake: false, is_default: false, is_default_for_application: false },
 ]
 /* eslint-enable no-restricted-syntax */
 
@@ -50,6 +53,7 @@ const toType = (r: Record<string, unknown>): AppointmentType => ({
   default_modality: (r.default_modality as Modality) ?? 'office',
   is_intake: Boolean(r.is_intake),
   is_default: Boolean(r.is_default),
+  is_default_for_application: Boolean(r.is_default_for_application),
 })
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.

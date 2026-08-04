@@ -59,7 +59,8 @@
     "action_rules": "Aktionsregeln",
     "ai": "Koios AI",
     "import_export": "Import & Export",
-    "document_types": "Dokumenttypen"
+    "document_types": "Dokumenttypen",
+    "appointments": "Termine"
   },
   "nav": {
     "candidate_display": "Tabellenansicht",
@@ -128,7 +129,7 @@
     "location_statuses": "Standortstatus",
     "department_statuses": "Abteilungsstatus",
     "contact_statuses": "Status",
-    "last_contact_types": "Kontakttyp",
+    "last_contact_types": "Letzter Kontakt",
     "pools": "Talentpools",
     "assessment_criteria": "Bewertungskriterien",
     "usage": "Verbrauch",
@@ -216,7 +217,11 @@
     "dt_call_list": "Anruflisten",
     "dt_match": "Matches",
     "dt_vacancy": "Stellen",
-    "vacancy_default_status": "Standardstatus"
+    "vacancy_default_status": "Standardstatus",
+    "nationalities": "Nationalitäten",
+    "blacklist_reasons": "Blacklist-Gründe",
+    "escalation_reasons": "Eskalationsgründe",
+    "opportunity_lookups": "Phasen & Typen"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -495,7 +500,8 @@
     "iconPlaceholder": "z. B. 📞",
     "loadError": "Die Liste konnte nicht geladen werden.",
     "deleteFailed": "Löschen fehlgeschlagen.",
-    "saveFailed": "Speichern fehlgeschlagen."
+    "saveFailed": "Speichern fehlgeschlagen.",
+    "clearDefault": "Klicken, um Standard aufzuheben"
   },
   "phases": {
     "title": "Phasen",
@@ -1547,7 +1553,11 @@
     "requiresMatch": "Erfordert einen Match",
     "requiresMatchHint": "Dieser Status nur mit verknüpftem Match (z. B. Eingesetzt).",
     "expectsReturnDate": "Fragt Rückkehrdatum",
-    "expectsReturnDateHint": "Fragt ein \"wieder verfügbar ab\"-Datum (z. B. Nicht verfügbar/Krank)."
+    "expectsReturnDateHint": "Fragt ein \"wieder verfügbar ab\"-Datum (z. B. Nicht verfügbar/Krank).",
+    "isBlacklist": "Sperrliste",
+    "isBlacklistHint": "Dieser Status markiert einen Kandidaten als für den Einsatz gesperrt; es wird ein Grund abgefragt.",
+    "isProposal": "Ist ein Vorschlag",
+    "isProposalHint": "Diese Phase bedeutet, dass der Kandidat dem Kunden vorgeschlagen wurde."
   },
   "planning": {
     "shiftTypes": {
@@ -1628,7 +1638,7 @@
     }
   },
   "lastContactTypes": {
-    "title": "Kontakttypen",
+    "title": "Letzter-Kontakt-Typen",
     "subtitle": "Kanäle für 'letzter Kontakt' (E-Mail, Telefon, WhatsApp).",
     "add": "Typ hinzufügen"
   },
@@ -1654,7 +1664,10 @@
     "contractTypeTitle": "Vertragsarten",
     "contractTypeSubtitle": "Verwalten Sie die Vertragsarten und ihre Standardlaufzeit.",
     "contractTypeAdd": "Vertragsart hinzufügen",
-    "contractTypeDurationLabel": "Laufzeit (Tage)"
+    "contractTypeDurationLabel": "Laufzeit (Tage)",
+    "stopReasonTitle": "Beendigungsgründe",
+    "stopReasonSubtitle": "Pflichtgrund beim vorzeitigen Beenden eines Matches.",
+    "stopReasonAdd": "Grund hinzufügen"
   },
   "matchRates": {
     "title": "Umrechnungsfaktor Einkauf→Verkauf",
@@ -1668,7 +1681,10 @@
     "statusSubtitle": "Verwalten Sie die Anruflisten-Status (Status + Farbe).",
     "statusAdd": "Status hinzufügen",
     "flagReached": "Zählt als erreicht",
-    "flagReachedDesc": "Dieser Status stempelt den Kontaktmoment auf den Anruflisten-Eintrag."
+    "flagReachedDesc": "Dieser Status stempelt den Kontaktmoment auf den Anruflisten-Eintrag.",
+    "outcomeTitle": "Ergebnisse",
+    "outcomeSubtitle": "Das Ergebnis eines Anrufversuchs, getrennt vom Status der Anrufliste.",
+    "outcomeAdd": "Ergebnis hinzufügen"
   },
   "tasks": {
     "statusTitle": "Status",
@@ -1679,7 +1695,8 @@
     "typeAdd": "Typ hinzufügen",
     "priorityTitle": "Prioritäten",
     "prioritySubtitle": "Verwalten Sie die Prioritäten Ihrer Aufgaben (niedrig, normal, hoch).",
-    "priorityAdd": "Priorität hinzufügen"
+    "priorityAdd": "Priorität hinzufügen",
+    "priorityDefault": "Standard"
   },
   "taskDisplay": {
     "title": "Tabellenansicht",
@@ -2112,7 +2129,9 @@
     "remote": "Remote",
     "phone": "Telefon",
     "isIntake": "Ist ein Intake",
-    "isIntakeDesc": "Arten mit diesem Flag gelten als Intake."
+    "isIntakeDesc": "Arten mit diesem Flag gelten als Intake.",
+    "isDefault": "Standard",
+    "isDefaultForApplication": "Standard bei Bewerbung"
   },
   "appointmentLocations": {
     "title": "Terminorte",
@@ -2549,5 +2568,65 @@
     "subtitle": "Der Status, den eine neue Stelle erhält, wenn keiner angegeben wird. Ohne Einstellung bleibt der Status leer — wählen Sie einen Status, um ihn automatisch anzuwenden.",
     "none": "Keine (manuell setzen)",
     "saveFailed": "Speichern fehlgeschlagen"
+  },
+  "nationalities": {
+    "title": "Nationalitäten",
+    "subtitle": "Verwalten Sie die Nationalitäten, die Kandidaten auswählen können.",
+    "add": "Nationalität hinzufügen"
+  },
+  "escalationReasons": {
+    "title": "Eskalationsgründe",
+    "subtitle": "Gründe, warum ein WhatsApp-Gespräch an einen Mitarbeiter übergeben wird.",
+    "add": "Grund hinzufügen"
+  },
+  "blacklistReasons": {
+    "tabs": {
+      "candidate": "Kandidat",
+      "customer": "Kunde"
+    },
+    "candidate": {
+      "title": "Sperrgründe — Kandidat",
+      "subtitle": "Gründe, einen Kandidaten auf die Sperrliste zu setzen."
+    },
+    "customer": {
+      "title": "Sperrgründe — Kunde",
+      "subtitle": "Gründe, einen Kunden auf die Sperrliste zu setzen."
+    },
+    "add": "Grund hinzufügen"
+  },
+  "opportunityLookups": {
+    "tabs": {
+      "stages": "Phasen",
+      "serviceTypes": "Dienstarten",
+      "agreementTypes": "Vertragsarten",
+      "dealTypes": "Deal-Typen"
+    },
+    "add": "Wert hinzufügen",
+    "stages": {
+      "title": "Pipeline-Phasen",
+      "subtitle": "Die Phasen, die eine Chance durchläuft."
+    },
+    "serviceTypes": {
+      "title": "Dienstarten",
+      "subtitle": "Die Art der Dienstleistung einer Chance."
+    },
+    "agreementTypes": {
+      "title": "Vertragsarten",
+      "subtitle": "Die Vertragsform, unter der eine Chance abgeschlossen wird."
+    },
+    "dealTypes": {
+      "title": "Deal-Typen",
+      "subtitle": "Der Deal-Typ mit einer Einheit (Euro/Stunden/Angebot), die misst, wie der Wert bestimmt wird.",
+      "unit": "Einheit",
+      "unitEuro": "Euro",
+      "unitHours": "Stunden",
+      "unitQuote": "Angebot"
+    }
+  },
+  "dashboards": {
+    "tabs": {
+      "kpis": "KPIs",
+      "blocks": "Diagramme & Listen"
+    }
   }
 }

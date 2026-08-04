@@ -8,6 +8,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
+import SearchSelect from '@/components/ui/SearchSelect'
 
 const num = (v) => (v == null ? '—' : Number(v).toLocaleString('nl-NL'))
 
@@ -70,11 +71,19 @@ export default function TenantUsageSettings() {
         </p>
         <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('usage.month', { defaultValue: 'Maand' })}</span>
-          <select value={month} onChange={(e) => setMonth(e.target.value)}
-            style={{ fontSize: 13, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)',
-              background: 'var(--surface)', color: 'var(--text)', textTransform: 'capitalize', cursor: 'pointer' }}>
-            {months.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-          </select>
+          <SearchSelect
+            options={months.map(m => ({ value: m.value, label: m.label }))}
+            selected={[month]}
+            onToggle={setMonth}
+            closeOnToggle
+            renderTrigger={toggle => (
+              <button type="button" onClick={toggle}
+                style={{ fontSize: 13, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)',
+                  background: 'var(--surface)', color: 'var(--text)', textTransform: 'capitalize', cursor: 'pointer' }}>
+                {months.find(m => m.value === month)?.label ?? month}
+              </button>
+            )}
+          />
         </label>
       </div>
 

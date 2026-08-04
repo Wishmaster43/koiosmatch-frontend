@@ -5,7 +5,7 @@
  * rolls the optimistic flip back if the backend rejects it.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
@@ -26,13 +26,14 @@ const type = (over = {}) => ({ id: 't1', name: 'Intake', color: '#3B8FD4', is_de
 afterEach(() => { vi.clearAllMocks(); vi.unstubAllGlobals() })
 
 describe('StatusListEditor — defaultField singleton', () => {
-  it('renders the current default as a non-interactive "Standaard" pill and the rest as clickable "Maak standaard"', async () => {
+  it('renders the current default as a "Standaard" pill (clickable, for undo) and the rest as "Maak standaard"', async () => {
     api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Intake', is_default: true }), type({ id: 't2', name: 'Kennismaking' })] })
     render(<StatusListEditor title="Afspraaktypes" subtitle="" endpoint="/appointment-types" addLabel="Toevoegen"
       defaultField={{ key: 'is_default' }} />)
 
+    // DEFAULT-UNDO (04-08): the active pill is no longer disabled — clicking it clears the default.
     const activePill = await screen.findByRole('button', { name: st('common.default') })
-    expect(activePill).toBeDisabled()
+    expect(activePill).not.toBeDisabled()
     const promoteBtn = screen.getByRole('button', { name: st('common.setDefault') })
     expect(promoteBtn).not.toBeDisabled()
   })
@@ -74,6 +75,56 @@ describe('StatusListEditor — defaultField singleton', () => {
     expect(screen.getByText('Intake').closest('div')).toBeTruthy()
     // Audit finding: the rollback used to be silent — it must notify the user too.
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.saveFailed')))
+  })
+
+  // DEFAULT-UNDO (Danny 04-08): "je kan niet undo doen" — clicking the ACTIVE default clears it.
+  it('clicking the active default PUTs {is_default:false} on the same per-id route', async () => {
+    api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Intake', is_default: true }), type({ id: 't2', name: 'Kennismaking' })] })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<StatusListEditor title="Afspraaktypes" subtitle="" endpoint="/appointment-types" addLabel="Toevoegen"
+      defaultField={{ key: 'is_default' }} />)
+
+    const activePill = await screen.findByRole('button', { name: st('common.default') })
+    await user.click(activePill)
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/appointment-types/t1', expect.objectContaining({ is_default: false })))
+    // No row is default any more — both rows now show "Maak standaard".
+    await waitFor(() => expect(screen.getAllByRole('button', { name: st('common.setDefault') })).toHaveLength(2))
+  })
+})
+
+// SECOND SINGLETON (04-08): two independent defaultFields, each its own marker/undo,
+// promoting/clearing one never touches the other's flag on the same row.
+describe('StatusListEditor — multiple independent defaultFields', () => {
+  const twoFlagType = (over = {}) => ({ id: 't1', name: 'Intake', color: '#3B8FD4', is_default: false, is_default_for_application: false, ...over })
+
+  it('promoting one singleton PUTs only its own key, leaving the other singleton untouched', async () => {
+    api.get.mockResolvedValue({
+      data: [
+        twoFlagType({ id: 't1', name: 'Intake', is_default: true, is_default_for_application: false }),
+        twoFlagType({ id: 't2', name: 'Kennismaking', is_default: false, is_default_for_application: true }),
+      ],
+    })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<StatusListEditor title="Afspraaktypes" subtitle="" endpoint="/appointment-types" addLabel="Toevoegen"
+      defaultFields={[
+        { field: 'is_default', labelKey: 'statusList.default' },
+        { field: 'is_default_for_application', labelKey: 'statusList.defaultForApplication' },
+      ]} />)
+
+    await screen.findByText('Kennismaking')
+    // Promote t1's is_default_for_application (currently false, t2 holds it).
+    const rows = screen.getAllByText('Intake')
+    expect(rows.length).toBeGreaterThan(0)
+    const promoteButtons = screen.getAllByRole('button', { name: st('statusList.defaultForApplication') })
+    await user.click(promoteButtons[0])
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/appointment-types/t1',
+      expect.objectContaining({ is_default_for_application: true })))
+    // The other singleton's own key is never part of this PUT's flip target.
+    expect(api.put).not.toHaveBeenCalledWith('/appointment-types/t2', expect.objectContaining({ is_default: expect.anything() }))
   })
 })
 
@@ -179,16 +230,71 @@ describe('StatusListEditor — entity scoping (note types)', () => {
     api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Intake' })] })
     api.put.mockResolvedValue({ data: {} })
     const user = userEvent.setup()
-    // withSave=false: the toolbar's own "Opslaan" (reorder) button would otherwise
-    // collide with the modal's identically-labelled submit button in this query.
     render(<StatusListEditor title="Notitietypes" subtitle="" endpoint="/note-types" addLabel="Type toevoegen"
-      withColor={false} withSave={false} entity="candidate" />)
+      withColor={false} entity="candidate" />)
 
     await screen.findByText('Intake')
     await user.click(screen.getByRole('button', { name: st('statusList.edit') }))
     await user.click(screen.getByRole('button', { name: st('common.save') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/note-types/t1', expect.objectContaining({ entity: 'candidate' })))
+  })
+})
+
+// REORDER-SAVES-ON-DROP (decision 04-08): a drag-drop persists immediately via the
+// reorder route — no pending-order/Save-button step any more.
+describe('StatusListEditor — reorder persists on drop', () => {
+  it('fires PUT {endpoint}/reorder with the reordered ids as soon as a row is dropped', async () => {
+    api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Intake' }), type({ id: 't2', name: 'Kennismaking' })] })
+    api.put.mockResolvedValue({ data: {} })
+    render(<StatusListEditor title="Fasen" subtitle="" endpoint="/phases" addLabel="Fase toevoegen" />)
+
+    await screen.findByText('Kennismaking')
+    const rowOf = (text) => screen.getByText(text).closest('div[draggable]')
+    const source = rowOf('Kennismaking')
+    const target = rowOf('Intake')
+
+    // Simulate the native drag sequence the shared DragList listens for.
+    fireEvent.dragStart(source)
+    fireEvent.dragOver(target)
+    fireEvent.drop(target)
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/phases/reorder', { ids: ['t2', 't1'] }))
+    // No leftover reorder "Save" button — the drop already persisted it.
+    expect(screen.queryByRole('button', { name: st('common.save') })).not.toBeInTheDocument()
+  })
+
+  it('reverts and notifies when the reorder PUT fails', async () => {
+    api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Intake' }), type({ id: 't2', name: 'Kennismaking' })] })
+    api.put.mockRejectedValue(new Error('network down'))
+    const { notifyError } = await import('@/lib/notify')
+    render(<StatusListEditor title="Fasen" subtitle="" endpoint="/phases" addLabel="Fase toevoegen" />)
+
+    await screen.findByText('Kennismaking')
+    const rowOf = (text) => screen.getByText(text).closest('div[draggable]')
+    fireEvent.dragStart(rowOf('Kennismaking'))
+    fireEvent.dragOver(rowOf('Intake'))
+    fireEvent.drop(rowOf('Intake'))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/phases/reorder', { ids: ['t2', 't1'] }))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.saveFailed')))
+  })
+})
+
+// withIcon retires the bare free-text lucide-key input — it now renders the SAME
+// IconPickerControl (fed by the curated generic set), never a raw <input>.
+describe('StatusListEditor — withIcon renders the curated picker, not a text input', () => {
+  it('shows an icon-picker trigger button in the create modal, not a free-text input', async () => {
+    api.get.mockResolvedValue({ data: [] })
+    const user = userEvent.setup()
+    render(<StatusListEditor title="Afspraaktypes" subtitle="" endpoint="/appointment-types" addLabel="Toevoegen" withIcon />)
+
+    await user.click(screen.getByRole('button', { name: 'Toevoegen' }))
+
+    // No bare text input for the icon slug any more.
+    expect(screen.queryByPlaceholderText(st('statusList.iconPlaceholder'))).not.toBeInTheDocument()
+    // The picker trigger is a labelled button (IconPickerControl), not an <input>.
+    expect(screen.getByRole('button', { name: `${st('documentTypes.icon', { ns: 'settings' })}: ${st('statusList.iconLabel')}` })).toBeInTheDocument()
   })
 })
 
@@ -224,16 +330,7 @@ describe('StatusListEditor — save failures notify the user', () => {
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.saveFailed')))
   })
 
-  it('notifies on a failed reorder save', async () => {
-    api.get.mockResolvedValue({ data: [type({ id: 't1', name: 'Intake' }), type({ id: 't2', name: 'Kennismaking' })] })
-    api.put.mockRejectedValue(new Error('network down'))
-    const { notifyError } = await import('@/lib/notify')
-    const user = userEvent.setup()
-    render(<StatusListEditor title="Fasen" subtitle="" endpoint="/phases" addLabel="Fase toevoegen" />)
-
-    await screen.findByText('Kennismaking')
-    await user.click(screen.getByRole('button', { name: st('common.save') }))
-
-    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('statusList.saveFailed')))
-  })
+  // Reorder-save-on-drop failure is covered by the dedicated
+  // "StatusListEditor — reorder persists on drop" describe block below (the Save
+  // button that used to trigger this no longer exists, per the 04-08 decision).
 })

@@ -59,7 +59,8 @@
     "action_rules": "Actieregels",
     "ai": "Koios AI",
     "import_export": "Import & Export",
-    "document_types": "Documenttypes"
+    "document_types": "Documenttypes",
+    "appointments": "Afspraken"
   },
   "nav": {
     "candidate_display": "Tabelweergave",
@@ -155,7 +156,7 @@
     "location_statuses": "Locatie statussen",
     "department_statuses": "Afdeling statussen",
     "contact_statuses": "Statussen",
-    "last_contact_types": "Contacttype",
+    "last_contact_types": "Laatste contact",
     "candidate_phases": "Fase",
     "candidate_required_fields": "Verplichte velden",
     "customer_required_fields": "Verplichte velden",
@@ -216,7 +217,11 @@
     "dt_call_list": "Bellijsten",
     "dt_match": "Matches",
     "dt_vacancy": "Vacatures",
-    "vacancy_default_status": "Standaardstatus"
+    "vacancy_default_status": "Standaardstatus",
+    "nationalities": "Nationaliteiten",
+    "blacklist_reasons": "Blacklistredenen",
+    "escalation_reasons": "Escalatieredenen",
+    "opportunity_lookups": "Fasen & typen"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -517,7 +522,8 @@
     "iconPlaceholder": "bijv. 📞",
     "loadError": "Kon de lijst niet laden.",
     "saveFailed": "Opslaan mislukt.",
-    "deleteFailed": "Verwijderen mislukt."
+    "deleteFailed": "Verwijderen mislukt.",
+    "clearDefault": "Klik om standaard op te heffen"
   },
   "phases": {
     "title": "Fasen",
@@ -583,7 +589,11 @@
     "requiresMatch": "Vereist een Match",
     "requiresMatchHint": "Deze status mag alleen met een gekoppelde Match (bv. Geplaatst).",
     "expectsReturnDate": "Vraagt terugkeerdatum",
-    "expectsReturnDateHint": "Vraagt een \"weer beschikbaar vanaf\"-datum (bv. Niet beschikbaar/Ziek)."
+    "expectsReturnDateHint": "Vraagt een \"weer beschikbaar vanaf\"-datum (bv. Niet beschikbaar/Ziek).",
+    "isBlacklist": "Blacklist",
+    "isBlacklistHint": "Deze status markeert een kandidaat als geblokkeerd voor inzet; er wordt om een reden gevraagd.",
+    "isProposal": "Is een voorstel",
+    "isProposalHint": "Deze fase betekent dat de kandidaat is voorgesteld aan de klant."
   },
   "vacancy": {
     "title": "Statussen",
@@ -616,7 +626,10 @@
     "contractTypeTitle": "Contractsoorten",
     "contractTypeSubtitle": "Beheer de contractsoorten en hun standaard looptijd.",
     "contractTypeAdd": "Contractsoort toevoegen",
-    "contractTypeDurationLabel": "Looptijd (dagen)"
+    "contractTypeDurationLabel": "Looptijd (dagen)",
+    "stopReasonTitle": "Beëindigingsredenen",
+    "stopReasonSubtitle": "Verplichte reden bij het voortijdig beëindigen van een match.",
+    "stopReasonAdd": "Reden toevoegen"
   },
   "matchRates": {
     "title": "Omrekenfactor inkoop→verkoop",
@@ -630,7 +643,10 @@
     "statusSubtitle": "Beheer de bellijst-statussen (status + kleur).",
     "statusAdd": "Status toevoegen",
     "flagReached": "Telt als bereikt",
-    "flagReachedDesc": "Deze status stempelt het contactmoment op de bellijst-regel."
+    "flagReachedDesc": "Deze status stempelt het contactmoment op de bellijst-regel.",
+    "outcomeTitle": "Uitkomsten",
+    "outcomeSubtitle": "Het resultaat van één belpoging, los van de bellijst-status.",
+    "outcomeAdd": "Uitkomst toevoegen"
   },
   "tasks": {
     "statusTitle": "Statussen",
@@ -641,7 +657,8 @@
     "typeAdd": "Type toevoegen",
     "priorityTitle": "Prioriteiten",
     "prioritySubtitle": "Beheer de prioriteiten van je taken (laag, normaal, hoog).",
-    "priorityAdd": "Prioriteit toevoegen"
+    "priorityAdd": "Prioriteit toevoegen",
+    "priorityDefault": "Standaard"
   },
   "taskDisplay": {
     "title": "Tabelweergave",
@@ -1821,7 +1838,7 @@
     }
   },
   "lastContactTypes": {
-    "title": "Contacttypes",
+    "title": "Laatste-contacttypes",
     "subtitle": "Kanalen voor 'laatste contact' (Email, Telefonisch, WhatsApp).",
     "add": "Type toevoegen"
   },
@@ -2112,7 +2129,9 @@
     "remote": "Op afstand",
     "phone": "Telefonisch",
     "isIntake": "Is een intake",
-    "isIntakeDesc": "Types met deze vlag gelden als intake (drijft \"intake gepland\")."
+    "isIntakeDesc": "Types met deze vlag gelden als intake (drijft \"intake gepland\").",
+    "isDefault": "Standaard",
+    "isDefaultForApplication": "Standaard bij sollicitatie"
   },
   "appointmentLocations": {
     "title": "Afspraaklocaties",
@@ -2549,5 +2568,65 @@
     "subtitle": "De status die een nieuwe vacature krijgt wanneer er geen status wordt meegegeven. Een ontbrekende instelling laat de status leeg — kies een status om die automatisch toe te passen.",
     "none": "Geen (handmatig instellen)",
     "saveFailed": "Opslaan mislukt"
+  },
+  "nationalities": {
+    "title": "Nationaliteiten",
+    "subtitle": "Beheer de nationaliteiten die kandidaten kunnen kiezen.",
+    "add": "Nationaliteit toevoegen"
+  },
+  "escalationReasons": {
+    "title": "Escalatieredenen",
+    "subtitle": "Redenen waarom een WhatsApp-gesprek wordt doorgezet naar een medewerker.",
+    "add": "Reden toevoegen"
+  },
+  "blacklistReasons": {
+    "tabs": {
+      "candidate": "Kandidaat",
+      "customer": "Klant"
+    },
+    "candidate": {
+      "title": "Blacklist-redenen — kandidaat",
+      "subtitle": "Redenen om een kandidaat op de blacklist te zetten."
+    },
+    "customer": {
+      "title": "Blacklist-redenen — klant",
+      "subtitle": "Redenen om een klant op de blacklist te zetten."
+    },
+    "add": "Reden toevoegen"
+  },
+  "opportunityLookups": {
+    "tabs": {
+      "stages": "Fases",
+      "serviceTypes": "Dienstsoorten",
+      "agreementTypes": "Overeenkomsttypen",
+      "dealTypes": "Dealtypen"
+    },
+    "add": "Waarde toevoegen",
+    "stages": {
+      "title": "Pipeline-fases",
+      "subtitle": "De fases waar een kans doorheen loopt."
+    },
+    "serviceTypes": {
+      "title": "Dienstsoorten",
+      "subtitle": "Het soort dienstverlening van een kans."
+    },
+    "agreementTypes": {
+      "title": "Overeenkomsttypen",
+      "subtitle": "De contractvorm waaronder een kans wordt afgesloten."
+    },
+    "dealTypes": {
+      "title": "Dealtypen",
+      "subtitle": "Het type deal, met een eenheid (euro/uren/offerte) waarmee de waarde wordt gemeten.",
+      "unit": "Eenheid",
+      "unitEuro": "Euro",
+      "unitHours": "Uren",
+      "unitQuote": "Offerte"
+    }
+  },
+  "dashboards": {
+    "tabs": {
+      "kpis": "KPI's",
+      "blocks": "Grafieken & lijsten"
+    }
   }
 }

@@ -31,7 +31,7 @@ describe('AppointmentLocationSettings', () => {
     await screen.findByText('Kantoor')
     expect(screen.getByText('Online')).toBeInTheDocument()
     const activePill = screen.getByRole('button', { name: st('common.default') })
-    expect(activePill).toBeDisabled()
+    expect(activePill).not.toBeDisabled() // DEFAULT-UNDO 04-08: active pill stays clickable (click = clear)
   })
 
   it('a 409 on delete keeps the row and flags it in-use instead of removing it', async () => {

@@ -15,6 +15,7 @@ import { PermissionMatrix } from './RolesPermissionMatrix'
 import { roleIconEl, ROLE_ICON_NAMES } from '@/lib/roleIcons'
 import RoleChip from '@/components/ui/RoleChip'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+import SearchSelect from '@/components/ui/SearchSelect'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useLocations } from '@/lib/useLocations'
 import { DASHBOARD_TYPES } from '@/pages/dashboard/templates'
@@ -216,13 +217,19 @@ function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }) {
         {/* Start dashboard — couples this role to a dashboard type (same labels as the switcher). */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('roles.startDashboard')}</span>
-          <select value={localRole.dashboard_type ?? ''} onChange={e => saveAppearance({ dashboard_type: e.target.value || null })}
-            aria-label={t('roles.startDashboard')}
-            style={{ height: 30, padding: '0 8px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 7,
-                     background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
-            <option value="">{t('roles.startDashboardNone')}</option>
-            {DASHBOARD_TYPES.map(dt => <option key={dt} value={dt}>{td(`types.${dt}`)}</option>)}
-          </select>
+          <SearchSelect
+            options={[{ value: '', label: t('roles.startDashboardNone') }, ...DASHBOARD_TYPES.map(dt => ({ value: dt, label: td(`types.${dt}`) }))]}
+            selected={[localRole.dashboard_type ?? '']}
+            onToggle={v => saveAppearance({ dashboard_type: v || null })}
+            closeOnToggle
+            renderTrigger={toggle => (
+              <button type="button" onClick={toggle} aria-label={t('roles.startDashboard')}
+                style={{ height: 30, padding: '0 8px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 7,
+                         background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer', textAlign: 'left' }}>
+                {localRole.dashboard_type ? td(`types.${localRole.dashboard_type}`) : t('roles.startDashboardNone')}
+              </button>
+            )}
+          />
         </div>
         <div style={{ marginLeft: 'auto' }}>
           <RoleChip name={localRole.name} color={color} icon={iconName} />

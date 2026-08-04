@@ -109,3 +109,31 @@ describe('usePlanIntakeForm · no hardcoded type fallback', () => {
     expect(api.post).toHaveBeenCalledWith('/candidates/cand-1/appointments', expect.objectContaining({ type: 'intake_flex' }))
   })
 })
+
+describe('usePlanIntakeForm · is_default_for_application preselect (APPT-1)', () => {
+  // Two types: plain default vs the application-context singleton — which one wins
+  // must depend ONLY on whether the modal was opened from an application.
+  const flex = { value: 'intake_flex', label: 'Intake Flex', default_duration_min: 30, default_modality: 'office', is_intake: true, is_default: true, is_default_for_application: false }
+  const sollicitatie = { value: 'sollicitatiegesprek', label: 'Sollicitatiegesprek', default_duration_min: 45, default_modality: 'office', is_intake: true, is_default: false, is_default_for_application: true }
+  const TWO_TYPES = {
+    types: [flex, sollicitatie], intakeTypes: [flex, sollicitatie],
+    metaOf: (v?: string | null) => [flex, sollicitatie].find(x => x.value === v),
+    defaultType: flex,
+  } as unknown as AppointmentTypesResult
+
+  it('preselects the is_default_for_application type when opened from an application', () => {
+    vi.mocked(useAppointmentTypes).mockReturnValue(TWO_TYPES)
+    const { result } = renderHook(() => usePlanIntakeForm({
+      candidateId: 'cand-1', onClose: noop, onCreated: noop, applicationId: 'app-1',
+    }))
+    expect(result.current.type).toBe('sollicitatiegesprek')
+    // The flagged type's own duration rides along (one option drives type + duration + modality).
+    expect(result.current.duration).toBe(45)
+  })
+
+  it('sticks to the plain is_default type without an application context', () => {
+    vi.mocked(useAppointmentTypes).mockReturnValue(TWO_TYPES)
+    const { result } = renderHook(() => usePlanIntakeForm({ candidateId: 'cand-1', onClose: noop, onCreated: noop }))
+    expect(result.current.type).toBe('intake_flex')
+  })
+})

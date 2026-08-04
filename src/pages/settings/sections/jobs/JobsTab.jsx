@@ -11,6 +11,7 @@ import DataTable from '@/components/ui/DataTable'
 import StatusPill from '@/components/ui/StatusPill'
 import { formatDT, formatDuration } from '@/components/reports/runFormat'
 import { useJobsList } from './useJobsList'
+import SearchSelect from '@/components/ui/SearchSelect'
 
 const STATE_COLOR = { pending: 'var(--text-muted)', reserved: 'var(--color-warning)' }
 
@@ -51,12 +52,23 @@ export default function JobsTab() {
           style={{ height: 32, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', width: 160 }} />
         <input value={filters.tenant} onChange={(e) => setFilter('tenant', e.target.value)} placeholder={t('jobs.filters.tenant')}
           style={{ height: 32, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', width: 160 }} />
-        <select value={filters.status} onChange={(e) => setFilter('status', e.target.value)}
-          style={{ height: 32, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
-          <option value="">{t('jobs.filters.all')}</option>
-          <option value="pending">{t('jobs.state.pending')}</option>
-          <option value="reserved">{t('jobs.state.reserved')}</option>
-        </select>
+        <SearchSelect
+          options={[
+            { value: '', label: t('jobs.filters.all') },
+            { value: 'pending', label: t('jobs.state.pending') },
+            { value: 'reserved', label: t('jobs.state.reserved') },
+          ]}
+          selected={[filters.status]}
+          onToggle={v => setFilter('status', v)}
+          closeOnToggle
+          searchable={false}
+          renderTrigger={toggle => (
+            <button type="button" onClick={toggle}
+              style={{ height: 32, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer', textAlign: 'left' }}>
+              {filters.status === 'pending' ? t('jobs.state.pending') : filters.status === 'reserved' ? t('jobs.state.reserved') : t('jobs.filters.all')}
+            </button>
+          )}
+        />
       </div>
 
       {/* A cancel that lost the race (worker reserved it first) — the 409's own message. */}

@@ -178,16 +178,18 @@ describe('RolesSettings — appearance save reverts on failure', () => {
 
     await user.click(await screen.findByRole('button', { name: st('roles.edit') }))
     const select = await screen.findByLabelText(st('roles.startDashboard'))
-    expect(select).toHaveValue('')
+    expect(select).toHaveTextContent(st('roles.startDashboardNone'))
 
-    await user.selectOptions(select, 'recruitment')
+    // SearchSelect: open the dropdown, then pick the "Recruitment" option.
+    await user.click(select)
+    await user.click(await screen.findByRole('button', { name: 'Recruitment' }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith(
       // eslint-disable-next-line no-restricted-syntax -- DATA: the fixture role's tenant-picked colour, not a style rule.
       '/roles/r1', { color: '#3B8FD4', icon: 'shield', dashboard_type: 'recruitment' }))
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('roles.appearanceSaveFailed')))
-    // Reverted: the select falls back to the original (empty) dashboard type.
-    await waitFor(() => expect(select).toHaveValue(''))
+    // Reverted: the trigger falls back to the original (empty) dashboard type.
+    await waitFor(() => expect(select).toHaveTextContent(st('roles.startDashboardNone')))
   })
 })
 

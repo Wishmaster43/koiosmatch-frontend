@@ -43,22 +43,27 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
   // Per-item flag location: is_applicant on statuses, requires_appointment on the funnel.
   const isStatusBlock = slug === 'statuses'
   const isFunnelBlock = slug === 'funnel-types'
+  const isPhaseBlock  = slug === 'phases'
+  // Default flag is settable on both funnel stages and phases (04-08: phases list stays
+  // add/remove-locked, but the default toggle becomes interactive on it).
+  const supportsDefault = isFunnelBlock || isPhaseBlock
 
   // eslint-disable-next-line no-restricted-syntax -- DATA: default swatch colour pre-filled for a newly created lookup row, not UI chrome
-  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', requires_appointment: false, requires_reason: false, requires_match: false, expects_return_date: false, is_match: false, is_rejected: false })
+  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', requires_appointment: false, requires_reason: false, requires_match: false, expects_return_date: false, is_match: false, is_rejected: false, is_proposal: false, is_blacklist: false })
   // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
   const openEdit = (it) => setModal({ mode: 'edit', id: it.id, value: it.value, label: it.label, color: it.color ?? '#6B7280',
     requires_appointment: it.requires_appointment === true, requires_reason: it.requires_reason === true,
     requires_match: it.requires_match === true, expects_return_date: it.expects_return_date === true,
-    is_match: it.is_match === true, is_rejected: it.is_rejected === true })
+    is_match: it.is_match === true, is_rejected: it.is_rejected === true,
+    is_proposal: it.is_proposal === true, is_blacklist: it.is_blacklist === true })
 
   const save = async () => {
     if (!modal.label.trim()) return
     setBusy(true)
     // Only send the flag that exists on this lookup; the backend guards the rest.
     const flagFields = {
-      ...(isStatusBlock ? { requires_reason: modal.requires_reason, requires_match: modal.requires_match, expects_return_date: modal.expects_return_date } : {}),
-      ...(isFunnelBlock ? { requires_appointment: modal.requires_appointment, is_match: modal.is_match, is_rejected: modal.is_rejected } : {}),
+      ...(isStatusBlock ? { requires_reason: modal.requires_reason, requires_match: modal.requires_match, expects_return_date: modal.expects_return_date, is_blacklist: modal.is_blacklist } : {}),
+      ...(isFunnelBlock ? { requires_appointment: modal.requires_appointment, is_match: modal.is_match, is_rejected: modal.is_rejected, is_proposal: modal.is_proposal } : {}),
     }
     try {
       if (modal.mode === 'add') {
@@ -165,8 +170,8 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
                 {t('lookups.appointmentBadge')}
               </span>
             )}
-            {/* Default toggle: the singleton stage new applications land on when none is chosen. */}
-            {isFunnelBlock && (
+            {/* Default toggle: the singleton stage/phase new records land on when none is chosen. */}
+            {supportsDefault && (
               <DefaultToggle active={Boolean(item.is_default)} busy={settingDefaultId === item.id}
                 onClick={() => setDefault(item)}
                 activeLabel={t('common.default')} inactiveLabel={t('common.setDefault')} />
@@ -259,6 +264,17 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
               </div>
             )}
 
+            {/* Blacklist toggle — statuses only (§3B: Blacklist is a deployability value, danger-styled). */}
+            {isStatusBlock && (
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Toggle checked={modal.is_blacklist} onChange={v => setModal(m => ({ ...m, is_blacklist: v }))} />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-danger)' }}>{t('lookups.isBlacklist')}</span>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.isBlacklistHint')}</div>
+              </div>
+            )}
+
             {/* Appointment toggle — funnel stages only; flags the intake stage. */}
             {isFunnelBlock && (
               <div style={{ marginBottom: 14 }}>
@@ -289,6 +305,17 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
                   <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.isRejected')}</span>
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.isRejectedHint')}</div>
+              </div>
+            )}
+
+            {/* Proposal toggle — funnel stages only; this stage represents the "proposed to customer" step. */}
+            {isFunnelBlock && (
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Toggle checked={modal.is_proposal} onChange={v => setModal(m => ({ ...m, is_proposal: v }))} />
+                  <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.isProposal')}</span>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.isProposalHint')}</div>
               </div>
             )}
 

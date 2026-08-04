@@ -5,6 +5,7 @@ import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { useIndustries } from '@/lib/useIndustries'
+import SearchSelect from '@/components/ui/SearchSelect'
 // One language source for the whole app (Danny 14/7): the same five shipped
 // locales the profile picker offers — never a diverging local list.
 import { LANGUAGES as APP_LANGUAGES } from '@/pages/auth/profileParts'
@@ -40,12 +41,22 @@ function Input({ value, onChange, placeholder, style }) {
   )
 }
 
+// Replaces the bare native <select> with the shared searchable dropdown (audit sweep) —
+// same value/onChange contract as before.
 function Select({ value, onChange, options }) {
   return (
-    <select value={value} onChange={e => onChange(e.target.value)}
-      style={{ ...baseInput, background: 'var(--surface)' }}>
-      {options.map(o => <option key={o}>{o}</option>)}
-    </select>
+    <SearchSelect
+      options={options.map(o => ({ value: o, label: o }))}
+      selected={value ? [value] : []}
+      onToggle={onChange}
+      closeOnToggle
+      renderTrigger={toggle => (
+        <button type="button" onClick={toggle}
+          style={{ ...baseInput, background: 'var(--surface)', textAlign: 'left', cursor: 'pointer' }}>
+          {value}
+        </button>
+      )}
+    />
   )
 }
 

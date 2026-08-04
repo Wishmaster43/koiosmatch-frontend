@@ -1,14 +1,15 @@
 /**
- * CandidateLookupsSettings — funnel-stage singleton `is_default` flip
- * (LOOKUP-DEFAULT-1, api 4c25677). Only the funnel_types block carries the
- * DefaultToggle; contract forms / statuses / phases must not render it.
+ * CandidateLookupsSettings — funnel-stage/phase singleton `is_default` flip
+ * (LOOKUP-DEFAULT-1, api 4c25677; extended 04-08 to phases). Funnel_types and
+ * phases carry the DefaultToggle; contract forms / statuses must not render it.
+ * Also covers the STATUS is_blacklist and FUNNEL is_proposal modal flags.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
-import { FunnelStagesSettings, ContractFormsSettings } from './CandidateLookupsSettings'
+import { FunnelStagesSettings, ContractFormsSettings, CandidateStatusesSettings, CandidatePhasesSettings } from './CandidateLookupsSettings'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
@@ -81,6 +82,69 @@ describe('CandidateLookupsSettings — funnel stage default singleton', () => {
     await screen.findByText('ZZP')
     expect(screen.queryByRole('button', { name: st('common.default') })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: st('common.setDefault') })).not.toBeInTheDocument()
+  })
+
+  // 04-08 decision: phases stays add/remove-locked, but the default flag becomes settable.
+  it('renders the DefaultToggle on the locked phases block and PUTs is_default:true', async () => {
+    api.get.mockResolvedValue({ data: {
+      phases: [
+        { id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_default: true },
+        { id: 'p2', value: 'candidate', label: 'Candidate', color: '#6E8FD6', is_default: false },
+      ],
+    } })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<CandidatePhasesSettings />)
+
+    await screen.findByText('Candidate')
+    await user.click(screen.getByRole('button', { name: st('common.setDefault') }))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      '/settings/candidate-lookups/phases/p2', expect.objectContaining({ is_default: true })))
+  })
+})
+
+describe('CandidateLookupsSettings — status is_blacklist flag', () => {
+  it('saves is_blacklist:true on a status via the edit modal', async () => {
+    api.get.mockResolvedValue({ data: {
+      // eslint-disable-next-line no-restricted-syntax -- DATA: fixture status colour, not a style rule.
+      statuses: [{ id: 's1', value: 'blacklist', label: 'Blacklist', color: '#DC2626', is_blacklist: false }],
+    } })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<CandidateStatusesSettings />)
+
+    await screen.findByText('Blacklist')
+    await user.click(screen.getByTitle(st('lookups.edit')))
+    // The Toggle component exposes no accessible name (no ariaLabel passed here);
+    // is_blacklist is the last of the four status modal toggles in render order.
+    const switches = screen.getAllByRole('switch')
+    await user.click(switches[switches.length - 1])
+    await user.click(screen.getByText(st('common.save')))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      '/settings/candidate-lookups/statuses/s1', expect.objectContaining({ is_blacklist: true })))
+  })
+})
+
+describe('CandidateLookupsSettings — funnel is_proposal flag', () => {
+  it('saves is_proposal:true on a funnel stage via the edit modal', async () => {
+    api.get.mockResolvedValue({ data: {
+      funnel_types: [stage({ id: 'f1', label: 'Voorgesteld', is_proposal: false })],
+    } })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<FunnelStagesSettings />)
+
+    await screen.findByText('Voorgesteld')
+    await user.click(screen.getByTitle(st('lookups.edit')))
+    // is_proposal is the last of the three funnel modal toggles in render order.
+    const switches = screen.getAllByRole('switch')
+    await user.click(switches[switches.length - 1])
+    await user.click(screen.getByText(st('common.save')))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      '/settings/candidate-lookups/funnel-types/f1', expect.objectContaining({ is_proposal: true })))
   })
 })
 

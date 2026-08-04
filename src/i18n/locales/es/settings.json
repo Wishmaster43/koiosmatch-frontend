@@ -59,7 +59,8 @@
     "action_rules": "Reglas de acción",
     "ai": "Koios AI",
     "import_export": "Importar y exportar",
-    "document_types": "Tipos de documento"
+    "document_types": "Tipos de documento",
+    "appointments": "Citas"
   },
   "nav": {
     "candidate_display": "Visualización de la tabla",
@@ -128,7 +129,7 @@
     "location_statuses": "Estados de ubicación",
     "department_statuses": "Estados de departamento",
     "contact_statuses": "Estados",
-    "last_contact_types": "Tipo de contacto",
+    "last_contact_types": "Último contacto",
     "pools": "Grupos de talento",
     "assessment_criteria": "Criterios de evaluación",
     "usage": "Uso",
@@ -216,7 +217,11 @@
     "dt_call_list": "Listas de llamadas",
     "dt_match": "Coincidencias",
     "dt_vacancy": "Vacantes",
-    "vacancy_default_status": "Estado predeterminado"
+    "vacancy_default_status": "Estado predeterminado",
+    "nationalities": "Nacionalidades",
+    "blacklist_reasons": "Motivos de lista negra",
+    "escalation_reasons": "Motivos de escalada",
+    "opportunity_lookups": "Etapas y tipos"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -495,7 +500,8 @@
     "iconPlaceholder": "p. ej. 📞",
     "loadError": "No se pudo cargar la lista.",
     "deleteFailed": "Error al eliminar.",
-    "saveFailed": "Error al guardar."
+    "saveFailed": "Error al guardar.",
+    "clearDefault": "Haga clic para quitar el valor predeterminado"
   },
   "phases": {
     "title": "Fases",
@@ -1547,7 +1553,11 @@
     "requiresMatch": "Requiere un Match",
     "requiresMatchHint": "Este estado solo con un Match vinculado (p. ej. Asignado).",
     "expectsReturnDate": "Pide fecha de regreso",
-    "expectsReturnDateHint": "Pide una fecha «disponible de nuevo» (p. ej. No disponible/Enfermo)."
+    "expectsReturnDateHint": "Pide una fecha «disponible de nuevo» (p. ej. No disponible/Enfermo).",
+    "isBlacklist": "Lista negra",
+    "isBlacklistHint": "Este estado marca a un candidato como bloqueado para la colocación; se solicitará un motivo.",
+    "isProposal": "Es una propuesta",
+    "isProposalHint": "Esta etapa significa que el candidato ha sido propuesto al cliente."
   },
   "planning": {
     "shiftTypes": {
@@ -1628,7 +1638,7 @@
     }
   },
   "lastContactTypes": {
-    "title": "Tipos de contacto",
+    "title": "Tipos de último contacto",
     "subtitle": "Canales para 'último contacto' (Email, Teléfono, WhatsApp).",
     "add": "Añadir tipo"
   },
@@ -1654,7 +1664,10 @@
     "contractTypeTitle": "Tipos de contrato",
     "contractTypeSubtitle": "Gestiona los tipos de contrato y su duración predeterminada.",
     "contractTypeAdd": "Añadir tipo de contrato",
-    "contractTypeDurationLabel": "Duración (días)"
+    "contractTypeDurationLabel": "Duración (días)",
+    "stopReasonTitle": "Motivos de finalización",
+    "stopReasonSubtitle": "Motivo obligatorio al finalizar un match anticipadamente.",
+    "stopReasonAdd": "Añadir motivo"
   },
   "matchRates": {
     "title": "Factor de conversión compra→venta",
@@ -1668,7 +1681,10 @@
     "statusSubtitle": "Gestiona los estados de listas de llamadas (estado + color).",
     "statusAdd": "Añadir estado",
     "flagReached": "Cuenta como contactado",
-    "flagReachedDesc": "Este estado marca el momento de contacto en la línea de la lista de llamadas."
+    "flagReachedDesc": "Este estado marca el momento de contacto en la línea de la lista de llamadas.",
+    "outcomeTitle": "Resultados",
+    "outcomeSubtitle": "El resultado de un intento de llamada, independiente del estado de la lista de llamadas.",
+    "outcomeAdd": "Añadir resultado"
   },
   "tasks": {
     "statusTitle": "Estados",
@@ -1679,7 +1695,8 @@
     "typeAdd": "Añadir tipo",
     "priorityTitle": "Prioridades",
     "prioritySubtitle": "Gestiona las prioridades de tus tareas (baja, normal, alta).",
-    "priorityAdd": "Añadir prioridad"
+    "priorityAdd": "Añadir prioridad",
+    "priorityDefault": "Predeterminado"
   },
   "taskDisplay": {
     "title": "Vista de tabla",
@@ -2112,7 +2129,9 @@
     "remote": "Remoto",
     "phone": "Teléfono",
     "isIntake": "Es un intake",
-    "isIntakeDesc": "Los tipos con este indicador cuentan como intake."
+    "isIntakeDesc": "Los tipos con este indicador cuentan como intake.",
+    "isDefault": "Predeterminado",
+    "isDefaultForApplication": "Predeterminado para solicitud"
   },
   "appointmentLocations": {
     "title": "Ubicaciones de cita",
@@ -2549,5 +2568,65 @@
     "subtitle": "El estado que recibe una nueva vacante cuando no se indica ninguno. Sin configuración, el estado queda vacío — elija un estado para aplicarlo automáticamente.",
     "none": "Ninguno (establecer manualmente)",
     "saveFailed": "Error al guardar"
+  },
+  "nationalities": {
+    "title": "Nacionalidades",
+    "subtitle": "Gestiona las nacionalidades que los candidatos pueden elegir.",
+    "add": "Añadir nacionalidad"
+  },
+  "escalationReasons": {
+    "title": "Motivos de escalada",
+    "subtitle": "Motivos por los que una conversación de WhatsApp se transfiere a un empleado.",
+    "add": "Añadir motivo"
+  },
+  "blacklistReasons": {
+    "tabs": {
+      "candidate": "Candidato",
+      "customer": "Cliente"
+    },
+    "candidate": {
+      "title": "Motivos de lista negra — candidato",
+      "subtitle": "Motivos para poner a un candidato en la lista negra."
+    },
+    "customer": {
+      "title": "Motivos de lista negra — cliente",
+      "subtitle": "Motivos para poner a un cliente en la lista negra."
+    },
+    "add": "Añadir motivo"
+  },
+  "opportunityLookups": {
+    "tabs": {
+      "stages": "Etapas",
+      "serviceTypes": "Tipos de servicio",
+      "agreementTypes": "Tipos de acuerdo",
+      "dealTypes": "Tipos de trato"
+    },
+    "add": "Añadir valor",
+    "stages": {
+      "title": "Etapas del embudo",
+      "subtitle": "Las etapas por las que pasa una oportunidad."
+    },
+    "serviceTypes": {
+      "title": "Tipos de servicio",
+      "subtitle": "El tipo de servicio de una oportunidad."
+    },
+    "agreementTypes": {
+      "title": "Tipos de acuerdo",
+      "subtitle": "La forma de contrato bajo la cual se cierra una oportunidad."
+    },
+    "dealTypes": {
+      "title": "Tipos de trato",
+      "subtitle": "El tipo de trato, con una unidad (euros/horas/presupuesto) que mide su valor.",
+      "unit": "Unidad",
+      "unitEuro": "Euro",
+      "unitHours": "Horas",
+      "unitQuote": "Presupuesto"
+    }
+  },
+  "dashboards": {
+    "tabs": {
+      "kpis": "KPI",
+      "blocks": "Gráficos y listas"
+    }
   }
 }

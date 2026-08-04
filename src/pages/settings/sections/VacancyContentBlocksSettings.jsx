@@ -14,6 +14,7 @@ import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
+import SearchSelect from '@/components/ui/SearchSelect'
 import { useConfirm } from '@/hooks/useConfirm'
 
 const ENDPOINT = '/vacancy-content-blocks'
@@ -150,9 +151,18 @@ export default function VacancyContentBlocksSettings() {
                   </div>
                   <div>
                     <label style={labelStyle}>{t('vacancyContentBlocksSettings.kindLabel')}</label>
-                    <select value={form.kind ?? 'intro'} onChange={e => setEF(block.id, 'kind', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-                      {KINDS.map(k => <option key={k} value={k}>{t(`vacancyContentBlocksSettings.kind.${k}`)}</option>)}
-                    </select>
+                    <SearchSelect
+                      options={KINDS.map(k => ({ value: k, label: t(`vacancyContentBlocksSettings.kind.${k}`) }))}
+                      selected={[form.kind ?? 'intro']}
+                      onToggle={v => setEF(block.id, 'kind', v)}
+                      closeOnToggle
+                      searchable={false}
+                      renderTrigger={toggle => (
+                        <button type="button" onClick={toggle} style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
+                          {t(`vacancyContentBlocksSettings.kind.${form.kind ?? 'intro'}`)}
+                        </button>
+                      )}
+                    />
                   </div>
                 </div>
                 <div>
@@ -201,9 +211,18 @@ export default function VacancyContentBlocksSettings() {
               </div>
               <div>
                 <label style={labelStyle}>{t('vacancyContentBlocksSettings.kindLabel')}</label>
-                <select value={newForm.kind} onChange={e => setNewForm(p => ({ ...p, kind: e.target.value }))} style={{ ...inputStyle, cursor: 'pointer' }}>
-                  {KINDS.map(k => <option key={k} value={k}>{t(`vacancyContentBlocksSettings.kind.${k}`)}</option>)}
-                </select>
+                <SearchSelect
+                  options={KINDS.map(k => ({ value: k, label: t(`vacancyContentBlocksSettings.kind.${k}`) }))}
+                  selected={[newForm.kind]}
+                  onToggle={v => setNewForm(p => ({ ...p, kind: v }))}
+                  closeOnToggle
+                  searchable={false}
+                  renderTrigger={toggle => (
+                    <button type="button" onClick={toggle} style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
+                      {t(`vacancyContentBlocksSettings.kind.${newForm.kind}`)}
+                    </button>
+                  )}
+                />
               </div>
             </div>
             <div>

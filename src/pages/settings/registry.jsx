@@ -20,6 +20,7 @@ import {
   ClipboardList, Clock, CreditCard, Download, EyeOff, Factory, FileText, Flag, Hash, Key, LayoutGrid,
   ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Megaphone, Package, Palette, Percent, Phone, Scale, Shield, SlidersHorizontal, Sparkles, Star,
   Boxes, Globe, Store, Tags, Target, Upload, UserCheck, Users, Webhook, XCircle,
+  ShieldOff, AlertTriangle, ListTree,
 } from 'lucide-react'
 import CustomFieldsSettings from './sections/CustomFieldsSettings'
 import VacancyGenerationSettings from './sections/VacancyGenerationSettings'
@@ -68,6 +69,11 @@ import ProposalSettings from './sections/ProposalSettings'
 import CandidateRequiredFieldsSettings from './sections/CandidateRequiredFieldsSettings'
 import CandidateVacancyTabSettings from './sections/CandidateVacancyTabSettings'
 import RetentionSettings from './sections/RetentionSettings'
+// NATIONALITY-1 / BLACKLIST-REASON-1 / ESCALATION-REASON-1 / OPP-LOOKUPS-1 (audit findings).
+import NationalitiesSettings from './sections/NationalitiesSettings'
+import BlacklistReasonsSettings from './sections/BlacklistReasonsSettings'
+import EscalationReasonsSettings from './sections/EscalationReasonsSettings'
+import OpportunityLookupsSettings from './sections/OpportunityLookupsSettings'
 import CvTemplateSettings from './sections/CvTemplateSettings'
 import DocumentTypesSettings from './sections/DocumentTypesSettings'
 import EmailSettings from './sections/EmailSettings'
@@ -176,6 +182,13 @@ export const NAV_GROUPS = [
       { id: 'candidate_phases', icon: Target, component: CandidatePhasesSettings },
       { id: 'candidate_statuses', icon: Users, component: CandidateStatusesSettings },
       { id: 'contract_forms', icon: Tags, component: ContractFormsSettings },
+      // Nationality lookup (audit finding NATIONALITY-1) — candidate.nationality was
+      // a free-text field with no tenant-managed vocabulary; mirrors genders/industries.
+      { id: 'nationalities', icon: Globe, component: NationalitiesSettings },
+      // Blacklist reason lookup (audit finding BLACKLIST-REASON-1) — the deployability
+      // status "Blacklist" (§3B) needs its own reason vocabulary, distinct from the
+      // generic status-reason free text; own icon so it reads as a flag, not a status.
+      { id: 'blacklist_reasons', icon: ShieldOff, component: BlacklistReasonsSettings },
       { id: 'pools', icon: Star, component: PoolsSettings },
       { id: 'cv_template', icon: FileText, component: CvTemplateSettings },
       // Document types moved OUT to their own top-level `document_types` group
@@ -253,6 +266,9 @@ export const NAV_GROUPS = [
     // service / agreement lookup editors move here in a later round.
     key: 'opportunities', icon: Target,
     items: [
+      // Opportunity pipeline lookups (audit finding OPP-LOOKUPS-1) — stage/service/
+      // agreement/deal-type lists previously had no editor at all.
+      { id: 'opportunity_lookups', icon: ListTree, component: OpportunityLookupsSettings },
       { id: 'opportunity_display', icon: Palette, schema: opportunityDisplay },
     ],
   },
@@ -296,8 +312,9 @@ export const NAV_GROUPS = [
     items: [
       { id: 'match_statuses', icon: Tags, component: MatchStatusSettings },
       { id: 'contract_types', icon: FileText, component: ContractTypesSettings },
-      { id: 'appointment_types', icon: CalendarCheck, component: AppointmentTypeSettings },
-      { id: 'appointment_locations', icon: MapPin, component: AppointmentLocationSettings },
+      // Appointment types/locations moved OUT to their own top-level `appointments`
+      // group below (Danny 2026-08-04) — appointments span every entity, not just
+      // matches, mirrors note_types/document_types.
       // Purchase→sale conversion factor (Danny 22-07) — moved here from Vacancies →
       // Matching: it's a match rate concept, not a per-vacancy one.
       { id: 'match_rates', icon: Percent, component: MatchRatesSettings },
@@ -309,6 +326,9 @@ export const NAV_GROUPS = [
     key: 'outreach', icon: Phone,
     items: [
       { id: 'outreach_statuses', icon: Tags, component: OutreachStatusSettings },
+      // Escalation reason lookup (audit finding ESCALATION-REASON-1) — call-list
+      // escalation had no tenant-managed reason vocabulary.
+      { id: 'escalation_reasons', icon: AlertTriangle, component: EscalationReasonsSettings },
       { id: 'outreach_display', icon: Palette, schema: outreachDisplay },
     ],
   },
@@ -417,6 +437,17 @@ export const NAV_GROUPS = [
       { id: 'dt_call_list', icon: Phone, render: () => <DocumentTypesSettings entity="call_list" /> },
       { id: 'dt_match', icon: Sparkles, render: () => <DocumentTypesSettings entity="match" /> },
       { id: 'dt_vacancy', icon: Briefcase, render: () => <DocumentTypesSettings entity="vacancy" /> },
+    ],
+  },
+  {
+    // Appointments — own top-level group (Danny 2026-08-04): appointment types and
+    // locations moved out of `matches` because appointments span every entity
+    // (candidate intakes, customer visits, …), not just the Matches feature —
+    // mirrors the note_types/document_types "spans every entity" moves above.
+    key: 'appointments', icon: CalendarCheck,
+    items: [
+      { id: 'appointment_types', icon: CalendarCheck, component: AppointmentTypeSettings },
+      { id: 'appointment_locations', icon: MapPin, component: AppointmentLocationSettings },
     ],
   },
   {

@@ -5,7 +5,7 @@ import { useLookups } from '@/context/LookupsContext'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { getVacancyTabDefaults } from '@/pages/candidates/lib/vacancyTabVisibility'
 import SubTabBar from '@/components/drawer/SubTabBar'
-import { ColorBadge } from '../components/SettingsControls'
+import LookupChipSelect from '../components/LookupChipSelect'
 
 /**
  * Vacatures-tab visibility + filter-default editor (Danny 23-07): the candidate
@@ -25,28 +25,6 @@ import { ColorBadge } from '../components/SettingsControls'
  * its in-file domain tabs), not a new tab-bar implementation.
  */
 const KEY = 'candidate_vacancy_tab'
-
-// Flat rows under the sub-tab bar — never a bordered card behind sub-tabs
-// (Danny 23-07: "we hebben geen grid achter sub-tabjes").
-const row = { display: 'flex', alignItems: 'center', gap: 10, padding: '8px 4px' }
-
-// One checkbox-list block, shared by all four sub-tabs — the phase/status/
-// contract-form/vacancy-status editors are visually identical, only the source
-// list + toggle handler differ.
-function LookupCheckboxBlock({ items, selected, onToggle }) {
-  return (
-    <div>
-      {items.map(it => (
-        <label key={it.value} style={row}>
-          <input type="checkbox" checked={selected.includes(it.value)} onChange={() => onToggle(it.value)}
-            style={{ cursor: 'pointer', width: 16, height: 16 }} />
-          {/* eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome */}
-          <ColorBadge label={it.label} color={it.color ?? '#6B7280'} />
-        </label>
-      ))}
-    </div>
-  )
-}
 
 // Wraps the editor in its OWN VacancyLookupsProvider (mirrors VacancySearchTab.tsx)
 // because that context is only mounted page-scoped around VacanciesPage, not here.
@@ -96,10 +74,10 @@ function CandidateVacancyTabSettingsInner() {
 
       <SubTabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
       <div style={{ marginTop: 14 }}>
-        {activeTab === 'phases' && <LookupCheckboxBlock items={phases} selected={cfg.phases} onToggle={toggleIn('phases')} />}
-        {activeTab === 'statuses' && <LookupCheckboxBlock items={statuses} selected={cfg.hidden_statuses} onToggle={toggleIn('hidden_statuses')} />}
-        {activeTab === 'types' && <LookupCheckboxBlock items={candidateTypes} selected={cfg.candidate_types} onToggle={toggleIn('candidate_types')} />}
-        {activeTab === 'vacancy_statuses' && <LookupCheckboxBlock items={vacancyStatuses} selected={cfg.vacancy_statuses} onToggle={toggleIn('vacancy_statuses')} />}
+        {activeTab === 'phases' && <LookupChipSelect items={phases} selected={cfg.phases} onToggle={toggleIn('phases')} ariaLabel={t('vacancyTab.phasesTitle')} />}
+        {activeTab === 'statuses' && <LookupChipSelect items={statuses} selected={cfg.hidden_statuses} onToggle={toggleIn('hidden_statuses')} ariaLabel={t('vacancyTab.statusesTitle')} />}
+        {activeTab === 'types' && <LookupChipSelect items={candidateTypes} selected={cfg.candidate_types} onToggle={toggleIn('candidate_types')} ariaLabel={t('vacancyTab.typesTitle')} />}
+        {activeTab === 'vacancy_statuses' && <LookupChipSelect items={vacancyStatuses} selected={cfg.vacancy_statuses} onToggle={toggleIn('vacancy_statuses')} ariaLabel={t('vacancyTab.vacancyStatusesTitle')} />}
       </div>
     </div>
   )

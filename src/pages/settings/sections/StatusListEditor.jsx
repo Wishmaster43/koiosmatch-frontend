@@ -6,13 +6,17 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import IconPickerControl from './IconPickerControl'
-import LookupIcon from '@/components/ui/LookupIcon'
-import { AlertTriangle, Check, Save, Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
+import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
+import SearchSelect from '@/components/ui/SearchSelect'
+import { AlertTriangle, Check, Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { useConfirm } from '@/hooks/useConfirm'
-import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
+import { DragList, ColorSwatch, ColorBadge } from '../components/SettingsControls'
 import { Toggle } from '../components/SettingsKit'
+
+// eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
+const FALLBACK_SWATCH = '#6B7280'
 
 // Typed label → the immutable backend slug ("Vaste klant" → "vaste_klant"). Diacritics
 // are folded first so "Café-klant" still yields a slug the ^[a-z0-9_]+$ rule accepts;
@@ -43,8 +47,34 @@ const slugify = (s) => {
 // CustomerLookupController) validate `value` as REQUIRED on create — this editor only
 // ever sent name/label, so their "+ toevoegen" 422'd. Opt in and the create POST
 // carries a slug derived from the typed name; name-shaped lookups stay untouched.
-export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null, flagField = null, numberField = null, defaultField = null, withIcon = false, iconPicker = null, allowAdd = true, showRank = false, entity = null, notFoundNotice = null, withValueSlug = false }) {
+// UndoableDefaultPill — one independent singleton marker. Unlike the shared
+// DefaultToggle (still one-way, used by other callers), the active pill here
+// stays clickable so it can be CLEARED (DEFAULT-UNDO, Danny 04-08: "je kan niet
+// undo doen") — same soft-tint spec (§4), stronger tint + weight 600 when active.
+function UndoableDefaultPill({ active, onClick, busy, activeLabel, inactiveLabel, title }) {
+  return (
+    <button type="button" onClick={onClick} disabled={busy} title={title}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4, height: 22, padding: '0 9px',
+        fontSize: 11, fontWeight: active ? 600 : 500, borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0,
+        border: `1px solid color-mix(in srgb, var(--color-primary) ${active ? 45 : 28}%, transparent)`,
+        background: `color-mix(in srgb, var(--color-primary) ${active ? 16 : 8}%, transparent)`,
+        color: 'var(--color-primary)', cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
+      }}>
+      {active && <Check size={10} />}
+      {active ? activeLabel : inactiveLabel}
+    </button>
+  )
+}
+
+export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, compact = false, extraField = null, flagField = null, numberField = null, defaultField = null, defaultFields = null, withIcon = false, iconPicker = null, allowAdd = true, showRank = false, entity = null, notFoundNotice = null, withValueSlug = false, reorderable = true }) {
   const { t } = useTranslation('settings')
+  // defaultField (singular) is sugar for a one-element defaultFields array — both
+  // props stay supported so existing callers are untouched (DEFAULT-UNDO, 04-08).
+  const singletons = defaultFields ?? (defaultField ? [defaultField] : [])
+  // The generic curated icon set backs the bare withIcon mode — an explicit iconPicker
+  // prop still wins (DocumentTypesSettings' own curated set), never overridden here.
+  const resolvedIconPicker = iconPicker ?? (withIcon ? { icons: GENERIC_LOOKUP_ICON_NAMES, resolve: resolveGenericLookupIcon } : null)
   // eslint-disable-next-line no-restricted-syntax -- DATA: default swatch colour pre-filled for a newly created lookup row, not UI chrome
   const emptyDraft = () => ({ name: '', color: '#3B8FD4', ...(withIcon ? { icon: '' } : {}), ...(extraField ? { [extraField.key]: extraField.default } : {}), ...(numberField ? { [numberField.key]: numberField.default } : {}), ...(flagField ? { [flagField.key]: false } : {}) })
   // Lookups differ in their display field: name (phases/status) vs label/value (genders/languages).
@@ -59,9 +89,10 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
   const [editing,   setEditing]   = useState(null)   // null = create; item = edit
   const [draft,     setDraft]     = useState(emptyDraft)
   const [saving,    setSaving]    = useState(false)
-  const [saved,     setSaved]     = useState(false)
   const [deleting,  setDeleting]  = useState(null)
-  const [settingDefaultId, setSettingDefaultId] = useState(null)
+  // Busy marker per singleton flip, keyed `${field}:${id}` — several independent
+  // singletons (is_default / is_default_for_application) can be mid-flight at once.
+  const [busyDefaultKey, setBusyDefaultKey] = useState(null)
   // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
   const { confirm, dialog } = useConfirm()
 
@@ -156,45 +187,58 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
     catch { setItems(previous); notifyError(t('statusList.saveFailed')) }
   }
 
-  // Singleton flip (defaultField): promote one row to the tenant default and clear
-  // every other row optimistically — the backend model-enforces the same rule, so
-  // this mirrors it locally instead of waiting on a refetch. Roll back on failure.
-  const setDefault = async (item) => {
-    if (!defaultField || item[defaultField.key] || settingDefaultId) return
-    const key = defaultField.key
+  // Singleton flip (defaultFields[i]): promote a row to that singleton's default,
+  // clearing every other row's flag optimistically (the backend model-enforces the
+  // same invariant, so this mirrors it locally instead of waiting on a refetch).
+  // DEFAULT-UNDO (Danny 04-08): clicking the ACTIVE default now CLEARS it instead of
+  // being a one-way ratchet — same PUT route, body `{ [key]: false }`, same revert.
+  const setDefault = async (field, item) => {
+    const key = field.field ?? field.key
+    const busyKey = `${key}:${item.id}`
+    if (busyDefaultKey) return
+    const next = !item[key]
     const previous = items
-    setSettingDefaultId(item.id)
-    setItems(p => p.map(x => ({ ...x, [key]: x.id === item.id })))
+    setBusyDefaultKey(busyKey)
+    setItems(p => p.map(x => (x.id === item.id ? { ...x, [key]: next } : (next ? { ...x, [key]: false } : x))))
     try {
-      await api.put(`${endpoint}/${item.id}`, { ...item, [key]: true })
+      await api.put(`${endpoint}/${item.id}`, { ...item, [key]: next })
     } catch {
       setItems(previous)
       notifyError(t('statusList.saveFailed'))
     } finally {
-      setSettingDefaultId(null)
+      setBusyDefaultKey(null)
     }
   }
 
-  const saveOrder = async () => {
-    setSaving(true)
+  // REORDER-SAVES-ON-DROP (decision 04-08): a drag-drop persists immediately —
+  // optimistic, revert + notify on a failed PUT. No pending-order/Save-button state.
+  const persistOrder = async (nextItems, previousItems) => {
     try {
-      await api.put(`${endpoint}/reorder`, { ids: items.map(x => x.id) })
-      setSaved(true); setTimeout(() => setSaved(false), 2000)
-    } catch { notifyError(t('statusList.saveFailed')) } finally { setSaving(false) }
+      await api.put(`${endpoint}/reorder`, { ids: nextItems.map(x => x.id) })
+    } catch {
+      setItems(previousItems)
+      notifyError(t('statusList.saveFailed'))
+    }
   }
 
-  // Set an item's priority by typing its rank: move it to that 1-based position.
-  // Local reorder only — the Save button persists the new order (same as drag).
+  // DragList calls this on drop with the already-reordered array — apply it locally
+  // then fire the persist PUT against the order it replaced (for revert on failure).
+  const handleReorder = (nextItems) => {
+    const previousItems = items
+    setItems(nextItems)
+    persistOrder(nextItems, previousItems)
+  }
+
+  // Set an item's priority by typing its rank: move it to that 1-based position,
+  // then persist immediately (same reorder route as drag-drop).
   const commitRank = (item, raw) => {
     const cur = items.findIndex(x => x.id === item.id)
     const target = Math.max(1, Math.min(items.length, parseInt(raw, 10) || cur + 1)) - 1
     if (target === cur || cur < 0) return
-    setItems(prev => {
-      const next = [...prev]
-      const [moved] = next.splice(cur, 1)
-      next.splice(target, 0, moved)
-      return next
-    })
+    const next = [...items]
+    const [moved] = next.splice(cur, 1)
+    next.splice(target, 0, moved)
+    handleReorder(next)
   }
 
   // Calm "not available yet" state — no list, no Add button (§3: never a dead
@@ -235,15 +279,6 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-          {withSave && (
-            <button onClick={saveOrder} disabled={saving}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
-                       fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none', cursor: 'pointer',
-                       whiteSpace: 'nowrap', flexShrink: 0,
-                       background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
-              {saved ? <><Check size={13}/> {t('common.saved')}</> : <><Save size={13}/> {t('common.save')}</>}
-            </button>
-          )}
           {allowAdd && (
             <button onClick={openCreate}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
@@ -259,7 +294,8 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
       {loading ? <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p> : (
         <DragList
           items={items}
-          onReorder={setItems}
+          sortable={reorderable}
+          onReorder={handleReorder}
           renderItem={(item) => (
             <>
               {/* Priority rank = position (top = 1 = sent first). Editable: type a number to move
@@ -279,17 +315,17 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                            borderRadius: 6, flexShrink: 0, outline: 'none' }} />
               )}
               {/* eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome */}
-              {withColor && <ColorSwatch color={item.color ?? '#6B7280'} onChange={c => updateColor(item, c)} />}
-              {withIcon && item.icon && <span style={{ display: 'inline-flex', flexShrink: 0, color: 'var(--text-muted)' }}><LookupIcon icon={item.icon} size={14} /></span>}
-              {/* Curated icon picker IN the row, next to the colour (Danny 23-07). */}
-              {iconPicker && (
-                // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
-                <IconPickerControl icons={iconPicker.icons} resolve={iconPicker.resolve} value={item.icon}
-                  color={item.color ?? '#6B7280'} label={labelOf(item)} onPick={icon => updateIcon(item, icon)} />
+              {withColor && <ColorSwatch color={item.color ?? FALLBACK_SWATCH} onChange={c => updateColor(item, c)} />}
+              {/* Curated icon picker IN the row, next to the colour (Danny 23-07). withIcon=true
+                  without an explicit iconPicker prop now ALSO renders the picker, fed by the
+                  generic curated set — the old free-text lucide-key input is retired (it
+                  silently accepted wrong keys). */}
+              {resolvedIconPicker && (
+                <IconPickerControl icons={resolvedIconPicker.icons} resolve={resolvedIconPicker.resolve} value={item.icon}
+                  color={item.color ?? FALLBACK_SWATCH} label={labelOf(item)} onPick={icon => updateIcon(item, icon)} />
               )}
               {withColor
-                // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
-                ? <ColorBadge label={labelOf(item)} color={item.color ?? '#6B7280'} />
+                ? <ColorBadge label={labelOf(item)} color={item.color ?? FALLBACK_SWATCH} />
                 : <span style={{ fontSize: 13, color: 'var(--text)' }}>{labelOf(item)}</span>}
               {flagField && item[flagField.key] && (
                 <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary)',
@@ -307,11 +343,19 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                   {extraField.options.find(o => o.value === item[extraField.key])?.label ?? item[extraField.key]}
                 </span>
               )}
-              {defaultField && (
-                <DefaultToggle active={Boolean(item[defaultField.key])} busy={settingDefaultId === item.id}
-                  onClick={() => setDefault(item)}
-                  activeLabel={t('common.default')} inactiveLabel={t('common.setDefault')} />
-              )}
+              {/* One independent pill per singleton (defaultFields) — each has its own
+                  tinted marker + tooltip + undo (SECOND SINGLETON, 04-08). */}
+              {singletons.map((field) => {
+                const key = field.field ?? field.key
+                const active = Boolean(item[key])
+                const label = field.labelKey ? t(field.labelKey) : undefined
+                return (
+                  <UndoableDefaultPill key={key} active={active} busy={busyDefaultKey === `${key}:${item.id}`}
+                    onClick={() => setDefault(field, item)}
+                    activeLabel={label ?? t('common.default')} inactiveLabel={label ?? t('common.setDefault')}
+                    title={active ? t('statusList.clearDefault', { defaultValue: 'Click to clear default' }) : undefined} />
+                )
+              })}
               <div style={{ flex: 1 }} />
               <button onClick={() => openEdit(item)} title={t('statusList.edit')}
                 style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -351,13 +395,14 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                 <ColorSwatch color={draft.color} onChange={c => setDraft(d => ({ ...d, color: c }))} />
               </div>
             )}
-            {withIcon && (
+            {resolvedIconPicker && (
+              // The bare free-text lucide-key input is retired (silently accepted wrong
+              // keys) — the same curated IconPickerControl now backs create/edit too.
               <div style={{ marginBottom: 14 }}>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('statusList.iconLabel')}</div>
-                <input value={draft.icon ?? ''} maxLength={64}
-                  onChange={e => setDraft(d => ({ ...d, icon: e.target.value }))}
-                  placeholder={t('statusList.iconPlaceholder')}
-                  style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }} />
+                <IconPickerControl icons={resolvedIconPicker.icons} resolve={resolvedIconPicker.resolve} value={draft.icon}
+                  color={draft.color ?? FALLBACK_SWATCH} label={draft.name || t('statusList.iconLabel')}
+                  onPick={icon => setDraft(d => ({ ...d, icon }))} />
               </div>
             )}
             {numberField && (
@@ -369,12 +414,16 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
               </div>
             )}
             {extraField && (
+              // The hand-rolled native <select> is replaced by the shared searchable
+              // SearchSelect (single-select via closeOnToggle) — extraField's prop API
+              // (key/label/options/default) is unchanged.
               <div style={{ marginBottom: 14 }}>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{extraField.label}</div>
-                <select value={draft[extraField.key]} onChange={e => setDraft(d => ({ ...d, [extraField.key]: e.target.value }))}
-                  style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)' }}>
-                  {extraField.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
+                <SearchSelect closeOnToggle width={352}
+                  options={extraField.options}
+                  selected={[draft[extraField.key]]}
+                  onToggle={value => setDraft(d => ({ ...d, [extraField.key]: value }))}
+                  triggerLabel={extraField.options.find(o => o.value === draft[extraField.key])?.label ?? extraField.label} />
               </div>
             )}
             {flagField && (

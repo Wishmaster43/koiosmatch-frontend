@@ -13,6 +13,7 @@ import api from '@/lib/api'
 import StatusPill from '@/components/ui/StatusPill'
 import { formatDuration } from '@/components/reports/runFormat'
 import { BTN_H } from '@/config/buttonMetrics'
+import SearchSelect from '@/components/ui/SearchSelect'
 
 const STATUS_COLOR = {
   completed: 'var(--color-success)', failed: 'var(--color-danger)',
@@ -57,11 +58,18 @@ export default function RecentJobsTab() {
     <div>
       {/* Toolbar: tenant filter + job search + refresh. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-        <select value={tenant} onChange={e => setTenant(e.target.value)} aria-label={t('jobs.recent.tenantFilter')}
-          style={{ height: BTN_H, padding: '0 8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 12, cursor: 'pointer' }}>
-          <option value="">{t('jobs.recent.allTenants')}</option>
-          {tenants.map(id => <option key={id} value={id}>{id}</option>)}
-        </select>
+        <SearchSelect
+          options={[{ value: '', label: t('jobs.recent.allTenants') }, ...tenants.map(id => ({ value: id, label: id }))]}
+          selected={[tenant]}
+          onToggle={setTenant}
+          closeOnToggle
+          renderTrigger={toggle => (
+            <button type="button" onClick={toggle} aria-label={t('jobs.recent.tenantFilter')}
+              style={{ height: BTN_H, padding: '0 8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 12, cursor: 'pointer', textAlign: 'left' }}>
+              {tenant || t('jobs.recent.allTenants')}
+            </button>
+          )}
+        />
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)' }}>
           <Search size={12} color="var(--text-muted)" />
           <input value={jobSearch} onChange={e => setJobSearch(e.target.value)} placeholder={t('jobs.recent.jobSearch')}

@@ -17,6 +17,7 @@ import { useState } from 'react'
 import { X, Plus } from 'lucide-react'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+import SearchSelect from '@/components/ui/SearchSelect'
 import { Toggle } from '../components/SettingsKit'
 import { useLocations } from '@/lib/useLocations'
 import { useContractTypes } from '@/lib/useContractTypes'
@@ -124,22 +125,47 @@ export default function VacancyGenerationProfileEditor({ draft, onChange, conten
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
           <div>
             <label style={labelStyle}>{t('vacancyGenerationSettings.toneLabel')}</label>
-            <select value={draft.content.tone_of_voice} onChange={e => setContent('tone_of_voice', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-              {TONES.map(v => <option key={v} value={v}>{t(`vacancyGenerationSettings.tone.${v}`)}</option>)}
-            </select>
+            <SearchSelect
+              options={TONES.map(v => ({ value: v, label: t(`vacancyGenerationSettings.tone.${v}`) }))}
+              selected={[draft.content.tone_of_voice]}
+              onToggle={v => setContent('tone_of_voice', v)}
+              closeOnToggle
+              searchable={false}
+              renderTrigger={toggle => (
+                <button type="button" onClick={toggle} style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
+                  {t(`vacancyGenerationSettings.tone.${draft.content.tone_of_voice}`)}
+                </button>
+              )}
+            />
           </div>
           <div>
             <label style={labelStyle}>{t('vacancyGenerationSettings.lengthLabel')}</label>
-            <select value={draft.content.length} onChange={e => setContent('length', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-              {LENGTHS.map(v => <option key={v} value={v}>{t(`vacancyGenerationSettings.length.${v}`)}</option>)}
-            </select>
+            <SearchSelect
+              options={LENGTHS.map(v => ({ value: v, label: t(`vacancyGenerationSettings.length.${v}`) }))}
+              selected={[draft.content.length]}
+              onToggle={v => setContent('length', v)}
+              closeOnToggle
+              searchable={false}
+              renderTrigger={toggle => (
+                <button type="button" onClick={toggle} style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
+                  {t(`vacancyGenerationSettings.length.${draft.content.length}`)}
+                </button>
+              )}
+            />
           </div>
           <div>
             <label style={labelStyle}>{t('vacancyGenerationSettings.languageLabel')}</label>
-            <select value={draft.content.language} onChange={e => setContent('language', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-              <option value="">{t('vacancyGenerationSettings.languagePlaceholder')}</option>
-              {languages.map(name => <option key={name} value={name}>{name}</option>)}
-            </select>
+            <SearchSelect
+              options={languages.map(name => ({ value: name, label: name }))}
+              selected={[draft.content.language]}
+              onToggle={v => setContent('language', v)}
+              closeOnToggle
+              renderTrigger={toggle => (
+                <button type="button" onClick={toggle} style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
+                  {draft.content.language || t('vacancyGenerationSettings.languagePlaceholder')}
+                </button>
+              )}
+            />
           </div>
         </div>
 

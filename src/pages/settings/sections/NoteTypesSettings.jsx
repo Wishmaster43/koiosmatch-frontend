@@ -20,7 +20,7 @@ export default function NoteTypesSettings({ entity }) {
   const entityLabel = t(`nav.${ENTITY_NAV_ID[entity] ?? entity}`)
   return (
     <div style={{ maxWidth: 640 }}>
-      <StatusListEditor withColor={false} entity={entity}
+      <StatusListEditor entity={entity}
         title={t('noteTypes.title', { entity: entityLabel })} subtitle={t('noteTypes.subtitle')}
         endpoint="/note-types" addLabel={t('noteTypes.add')} />
     </div>

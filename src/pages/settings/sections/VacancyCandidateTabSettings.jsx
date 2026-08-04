@@ -5,8 +5,9 @@ import { useLookups } from '@/context/LookupsContext'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { getCandidateTabDefaults } from '@/pages/vacancies/lib/candidateTabVisibility'
 import SubTabBar from '@/components/drawer/SubTabBar'
-import { ColorBadge } from '../components/SettingsControls'
 import { Toggle } from '../components/SettingsKit'
+import LookupChipSelect from '../components/LookupChipSelect'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 
 /**
  * Kandidaten zoeken-tab visibility + filter-default editor (Danny 23-07): the
@@ -35,10 +36,6 @@ import { Toggle } from '../components/SettingsKit'
  */
 const KEY = 'vacancy_candidate_tab'
 
-// Flat rows under the sub-tab bar — never a bordered card behind sub-tabs
-// (Danny 23-07: "we hebben geen grid achter sub-tabjes").
-const row = { display: 'flex', alignItems: 'center', gap: 10, padding: '8px 4px' }
-
 // Function-match strictness options for the leads-criteria block — 'category' is
 // flagged with an honest note because vacancies have no category column yet (the
 // backend MatchCriteriaResolver treats it exactly like 'exact' until that lands).
@@ -47,24 +44,6 @@ const FUNCTION_MATCH_OPTIONS = [
   { value: 'category', labelKey: 'functionMatchCategory', descKey: 'functionMatchCategoryDesc' },
   { value: 'all', labelKey: 'functionMatchAll', descKey: 'functionMatchAllDesc' },
 ]
-
-// One checkbox-list block, shared by all three sub-tabs — the vacancy-status/
-// deployability-status/contract-form editors are visually identical, only the
-// source list + toggle handler differ.
-function LookupCheckboxBlock({ items, selected, onToggle }) {
-  return (
-    <div>
-      {items.map(it => (
-        <label key={it.value} style={row}>
-          <input type="checkbox" checked={selected.includes(it.value)} onChange={() => onToggle(it.value)}
-            style={{ cursor: 'pointer', width: 16, height: 16 }} />
-          {/* eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome */}
-          <ColorBadge label={it.label} color={it.color ?? '#6B7280'} />
-        </label>
-      ))}
-    </div>
-  )
-}
 
 // One label+hint toggle row, reused for every boolean leads-criteria toggle
 // (apply_radius / exclude_already_applied / include_expiring_placements) so the
@@ -154,9 +133,9 @@ function VacancyCandidateTabSettingsInner() {
 
       <SubTabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
       <div style={{ marginTop: 14 }}>
-        {activeTab === 'vacancy_statuses' && <LookupCheckboxBlock items={vacancyStatuses} selected={cfg.vacancy_statuses} onToggle={toggleIn('vacancy_statuses')} />}
-        {activeTab === 'candidate_statuses' && <LookupCheckboxBlock items={candidateStatuses} selected={cfg.candidate_statuses} onToggle={toggleIn('candidate_statuses')} />}
-        {activeTab === 'contract_forms' && <LookupCheckboxBlock items={candidateTypes} selected={cfg.contract_forms} onToggle={toggleIn('contract_forms')} />}
+        {activeTab === 'vacancy_statuses' && <LookupChipSelect items={vacancyStatuses} selected={cfg.vacancy_statuses} onToggle={toggleIn('vacancy_statuses')} ariaLabel={t('candidateTab.vacancyStatusesTitle')} />}
+        {activeTab === 'candidate_statuses' && <LookupChipSelect items={candidateStatuses} selected={cfg.candidate_statuses} onToggle={toggleIn('candidate_statuses')} ariaLabel={t('candidateTab.candidateStatusesTitle')} />}
+        {activeTab === 'contract_forms' && <LookupChipSelect items={candidateTypes} selected={cfg.contract_forms} onToggle={toggleIn('contract_forms')} ariaLabel={t('candidateTab.contractFormsTitle')} />}
       </div>
 
       {/* LEADS-CRITERIA-1: every control below is read by the SAME backend
@@ -170,11 +149,8 @@ function VacancyCandidateTabSettingsInner() {
             leads counter; reuses the same vacancy-status list + checkbox affordance
             as the sub-tab above. Empty selection = every status counts. */}
         <div style={{ marginBottom: 18 }}>
-          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', display: 'block', marginBottom: 2 }}>
-            {t('candidateTab.leadsCriteria.countableStatusesTitle')}
-          </label>
-          <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('candidateTab.leadsCriteria.countableStatusesHint')}</p>
-          <LookupCheckboxBlock items={vacancyStatuses} selected={cfg.countable_vacancy_statuses} onToggle={toggleIn('countable_vacancy_statuses')} />
+          <LookupChipSelect items={vacancyStatuses} selected={cfg.countable_vacancy_statuses} onToggle={toggleIn('countable_vacancy_statuses')}
+            label={t('candidateTab.leadsCriteria.countableStatusesTitle')} hint={t('candidateTab.leadsCriteria.countableStatusesHint')} />
         </div>
 
         {/* (b)+(c) apply_radius gates default_radius_km (RADIUS-SETTING-1's input,
@@ -209,36 +185,21 @@ function VacancyCandidateTabSettingsInner() {
             {t('candidateTab.leadsCriteria.functionMatchTitle')}
           </label>
           <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('candidateTab.leadsCriteria.functionMatchHint')}</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {FUNCTION_MATCH_OPTIONS.map(opt => {
-              const active = cfg.function_match === opt.value
-              return (
-                <label key={opt.value} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 10px',
-                  borderRadius: 8, cursor: 'pointer',
-                  border: `1px solid ${active ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}`,
-                  background: active ? 'color-mix(in srgb, var(--color-primary) 8%, transparent)' : 'var(--bg)' }}>
-                  <input type="radio" name="function_match" value={opt.value} checked={active}
-                    aria-label={t(`candidateTab.leadsCriteria.${opt.labelKey}`)}
-                    onChange={() => persist({ function_match: opt.value })}
-                    style={{ marginTop: 2, accentColor: 'var(--color-primary)' }} />
-                  <span style={{ minWidth: 0 }}>
-                    <span style={{ display: 'block', fontSize: 12.5, fontWeight: active ? 600 : 500, color: 'var(--text)' }}>
-                      {t(`candidateTab.leadsCriteria.${opt.labelKey}`)}
-                    </span>
-                    <span style={{ display: 'block', fontSize: 11.5, color: 'var(--text-muted)', marginTop: 1 }}>
-                      {t(`candidateTab.leadsCriteria.${opt.descKey}`)}
-                    </span>
-                    {/* Honest backend caveat — never present 'category' as doing more than it does today. */}
-                    {opt.value === 'category' && (
-                      <span style={{ display: 'block', fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)', marginTop: 2 }}>
-                        {t('candidateTab.leadsCriteria.functionMatchCategoryNote')}
-                      </span>
-                    )}
-                  </span>
-                </label>
-              )
-            })}
-          </div>
+          <SegmentedControl
+            ariaLabel={t('candidateTab.leadsCriteria.functionMatchTitle')}
+            value={cfg.function_match}
+            onChange={value => persist({ function_match: value })}
+            options={FUNCTION_MATCH_OPTIONS.map(opt => ({
+              value: opt.value,
+              label: t(`candidateTab.leadsCriteria.${opt.labelKey}`),
+              description: t(`candidateTab.leadsCriteria.${opt.descKey}`),
+            }))}
+          />
+          {/* Honest backend caveat, always shown — 'category' must never present
+              itself as doing more than 'exact' does today (no vacancy category column yet). */}
+          <span style={{ display: 'block', fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)', marginTop: 6 }}>
+            {t('candidateTab.leadsCriteria.functionMatchCategoryNote')}
+          </span>
         </div>
 
         {/* (e) exclude_already_applied — a candidate with a live application on THIS

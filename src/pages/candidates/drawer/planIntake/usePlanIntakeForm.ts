@@ -68,8 +68,11 @@ export function usePlanIntakeForm({
   // so restricting to intakeTypes there would make them unreachable.
   const typeOptions = mode === 'appointment' ? types : intakeTypes
   // S24a(c): preselect the tenant's flagged default WITHIN the relevant subset
-  // (intake-only vs. all types), falling back to the first option.
-  const defaultTypeOption = typeOptions.find(x => x.is_default) ?? typeOptions[0]
+  // (intake-only vs. all types), falling back to the first option. When planning
+  // FROM an application (applicationId present), the second singleton
+  // `is_default_for_application` wins over the plain default (APPT-1, 04-08).
+  const defaultTypeOption = (applicationId ? typeOptions.find(x => x.is_default_for_application) : undefined)
+    ?? typeOptions.find(x => x.is_default) ?? typeOptions[0]
 
   // datetime-local wants "YYYY-MM-DDTHH:MM" — trim an ISO string to that shape.
   const toLocalInput = (iso?: string) => iso ? iso.slice(0, 16) : ''

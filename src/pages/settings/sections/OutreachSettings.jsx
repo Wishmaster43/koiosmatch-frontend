@@ -19,3 +19,19 @@ export function OutreachStatusSettings() {
     </div>
   )
 }
+
+/**
+ * Outreach outcomes — the RESULT of one call attempt (OUTREACH-2), a separate
+ * dimension from status (the pipeline). Same value/label/color/order shape as
+ * OutreachStatus (SlugLookupController base) — no extra flags, in-use guarded
+ * by outreach_targets.outcome.
+ */
+export function OutreachOutcomeSettings() {
+  const { t } = useTranslation('settings')
+  return (
+    <div style={{ maxWidth: 640 }}>
+      <StatusListEditor compact withColor title={t('outreach.outcomeTitle')} subtitle={t('outreach.outcomeSubtitle')}
+        endpoint="/outreach-outcomes" addLabel={t('outreach.outcomeAdd')} />
+    </div>
+  )
+}

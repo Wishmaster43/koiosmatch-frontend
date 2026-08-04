@@ -9,8 +9,9 @@ import StatusListEditor from './StatusListEditor'
  */
 export default function RejectionSettings() {
   const { t } = useTranslation('settings')
+  // reorderable off: SimpleLookupController family has no /reorder route (audit 04-08).
   return (
-    <StatusListEditor title={t('rejection.title')} subtitle={t('rejection.subtitle')}
+    <StatusListEditor reorderable={false} title={t('rejection.title')} subtitle={t('rejection.subtitle')}
       endpoint="/candidate-rejection-reasons" addLabel={t('rejection.add')} withColor />
   )
 }

@@ -49,7 +49,7 @@ describe('VacancySenioritySettings', () => {
     render(<VacancySenioritySettings />)
 
     const pill = await screen.findByRole('button', { name: st('common.default') })
-    expect(pill).toBeDisabled()
+    expect(pill).not.toBeDisabled() // DEFAULT-UNDO 04-08: active pill stays clickable (click = clear)
   })
 })
 

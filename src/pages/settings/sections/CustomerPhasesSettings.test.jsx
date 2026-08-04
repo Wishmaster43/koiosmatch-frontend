@@ -40,7 +40,7 @@ describe('CustomerPhasesSettings', () => {
     expect(api.get).toHaveBeenCalledWith('/customer-phases', undefined)
     expect(screen.getByText('Klant')).toBeInTheDocument()
     // The is_default row renders the active (disabled) "Standaard" pill.
-    expect(screen.getByRole('button', { name: st('common.default') })).toBeDisabled()
+    expect(screen.getByRole('button', { name: st('common.default') })).not.toBeDisabled() // DEFAULT-UNDO 04-08: active pill stays clickable (click = clear)
   })
 
   it('adding a phase POSTs a valid slug + label + the is_customer flag (the body the API requires)', async () => {
