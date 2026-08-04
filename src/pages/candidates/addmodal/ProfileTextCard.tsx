@@ -5,8 +5,12 @@
  * Reuses the candidate drawer's own `profile.summary` label — never a second
  * "profile text" key — and the shared CollapsibleRichText block (components/ui)
  * so this create form gets the exact same low-height, always-present shape as
- * the +Match "Opmerkingen" card. Full width, own state (this modal has no
- * form-level hook to own it, unlike the match form).
+ * the +Match "Opmerkingen" card. Sits LEFT on the vestiging row (Danny 05-08:
+ * "profiel txt op 1 lijn met vestiging ... profiel txt links zoals we ook
+ * hebben bij + match") — no longer full-width; the parent grid (AddCandidateModal,
+ * built via the shared `modalColumns` convention) auto-places this card next to
+ * BranchesCard, mirroring the +Match modal's own left text column. Own local
+ * state (this modal has no form-level hook to own it, unlike the match form).
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -26,7 +30,9 @@ export default function ProfileTextCard({ form, set }: ProfileTextCardProps) {
   const [expanded, setExpanded] = useState(false)
   const [editing, setEditing] = useState(false)
   return (
-    <div style={{ gridColumn: '1 / -1' }}>
+    // No gridColumn span (Danny 05-08): a plain grid cell so this card sits LEFT,
+    // side by side with BranchesCard, instead of stacking full-width above it.
+    <div>
       <div style={cardHead}>{t('profile.summary')}</div>
       <div style={cardBox}>
         <CollapsibleRichText t={t} value={form.summary} onChange={v => set('summary', v)}

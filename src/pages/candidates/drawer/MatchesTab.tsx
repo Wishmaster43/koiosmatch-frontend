@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import SectionCard from '@/components/ui/SectionCard'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
+import DrawerAddButton from './DrawerAddButton'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import MatchCard from '@/pages/matches/MatchCard'
 import { rememberReturnTab } from './constants'
@@ -28,10 +29,26 @@ import type { Id } from '@/types/common'
  * Matches wil ik ook een zoekbalk en statussen hebben"): search (vacancy title +
  * client name) + the shared StatusFilterSelect keyed on the SAME match-status
  * vocabulary the title's own fase resolves via useMatchStatuses().
+ *
+ * ONE-LINE TOOLBAR (Danny live review, 04-08: "Zoeken status en + match moet op
+ * 1 lijn!!"): the optional `onAdd` renders the house DrawerAddButton at the END
+ * of this SAME row — WorkTab used to render "+ Match" on its own flex-end row
+ * ABOVE this component; that separate row is gone, `onAdd` is how WorkTab still
+ * owns the modal-open callback without this read-only tab knowing about MatchModal.
+ *
+ * COMPACT ROWS + NEWEST-FIRST (Danny live review, 04-08: the per-match cards
+ * "meer compact in een tabel weergegeven met de optie om het open te klappen …
+ * gesorteerd op nieuwste match bovenaan"): every `MatchCard` renders with its
+ * opt-in `collapsible` prop — one summary row per match, expanding in place —
+ * and the list is sorted by `createdAt` descending before render (see the sort
+ * comment below for the field's provenance).
  */
-export default function MatchesTab({ c, onEdit }: { c: Candidate
+export default function MatchesTab({ c, onEdit, onAdd }: { c: Candidate
   // Opens the match in MatchModal as an edit (WorkTab owns the modal state).
-  onEdit?: (matchId: Id) => void }) {
+  onEdit?: (matchId: Id) => void
+  // Opens the match CREATE modal (WorkTab owns the modal state) — omitted, the
+  // button simply doesn't render (mirrors the onEdit pencil's own optional gate).
+  onAdd?: () => void }) {
   const { t } = useTranslation('candidates')
   // Match lifecycle lookup (R-1b) — resolves the title's fase + the "Contract"
   // row from the status slug, same as MatchesTable/MatchDrawer; the backend-
@@ -46,15 +63,28 @@ export default function MatchesTab({ c, onEdit }: { c: Candidate
 
   // Free-text search on top of the status filter — vacancy title + client name.
   const q = search.trim().toLowerCase()
-  const matches = q ? statusMatches.filter(m => [m.vacancyTitle, m.client].some(v => String(v ?? '').toLowerCase().includes(q))) : statusMatches
+  const filteredMatches = q ? statusMatches.filter(m => [m.vacancyTitle, m.client].some(v => String(v ?? '').toLowerCase().includes(q))) : statusMatches
+
+  // Sort newest match first (Danny live review, 04-08: "gesorteerd... op nieuwste
+  // match bovenaan"). CandidateMatch.createdAt (mapCandidate.ts MATCH-EMBED-1)
+  // carries the row's own created_at — Candidate/MatchResource.php:34 ships it on
+  // every candidate-embedded match, so no field is invented here. A row missing
+  // it (should not happen given the backend always sends it) sorts LAST, never
+  // reordered ahead of a dated row.
+  const matches = [...filteredMatches].sort((a, b) => {
+    const at = a.createdAt ? new Date(a.createdAt).getTime() : -Infinity
+    const bt = b.createdAt ? new Date(b.createdAt).getTime() : -Infinity
+    return bt - at
+  })
 
   return (
     // No title here (Danny addendum 4): this only ever renders inside the Match
     // tab's own "Matches" sub-tab — a second "Matches" heading would just repeat
     // the sub-tab bar right above it.
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {/* Toolbar mirrors the customer's own Matches tab — search left, status
-          filter right, no add trigger (read-only list). */}
+      {/* Toolbar mirrors the customer's own Matches tab — search left (grows),
+          status filter, then "+ Match" (when the host wires onAdd) — ALL ON ONE
+          LINE (Danny live review, 04-08). */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 120, padding: '6px 10px',
           background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
@@ -64,6 +94,9 @@ export default function MatchesTab({ c, onEdit }: { c: Candidate
             style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
         </div>
         <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={matchStatuses} />
+        {/* "+ Match" stays a FULL-label named action (05-08 short-label decision
+            list) — never the drawer sub-tab's shortened "Nieuw". */}
+        {onAdd && <DrawerAddButton onClick={onAdd} label={t('work.addMatch')} />}
       </div>
       <SectionCard>
       {matches.length === 0 ? (
@@ -86,6 +119,9 @@ export default function MatchesTab({ c, onEdit }: { c: Candidate
             contractType={m.contractType} contractStatus={m.contractStatus}
             functionTitle={m.functionTitle} startDate={m.startDate} endDate={m.endDate}
             isClosed={statusMeta?.is_closed}
+            // Compact mode (Danny live review, 04-08): collapsed by default, one
+            // summary row per match, expanding in place — see MatchCard's own prop doc.
+            collapsible
           />
         )
       })}

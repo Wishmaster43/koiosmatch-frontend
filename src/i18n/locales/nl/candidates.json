@@ -245,7 +245,7 @@
     "statusPanelHint": "Standaard Lead. Een nieuwe kandidaat begint als Lead.",
     "cv": {
       "title": "Kandidaat uit cv",
-      "intro": "Upload een cv (pdf). Koios leest de gegevens eruit en vult dit formulier alvast in. Er wordt niets opgeslagen: jij controleert de velden en klikt zelf op aanmaken.",
+      "intro": "Koios vult dit formulier in vanuit het cv — jij controleert en klikt zelf op aanmaken.",
       "choose": "Cv kiezen",
       "hint": "Alleen pdf · max. 10 MB",
       "uploading": "Cv wordt geüpload…",
@@ -373,7 +373,8 @@
     "openRestored": "Openen",
     "archivedNamed": "{{name}} gearchiveerd",
     "noStatus": "Geen status",
-    "changelog": "Wijzigingslog"
+    "changelog": "Wijzigingslog",
+    "tasksSearchPlaceholder": "Zoek taak…"
   },
   "stage": {
     "lead": "Lead",
@@ -499,7 +500,10 @@
     "appointmentVacancyHint": "Laat leeg voor een afspraak zonder vacature.",
     "endTime": "Eindtijd",
     "endTimeAt": "tot {{time}}",
-    "vacancyUnknown": "Onbekende vacature"
+    "vacancyUnknown": "Onbekende vacature",
+    "searchPlaceholder": "Zoek vacature…",
+    "colStatus": "Status",
+    "colDate": "Datum"
   },
   "communication": {
     "newNote": "Nieuwe notitie",

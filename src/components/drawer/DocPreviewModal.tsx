@@ -8,6 +8,15 @@ import PdfPreview from './PdfPreview'
 const isImage = (name = '') => /\.(png|jpe?g|gif|webp|svg)$/i.test(name)
 const isPdf   = (name = '') => /\.pdf$/i.test(name)
 
+// The API's origin (protocol + host, no /api path) — relative document urls from
+// the backend resolve against THIS, never against the frontend's own origin.
+// A RELATIVE VITE_API_URL (same-origin proxy setups, and the test env) means the
+// API genuinely lives on the frontend origin — fall back to it instead of throwing.
+const API_ORIGIN = (() => {
+  const raw = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
+  try { return new URL(raw).origin } catch { return window.location.origin }
+})()
+
 interface PreviewDoc {
   objectUrl?: string
   url?: string
@@ -73,17 +82,28 @@ export default function DocPreviewModal({ doc, onClose, docTypeScope = 'candidat
   // stream route) is fetched as a blob only when the file type is one we can
   // actually render — an unsupported type never triggers the network round-trip,
   // it goes straight to the "download to view" fallback below.
+  // PREVIEW-RELATIVE-URL-1 (Danny 05-08 "werkt niet meer!!"): the candidate
+  // resource returns `url` as a RELATIVE api path — a bare fetch resolves that
+  // against the FRONTEND origin (the Vite port) and 404s. Prefer an absolute
+  // signed `download_url` (same bytes), else resolve the relative path against
+  // the API origin; an already-absolute `url` (customer docs) passes through.
+  const fetchableUrl = (() => {
+    if (!doc) return null
+    const abs = (u?: string) => (u && /^https?:\/\//.test(u) ? u : null)
+    const rel = (u?: string) => (u && u.startsWith('/') ? new URL(u, API_ORIGIN).toString() : null)
+    return abs(doc.url) ?? abs(doc.download_url) ?? rel(doc.url) ?? rel(doc.download_url)
+  })()
   useEffect(() => {
     setPdfFailed(false)
     setBlobUrl(null)
     setFetchState('idle')
     if (!doc) return
     if (doc.objectUrl) { setBlobUrl(doc.objectUrl); return }
-    if (!doc.url || !previewable) return
+    if (!fetchableUrl || !previewable) return
     let cancelled = false
     let created: string | null = null
     setFetchState('loading')
-    fetch(doc.url, { credentials: 'include' })
+    fetch(fetchableUrl, { credentials: 'include' })
       .then(res => { if (!res.ok) throw new Error(`preview fetch failed: ${res.status}`); return res.blob() })
       .then(blob => {
         if (cancelled) return
@@ -97,7 +117,7 @@ export default function DocPreviewModal({ doc, onClose, docTypeScope = 'candidat
       if (created) URL.revokeObjectURL(created)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on the doc's own identity fields (url/objectUrl), not the whole object — a parent that re-creates the doc object on every render (e.g. a `.map(d => ({ ...d, _i }))` spread) must never re-trigger this fetch.
-  }, [doc?.url, doc?.objectUrl, previewable])
+  }, [fetchableUrl, doc?.objectUrl, previewable])
 
   if (!doc) return null
   const typeLabel = docTypeLabel(doc.type)

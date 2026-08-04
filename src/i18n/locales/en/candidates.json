@@ -245,7 +245,7 @@
     "statusPanelHint": "Defaults to Lead. A new candidate starts as a Lead.",
     "cv": {
       "title": "Candidate from CV",
-      "intro": "Upload a CV (PDF). Koios reads the details and prefills this form. Nothing is saved: you check the fields and click create yourself.",
+      "intro": "Koios prefills this form from the CV — you check it and click create yourself.",
       "choose": "Choose CV",
       "hint": "PDF only · max. 10 MB",
       "uploading": "Uploading CV…",
@@ -373,7 +373,8 @@
     "openRestored": "Open",
     "archivedNamed": "{{name}} archived",
     "noStatus": "No status",
-    "changelog": "Changelog"
+    "changelog": "Changelog",
+    "tasksSearchPlaceholder": "Search task…"
   },
   "stage": {
     "lead": "Lead",
@@ -499,7 +500,10 @@
     "appointmentVacancyHint": "Leave empty for an appointment without a vacancy.",
     "endTime": "End time",
     "endTimeAt": "until {{time}}",
-    "vacancyUnknown": "Unknown vacancy"
+    "vacancyUnknown": "Unknown vacancy",
+    "searchPlaceholder": "Search vacancy…",
+    "colStatus": "Status",
+    "colDate": "Date"
   },
   "communication": {
     "newNote": "New note",

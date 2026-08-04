@@ -9,12 +9,21 @@
  * leaves "+ Taak" clickable, a block additionally disables it. Only the
  * network-backed `useActionRulePreflight` hook is stubbed; the real
  * ActionRuleBanner and EntityLink render.
+ *
+ * TOOLBAR (Danny live review, 04-08, final shape): search → StatusFilterSelect →
+ * "+ Taak", ONE line, the old Open/Historie toggle gone entirely (see
+ * CandidateTasks.tsx's own header comment for why full EntityTasksTab adoption
+ * was still rejected). The tenant task-status lookup is stubbed with a
+ * controllable ref (mirrors EntityTasksTab.test.tsx's own `statusesRef`) so the
+ * filter tests below pick a real option without a network round-trip.
  */
+import type { ReactNode } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CandidateTasks from './CandidateTasks'
 import { useActionRulePreflight } from '@/components/actionrules'
+import api from '@/lib/api'
 
 // One fixture task row (as GET /tasks?candidate={id} returns it) — content is
 // irrelevant to the AXIS-MATRIX-2 gating tests but gives the row-actions tests
@@ -40,6 +49,19 @@ vi.mock('@/pages/tasks/AddTaskModal', () => ({
 vi.mock('@/components/actionrules', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/components/actionrules')>()),
   useActionRulePreflight: vi.fn(() => ({ decision: null, loading: false, error: false })),
+}))
+// Controllable tenant task-status lookup (mirrors EntityTasksTab.test.tsx's own
+// statusesRef) — the component now wraps its WHOLE body in TaskLookupsProvider
+// (not just the add/edit modal), so the status filter needs this at all times.
+const statusesRef = vi.hoisted(() => ({ current: [
+  // eslint-disable-next-line no-restricted-syntax -- test fixture colour, mirroring the tenant seed
+  { value: 'todo', label: 'Te doen', color: '#D98A8A' },
+  // eslint-disable-next-line no-restricted-syntax -- test fixture colour, mirroring the tenant seed
+  { value: 'done', label: 'Afgerond', color: '#79B58E' },
+] }))
+vi.mock('@/context/TaskLookupsContext', () => ({
+  TaskLookupsProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+  useTaskLookups: () => ({ statuses: statusesRef.current }),
 }))
 
 describe('CandidateTasks · AXIS-MATRIX-2 preflight (CMFE audit R1)', () => {
@@ -121,5 +143,61 @@ describe('CandidateTasks · row actions (Danny 20-07: EntityLink title + edit pe
     // The pencil is a sibling action, not the row's own nav — clicking it must
     // never also trigger the EntityLink's in-app open.
     expect(openEntity).not.toHaveBeenCalled()
+  })
+})
+
+// Danny live review, 04-08, final shape ("taken is nog niet goed" → search +
+// StatusFilterSelect + "+ Taak", ONE line, Open/Historie gone entirely).
+describe('CandidateTasks · toolbar (search + status filter, ONE line)', () => {
+  const twoTasks = [
+    { id: 't1', title: 'Bel kandidaat', due_date: null, completed_at: null, created_at: null, status: 'todo' },
+    { id: 't2', title: 'Stuur contract', due_date: null, completed_at: '2026-07-01', created_at: null, status: 'done' },
+  ]
+
+  beforeEach(() => {
+    vi.mocked(useActionRulePreflight).mockReturnValue({ decision: null, loading: false, error: false })
+  })
+
+  it('renders search, status filter and "+ Taak" as ONE-line siblings, in that DOM order', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: twoTasks } })
+    render(<CandidateTasks candidateId="cand-1" />)
+    const search = await screen.findByPlaceholderText('drawer.tasksSearchPlaceholder')
+    const statusTrigger = screen.getByRole('button', { name: 'filters.allStatuses' })
+    const addButton = screen.getByRole('button', { name: /drawer.newTask/ })
+    // DOM_POSITION_FOLLOWING: each control sits AFTER the previous one, confirming
+    // the left-to-right toolbar order (search → status → add) on one row.
+    expect(search.compareDocumentPosition(statusTrigger) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(statusTrigger.compareDocumentPosition(addButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    // No more Open/Historie toggle — this was the double-filtering Danny flagged.
+    expect(screen.queryByText('drawer.tasksOpen')).toBeNull()
+    expect(screen.queryByText('drawer.tasksHistory')).toBeNull()
+  })
+
+  it('shows every task (open + done) until a status is picked — the old Open/Historie split is gone', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: twoTasks } })
+    render(<CandidateTasks candidateId="cand-1" />)
+    expect(await screen.findByText('Bel kandidaat')).toBeInTheDocument()
+    expect(screen.getByText('Stuur contract')).toBeInTheDocument()
+  })
+
+  it('search narrows the visible tasks on title', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: twoTasks } })
+    const user = userEvent.setup()
+    render(<CandidateTasks candidateId="cand-1" />)
+    expect(await screen.findByText('Bel kandidaat')).toBeInTheDocument()
+    await user.type(screen.getByPlaceholderText('drawer.tasksSearchPlaceholder'), 'contract')
+    expect(screen.queryByText('Bel kandidaat')).toBeNull()
+    expect(screen.getByText('Stuur contract')).toBeInTheDocument()
+  })
+
+  it('the status filter narrows to the picked status only', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: twoTasks } })
+    const user = userEvent.setup()
+    render(<CandidateTasks candidateId="cand-1" />)
+    await screen.findByText('Bel kandidaat')
+    await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
+    await user.click(await screen.findByRole('button', { name: 'Afgerond' }))
+    expect(screen.getByText('Stuur contract')).toBeInTheDocument()
+    expect(screen.queryByText('Bel kandidaat')).toBeNull()
   })
 })

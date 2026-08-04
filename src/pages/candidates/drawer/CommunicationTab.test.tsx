@@ -89,7 +89,7 @@ describe('CommunicationTab · optimistic consent date (Danny punt F)', () => {
     const onSave = vi.fn()
     render(<CommunicationTab c={candidate({ whatsapp_opt_in: false })} onSave={onSave} />)
     await openConsent(user)
-    await user.click(screen.getAllByRole('checkbox')[0]) // whatsapp is first in CONSENT_CH
+    await user.click(screen.getAllByRole('switch')[0]) // whatsapp is first in CONSENT_CH
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ whatsapp_opt_in: true, whatsapp_consent_at: expect.any(String) }))
   })
 
@@ -98,7 +98,7 @@ describe('CommunicationTab · optimistic consent date (Danny punt F)', () => {
     const onSave = vi.fn()
     render(<CommunicationTab c={candidate({ whatsapp_opt_in: true, whatsapp_consent_at: '2026-01-01T00:00:00.000Z' })} onSave={onSave} />)
     await openConsent(user)
-    await user.click(screen.getAllByRole('checkbox')[0])
+    await user.click(screen.getAllByRole('switch')[0])
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ whatsapp_opt_in: false, whatsapp_consent_at: null }))
   })
 
@@ -107,7 +107,7 @@ describe('CommunicationTab · optimistic consent date (Danny punt F)', () => {
     const onSave = vi.fn()
     render(<CommunicationTab c={candidate({ email_opt_in: false })} onSave={onSave} />)
     await openConsent(user)
-    await user.click(screen.getAllByRole('checkbox')[1]) // email is second in CONSENT_CH
+    await user.click(screen.getAllByRole('switch')[1]) // email is second in CONSENT_CH
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ email_opt_in: true, email_consent_at: expect.any(String) }))
   })
 
@@ -116,7 +116,7 @@ describe('CommunicationTab · optimistic consent date (Danny punt F)', () => {
     const onSave = vi.fn()
     render(<CommunicationTab c={candidate({ newsletter_opt_in: false })} onSave={onSave} />)
     await openConsent(user)
-    await user.click(screen.getAllByRole('checkbox')[2]) // newsletter is third in CONSENT_CH
+    await user.click(screen.getAllByRole('switch')[2]) // newsletter is third in CONSENT_CH
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ newsletter_opt_in: true, newsletter_consent_at: expect.any(String) }))
   })
 

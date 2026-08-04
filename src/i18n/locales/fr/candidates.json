@@ -223,7 +223,7 @@
     "statusPanelHint": "Par défaut Lead. Un nouveau candidat commence comme Lead.",
     "cv": {
       "title": "Candidat à partir d'un CV",
-      "intro": "Téléversez un CV (PDF). Koios en extrait les données et préremplit ce formulaire. Rien n'est enregistré : vous vérifiez les champs et cliquez vous-même sur créer.",
+      "intro": "Koios préremplit ce formulaire à partir du CV — vous vérifiez et cliquez vous-même sur créer.",
       "choose": "Choisir un CV",
       "hint": "PDF uniquement · max. 10 Mo",
       "uploading": "Téléversement du CV…",
@@ -351,7 +351,8 @@
     "openRestored": "Ouvrir",
     "archivedNamed": "{{name}} archivé",
     "noStatus": "Sans statut",
-    "changelog": "Journal"
+    "changelog": "Journal",
+    "tasksSearchPlaceholder": "Rechercher une tâche…"
   },
   "stage": {
     "lead": "Piste",
@@ -477,7 +478,10 @@
     "appointmentVacancyHint": "Laissez vide pour un rendez-vous sans offre.",
     "endTime": "Heure de fin",
     "endTimeAt": "jusqu'à {{time}}",
-    "vacancyUnknown": "Offre inconnue"
+    "vacancyUnknown": "Offre inconnue",
+    "searchPlaceholder": "Rechercher une vacance…",
+    "colStatus": "Statut",
+    "colDate": "Date"
   },
   "communication": {
     "newNote": "Nouvelle note",

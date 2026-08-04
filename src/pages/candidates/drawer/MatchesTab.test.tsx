@@ -5,6 +5,11 @@
  * `useDateFormat` (lib/datetime), which itself imports `@/i18n` for its locale
  * map, so a raw-key stub would assert against text that never actually renders
  * — real copy is the only assertion that can't quietly rot.
+ *
+ * COMPACT ROWS (Danny live review, 04-08): this tab always renders `MatchCard`
+ * with `collapsible` on, so every fixture below is now COLLAPSED by default —
+ * tests that assert on DETAIL-row content (Contractvorm, dashes, …) click the
+ * chevron (title = cm('expand')/cm('collapse')) first.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -51,18 +56,25 @@ describe('MatchesTab', () => {
     expect(screen.getByText(ct('matchesView.empty'))).toBeInTheDocument()
   })
 
-  it('renders Klant + Contractvorm rows, dash when Contractvorm is absent', () => {
+  it('renders Klant + Contractvorm rows (after expanding the compact card), dash when Contractvorm is absent', async () => {
+    const user = userEvent.setup()
     render(<MatchesTab c={candidate([
       { id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway', contractType: null, contractStatus: 'active' },
     ])} />)
+    // Client is ALSO visible inline in the collapsed summary row (compact mode).
     expect(screen.getByText('Yesway')).toBeInTheDocument()
+    // The detail rows (incl. the dashes) only show once the card is expanded.
+    await user.click(screen.getByTitle(cm('expand')))
     expect(screen.getAllByText('—').length).toBeGreaterThan(0)
   })
 
-  it('renders the Contractvorm value when present', () => {
+  it('renders the Contractvorm value when present (after expanding the compact card)', async () => {
+    const user = userEvent.setup()
     render(<MatchesTab c={candidate([
       { id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway', contractType: 'Fase 1-2 z.u.b. (Works)' },
     ])} />)
+    expect(screen.queryByText('Fase 1-2 z.u.b. (Works)')).toBeNull()
+    await user.click(screen.getByTitle(cm('expand')))
     expect(screen.getByText('Fase 1-2 z.u.b. (Works)')).toBeInTheDocument()
   })
 
@@ -148,6 +160,29 @@ describe('MatchesTab · toolbar search + status filter', () => {
   })
 })
 
+/** ONE-LINE toolbar with "+ Match" (Danny live review, 04-08: "Zoeken status en
+ *  + match moet op 1 lijn!!") — WorkTab used to render "+ Match" on its own row
+ *  ABOVE this component; `onAdd` now renders it at the END of this SAME row. */
+describe('MatchesTab · onAdd renders "+ Match" at the end of the ONE-LINE toolbar', () => {
+  it('renders no "+ Match" trigger when onAdd is omitted (read-only list, unchanged)', () => {
+    render(<MatchesTab c={candidate([])} />)
+    expect(screen.queryByRole('button', { name: ct('work.addMatch') })).toBeNull()
+  })
+
+  it('renders "+ Match" and fires onAdd, positioned AFTER the search box and status filter (DOM order)', async () => {
+    const onAdd = vi.fn()
+    const user = userEvent.setup()
+    render(<MatchesTab c={candidate([])} onAdd={onAdd} />)
+    const search = screen.getByRole('textbox')
+    const statusTrigger = screen.getByRole('button', { name: i18n.t('filters.allStatuses', { ns: 'customers' }) })
+    const addButton = screen.getByRole('button', { name: ct('work.addMatch') })
+    expect(search.compareDocumentPosition(statusTrigger) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(statusTrigger.compareDocumentPosition(addButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    await user.click(addButton)
+    expect(onAdd).toHaveBeenCalledTimes(1)
+  })
+})
+
 /** Double open-icon fix (Danny, seeing a Verzorgende IG / EVV match card: "Waarom
  *  heb ik op de regel twee keer een icoon met open-in-nieuw-venster?"). The
  *  vacancy title's own EntityLink icon is now suppressed (hideIcon) — the
@@ -160,5 +195,68 @@ describe('MatchesTab · exactly one open-in-new icon per card header', () => {
     // this fix and absent from this fixture (no vacancyUrl).
     const header = screen.getByTitle(ct('matchesView.openMatch')).parentElement as HTMLElement
     expect(header.querySelectorAll('svg.lucide-external-link')).toHaveLength(1)
+  })
+})
+
+/** Compact rows (Danny live review, 04-08: "meer compact in een tabel weergegeven
+ *  met de optie om het open te klappen") — collapsed by default to one summary
+ *  row per match, expanding in place to the existing detail rows. */
+describe('MatchesTab · compact collapsed/expandable rows', () => {
+  it('renders ONE collapsed summary row per match — detail rows stay hidden until expanded', () => {
+    render(<MatchesTab c={candidate([
+      { id: 'm1', vacancyId: 'v1', vacancyTitle: 'Verpleegkundige', client: 'Yesway', functionTitle: 'Verpleegkundige IC' },
+    ])} />)
+    // Summary line: vacancy title + client are both visible without expanding.
+    expect(screen.getByRole('button', { name: 'Verpleegkundige' })).toBeInTheDocument()
+    expect(screen.getByText('Yesway')).toBeInTheDocument()
+    // The detail row's OWN value (Functietitel) stays hidden until expanded.
+    expect(screen.queryByText('Verpleegkundige IC')).toBeNull()
+  })
+
+  it('expanding a match (chevron click) reveals its detail rows in place, collapsing again hides them', async () => {
+    const user = userEvent.setup()
+    render(<MatchesTab c={candidate([
+      { id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway', functionTitle: 'Verpleegkundige IC' },
+    ])} />)
+    expect(screen.queryByText('Verpleegkundige IC')).toBeNull()
+    await user.click(screen.getByTitle(cm('expand')))
+    expect(screen.getByText('Verpleegkundige IC')).toBeInTheDocument()
+    await user.click(screen.getByTitle(cm('collapse')))
+    expect(screen.queryByText('Verpleegkundige IC')).toBeNull()
+  })
+
+  it("each match's expand state is independent of the others", async () => {
+    const user = userEvent.setup()
+    render(<MatchesTab c={candidate([
+      { id: 'm1', vacancyTitle: 'Verpleegkundige', client: 'Yesway', functionTitle: 'Functie Een' },
+      { id: 'm2', vacancyTitle: 'Verzorgende IG', client: 'Acme', functionTitle: 'Functie Twee' },
+    ])} />)
+    await user.click(screen.getAllByTitle(cm('expand'))[0])
+    expect(screen.getByText('Functie Een')).toBeInTheDocument()
+    expect(screen.queryByText('Functie Twee')).toBeNull()
+  })
+})
+
+/** Newest match first (Danny live review, 04-08: "gesorteerd op nieuwste match
+ *  bovenaan") — CandidateMatch.createdAt (mapCandidate.ts MATCH-EMBED-1, off
+ *  Candidate/MatchResource.php's own created_at) drives the sort. */
+describe('MatchesTab · sorts newest match first', () => {
+  it('sorts by createdAt descending regardless of the source array order', () => {
+    render(<MatchesTab c={candidate([
+      { id: 'm-old', vacancyId: 'v-old', vacancyTitle: 'Oudste', client: 'A', createdAt: '2026-01-01T00:00:00Z' },
+      { id: 'm-new', vacancyId: 'v-new', vacancyTitle: 'Nieuwste', client: 'B', createdAt: '2026-07-01T00:00:00Z' },
+      { id: 'm-mid', vacancyId: 'v-mid', vacancyTitle: 'Midden', client: 'C', createdAt: '2026-04-01T00:00:00Z' },
+    ])} />)
+    const titles = screen.getAllByRole('button', { name: /^(Oudste|Nieuwste|Midden)$/ }).map(el => el.textContent)
+    expect(titles).toEqual(['Nieuwste', 'Midden', 'Oudste'])
+  })
+
+  it('sorts a match with no createdAt LAST, never ahead of a dated row', () => {
+    render(<MatchesTab c={candidate([
+      { id: 'm-dated', vacancyId: 'v-dated', vacancyTitle: 'Gedateerd', client: 'A', createdAt: '2020-01-01T00:00:00Z' },
+      { id: 'm-undated', vacancyId: 'v-undated', vacancyTitle: 'Ongedateerd', client: 'B' },
+    ])} />)
+    const titles = screen.getAllByRole('button', { name: /^(Gedateerd|Ongedateerd)$/ }).map(el => el.textContent)
+    expect(titles).toEqual(['Gedateerd', 'Ongedateerd'])
   })
 })

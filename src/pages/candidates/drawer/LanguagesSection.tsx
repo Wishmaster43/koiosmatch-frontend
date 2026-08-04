@@ -45,22 +45,28 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6, marginBottom: 6 }}>
         {/* "+ Taal" top-right, same reference style as + Match / Ervaring — ALWAYS
             visible (Danny 20-07: net als de andere secties): outside edit mode a
-            click enters edit AND adds the fresh row in one go. Save/✕ stay put.
+            click enters edit AND adds the fresh row in one go.
             Short text (DRAWER-ADD-SHORT-1, Danny 05-08): always inside the
             Achtergrond → Talen sub-tab, never a full page. */}
         <DrawerAddButton label={t('addFields.language')} short
           onClick={() => { if (!editing) { setRows([...initial(), { language: '', spoken: '', written: '' }]); setEditing(true) } else addRow() }} />
-        {editing ? (
-          <div style={{ display: 'flex', gap: 4 }}>
-            <button onClick={save} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
-            <button onClick={cancel} title={t('common:cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
-          </div>
-        ) : (
-          <button onClick={() => { setRows(initial()); setEditing(true) }} title={t('common:edit')} style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
-        )}
       </div>
 
-      <div style={{ borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: '10px 12px' }}>
+      {/* The edit cluster lives INSIDE the card ("potlootje in talen box", Danny
+          05-08) — pencil top-right of the block it edits, toggling to save/✕. */}
+      <div style={{ position: 'relative', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)',
+        // Right padding clears the in-card cluster: one pencil (view) vs save+✕ (edit).
+        padding: editing ? '10px 68px 10px 12px' : '10px 40px 10px 12px' }}>
+        <div style={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: 4 }}>
+          {editing ? (
+            <>
+              <button onClick={save} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+              <button onClick={cancel} title={t('common:cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+            </>
+          ) : (
+            <button onClick={() => { setRows(initial()); setEditing(true) }} title={t('common:edit')} style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
+          )}
+        </div>
         {editing ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {rows.map((row, i) => (

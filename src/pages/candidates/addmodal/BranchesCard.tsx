@@ -7,6 +7,10 @@
  * ronde-2): the reference-style DrawerAddButton, right-aligned, OUTSIDE the card
  * next to the "Vestigingen" heading — not the old dashed ghost button inside it.
  * Behaviour (SearchSelect + chips-with-×) is unchanged, only the trigger moved.
+ *
+ * No longer full-width (Danny 05-08): sits RIGHT of ProfileTextCard on the same
+ * row — the parent grid auto-places this card into the column ProfileTextCard
+ * doesn't occupy (§AddCandidateModal, shared `modalColumns` convention).
  */
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -24,7 +28,9 @@ interface BranchesCardProps {
 export default function BranchesCard({ branchIds, setBranchIds, locations }: BranchesCardProps) {
   const { t } = useTranslation(['candidates', 'common'])
   return (
-    <div style={{ gridColumn: '1 / -1' }}>
+    // No gridColumn span (Danny 05-08): a plain grid cell so this card sits
+    // side by side with ProfileTextCard instead of stacking full-width below it.
+    <div>
       {/* Header row: card title left, "+ Vestiging" trigger right (drill-down parity). */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
         <div style={{ ...cardHead, marginBottom: 0 }}>{t('modal.fields.branches')}</div>

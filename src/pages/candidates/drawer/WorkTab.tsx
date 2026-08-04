@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ExternalLink, CalendarPlus, Calendar, Clock, User, Building2, Video, Phone, Pencil } from 'lucide-react'
+import { ExternalLink, CalendarPlus, Calendar, Clock, User, Building2, Video, Phone, Pencil, Search } from 'lucide-react'
 import MatchesTab from './MatchesTab'
 import PoolsSection from './PoolsSection'
 import DrawerAddButton from './DrawerAddButton'
 import SubTabBar from '@/components/drawer/SubTabBar'
+import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
 import AddApplicationModal from './AddApplicationModal'
@@ -15,7 +16,7 @@ import api, { unwrap, unwrapList } from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock, rememberReturnTab } from './constants'
 import type { Candidate } from '@/types/candidate'
-import type { Id } from '@/types/common'
+import type { Id, LookupOption } from '@/types/common'
 import { isSafeUrl } from '@/lib/safeUrl'
 
 // A linked appointment as returned by /candidates/{id}/appointments.
@@ -33,6 +34,11 @@ const vacancyUrlOf = (s: AppRow) => {
   return isSafeUrl(url) ? url : null
 }
 
+// The row's own vacancy label, null for a genuinely vacancy-less (intake) row —
+// shared by both the row render (dash fallback) and the search filter below, so
+// the two never drift into two different ideas of "the label".
+const vacancyLabelOf = (s: AppRow): string | null => s.vacature ?? s.vacancy?.title ?? s.title ?? null
+
 // Known sub-tab ids (deep-link validation lives here, not in the drawer).
 const KNOWN_SUB_TABS = ['applications', 'matches', 'pools'] as const
 
@@ -49,6 +55,9 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
   // Appointments (who/when/where) keyed by application_id — shown under each row.
   const [appts, setAppts] = useState<Appt[]>([])
   const [page, setPage] = useState(1)
+  // Sollicitaties toolbar (Danny live review, 04-08: "Zoeken en status erbij!") —
+  // free-text search on the vacancy label, applied on top of the stage filter below.
+  const [search, setSearch] = useState('')
   const [modal, setModal] = useState<null | 'apply' | 'intake' | 'match'>(null)
   // The appointment being edited (pencil on the appointment line) → prefilled intake modal.
   const [editAppt, setEditAppt] = useState<ExistingAppointment | null>(null)
@@ -99,15 +108,45 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
   }
 
   const PER = 5
-  const pages = Math.max(1, Math.ceil(apps.length / PER))
-  const slice = apps.slice((page - 1) * PER, page * PER)
+
+  // Stage filter (Danny live review, 04-08): the candidate-embedded application row
+  // only ever carries the RESOLVED `stageLabel`/`stageColor` — the backend's
+  // ApplicationResource (Candidate embed) never sends a stage id/slug, unlike the
+  // real /application-stages lookup (useApplicationStages) — so there is no stable
+  // key here to match a tenant lookup id against. Deriving the option list from the
+  // loaded rows themselves is the honest fallback: it can only ever offer stages
+  // that actually occur on this candidate, deduped by their (tenant-set) label text,
+  // which doubles as the filter identity. Known edge case: if a tenant literally
+  // names a stage "Open"/"Actief"/"Active", useStatusFilter's shared active-guess
+  // heuristic would auto-select it as the default filter — an accepted limitation
+  // of this derived list, not a bug in the shared hook.
+  const stageOptions: LookupOption[] = Object.values(
+    apps.reduce<Record<string, LookupOption>>((acc, s) => {
+      if (s.stageLabel && !acc[s.stageLabel]) acc[s.stageLabel] = { value: s.stageLabel, label: s.stageLabel, color: s.stageColor ?? undefined }
+      return acc
+    }, {})
+  )
+  const { value: stageFilter, toggle: toggleStage, filtered: stageFiltered } =
+    useStatusFilter(apps, stageOptions, s => s.stageLabel ?? '')
+
+  // Free-text search on top of the stage filter — narrows on the vacancy label only.
+  const q = search.trim().toLowerCase()
+  const filteredApps = q ? stageFiltered.filter(s => (vacancyLabelOf(s) ?? '').toLowerCase().includes(q)) : stageFiltered
+
+  // Reset to page 1 whenever the search/stage filter narrows the list, so a filter
+  // change never strands the view on a now out-of-range page.
+  useEffect(() => { setPage(1) }, [search, stageFilter])
+
+  const pages = Math.max(1, Math.ceil(filteredApps.length / PER))
+  const slice = filteredApps.slice((page - 1) * PER, page * PER)
 
   // INTAKE-VACANCY-ID-1: a single distinct vacancy across the candidate's own
   // applications is an unambiguous "Intake plannen" default — without vacancy_id
   // on the create payload the vacancy's leads-list stays empty (CMBE VAC-LEADS-1).
   // 0 or 2+ distinct vacancies is genuinely ambiguous — left to the modal's own
   // searchable vacancy picker rather than guessing (never string-match stage
-  // labels here: funnel stages are tenant lookups, not a fixed vocabulary).
+  // labels here: funnel stages are tenant lookups, not a fixed vocabulary). This
+  // stays over the FULL (unfiltered) `apps` — it is unrelated to the display filter above.
   const distinctVacancyIds = Array.from(new Set(
     apps.map(s => s.vacancy?.id).filter((id): id is Id => id != null).map(String)
   ))
@@ -133,14 +172,11 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
 
-      {/* Matches — read-only list; "+ Match" moved here from the Sollicitaties header. */}
+      {/* Matches — read-only list; "+ Match" now sits on MatchesTab's OWN toolbar
+          row (Danny live review, 04-08: "Zoeken status en + match moet op 1 lijn!!") —
+          no more separate flex-end row above it. */}
       {subTab === 'matches' && (
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 6 }}>
-            <DrawerAddButton onClick={() => setModal('match')} label={t('work.addMatch')} />
-          </div>
-          <MatchesTab c={c} onEdit={setEditMatchId} />
-        </div>
+        <MatchesTab c={c} onEdit={setEditMatchId} onAdd={() => setModal('match')} />
       )}
 
       {/* Talentenpools — moved here from the Profiel tab (kept as the exact same component). */}
@@ -149,10 +185,18 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
       {subTab === 'applications' && (
       <div>
         {/* No "Sollicitaties" label here (Danny addendum 4) — the sub-tab bar
-            above already says it. The leftover count used to sit on the left
-            (Danny consistency sweep 2026-07: "kan weg links") — only the two
-            right-aligned actions remain now. */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 6 }}>
+            above already says it. Toolbar (Danny live review, 04-08: "Zoeken en
+            status erbij!"): search (grows) → stage filter → the two actions,
+            ALL ON ONE LINE — mirrors the customer drill-down toolbar footprint. */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 120, padding: '6px 10px',
+            background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
+            <Search size={13} color="var(--text-muted)" />
+            <input value={search} onChange={e => setSearch(e.target.value)}
+              placeholder={t('work.searchPlaceholder')} aria-label={t('work.searchPlaceholder')}
+              style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
+          </div>
+          <StatusFilterSelect value={stageFilter} onToggle={toggleStage} statuses={stageOptions} />
           <div style={{ display: 'flex', gap: 6 }}>
             <DrawerAddButton onClick={() => setModal('apply')} label={t('work.addApplication')} />
             <DrawerAddButton onClick={() => setModal('intake')} icon={CalendarPlus} label={t('work.planIntake')} />
@@ -160,12 +204,20 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
         </div>
         <div style={sectionBlock}>
         <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-          <div style={{ padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>{t('work.vacancy')}</div>
+          {/* Column headers (Danny live review: "Status en datum hebben geen
+              kopje?") — aligned with the row's own layout below: the vacancy
+              label grows, the stage pill and the applied-on date each get a
+              fixed-width header cell over their own column. */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>
+            <span style={{ flex: 1, minWidth: 0 }}>{t('work.vacancy')}</span>
+            <span style={{ width: 90, flexShrink: 0 }}>{t('work.colStatus')}</span>
+            <span style={{ width: 64, flexShrink: 0, textAlign: 'right' }}>{t('work.colDate')}</span>
+          </div>
           {slice.length === 0
             ? <div style={{ padding: '20px', textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>{t('sections.applicationsEmpty')}</div>
             : slice.map((s, i) => {
               // Vacancy-less intake applications have no title → show a dash (CONSIST-2).
-              const label = s.vacature ?? s.vacancy?.title ?? s.title ?? '—'
+              const label = vacancyLabelOf(s) ?? '—'
               const url = vacancyUrlOf(s)
               const vacancyId = s.vacancy?.id ?? null
               const appt = apptFor(s.id)
@@ -215,9 +267,9 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
             )})
           }
         </div>
-        {apps.length > 0 && (
+        {filteredApps.length > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
-            <span>{(page - 1) * PER + 1}–{Math.min(page * PER, apps.length)} {t('work.of')} {apps.length}</span>
+            <span>{(page - 1) * PER + 1}–{Math.min(page * PER, filteredApps.length)} {t('work.of')} {filteredApps.length}</span>
             <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 5, background: 'var(--bg)', cursor: page <= 1 ? 'default' : 'pointer', color: page <= 1 ? 'var(--border)' : 'var(--text-muted)' }}>‹</button>
             <button onClick={() => setPage(p => Math.min(pages, p + 1))} disabled={page >= pages} style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 5, background: 'var(--bg)', cursor: page >= pages ? 'default' : 'pointer', color: page >= pages ? 'var(--border)' : 'var(--text-muted)' }}>›</button>
           </div>

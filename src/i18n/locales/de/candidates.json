@@ -223,7 +223,7 @@
     "statusPanelHint": "Standard: Lead. Ein neuer Kandidat beginnt als Lead.",
     "cv": {
       "title": "Kandidat aus Lebenslauf",
-      "intro": "Laden Sie einen Lebenslauf (PDF) hoch. Koios liest die Daten aus und füllt dieses Formular vor. Es wird nichts gespeichert: Sie prüfen die Felder und klicken selbst auf Anlegen.",
+      "intro": "Koios füllt dieses Formular anhand des Lebenslaufs aus — Sie prüfen es und klicken selbst auf Anlegen.",
       "choose": "Lebenslauf wählen",
       "hint": "Nur PDF · max. 10 MB",
       "uploading": "Lebenslauf wird hochgeladen…",
@@ -351,7 +351,8 @@
     "openRestored": "Öffnen",
     "archivedNamed": "{{name}} archiviert",
     "noStatus": "Kein Status",
-    "changelog": "Änderungsprotokoll"
+    "changelog": "Änderungsprotokoll",
+    "tasksSearchPlaceholder": "Aufgabe suchen…"
   },
   "stage": {
     "lead": "Lead",
@@ -477,7 +478,10 @@
     "appointmentVacancyHint": "Leer lassen für einen Termin ohne Stelle.",
     "endTime": "Endzeit",
     "endTimeAt": "bis {{time}}",
-    "vacancyUnknown": "Unbekannte Stelle"
+    "vacancyUnknown": "Unbekannte Stelle",
+    "searchPlaceholder": "Vakanz suchen…",
+    "colStatus": "Status",
+    "colDate": "Datum"
   },
   "communication": {
     "newNote": "Neue Notiz",

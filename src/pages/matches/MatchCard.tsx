@@ -1,4 +1,5 @@
-import { ExternalLink, Link2, Pencil } from 'lucide-react'
+import { useState } from 'react'
+import { ExternalLink, Link2, Pencil, ChevronRight, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import SoftChip from '@/components/ui/SoftChip'
@@ -48,6 +49,13 @@ export interface MatchCardProps {
   // Gates the expiry chip (point 6) — a finished match never needs the nag.
   isClosed?: boolean
   archived?: boolean
+  // Opt-in COMPACT mode (Danny live review, 04-08: "meer compact in een tabel
+  // weergegeven met de optie om het open te klappen"): collapses to ONE summary
+  // row per match — title/stage, the other-party value, score, the open/edit
+  // icons, and a chevron — expanding in place to the existing detail rows below.
+  // Off by default so the customer drawer's own MatchesTab (and, in spirit, the
+  // scoped Matches sub-tab) render byte-identical, unchanged.
+  collapsible?: boolean
 }
 
 /**
@@ -79,9 +87,14 @@ export default function MatchCard({
   otherPartyLabel, otherPartyValue,
   contractType, contractStatus, functionTitle, branchName, ownerName, startDate, endDate,
   isClosed = false, archived = false,
+  collapsible = false,
 }: MatchCardProps) {
   const { t } = useTranslation(['candidates', 'common'])
   const { formatDate } = useDateFormat()
+  // Compact mode's own expand state — collapsed by default (Danny: "collapsed
+  // by default … click expands"); a per-card independent toggle, purely
+  // presentational, never touched when collapsible is off.
+  const [expanded, setExpanded] = useState(false)
 
   // Period row value — a single em-dash when NEITHER date is known, otherwise
   // formatDate's own '—' fallback covers a one-sided range (mirrors CommunicationTab).
@@ -111,57 +124,108 @@ export default function MatchCard({
     { key: 'contractStatus', label: t('matchesView.contract'), value: t(`matchesView.contractStatus.${contractStatus ?? 'none'}`, { defaultValue: contractStatus || t('matchesView.contractStatus.none') }) },
   ]
 
+  // Title block: "{vacature} — {fase}" (point 2) — shared verbatim between the
+  // default header and the compact summary row, never a second copy.
+  const titleBlock = (
+    <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 600, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 4, overflow: 'hidden' }}>
+      <span onClickCapture={onBeforeOpen} onClick={e => e.stopPropagation()} style={{ minWidth: 0, overflow: 'hidden' }}>
+        {/* hideIcon: the explicit "Open match" ⧉ right after this is the ONE
+            open-in-new icon for this row (Danny: "twee keer een icoon met
+            open-in-nieuw-venster"). */}
+        <EntityLink page="vacancies" id={vacancyId} title={vacancyTitle || '—'} hideIcon>{vacancyTitle || '—'}</EntityLink>
+      </span>
+      {stageLabel && (
+        <>
+          {/* Decorative separator, own element: keeps the fase label itself as a
+              clean text match (getByText) and out of the screen-reader run. */}
+          <span aria-hidden="true" style={{ color: 'var(--text-muted)', flexShrink: 0 }}> — </span>
+          <span style={{ color: stageColor || 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>
+            {stageLabel}
+          </span>
+        </>
+      )}
+    </span>
+  )
+
+  // Right-side icons: open-in-new / edit / backoffice / vacancy-URL — shared
+  // verbatim between the default header and the compact summary row.
+  const iconsBlock = (
+    <>
+      {id != null && (
+        <a href={buildEntityDeepLink('matches', id)} target="_blank" rel="noopener noreferrer" onClick={onBeforeOpen}
+          title={t('matchesView.openMatch')} aria-label={t('matchesView.openMatch')}
+          style={{ display: 'flex', color: 'var(--color-primary)', padding: 2 }}>
+          <ExternalLink size={12} />
+        </a>
+      )}
+      {/* Point 2 (Danny live P1): edit this match's contract fields — candidate card only. */}
+      {onEdit && id != null && (
+        <button type="button" onClick={onEdit} title={t('common:edit')} aria-label={t('common:edit')}
+          style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2 }}>
+          <Pencil size={12} />
+        </button>
+      )}
+      {helloflexGuid ? (
+        <span title={t('matchesView.backofficeLinked')} style={{ display: 'flex', color: 'var(--color-primary)' }}><Link2 size={13} /></span>
+      ) : null}
+      {(showHelloflex || showShiftmanager) && (
+        <BackofficeCouplingIndicator helloflexLink={helloflexLink} shiftmanagerLink={shiftmanagerLink}
+          showHelloflex={showHelloflex} showShiftmanager={showShiftmanager} />
+      )}
+      {isSafeUrl(vacancyUrl) ? (
+        <a href={vacancyUrl ?? undefined} target="_blank" rel="noopener noreferrer" title={t('work.openVacancy')}
+          style={{ display: 'flex', color: 'var(--text-muted)' }}><ExternalLink size={12} /></a>
+      ) : null}
+    </>
+  )
+  const scorePill = <ScorePill value={score ?? null} />
+
+  // Compact mode toggles on any click landing on the header's own empty space
+  // (title/icons/score each stop propagation above so they keep working
+  // independently) — the chevron button stays the explicit, keyboard-reachable
+  // control (aria-expanded), the row click is a mouse convenience on top of it.
+  const toggle = () => setExpanded(x => !x)
+  const showRows = !collapsible || expanded
+
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', marginBottom: 8 }}>
-      {/* Header: "{vacature} — {fase}" one-liner (point 2) + score + coupling glyphs. */}
-      <div style={{ padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 600, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 4, overflow: 'hidden' }}>
-          <span onClickCapture={onBeforeOpen} style={{ minWidth: 0, overflow: 'hidden' }}>
-            {/* hideIcon: the explicit "Open match" ⧉ right after this is the ONE
-                open-in-new icon for this row (Danny: "twee keer een icoon met
-                open-in-nieuw-venster"). */}
-            <EntityLink page="vacancies" id={vacancyId} title={vacancyTitle || '—'} hideIcon>{vacancyTitle || '—'}</EntityLink>
-          </span>
-          {stageLabel && (
-            <>
-              {/* Decorative separator, own element: keeps the fase label itself as a
-                  clean text match (getByText) and out of the screen-reader run. */}
-              <span aria-hidden="true" style={{ color: 'var(--text-muted)', flexShrink: 0 }}> — </span>
-              <span style={{ color: stageColor || 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>
-                {stageLabel}
-              </span>
-            </>
-          )}
-        </span>
-        {id != null && (
-          <a href={buildEntityDeepLink('matches', id)} target="_blank" rel="noopener noreferrer" onClick={onBeforeOpen}
-            title={t('matchesView.openMatch')} aria-label={t('matchesView.openMatch')}
-            style={{ display: 'flex', color: 'var(--color-primary)', padding: 2 }}>
-            <ExternalLink size={12} />
-          </a>
+      {/* Header: "{vacature} — {fase}" one-liner (point 2) + score + coupling
+          glyphs. Compact mode (collapsible) additionally shows the other-party
+          value inline and a chevron, in the order Danny asked for: title—stage,
+          other party, score, icons, chevron. */}
+      <div onClick={collapsible ? toggle : undefined}
+        style={{ padding: '8px 12px', background: 'var(--bg)', borderBottom: collapsible && !expanded ? 'none' : '1px solid var(--border)',
+          display: 'flex', alignItems: 'center', gap: 8, cursor: collapsible ? 'pointer' : undefined }}>
+        {titleBlock}
+        {collapsible ? (
+          <>
+            {/* Other-party value inline in the summary row (Danny: "vacancy title —
+                status, client, score %, …") — stops propagation so clicking the
+                value itself (may be an EntityLink) doesn't also toggle the row. */}
+            <span onClick={e => e.stopPropagation()} style={{ fontSize: 12, color: 'var(--text-muted)', flexShrink: 0, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {otherPartyValue}
+            </span>
+            <span onClick={e => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              {scorePill}
+              {iconsBlock}
+            </span>
+            <button type="button" onClick={e => { e.stopPropagation(); toggle() }}
+              title={expanded ? t('common:collapse') : t('common:expand')}
+              aria-label={expanded ? t('common:collapse') : t('common:expand')}
+              aria-expanded={expanded}
+              style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, flexShrink: 0 }}>
+              {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            </button>
+          </>
+        ) : (
+          <>
+            {iconsBlock}
+            {scorePill}
+          </>
         )}
-        {/* Point 2 (Danny live P1): edit this match's contract fields — candidate card only. */}
-        {onEdit && id != null && (
-          <button type="button" onClick={onEdit} title={t('common:edit')} aria-label={t('common:edit')}
-            style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2 }}>
-            <Pencil size={12} />
-          </button>
-        )}
-        {helloflexGuid ? (
-          <span title={t('matchesView.backofficeLinked')} style={{ display: 'flex', color: 'var(--color-primary)' }}><Link2 size={13} /></span>
-        ) : null}
-        {(showHelloflex || showShiftmanager) && (
-          <BackofficeCouplingIndicator helloflexLink={helloflexLink} shiftmanagerLink={shiftmanagerLink}
-            showHelloflex={showHelloflex} showShiftmanager={showShiftmanager} />
-        )}
-        {isSafeUrl(vacancyUrl) ? (
-          <a href={vacancyUrl ?? undefined} target="_blank" rel="noopener noreferrer" title={t('work.openVacancy')}
-            style={{ display: 'flex', color: 'var(--text-muted)' }}><ExternalLink size={12} /></a>
-        ) : null}
-        <ScorePill value={score ?? null} />
       </div>
 
-      {rows.map(({ key, label, value }) => (
+      {showRows && rows.map(({ key, label, value }) => (
         <div key={key} style={{ display: 'flex', padding: '7px 12px', borderBottom: '1px solid var(--border)', gap: 16, background: 'var(--surface)', alignItems: 'center' }}>
           <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{label}</span>
           <span style={{ fontSize: 12, color: 'var(--text)' }}>{value}</span>

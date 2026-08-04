@@ -2,6 +2,7 @@ import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ShieldCheck, ShieldAlert, HelpCircle } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import Toggle from '@/components/ui/Toggle'
 import { useDateFormat } from '@/lib/datetime'
 import { useAuth } from '@/context/AuthContext'
 import { resolveRetentionConsent } from './retentionConsent'
@@ -73,11 +74,12 @@ export default function RetentionConsentBlock({ optIn, consentAt, expiresAt, onT
       </div>
 
       {/* Opt-in toggle — described by the validity line below, so a screen reader
-          hears "may be kept … consent lapsed on 12-05-2026" as one statement. */}
+          hears "may be kept … consent lapsed on 12-05-2026" as one statement.
+          House toggle (Danny live review, 04-08: "Vervangen door toggles!!" —
+          a raw checkbox is never the house control, §0/§4); `describedBy` wires
+          aria-describedby onto Toggle's own underlying switch button. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-        <input type="checkbox" checked={optIn} onChange={e => onToggle(e.target.checked)}
-          aria-label={t('communication.consentRetentionOptIn')} aria-describedby={statusId}
-          style={{ width: 16, height: 16, cursor: 'pointer', flexShrink: 0 }} />
+        <Toggle checked={optIn} onChange={onToggle} ariaLabel={t('communication.consentRetentionOptIn')} describedBy={statusId} />
         <span style={{ fontSize: 13, color: 'var(--text)', flex: 1 }}>{t('communication.consentRetentionOptIn')}</span>
         {optIn && consentAt && (
           <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>

@@ -198,3 +198,51 @@ describe('WorkTab · pencil on a match row opens the edit modal (point 2)', () =
     expect(screen.getByTestId('match-modal')).toHaveAttribute('data-edit-match-id', 'match-7')
   })
 })
+
+// Danny live review, 04-08: "Zoeken en status erbij!" — the Sollicitaties list
+// gets the same search + stage-filter toolbar idiom as the customer drill-down,
+// on the SAME line as the two existing action buttons; plus column headers for
+// the stage pill / applied-on date the header row was missing.
+describe('WorkTab · Sollicitaties toolbar (search + stage filter, Danny live review 04-08)', () => {
+  const twoApps = [
+    { id: 'a1', vacancy: { id: 'v1', title: 'Verpleegkundige' }, stageLabel: 'Gesolliciteerd', created_at: '2026-07-01' },
+    { id: 'a2', vacancy: { id: 'v2', title: 'Verzorgende' }, stageLabel: 'Ingepland', created_at: '2026-07-02' },
+  ]
+
+  it('renders search, stage filter and the two actions on ONE line, in that DOM order', () => {
+    render(<WorkTab c={candidate(twoApps)} />)
+    const search = screen.getByPlaceholderText('work.searchPlaceholder')
+    const stageFilter = screen.getByRole('button', { name: 'filters.allStatuses' })
+    const applyButton = screen.getByRole('button', { name: 'work.addApplication' })
+    const intakeButton = screen.getByRole('button', { name: 'work.planIntake' })
+    expect(search.compareDocumentPosition(stageFilter) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(stageFilter.compareDocumentPosition(applyButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(applyButton.compareDocumentPosition(intakeButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('search narrows the visible applications on the vacancy label', async () => {
+    const user = userEvent.setup()
+    render(<WorkTab c={candidate(twoApps)} />)
+    expect(screen.getByRole('button', { name: 'Verpleegkundige' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Verzorgende' })).toBeInTheDocument()
+    await user.type(screen.getByPlaceholderText('work.searchPlaceholder'), 'verzorg')
+    expect(screen.queryByRole('button', { name: 'Verpleegkundige' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'Verzorgende' })).toBeInTheDocument()
+  })
+
+  it('the stage filter (derived from the loaded rows) narrows to the picked stage only', async () => {
+    const user = userEvent.setup()
+    render(<WorkTab c={candidate(twoApps)} />)
+    await user.click(screen.getByRole('button', { name: 'filters.allStatuses' }))
+    await user.click(await screen.findByRole('button', { name: 'Ingepland' }))
+    expect(screen.getByRole('button', { name: 'Verzorgende' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Verpleegkundige' })).toBeNull()
+  })
+
+  it('renders column headers for Vacature, Status and Datum (Danny live review: "geen kopje?")', () => {
+    render(<WorkTab c={candidate(twoApps)} />)
+    expect(screen.getByText('work.vacancy')).toBeInTheDocument()
+    expect(screen.getByText('work.colStatus')).toBeInTheDocument()
+    expect(screen.getByText('work.colDate')).toBeInTheDocument()
+  })
+})

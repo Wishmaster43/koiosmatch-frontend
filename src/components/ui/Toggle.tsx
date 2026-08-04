@@ -11,11 +11,16 @@ export interface ToggleProps {
   onChange: (v: boolean) => void
   ariaLabel?: string
   disabled?: boolean
+  // Optional (candidate RetentionConsentBlock, 04-08): forwards aria-describedby
+  // to the underlying switch button, so a screen reader reads a validity line
+  // right below it as part of the SAME announcement. Additive — every existing
+  // consumer that never passes it keeps the exact same markup, unchanged.
+  describedBy?: string
 }
 
-export default function Toggle({ checked, onChange, ariaLabel, disabled }: ToggleProps) {
+export default function Toggle({ checked, onChange, ariaLabel, disabled, describedBy }: ToggleProps) {
   return (
-    <button type="button" role="switch" aria-checked={checked} aria-label={ariaLabel}
+    <button type="button" role="switch" aria-checked={checked} aria-label={ariaLabel} aria-describedby={describedBy}
       disabled={disabled} onClick={() => onChange(!checked)}
       style={{ width: 32, height: 18, borderRadius: 999, border: 'none',
                cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1,

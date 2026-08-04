@@ -59,7 +59,10 @@ describe('DocPreviewModal', () => {
   it('fetches a PERSISTED doc as a blob (never window.open/navigation) and renders the pdf.js canvas preview', async () => {
     const openSpy = vi.spyOn(window, 'open')
     render(<DocPreviewModal doc={{ name: 'cv.pdf', url: '/api/candidates/1/documents/2/download' }} onClose={() => {}} />)
-    await waitFor(() => expect(fetch).toHaveBeenCalledWith('/api/candidates/1/documents/2/download', { credentials: 'include' }))
+    // PREVIEW-RELATIVE-URL-1: a relative api url resolves against the API origin
+    // (test env: VITE_API_URL is relative → falls back to the frontend origin),
+    // never fetched raw — a bare relative fetch was exactly the live 05-08 bug.
+    await waitFor(() => expect(fetch).toHaveBeenCalledWith(`${window.location.origin}/api/candidates/1/documents/2/download`, { credentials: 'include' }))
     await waitFor(() => expect(document.querySelectorAll('canvas').length).toBe(2))
     expect(document.querySelector('iframe')).toBeNull()
     expect(openSpy).not.toHaveBeenCalled()

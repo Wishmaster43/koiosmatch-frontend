@@ -5,6 +5,7 @@ import { useDateFormat } from '@/lib/datetime'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import SectionCard from '@/components/ui/SectionCard'
+import Toggle from '@/components/ui/Toggle'
 import RetentionConsentBlock from './RetentionConsentBlock'
 import CandidateTasks from './CandidateTasks'
 import ConversationsSection from './ConversationsSection'
@@ -185,9 +186,10 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
               const on = (consent[ch.key] as boolean | undefined) ?? ch.dflt
               const at = consent[ch.at] as string | null | undefined
               return (
+                // House toggle (Danny live review, 04-08: "Vervangen door
+                // toggles!!" — a raw checkbox is never the house control, §0/§4).
                 <div key={ch.key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <input type="checkbox" checked={!!on} onChange={e => setConsent(ch.key, e.target.checked)}
-                    style={{ width: 16, height: 16, cursor: 'pointer', flexShrink: 0 }} />
+                  <Toggle checked={!!on} onChange={v => setConsent(ch.key, v)} ariaLabel={ch.label} />
                   <span style={{ fontSize: 13, color: 'var(--text)', flex: 1 }}>{ch.label}</span>
                   {on && at && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('communication.consentGivenAt', { date: formatDate(at) })}</span>}
                 </div>

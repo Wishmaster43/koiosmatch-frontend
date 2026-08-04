@@ -28,6 +28,7 @@ import { useProvinces } from '@/hooks/useProvinces'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { modalColumns } from '@/components/ui/modalCards'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 import ModalHeader from './addmodal/ModalHeader'
@@ -311,12 +312,17 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
               </div>
             ) : (
               // Two-column grid of titled cards (Optie A) — Persoonlijk/Adres span both
-              // columns (their paired rows need the width); Contact/Werk sit side by side.
+              // columns (their paired rows need the width); Contact/Werk, and now
+              // Profiel-tekst/Vestiging (Danny 05-08: profile text LEFT, mirroring the
+              // +Match modal's own left text column) sit side by side. Built from the
+              // shared modalColumns helper (components/ui/modalCards) — same convention
+              // as +Match's twoColSections — with this form's own tighter gap (14 vs the
+              // helper's 24 default) kept via an explicit override.
               // Each card is a presentational component under addmodal/ (§refactor 2026-07-20).
               // CvFilledContext lets each card mark its own CV-prefilled fields
               // without drilling the set through two levels (§3).
               <CvFilledContext.Provider value={cvFilled}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, alignItems: 'start' }}>
+                <div style={{ ...modalColumns(), gap: 14 }}>
                   {/* Both parse routes require candidates.update — hide the control when
                       it would 403 rather than offer an affordance that cannot work. */}
                   {canParseCv && (
