@@ -149,14 +149,6 @@ export default function DashboardsSettings() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 1000 }}>
-      {/* Intro — how toggling works + where to preview / couple roles. */}
-      <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-        <p style={{ margin: 0 }}>{t('dashboardsIntro')}</p>
-        <p style={{ margin: '6px 0 0' }}>· {t('dashboardsToggleHint')}</p>
-        <p style={{ margin: '2px 0 0' }}>· {t('dashboardsPreviewHint')}</p>
-        <p style={{ margin: '2px 0 0' }}>· {t('dashboardsRoleHint')}</p>
-      </div>
-
       <SubTabBar
         tabs={[
           { id: 'kpis', label: t('dashboards.tabs.kpis') },

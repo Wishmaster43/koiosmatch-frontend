@@ -72,3 +72,27 @@ describe('NotesTab · search', () => {
     expect(onEditNote).toHaveBeenCalledWith(2, expect.objectContaining({}))
   })
 })
+
+// Load-error state (Danny 04-08: retry affordance added HERE, in the shared tab, so
+// every host gets it at once — see the four pages/*/drawer/NotesTab.tsx wrappers).
+describe('NotesTab · load-error retry', () => {
+  it('renders the danger text and a retry button, and calls onRetry on click', async () => {
+    const user = userEvent.setup()
+    const onRetry = vi.fn()
+    render(<NotesTab error onRetry={onRetry} labels={{ ...labels, loadError: 'Notes could not be loaded.', retry: 'Try again' }} />)
+    expect(screen.getByText('Notes could not be loaded.')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Try again' }))
+    expect(onRetry).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders only the static text, no button, when onRetry is omitted (back-compat)', () => {
+    render(<NotesTab error labels={{ ...labels, loadError: 'Notes could not be loaded.' }} />)
+    expect(screen.getByText('Notes could not be loaded.')).toBeInTheDocument()
+    expect(screen.queryByRole('button')).toBeNull()
+  })
+
+  it('does not render the notes body while in the error state', () => {
+    render(<NotesTab error notes={[note()]} labels={{ ...labels, loadError: 'Notes could not be loaded.' }} />)
+    expect(screen.queryByText('Hello world')).toBeNull()
+  })
+})

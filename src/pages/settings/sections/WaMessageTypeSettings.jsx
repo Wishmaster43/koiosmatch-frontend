@@ -10,8 +10,11 @@ export function WaMessageTypeSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      {/* Order = queue priority (sort_order via the editor's reorder; no extra field). */}
-      <StatusListEditor compact withColor
+      {/* showRank: this is the ONE list where order IS a send priority (sort_order
+          drives WhatsAppSendModule::queueForMessageType's high/low queue split, api
+          app/Workflow/Modules/WhatsAppSendModule.php:260-276) — the rank number makes
+          that "1 = sent first" semantic explicit, unlike a plain display-order lookup. */}
+      <StatusListEditor compact withColor showRank
         title={t('waMessageTypes.title')} subtitle={t('waMessageTypes.subtitle')}
         endpoint="/whatsapp-message-types" addLabel={t('waMessageTypes.add')} />
     </div>

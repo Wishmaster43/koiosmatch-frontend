@@ -71,4 +71,28 @@ describe('task NotesTab (NT-TASK-1, shared reuse)', () => {
     expect(screen.getByText('notes.empty')).toBeInTheDocument()
     expect(notifyError).toHaveBeenCalledWith('Notitie opslaan mislukt')
   })
+
+  // Load-error retry (Danny 04-08, mirrors the match tab): a failed GET renders the
+  // shared tab's danger row + retry button; clicking it must fire a SECOND request
+  // (§13 — assert the REQUEST, never only that a callback fired).
+  it('retries the GET when the load-error retry button is clicked', async () => {
+    // Reset the call ledger first — earlier tests in this file already mounted a
+    // task with the same id, so their /tasks/t1/notes calls would otherwise inflate
+    // the counts below. `api.get` is ALSO shared with useNoteTypes' own
+    // `/note-types?entity=task` lookup, so filter on the notes route specifically.
+    mockGet.mockClear()
+    const notesCalls = () => mockGet.mock.calls.filter(c => c[0] === '/tasks/t1/notes').length
+    mockGet.mockImplementation((url: string) =>
+      url === '/tasks/t1/notes' && notesCalls() === 1
+        ? Promise.reject({ response: { status: 500 } })
+        : Promise.resolve({ data: [] }))
+    const user = userEvent.setup()
+    render(<NotesTab task={task()} />)
+    await waitFor(() => expect(notesCalls()).toBe(1))
+    expect(await screen.findByText('notes.loadError')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'common:error.retry' }))
+    await waitFor(() => expect(notesCalls()).toBe(2))
+    expect(mockGet).toHaveBeenCalledWith('/tasks/t1/notes')
+    expect(await screen.findByText('notes.empty')).toBeInTheDocument()
+  })
 })

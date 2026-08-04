@@ -36,11 +36,13 @@ const STORED = {
 }
 
 describe('CandidateVacancyTabSettings', () => {
-  it('toggling a phase chip POSTs the FULL merged object, no sibling key lost', async () => {
+  it('toggling a phase switch POSTs the FULL merged object, no sibling key lost', async () => {
     blobRef.current = { candidate_vacancy_tab: JSON.stringify(STORED) }
     const user = userEvent.setup()
     render(<CandidateVacancyTabSettings />)
-    await user.click(screen.getByText('Candidate'))
+    // The control is a real Toggle switch since 05-08 ("Toggle maken!!") — the
+    // coloured chip next to it is a label, not the clickable element.
+    await user.click(screen.getByRole('switch', { name: 'Candidate' }))
     expect(postMock).toHaveBeenCalledWith('/settings', {
       candidate_vacancy_tab: JSON.stringify({ ...STORED, phases: ['lead', 'candidate'] }),
     })

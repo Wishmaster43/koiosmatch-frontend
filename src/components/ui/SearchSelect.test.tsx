@@ -115,3 +115,46 @@ describe('SearchSelect · flip + clamp + portal', () => {
     expect(menu.style.left).toBe('')
   })
 })
+
+// `disabled` (2026-08): replaces the per-callsite onClick-guard emulation (e.g.
+// CustomFieldsSettings' locked type selector) with a first-class prop — the
+// dropdown must never open, via mouse OR keyboard, while disabled.
+describe('SearchSelect · disabled', () => {
+  it('renders the default trigger inert: a click does not open the dropdown', () => {
+    const onToggle = vi.fn()
+    render(<SearchSelect triggerLabel="Vestiging toevoegen" options={['A', 'B']} onToggle={onToggle} disabled />)
+    const trigger = screen.getByRole('button', { name: /Vestiging toevoegen/ })
+    expect(trigger).toBeDisabled()
+    fireEvent.click(trigger)
+    expect(screen.queryByPlaceholderText('search')).not.toBeInTheDocument()
+  })
+
+  it('does not open via a keyboard activation attempt while disabled', () => {
+    render(<SearchSelect triggerLabel="Vestiging toevoegen" options={['A', 'B']} onToggle={() => {}} disabled />)
+    const trigger = screen.getByRole('button', { name: /Vestiging toevoegen/ })
+    fireEvent.keyDown(trigger, { key: 'Enter', code: 'Enter' })
+    fireEvent.click(trigger)
+    expect(screen.queryByPlaceholderText('search')).not.toBeInTheDocument()
+  })
+
+  it('gates a caller-supplied renderTrigger button too — the toggle it receives is a no-op', () => {
+    render(
+      <SearchSelect
+        options={['A', 'B']}
+        onToggle={() => {}}
+        disabled
+        renderTrigger={toggle => <button type="button" onClick={toggle}>Custom trigger</button>}
+      />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Custom trigger' }))
+    expect(screen.queryByPlaceholderText('search')).not.toBeInTheDocument()
+  })
+
+  it('re-enables normally when disabled is false (back-compat: default behaviour untouched)', () => {
+    render(<SearchSelect triggerLabel="Vestiging toevoegen" options={['A', 'B']} onToggle={() => {}} />)
+    const trigger = screen.getByRole('button', { name: /Vestiging toevoegen/ })
+    expect(trigger).not.toBeDisabled()
+    fireEvent.click(trigger)
+    expect(screen.getByPlaceholderText('search')).toBeInTheDocument()
+  })
+})

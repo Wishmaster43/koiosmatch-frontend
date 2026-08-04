@@ -6,7 +6,7 @@
  * alone), and a failed PATCH rolls the optimistic UI back.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import i18n from '@/i18n'
 import CustomFieldsSettings from './CustomFieldsSettings'
 import api from '@/lib/api'
@@ -84,5 +84,46 @@ describe('CustomFieldsSettings — visible_in_ui toggle (worklist #44)', () => {
     // from the visible_in_ui "Show in UI" control that reflects the hidden state.
     expect(screen.getByTitle(st('customFieldsSettings.deactivate'))).toBeInTheDocument()
     expect(screen.getByTitle(st('customFieldsSettings.showInUi'))).toBeInTheDocument()
+  })
+})
+
+// Type-selector lock (2026-08): a field that already has data must not let its type
+// change — no safe text<->number conversion for stored values. This now runs through
+// SearchSelect's own `disabled` prop instead of a hand-rolled onClick guard.
+describe('CustomFieldsSettings — type selector locks once a field has data', () => {
+  // The expand/collapse chevron is the last button in the row (active + visible-in-ui
+  // toggles come first) — it carries no title/name of its own, so it's targeted
+  // positionally within the row scoped by the field's own label text.
+  const expandCard = () => {
+    const row = screen.getByText('Plate').parentElement.parentElement
+    const buttons = within(row).getAllByRole('button')
+    fireEvent.click(buttons[buttons.length - 1])
+  }
+
+  it('renders the type trigger as a real disabled control when has_data is true, and it does not open', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ ...FIELD, in_use: true }] } })
+    render(<CustomFieldsSettings entityType="vacancy" />)
+    await waitFor(() => expect(screen.getByText('Plate')).toBeInTheDocument())
+    expandCard()
+
+    const typeTrigger = screen.getByRole('button', { name: st('customFieldsSettings.types.text') })
+    expect(typeTrigger).toBeDisabled()
+
+    // Clicking a natively disabled trigger must not open the dropdown.
+    fireEvent.click(typeTrigger)
+    expect(screen.queryByText(st('customFieldsSettings.types.number'))).not.toBeInTheDocument()
+  })
+
+  it('leaves the type trigger enabled and openable when the field has no data', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [FIELD] } })
+    render(<CustomFieldsSettings entityType="vacancy" />)
+    await waitFor(() => expect(screen.getByText('Plate')).toBeInTheDocument())
+    expandCard()
+
+    const typeTrigger = screen.getByRole('button', { name: st('customFieldsSettings.types.text') })
+    expect(typeTrigger).not.toBeDisabled()
+
+    fireEvent.click(typeTrigger)
+    expect(screen.getByText(st('customFieldsSettings.types.number'))).toBeInTheDocument()
   })
 })

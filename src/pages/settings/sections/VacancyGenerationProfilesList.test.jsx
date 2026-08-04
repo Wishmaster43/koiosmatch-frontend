@@ -132,3 +132,48 @@ describe('VacancyGenerationProfilesList', () => {
     expect(screen.getByText('Zorg — ochtenddiensten')).toBeInTheDocument()
   })
 })
+
+// DEFAULT-UNDO (Danny 04-08): verified clear-safe against
+// VacancyGenerationProfileController::update() (no singleton-reject guard on
+// is_default; the resolver already falls back to highest-priority with no
+// default set) — clicking the active default pill now clears it instead of
+// staying a one-way ratchet.
+describe('VacancyGenerationProfilesList — is_default undo', () => {
+  it('the active default pill is not disabled (clickable, for undo)', async () => {
+    mockGet(Promise.resolve({ data: { data: [profile({ is_default: true })] } }))
+    render(<VacancyGenerationProfilesList />)
+
+    const activePill = await screen.findByRole('button', { name: st('common.default') })
+    expect(activePill).not.toBeDisabled()
+  })
+
+  it('clicking the active default PUTs {is_default:false} on the same per-id route', async () => {
+    mockGet(Promise.resolve({ data: { data: [profile({ is_default: true })] } }))
+    api.put.mockResolvedValue({ data: { data: profile({ is_default: false }) } })
+    const user = userEvent.setup()
+    render(<VacancyGenerationProfilesList />)
+
+    const activePill = await screen.findByRole('button', { name: st('common.default') })
+    await user.click(activePill)
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/vacancy-generation-profiles/p1',
+      expect.objectContaining({ is_default: false })))
+    // No profile is default any more — the row now offers "Maak standaard".
+    await waitFor(() => expect(screen.getByRole('button', { name: st('common.setDefault') })).toBeInTheDocument())
+  })
+
+  it('reverts and notifies when the clear PUT fails', async () => {
+    mockGet(Promise.resolve({ data: { data: [profile({ is_default: true })] } }))
+    api.put.mockRejectedValue(new Error('network down'))
+    const { notifyError } = await import('@/lib/notify')
+    const user = userEvent.setup()
+    render(<VacancyGenerationProfilesList />)
+
+    const activePill = await screen.findByRole('button', { name: st('common.default') })
+    await user.click(activePill)
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(st('vacancyGenerationSettings.saveFailed')))
+    // Reverted: the pill is still the active default.
+    expect(await screen.findByRole('button', { name: st('common.default') })).toBeInTheDocument()
+  })
+})

@@ -223,7 +223,8 @@
     "escalation_reasons": "Motifs d'escalade",
     "opportunity_lookups": "Étapes et types",
     "nt_match": "Matchs",
-    "nt_task": "Tâches"
+    "nt_task": "Tâches",
+    "customer_blacklist_reasons": "Motifs de liste noire"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -2080,9 +2081,6 @@
       }
     }
   },
-  "dashboardsIntro": "Chaque rôle dispose de son propre tableau de bord avec une rangée de KPI fixe et des graphiques et listes correspondants.",
-  "dashboardsPreviewHint": "Prévisualisez chaque vue en direct via le sélecteur de tableau de bord en haut à droite (direction et admin).",
-  "dashboardsRoleHint": "Associez un rôle à un tableau de bord dans Rôles et autorisations.",
   "dashboardsKpis": "KPI",
   "dashboardsBlocks": "Graphiques et listes",
   "dashboardsAll": "Tous les graphiques et listes",
@@ -2096,7 +2094,6 @@
     "planning": "Services, file d'attente WhatsApp et exécutions incomplètes.",
     "readonly": "Résumé en lecture seule."
   },
-  "dashboardsToggleHint": "Cliquez sur un KPI ou un graphique pour l activer/désactiver pour ce rôle — tout est activé par défaut.",
   "dashboardsToggleOn": "Activer",
   "dashboardsToggleOff": "Désactiver",
   "log": {
@@ -2582,10 +2579,6 @@
     "add": "Ajouter un motif"
   },
   "blacklistReasons": {
-    "tabs": {
-      "candidate": "Candidat",
-      "customer": "Client"
-    },
     "candidate": {
       "title": "Motifs de liste noire — candidat",
       "subtitle": "Motifs pour mettre un candidat sur liste noire."
@@ -2606,7 +2599,11 @@
     "add": "Ajouter une valeur",
     "stages": {
       "title": "Étapes du pipeline",
-      "subtitle": "Les étapes que traverse une opportunité."
+      "subtitle": "Les étapes que traverse une opportunité.",
+      "isWon": "Étape gagnée",
+      "isWonHint": "Cette étape marque une opportunité comme gagnée (alimente les KPI gagné/perdu).",
+      "isLost": "Étape perdue",
+      "isLostHint": "Cette étape marque une opportunité comme perdue (alimente les KPI gagné/perdu)."
     },
     "serviceTypes": {
       "title": "Types de service",

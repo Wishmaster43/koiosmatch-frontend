@@ -12,9 +12,12 @@ export default function NationalitiesSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      {/* reorderable off: SimpleLookupController family has no /reorder route (audit 04-08) */}
-      <StatusListEditor reorderable={false} title={t('nationalities.title')} subtitle={t('nationalities.subtitle')}
-        endpoint="/nationalities" addLabel={t('nationalities.add')} withColor />
+      {/* reorderable off: SimpleLookupController family has no /reorder route (audit 04-08).
+          withColor off: a colour on a nationality carries no meaning (§4 — "alles 1 kleur?",
+          Danny 05-08); the real adornment is a country FLAG, which needs a backend
+          country_code column first (NATION-FLAG-1) — flag render lands with that ticket. */}
+      <StatusListEditor reorderable={false} withColor={false} title={t('nationalities.title')} subtitle={t('nationalities.subtitle')}
+        endpoint="/nationalities" addLabel={t('nationalities.add')} />
     </div>
   )
 }

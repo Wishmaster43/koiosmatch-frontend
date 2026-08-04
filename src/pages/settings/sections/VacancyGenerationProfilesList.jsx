@@ -4,7 +4,9 @@
  * shape): a chevron reveals the full VacancyGenerationProfileEditor form; a
  * dashed "+ Profiel" card adds a new one. `is_default` is a singleton flip
  * (mirrors StatusListEditor's defaultField) — promoting one profile locally
- * clears every other row without waiting for a refetch.
+ * clears every other row without waiting for a refetch. The shared DefaultToggle
+ * is undoable (DEFAULT-UNDO, Danny 04-08): clicking the active pill clears it —
+ * verified clear-safe against the backend (see setDefault below).
  *
  * The backend endpoints (`/vacancy-generation-profiles`, `/vacancy-content-blocks`)
  * do not exist yet (VACGEN-1 is a backend-Claude hand-off) — a 404 on the initial
@@ -127,15 +129,22 @@ export default function VacancyGenerationProfilesList() {
     }, { danger: true })
   }
 
-  // Singleton is_default flip — promote one profile, clear every other row locally
-  // (optimistic; the backend model-enforces the same rule), rolling back on failure.
+  // Singleton is_default flip — promote one profile (clearing every other row
+  // locally, mirrors the backend's own keepSingleDefault) OR clear the active one
+  // (DEFAULT-UNDO, Danny 04-08). Verified clear-safe against
+  // VacancyGenerationProfileController::update() (koiosmatch-api,
+  // VacancyGenerationProfileController.php:35-42): `is_default` is a plain
+  // `sometimes|boolean`, keepSingleDefault only acts when the flag turns ON, and the
+  // resolver (VacancyProfileResolver.php) already falls back to the highest-priority
+  // profile when no profile is default — so "no default" is a supported state.
   const setDefault = async (profile) => {
-    if (profile.is_default || settingDefaultId) return
+    if (settingDefaultId) return
+    const next = !profile.is_default
     const previous = profiles
     setSettingDefaultId(profile.id)
-    setProfiles(p => p.map(x => ({ ...x, is_default: x.id === profile.id })))
+    setProfiles(p => p.map(x => (x.id === profile.id ? { ...x, is_default: next } : (next ? { ...x, is_default: false } : x))))
     try {
-      await api.put(`${ENDPOINT}/${profile.id}`, { ...profile, is_default: true })
+      await api.put(`${ENDPOINT}/${profile.id}`, { ...profile, is_default: next })
     } catch {
       setProfiles(previous)
       notifyError(t('vacancyGenerationSettings.saveFailed'))

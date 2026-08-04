@@ -11,9 +11,14 @@
  *                    appointment; missing one is flagged — see §3B / C-22)
  *
  * `is_default` (LOOKUP-DEFAULT-1, api 4c25677) is a backend-enforced SINGLETON on
- * funnel_types (application_stages) — at most one stage may carry it (seeded:
- * Gesolliciteerd/Applied). A dedicated DefaultToggle per row promotes one stage
- * and clears the others optimistically; no modal field (see setDefault below).
+ * funnel_types (application_stages) and phases — at most one row may carry it per
+ * lookup (seeded: Gesolliciteerd/Applied). A dedicated DefaultToggle per row promotes
+ * one row and clears the others optimistically; no modal field (see setDefault below).
+ * DEFAULT-UNDO (Danny 04-08) made the shared DefaultToggle undoable by default, but
+ * THIS caller stays one-way (`undoable={false}`) — verified against
+ * CandidateLookupController::update() (koiosmatch-api, CandidateLookupController.php:
+ * 138-143): the backend 422s a PUT that clears is_default on funnel-types/phases, so
+ * there is no clear path to mirror here.
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -170,10 +175,18 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
                 {t('lookups.appointmentBadge')}
               </span>
             )}
-            {/* Default toggle: the singleton stage/phase new records land on when none is chosen. */}
+            {/* Default toggle: the singleton stage/phase new records land on when none is chosen.
+                undoable={false}: CandidateLookupController::update() (koiosmatch-api,
+                app/Http/Controllers/CandidateLookupController.php:138-143) 422s any PUT that
+                clears is_default on funnel-types/phases — ApplicationStage::SINGLETON_FLAGS
+                (app/Models/ApplicationStage.php:22) includes is_default and the controller
+                aborts "At least one stage must keep its is_default flag." for BOTH lookup
+                types (the guard iterates SINGLETON_FLAGS against cfg['flags'], which lists
+                is_default for both). Verified 04-08 — this pill stays a one-way ratchet
+                until the backend adds a real clear path. */}
             {supportsDefault && (
               <DefaultToggle active={Boolean(item.is_default)} busy={settingDefaultId === item.id}
-                onClick={() => setDefault(item)}
+                onClick={() => setDefault(item)} undoable={false}
                 activeLabel={t('common.default')} inactiveLabel={t('common.setDefault')} />
             )}
             <div style={{ flex: 1 }} />

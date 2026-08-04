@@ -48,10 +48,17 @@ interface SearchSelectProps {
   menuAlign?: 'left' | 'right'
   // Opt-in: close the menu after a pick — single-select dropdowns (Conversie).
   closeOnToggle?: boolean
+  // Lock the whole control inert (e.g. a field-type selector once data exists).
+  // The default trigger gets the real native `disabled` attribute (keyboard,
+  // click and focus all inert, aria-disabled for free); a caller's own
+  // `renderTrigger` markup is dimmed + pointer-blocked, and — the part that
+  // matters most — opening is gated centrally below, so no callsite ever needs
+  // its own onClick guard again.
+  disabled?: boolean
 }
 
 export default function SearchSelect({
-  triggerLabel, options = [], selected = [], onToggle, searchable = true, width = 280, onSearch, renderTrigger, menuAlign = 'left', closeOnToggle = false,
+  triggerLabel, options = [], selected = [], onToggle, searchable = true, width = 280, onSearch, renderTrigger, menuAlign = 'left', closeOnToggle = false, disabled = false,
 }: SearchSelectProps) {
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
@@ -88,14 +95,26 @@ export default function SearchSelect({
   const opts: SearchSelectOption[] = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
   const shown = onSearch ? opts : (query ? opts.filter(o => o.label.toLowerCase().includes(query.toLowerCase())) : opts)
 
+  // Single gate for opening — disabled short-circuits both the default trigger
+  // and any caller-supplied `renderTrigger` button, so `open` can never become
+  // true while disabled, regardless of how the trigger tries to invoke it.
+  const toggle = () => { if (!disabled) setOpen(o => !o) }
+
   return (
     <div ref={ref} style={{ position: 'relative' }}>
       {renderTrigger
-        ? renderTrigger(() => setOpen(o => !o))
+        ? (disabled
+          // Caller owns this markup; only wrap it when disabled, so every existing
+          // renderTrigger callsite (16+ across Settings) renders byte-for-byte as
+          // before — the wrapper (dim + block pointer interaction) is new, opt-in
+          // behaviour, never a layout change for callers that never pass `disabled`.
+          ? <div style={{ opacity: 0.5, cursor: 'default', pointerEvents: 'none' }}>{renderTrigger(toggle)}</div>
+          : renderTrigger(toggle))
         : (
-          <button onClick={() => setOpen(o => !o)}
+          <button onClick={toggle} disabled={disabled}
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', fontSize: 11, fontWeight: 500,
-              border: '1px dashed var(--border)', borderRadius: 7, background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+              border: '1px dashed var(--border)', borderRadius: 7, background: 'none', color: 'var(--text-muted)',
+              cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.5 : 1 }}>
             <Plus size={11} /> {triggerLabel}
           </button>
         )}

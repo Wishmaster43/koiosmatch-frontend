@@ -20,9 +20,16 @@ import StatusListEditor from './StatusListEditor'
  *
  * Deal type carries an extra `unit` (euro|hours|quote) driving how the FE measures a
  * deal's value (OpportunityDealType.php) — stage/service/agreement have no such field.
- * Stage also carries `is_won`/`is_lost` terminal flags on the backend, but those are
- * NOT exposed here (out of scope for this pass — a stage's name/colour/order only);
- * flagging the gap rather than inventing UI for it.
+ *
+ * Stage also carries `is_won`/`is_lost` terminal flags (OpportunityStage.php) — wired
+ * here as `flagFields` (04-08, generalized from StatusListEditor's single flagField)
+ * because they have REAL consumers, not a speculative toggle: OpportunitiesInsightsRow
+ * derives its won/lost/open KPI counts from `stages.find(s => s.isWon/isLost)`, and
+ * OpportunitiesTable's isTerminalStage() gates the expected-close-date column the same
+ * way (both via useOpportunityStages/lookupUtils.mapOpportunityLookup). The backend's
+ * OpportunityStageController already validates both as plain `sometimes|boolean` with
+ * no singleton/exclusivity guard, so both flags toggle freely (modal checkbox + row
+ * badge, same as any other flagFields entry — never a DefaultToggle-style singleton).
  */
 export default function OpportunityLookupsSettings() {
   const { t } = useTranslation('settings')
@@ -41,7 +48,16 @@ export default function OpportunityLookupsSettings() {
         {activeTab === 'stages' && (
           <StatusListEditor withColor withValueSlug
             title={t('opportunityLookups.stages.title')} subtitle={t('opportunityLookups.stages.subtitle')}
-            endpoint="/opportunity-stages" addLabel={t('opportunityLookups.add')} />
+            endpoint="/opportunity-stages" addLabel={t('opportunityLookups.add')}
+            // defaultValue: the ns/key pair is reported to the owning lane for the
+            // five locale bundles (§5) rather than hand-edited here (out of scope
+            // for this task) — the fallback keeps the UI in real English meanwhile.
+            flagFields={[
+              { key: 'is_won', label: t('opportunityLookups.stages.isWon', { defaultValue: 'Won stage' }),
+                description: t('opportunityLookups.stages.isWonHint', { defaultValue: 'This stage marks a deal as won (feeds the won/lost KPIs).' }) },
+              { key: 'is_lost', label: t('opportunityLookups.stages.isLost', { defaultValue: 'Lost stage' }),
+                description: t('opportunityLookups.stages.isLostHint', { defaultValue: 'This stage marks a deal as lost (feeds the won/lost KPIs).' }) },
+            ]} />
         )}
         {activeTab === 'serviceTypes' && (
           <StatusListEditor withColor withValueSlug

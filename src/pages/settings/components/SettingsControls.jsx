@@ -70,19 +70,24 @@ export function ColorBadge({ label, color }) {
 }
 
 // Per-row "Standaard" (is_default) singleton toggle — soft-chip convention (§4):
-// tinted primary background/border, never a solid fill. Active = calm filled pill
-// (not clickable, it's already the default); inactive = a lighter, clickable pill
-// that promotes this row. The caller owns the singleton flip (only one row true).
-export function DefaultToggle({ active, onClick, busy, activeLabel, inactiveLabel }) {
+// tinted primary background/border, never a solid fill. By default the ACTIVE pill
+// stays clickable so clicking it CLEARS the default (DEFAULT-UNDO, Danny 04-08:
+// "je kan niet undo doen") — same soft-tint spec, stronger tint + weight 600 when
+// active; the caller owns the singleton flip/clear PUT (only one row true at a time).
+// `undoable={false}` opts a caller BACK into the old one-way ratchet (active pill
+// hard-disabled) for the rare backend that rejects clearing the flag — see
+// CandidateLookupsSettings.jsx's funnel-types/phases usage for the verified case.
+export function DefaultToggle({ active, onClick, busy, activeLabel, inactiveLabel, undoable = true, title }) {
+  const disabled = busy || (!undoable && active)
   return (
-    <button type="button" onClick={onClick} disabled={active || busy}
-      title={active ? activeLabel : inactiveLabel}
+    <button type="button" onClick={onClick} disabled={disabled}
+      title={title ?? (active ? activeLabel : inactiveLabel)}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 4, height: 22, padding: '0 9px',
         fontSize: 11, fontWeight: active ? 600 : 500, borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0,
         border: `1px solid color-mix(in srgb, var(--color-primary) ${active ? 45 : 28}%, transparent)`,
         background: `color-mix(in srgb, var(--color-primary) ${active ? 16 : 8}%, transparent)`,
-        color: 'var(--color-primary)', cursor: active || busy ? 'default' : 'pointer',
+        color: 'var(--color-primary)', cursor: disabled ? 'default' : 'pointer',
         opacity: busy ? 0.6 : 1,
       }}>
       {active && <Check size={10} />}

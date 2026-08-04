@@ -1,7 +1,8 @@
 /**
- * BlacklistReasonsSettings — two sub-tabs (candidate/customer), each a StatusListEditor
- * against its own endpoint. Asserts each tab hits its OWN route (the key regression
- * risk of one component sharing two endpoints) and the create REQUEST (§13).
+ * BlacklistReasonsSettings — ONE entity per registration ("klant bij klant,
+ * kandidaat bij kandidaat", Danny 2026-08-05): the entity prop picks the endpoint.
+ * Asserts each entity hits its OWN route (the key regression risk of one component
+ * serving two endpoints) and the create REQUEST (§13).
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -24,7 +25,7 @@ const row = (over = {}) => ({ id: 'b1', name: 'No-show', color: '#D98A8A', in_us
 afterEach(() => vi.clearAllMocks())
 
 describe('BlacklistReasonsSettings', () => {
-  it('defaults to the candidate tab, GETting /candidate-blacklist-reasons', async () => {
+  it('the candidate registration (default) GETs /candidate-blacklist-reasons', async () => {
     api.get.mockResolvedValue({ data: [row()] })
     render(<BlacklistReasonsSettings />)
 
@@ -32,14 +33,11 @@ describe('BlacklistReasonsSettings', () => {
     expect(api.get).toHaveBeenCalledWith('/candidate-blacklist-reasons', undefined)
   })
 
-  it('switching to the customer tab GETs /customer-blacklist-reasons', async () => {
+  it('the customer registration GETs /customer-blacklist-reasons', async () => {
     api.get.mockResolvedValue({ data: [row()] })
-    const user = userEvent.setup()
-    render(<BlacklistReasonsSettings />)
+    render(<BlacklistReasonsSettings entity="customer" />)
 
     await screen.findByText('No-show')
-    await user.click(screen.getByRole('tab', { name: st('blacklistReasons.tabs.customer') }))
-
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customer-blacklist-reasons', undefined))
   })
 

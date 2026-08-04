@@ -223,7 +223,8 @@
     "escalation_reasons": "Eskalationsgründe",
     "opportunity_lookups": "Phasen & Typen",
     "nt_match": "Matches",
-    "nt_task": "Aufgaben"
+    "nt_task": "Aufgaben",
+    "customer_blacklist_reasons": "Blacklist-Gründe"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -2080,9 +2081,6 @@
       }
     }
   },
-  "dashboardsIntro": "Jede Rolle hat ein eigenes Dashboard mit einer festen KPI-Zeile und passenden Diagrammen und Listen.",
-  "dashboardsPreviewHint": "Sehen Sie jede Ansicht live über den Dashboard-Umschalter oben rechts (Management und Admin).",
-  "dashboardsRoleHint": "Verknüpfen Sie eine Rolle mit einem Dashboard unter Rollen & Rechte.",
   "dashboardsKpis": "KPIs",
   "dashboardsBlocks": "Diagramme & Listen",
   "dashboardsAll": "Alle Diagramme & Listen",
@@ -2096,7 +2094,6 @@
     "planning": "Dienste, WhatsApp-Warteschlange und unvollständige Runs.",
     "readonly": "Schreibgeschützte Zusammenfassung."
   },
-  "dashboardsToggleHint": "Klicken Sie auf eine KPI oder ein Diagramm, um es für diese Rolle ein-/auszuschalten — standardmäßig ist alles an.",
   "dashboardsToggleOn": "Einschalten",
   "dashboardsToggleOff": "Ausschalten",
   "log": {
@@ -2582,10 +2579,6 @@
     "add": "Grund hinzufügen"
   },
   "blacklistReasons": {
-    "tabs": {
-      "candidate": "Kandidat",
-      "customer": "Kunde"
-    },
     "candidate": {
       "title": "Sperrgründe — Kandidat",
       "subtitle": "Gründe, einen Kandidaten auf die Sperrliste zu setzen."
@@ -2606,7 +2599,11 @@
     "add": "Wert hinzufügen",
     "stages": {
       "title": "Pipeline-Phasen",
-      "subtitle": "Die Phasen, die eine Chance durchläuft."
+      "subtitle": "Die Phasen, die eine Chance durchläuft.",
+      "isWon": "Gewonnene Phase",
+      "isWonHint": "Diese Phase markiert einen Deal als gewonnen (speist die Gewonnen/Verloren-KPIs).",
+      "isLost": "Verlorene Phase",
+      "isLostHint": "Diese Phase markiert einen Deal als verloren (speist die Gewonnen/Verloren-KPIs)."
     },
     "serviceTypes": {
       "title": "Dienstarten",

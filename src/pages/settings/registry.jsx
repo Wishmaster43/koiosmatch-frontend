@@ -188,7 +188,9 @@ export const NAV_GROUPS = [
       // Blacklist reason lookup (audit finding BLACKLIST-REASON-1) — the deployability
       // status "Blacklist" (§3B) needs its own reason vocabulary, distinct from the
       // generic status-reason free text; own icon so it reads as a flag, not a status.
-      { id: 'blacklist_reasons', icon: ShieldOff, component: BlacklistReasonsSettings },
+      // Candidate half only — the customer vocabulary lives in the customers group
+      // ("klant bij klant, kandidaat bij kandidaat", Danny 2026-08-05).
+      { id: 'blacklist_reasons', icon: ShieldOff, render: () => <BlacklistReasonsSettings entity="candidate" /> },
       { id: 'pools', icon: Star, component: PoolsSettings },
       { id: 'cv_template', icon: FileText, component: CvTemplateSettings },
       // Document types moved OUT to their own top-level `document_types` group
@@ -231,6 +233,9 @@ export const NAV_GROUPS = [
       // candidate phase editor, so both read as "the same thing on another entity".
       { id: 'customer_phases', icon: Target, component: CustomerPhasesSettings },
       { id: 'customer_statuses', icon: Tags, component: CustomerStatusesSettings },
+      // Customer half of the blacklist-reason vocabulary (KLANT-BLACKLIST-1) — lives
+      // HERE, not as a sub-tab under candidates ("klant bij klant", Danny 2026-08-05).
+      { id: 'customer_blacklist_reasons', icon: ShieldOff, render: () => <BlacklistReasonsSettings entity="customer" /> },
       // CAO lookup — feeds price agreements + the + Match popup (Danny 24-07).
       { id: 'cao', icon: Scale, component: CaoSettings },
       { id: 'location_statuses', icon: MapPin, component: LocationStatusesSettings },

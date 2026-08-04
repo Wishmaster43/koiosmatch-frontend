@@ -234,7 +234,10 @@ export default function CustomFieldsSettings({ entityType }) {
                     <input value={field.key} disabled style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }} />
                   </div>
 
-                  {/* Type — disabled if has_data */}
+                  {/* Type — locked once the field has data: switching type on stored
+                      values has no safe conversion (e.g. text -> number), so the
+                      selector goes inert via SearchSelect's own `disabled` prop
+                      (the single source of truth — no per-callsite guard/styling). */}
                   <div>
                     <label style={labelStyle}>{t('customFieldsSettings.type')} {field.has_data && <span style={{ color: 'var(--color-warning)', fontWeight: 400 }}>({t('customFieldsSettings.hasData')})</span>}</label>
                     <SearchSelect
@@ -243,9 +246,9 @@ export default function CustomFieldsSettings({ entityType }) {
                       onToggle={v => setEF(field.id, 'type', v)}
                       closeOnToggle
                       searchable={false}
+                      disabled={field.has_data}
                       renderTrigger={toggle => (
-                        <button type="button" onClick={() => !field.has_data && toggle()} disabled={field.has_data}
-                          style={{ ...inputStyle, textAlign: 'left', cursor: field.has_data ? 'not-allowed' : 'pointer', opacity: field.has_data ? 0.5 : 1 }}>
+                        <button type="button" onClick={toggle} disabled={field.has_data} style={{ ...inputStyle, textAlign: 'left' }}>
                           {t(`customFieldsSettings.types.${currentType}`)}
                         </button>
                       )}

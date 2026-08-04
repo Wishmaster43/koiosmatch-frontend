@@ -1,7 +1,7 @@
 /**
- * LookupChipSelect — thin wiring test: verifies the lookup list reaches
- * ChipMultiSelect (chip renders, click calls onToggle with the raw value) and
- * that the label/hint row renders when passed.
+ * LookupChipSelect — thin wiring test: one row per lookup value with a soft
+ * colour chip + a real Toggle switch ("Toggle maken!!", Danny 2026-08-05);
+ * toggling calls onToggle with the raw value; label/hint row renders when passed.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -14,13 +14,19 @@ const ITEMS = [
 ]
 
 describe('LookupChipSelect', () => {
-  it('renders one chip per lookup item and calls onToggle with the raw value on click', async () => {
+  it('renders one Toggle switch per lookup item, reflecting the selected state', () => {
+    render(<LookupChipSelect items={ITEMS} selected={['open']} onToggle={() => {}} />)
+    const switches = screen.getAllByRole('switch')
+    expect(switches).toHaveLength(2)
+    expect(screen.getByRole('switch', { name: 'Open' })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('switch', { name: 'Closed' })).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('flipping a switch calls onToggle with the raw lookup value', async () => {
     const onToggle = vi.fn()
     const user = userEvent.setup()
     render(<LookupChipSelect items={ITEMS} selected={['open']} onToggle={onToggle} />)
-    expect(screen.getByText('Open')).toBeInTheDocument()
-    expect(screen.getByText('Closed')).toBeInTheDocument()
-    await user.click(screen.getByText('Closed'))
+    await user.click(screen.getByRole('switch', { name: 'Closed' }))
     expect(onToggle).toHaveBeenCalledWith('closed')
   })
 

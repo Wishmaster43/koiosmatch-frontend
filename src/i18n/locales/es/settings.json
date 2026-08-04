@@ -223,7 +223,8 @@
     "escalation_reasons": "Motivos de escalada",
     "opportunity_lookups": "Etapas y tipos",
     "nt_match": "Coincidencias",
-    "nt_task": "Tareas"
+    "nt_task": "Tareas",
+    "customer_blacklist_reasons": "Motivos de lista negra"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -2080,9 +2081,6 @@
       }
     }
   },
-  "dashboardsIntro": "Cada rol tiene su propio panel con una fila de KPI fija y gráficos y listas correspondientes.",
-  "dashboardsPreviewHint": "Previsualiza cada vista en vivo con el selector de panel en la parte superior derecha (dirección y admin).",
-  "dashboardsRoleHint": "Vincula un rol a un panel en Roles y permisos.",
   "dashboardsKpis": "KPI",
   "dashboardsBlocks": "Gráficos y listas",
   "dashboardsAll": "Todos los gráficos y listas",
@@ -2096,7 +2094,6 @@
     "planning": "Turnos, cola de WhatsApp y ejecuciones incompletas.",
     "readonly": "Resumen de solo lectura."
   },
-  "dashboardsToggleHint": "Haz clic en un KPI o gráfico para activarlo/desactivarlo para este rol — todo está activado por defecto.",
   "dashboardsToggleOn": "Activar",
   "dashboardsToggleOff": "Desactivar",
   "log": {
@@ -2582,10 +2579,6 @@
     "add": "Añadir motivo"
   },
   "blacklistReasons": {
-    "tabs": {
-      "candidate": "Candidato",
-      "customer": "Cliente"
-    },
     "candidate": {
       "title": "Motivos de lista negra — candidato",
       "subtitle": "Motivos para poner a un candidato en la lista negra."
@@ -2606,7 +2599,11 @@
     "add": "Añadir valor",
     "stages": {
       "title": "Etapas del embudo",
-      "subtitle": "Las etapas por las que pasa una oportunidad."
+      "subtitle": "Las etapas por las que pasa una oportunidad.",
+      "isWon": "Etapa ganada",
+      "isWonHint": "Esta etapa marca una oportunidad como ganada (alimenta los KPI de ganado/perdido).",
+      "isLost": "Etapa perdida",
+      "isLostHint": "Esta etapa marca una oportunidad como perdida (alimenta los KPI de ganado/perdido)."
     },
     "serviceTypes": {
       "title": "Tipos de servicio",

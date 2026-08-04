@@ -223,7 +223,8 @@
     "escalation_reasons": "Escalation reasons",
     "opportunity_lookups": "Stages & types",
     "nt_match": "Matches",
-    "nt_task": "Tasks"
+    "nt_task": "Tasks",
+    "customer_blacklist_reasons": "Blacklist reasons"
   },
   "kpis": {
     "title": "KPI settings",
@@ -2080,9 +2081,6 @@
       }
     }
   },
-  "dashboardsIntro": "Each role has its own dashboard with a fixed KPI row and matching charts and lists.",
-  "dashboardsPreviewHint": "Preview each view live via the dashboard switcher at the top right (management and admin).",
-  "dashboardsRoleHint": "Link a role to a dashboard under Roles & Permissions.",
   "dashboardsKpis": "KPIs",
   "dashboardsBlocks": "Charts & lists",
   "dashboardsAll": "All charts & lists",
@@ -2096,7 +2094,6 @@
     "planning": "Shifts, WhatsApp queue and incomplete runs.",
     "readonly": "Read-only summary."
   },
-  "dashboardsToggleHint": "Click a KPI or chart to switch it on/off for this role — everything is on by default.",
   "dashboardsToggleOn": "Turn on",
   "dashboardsToggleOff": "Turn off",
   "log": {
@@ -2582,10 +2579,6 @@
     "add": "Add reason"
   },
   "blacklistReasons": {
-    "tabs": {
-      "candidate": "Candidate",
-      "customer": "Customer"
-    },
     "candidate": {
       "title": "Blacklist reasons — candidate",
       "subtitle": "Reasons for putting a candidate on the blacklist."
@@ -2606,7 +2599,11 @@
     "add": "Add value",
     "stages": {
       "title": "Pipeline stages",
-      "subtitle": "The stages an opportunity moves through."
+      "subtitle": "The stages an opportunity moves through.",
+      "isWon": "Won stage",
+      "isWonHint": "This stage marks a deal as won (feeds the won/lost KPIs).",
+      "isLost": "Lost stage",
+      "isLostHint": "This stage marks a deal as lost (feeds the won/lost KPIs)."
     },
     "serviceTypes": {
       "title": "Service types",

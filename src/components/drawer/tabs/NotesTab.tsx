@@ -43,6 +43,11 @@ interface NotesLabels {
   // it still gets a working, just unlabelled, search input; every current host
   // supplies one via its own i18n namespace).
   searchPlaceholder?: string
+  // Load-error row copy (see `error`/`onRetry` below) — the host's own "notes could
+  // not be loaded" message and the shared retry-button label (hosts reuse the
+  // existing `common:error.retry` key, mirrors MatchContractSection).
+  loadError?: ReactNode
+  retry?: ReactNode
 }
 interface NotePayload { type: string; title: string; body: string; channel?: string }
 
@@ -81,6 +86,15 @@ interface NotesTabProps {
   // the only current caller). Hosts that omit it — every other entity/tab — render
   // no pencil at all; zero behaviour change for them (additive prop).
   onEditStatusEvent?: () => void
+  // Optional load-error state (Danny 04-08: "voeg retry toe aan de notities-tab
+  // load-error" — added HERE, in the shared tab, so every host (applications,
+  // vacancies, matches, tasks, …) gets the same retry affordance at once, mirroring
+  // MatchContractSection's error+retry row. `error` replaces the whole tab body with
+  // a calm danger row; `onRetry` adds a retry button to it. A host that passes
+  // `error` without `onRetry` gets the previous static-text-only behaviour —
+  // fully back-compat for any caller that hasn't wired a retry point yet.
+  error?: boolean
+  onRetry?: () => void
   // Optional per-item content override (MATCH-TIMELINE-EVENT-1, point 3): when it
   // returns a node for a given timeline item, that REPLACES the default text line
   // inside the row's existing dot/avatar/date wrapper — keeps this shared tab
@@ -95,6 +109,7 @@ export default function NotesTab({
   notes = [], systemNotes = [], timeline = [], noteTypes = [], chipTypes, channels = [], labels = {}, editorLabels,
   authorInitials, timelineName, timelineInitials, onAddNote, onEditNote,
   showNotes = true, showTimeline = true, showConversations = true, onEditStatusEvent, renderTimelineContent,
+  error, onRetry,
 }: NotesTabProps) {
   const [adding, setAdding]   = useState(false)
   const [editingIdx, setEditingIdx] = useState<number | null>(null)   // null = new; index = editing
@@ -107,6 +122,21 @@ export default function NotesTab({
   // Notes search (Danny 03-08) — client-side over the already-loaded `notes` prop.
   const [search, setSearch] = useState('')
   const { formatDate } = useDateFormat()
+
+  // Load-error state (see NotesTabProps.error) — a calm danger row replaces the
+  // whole tab body, same shape as MatchContractSection's error+retry; no button
+  // at all when the host hasn't wired a retry point (back-compat).
+  if (error) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger)', padding: '10px 2px' }}>
+        <span>{labels.loadError}</span>
+        {onRetry && (
+          <button onClick={onRetry} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
+            padding: '3px 9px', cursor: 'pointer', color: 'var(--text)' }}>{labels.retry}</button>
+        )}
+      </div>
+    )
+  }
   // Note timestamp: real date+time when the note carries one, else the relative "ago".
   const noteWhen = (n: NoteItem) => n.created_at
     ? formatDate(n.created_at as string, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })

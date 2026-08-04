@@ -128,6 +128,49 @@ describe('StatusListEditor — multiple independent defaultFields', () => {
   })
 })
 
+// FLAGFIELDS-1 (04-08): flagField generalizes to a flagFields array — multiple
+// independent behaviour flags on the same lookup, each its own modal toggle + row
+// badge (mirrors defaultField → defaultFields; no singleton rule between flags).
+describe('StatusListEditor — multiple independent flagFields', () => {
+  // eslint-disable-next-line no-restricted-syntax -- DATA: a fixture row's tenant-picked colour, not a style rule.
+  const twoFlagRow = (over = {}) => ({ id: 's1', name: 'Won', color: '#3B8FD4', is_won: false, is_lost: false, ...over })
+
+  it('renders one badge per active flag and one toggle per flag in the edit modal', async () => {
+    api.get.mockResolvedValue({ data: [twoFlagRow({ is_won: true, is_lost: false })] })
+    render(<StatusListEditor title="Stages" subtitle="" endpoint="/opportunity-stages" addLabel="Toevoegen"
+      flagFields={[
+        { key: 'is_won', label: 'Gewonnen' },
+        { key: 'is_lost', label: 'Verloren' },
+      ]} />)
+
+    // Only the active flag's badge shows in the row.
+    await screen.findByText('Won')
+    expect(screen.getByText('Gewonnen')).toBeInTheDocument()
+    expect(screen.queryByText('Verloren')).not.toBeInTheDocument()
+  })
+
+  it('editing a row PUTs both flag keys, independently toggled in the modal', async () => {
+    api.get.mockResolvedValue({ data: [twoFlagRow({ is_won: false, is_lost: false })] })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<StatusListEditor title="Stages" subtitle="" endpoint="/opportunity-stages" addLabel="Toevoegen"
+      flagFields={[
+        { key: 'is_won', label: 'Gewonnen' },
+        { key: 'is_lost', label: 'Verloren' },
+      ]} />)
+
+    await screen.findByText('Won')
+    await user.click(screen.getByRole('button', { name: st('statusList.edit') }))
+    // Only the is_won toggle is switched on; is_lost stays false.
+    const switches = screen.getAllByRole('switch')
+    await user.click(switches[0])
+    await user.click(screen.getByText(st('common.save')))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/opportunity-stages/s1',
+      expect.objectContaining({ is_won: true, is_lost: false })))
+  })
+})
+
 // Audit finding: a non-409 delete failure (500/network) used to swallow the
 // error silently — the row just stayed in the list with no explanation.
 describe('StatusListEditor — delete failures notify the user', () => {

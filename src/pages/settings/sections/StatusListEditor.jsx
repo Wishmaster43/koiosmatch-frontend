@@ -8,11 +8,11 @@ import { useTranslation } from 'react-i18next'
 import IconPickerControl from './IconPickerControl'
 import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
 import SearchSelect from '@/components/ui/SearchSelect'
-import { AlertTriangle, Check, Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
+import { AlertTriangle, Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { useConfirm } from '@/hooks/useConfirm'
-import { DragList, ColorSwatch, ColorBadge } from '../components/SettingsControls'
+import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
 import { Toggle } from '../components/SettingsKit'
 
 // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
@@ -29,13 +29,20 @@ const slugify = (s) => {
 
 // extraField (optioneel): { key, label, options: [{value,label}], default } —
 // rendert een extra keuzeveld in de aanmaak-modal + een badge in de rij.
-// flagField (optioneel): { key, label, description } — boolean gedragsvlag (R-1b:
-// is_closed/is_reached); checkbox in de modal + badge in de rij. De VLAG bepaalt
-// het gedrag, nooit het slug — zo werken tenant-eigen statussen op de schrijfpaden.
+// flagField (optioneel): { key, label, description } — a single boolean behaviour
+// flag (R-1b: is_closed/is_reached); checkbox in the modal + badge in the row. The
+// FLAG drives behaviour, never the slug — so tenant-own statuses work on the write
+// paths. flagFields (optioneel): array of flagField-shaped objects — MULTIPLE
+// independent behaviour flags on the same lookup (back-compat sugar exactly like
+// defaultField → defaultFields below); flagField stays supported as a one-element
+// shorthand for existing callers.
 // defaultField (optioneel): { key, label } — SINGLETON vlag (bv. is_default), model-
 // enforced op de backend (max één per lookup). Geen modal-veld: een losse
 // DefaultToggle per rij "promoveert" die rij en zet alle andere rijen lokaal terug
 // (optimistisch), zodat de UI de server-singleton weerspiegelt zonder een refetch.
+// The shared DefaultToggle is undoable by default (DEFAULT-UNDO, Danny 04-08:
+// "je kan niet undo doen") — clicking the active pill clears the flag; setDefault
+// below flips true/false on the same per-id PUT route.
 // entity (optioneel): scopes a shared lookup (e.g. /note-types) to one owning entity —
 // GET reads `?entity=X`, POST/PUT writes send `entity: X` so create/edit stay scoped
 // (mirrors NoteType::ENTITIES on the backend; NOTE-TYPES-2/3).
@@ -47,36 +54,20 @@ const slugify = (s) => {
 // CustomerLookupController) validate `value` as REQUIRED on create — this editor only
 // ever sent name/label, so their "+ toevoegen" 422'd. Opt in and the create POST
 // carries a slug derived from the typed name; name-shaped lookups stay untouched.
-// UndoableDefaultPill — one independent singleton marker. Unlike the shared
-// DefaultToggle (still one-way, used by other callers), the active pill here
-// stays clickable so it can be CLEARED (DEFAULT-UNDO, Danny 04-08: "je kan niet
-// undo doen") — same soft-tint spec (§4), stronger tint + weight 600 when active.
-function UndoableDefaultPill({ active, onClick, busy, activeLabel, inactiveLabel, title }) {
-  return (
-    <button type="button" onClick={onClick} disabled={busy} title={title}
-      style={{
-        display: 'inline-flex', alignItems: 'center', gap: 4, height: 22, padding: '0 9px',
-        fontSize: 11, fontWeight: active ? 600 : 500, borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0,
-        border: `1px solid color-mix(in srgb, var(--color-primary) ${active ? 45 : 28}%, transparent)`,
-        background: `color-mix(in srgb, var(--color-primary) ${active ? 16 : 8}%, transparent)`,
-        color: 'var(--color-primary)', cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1,
-      }}>
-      {active && <Check size={10} />}
-      {active ? activeLabel : inactiveLabel}
-    </button>
-  )
-}
 
-export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, compact = false, extraField = null, flagField = null, numberField = null, defaultField = null, defaultFields = null, withIcon = false, iconPicker = null, allowAdd = true, showRank = false, entity = null, notFoundNotice = null, withValueSlug = false, reorderable = true }) {
+export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, compact = false, extraField = null, flagField = null, flagFields = null, numberField = null, defaultField = null, defaultFields = null, withIcon = false, iconPicker = null, allowAdd = true, showRank = false, entity = null, notFoundNotice = null, withValueSlug = false, reorderable = true }) {
   const { t } = useTranslation('settings')
   // defaultField (singular) is sugar for a one-element defaultFields array — both
   // props stay supported so existing callers are untouched (DEFAULT-UNDO, 04-08).
   const singletons = defaultFields ?? (defaultField ? [defaultField] : [])
+  // flagField (singular) is sugar for a one-element flagFields array — same back-
+  // compat pattern as defaultField → defaultFields above.
+  const flagList = flagFields ?? (flagField ? [flagField] : [])
   // The generic curated icon set backs the bare withIcon mode — an explicit iconPicker
   // prop still wins (DocumentTypesSettings' own curated set), never overridden here.
   const resolvedIconPicker = iconPicker ?? (withIcon ? { icons: GENERIC_LOOKUP_ICON_NAMES, resolve: resolveGenericLookupIcon } : null)
   // eslint-disable-next-line no-restricted-syntax -- DATA: default swatch colour pre-filled for a newly created lookup row, not UI chrome
-  const emptyDraft = () => ({ name: '', color: '#3B8FD4', ...(withIcon ? { icon: '' } : {}), ...(extraField ? { [extraField.key]: extraField.default } : {}), ...(numberField ? { [numberField.key]: numberField.default } : {}), ...(flagField ? { [flagField.key]: false } : {}) })
+  const emptyDraft = () => ({ name: '', color: '#3B8FD4', ...(withIcon ? { icon: '' } : {}), ...(extraField ? { [extraField.key]: extraField.default } : {}), ...(numberField ? { [numberField.key]: numberField.default } : {}), ...Object.fromEntries(flagList.map(f => [f.key, false])) })
   // Lookups differ in their display field: name (phases/status) vs label/value (genders/languages).
   const labelOf = (i) => i.name ?? i.label ?? i.value ?? ''
   // An item is protected when the backend marks it as referenced by existing data.
@@ -131,7 +122,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
       ...(withIcon ? { icon: item.icon ?? '' } : {}),
       ...(extraField ? { [extraField.key]: item[extraField.key] ?? extraField.default } : {}),
       ...(numberField ? { [numberField.key]: item[numberField.key] ?? numberField.default } : {}),
-      ...(flagField ? { [flagField.key]: Boolean(item[flagField.key]) } : {}) })
+      ...Object.fromEntries(flagList.map(f => [f.key, Boolean(item[f.key])])) })
     setShowModal(true)
   }
 
@@ -327,12 +318,13 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
               {withColor
                 ? <ColorBadge label={labelOf(item)} color={item.color ?? FALLBACK_SWATCH} />
                 : <span style={{ fontSize: 13, color: 'var(--text)' }}>{labelOf(item)}</span>}
-              {flagField && item[flagField.key] && (
-                <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary)',
+              {/* One badge per active flag (flagFields) — independent booleans, no singleton rule. */}
+              {flagList.map(f => item[f.key] && (
+                <span key={f.key} style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary)',
                                background: 'var(--color-primary-bg)', padding: '2px 7px', borderRadius: 999, whiteSpace: 'nowrap' }}>
-                  {flagField.label}
+                  {f.label}
                 </span>
-              )}
+              ))}
               {numberField && item[numberField.key] != null && (
                 <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', background: 'var(--border)', padding: '2px 7px', borderRadius: 999, whiteSpace: 'nowrap' }}>
                   {item[numberField.key]}{numberField.suffix ? ` ${numberField.suffix}` : ''}
@@ -350,7 +342,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                 const active = Boolean(item[key])
                 const label = field.labelKey ? t(field.labelKey) : undefined
                 return (
-                  <UndoableDefaultPill key={key} active={active} busy={busyDefaultKey === `${key}:${item.id}`}
+                  <DefaultToggle key={key} active={active} busy={busyDefaultKey === `${key}:${item.id}`}
                     onClick={() => setDefault(field, item)}
                     activeLabel={label ?? t('common.default')} inactiveLabel={label ?? t('common.setDefault')}
                     title={active ? t('statusList.clearDefault', { defaultValue: 'Click to clear default' }) : undefined} />
@@ -426,16 +418,17 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                   triggerLabel={extraField.options.find(o => o.value === draft[extraField.key])?.label ?? extraField.label} />
               </div>
             )}
-            {flagField && (
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 14 }}>
-                <Toggle checked={Boolean(draft[flagField.key])} ariaLabel={flagField.label}
-                  onChange={v => setDraft(d => ({ ...d, [flagField.key]: v }))} />
+            {/* One toggle per behaviour flag (flagFields) — independent booleans. */}
+            {flagList.map(f => (
+              <div key={f.key} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 14 }}>
+                <Toggle checked={Boolean(draft[f.key])} ariaLabel={f.label}
+                  onChange={v => setDraft(d => ({ ...d, [f.key]: v }))} />
                 <span style={{ minWidth: 0 }}>
-                  <span style={{ display: 'block', fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{flagField.label}</span>
-                  {flagField.description && <span style={{ display: 'block', fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>{flagField.description}</span>}
+                  <span style={{ display: 'block', fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{f.label}</span>
+                  {f.description && <span style={{ display: 'block', fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>{f.description}</span>}
                 </span>
               </div>
-            )}
+            ))}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
               <button onClick={() => setShowModal(false)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer' }}>{t('common.cancel')}</button>
               <button onClick={submit} disabled={saving || !draft.name.trim()}

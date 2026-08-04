@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
@@ -21,25 +21,31 @@ interface Note { type?: string; title?: string; author?: string; text?: string; 
  * fetch-on-mount shape as the match tab.
  */
 export default function NotesTab({ task }: { task: TaskDetail }) {
-  const { t } = useTranslation('tasks')
+  const { t } = useTranslation(['tasks', 'common'])
   // Note categories from the tenant lookup, scoped to 'task' (NOTE-TYPES-2/3).
   const { writableTypes: noteTypes } = useNoteTypes('task')
   const [notes, setNotes] = useState<Note[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  // Freshness guard (§9): a monotonic request id, not just a boolean, since the
+  // retry button can start a SECOND fetch while an earlier one is still in
+  // flight — only the most recent request's response/error may land in state.
+  const requestIdRef = useRef(0)
 
-  // Detail-only data (§8): fetch this task's notes once on mount/task switch.
-  // A failed/missing list degrades to the empty state, never a stuck spinner.
-  useEffect(() => {
+  // Detail-only data (§8): fetch this task's notes, callable from BOTH the
+  // mount/task-switch effect below AND the load-error retry button (04-08), so
+  // a retry re-runs the exact same request instead of a bespoke copy.
+  const fetchNotes = useCallback(() => {
     if (task.id == null) { setLoading(false); return }
-    let alive = true
+    const requestId = ++requestIdRef.current
     setLoading(true); setError(false)
     api.get(`/tasks/${task.id}/notes`)
-      .then(r => { if (alive) setNotes(unwrapList<Note>(r).rows) })
-      .catch(e => { if (alive && e?.response?.status !== 404) setError(true) })
-      .finally(() => { if (alive) setLoading(false) })
-    return () => { alive = false }
+      .then(r => { if (requestIdRef.current === requestId) setNotes(unwrapList<Note>(r).rows) })
+      .catch(e => { if (requestIdRef.current === requestId && e?.response?.status !== 404) setError(true) })
+      .finally(() => { if (requestIdRef.current === requestId) setLoading(false) })
   }, [task.id])
+  // A failed/missing list degrades to the empty state, never a stuck spinner.
+  useEffect(() => { fetchNotes() }, [fetchNotes])
 
   // Author avatar initials — the task's owner, else a Koios fallback.
   const ownerName = task.owner?.name || 'Koios'
@@ -59,18 +65,18 @@ export default function NotesTab({ task }: { task: TaskDetail }) {
     }
   }
 
-  // Four UI states (§3): loading / error / empty (the shared NotesTab's own
+  // Four UI states (§3): loading / error+retry (rendered by the SHARED tab, 04-08 —
+  // `fetchNotes` doubles as the retry action) / empty (the shared tab's own
   // "notesEmpty" copy) / success.
   if (loading) {
     return <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '10px 2px' }}>{t('notes.loading')}</div>
-  }
-  if (error) {
-    return <div style={{ fontSize: 12, color: 'var(--color-danger)', padding: '10px 2px' }}>{t('notes.loadError')}</div>
   }
 
   return (
     <SharedNotesTab
       notes={notes}
+      error={error}
+      onRetry={fetchNotes}
       onAddNote={addNote}
       noteTypes={noteTypes}
       authorInitials={initials}
@@ -85,6 +91,8 @@ export default function NotesTab({ task }: { task: TaskDetail }) {
         notesEmpty: t('notes.empty'),
         notePlaceholder: () => t('notes.placeholder'),
         searchPlaceholder: t('notes.searchPlaceholder'),
+        loadError: t('notes.loadError'),
+        retry: t('common:error.retry'),
       }}
     />
   )

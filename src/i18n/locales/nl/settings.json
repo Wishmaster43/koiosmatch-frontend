@@ -223,7 +223,8 @@
     "escalation_reasons": "Escalatieredenen",
     "opportunity_lookups": "Fasen & typen",
     "nt_match": "Matches",
-    "nt_task": "Taken"
+    "nt_task": "Taken",
+    "customer_blacklist_reasons": "Blacklistredenen"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -2080,9 +2081,6 @@
       }
     }
   },
-  "dashboardsIntro": "Elke rol krijgt een eigen dashboard met een vaste KPI-rij en bijpassende grafieken en lijsten.",
-  "dashboardsPreviewHint": "Bekijk elke weergave live via de dashboard-switcher rechtsboven (management en admin).",
-  "dashboardsRoleHint": "Koppel een rol aan een dashboard bij Rollen & Rechten.",
   "dashboardsKpis": "KPI's",
   "dashboardsBlocks": "Grafieken & lijsten",
   "dashboardsAll": "Alle grafieken & lijsten",
@@ -2096,7 +2094,6 @@
     "planning": "Diensten, WhatsApp-wachtrij en incomplete runs.",
     "readonly": "Alleen-lezen samenvatting."
   },
-  "dashboardsToggleHint": "Klik een KPI of grafiek om 'm voor deze rol aan/uit te zetten — alles staat standaard aan.",
   "dashboardsToggleOn": "Inschakelen",
   "dashboardsToggleOff": "Uitschakelen",
   "log": {
@@ -2582,10 +2579,6 @@
     "add": "Reden toevoegen"
   },
   "blacklistReasons": {
-    "tabs": {
-      "candidate": "Kandidaat",
-      "customer": "Klant"
-    },
     "candidate": {
       "title": "Blacklist-redenen — kandidaat",
       "subtitle": "Redenen om een kandidaat op de blacklist te zetten."
@@ -2606,7 +2599,11 @@
     "add": "Waarde toevoegen",
     "stages": {
       "title": "Pipeline-fases",
-      "subtitle": "De fases waar een kans doorheen loopt."
+      "subtitle": "De fases waar een kans doorheen loopt.",
+      "isWon": "Gewonnen fase",
+      "isWonHint": "Deze fase markeert een kans als gewonnen (voedt de gewonnen/verloren KPI's).",
+      "isLost": "Verloren fase",
+      "isLostHint": "Deze fase markeert een kans als verloren (voedt de gewonnen/verloren KPI's)."
     },
     "serviceTypes": {
       "title": "Dienstsoorten",

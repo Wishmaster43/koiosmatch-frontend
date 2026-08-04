@@ -1,17 +1,16 @@
-import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+import Toggle from '@/components/ui/Toggle'
 
 /**
  * LookupChipSelect — the ONE shared block for "select which lookup values count"
  * (vacancy statuses / deployability statuses / contract forms / phases / …).
- * Wires a tenant lookup list (with its own `color`) onto the shared
- * `ChipMultiSelect`, with an optional label + hint row above it — replaces the
- * duplicated raw-checkbox `LookupCheckboxBlock` that used to live inline in
- * VacancyCandidateTabSettings and CandidateVacancyTabSettings (house idiom,
- * Danny: "checkbox? wij gebruiken toch toggles?").
+ * Renders one ROW per lookup value: the value as a soft-tinted chip in its own
+ * colour + a real Toggle switch ("Toggle maken!!", Danny 2026-08-05 — the earlier
+ * chip-buttons read as static pills, not as controls). Replaces the duplicated
+ * raw-checkbox `LookupCheckboxBlock` that used to live inline in
+ * VacancyCandidateTabSettings and CandidateVacancyTabSettings. The name stays
+ * (both callers + tests import it) even though the control inside is now a toggle.
  */
-export default function LookupChipSelect({ label, hint, items, selected, onToggle, color, emptyText, ariaLabel }) {
-  // Lookup rows arrive as { value, label, color } — map straight onto ChipMultiSelect's option shape.
-  const options = items.map(it => ({ value: it.value, label: it.label, color: it.color }))
+export default function LookupChipSelect({ label, hint, items, selected, onToggle, emptyText, ariaLabel }) {
   return (
     <div>
       {label && (
@@ -20,7 +19,28 @@ export default function LookupChipSelect({ label, hint, items, selected, onToggl
         </label>
       )}
       {hint && <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{hint}</p>}
-      <ChipMultiSelect options={options} values={selected} onToggle={onToggle} color={color} emptyText={emptyText} ariaLabel={ariaLabel ?? label} />
+      {items.length === 0 && emptyText && (
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{emptyText}</p>
+      )}
+      <div role="group" aria-label={ariaLabel ?? label} style={{ display: 'flex', flexDirection: 'column', maxWidth: 420 }}>
+        {items.map(it => {
+          const on = selected.includes(it.value)
+          const tone = it.color || 'var(--color-primary)'
+          return (
+            <div key={it.value} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                         gap: 12, padding: '7px 0', borderBottom: '1px solid var(--border)' }}>
+              {/* The value reads as the soft chip it is everywhere else (§4) — colour stays
+                  even when toggled off; the Toggle carries the on/off state, not the tint. */}
+              <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 999, fontSize: 12, fontWeight: 500,
+                             background: `color-mix(in srgb, ${tone} 12%, transparent)`, color: tone,
+                             border: `1px solid color-mix(in srgb, ${tone} 40%, transparent)` }}>
+                {it.label}
+              </span>
+              <Toggle checked={on} onChange={() => onToggle(it.value)} ariaLabel={it.label} />
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

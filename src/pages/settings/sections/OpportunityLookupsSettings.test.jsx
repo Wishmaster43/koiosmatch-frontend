@@ -64,4 +64,37 @@ describe('OpportunityLookupsSettings', () => {
     await screen.findByText('Project')
     expect(api.get).toHaveBeenCalledWith('/opportunity-deal-types', undefined)
   })
+
+  // is_won/is_lost (04-08): real consumers — OpportunitiesInsightsRow's won/lost/open
+  // KPI counts and OpportunitiesTable's isTerminalStage() both key off these flags
+  // (via useOpportunityStages), so the stages tab wires them as flagFields.
+  describe('OpportunityLookupsSettings — stage is_won/is_lost flagFields', () => {
+    it('shows the won badge on a stage flagged is_won, not the lost badge', async () => {
+      api.get.mockResolvedValue({ data: [row({ id: 's2', value: 'won', label: 'Won', is_won: true, is_lost: false })] })
+      render(<OpportunityLookupsSettings />)
+
+      // These two keys aren't in the locale bundles yet (reported separately, §5) —
+      // the component supplies the same defaultValue, so resolve it the same way here.
+      await screen.findByText('Won')
+      expect(screen.getByText(st('opportunityLookups.stages.isWon', { defaultValue: 'Won stage' }))).toBeInTheDocument()
+      expect(screen.queryByText(st('opportunityLookups.stages.isLost', { defaultValue: 'Lost stage' }))).not.toBeInTheDocument()
+    })
+
+    it('editing a stage PUTs is_won:true when its toggle is switched on', async () => {
+      api.get.mockResolvedValue({ data: [row({ id: 's2', value: 'won', label: 'Won', is_won: false, is_lost: false })] })
+      api.put.mockResolvedValue({ data: {} })
+      const user = userEvent.setup()
+      render(<OpportunityLookupsSettings />)
+
+      await screen.findByText('Won')
+      await user.click(screen.getByRole('button', { name: st('statusList.edit') }))
+      // is_won is the first of the two stage modal toggles in render order.
+      const switches = screen.getAllByRole('switch')
+      await user.click(switches[0])
+      await user.click(screen.getByText(st('common.save')))
+
+      await waitFor(() => expect(api.put).toHaveBeenCalledWith('/opportunity-stages/s2',
+        expect.objectContaining({ is_won: true, is_lost: false })))
+    })
+  })
 })
