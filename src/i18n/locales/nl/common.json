@@ -209,7 +209,9 @@
   },
   "geocode": {
     "refresh": "PDOK opnieuw ophalen",
-    "started": "Opnieuw ophalen gestart…"
+    "started": "Opnieuw ophalen gestart…",
+    "updated": "Coördinaten bijgewerkt.",
+    "notFound": "Adres niet gevonden — controleer de adresgegevens."
   },
   "noAccess": "Geen toegang",
   "noAccessDesc": "Je hebt geen rechten voor deze pagina.",

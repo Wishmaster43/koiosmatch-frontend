@@ -327,8 +327,10 @@ export default function CustomerDrawer({
       case 'koppelingen':   return (
         <BackofficeLinksTab entity="customers" id={c.id as Id} helloflexLink={c.helloflexLink} shiftmanagerLink={c.shiftmanagerLink} canLink={canLinkBackoffice}>
           {/* PDOK moved out of the title row into this tab (Danny 28-07). Disabled when
-              there is no city yet — the customer's own address is city-only here. */}
-          <PdokCard endpoint={`/customers/${c.id}/geocode`} permission="customers.update" disabled={!c.city} />
+              there is no city yet — the customer's own address is city-only here.
+              lat/lng were never passed (CMBE 04-08) — the card decides "geocoded" on
+              them, so this ALWAYS said "nog niet gegecodeerd" regardless of the data. */}
+          <PdokCard lat={c.lat} lng={c.lng} endpoint={`/customers/${c.id}/geocode`} permission="customers.update" disabled={!c.city} />
         </BackofficeLinksTab>
       )
       default: return null

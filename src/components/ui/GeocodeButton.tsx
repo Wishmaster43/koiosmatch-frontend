@@ -14,8 +14,9 @@ import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
-import api from '@/lib/api'
-import { notifySuccess } from '@/lib/notify'
+import api, { unwrap } from '@/lib/api'
+import { notifySuccess, notifyError } from '@/lib/notify'
+import { toCoord } from '@/lib/coords'
 import { useAuth } from '@/context/AuthContext'
 
 export interface GeocodeButtonProps {
@@ -31,9 +32,13 @@ export interface GeocodeButtonProps {
   // (ChangelogPopover, merge, archive); 'row' matches a settings table row's boxed
   // icon-button convention (LocationsSettings' Pencil/Trash2 actions).
   variant?: 'ghost' | 'row'
+  // GEO-INLINE-1 (CMBE 04-08): the per-id route answers INLINE now — fresh
+  // coordinates (or an honest geocoded:false) instead of 202-queued. Hosts pass
+  // this to receive the result and update their own display without a refetch.
+  onResult?: (lat: number, lng: number) => void
 }
 
-export default function GeocodeButton({ endpoint, permission, disabled = false, variant = 'ghost' }: GeocodeButtonProps) {
+export default function GeocodeButton({ endpoint, permission, disabled = false, variant = 'ghost', onResult }: GeocodeButtonProps) {
   const { t } = useTranslation('common')
   const auth = useAuth()
   const hasPermission = auth?.hasPermission ?? (() => false)
@@ -43,17 +48,29 @@ export default function GeocodeButton({ endpoint, permission, disabled = false, 
   // recruiter can't use anyway (mirrors the other hide-not-disable gates in this repo).
   if (!hasPermission(permission)) return null
 
-  // Fire the queued re-geocode. A 202 only ever means "queued" — the toast says so
-  // honestly; a failure is already surfaced by api.ts's dev error toast (§10), so
-  // there is nothing extra to show the user here beyond stopping the spinner.
+  // GEO-INLINE-1: the per-id route runs inline now (CMBE 04-08, measured 64-214ms) and
+  // returns the real outcome — coordinates, or an honest `geocoded: false` when the
+  // address can't be resolved. Coordinates arrive as Laravel decimal STRINGS (§10),
+  // so they go through toCoord, never a typeof check. A legacy 202/empty body still
+  // falls back to the old "started" toast (bulk stays queued by design).
   const handleClick = async () => {
     if (disabled || loading) return
     setLoading(true)
     try {
-      await api.post(endpoint)
-      notifySuccess(t('geocode.started'))
+      const res = await api.post(endpoint)
+      const body = unwrap<{ lat?: unknown; lng?: unknown; geocoded?: boolean }>(res) ?? {}
+      const lat = toCoord(body.lat)
+      const lng = toCoord(body.lng)
+      if (lat != null && lng != null) {
+        onResult?.(lat, lng)
+        notifySuccess(t('geocode.updated'))
+      } else if (body.geocoded === false) {
+        notifyError(t('geocode.notFound'))
+      } else {
+        notifySuccess(t('geocode.started'))
+      }
     } catch {
-      // Swallowed here on purpose — see the comment above.
+      // Failures are surfaced by api.ts's own error handling (§10) — only stop the spinner.
     } finally {
       setLoading(false)
     }

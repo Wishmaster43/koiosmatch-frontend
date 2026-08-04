@@ -7,6 +7,7 @@
  * the plain version for entities without that polling, built on the SAME shared
  * GeocodeButton so the request path is identical everywhere (§3A/§11).
  */
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
@@ -35,7 +36,12 @@ interface PdokCardProps {
 
 export default function PdokCard({ lat, lng, endpoint, permission, disabled }: PdokCardProps) {
   const { t } = useTranslation('common')
-  const hasCoords = lat != null && lng != null
+  // GEO-INLINE-1: a manual re-geocode answers inline now — the fresh result
+  // overrides the (stale) record props until the host refetches.
+  const [fresh, setFresh] = useState<{ lat: number; lng: number } | null>(null)
+  const shownLat = fresh?.lat ?? lat
+  const shownLng = fresh?.lng ?? lng
+  const hasCoords = shownLat != null && shownLng != null
   return (
     <SectionCard title={<CardTitle icon={pdokIcon} alt={t('backofficeLinks.pdok.alt')} label={t('backofficeLinks.pdok.name')} />}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
@@ -43,13 +49,14 @@ export default function PdokCard({ lat, lng, endpoint, permission, disabled }: P
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <SoftChip label={t('backofficeLinks.pdok.linked')} color="var(--color-success)" />
             <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
-              {lat?.toFixed(5)}, {lng?.toFixed(5)}
+              {shownLat?.toFixed(5)}, {shownLng?.toFixed(5)}
             </span>
           </div>
         ) : (
           <SoftChip label={t('backofficeLinks.pdok.notGeocoded')} color="var(--text-muted)" />
         )}
-        {endpoint && <GeocodeButton endpoint={endpoint} permission={permission} disabled={disabled} variant="row" />}
+        {endpoint && <GeocodeButton endpoint={endpoint} permission={permission} disabled={disabled} variant="row"
+          onResult={(la, ln) => setFresh({ lat: la, lng: ln })} />}
       </div>
       <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '8px 0 0' }}>
         {endpoint ? t('backofficeLinks.pdok.autoInfo') : t('backofficeLinks.pdok.readOnly')}

@@ -209,7 +209,9 @@
   },
   "geocode": {
     "refresh": "Actualizar coordenadas PDOK",
-    "started": "Actualización iniciada…"
+    "started": "Actualización iniciada…",
+    "updated": "Coordenadas actualizadas.",
+    "notFound": "Dirección no encontrada — revisa los datos."
   },
   "noAccess": "Sin acceso",
   "noAccessDesc": "No tienes permisos para esta página.",

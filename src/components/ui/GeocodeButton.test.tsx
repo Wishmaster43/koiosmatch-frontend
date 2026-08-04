@@ -12,10 +12,17 @@ import GeocodeButton from './GeocodeButton'
 const mockUseAuth = vi.fn()
 const mockPost = vi.fn()
 const mockNotifySuccess = vi.fn()
+const mockNotifyError = vi.fn()
 
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
-vi.mock('@/lib/api', () => ({ default: { post: (...args: unknown[]) => mockPost(...args) } }))
-vi.mock('@/lib/notify', () => ({ notifySuccess: (...a: unknown[]) => mockNotifySuccess(...a) }))
+vi.mock('@/lib/api', () => ({
+  default: { post: (...args: unknown[]) => mockPost(...args) },
+  unwrap: (r: { data?: { data?: unknown } }) => r?.data?.data ?? r?.data,
+}))
+vi.mock('@/lib/notify', () => ({
+  notifySuccess: (...a: unknown[]) => mockNotifySuccess(...a),
+  notifyError: (...a: unknown[]) => mockNotifyError(...a),
+}))
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -83,6 +90,31 @@ describe('GeocodeButton · failure stays quiet (api.ts already surfaces the dev 
     render(<GeocodeButton endpoint="/locations/3/geocode" permission="settings.update" />)
     await user.click(screen.getByRole('button'))
     await waitFor(() => expect(screen.getByRole('button')).not.toBeDisabled())
+    expect(mockNotifySuccess).not.toHaveBeenCalled()
+  })
+})
+
+// GEO-INLINE-1 (CMBE 04-08): the per-id route answers inline now — the button
+// consumes the real outcome instead of pretending everything is queued.
+describe('GeocodeButton · inline result handling (GEO-INLINE-1)', () => {
+  it('reports fresh coordinates to the host and toasts "updated" (decimal strings coerced, §10)', async () => {
+    mockPost.mockResolvedValue({ status: 200, data: { data: { geocoded: true, lat: '52.3702157', lng: '4.8951679' } } })
+    const onResult = vi.fn()
+    const user = userEvent.setup()
+    render(<GeocodeButton endpoint="/customers/c1/geocode" permission="customers.update" onResult={onResult} />)
+
+    await user.click(screen.getByRole('button'))
+    await waitFor(() => expect(onResult).toHaveBeenCalledWith(52.3702157, 4.8951679))
+    expect(mockNotifySuccess).toHaveBeenCalledWith('geocode.updated')
+  })
+
+  it('toasts an honest "not found" on geocoded:false — never a success', async () => {
+    mockPost.mockResolvedValue({ status: 200, data: { data: { geocoded: false } } })
+    const user = userEvent.setup()
+    render(<GeocodeButton endpoint="/customers/c1/geocode" permission="customers.update" />)
+
+    await user.click(screen.getByRole('button'))
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('geocode.notFound'))
     expect(mockNotifySuccess).not.toHaveBeenCalled()
   })
 })
