@@ -224,7 +224,8 @@
     "opportunity_lookups": "Fasen & typen",
     "nt_match": "Matches",
     "nt_task": "Taken",
-    "customer_blacklist_reasons": "Blacklistredenen"
+    "customer_blacklist_reasons": "Blacklistredenen",
+    "match_stop_reasons": "Beëindigingsredenen"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -596,7 +597,10 @@
     "isBlacklist": "Blacklist",
     "isBlacklistHint": "Deze status markeert een kandidaat als geblokkeerd voor inzet; er wordt om een reden gevraagd.",
     "isProposal": "Is een voorstel",
-    "isProposalHint": "Deze fase betekent dat de kandidaat is voorgesteld aan de klant."
+    "isProposalHint": "Deze fase betekent dat de kandidaat is voorgesteld aan de klant.",
+    "phaseApplicant": "Is de sollicitant-fase",
+    "phaseApplicantHint": "Nieuwe leads komen automatisch in deze fase terecht bij hun eerste sollicitatie (Lead → Kandidaat).",
+    "phaseApplicantBadge": "Sollicitant-fase"
   },
   "vacancy": {
     "title": "Statussen",
@@ -2169,7 +2173,13 @@
       "vacancy": "Vacature",
       "customer_location": "Locatie",
       "customer_department": "Afdeling",
-      "match": "Match"
+      "match": "Match",
+      "application": "Sollicitatie",
+      "task": "Taak",
+      "opportunity": "Kans",
+      "outreach_campaign": "Bellijst",
+      "customer_contact": "Contactpersoon",
+      "location": "Vestiging (eigen)"
     }
   },
   "vacancyDisplay": {

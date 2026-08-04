@@ -36,5 +36,10 @@
     "model": "Model",
     "input": "Input",
     "output": "Output"
+  },
+  "voice": {
+    "start": "Dictate your message",
+    "stop": "Stop listening",
+    "denied": "Microphone denied — allow access in your browser"
   }
 }

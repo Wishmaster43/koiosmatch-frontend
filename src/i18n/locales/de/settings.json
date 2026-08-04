@@ -224,7 +224,8 @@
     "opportunity_lookups": "Phasen & Typen",
     "nt_match": "Matches",
     "nt_task": "Aufgaben",
-    "customer_blacklist_reasons": "Blacklist-Gründe"
+    "customer_blacklist_reasons": "Blacklist-Gründe",
+    "match_stop_reasons": "Beendigungsgründe"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -1561,7 +1562,10 @@
     "isBlacklist": "Sperrliste",
     "isBlacklistHint": "Dieser Status markiert einen Kandidaten als für den Einsatz gesperrt; es wird ein Grund abgefragt.",
     "isProposal": "Ist ein Vorschlag",
-    "isProposalHint": "Diese Phase bedeutet, dass der Kandidat dem Kunden vorgeschlagen wurde."
+    "isProposalHint": "Diese Phase bedeutet, dass der Kandidat dem Kunden vorgeschlagen wurde.",
+    "phaseApplicant": "Ist die Bewerber-Phase",
+    "phaseApplicantHint": "Neue Leads wechseln bei ihrer ersten Bewerbung automatisch in diese Phase (Lead → Kandidat).",
+    "phaseApplicantBadge": "Bewerber-Phase"
   },
   "planning": {
     "shiftTypes": {
@@ -2169,7 +2173,13 @@
       "vacancy": "Stelle",
       "customer_location": "Standort",
       "customer_department": "Abteilung",
-      "match": "Match"
+      "match": "Match",
+      "application": "Bewerbung",
+      "task": "Aufgabe",
+      "opportunity": "Chance",
+      "outreach_campaign": "Anrufliste",
+      "customer_contact": "Ansprechpartner",
+      "location": "Niederlassung (eigen)"
     }
   },
   "vacancyDisplay": {

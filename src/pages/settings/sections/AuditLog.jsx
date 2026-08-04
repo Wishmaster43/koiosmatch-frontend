@@ -13,6 +13,7 @@ import AuditLogTable from './AuditLogTable'
 import { useAuditFilters } from './useAuditFilters'
 import { exportAuditCsv } from './auditCsvExport'
 import PaginationBar from '@/components/ui/PaginationBar'
+import CalloutBox from '@/components/ui/CalloutBox'
 
 const PAGE_SIZE = 25
 
@@ -89,10 +90,8 @@ export default function AuditLog() {
       </div>
 
       {error && (
-        <div style={{ padding: '12px 14px', borderRadius: 10, background: 'var(--color-warning-bg)',
-                      // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this warning-banner border/text shade; kept literal to avoid changing the rendered tone
-                      border: '1px solid #FDE68A', fontSize: 13, color: '#92400E', marginBottom: 12 }}>
-          {error}
+        <div style={{ marginBottom: 12 }}>
+          <CalloutBox variant="warning">{error}</CalloutBox>
         </div>
       )}
 

@@ -50,7 +50,8 @@ describe('EducationTab · read/edit start-date parity (C-12)', () => {
     render(<EducationTab items={[item]} onEdit={vi.fn()} />)
     expect(screen.getByText(/01-01-2009/)).toBeInTheDocument()
 
-    await user.click(screen.getAllByTitle('Bewerken').at(-1)!) // last = the AddableSection ROW edit; the description ProseField pencil renders first (inside the row content)
+    // One pencil per entry (DRAWER-ONE-PENCIL-1, Danny 05-08) — the row-level edit form.
+    await user.click(screen.getByTitle('Bewerken'))
     expect(screen.getByDisplayValue('01-01-2009')).toBeInTheDocument()
   })
 
@@ -58,7 +59,7 @@ describe('EducationTab · read/edit start-date parity (C-12)', () => {
     const user = userEvent.setup()
     const item = { id: 'e2', title: 'Onbekend', inProgress: true }
     render(<EducationTab items={[item]} onEdit={vi.fn()} />)
-    await user.click(screen.getAllByTitle('Bewerken').at(-1)!) // last = the AddableSection ROW edit; the description ProseField pencil renders first (inside the row content)
+    await user.click(screen.getByTitle('Bewerken'))
     // The start-date field (react-datepicker) has no display value to assert against —
     // confirm no stray date leaked in instead.
     expect(screen.queryByDisplayValue(/\d{2}-\d{2}-\d{4}/)).toBeNull()
@@ -103,31 +104,34 @@ describe('CertificationsTab · compact display (C-13a/b)', () => {
   })
 })
 
-describe('CertificationsTab · description = rich-text pattern with its own pencil (C-13c)', () => {
-  it('renders the saved description through SafeHtml, not a bare textarea', () => {
+describe('CertificationsTab · description read-only, edited via the ONE row pencil (C-13c, DRAWER-ONE-PENCIL-1)', () => {
+  it('renders the saved description through SafeHtml, not a bare textarea, with no field-level pencil of its own', () => {
     const item = { id: 'c1', name: 'VCA Basis', desc: '<p>Basisveiligheid <strong>VOL</strong></p>' }
     render(<CertificationsTab items={[item]} />)
     expect(screen.getByText('Basisveiligheid')).toBeInTheDocument()
     expect(screen.getByText('VOL').tagName).toBe('STRONG')
     expect(screen.queryByRole('textbox')).toBeNull() // no bare <textarea> in read mode
+    // No onEdit passed → AddableSection renders no row pencil either (no fake affordance).
+    expect(screen.queryByTitle('Bewerken')).toBeNull()
   })
 
-  it('edits the description via its OWN pencil (independent of the row-level edit) and saves only {desc}', async () => {
+  it('edits the description through the ONE row-level pencil — the save payload carries the edited desc html', async () => {
     const user = userEvent.setup()
     const onEdit = vi.fn()
     const item = { id: 'c1', name: 'VCA Basis', org: 'SSVV', desc: '<p>Basisveiligheid</p>' }
     render(<CertificationsTab items={[item]} onEdit={onEdit} />)
 
-    await user.click(screen.getByTestId('prose-edit'))
+    // Exactly ONE 'Bewerken' pencil now — the description no longer has its own (the fix).
+    expect(screen.getAllByTitle('Bewerken')).toHaveLength(1)
+    await user.click(screen.getByTitle('Bewerken'))
     expect(screen.getByTestId('rte')).toHaveValue('<p>Basisveiligheid</p>')
     await user.clear(screen.getByTestId('rte'))
     await user.type(screen.getByTestId('rte'), '<p>Edited</p>')
-    await user.click(screen.getByTestId('prose-save'))
+    await user.click(screen.getByTitle('Opslaan'))
 
-    expect(onEdit).toHaveBeenCalledWith(0, { desc: '<p>Edited</p>' })
-    // The row-level pencil (name/org/dates) is untouched by this flow — both it and
-    // the description's own pencil share the 'Bewerken' title, so there are two.
-    expect(screen.getAllByTitle('Bewerken')).toHaveLength(2)
+    // §13: assert the REQUEST payload, not just that the callback fired — the edited
+    // desc html rides along in the SAME row-level save (merged with the other fields).
+    expect(onEdit).toHaveBeenCalledWith(0, expect.objectContaining({ desc: '<p>Edited</p>' }))
   })
 
   it('cancel discards the draft without calling onEdit', async () => {
@@ -135,40 +139,40 @@ describe('CertificationsTab · description = rich-text pattern with its own penc
     const onEdit = vi.fn()
     const item = { id: 'c1', name: 'VCA Basis', desc: '<p>Basisveiligheid</p>' }
     render(<CertificationsTab items={[item]} onEdit={onEdit} />)
-    await user.click(screen.getByTestId('prose-edit'))
+    await user.click(screen.getByTitle('Bewerken'))
     await user.clear(screen.getByTestId('rte'))
     await user.type(screen.getByTestId('rte'), '<p>Discarded</p>')
-    await user.click(screen.getByTestId('prose-cancel'))
+    await user.click(screen.getByTitle('Annuleren'))
     expect(onEdit).not.toHaveBeenCalled()
     expect(screen.getByText('Basisveiligheid')).toBeInTheDocument()
   })
 })
 
-describe('ExperienceTab · description = rich-text pattern with its own pencil (C-14)', () => {
-  it('shows the description via SafeHtml and edits it through its own pencil', async () => {
+describe('ExperienceTab · description read-only, edited via the ONE row pencil (C-14, DRAWER-ONE-PENCIL-1)', () => {
+  it('shows the description via SafeHtml and edits it through the single row-level pencil', async () => {
     const user = userEvent.setup()
     const onEdit = vi.fn()
     const item = { id: 'x1', title: 'Verpleegkundige', company: 'Yesway', desc: '<p>Zorgtaken</p>' }
     render(<ExperienceTab items={[item]} onEdit={onEdit} />)
 
     expect(screen.getByText('Zorgtaken')).toBeInTheDocument()
-    await user.click(screen.getByTestId('prose-edit'))
+    // Exactly ONE 'Bewerken' pencil — the description no longer has its own (the fix).
+    expect(screen.getAllByTitle('Bewerken')).toHaveLength(1)
+    await user.click(screen.getByTitle('Bewerken'))
     expect(screen.getByTestId('rte')).toHaveValue('<p>Zorgtaken</p>')
-    await user.click(screen.getByTestId('prose-save'))
-    expect(onEdit).toHaveBeenCalledWith(0, { desc: '<p>Zorgtaken</p>' })
+    await user.click(screen.getByTitle('Opslaan'))
+    // §13: assert the REQUEST payload — the row save carries the (unchanged) desc html
+    // merged alongside the other row fields, not a separate partial-desc call.
+    expect(onEdit).toHaveBeenCalledWith(0, expect.objectContaining({ desc: '<p>Zorgtaken</p>' }))
   })
 
-  it('no longer offers the description as a plain textarea field on the row-level edit form', async () => {
+  it('renders the description as a rich-text field INSIDE the row-level edit form (one pencil owns it all)', async () => {
     const user = userEvent.setup()
-    const item = { id: 'x1', title: 'Verpleegkundige', company: 'Yesway' }
-    const { container } = render(<ExperienceTab items={[item]} onEdit={vi.fn()} />)
-    // Two pencils share the 'Bewerken' title (the row-level one + the description's
-    // own, ProseField) — click the row-level one specifically (not data-testid=prose-edit).
-    const rowPencil = screen.getAllByTitle('Bewerken').find(el => el.dataset.testid !== 'prose-edit')
-    await user.click(rowPencil as HTMLElement)
-    // The row form (title/company/location/dates/current) must not include a bare
-    // <textarea> for description anymore — that moved to its own rich-text pencil,
-    // and AddableSection swaps renderItem (incl. ProseField) out while this form is open.
-    expect(container.querySelectorAll('textarea')).toHaveLength(0)
+    const item = { id: 'x1', title: 'Verpleegkundige', company: 'Yesway', desc: '<p>Zorgtaken</p>' }
+    render(<ExperienceTab items={[item]} onEdit={vi.fn()} />)
+    await user.click(screen.getByTitle('Bewerken'))
+    // The row form (title/company/location/dates/current) now ALSO renders the
+    // description — mocked as the `rte` textarea — inside the SAME form.
+    expect(screen.getByTestId('rte')).toBeInTheDocument()
   })
 })

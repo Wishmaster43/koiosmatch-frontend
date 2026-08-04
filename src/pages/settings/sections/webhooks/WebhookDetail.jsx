@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Check, Copy, MoreHorizontal, Pencil, Power, RefreshCw, Save, Trash2, Webhook, X } from 'lucide-react'
 import StatusBadge from '@/components/ui/StatusBadge'
 import ActionMenu from '@/components/ui/ActionMenu'
+import CalloutBox from '@/components/ui/CalloutBox'
 import { useConfirm } from '@/hooks/useConfirm'
 import { getSubscription, updateSubscription, deleteSubscription, regenerateSecret } from './webhooksApi'
 import EventCatalog from './EventCatalog'
@@ -105,18 +106,17 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
 
       {/* One-time secret banner after regenerate */}
       {secret && (
-        /* eslint-disable no-restricted-syntax -- no exact/close index.css token match for these success-banner border/text shades; kept literal to avoid changing the rendered tone */
-        <div style={{ background: 'var(--color-success-bg)', border: '1px solid #BBF7D0', borderRadius: 10, padding: 14, margin: '14px 0' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#166534', marginBottom: 8 }}>{t('webhooks.outgoing.secretOnce')}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <code style={{ flex: 1, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'var(--surface)', border: '1px solid #BBF7D0', borderRadius: 6, padding: '8px 10px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{secret}</code>
-            <button onClick={copySecret} style={{ height: BTN_H, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: '1px solid #BBF7D0', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
-              {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('webhooks.outgoing.copySecret')}
-            </button>
-          </div>
-          <button onClick={() => setSecret(null)} style={{ marginTop: 8, fontSize: 12, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>{t('webhooks.outgoing.dismiss')}</button>
+        <div style={{ margin: '14px 0' }}>
+          <CalloutBox variant="success" title={t('webhooks.outgoing.secretOnce')}
+            onDismiss={() => setSecret(null)} dismissLabel={t('webhooks.outgoing.dismiss')}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <code style={{ flex: 1, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'var(--surface)', border: '1px solid color-mix(in srgb, var(--color-success) 35%, transparent)', borderRadius: 6, padding: '8px 10px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{secret}</code>
+              <button onClick={copySecret} style={{ height: BTN_H, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: '1px solid color-mix(in srgb, var(--color-success) 35%, transparent)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
+                {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('webhooks.outgoing.copySecret')}
+              </button>
+            </div>
+          </CalloutBox>
         </div>
-        /* eslint-enable no-restricted-syntax */
       )}
 
       {/* Details card (name + url) */}

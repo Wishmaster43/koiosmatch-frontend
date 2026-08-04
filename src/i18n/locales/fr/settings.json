@@ -224,7 +224,8 @@
     "opportunity_lookups": "Étapes et types",
     "nt_match": "Matchs",
     "nt_task": "Tâches",
-    "customer_blacklist_reasons": "Motifs de liste noire"
+    "customer_blacklist_reasons": "Motifs de liste noire",
+    "match_stop_reasons": "Motifs de résiliation"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -1561,7 +1562,10 @@
     "isBlacklist": "Liste noire",
     "isBlacklistHint": "Ce statut marque un candidat comme bloqué pour le placement ; un motif sera demandé.",
     "isProposal": "Est une proposition",
-    "isProposalHint": "Cette étape signifie que le candidat a été proposé au client."
+    "isProposalHint": "Cette étape signifie que le candidat a été proposé au client.",
+    "phaseApplicant": "Est la phase de candidature",
+    "phaseApplicantHint": "Les nouveaux leads passent automatiquement à cette phase lors de leur première candidature (Lead → Candidat).",
+    "phaseApplicantBadge": "Phase de candidat"
   },
   "planning": {
     "shiftTypes": {
@@ -2169,7 +2173,13 @@
       "vacancy": "Poste",
       "customer_location": "Site",
       "customer_department": "Département",
-      "match": "Match"
+      "match": "Match",
+      "application": "Candidature",
+      "task": "Tâche",
+      "opportunity": "Opportunité",
+      "outreach_campaign": "Liste d'appels",
+      "customer_contact": "Personne de contact",
+      "location": "Agence (propre)"
     }
   },
   "vacancyDisplay": {

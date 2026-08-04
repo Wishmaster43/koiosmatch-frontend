@@ -174,15 +174,19 @@ export default function SettingsPage() {
           </div>
 
           {/* Search trigger */}
+          {/* Audit finding (§4/§10): the hairline border here is now the standard --border
+              token (close enough to the old #EEF0F3 to be indistinguishable — no need for a
+              literal). The ⌘K hint stays a literal: it is deliberately lighter than
+              --text-muted (a barely-there shortcut hint, not body text) and no existing
+              token sits that light — kept as documented DATA-adjacent chrome. */}
           <button onClick={() => setSearchOpen(true)} style={{
             display: 'flex', alignItems: 'center', gap: 8, width: '100%', height: 34, padding: '0 10px',
-            // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this hairline border; kept literal to avoid changing the rendered tone
-            marginBottom: 16, border: '1px solid #EEF0F3', borderRadius: 9, background: 'var(--hover-bg)',
+            marginBottom: 16, border: '1px solid var(--border)', borderRadius: 9, background: 'var(--hover-bg)',
             cursor: 'pointer', color: 'var(--text-muted)',
           }}>
             <Search size={14} />
             <span style={{ fontSize: 13 }}>{t('shell.search')}</span>
-            {/* eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this shortcut-hint grey; kept literal to avoid changing the rendered tone */}
+            {/* eslint-disable-next-line no-restricted-syntax -- no --text-muted-adjacent token this light exists; a barely-there ⌘K hint, kept literal on purpose (see comment above) */}
             <kbd style={{ marginLeft: 'auto', fontSize: 11, fontFamily: 'inherit', color: '#C4C4CF' }}>⌘K</kbd>
           </button>
 
@@ -209,7 +213,12 @@ export default function SettingsPage() {
 
         {/* ── Content ── */}
         <div style={{ flex: 1, overflowY: 'auto', padding: 32, minWidth: 0 }}>
-          {/* Mobile category selector (sidebar is hidden) */}
+          {/* Mobile category selector (sidebar is hidden). DELIBERATE DEVIATION from the
+              shared SearchSelect (audit finding, house rule §4/§11): on touch devices a
+              native <select> opens the OS's own picker sheet — full-height, one-thumb
+              scrollable, no custom-overlay hit-testing quirks — which beats our SearchSelect
+              popover specifically on small screens. Desktop keeps the real sidebar (above)
+              and never sees this control. Kept as a native select on purpose; do not convert. */}
           {currentGroup && (
             <div className="md:hidden" style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
               <select value={category} onChange={e => selectCategory(e.target.value)}

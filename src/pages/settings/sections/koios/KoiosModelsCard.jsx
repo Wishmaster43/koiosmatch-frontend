@@ -8,16 +8,22 @@
 import { useState } from 'react'
 import { Zap, Sparkles, Crown, Check } from 'lucide-react'
 import { updateKoiosModel } from './koiosApi'
+import { tierKeyForModel } from '@/lib/koiosModelTiers'
 
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
 const cardTitle = { fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }
 
-// Model id → customer-language tier. Unknown ids fall back to a plain id tile.
+// Icon/colour per tier — presentation only. The id→tier MATCH itself lives in the
+// shared lib/koiosModelTiers (K-37) so this card and the floating Koios panel's
+// model picker never drift into two hand-maintained id→tier maps (CLAUDE.md §11).
+const TIER_STYLE = {
+  snel: { Icon: Zap, color: '#059669' },
+  slim: { Icon: Sparkles, color: '#2563EB' },
+  max:  { Icon: Crown, color: '#7C3AED' },
+}
 const tierFor = (id) => {
-  if (id.includes('haiku')) return { key: 'snel', Icon: Zap, color: '#059669' }
-  if (id.includes('sonnet')) return { key: 'slim', Icon: Sparkles, color: '#2563EB' }
-  if (id.includes('opus') || id.includes('fable')) return { key: 'max', Icon: Crown, color: '#7C3AED' }
-  return { key: null, Icon: Sparkles, color: 'var(--text-muted)' }
+  const key = tierKeyForModel(id)
+  return key ? { key, ...TIER_STYLE[key] } : { key: null, Icon: Sparkles, color: 'var(--text-muted)' }
 }
 
 export default function KoiosModelsCard({ models, t, onChanged }) {

@@ -11,12 +11,9 @@
  * `title` is falsy but still renders its `action` ("+ Toevoegen"), so the calm
  * content starts directly with the add-button row.
  */
-import { useState } from 'react'
-import type { ComponentType, CSSProperties } from 'react'
+import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X } from 'lucide-react'
 import AddableSectionJs from '@/components/forms/AddableSection'
-import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
 import DrawerAddButton from './DrawerAddButton'
 import { useDateFormat } from '@/lib/datetime'
@@ -58,40 +55,19 @@ export function resolveEducationStartDate(o: {
   return inProgress ? ((o.issued ?? o.issue_date) as string | undefined) : undefined
 }
 
-/** One multi-line "prose" field with its OWN pencil → RichTextEditor → save/✕, exactly
- * mirroring the candidate profile text (house rule: every free-text field is a rich-text
- * block — ProfileTab.tsx's summary editor is the reference). Shared by the Experience and
- * Certifications rows so their description never regresses to a bare textarea again. */
-function ProseField({ value, onSave }: { value?: string; onSave: (html: string) => void }) {
-  const { t } = useTranslation('common')
-  const [editing, setEditing] = useState(false)
-  const [draft, setDraft] = useState(value ?? '')
-  const iconBtn: CSSProperties = { width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer', flexShrink: 0 }
-  const start  = () => { setDraft(value ?? ''); setEditing(true) }
-  const save   = () => { onSave(draft); setEditing(false) }
-  const cancel = () => { setDraft(value ?? ''); setEditing(false) }
+/** Read-only "prose" line for a row's description — renders the saved HTML via
+ * SafeHtml (house rule: every free-text field is a rich-text block), or the "-"
+ * empty placeholder. VIEW ONLY (Danny 05-08, DRAWER-ONE-PENCIL-1): this used to
+ * carry its OWN pencil → RichTextEditor → save/✕, so an entry showed TWO edit
+ * affordances (this one + the row-level pencil). Editing moved into the row's
+ * own edit form — the `desc` field now renders there via the shared
+ * `richtext: true` field type (AddForm.tsx) — so one pencil owns the whole row. */
+function ProseField({ value }: { value?: string }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, marginTop: 6 }}>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {editing
-          // Compact editor: a row description is one or two lines — the default 120px
-          // block dwarfed the row it belongs to (Danny punt 48, "rode blok te groot").
-          ? <RichTextEditor value={draft} onChange={setDraft} minHeight={48} />
-          : (value
-              ? <SafeHtml html={value} style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }} />
-              : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>)}
-      </div>
-      <div style={{ display: 'flex', gap: 4 }}>
-        {editing ? (
-          <>
-            {/* data-testid: disambiguates this pencil from the row-level one in tests (both share the 'Bewerken' title). */}
-            <button onClick={save} title={t('save')} data-testid="prose-save" style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={12} /></button>
-            <button onClick={cancel} title={t('cancel')} data-testid="prose-cancel" style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={12} /></button>
-          </>
-        ) : (
-          <button onClick={start} title={t('edit')} data-testid="prose-edit" style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={12} /></button>
-        )}
-      </div>
+    <div style={{ marginTop: 6 }}>
+      {value
+        ? <SafeHtml html={value} style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }} />
+        : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>}
     </div>
   )
 }
@@ -102,8 +78,8 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }: RelTabPro
   // Format a date to DD-MM-YYYY, or '' when empty (so ranges don't show a stray dash).
   const fmt = (d?: string) => (d ? formatDate(d) : '')
   // Compact layout: title+company and start+end each pair onto one row. The
-  // description is NOT a plain-form field anymore — it gets its own rich-text
-  // pencil below (ProseField), mirroring the candidate profile text.
+  // description renders as a `richtext` field IN this same form (one pencil
+  // per entry, Danny 05-08) — the row reads it back via ProseField (view-only).
   const fields = [
     { key: 'title',    label: t('addFields.functionTitle'), half: true },
     { key: 'company',  label: t('addFields.company'),        half: true },
@@ -113,6 +89,7 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }: RelTabPro
     // upcoming end date on a current job must be enterable).
     { key: 'end',      label: t('addFields.endDate'),   half: true, date: true },
     { key: 'current',  label: t('addFields.currentJob'), checkbox: true },
+    { key: 'desc',     label: t('addFields.description'), richtext: true },
   ]
   return (
     <AddableSection title={null} emptyText={t('sections.experienceEmpty')} renderAddButton={renderAddButton}
@@ -133,7 +110,7 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }: RelTabPro
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{e.title ?? e.function_title}</div>
               {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}
-              <ProseField value={e.desc} onSave={html => onEdit?.(i, { desc: html })} />
+              <ProseField value={e.desc} />
             </div>
           </div>
         )
@@ -145,7 +122,7 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProp
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const fmt = (d?: string) => (d ? formatDate(d) : '')
-  // Compact layout: diploma+school and start+end each pair; textarea goes last.
+  // Compact layout: diploma+school and start+end each pair; description (richtext) goes last.
   const fields = [
     { key: 'title',     label: t('addFields.diploma'),     half: true },
     { key: 'school',    label: t('addFields.institution'), half: true },
@@ -154,8 +131,9 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProp
       altLabel: t('addFields.expectedEnd'), altLabelWhen: 'inProgress' },
     { key: 'inProgress', label: t('addFields.inProgress'), checkbox: true },
     { key: 'issued',    label: t('addFields.diplomaDate'), date: true, hideWhen: 'inProgress' },
-    // Description is NOT a plain-form field — it gets its own rich-text pencil
-    // below (ProseField), mirroring Experience/Certifications (house rule).
+    // Description renders as a `richtext` field in this same form, mirroring
+    // Experience/Certifications — one pencil per entry (Danny 05-08).
+    { key: 'desc',      label: t('addFields.description'), richtext: true },
   ]
   return (
     <AddableSection title={null} emptyText={t('sections.educationEmpty')} renderAddButton={renderAddButton}
@@ -188,7 +166,7 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProp
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{o.title ?? o.education}</div>
               {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}
-              <ProseField value={(o as { desc?: string }).desc} onSave={html => onEdit?.(i, { desc: html })} />
+              <ProseField value={(o as { desc?: string }).desc} />
             </div>
           </div>
         )
@@ -201,7 +179,8 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove }: RelTa
   const { formatDate } = useDateFormat()
   const fmt = (d?: string) => (d ? formatDate(d) : '')
   // Compact layout: name+org pair; issued–expires stay a "tot" pair (separator).
-  // The description is NOT a plain-form field anymore — see ProseField below.
+  // The description renders as a `richtext` field in this same form (one
+  // pencil per entry, Danny 05-08) — see ProseField (view-only) below.
   const fields = [
     { key: 'name',    label: t('addFields.certName'),     half: true },
     { key: 'org',     label: t('addFields.organisation'), half: true },
@@ -209,6 +188,7 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove }: RelTa
     { key: 'expires', label: t('addFields.expiryDate'), date: true, disabledWhen: 'noExpiry' },
     { key: 'noExpiry', label: t('addFields.alwaysValid'), checkbox: true },
     { key: 'license', label: t('addFields.licenseNumber') },
+    { key: 'desc',    label: t('addFields.description'), richtext: true },
   ]
   return (
     <AddableSection title={null} emptyText={t('sections.certificationsEmpty')} renderAddButton={renderAddButton}
@@ -228,7 +208,7 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove }: RelTa
               {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}
               {/* Licence number (C-13b) — a code/ID, so JetBrains Mono per §4. */}
               {cert.license && <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>{t('addFields.licenseNumber')}: {cert.license}</div>}
-              <ProseField value={cert.desc} onSave={html => onEdit?.(i, { desc: html })} />
+              <ProseField value={cert.desc} />
             </div>
           </div>
         )

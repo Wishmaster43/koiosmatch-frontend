@@ -12,6 +12,7 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import DataTable from '@/components/ui/DataTable'
 import type { Column, RowId } from '@/components/ui/DataTable'
 import { escapeCsvCell } from '@/lib/csv'
+import CalloutBox from '@/components/ui/CalloutBox'
 
 export interface LogExportCol<Row> { header: string; value: (row: Row) => string }
 
@@ -74,10 +75,8 @@ export default function LogView<Row>({
       </div>
 
       {error && (
-        <div style={{ padding: '12px 14px', borderRadius: 10, background: 'var(--color-warning-bg)',
-          // eslint-disable-next-line no-restricted-syntax -- no close-enough warning-contrast token for this alert box border/text; tracked as a token-set follow-up (mirrors KoiosRadar.tsx precedent)
-          border: '1px solid #FDE68A', fontSize: 13, color: '#92400E', marginBottom: 12 }}>
-          {error}
+        <div style={{ marginBottom: 12 }}>
+          <CalloutBox variant="warning">{error}</CalloutBox>
         </div>
       )}
 

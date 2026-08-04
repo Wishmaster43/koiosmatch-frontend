@@ -3,9 +3,16 @@
  * the create modal and the Access tab so both render identical rows. Pure and
  * controlled: it renders `value` (an { entity: level } map) and reports edits via
  * onChange — the parent decides when/how to persist. Off = entity absent = no access.
+ *
+ * The permission-level picker uses the shared SearchSelect (audit finding, §4/§11 —
+ * was a bare native <select>), mirroring ApiKeyGeneralTab's own type picker: single-
+ * select via closeOnToggle + searchable={false}, disabled forwarded to BOTH
+ * SearchSelect's own gate AND the renderTrigger button (mirrors CustomFieldsSettings'
+ * field-type picker) so an off row's level control is fully inert, not just dimmed.
  */
 import { useTranslation } from 'react-i18next'
 import { Toggle } from '@/pages/settings/components/SettingsKit'
+import SearchSelect from '@/components/ui/SearchSelect'
 import { SCOPE_ENTITIES, ACCESS_LEVELS } from './constants'
 
 export default function ScopeEditor({ value = {}, onChange }) {
@@ -33,11 +40,20 @@ export default function ScopeEditor({ value = {}, onChange }) {
             <span style={{ flex: 1, fontSize: 13, color: 'var(--text)', fontWeight: on ? 500 : 400 }}>
               {t(`apiKeys.scopes.${entity}`)}
             </span>
-            <select value={level ?? 'read'} onChange={(e) => setLevel(entity, e.target.value)} disabled={!on}
-              aria-label={t(`apiKeys.scopes.${entity}`)}
-              style={{ height: 30, padding: '0 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', color: on ? 'var(--text)' : 'var(--text-muted)', cursor: on ? 'pointer' : 'not-allowed', opacity: on ? 1 : 0.5 }}>
-              {ACCESS_LEVELS.map((lvl) => <option key={lvl} value={lvl}>{t(`apiKeys.level.${lvl}`)}</option>)}
-            </select>
+            <SearchSelect
+              options={ACCESS_LEVELS.map((lvl) => ({ value: lvl, label: t(`apiKeys.level.${lvl}`) }))}
+              selected={[level ?? 'read']}
+              onToggle={(v) => setLevel(entity, v)}
+              closeOnToggle
+              searchable={false}
+              disabled={!on}
+              renderTrigger={(toggleOpen) => (
+                <button type="button" onClick={toggleOpen} disabled={!on} aria-label={t(`apiKeys.scopes.${entity}`)}
+                  style={{ height: 30, minWidth: 110, padding: '0 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', color: on ? 'var(--text)' : 'var(--text-muted)', cursor: on ? 'pointer' : 'not-allowed', textAlign: 'left' }}>
+                  {t(`apiKeys.level.${level ?? 'read'}`)}
+                </button>
+              )}
+            />
           </div>
         )
       })}

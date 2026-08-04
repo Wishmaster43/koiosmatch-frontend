@@ -224,7 +224,8 @@
     "opportunity_lookups": "Stages & types",
     "nt_match": "Matches",
     "nt_task": "Tasks",
-    "customer_blacklist_reasons": "Blacklist reasons"
+    "customer_blacklist_reasons": "Blacklist reasons",
+    "match_stop_reasons": "Termination reasons"
   },
   "kpis": {
     "title": "KPI settings",
@@ -596,7 +597,10 @@
     "isBlacklist": "Blacklist",
     "isBlacklistHint": "This status marks a candidate as blocked for deployment; a reason will be requested.",
     "isProposal": "Is a proposal",
-    "isProposalHint": "This stage means the candidate has been proposed to the customer."
+    "isProposalHint": "This stage means the candidate has been proposed to the customer.",
+    "phaseApplicant": "Is the applicant phase",
+    "phaseApplicantHint": "New leads automatically move to this phase on their first application (Lead → Candidate).",
+    "phaseApplicantBadge": "Applicant phase"
   },
   "vacancy": {
     "title": "Statuses",
@@ -2169,7 +2173,13 @@
       "vacancy": "Vacancy",
       "customer_location": "Location",
       "customer_department": "Department",
-      "match": "Match"
+      "match": "Match",
+      "application": "Application",
+      "task": "Task",
+      "opportunity": "Opportunity",
+      "outreach_campaign": "Call list",
+      "customer_contact": "Contact person",
+      "location": "Branch (own)"
     }
   },
   "vacancyDisplay": {

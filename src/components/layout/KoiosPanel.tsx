@@ -22,6 +22,7 @@ import KoiosResizeHandle from './koios/KoiosResizeHandle'
 import KoiosPendingActionCard from './koios/KoiosPendingActionCard'
 import KoiosResultCards from './koios/KoiosResultCards'
 import KoiosRadar from './koios/KoiosRadar'
+import KoiosVoiceButton from './koios/KoiosVoiceButton'
 import type { KoiosEntityHit } from './koios/useKoiosEntitySearch'
 import type { KoiosResultRef } from './koios/koiosTypes'
 import type { KoiosChatMessage, KoiosContextRef, TFn } from '@/types/koios'
@@ -245,6 +246,16 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
 
   const removeContext = (id: string) => setContextRefs(prev => removeContextRef(prev, id))
 
+  // Dictation (SPEECH-1): append a recognized chunk to the draft, spacing it
+  // off the existing text, then refocus so typing can resume mid-dictation.
+  const appendVoiceText = (chunk: string) => {
+    setInput(prev => {
+      const needsSpace = prev.length > 0 && !/\s$/.test(prev)
+      return prev + (needsSpace ? ' ' : '') + chunk
+    })
+    textareaRef.current?.focus()
+  }
+
   const newChat = () => { reset(); setInput(''); setShowMention(false); setActiveCategory(null); setContextRefs([]) }
 
   if (!open) return null
@@ -380,9 +391,13 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
               models={settings?.models?.selectable}
               value={model ?? settings?.models?.active}
               onChange={setModel}
+              t={t}
             />
 
             <div style={{ flex: 1 }} />
+
+            {/* Voice dictation (SPEECH-1) — renders nothing without browser support */}
+            <KoiosVoiceButton onText={appendVoiceText} t={t} />
 
             {/* Send */}
             <button

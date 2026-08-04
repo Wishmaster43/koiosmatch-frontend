@@ -16,6 +16,8 @@ import helloflexLogo from '@/assets/integrations/helloflex.png'
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { BTN_H } from '@/config/buttonMetrics'
+import SegmentedControl from '@/components/ui/SegmentedControl'
+import Toggle from '@/components/ui/Toggle'
 
 // Base tiers (the "size bar"). `desc` lists what each tier adds over the previous one.
 const TIERS = [
@@ -126,29 +128,22 @@ export default function ModulesSettings() {
                     letterSpacing: '0.07em', marginBottom: 10 }}>
         {t('modules.tierHeading', { defaultValue: 'Pakket' })}
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
-        {TIERS.map(tier => {
-          const active = pkg === tier.id
-          return (
-            <div key={tier.id} onClick={() => setPkg(tier.id)}
-              style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px', cursor: 'pointer',
-                borderRadius: 10, transition: 'border-color 0.12s, background 0.12s',
-                background: active ? 'var(--color-success-bg)' : 'var(--surface)',
-                border: `1.5px solid ${active ? 'var(--color-success)' : 'var(--border)'}` }}>
-              <div style={{ width: 18, height: 18, borderRadius: '50%', flexShrink: 0, marginTop: 1,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                border: `2px solid ${active ? 'var(--color-success)' : 'var(--border)'}`,
-                background: active ? 'var(--color-success)' : 'transparent' }}>
-                {active && <Check size={11} color="#fff" />}
-              </div>
-              <tier.Icon size={17} color={active ? 'var(--color-success)' : 'var(--text-muted)'} style={{ flexShrink: 0, marginTop: 1 }} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{tier.name}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`modules.tierDesc.${tier.id}`, { defaultValue: tier.desc })}</div>
-              </div>
-            </div>
-          )
-        })}
+      {/* Shared SegmentedControl (audit finding, §4/§11) replaces the hand-rolled radio
+          cards + hardcoded white check — same tier semantics/payload (setPkg(tier.id)),
+          same success-green tint the "activate" flow already uses for "this is on". */}
+      <div style={{ marginBottom: 28 }}>
+        <SegmentedControl
+          ariaLabel={t('modules.tierHeading', { defaultValue: 'Pakket' })}
+          color="var(--color-success)"
+          value={pkg}
+          onChange={setPkg}
+          options={TIERS.map(tier => ({
+            value: tier.id,
+            label: tier.name,
+            description: t(`modules.tierDesc.${tier.id}`, { defaultValue: tier.desc }),
+            icon: tier.Icon,
+          }))}
+        />
       </div>
 
       {/* Add-ons (toggle on top of the package) */}
@@ -174,11 +169,13 @@ export default function ModulesSettings() {
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t(`modules.addon.${addon.id}`, { defaultValue: addon.name })}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`modules.addonDesc.${addon.id}`, { defaultValue: addon.desc })}</div>
               </div>
-              {/* Switch — rechts, zoals op de apps-pagina (Danny 23-07). */}
-              <div style={{ width: 34, height: 20, borderRadius: 999, flexShrink: 0, position: 'relative',
-                background: on ? 'var(--color-success)' : 'var(--border)', transition: 'background 0.15s' }}>
-                <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#fff', position: 'absolute',
-                  top: 2, left: on ? 16 : 2, transition: 'left 0.15s' }} />
+              {/* Shared Toggle (audit finding, §4/§11) replaces the hand-rolled switch +
+                  hardcoded white thumb — same on/off semantics (toggleAddon). Wrapped with
+                  its own stopPropagation so clicking the switch directly does not ALSO fire
+                  the row's own onClick (which would double-toggle it straight back off). */}
+              <div onClick={(e) => e.stopPropagation()}>
+                <Toggle checked={on} onChange={() => toggleAddon(addon.id)} disabled={disabled}
+                  ariaLabel={t(`modules.addon.${addon.id}`, { defaultValue: addon.name })} />
               </div>
               {disabled && (
                 <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-info)',

@@ -36,5 +36,10 @@
     "model": "Modell",
     "input": "Eingabe",
     "output": "Ausgabe"
+  },
+  "voice": {
+    "start": "Nachricht einsprechen",
+    "stop": "Zuhören stoppen",
+    "denied": "Mikrofonzugriff verweigert — erlauben Sie den Zugriff in Ihrem Browser"
   }
 }

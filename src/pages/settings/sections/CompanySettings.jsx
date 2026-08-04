@@ -5,18 +5,19 @@ import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { useIndustries } from '@/lib/useIndustries'
+import { useCountriesLookup } from '@/lib/useCountriesLookup'
 import SearchSelect from '@/components/ui/SearchSelect'
 // One language source for the whole app (Danny 14/7): the same five shipped
 // locales the profile picker offers — never a diverging local list.
 import { LANGUAGES as APP_LANGUAGES } from '@/pages/auth/profileParts'
 import { BTN_H } from '@/config/buttonMetrics'
 
-// Option lists (data — kept as-is; only labels are translated). Industries are
-// now tenant-configurable (Settings → Personalisation → Industries).
+// Option lists (data — kept as-is; only labels are translated). Industries and
+// countries are now backend-sourced (Settings → Personalisation → Industries;
+// GET /countries, COUNTRY-LOOKUP-1) — never a hardcoded list of either.
 const LANGUAGES = APP_LANGUAGES.map(l => l.label)
 const CURRENCIES = ['Euro (€)','Dollar ($)','Pond (£)']
 const TIMEZONES  = ['Europa/Amsterdam','Europa/Brussel','Europa/Londen','UTC']
-const COUNTRIES  = ['Netherlands','Belgium','Germany','United Kingdom']
 
 // Module-scope so they keep a stable identity across renders (otherwise text
 // inputs lose focus on every keystroke).
@@ -42,26 +43,35 @@ function Input({ value, onChange, placeholder, style }) {
 }
 
 // Replaces the bare native <select> with the shared searchable dropdown (audit sweep) —
-// same value/onChange contract as before.
+// same value/onChange contract as before. `options` accepts plain strings (value ===
+// label, e.g. LANGUAGES/CURRENCIES/TIMEZONES) OR {value,label} pairs (e.g. the
+// backend-sourced country codes) — the trigger always shows the resolved LABEL,
+// never a raw stored code (the bug this replaces: a stored 'NL' rendered as literal
+// "NL" because the old hardcoded list only matched on full English names).
 function Select({ value, onChange, options }) {
+  const opts = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
+  const selectedLabel = opts.find(o => o.value === value)?.label ?? value
   return (
     <SearchSelect
-      options={options.map(o => ({ value: o, label: o }))}
+      options={opts}
       selected={value ? [value] : []}
       onToggle={onChange}
       closeOnToggle
       renderTrigger={toggle => (
         <button type="button" onClick={toggle}
           style={{ ...baseInput, background: 'var(--surface)', textAlign: 'left', cursor: 'pointer' }}>
-          {value}
+          {selectedLabel}
         </button>
       )}
     />
   )
 }
 
+// company_country stores the ISO-2 CODE ('NL'), matching the backend's own seed
+// (DevResetCommand.php) and GET /countries — a plain English name here used to
+// mismatch that seed and render as a raw unmatched value (COUNTRY-LOOKUP-1).
 const EMPTY = {
-  company_industry: '', company_country: 'Netherlands',
+  company_industry: '', company_country: 'NL',
   company_street: '', company_house_number: '', company_house_number_suffix: '',
   company_postcode: '', company_city: '', company_province: '',
   company_language: 'Nederlands', company_currency: 'Euro (€)', company_timezone: 'Europa/Amsterdam',
@@ -71,6 +81,8 @@ export default function CompanySettings() {
   const { t } = useTranslation('settings')
   // Tenant-configurable industry options for the dropdown below.
   const { industries } = useIndustries()
+  // Backend-sourced operating-country codes, labelled in the current UI language.
+  const { options: countryOptions } = useCountriesLookup()
   const [form,       setForm]       = useState(EMPTY)
   const [bannerUrl,  setBannerUrl]  = useState(null)
   const [saved,      setSaved]      = useState(false)
@@ -83,7 +95,7 @@ export default function CompanySettings() {
       setForm(f => ({
         ...f,
         company_industry: s.company_industry ?? '',
-        company_country:  s.company_country  ?? 'Netherlands',
+        company_country:  s.company_country  ?? 'NL',
         // Migrate legacy single-line address into the street field if needed.
         company_street:              s.company_street              ?? s.company_address1 ?? '',
         company_house_number:        s.company_house_number        ?? '',
@@ -169,7 +181,7 @@ export default function CompanySettings() {
             </div>
           </Row>
           <Row label={t('company.industry')}><Select value={form.company_industry} onChange={v => set('company_industry', v)} options={industries} /></Row>
-          <Row label={t('company.country')}><Select value={form.company_country} onChange={v => set('company_country', v)} options={COUNTRIES} /></Row>
+          <Row label={t('company.country')}><Select value={form.company_country} onChange={v => set('company_country', v)} options={countryOptions} /></Row>
 
           <Row label={t('company.street')}><Input value={form.company_street} onChange={v => set('company_street', v)} placeholder={t('company.streetPlaceholder')} /></Row>
           <Row label={t('company.houseNumber')}>

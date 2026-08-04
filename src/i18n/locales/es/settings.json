@@ -224,7 +224,8 @@
     "opportunity_lookups": "Etapas y tipos",
     "nt_match": "Coincidencias",
     "nt_task": "Tareas",
-    "customer_blacklist_reasons": "Motivos de lista negra"
+    "customer_blacklist_reasons": "Motivos de lista negra",
+    "match_stop_reasons": "Motivos de finalización"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -1561,7 +1562,10 @@
     "isBlacklist": "Lista negra",
     "isBlacklistHint": "Este estado marca a un candidato como bloqueado para la colocación; se solicitará un motivo.",
     "isProposal": "Es una propuesta",
-    "isProposalHint": "Esta etapa significa que el candidato ha sido propuesto al cliente."
+    "isProposalHint": "Esta etapa significa que el candidato ha sido propuesto al cliente.",
+    "phaseApplicant": "Es la fase de solicitante",
+    "phaseApplicantHint": "Los nuevos leads pasan automáticamente a esta fase en su primera solicitud (Lead → Candidato).",
+    "phaseApplicantBadge": "Fase de solicitante"
   },
   "planning": {
     "shiftTypes": {
@@ -2169,7 +2173,13 @@
       "vacancy": "Vacante",
       "customer_location": "Ubicación",
       "customer_department": "Departamento",
-      "match": "Match"
+      "match": "Match",
+      "application": "Candidatura",
+      "task": "Tarea",
+      "opportunity": "Oportunidad",
+      "outreach_campaign": "Lista de llamadas",
+      "customer_contact": "Persona de contacto",
+      "location": "Sucursal (propia)"
     }
   },
   "vacancyDisplay": {

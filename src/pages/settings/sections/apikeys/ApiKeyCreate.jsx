@@ -13,6 +13,7 @@ import { createApiKey } from './apiKeysApi'
 import { KEY_TYPES } from './constants'
 import ScopeEditor from './ScopeEditor'
 import SearchSelect from '@/components/ui/SearchSelect'
+import CalloutBox from '@/components/ui/CalloutBox'
 import { BTN_H } from '@/config/buttonMetrics'
 
 export default function ApiKeyCreate({ onBack, onCreated }) {
@@ -75,18 +76,17 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
         {result ? (
           // Phase 2 — one-time secret reveal.
           <div>
-            {/* eslint-disable no-restricted-syntax -- no exact/close index.css token match for these success-banner border/text shades; kept literal to avoid changing the rendered tone */}
-            <div style={{ background: 'var(--color-success-bg)', border: '1px solid #BBF7D0', borderRadius: 10, padding: 16, marginBottom: 16 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#166534', marginBottom: 8 }}>{t('apiKeys.secretOnce')}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <code style={{ flex: 1, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'var(--surface)', border: '1px solid #BBF7D0', borderRadius: 6, padding: '9px 11px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{result.secret}</code>
-                <button onClick={copySecret} aria-label={t('apiKeys.copySecret')}
-                  style={{ height: BTN_H, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: '1px solid #BBF7D0', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
-                  {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('apiKeys.copySecret')}
-                </button>
-              </div>
+            <div style={{ marginBottom: 16 }}>
+              <CalloutBox variant="success" title={t('apiKeys.secretOnce')}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <code style={{ flex: 1, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'var(--surface)', border: '1px solid color-mix(in srgb, var(--color-success) 35%, transparent)', borderRadius: 6, padding: '9px 11px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{result.secret}</code>
+                  <button onClick={copySecret} aria-label={t('apiKeys.copySecret')}
+                    style={{ height: BTN_H, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: '1px solid color-mix(in srgb, var(--color-success) 35%, transparent)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
+                    {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('apiKeys.copySecret')}
+                  </button>
+                </div>
+              </CalloutBox>
             </div>
-            {/* eslint-enable no-restricted-syntax */}
             <button onClick={onBack}
               style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
               {t('apiKeys.done')}

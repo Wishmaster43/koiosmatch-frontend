@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Check, Copy, Webhook } from 'lucide-react'
 import { createSubscription } from './webhooksApi'
 import EventCatalog from './EventCatalog'
+import CalloutBox from '@/components/ui/CalloutBox'
 import { BTN_H } from '@/config/buttonMetrics'
 
 export default function WebhookCreate({ onBack, onCreated }) {
@@ -72,19 +73,18 @@ export default function WebhookCreate({ onBack, onCreated }) {
         {result ? (
           // Phase 2 — one-time signing secret reveal.
           <div>
-            {/* eslint-disable no-restricted-syntax -- no exact/close index.css token match for these success-banner border/text shades; kept literal to avoid changing the rendered tone */}
-            <div style={{ background: 'var(--color-success-bg)', border: '1px solid #BBF7D0', borderRadius: 10, padding: 16, marginBottom: 16 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#166534', marginBottom: 8 }}>{t('webhooks.outgoing.secretOnce')}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <code style={{ flex: 1, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'var(--surface)', border: '1px solid #BBF7D0', borderRadius: 6, padding: '9px 11px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{result.secret}</code>
-                <button onClick={copySecret} aria-label={t('webhooks.outgoing.copySecret')}
-                  style={{ height: BTN_H, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: '1px solid #BBF7D0', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
-                  {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('webhooks.outgoing.copySecret')}
-                </button>
-              </div>
-              <p style={{ fontSize: 11, color: '#166534', marginTop: 8 }}>{t('webhooks.outgoing.signingHint')}</p>
+            <div style={{ marginBottom: 16 }}>
+              <CalloutBox variant="success" title={t('webhooks.outgoing.secretOnce')}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <code style={{ flex: 1, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'var(--surface)', border: '1px solid color-mix(in srgb, var(--color-success) 35%, transparent)', borderRadius: 6, padding: '9px 11px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{result.secret}</code>
+                  <button onClick={copySecret} aria-label={t('webhooks.outgoing.copySecret')}
+                    style={{ height: BTN_H, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: '1px solid color-mix(in srgb, var(--color-success) 35%, transparent)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
+                    {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('webhooks.outgoing.copySecret')}
+                  </button>
+                </div>
+                <p style={{ fontSize: 11, color: 'var(--color-success)', marginTop: 8, marginBottom: 0 }}>{t('webhooks.outgoing.signingHint')}</p>
+              </CalloutBox>
             </div>
-            {/* eslint-enable no-restricted-syntax */}
             <button onClick={onBack}
               style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
               {t('webhooks.outgoing.done')}

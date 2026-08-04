@@ -36,5 +36,10 @@
     "model": "Modèle",
     "input": "Entrée",
     "output": "Sortie"
+  },
+  "voice": {
+    "start": "Dictez votre message",
+    "stop": "Arrêtez l'écoute",
+    "denied": "Microphone refusé — autorisez l'accès dans votre navigateur"
   }
 }

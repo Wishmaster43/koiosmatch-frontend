@@ -1,16 +1,30 @@
 /**
  * KoiosModelPicker — compact model selector for the composer toolbar. Only shown
  * when the tenant has more than one selectable model; with a single model the
- * active one is used silently. Renders the raw model id (truncated) + a dropdown.
+ * active one is used silently. Renders the tenant-facing STAND name (Snel/Slim/
+ * Max), never the vendor model id (K-37, Danny 05-08: the panel used to show the
+ * raw id — e.g. "claude-haiku-4-5" — while Settings already had a customer-facing
+ * name for the same model). The id→tier match is the SAME shared helper the
+ * Settings model picker uses (`lib/koiosModelTiers`) — never a second map. An id
+ * outside that whitelist falls back to showing itself rather than a guessed label.
  */
 import { useEffect, useRef, useState } from 'react'
 import { ChevronDown, Check } from 'lucide-react'
+import { tierKeyForModel } from '@/lib/koiosModelTiers'
+import type { TFn } from '@/types/koios'
 
-export default function KoiosModelPicker({ models, value, onChange }: {
-  models?: string[]; value?: string | null; onChange: (m: string) => void
+export default function KoiosModelPicker({ models, value, onChange, t }: {
+  models?: string[]; value?: string | null; onChange: (m: string) => void; t: TFn
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+
+  // Resolve a raw model id to its tenant-facing stand label (ns 'koios' — the same
+  // keys the Settings model picker already ships in all five locales).
+  const standLabel = (id?: string | null) => {
+    const key = tierKeyForModel(id)
+    return key ? t(`models.tier.${key}`, { ns: 'koios' }) : (id ?? '')
+  }
 
   // Close the menu on an outside click.
   useEffect(() => {
@@ -27,7 +41,7 @@ export default function KoiosModelPicker({ models, value, onChange }: {
         style={{ display: 'flex', alignItems: 'center', gap: 4, maxWidth: 130, padding: '4px 9px',
                  borderRadius: 999, border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 600,
                  background: 'var(--hover-bg)', color: 'var(--text-muted)' }}>
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</span>
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{standLabel(value)}</span>
         <ChevronDown size={10} style={{ flexShrink: 0, opacity: 0.6 }} />
       </button>
 
@@ -43,7 +57,7 @@ export default function KoiosModelPicker({ models, value, onChange }: {
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--hover-bg)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}>
               <Check size={12} style={{ flexShrink: 0, opacity: m === value ? 1 : 0 }} color="var(--color-primary)" />
-              <span style={{ fontFamily: 'monospace' }}>{m}</span>
+              <span>{standLabel(m)}</span>
             </button>
           ))}
         </div>

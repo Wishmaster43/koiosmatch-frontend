@@ -36,5 +36,10 @@
     "model": "Model",
     "input": "Input",
     "output": "Output"
+  },
+  "voice": {
+    "start": "Spreek je bericht in",
+    "stop": "Stop met luisteren",
+    "denied": "Microfoon geweigerd — sta toegang toe in je browser"
   }
 }

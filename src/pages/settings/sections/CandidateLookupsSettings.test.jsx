@@ -104,6 +104,61 @@ describe('CandidateLookupsSettings — funnel stage default singleton', () => {
   })
 })
 
+// Audit finding: candidate_phases.is_applicant is a real backend flag (Candidate
+// LookupController.php:41; ApplicantStatusTransition.php:29/75 reads it to drive the
+// Lead→Candidate promotion) that had zero FE control. Not a backend singleton for
+// phases (ApplicationStage::SINGLETON_FLAGS excludes is_applicant there) — plain toggle.
+describe('CandidateLookupsSettings — phase is_applicant flag', () => {
+  it('shows the applicant badge on the flagged phase row', async () => {
+    api.get.mockResolvedValue({ data: {
+      /* eslint-disable no-restricted-syntax -- DATA: fixture phase colours, not a style rule. */
+      phases: [
+        { id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false },
+        { id: 'p2', value: 'candidate', label: 'Candidate', color: '#6E8FD6', is_applicant: true },
+      ],
+      /* eslint-enable no-restricted-syntax */
+    } })
+    render(<CandidatePhasesSettings />)
+
+    await screen.findByText('Candidate')
+    expect(screen.getByText(st('lookups.phaseApplicantBadge'))).toBeInTheDocument()
+  })
+
+  it('saves is_applicant:true on a phase via the edit modal', async () => {
+    api.get.mockResolvedValue({ data: {
+      // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.
+      phases: [{ id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false }],
+    } })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<CandidatePhasesSettings />)
+
+    await screen.findByText('Lead')
+    await user.click(screen.getByTitle(st('lookups.edit')))
+    await user.click(screen.getByRole('switch'))
+    await user.click(screen.getByText(st('common.save')))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      '/settings/candidate-lookups/phases/p1', expect.objectContaining({ is_applicant: true })))
+  })
+
+  it('keeps the edit pencil enabled on the locked phases block while hiding add/delete', async () => {
+    api.get.mockResolvedValue({ data: {
+      // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.
+      phases: [{ id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false }],
+    } })
+    render(<CandidatePhasesSettings />)
+
+    await screen.findByText('Lead')
+    // Locked list: no "add" button, no delete button — but the edit pencil stays enabled
+    // (CandidateLookupController::update() carries no phases restriction, only store()/
+    // destroy() abort_if — audit finding, 04-08).
+    expect(screen.queryByRole('button', { name: st('lookups.add') })).not.toBeInTheDocument()
+    const editBtn = screen.getByTitle(st('lookups.edit'))
+    expect(editBtn).not.toBeDisabled()
+  })
+})
+
 describe('CandidateLookupsSettings — status is_blacklist flag', () => {
   it('saves is_blacklist:true on a status via the edit modal', async () => {
     api.get.mockResolvedValue({ data: {

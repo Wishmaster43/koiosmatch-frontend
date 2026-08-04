@@ -6,7 +6,9 @@
  * slug is derived from its label but can be overridden. Colours/labels per tenant.
  *
  * Two per-item flags live here:
- *   - statuses    → `is_applicant`        (legacy funnel-reveal flag, model A)
+ *   - phases      → `is_applicant`        (the phase a Lead auto-promotes to on
+ *                    their first application — ApplicantStatusTransition reads
+ *                    it; NOT a backend singleton, see the phase block below)
  *   - funnel_types→ `requires_appointment` (this stage expects a planned intake
  *                    appointment; missing one is flagged — see §3B / C-22)
  *
@@ -54,13 +56,14 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
   const supportsDefault = isFunnelBlock || isPhaseBlock
 
   // eslint-disable-next-line no-restricted-syntax -- DATA: default swatch colour pre-filled for a newly created lookup row, not UI chrome
-  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', requires_appointment: false, requires_reason: false, requires_match: false, expects_return_date: false, is_match: false, is_rejected: false, is_proposal: false, is_blacklist: false })
+  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', requires_appointment: false, requires_reason: false, requires_match: false, expects_return_date: false, is_match: false, is_rejected: false, is_proposal: false, is_blacklist: false, is_applicant: false })
   // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
   const openEdit = (it) => setModal({ mode: 'edit', id: it.id, value: it.value, label: it.label, color: it.color ?? '#6B7280',
     requires_appointment: it.requires_appointment === true, requires_reason: it.requires_reason === true,
     requires_match: it.requires_match === true, expects_return_date: it.expects_return_date === true,
     is_match: it.is_match === true, is_rejected: it.is_rejected === true,
-    is_proposal: it.is_proposal === true, is_blacklist: it.is_blacklist === true })
+    is_proposal: it.is_proposal === true, is_blacklist: it.is_blacklist === true,
+    is_applicant: it.is_applicant === true })
 
   const save = async () => {
     if (!modal.label.trim()) return
@@ -69,6 +72,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
     const flagFields = {
       ...(isStatusBlock ? { requires_reason: modal.requires_reason, requires_match: modal.requires_match, expects_return_date: modal.expects_return_date, is_blacklist: modal.is_blacklist } : {}),
       ...(isFunnelBlock ? { requires_appointment: modal.requires_appointment, is_match: modal.is_match, is_rejected: modal.is_rejected, is_proposal: modal.is_proposal } : {}),
+      ...(isPhaseBlock  ? { is_applicant: modal.is_applicant } : {}),
     }
     try {
       if (modal.mode === 'add') {
@@ -175,6 +179,19 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
                 {t('lookups.appointmentBadge')}
               </span>
             )}
+            {/* Applicant badge: marks the phase a Lead auto-promotes to on their first
+                application (CandidatePhase.is_applicant — ApplicantStatusTransition,
+                koiosmatch-api). Audit finding: the flag drives real backend automation
+                but had zero FE control until now. Keys are namespaced `phaseApplicant*`
+                (not `isApplicant`/`applicantBadge`) — those two already exist in every
+                locale for an unrelated, now-dead "statuses reveal the funnel" flag from
+                the retired model-A UI; reusing them would show stale copy here. */}
+            {isPhaseBlock && item.is_applicant && (
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-success)',
+                             background: 'var(--color-success-bg)', padding: '2px 7px', borderRadius: 999 }}>
+                {t('lookups.phaseApplicantBadge')}
+              </span>
+            )}
             {/* Default toggle: the singleton stage/phase new records land on when none is chosen.
                 undoable={false}: CandidateLookupController::update() (koiosmatch-api,
                 app/Http/Controllers/CandidateLookupController.php:138-143) 422s any PUT that
@@ -190,11 +207,15 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
                 activeLabel={t('common.default')} inactiveLabel={t('common.setDefault')} />
             )}
             <div style={{ flex: 1 }} />
-            {/* Locked (system) list: edit greyed out too — fully read-only rows (Danny 23-07). */}
-            <button onClick={() => openEdit(item)} title={t('lookups.edit')} disabled={locked}
+            {/* Locked (system) list: only ADD/DELETE are blocked here — CandidateLookupController
+                (koiosmatch-api) only abort_if($type === 'phases') inside store()/destroy()
+                (PHASE-LOCK-1); update() carries NO phases restriction, so rename/colour/flag
+                edits stay open on a system phase. The edit pencil must therefore stay enabled
+                (audit finding, 04-08 — it used to be wrongly disabled here too). */}
+            <button onClick={() => openEdit(item)} title={t('lookups.edit')}
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
                        background: 'var(--border)', border: 'none', borderRadius: 6,
-                       cursor: locked ? 'not-allowed' : 'pointer', color: 'var(--text-muted)', opacity: locked ? 0.45 : 1 }}>
+                       cursor: 'pointer', color: 'var(--text-muted)' }}>
               <Pencil size={11} />
             </button>
             {!locked && <button onClick={() => remove(item)} disabled={deleting === item.id || inUse(item)}
@@ -243,6 +264,21 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.colorField')}</div>
               <ColorSwatch color={modal.color} onChange={c => setModal(m => ({ ...m, color: c }))} />
             </div>
+
+            {/* Applicant toggle — phases only. Not backend-singleton (verified against
+                CandidateLookupController::update(), koiosmatch-api: ApplicationStage::
+                SINGLETON_FLAGS does not include is_applicant for the phases config), so a
+                plain toggle — multiple phases may carry it, ApplicantStatusTransition just
+                reads the first active match. */}
+            {isPhaseBlock && (
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Toggle checked={modal.is_applicant} onChange={v => setModal(m => ({ ...m, is_applicant: v }))} />
+                  <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.phaseApplicant')}</span>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.phaseApplicantHint')}</div>
+              </div>
+            )}
 
             {/* Reason-required toggle — statuses only (e.g. Inactive needs a reason). */}
             {isStatusBlock && (
@@ -383,7 +419,8 @@ export function FunnelStagesSettings() {
 // Candidate phase (relationship lifecycle: Lead → Kandidaat) — model v2 axis.
 export function CandidatePhasesSettings() {
   // Lead/Kandidaat are SYSTEM values (automations + the matrix depend on them):
-  // no add, no delete — rename/colour only (Danny 23-07; BE guard ticketed).
+  // no add, no delete — rename/colour/flags only (Danny 23-07; BE guard ticketed;
+  // the edit pencil itself must stay enabled, audit finding fixed 04-08).
   return <CandidateLookupSection typeKey="phases" slug="phases" locked />
 }
 

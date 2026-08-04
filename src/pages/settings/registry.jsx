@@ -59,7 +59,7 @@ import { CustomerConversionSettings } from './sections/CustomerConversionSetting
 import MatchTemplatesSettings from './sections/MatchTemplatesSettings'
 import MatchRatesSettings from './sections/MatchRatesSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
-import { MatchStatusSettings, ContractTypesSettings } from './sections/MatchSettings'
+import { MatchStatusSettings, ContractTypesSettings, MatchStopReasonSettings } from './sections/MatchSettings'
 import { AppointmentTypeSettings } from './sections/AppointmentTypeSettings'
 import { AppointmentLocationSettings } from './sections/AppointmentLocationSettings'
 import { SkillLevelSettings } from './sections/SkillLevelSettings'
@@ -317,6 +317,11 @@ export const NAV_GROUPS = [
     items: [
       { id: 'match_statuses', icon: Tags, component: MatchStatusSettings },
       { id: 'contract_types', icon: FileText, component: ContractTypesSettings },
+      // Match stop reasons (audit finding, 04-08) — MatchStopReasonSettings was fully
+      // built + tested in MatchSettings.jsx but never wired into the registry, so the
+      // mandatory reason recorded on POST /matches/{id}/terminate (MATCH-TERMINATE-1)
+      // had no settings screen at all.
+      { id: 'match_stop_reasons', icon: XCircle, component: MatchStopReasonSettings },
       // Appointment types/locations moved OUT to their own top-level `appointments`
       // group below (Danny 2026-08-04) — appointments span every entity, not just
       // matches, mirrors note_types/document_types.
@@ -491,6 +496,19 @@ export const NAV_GROUPS = [
   },
   {
     // Communication = e-mail per context (clients / candidates / planning).
+    //
+    // WITHHELD (offered-iff-read registry rule, mirrors the note_types/document_types
+    // comments above): the backend ships full tenant CRUD for message_purposes
+    // (MSG-PURPOSE-1 — MessagePurposeController.php, "Settings → Communicatie" in its
+    // own doc-block) — a value/label vocabulary for WHY a WhatsApp/e-mail message
+    // exists (birthday, evaluation, interview, manual, …), validated on
+    // POST /messages `purpose`. There is ZERO frontend consumer today: no manual
+    // compose picker, no workflow send-step, no timeline badge reads it. Per §3 (no
+    // fake affordances) this does NOT get a settings screen yet — a tenant would be
+    // able to curate a vocabulary nothing ever applies. No tenant data is at risk:
+    // the endpoint keeps serving message_purposes, and re-adding this item becomes a
+    // one-line change the day a real `purpose` picker/reader lands on the message
+    // compose or workflow send-step surface.
     key: 'communication', icon: Mail,
     items: [
       { id: 'email_klanten', icon: Mail, render: () => <EmailSettings context="klanten" /> },

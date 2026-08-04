@@ -59,7 +59,11 @@ export default function PaginationBar({ page, totalPages, totalRows, pageSize, o
         {btn(() => onPageChange(totalPages), page >= totalPages, <ChevronsRight size={13} />, t('lastPage'))}
       </div>
 
-      {/* Rows per page */}
+      {/* Rows per page. DELIBERATE DEVIATION from the shared SearchSelect (audit finding,
+          house rule §4/§11): this is a compact numeric enum living inline in app-wide
+          pagination chrome shown on every table — a native <select> keeps its tiny
+          footprint (no popover/portal, no search row) exactly where the point of this
+          control IS its small footprint. Kept as a native select on purpose. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('rowsPerPage')}</span>
         <select value={pageSize} onChange={e => onPageSizeChange(Number(e.target.value))}

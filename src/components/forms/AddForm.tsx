@@ -10,6 +10,7 @@ import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, X } from 'lucide-react'
+import RichTextEditor from '@/components/ui/RichTextEditor'
 import { TextField, TextArea, DateField } from './fields'
 
 export interface FieldDef {
@@ -19,6 +20,11 @@ export interface FieldDef {
   altLabelWhen?: string
   checkbox?: boolean
   textarea?: boolean
+  // Rendered as the shared RichTextEditor (house rule: free text = rich-text block).
+  // Lets a description live in the SAME edit form as the row's other fields — one
+  // pencil per entry (DRAWER-ONE-PENCIL-1, Danny 05-08) instead of a second,
+  // field-level pencil bolted onto the read view.
+  richtext?: boolean
   date?: boolean
   options?: Array<string | { value: string; label?: ReactNode }>
   type?: string
@@ -48,6 +54,19 @@ function FieldInput({ f, value, onChange, values, disabled }: {
       <input type="checkbox" checked={!!value} onChange={e => onChange(e.target.checked)} style={{ cursor: 'pointer' }} />
       {f.label}
     </label>
+  )
+  // Compact rich-text block: a small caption label above (RichTextEditor has no
+  // placeholder slot) + the shared editor at minHeight 48 (the row it belongs to
+  // is a couple of lines, not a full page — Danny punt 48, "rode blok te groot").
+  if (f.richtext) return wrap(
+    <div>
+      {labelText && (
+        <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }}>
+          {labelText}
+        </div>
+      )}
+      <RichTextEditor value={value as string | undefined} onChange={onChange} minHeight={48} />
+    </div>
   )
   if (f.textarea) return wrap(<TextArea placeholder={labelText} value={value as string | undefined} onChange={onChange} rows={2} />)
   if (f.date)     return wrap(<DateField placeholder={labelText} value={value as string | undefined} onChange={onChange} />)

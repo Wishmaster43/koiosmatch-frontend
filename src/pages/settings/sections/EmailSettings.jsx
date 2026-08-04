@@ -11,6 +11,7 @@ import { Save, RefreshCw, Check, Mail, AlertTriangle, Eye, EyeOff } from 'lucide
 import api from '@/lib/api'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import RichTextEditor from '@/components/ui/RichTextEditor'
+import CalloutBox from '@/components/ui/CalloutBox'
 
 export default function EmailSettings({ context = 'klanten' }) {
   const { t } = useTranslation('settings')
@@ -163,10 +164,10 @@ export default function EmailSettings({ context = 'klanten' }) {
           </div>
 
           {(provider === 'gmail' || provider === 'office') && (
-            <div style={{ marginTop: 14, padding: '12px 14px', background: 'var(--color-warning-bg)',
-                          // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for this warning-banner border/text shade; kept literal to avoid changing the rendered tone
-                          border: '1px solid #FDE68A', borderRadius: 8, fontSize: 12, color: '#92400E' }}>
-              <strong>{t('email.oauthWarningTitle')}</strong> {t('email.oauthWarning', { provider: provider === 'gmail' ? 'Google' : 'Microsoft' })}
+            <div style={{ marginTop: 14 }}>
+              <CalloutBox variant="warning" title={t('email.oauthWarningTitle')}>
+                {t('email.oauthWarning', { provider: provider === 'gmail' ? 'Google' : 'Microsoft' })}
+              </CalloutBox>
             </div>
           )}
         </div>
