@@ -1,8 +1,10 @@
 /**
- * ConversationsSection — CONV-DRILLDOWN-FE. Proves the panel actually CALLS the
- * endpoint (the bug it replaces was a hardcoded-empty placeholder): the list
- * request carries ?candidate_id, threads render with the is_active badge, and
- * expanding a thread fetches + renders its messages with the purpose badge.
+ * ConversationsSection — CONV-DRILLDOWN-FE, promoted to components/drawer/
+ * (GESPREK-CONTACT-1). Proves the panel actually CALLS the endpoint the
+ * caller points it at via `threadsUrl`/`threadsParams` (the bug it replaces
+ * was a hardcoded-empty placeholder): the list request carries the caller's
+ * params, threads render with the is_active badge, and expanding a thread
+ * fetches + renders its messages with the purpose badge.
  * Also covers the four polish refinements: auto-expand, candidate-name heading,
  * WhatsApp-style delivery ticks and per-sender colour coding.
  */
@@ -37,16 +39,16 @@ beforeEach(() => {
 })
 
 describe('ConversationsSection', () => {
-  it('fetches the candidate-scoped threads and shows the active badge', async () => {
-    render(<ConversationsSection candidateId="cand-1" />)
-    // The core CONV-DRILLDOWN-FE fix: the panel calls the endpoint, scoped by candidate.
+  it('fetches the caller-scoped threads and shows the active badge', async () => {
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    // The core CONV-DRILLDOWN-FE fix: the panel calls the endpoint, scoped by the caller's params.
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/conversations', { params: { candidate_id: 'cand-1' } }))
     expect(await screen.findByText('+31612345678')).toBeInTheDocument()
     expect(screen.getByText('conversations.active')).toBeInTheDocument()
   })
 
   it('auto-expands the single thread and renders its messages with the purpose badge', async () => {
-    render(<ConversationsSection candidateId="cand-1" />)
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
     // Refinement 1: a lone thread opens itself — no click needed to see anything.
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/conversations/conv-1/messages'))
     expect(await screen.findByText('Ja! We plannen een intake.')).toBeInTheDocument()
@@ -57,7 +59,7 @@ describe('ConversationsSection', () => {
 
   it('shows the empty state only when the fetch returns zero threads', async () => {
     vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
-    render(<ConversationsSection candidateId="cand-2" />)
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-2' }} />)
     expect(await screen.findByText('sections.conversationsEmpty')).toBeInTheDocument()
   })
 
@@ -69,7 +71,7 @@ describe('ConversationsSection', () => {
       if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
       return Promise.reject(new Error(`unexpected GET ${url}`))
     })
-    render(<ConversationsSection candidateId="cand-1" />)
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
     expect(await screen.findByText('Jamie Vos')).toBeInTheDocument()
     expect(screen.getByText('+31612345678')).toBeInTheDocument()
   })
@@ -86,7 +88,7 @@ describe('ConversationsSection', () => {
       return Promise.reject(new Error(`unexpected GET ${url}`))
     })
     const user = userEvent.setup()
-    render(<ConversationsSection candidateId="cand-1" />)
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
     // The first thread's messages load automatically...
     expect(await screen.findByText('Ja! We plannen een intake.')).toBeInTheDocument()
     // ...the second does not, until it is clicked open.
@@ -106,7 +108,7 @@ describe('ConversationsSection', () => {
       if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: messagesWithDelivery } })
       return Promise.reject(new Error(`unexpected GET ${url}`))
     })
-    render(<ConversationsSection candidateId="cand-1" />)
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
     // Refinement 3: sent → single tick, delivered → double tick, read → double tick, each with an a11y label.
     expect(await screen.findByRole('img', { name: 'conversations.delivery.sent' })).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'conversations.delivery.delivered' })).toBeInTheDocument()
@@ -117,5 +119,23 @@ describe('ConversationsSection', () => {
     const kelly = screen.getByText('Kelly')
     expect(ravi).toHaveStyle({ color: avatarColor('Ravi') })
     expect(kelly).toHaveStyle({ color: avatarColor('Kelly') })
+  })
+
+  it('refetches when the caller-passed params VALUE changes, even with a fresh object literal', async () => {
+    // Guards the paramsKey serialization: a new inline object each render must not be
+    // ignored just because the params VALUE (candidate_id) actually changed.
+    const otherThreads = [{ id: 'conv-9', wa_number: '+31600000000', last_message_at: '2026-07-18T09:00:00Z', is_active: true, escalated: false }]
+    vi.mocked(api.get).mockImplementation((url: string, config?: { params?: { candidate_id?: string } }) => {
+      if (url === '/conversations' && config?.params?.candidate_id === 'cand-1') return Promise.resolve({ data: { data: THREADS } })
+      if (url === '/conversations' && config?.params?.candidate_id === 'cand-9') return Promise.resolve({ data: { data: otherThreads } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+      if (url === '/conversations/conv-9/messages') return Promise.resolve({ data: { data: [] } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    const { rerender } = render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    expect(await screen.findByText('+31612345678')).toBeInTheDocument()
+    // A brand-new object literal, same shape, different value — must trigger a refetch.
+    rerender(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-9' }} />)
+    expect(await screen.findByText('+31600000000')).toBeInTheDocument()
   })
 })

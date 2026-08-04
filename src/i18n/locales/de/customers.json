@@ -379,7 +379,8 @@
       "none": "Nicht angegeben",
       "subtabs": {
         "data": "Details",
-        "tasks": "Aufgaben"
+        "tasks": "Aufgaben",
+        "conversations": "Gespräch"
       },
       "linkLocation": "Standort verknüpfen",
       "linkDepartment": "Abteilung verknüpfen",
@@ -750,7 +751,8 @@
   "scopedList": {
     "vacanciesEmpty": "Noch keine Stellen.",
     "matchesEmpty": "Noch keine Matches.",
-    "loadError": "Laden fehlgeschlagen. Möglicherweise haben Sie keinen Zugriff auf diesen Standort."
+    "loadError": "Laden fehlgeschlagen. Möglicherweise haben Sie keinen Zugriff auf diesen Standort.",
+    "opportunitiesEmpty": "Noch keine Chancen."
   },
   "inUse": {
     "title": "Noch in Verwendung",

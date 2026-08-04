@@ -63,6 +63,9 @@ import EditableRichTextField from './EditableRichTextField'
 // shared config-driven tab, never a forked copy).
 import ScopedVacanciesTab from './ScopedVacanciesTab'
 import ScopedMatchesTab from './ScopedMatchesTab'
+// SCOPED-LIST-TAB-1: this department's own Kansen sub-tab, right after Matches
+// (§3A — shared config-driven tab, never a forked copy — mirrors LocationDetail).
+import ScopedOpportunitiesTab from './ScopedOpportunitiesTab'
 // SOLLICITATIES-SCOPE-1 (Danny asked 3x at customer level, then again here): the
 // department's own Sollicitaties sub-tab — reuses the shared CustomerApplicationsList
 // (its `vacancyIds` mode) fed by this department's OWN vacancy ids.
@@ -174,7 +177,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   // Sub-tabs (short labels, Danny 2026-07-14) — default Gegevens. SCOPED-LIST-TAB-1/
   // TAKEN-OP-AFDELING-1 added vacancies/matches/tasks. SOLLICITATIES-SCOPE-1 added
   // 'applications'. NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1 added 'notes'/'documents'.
-  const [subTab, setSubTab] = useState<'data' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'documents' | 'matches' | 'tasks' | 'extra' | 'koppelingen'>('data')
+  const [subTab, setSubTab] = useState<'data' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'documents' | 'matches' | 'opportunities' | 'tasks' | 'extra' | 'koppelingen'>('data')
 
   // JOB-STATUS-1 (mirrors LocationDetail): status options for the title-row picker.
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
@@ -295,6 +298,9 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           { id: 'notes',     label: t('drawer.tabs.notes') },
           { id: 'documents', label: t('drawer.tabs.documents') },
           { id: 'matches',   label: t('drawer.tabs.matches') },
+          // SCOPED-LIST-TAB-1: reuses the existing top-level drawer.tabs.opportunities
+          // key (already five-locale complete) — right after Matches, per Danny's ask.
+          { id: 'opportunities', label: t('drawer.tabs.opportunities') },
           // TAKEN-OP-AFDELING-1: TaskLinkResolver already knows 'department' → task_links.
           { id: 'tasks',     label: t('drawer.tabs.tasks') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
@@ -345,6 +351,8 @@ export default function DepartmentDetail({ department, locations, statuses, cont
       {subTab === 'notes' && <ScopedNotesTab scope="department" id={department.id as Id} customerId={customerId} />}
       {subTab === 'documents' && <ScopedDocumentsTab scope="department" id={department.id as Id} customerId={customerId} />}
       {subTab === 'matches' && <ScopedMatchesTab scope="department" id={department.id as Id} customerId={customerId} />}
+      {/* SCOPED-LIST-TAB-1: read-only, opens the real opportunity on row-click. */}
+      {subTab === 'opportunities' && <ScopedOpportunitiesTab scope="department" id={department.id as Id} customerId={customerId} />}
       {/* TAKEN-OP-AFDELING-1: own scoped label block (mirrors contacts.tasks.*) —
           the shared tab's CURRENT labels interface (newTask/searchPlaceholder/empty/
           loading/error/openTask); re-check this call site if EntityTasksTab's

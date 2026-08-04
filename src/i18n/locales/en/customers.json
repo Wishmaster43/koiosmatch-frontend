@@ -379,7 +379,8 @@
       "none": "Not provided",
       "subtabs": {
         "data": "Details",
-        "tasks": "Tasks"
+        "tasks": "Tasks",
+        "conversations": "Conversation"
       },
       "linkLocation": "Link location",
       "linkDepartment": "Link department",
@@ -750,7 +751,8 @@
   "scopedList": {
     "vacanciesEmpty": "No vacancies yet.",
     "matchesEmpty": "No matches yet.",
-    "loadError": "Loading failed. You may not have access to this branch."
+    "loadError": "Loading failed. You may not have access to this branch.",
+    "opportunitiesEmpty": "No opportunities yet."
   },
   "inUse": {
     "title": "Still in use",

@@ -12,6 +12,8 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import type { ReactNode } from 'react'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import ContactDetail from './ContactDetail'
@@ -456,5 +458,53 @@ describe('ContactDetail · changelog (LOC-DEPT-CHANGELOG-1)', () => {
 
     await user.click(screen.getByRole('button', { name: cm('changelog') }))
     await waitFor(() => expect(vi.mocked(api.get)).toHaveBeenCalledWith('/customers/cust-1/contacts/c1/activity', expect.anything()))
+  })
+})
+
+/**
+ * SCOPED-LIST-TAB-1 — the contact's own Kansen sub-tab (mirrors Location/
+ * DepartmentDetail's identical wiring). Mounts the REAL ScopedOpportunitiesTab
+ * (no stub) so the assertion below proves the ACTUAL request — method + route +
+ * the `contact_id[]` array-shaped param key (§13, never only that a callback
+ * fired). Needs a QueryClientProvider: unlike every other hook this file already
+ * exercises, ScopedOpportunitiesTab's list fetch goes through react-query.
+ */
+describe('ContactDetail · Kansen sub-tab (SCOPED-LIST-TAB-1)', () => {
+  const queryWrapper = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      {children}
+    </QueryClientProvider>
+  )
+
+  it('renders the Kansen sub-tab content and fetches /opportunities with contact_id[]', async () => {
+    const user = userEvent.setup()
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />, { wrapper: queryWrapper })
+
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.opportunities') }))
+
+    // The scope param key itself carries the literal `[]` (see ScopedOpportunitiesTab's
+    // own file-header doc) — this is what turns a bare id into the one-element array
+    // OpportunityQuery expects for the contact scope.
+    await waitFor(() => expect(vi.mocked(api.get)).toHaveBeenCalledWith('/opportunities',
+      expect.objectContaining({ params: { 'contact_id[]': 'c1', per_page: 100 } })))
+  })
+})
+
+/**
+ * GESPREK-CONTACT-1 — the contact's own Conversaties sub-tab. Mounts the REAL
+ * ContactConversationsSection (no stub) so the assertion proves the actual
+ * nested request, mirroring the Kansen test above and ContactConversationsSection's
+ * own dedicated test file.
+ */
+describe('ContactDetail · Conversaties sub-tab (GESPREK-CONTACT-1)', () => {
+  it('renders the Conversaties sub-tab content and fetches this contact\'s nested conversations route', async () => {
+    const user = userEvent.setup()
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+
+    await user.click(screen.getByRole('tab', { name: ct('contacts.detail.subtabs.conversations') }))
+
+    await waitFor(() => expect(vi.mocked(api.get)).toHaveBeenCalledWith('/customers/cust-1/contacts/c1/conversations', { params: undefined }))
   })
 })

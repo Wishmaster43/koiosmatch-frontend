@@ -1,14 +1,16 @@
 /**
- * ConversationsSection — the candidate's WhatsApp conversations in the
- * Communicatie → Conversaties sub-tab (CONV-DRILLDOWN-FE). Replaces the old
- * hardcoded-empty placeholder that never called the endpoint: it fetches the
- * real threads for this candidate and lets you expand one to read its messages.
+ * ConversationsSection — shared WhatsApp conversation thread panel
+ * (CONV-DRILLDOWN-FE, promoted to components/drawer/ for GESPREK-CONTACT-1):
+ * originally the candidate's Communicatie → Conversaties sub-tab, now reused
+ * by any dossier that has a conversations list endpoint. The caller decides
+ * WHICH threads to list via `threadsUrl` (+ optional `threadsParams`); this
+ * component owns the accordion, auto-expand and the per-thread messages fetch
+ * (`/conversations/{id}/messages`), which is the same endpoint for every caller.
  *
- * Data: GET /conversations?candidate_id={id} (native-first candidate relation,
- * setting-driven `is_active`, carries the candidate identity for the thread
- * heading), then GET /conversations/{id}/messages on expand — each message now
- * carries `sent_by` (the recruiter/agent), `delivered_at` and `read_at`.
- * Health-adjacent PII (§8): nothing is logged; we only render what the screen needs.
+ * UI strings live on the 'candidates' i18n namespace — ONE source, both
+ * dossiers reuse them (never duplicate the `conversations.*` keys into
+ * 'customers'). Health-adjacent PII (§8): nothing is logged; we only render
+ * what the screen needs.
  */
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -27,7 +29,7 @@ interface ConversationCandidate {
   last_name?: string | null
 }
 
-// One conversation thread as GET /conversations returns it (only the fields the panel shows).
+// One conversation thread as the list endpoint returns it (only the fields the panel shows).
 interface ConversationRow {
   id: Id
   wa_number?: string | null
@@ -82,7 +84,13 @@ function DeliveryTicks({ sentAt, deliveredAt, readAt }: { sentAt?: string | null
   return <Icon size={12} style={{ color, flexShrink: 0 }} role="img" aria-label={t(`conversations.delivery.${state}`)} />
 }
 
-export default function ConversationsSection({ candidateId }: { candidateId: Id }) {
+export default function ConversationsSection({ threadsUrl, threadsParams }: {
+  // The list request the caller wants — candidate scope passes '/conversations' +
+  // { candidate_id }, the contact variant passes its nested contact-conversations route.
+  threadsUrl: string
+  threadsParams?: Record<string, unknown>
+}) {
+  // thread UI strings live in the candidates ns — ONE source, both dossiers reuse them
   const { t } = useTranslation('candidates')
   const { formatDate, formatDateTime } = useDateFormat()
   const [rows, setRows] = useState<ConversationRow[]>([])
@@ -93,17 +101,22 @@ export default function ConversationsSection({ candidateId }: { candidateId: Id 
   const [messages, setMessages] = useState<Record<string, MessageRow[]>>({})
   const [msgLoading, setMsgLoading] = useState(false)
 
-  // Load this candidate's threads; a 404/422 (filter not built) reads as empty, not broken.
+  // Serialize the caller's params so a fresh object literal each render doesn't
+  // retrigger the fetch — only the actual VALUES (e.g. candidate_id) matter.
+  const paramsKey = JSON.stringify(threadsParams ?? {})
+
+  // Load this dossier's threads; a 404/422 (filter not built) reads as empty, not broken.
   useEffect(() => {
     let alive = true
     setLoading(true); setError(false)
     setOpenId(null); setMessages({})
-    api.get('/conversations', { params: { candidate_id: candidateId } })
+    api.get(threadsUrl, { params: threadsParams })
       .then(r => { if (alive) setRows(unwrapList<ConversationRow>(r).rows) })
       .catch(e => { if (!alive) return; if ([404, 422].includes(e?.response?.status)) setRows([]); else setError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [candidateId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- threadsParams itself is intentionally excluded: paramsKey (its serialized value) is the real dependency, so an inline object literal from the caller never retriggers a spurious refetch
+  }, [threadsUrl, paramsKey])
 
   // Auto-expand: a single thread opens immediately; with several, the first (most recent/
   // active) does. Never leaves a closed accordion the recruiter has to click through first.
@@ -136,7 +149,7 @@ export default function ConversationsSection({ candidateId }: { candidateId: Id 
   )
 
   return (
-    // No title: the sub-tab bar already says "Conversaties" (Danny addendum 4).
+    // No title: the host sub-tab bar already says "Conversaties" (Danny addendum 4).
     <SectionCard>
       {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('conversations.loading')}</div>}
       {!loading && error && <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('conversations.error')}</div>}

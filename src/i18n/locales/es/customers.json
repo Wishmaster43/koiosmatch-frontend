@@ -379,7 +379,8 @@
       "none": "No indicado",
       "subtabs": {
         "data": "Datos",
-        "tasks": "Tareas"
+        "tasks": "Tareas",
+        "conversations": "Conversación"
       },
       "linkLocation": "Vincular ubicación",
       "linkDepartment": "Vincular departamento",
@@ -750,7 +751,8 @@
   "scopedList": {
     "vacanciesEmpty": "Aún no hay vacantes.",
     "matchesEmpty": "Aún no hay coincidencias.",
-    "loadError": "Error al cargar. Puede que no tengas acceso a esta ubicación."
+    "loadError": "Error al cargar. Puede que no tengas acceso a esta ubicación.",
+    "opportunitiesEmpty": "Aún no hay oportunidades."
   },
   "inUse": {
     "title": "Todavía en uso",

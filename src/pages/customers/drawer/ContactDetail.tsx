@@ -47,6 +47,12 @@ import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ChangelogTab from './ChangelogTab'
 import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import MergeContactModal from './MergeContactModal'
+// SCOPED-LIST-TAB-1: this contact's own Kansen sub-tab, mirrors Location/
+// DepartmentDetail's identical wiring (§3A — shared config-driven tab, never a forked copy).
+import ScopedOpportunitiesTab from './ScopedOpportunitiesTab'
+// GESPREK-CONTACT-1: this contact's own Conversaties sub-tab — thin wrapper over the
+// shared components/drawer/ConversationsSection, pointed at the nested contact route.
+import ContactConversationsSection from './ContactConversationsSection'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useGenders } from '@/lib/useGenders'
@@ -92,7 +98,9 @@ export default function ContactDetail({ contact, locations, departments, statuse
   const [tableEpoch, setTableEpoch] = useState(0)
   // The Extra sub-tab only shows when the tenant has defined customer_contact custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('customer_contact')
-  const [subTab, setSubTab] = useState<'data' | 'tasks' | 'extra' | 'koppelingen'>('data')
+  // SCOPED-LIST-TAB-1/GESPREK-CONTACT-1 added 'kansen'/'conversations', right after
+  // Gegevens and Taken respectively (§3A — same shared tabs Location/DepartmentDetail carry).
+  const [subTab, setSubTab] = useState<'data' | 'kansen' | 'tasks' | 'conversations' | 'extra' | 'koppelingen'>('data')
   // Contact function (job title) is a lookup combobox, split from the candidate
   // function list (FUNCTIONS-SPLIT-1) — never a plain free-text field.
   const { contactFunctions, allowFreeEntry } = useContactFunctions()
@@ -314,7 +322,12 @@ export default function ContactDetail({ contact, locations, departments, statuse
       <SubTabBar
         tabs={[
           { id: 'data',  label: t('contacts.detail.subtabs.data') },
+          // SCOPED-LIST-TAB-1: reuses the existing top-level drawer.tabs.opportunities
+          // key (already five-locale complete) — same shared label Location/DepartmentDetail use.
+          { id: 'kansen', label: t('drawer.tabs.opportunities') },
           { id: 'tasks', label: t('contacts.detail.subtabs.tasks') },
+          // GESPREK-CONTACT-1: local-only label, mirrors the 'data'/'tasks' siblings above.
+          { id: 'conversations', label: t('contacts.detail.subtabs.conversations') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
           { id: 'koppelingen', label: t('common:backofficeLinks.tabLabel') },
         ]}
@@ -337,6 +350,13 @@ export default function ContactDetail({ contact, locations, departments, statuse
         </>
       )}
 
+      {/* SCOPED-LIST-TAB-1: read-only, opens the real opportunity on row-click.
+          customerId comes off the contact record itself (this component receives
+          no separate customerId prop) — "+ Kans" stays hidden until it resolves. */}
+      {subTab === 'kansen' && (
+        <ScopedOpportunitiesTab scope="contact" id={contact.id} customerId={contact.customerId ?? undefined} />
+      )}
+
       {/* Taken — the tasks linked to THIS contact (Danny 28-07: "we willen hierop ook
           … taken hebben op de klant en gelinkt aan contactpersoon"). Reads the generic
           GET /tasks?contact={id} filter, which only started working on 28-07
@@ -355,6 +375,14 @@ export default function ContactDetail({ contact, locations, departments, statuse
             openTask: t('contacts.tasks.openTask'), searchPlaceholder: t('contacts.tasks.searchPlaceholder'),
           }}
         />
+      )}
+
+      {/* GESPREK-CONTACT-1: the nested contact route needs a real customerId — mirrors
+          the ChangelogPopover/merge gating above (contact.customerId can be null on
+          legacy/edge data), so the tab silently shows nothing rather than firing a
+          /customers/undefined/… request. */}
+      {subTab === 'conversations' && contact.customerId != null && (
+        <ContactConversationsSection customerId={contact.customerId} contactId={contact.id as Id} />
       )}
 
       {subTab === 'extra' && customFieldDefs.length > 0 && (

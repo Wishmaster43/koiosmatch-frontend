@@ -52,6 +52,9 @@ import { useCustomFields } from '@/lib/useCustomFields'
 // shared config-driven tab, never a forked copy — mirrors DepartmentDetail).
 import ScopedVacanciesTab from './ScopedVacanciesTab'
 import ScopedMatchesTab from './ScopedMatchesTab'
+// SCOPED-LIST-TAB-1: this location's own Kansen sub-tab, right after Matches
+// (§3A — shared config-driven tab, never a forked copy — mirrors DepartmentDetail).
+import ScopedOpportunitiesTab from './ScopedOpportunitiesTab'
 // SOLLICITATIES-SCOPE-1 (Danny asked 3x at customer level, then again here): the
 // location's own Sollicitaties sub-tab — reuses the shared CustomerApplicationsList
 // (its `vacancyIds` mode) fed by this location's OWN vacancy ids.
@@ -169,7 +172,7 @@ export default function LocationDetail({
   // 'applications'. TAKEN-OP-LOCATIE-1 added 'tasks' (KLANTLOCATIE-TAAK-1 — the
   // WORKLIST note about "no location Taken tab" is now superseded by that ticket).
   // NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1 added 'notes'/'documents', right after 'applications'.
-  const [subTab, setSubTab] = useState<'address' | 'departments' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'documents' | 'matches' | 'tasks' | 'extra' | 'koppelingen'>('address')
+  const [subTab, setSubTab] = useState<'address' | 'departments' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'documents' | 'matches' | 'opportunities' | 'tasks' | 'extra' | 'koppelingen'>('address')
 
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
 
@@ -277,6 +280,9 @@ export default function LocationDetail({
           { id: 'notes',       label: t('drawer.tabs.notes') },
           { id: 'documents',   label: t('drawer.tabs.documents') },
           { id: 'matches',     label: t('drawer.tabs.matches') },
+          // SCOPED-LIST-TAB-1: reuses the existing top-level drawer.tabs.opportunities
+          // key (already five-locale complete) — right after Matches, per Danny's ask.
+          { id: 'opportunities', label: t('drawer.tabs.opportunities') },
           // TAKEN-OP-LOCATIE-1: TaskLinkResolver already knows 'customer_location' → task_links.
           { id: 'tasks',       label: t('drawer.tabs.tasks') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
@@ -332,6 +338,8 @@ export default function LocationDetail({
       {subTab === 'notes' && <ScopedNotesTab scope="location" id={l.id as Id} customerId={customerId} />}
       {subTab === 'documents' && <ScopedDocumentsTab scope="location" id={l.id as Id} customerId={customerId} />}
       {subTab === 'matches' && <ScopedMatchesTab scope="location" id={l.id as Id} customerId={customerId} />}
+      {/* SCOPED-LIST-TAB-1: read-only, opens the real opportunity on row-click. */}
+      {subTab === 'opportunities' && <ScopedOpportunitiesTab scope="location" id={l.id as Id} customerId={customerId} />}
       {/* TAKEN-OP-LOCATIE-1: own scoped label block (mirrors DepartmentDetail's
           identical wiring) — the shared tab's CURRENT labels interface. */}
       {subTab === 'tasks' && (

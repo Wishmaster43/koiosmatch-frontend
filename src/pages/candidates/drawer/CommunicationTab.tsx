@@ -8,7 +8,7 @@ import SectionCard from '@/components/ui/SectionCard'
 import Toggle from '@/components/ui/Toggle'
 import RetentionConsentBlock from './RetentionConsentBlock'
 import CandidateTasks from './CandidateTasks'
-import ConversationsSection from './ConversationsSection'
+import ConversationsSection from '@/components/drawer/ConversationsSection'
 import { useNoteTypes, SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import { useCandidateNotes } from '@/pages/candidates/hooks/useCandidateNotes'
@@ -216,7 +216,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
       {/* Notes / timeline / conversations — one NotesTab section per sub-tab. */}
       {subTab === 'notes'         && <NotesTab {...notesProps} showTimeline={false} showConversations={false} />}
       {subTab === 'timeline'      && <NotesTab {...notesProps} showNotes={false} showConversations={false} />}
-      {subTab === 'conversations' && <ConversationsSection candidateId={c.id} />}
+      {subTab === 'conversations' && <ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: c.id }} />}
     </div>
   )
 }

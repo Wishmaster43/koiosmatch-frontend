@@ -379,7 +379,8 @@
       "none": "Non renseigné",
       "subtabs": {
         "data": "Détails",
-        "tasks": "Tâches"
+        "tasks": "Tâches",
+        "conversations": "Conversation"
       },
       "linkLocation": "Lier un site",
       "linkDepartment": "Lier un service",
@@ -750,7 +751,8 @@
   "scopedList": {
     "vacanciesEmpty": "Aucun poste pour le moment.",
     "matchesEmpty": "Aucun match pour le moment.",
-    "loadError": "Le chargement a échoué. Vous n'avez peut-être pas accès à ce site."
+    "loadError": "Le chargement a échoué. Vous n'avez peut-être pas accès à ce site.",
+    "opportunitiesEmpty": "Aucune opportunité pour le moment."
   },
   "inUse": {
     "title": "Encore utilisé",

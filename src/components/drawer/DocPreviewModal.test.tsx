@@ -93,7 +93,11 @@ describe('DocPreviewModal', () => {
   })
 
   it('falls back to the download link when pdf.js fails to render (never a blank frame)', async () => {
-    mockGetDocument.mockReturnValue({ promise: Promise.reject(new Error('broken pdf')) })
+    // Pre-attach a catch so the rejection is never "unhandled" before the component's own
+    // .catch runs — otherwise vitest reports a false-positive unhandled rejection.
+    const broken = Promise.reject(new Error('broken pdf'))
+    broken.catch(() => {})
+    mockGetDocument.mockReturnValue({ promise: broken })
     render(<DocPreviewModal doc={{ name: 'cv.pdf', url: '/x' }} onClose={() => {}} />)
     await waitFor(() => expect(screen.getByText('documents.previewUnavailable')).toBeInTheDocument())
     expect(document.querySelector('canvas')).toBeNull()
