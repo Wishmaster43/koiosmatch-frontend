@@ -37,6 +37,10 @@ export async function boot({ tenant = 'demo' } = {}) {
   page.on('response', async r => {
     if (r.status() >= 400) {
       if (r.status() === 404 && OPTIONAL_404.some(re => re.test(r.url()))) return
+      // Deliberate harness probes (naad-contract's per_page ladder) tag themselves —
+      // their expected 4xx must never bleed into ANOTHER flow's error window (the
+      // response event can trail past the between-flows reset; measured 05-08).
+      if (r.url().includes('_probe=1')) return
       // Include the response body — a bare "422" hides WHICH rule failed (the whole point).
       let body = ''
       try { body = (await r.text()).slice(0, 200) } catch { /* stream may be gone */ }

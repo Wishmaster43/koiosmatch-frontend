@@ -60,7 +60,8 @@
     "ai": "Koios AI",
     "import_export": "Importar y exportar",
     "document_types": "Tipos de documento",
-    "appointments": "Citas"
+    "appointments": "Citas",
+    "workflows": "Workflows"
   },
   "nav": {
     "candidate_display": "Visualización de la tabla",
@@ -221,7 +222,8 @@
     "nt_task": "Tareas",
     "customer_blacklist_reasons": "Motivos de lista negra",
     "match_stop_reasons": "Motivos de finalización",
-    "outreach_outcomes": "Resultados"
+    "outreach_outcomes": "Resultados",
+    "workflow_run_history": "Historial de ejecuciones"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -2126,7 +2128,11 @@
     "contact": "Contacto",
     "message": "Mensaje",
     "searchPlaceholder": "Buscar contacto o mensaje…",
-    "empty": "Aún no hay mensajes de WhatsApp."
+    "empty": "Aún no hay mensajes de WhatsApp.",
+    "memoryDaysTitle": "Memoria de conversación de Koios",
+    "memoryDaysHint": "Cuántos días de historial de WhatsApp usa Koios como contexto al redactar una respuesta.",
+    "memoryDaysLabel": "Días (1-365)",
+    "memoryDaysSaveFailed": "No se pudo guardar la memoria de conversación."
   },
   "appointmentTypes": {
     "title": "Tipos de cita",
@@ -2643,6 +2649,16 @@
     "tabs": {
       "kpis": "KPI",
       "blocks": "Gráficos y listas"
+    }
+  },
+  "workflowRunHistory": {
+    "subtitle": "Cuánto tiempo se conservan las ejecuciones de workflow completadas",
+    "fields": {
+      "workflow_run_retention_days": {
+        "label": "Período de retención",
+        "description": "Número de días que se conserva una ejecución completada (máx. 31). La ejecución más reciente de cada workflow se conserva siempre, sin importar su antigüedad.",
+        "unit": "días"
+      }
     }
   }
 }

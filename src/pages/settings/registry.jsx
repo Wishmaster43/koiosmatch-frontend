@@ -17,7 +17,7 @@
  */
 import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays, Car,
-  ClipboardList, Clock, CreditCard, Download, EyeOff, Factory, FileText, Flag, Hash, Key, LayoutGrid,
+  ClipboardList, Clock, CreditCard, Download, EyeOff, Factory, FileText, Flag, Hash, History, Key, LayoutGrid,
   ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Megaphone, Package, Palette, Percent, Phone, Scale, Shield, SlidersHorizontal, Sparkles, Star,
   Boxes, Globe, Store, Tags, Target, Upload, UserCheck, Users, Webhook, XCircle,
   ShieldOff, AlertTriangle, ListTree, CheckCircle,
@@ -114,6 +114,7 @@ import matchDisplay from './schemas/matchDisplay'
 import outreachDisplay from './schemas/outreachDisplay'
 import DriverLicenseSettings from './sections/DriverLicenseSettings'
 import ActionRulesSettings from './sections/ActionRulesSettings'
+import workflowRunHistory from './schemas/workflowRunHistory'
 
 export const NAV_GROUPS = [
   {
@@ -508,6 +509,19 @@ export const NAV_GROUPS = [
     key: 'action_rules', icon: Scale,
     items: [
       { id: 'action_rules', icon: Scale, component: ActionRulesSettings },
+    ],
+  },
+  {
+    // Workflow run-history retention (WF-RUN-PRUNE-1, Danny 05-08): a tenant-level
+    // pruning window for completed workflow runs. Its own top-level group — not
+    // "AI-flavoured" (the `ai` group), not the superadmin central job queue, and
+    // not roles/users, so it doesn't fit any existing category (mirrors the
+    // action_rules single-item-group precedent above). Gated on the 'workflows'
+    // page/module (mirrors 'whatsapp'/'shiftmanager' below) — a tenant without the
+    // workflows module has nothing to retain, so the group auto-hides for them.
+    key: 'workflows', icon: History,
+    items: [
+      { id: 'workflow_run_history', icon: History, schema: workflowRunHistory, requiresPage: 'workflows' },
     ],
   },
   // Planning lookups — each item gated on the 'plan' module (requiresPage → canAccessPage →

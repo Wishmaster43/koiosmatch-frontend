@@ -284,7 +284,7 @@ describe('AddTaskModal · validation (Danny 27-07: the redesigned popup still bl
     expect(api.post).not.toHaveBeenCalled()
     // Let the link-picker loads (candidates/customers/contacts) settle before the
     // test returns, so their `.then` never lands after RTL's cleanup/unmount.
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidates'))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/candidates', { params: { per_page: 200 } }))
   })
 })
 

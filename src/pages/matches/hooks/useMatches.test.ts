@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
-import { useMatches } from './useMatches'
+import { useMatches, MATCHES_MAX_PER_PAGE } from './useMatches'
 import api from '@/lib/api'
 
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn() } }))
@@ -132,5 +132,53 @@ describe('useMatches · MATCH-ARCHIVED-LIST-1', () => {
     const { result } = renderHook(() => useMatches('M-00042', true))
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(mockedGet).toHaveBeenCalledWith('/matches', { params: { ref: 'M-00042', include_archived: 1 } })
+  })
+})
+
+// §13 seam guard: GET /matches 422s above per_page=200 (MatchQuery::rules()) while
+// the FE's shared page-size dropdown (useListPageSize, PAGE_SIZE_OPTIONS) offers up
+// to 500 — this hook is the only thing that ever calls GET /matches, and it never
+// takes the UI's pageSize as an argument (MatchesPage slices the already-fetched
+// full set in-memory instead, see MatchesPage.tsx), so the request itself must
+// always stay pinned to MATCHES_MAX_PER_PAGE regardless of any stored preference.
+describe('useMatches · per_page cap (MATCHES_MAX_PER_PAGE, seam-harness 2026-08-05)', () => {
+  it('names the cap 200 — the measured MatchQuery ceiling', () => {
+    expect(MATCHES_MAX_PER_PAGE).toBe(200)
+  })
+
+  it('sends exactly MATCHES_MAX_PER_PAGE on the first page of the fetch-all loop', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [], meta: { last_page: 1 } } })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(mockedGet).toHaveBeenCalledWith('/matches', { params: { per_page: MATCHES_MAX_PER_PAGE, page: 1 } })
+  })
+
+  it('never exceeds per_page=200 across a multi-page fetch, even with many pages available', async () => {
+    // Three server pages available — the loop must keep requesting at exactly the
+    // capped per_page on every page, never creep upward.
+    mockedGet.mockResolvedValue({ data: { data: [], meta: { last_page: 3 } } })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const matchCalls = mockedGet.mock.calls.filter(c => c[0] === '/matches')
+    expect(matchCalls).toHaveLength(3)
+    matchCalls.forEach(call => {
+      const params = (call[1] as { params?: Record<string, unknown> })?.params
+      expect(params?.per_page).toBe(200)
+      expect(Number(params?.per_page)).toBeLessThanOrEqual(200)
+    })
+  })
+
+  it('keeps the request pinned at 200 even with a 500 stored user preference (default_per_page)', async () => {
+    // useMatches doesn't accept a pageSize/serverCap argument at all — the stored
+    // preference lives entirely in useListPageSize/MatchesPage and never reaches
+    // this hook. Calling it exactly as MatchesPage does (no pageSize passed
+    // through) proves the request stays capped independent of whatever the tenant's
+    // default_per_page or a remembered dropdown pick is set to.
+    mockedGet.mockResolvedValue({ data: { data: [], meta: { last_page: 1 } } })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const matchCall = mockedGet.mock.calls.find(c => c[0] === '/matches')
+    expect(matchCall?.[1]?.params).toMatchObject({ per_page: 200 })
+    expect(matchCall?.[1]?.params).not.toMatchObject({ per_page: 500 })
   })
 })

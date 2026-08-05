@@ -352,7 +352,13 @@ export default function ContactDetail({ contact, locations, departments, statuse
 
       {/* SCOPED-LIST-TAB-1: read-only, opens the real opportunity on row-click.
           customerId comes off the contact record itself (this component receives
-          no separate customerId prop) — "+ Kans" stays hidden until it resolves. */}
+          no separate customerId prop) — "+ Kans" stays hidden until it resolves.
+          OPP-MODAL-PREFILL-1: unlike Location/DepartmentDetail, this file has no
+          customerName in scope (Contact carries no such field and ContactDetail's
+          own props don't thread one) — the "+ Kans" modal's customer-picker option
+          label stays blank here. The customer/location/contact id itself still
+          locks correctly; fixing the label would need a new prop threaded through
+          ContactsPanel/CustomerDrawer, neither named in this task (§0 stay in scope). */}
       {subTab === 'kansen' && (
         <ScopedOpportunitiesTab scope="contact" id={contact.id} customerId={contact.customerId ?? undefined} />
       )}

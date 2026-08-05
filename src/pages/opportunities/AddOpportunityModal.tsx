@@ -50,13 +50,28 @@ interface ModalCustomer { id: Id; name: string }
  * mapping. The stage/service/agreement selects key on the lookup id (the writes
  * expect *_id) — `stageId` is resolved from `existing.stageValue` once the tenant
  * stage lookup loads, since Opportunity only carries the stage's stable `value`.
+ *
+ * OPP-MODAL-PREFILL-1 (2026-08-05): `initialLocationId`/`initialDepartmentId`/
+ * `initialContactId` mirror MatchModal's `initialCustomerLocationId`/
+ * `initialCustomerDepartmentId` — a scoped "+ Kans" (opened from a customer's
+ * own location/department/contact tab) can now lock the whole cascade, not just
+ * the customer. No separate "name" props are needed here: once `useCustomerCascade`
+ * resolves the picked customer's own locations/contacts, the CreatableSelect
+ * options carry the real label for these ids the same way `existing` already
+ * resolves an edited Kans's cascade — only the seed VALUE differs.
  */
-export default function AddOpportunityModal({ onClose, onCreated, users = [], customers = [], defaultCustomerId, existing }: {
+export default function AddOpportunityModal({ onClose, onCreated, users = [], customers = [], defaultCustomerId, initialLocationId, initialDepartmentId, initialContactId, existing }: {
   onClose: () => void; onCreated?: (o: Opportunity) => void; users?: ModalUser[]; customers?: ModalCustomer[]
   // Pre-fill the client when opened from a customer's own drawer (Kansen tab) —
   // minimal addition, the picker still shows so the field never silently locks
   // out a correction; keep prop-driven (no hardcoded id) per §3A.
   defaultCustomerId?: Id
+  // OPP-MODAL-PREFILL-1: pre-select the cascade's deeper levels when "+ Kans" opens
+  // from a location/department/contact scope — same "still changeable" contract as
+  // defaultCustomerId (§3, no lock-out).
+  initialLocationId?: Id
+  initialDepartmentId?: Id
+  initialContactId?: Id
   // Edit mode: the Kans being edited. Present ⇒ PATCH /opportunities/{id}, absent ⇒ POST /opportunities.
   existing?: Opportunity
 }) {
@@ -110,11 +125,24 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
 
   // Klant → locatie → afdeling → contactpersoon cascade (mirrors MatchModal).
   // All three stay optional; picking a different client resets the dependent picks.
-  const [locationId,   setLocationId]   = useState(existing?.locationId != null ? String(existing.locationId) : '')
-  const [departmentId, setDepartmentId] = useState(existing?.departmentId != null ? String(existing.departmentId) : '')
-  const [contactId,    setContactId]    = useState(existing?.contactId != null ? String(existing.contactId) : '')
+  // OPP-MODAL-PREFILL-1: `existing` (edit mode) wins over `initial*` (scoped-create
+  // mode) — the two never both apply, since `existing` only appears in edit mode.
+  const [locationId,   setLocationId]   = useState(existing?.locationId != null ? String(existing.locationId) : (initialLocationId != null ? String(initialLocationId) : ''))
+  const [departmentId, setDepartmentId] = useState(existing?.departmentId != null ? String(existing.departmentId) : (initialDepartmentId != null ? String(initialDepartmentId) : ''))
+  const [contactId,    setContactId]    = useState(existing?.contactId != null ? String(existing.contactId) : (initialContactId != null ? String(initialContactId) : ''))
   const { locations, contacts } = useCustomerCascade(form.clientId)
   const departments = locations.find(l => String(l.id) === locationId)?.departments ?? []
+
+  // OPP-MODAL-PREFILL-2: a department implies its parent location — a department-scoped
+  // "+ Kans" arrives with only initialDepartmentId, which would leave the department
+  // picker optionless AND save an inconsistent pair (department without its location).
+  // Resolve the parent from the cascade once it loads; never overrides an explicit pick.
+  useEffect(() => {
+    if (!departmentId || locationId) return
+    const parent = locations.find(l => (l.departments ?? []).some(d => String(d.id) === departmentId))
+    if (parent) setLocationId(String(parent.id))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- locations arriving is the trigger; ids are guards
+  }, [locations])
 
   const set = (k: keyof OppForm, v: string) => {
     setForm(f => ({ ...f, [k]: v }))

@@ -49,7 +49,9 @@ export function useVacanciesData({ filterParams, page, pageSize, t }: UseVacanci
   const { data: customers = EMPTY_CUSTOMERS } = useQuery({
     queryKey: ['vacancies', 'customer-pickers'],
     queryFn: async ({ signal }): Promise<VacancyCustomer[]> => {
-      const res = await api.get('/customers', { signal })
+      // per_page 200 = the /customers server cap — without it the server default (25)
+      // silently truncated the picker to the first 25 customers (fleet-verify 05-08).
+      const res = await api.get('/customers', { signal, params: { per_page: 200 } })
       return unwrapList<{ id?: Id; name?: string; company_name?: string }>(res).rows.map(c => ({ id: c.id, name: c.name ?? c.company_name ?? '—' }))
     },
   })

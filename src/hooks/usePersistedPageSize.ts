@@ -9,10 +9,15 @@ import api from '@/lib/api'
 import { useDefaultPageSize } from '@/lib/usePageSize'
 import { useAuth } from '@/context/AuthContext'
 
-export function usePersistedPageSize() {
+// Server cap shared by the report-table endpoints (per_page between 1 and 200) —
+// the raw stored preference can be 500, which 422s (seam harness, 05-08).
+const SERVER_CAP = 200
+
+export function usePersistedPageSize(serverCap: number = SERVER_CAP) {
   const defaultPageSize = useDefaultPageSize()
   const { refreshUser } = useAuth() ?? {}
-  const [pageSize, setPageSize] = useState(defaultPageSize)
+  // Clamp on read: an over-cap stored preference must never reach the request.
+  const [pageSize, setPageSize] = useState(Math.min(defaultPageSize, serverCap))
 
   // Persist the chosen size as the user's new default; local state applies regardless.
   const handlePageSizeChange = async (n: number) => {

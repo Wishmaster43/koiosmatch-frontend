@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link2, X, Plus } from 'lucide-react'
@@ -39,20 +39,30 @@ const LINK_PAGE: Record<string, string> = {
 
 // Inline "add link" row: pick a type, then pick an entity of that type.
 function AddLinkRow({ existing, onAdd, onClose }: { existing: TaskLink[]; onAdd: (link: NewLink) => void; onClose: () => void }) {
-  const { t } = useTranslation('tasks')
+  const { t } = useTranslation(['tasks', 'common'])
   const [type, setType] = useState('candidate')
   const [rows, setRows] = useState<LinkRow[]>([])
   const [query, setQuery] = useState('')
+  const [error, setError] = useState(false)
+  // Freshness guard (mirrors RelatedTasks.tsx/NotesTab.tsx in this same drawer):
+  // lets the retry button re-run this exact fetch without a stale in-flight
+  // response overwriting a newer one.
+  const requestIdRef = useRef(0)
 
-  // Load a capped, server-searched page for the chosen type — never the whole table.
-  useEffect(() => {
-    setRows([])
-    const cfg = TYPE_ENDPOINTS[type]; if (!cfg) return
-    let alive = true
+  // Load a capped, server-searched page for the chosen type — never the whole
+  // table. A failed load now surfaces its OWN error line (audit finding
+  // 2026-08-05: this used to silently swallow the failure, leaving the picker
+  // at zero options — indistinguishable from "no matches for this search").
+  const fetchOptions = useCallback(() => {
+    const cfg = TYPE_ENDPOINTS[type]
+    if (!cfg) { setRows([]); return }
+    const requestId = ++requestIdRef.current
+    setError(false)
     api.get(cfg.url, { params: { q: query, search: query, per_page: 25 } })
-      .then(r => { if (alive) setRows(unwrapList<LinkRow>(r).rows) }).catch(() => {})
-    return () => { alive = false }
+      .then(r => { if (requestIdRef.current === requestId) setRows(unwrapList<LinkRow>(r).rows) })
+      .catch(() => { if (requestIdRef.current === requestId) setError(true) })
   }, [type, query])
+  useEffect(() => { setRows([]); fetchOptions() }, [fetchOptions])
 
   const cfg = TYPE_ENDPOINTS[type]
   const linked = new Set(existing.filter(l => l.type === type).map(l => String(l.id)))
@@ -60,18 +70,29 @@ function AddLinkRow({ existing, onAdd, onClose }: { existing: TaskLink[]; onAdd:
   const typeOptions = Object.keys(TYPE_ENDPOINTS).map(k => ({ value: k, label: t(`links.${k}`) }))
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px',
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '10px 12px',
       border: '1px dashed var(--border)', borderRadius: 10, marginBottom: 8 }}>
-      <div style={{ width: 150, flexShrink: 0 }}>
-        <SelectField value={type} onChange={v => { setType(v); setQuery('') }} options={typeOptions} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ width: 150, flexShrink: 0 }}>
+          <SelectField value={type} onChange={v => { setType(v); setQuery('') }} options={typeOptions} />
+        </div>
+        <SearchSelect triggerLabel={t('links.selectEntity')} options={options} selected={[]} onSearch={setQuery}
+          onToggle={(v: string) => { const r = rows.find(x => String(x.id) === v); onAdd({ type, id: v, label: r ? cfg.label(r) : '' }); onClose() }} />
+        <div style={{ flex: 1 }} />
+        <button onClick={onClose} aria-label={t('modal.cancel')}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
+          <X size={15} />
+        </button>
       </div>
-      <SearchSelect triggerLabel={t('links.selectEntity')} options={options} selected={[]} onSearch={setQuery}
-        onToggle={(v: string) => { const r = rows.find(x => String(x.id) === v); onAdd({ type, id: v, label: r ? cfg.label(r) : '' }); onClose() }} />
-      <div style={{ flex: 1 }} />
-      <button onClick={onClose} aria-label={t('modal.cancel')}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
-        <X size={15} />
-      </button>
+      {/* Load error (§3, four UI states): distinct from "no matches" so the
+          recruiter knows the search itself failed and can retry it. */}
+      {error && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--color-danger)' }}>
+          <span>{t('links.loadError')}</span>
+          <button onClick={fetchOptions} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
+            padding: '2px 8px', cursor: 'pointer', color: 'var(--text)' }}>{t('common:error.retry')}</button>
+        </div>
+      )}
     </div>
   )
 }

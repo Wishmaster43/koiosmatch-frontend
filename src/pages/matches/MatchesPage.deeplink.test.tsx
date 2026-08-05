@@ -26,6 +26,8 @@ const rows = [
 vi.mock('./hooks/useMatches', () => ({
   useMatches: () => ({ rows, loading: false, error: false, updateMatch: vi.fn(), reload: vi.fn() }),
   mapMatch: (r: unknown) => r,
+  // useListPageSize's serverCap argument (MatchesPage.tsx) reads this named export.
+  MATCHES_MAX_PER_PAGE: 200,
 }))
 vi.mock('./hooks/useMatchesBulkActions', () => ({
   useMatchesBulkActions: () => ({ toggleRow: vi.fn(), toggleAll: vi.fn(), bulkCoupleHelloFlex: vi.fn(), bulkCoupleShiftmanager: vi.fn() }),

@@ -338,8 +338,10 @@ export default function LocationDetail({
       {subTab === 'notes' && <ScopedNotesTab scope="location" id={l.id as Id} customerId={customerId} />}
       {subTab === 'documents' && <ScopedDocumentsTab scope="location" id={l.id as Id} customerId={customerId} />}
       {subTab === 'matches' && <ScopedMatchesTab scope="location" id={l.id as Id} customerId={customerId} />}
-      {/* SCOPED-LIST-TAB-1: read-only, opens the real opportunity on row-click. */}
-      {subTab === 'opportunities' && <ScopedOpportunitiesTab scope="location" id={l.id as Id} customerId={customerId} />}
+      {/* SCOPED-LIST-TAB-1: read-only, opens the real opportunity on row-click.
+          OPP-MODAL-PREFILL-1: customerName rides along too, for the "+ Kans"
+          modal's customer-picker option label (mirrors ScopedVacanciesTab above). */}
+      {subTab === 'opportunities' && <ScopedOpportunitiesTab scope="location" id={l.id as Id} customerId={customerId} customerName={customerName} />}
       {/* TAKEN-OP-LOCATIE-1: own scoped label block (mirrors DepartmentDetail's
           identical wiring) — the shared tab's CURRENT labels interface. */}
       {subTab === 'tasks' && (

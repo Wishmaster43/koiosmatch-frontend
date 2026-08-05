@@ -183,7 +183,9 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
 
   // Load the link pickers; each is independent and tolerates a missing endpoint.
   useEffect(() => {
-    const load = (url: string, set: (rows: EntityRow[]) => void) => api.get(url).then(r => set(unwrapList<EntityRow>(r).rows)).catch(() => {})
+    // per_page 200 = the shared server cap — the server default (25) silently truncated
+    // these pickers to the first 25 rows (fleet-verify 05-08).
+    const load = (url: string, set: (rows: EntityRow[]) => void) => api.get(url, { params: { per_page: 200 } }).then(r => set(unwrapList<EntityRow>(r).rows)).catch(() => {})
     load('/candidates', setCandidates); load('/customers', setCustomers); load('/contacts', setContacts)
   }, [])
 

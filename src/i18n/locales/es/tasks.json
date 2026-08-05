@@ -87,7 +87,8 @@
     "department": "Departamento",
     "contact": "Contacto",
     "workflow": "Workflow",
-    "open": "Abrir"
+    "open": "Abrir",
+    "loadError": "No se pudieron cargar los resultados."
   },
   "activity": {
     "empty": "Aún no hay actividad."
@@ -149,7 +150,9 @@
     "title": "Tareas de este candidato",
     "open": "Abiertas",
     "history": "Historial",
-    "empty": "No hay tareas en esta vista."
+    "empty": "No hay tareas en esta vista.",
+    "loading": "Cargando tareas…",
+    "error": "No se pudieron cargar las tareas relacionadas."
   },
   "notes": {
     "title": "Notas",

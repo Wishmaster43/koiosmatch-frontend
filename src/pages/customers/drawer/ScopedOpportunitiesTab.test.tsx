@@ -109,13 +109,35 @@ describe('ScopedOpportunitiesTab · "+ Kans" (customer-only prefill)', () => {
     expect(screen.queryByRole('button', { name: cust('opportunities.newOpportunity') })).toBeNull()
   })
 
-  it('opens AddOpportunityModal prefilled with the customer id on click (no location/department prefill)', async () => {
+  it('opens AddOpportunityModal prefilled with the customer id + name and this location (OPP-MODAL-PREFILL-1)', async () => {
     const user = userEvent.setup()
     apiGet.mockResolvedValue({ data: { data: [] } })
-    render(<ScopedOpportunitiesTab scope="location" id="loc-1" customerId="cust-1" />, { wrapper })
+    render(<ScopedOpportunitiesTab scope="location" id="loc-1" customerId="cust-1" customerName="Zorggroep A" />, { wrapper })
+    await user.click(screen.getByRole('button', { name: cust('opportunities.newOpportunity') }))
+    expect(addOpportunityModalProps).toHaveBeenCalledWith(expect.objectContaining({
+      defaultCustomerId: 'cust-1', customers: [{ id: 'cust-1', name: 'Zorggroep A' }],
+      initialLocationId: 'loc-1', initialDepartmentId: undefined, initialContactId: undefined,
+    }))
+  })
+
+  it('falls back to a blank customer-option label when customerName is not threaded (contact scope today)', async () => {
+    const user = userEvent.setup()
+    apiGet.mockResolvedValue({ data: { data: [] } })
+    render(<ScopedOpportunitiesTab scope="contact" id="contact-1" customerId="cust-1" />, { wrapper })
     await user.click(screen.getByRole('button', { name: cust('opportunities.newOpportunity') }))
     expect(addOpportunityModalProps).toHaveBeenCalledWith(expect.objectContaining({
       defaultCustomerId: 'cust-1', customers: [{ id: 'cust-1', name: '' }],
+      initialContactId: 'contact-1', initialLocationId: undefined, initialDepartmentId: undefined,
+    }))
+  })
+
+  it('pre-sets the department id (not location/contact) when scoped to a department', async () => {
+    const user = userEvent.setup()
+    apiGet.mockResolvedValue({ data: { data: [] } })
+    render(<ScopedOpportunitiesTab scope="department" id="dep-1" customerId="cust-1" customerName="Zorggroep A" />, { wrapper })
+    await user.click(screen.getByRole('button', { name: cust('opportunities.newOpportunity') }))
+    expect(addOpportunityModalProps).toHaveBeenCalledWith(expect.objectContaining({
+      initialDepartmentId: 'dep-1', initialLocationId: undefined, initialContactId: undefined,
     }))
   })
 

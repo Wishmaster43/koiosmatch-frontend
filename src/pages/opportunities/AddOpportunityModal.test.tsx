@@ -167,6 +167,42 @@ describe('AddOpportunityModal · same POST payload as before, searchable picks i
   })
 })
 
+describe('AddOpportunityModal · OPP-MODAL-PREFILL-1 (initialLocationId/initialDepartmentId/initialContactId)', () => {
+  it('shows the location/department/contact pickers pre-selected on mount, from the initial* props', () => {
+    render(
+      <AddOpportunityModal onClose={noop} customers={[{ id: 'cust-1', name: 'Acme' }]}
+        defaultCustomerId="cust-1" initialLocationId="loc-1" initialDepartmentId="dep-1" initialContactId="con-1" />,
+    )
+    // Options resolve straight from the mocked cascade (no network round trip in
+    // the test), so the pre-selected labels are visible on the very first render.
+    expect(fieldTrigger('modal.fields.location')).toHaveTextContent('Locatie Noord')
+    expect(fieldTrigger('modal.fields.department')).toHaveTextContent('Afdeling A')
+    expect(fieldTrigger('modal.fields.contact')).toHaveTextContent('Jan Jansen')
+  })
+
+  it('posts the pre-selected cascade ids unchanged when the recruiter submits without touching them', async () => {
+    const user = userEvent.setup()
+    render(
+      <AddOpportunityModal onClose={noop} customers={[{ id: 'cust-1', name: 'Acme' }]}
+        defaultCustomerId="cust-1" initialLocationId="loc-1" initialDepartmentId="dep-1" initialContactId="con-1" />,
+    )
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Kans vanuit locatie-tab')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+    expect(api.post).toHaveBeenCalledWith('/opportunities', expect.objectContaining({
+      customer_id: 'cust-1', customer_location_id: 'loc-1', department_id: 'dep-1', contact_id: 'con-1',
+    }))
+  })
+
+  it('only pre-selects the ONE level actually passed — the others stay unset (mirrors the scoped-tab caller)', () => {
+    render(
+      <AddOpportunityModal onClose={noop} customers={[{ id: 'cust-1', name: 'Acme' }]}
+        defaultCustomerId="cust-1" initialContactId="con-1" />,
+    )
+    expect(fieldTrigger('modal.fields.contact')).toHaveTextContent('Jan Jansen')
+    expect(fieldTrigger('modal.fields.location')).not.toHaveTextContent('Locatie Noord')
+  })
+})
+
 describe('AddOpportunityModal · edit mode (existing prop) — PATCH, never POST', () => {
   const existing = {
     id: 'opp-9', title: 'Bestaande kans', clientId: 'cust-1', stageValue: 'lead',

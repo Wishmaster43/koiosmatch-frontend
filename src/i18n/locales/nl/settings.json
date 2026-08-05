@@ -60,7 +60,8 @@
     "ai": "Koios AI",
     "import_export": "Import & Export",
     "document_types": "Documenttypes",
-    "appointments": "Afspraken"
+    "appointments": "Afspraken",
+    "workflows": "Workflows"
   },
   "nav": {
     "candidate_display": "Tabelweergave",
@@ -221,7 +222,8 @@
     "nt_task": "Taken",
     "customer_blacklist_reasons": "Blacklistredenen",
     "match_stop_reasons": "Beëindigingsredenen",
-    "outreach_outcomes": "Uitkomsten"
+    "outreach_outcomes": "Uitkomsten",
+    "workflow_run_history": "Rungeschiedenis"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -2126,7 +2128,11 @@
     "contact": "Contact",
     "message": "Bericht",
     "searchPlaceholder": "Zoek op contact of bericht…",
-    "empty": "Nog geen WhatsApp-berichten."
+    "empty": "Nog geen WhatsApp-berichten.",
+    "memoryDaysTitle": "Koios-gespreksgeheugen",
+    "memoryDaysHint": "Hoeveel dagen WhatsApp-gespreksgeschiedenis Koios meeneemt als context bij het opstellen van een antwoord.",
+    "memoryDaysLabel": "Dagen (1-365)",
+    "memoryDaysSaveFailed": "Opslaan van het gespreksgeheugen is mislukt."
   },
   "appointmentTypes": {
     "title": "Afspraaktypes",
@@ -2643,6 +2649,16 @@
     "tabs": {
       "kpis": "KPI's",
       "blocks": "Grafieken & lijsten"
+    }
+  },
+  "workflowRunHistory": {
+    "subtitle": "Hoelang voltooide workflow-runs bewaard blijven",
+    "fields": {
+      "workflow_run_retention_days": {
+        "label": "Bewaartermijn",
+        "description": "Aantal dagen dat een voltooide workflow-run bewaard blijft (max. 31). De meest recente run van elke workflow blijft altijd bewaard, ongeacht de leeftijd.",
+        "unit": "dagen"
+      }
     }
   }
 }

@@ -19,6 +19,19 @@ import { initialsOf } from '@/lib/initials'
 import { backofficeLinkOf } from '@/lib/backofficeLink'
 import type { RawMatch, MatchRow } from '@/types/match'
 
+// MatchQuery caps per_page at `between:1,200` (measured 2026-08-05 seam-harness:
+// GET /matches 422s above per_page=200). Named the same way as the other
+// 200-capped, full-fetch entities (TASKS_MAX_PER_PAGE in useTasksData.ts,
+// OUTREACH_MAX_PER_PAGE in useOutreachCampaigns.ts) instead of a bare literal, and
+// exported so MatchesPage can pass it as useListPageSize's serverCap — the dropdown
+// must never offer a size (300/400/500) disconnected from what this hook's own
+// fetch loop (and the endpoint) actually caps at.
+export const MATCHES_MAX_PER_PAGE = 200
+// Safety cap on the fetch-all loop below — same 1000-row scale as tasks/outreach
+// (MATCHES_MAX_PAGES * MATCHES_MAX_PER_PAGE), just reached in fewer, larger requests
+// now that the per-request size doubled from the old bare 100.
+const MATCHES_MAX_PAGES = 5
+
 // Map a raw API match → the flat shape the table renders (snake_case-tolerant).
 export function mapMatch(m: RawMatch): MatchRow {
   const cand = m.candidate ?? {}
@@ -105,10 +118,11 @@ export function useMatches(ref: string | null = null, includeArchived: boolean =
     let alive = true
     setLoading(true)
     // Fetch the FULL set: the default 25-row page made every KPI/board undercount
-    // (Danny: "84 vs 25" — 25 wás de bug). per_page is server-capped at 100 (422
-    // above it), so follow last_page and accumulate; safety cap at 10 pages.
-    // include_archived rides on every page request (numeric 1, not a JS boolean).
-    const base: Record<string, unknown> = { per_page: 100 }
+    // (Danny: "84 vs 25" — 25 wás de bug). per_page is server-capped at
+    // MATCHES_MAX_PER_PAGE (422 above it), so follow last_page and accumulate;
+    // safety cap at MATCHES_MAX_PAGES pages. include_archived rides on every page
+    // request (numeric 1, not a JS boolean).
+    const base: Record<string, unknown> = { per_page: MATCHES_MAX_PER_PAGE }
     if (includeArchived) base.include_archived = 1
     const loadAll = async () => {
       // A reference-number query (NUMMER-1) is an exact server-side lookup — one
@@ -118,7 +132,7 @@ export function useMatches(ref: string | null = null, includeArchived: boolean =
         return (r.data?.data ?? []) as RawMatch[]
       }
       const all: RawMatch[] = []
-      for (let pageNo = 1; pageNo <= 10; pageNo++) {
+      for (let pageNo = 1; pageNo <= MATCHES_MAX_PAGES; pageNo++) {
         const r = await api.get('/matches', { params: { ...base, page: pageNo } })
         all.push(...(r.data?.data ?? []))
         const last = r.data?.meta?.last_page ?? 1

@@ -87,7 +87,8 @@
     "department": "Service",
     "contact": "Contact",
     "workflow": "Workflow",
-    "open": "Ouvrir"
+    "open": "Ouvrir",
+    "loadError": "Impossible de charger les résultats."
   },
   "activity": {
     "empty": "Aucune activité pour le moment."
@@ -149,7 +150,9 @@
     "title": "Tâches de ce candidat",
     "open": "Ouvertes",
     "history": "Historique",
-    "empty": "Aucune tâche dans cette vue."
+    "empty": "Aucune tâche dans cette vue.",
+    "loading": "Chargement des tâches…",
+    "error": "Impossible de charger les tâches liées."
   },
   "notes": {
     "title": "Notes",

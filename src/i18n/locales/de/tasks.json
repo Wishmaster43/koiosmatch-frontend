@@ -87,7 +87,8 @@
     "department": "Abteilung",
     "contact": "Kontakt",
     "workflow": "Workflow",
-    "open": "Öffnen"
+    "open": "Öffnen",
+    "loadError": "Ergebnisse konnten nicht geladen werden."
   },
   "activity": {
     "empty": "Noch keine Aktivität."
@@ -149,7 +150,9 @@
     "title": "Aufgaben dieses Kandidaten",
     "open": "Offen",
     "history": "Historie",
-    "empty": "Keine Aufgaben in dieser Ansicht."
+    "empty": "Keine Aufgaben in dieser Ansicht.",
+    "loading": "Aufgaben werden geladen…",
+    "error": "Verknüpfte Aufgaben konnten nicht geladen werden."
   },
   "notes": {
     "title": "Notizen",

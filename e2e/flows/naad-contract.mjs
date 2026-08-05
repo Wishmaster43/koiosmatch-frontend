@@ -23,7 +23,9 @@ const LADDER = [50, 100, 200, 300, 400, 500]
 // the real login sets then authenticates exactly like every request the app itself makes.
 async function fetchPerPage(page, endpoint, perPage) {
   return page.evaluate(async ([ep, n]) => {
-    const r = await fetch(`/api${ep}?per_page=${n}`, { headers: { 'X-Tenant': 'demo', Accept: 'application/json' }, credentials: 'include' })
+    // `_probe=1` marks this as a deliberate contract probe — lib.mjs's error
+    // listener skips tagged responses so an expected 422 never fails another flow.
+    const r = await fetch(`/api${ep}?per_page=${n}&_probe=1`, { headers: { 'X-Tenant': 'demo', Accept: 'application/json' }, credentials: 'include' })
     let message = ''
     if (r.status >= 400) { try { message = (await r.json())?.message ?? '' } catch { /* no json body */ } }
     return { status: r.status, message }

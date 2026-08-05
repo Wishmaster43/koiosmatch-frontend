@@ -28,7 +28,7 @@ import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
-import { useMatches, mapMatch } from './hooks/useMatches'
+import { useMatches, mapMatch, MATCHES_MAX_PER_PAGE } from './hooks/useMatches'
 import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
 import { useMatchArchive } from './hooks/useMatchArchive'
 import { useMatchMutations } from './hooks/useMatchMutations'
@@ -56,12 +56,15 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // an APPLICATION axis — the match resource no longer carries a stage).
   const { statuses: matchStatuses, metaOf: matchStatusMeta } = useMatchStatuses()
   const [page,        setPage]        = useState(1)
-  // Shared page-size hook (§ audit 2026-08-05): no serverCap needed here — useMatches
-  // already fetches the FULL set client-side (loop, safety-capped at 1000 rows) and
-  // `pageSize` only slices that in-memory array for display, so it never round-trips
-  // to the server as `per_page` and can't 422 (unlike Vacancies/Customers, which sent
-  // pageSize straight through). Still adopts the hook for the session-sticky pick.
-  const { pageSize, setPageSize } = useListPageSize('matches')
+  // Shared page-size hook (§ audit 2026-08-05): useMatches already fetches the FULL
+  // set client-side (loop, safety-capped at MATCHES_MAX_PAGES pages) and `pageSize`
+  // only slices that in-memory array for display, so it never round-trips to the
+  // server as `per_page` on its own (unlike Vacancies/Customers, which used to send
+  // pageSize straight through). serverCap still passes MATCHES_MAX_PER_PAGE (200) so
+  // the dropdown stays honest and matches every other 200-capped entity — never
+  // offering a size (300/400/500) disconnected from what this page's own data ever
+  // actually holds.
+  const { pageSize, setPageSize, options: pageSizeOptions } = useListPageSize('matches', MATCHES_MAX_PER_PAGE)
   const [stageFilter, setStageFilter] = usePageMemory<string[]>('matches.stage', [])
   // KPI attention toggle (Gem. score → only scored matches).
   const [kpiScored, setKpiScored] = usePageMemory('matches.scored', false)
@@ -341,7 +344,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
 
               <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
                 pageSize={pageSize} onPageChange={setPage}
-                onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
+                onPageSizeChange={n => { setPageSize(n); setPage(1) }} pageSizeOptions={pageSizeOptions} />
             </>
           ),
         },

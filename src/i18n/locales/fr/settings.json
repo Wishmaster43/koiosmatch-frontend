@@ -60,7 +60,8 @@
     "ai": "Koios AI",
     "import_export": "Import & Export",
     "document_types": "Types de document",
-    "appointments": "Rendez-vous"
+    "appointments": "Rendez-vous",
+    "workflows": "Workflows"
   },
   "nav": {
     "candidate_display": "Affichage du tableau",
@@ -221,7 +222,8 @@
     "nt_task": "Tâches",
     "customer_blacklist_reasons": "Motifs de liste noire",
     "match_stop_reasons": "Motifs de résiliation",
-    "outreach_outcomes": "Résultats"
+    "outreach_outcomes": "Résultats",
+    "workflow_run_history": "Historique des exécutions"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -2126,7 +2128,11 @@
     "contact": "Contact",
     "message": "Message",
     "searchPlaceholder": "Rechercher contact ou message…",
-    "empty": "Aucun message WhatsApp."
+    "empty": "Aucun message WhatsApp.",
+    "memoryDaysTitle": "Mémoire de conversation Koios",
+    "memoryDaysHint": "Nombre de jours d’historique WhatsApp que Koios utilise comme contexte pour rédiger une réponse.",
+    "memoryDaysLabel": "Jours (1-365)",
+    "memoryDaysSaveFailed": "Échec de l’enregistrement de la mémoire de conversation."
   },
   "appointmentTypes": {
     "title": "Types de rendez-vous",
@@ -2643,6 +2649,16 @@
     "tabs": {
       "kpis": "KPI",
       "blocks": "Graphiques et listes"
+    }
+  },
+  "workflowRunHistory": {
+    "subtitle": "Durée de conservation des exécutions de workflow terminées",
+    "fields": {
+      "workflow_run_retention_days": {
+        "label": "Durée de conservation",
+        "description": "Nombre de jours de conservation d’une exécution terminée (max. 31). L’exécution la plus récente de chaque workflow est toujours conservée, quel que soit son âge.",
+        "unit": "jours"
+      }
     }
   }
 }

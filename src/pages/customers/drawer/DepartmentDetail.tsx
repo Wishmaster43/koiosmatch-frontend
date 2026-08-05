@@ -351,8 +351,10 @@ export default function DepartmentDetail({ department, locations, statuses, cont
       {subTab === 'notes' && <ScopedNotesTab scope="department" id={department.id as Id} customerId={customerId} />}
       {subTab === 'documents' && <ScopedDocumentsTab scope="department" id={department.id as Id} customerId={customerId} />}
       {subTab === 'matches' && <ScopedMatchesTab scope="department" id={department.id as Id} customerId={customerId} />}
-      {/* SCOPED-LIST-TAB-1: read-only, opens the real opportunity on row-click. */}
-      {subTab === 'opportunities' && <ScopedOpportunitiesTab scope="department" id={department.id as Id} customerId={customerId} />}
+      {/* SCOPED-LIST-TAB-1: read-only, opens the real opportunity on row-click.
+          OPP-MODAL-PREFILL-1: customerName rides along too, for the "+ Kans"
+          modal's customer-picker option label (mirrors ScopedVacanciesTab above). */}
+      {subTab === 'opportunities' && <ScopedOpportunitiesTab scope="department" id={department.id as Id} customerId={customerId} customerName={customerName} />}
       {/* TAKEN-OP-AFDELING-1: own scoped label block (mirrors contacts.tasks.*) —
           the shared tab's CURRENT labels interface (newTask/searchPlaceholder/empty/
           loading/error/openTask); re-check this call site if EntityTasksTab's

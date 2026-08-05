@@ -60,7 +60,8 @@
     "ai": "Koios AI",
     "import_export": "Import & Export",
     "document_types": "Document types",
-    "appointments": "Appointments"
+    "appointments": "Appointments",
+    "workflows": "Workflows"
   },
   "nav": {
     "candidate_display": "Table display",
@@ -221,7 +222,8 @@
     "nt_task": "Tasks",
     "customer_blacklist_reasons": "Blacklist reasons",
     "match_stop_reasons": "Termination reasons",
-    "outreach_outcomes": "Outcomes"
+    "outreach_outcomes": "Outcomes",
+    "workflow_run_history": "Run history"
   },
   "kpis": {
     "title": "KPI settings",
@@ -2126,7 +2128,11 @@
     "contact": "Contact",
     "message": "Message",
     "searchPlaceholder": "Search contact or message…",
-    "empty": "No WhatsApp messages yet."
+    "empty": "No WhatsApp messages yet.",
+    "memoryDaysTitle": "Koios conversation memory",
+    "memoryDaysHint": "How many days of WhatsApp conversation history Koios uses as context when drafting a reply.",
+    "memoryDaysLabel": "Days (1-365)",
+    "memoryDaysSaveFailed": "Saving the conversation memory failed."
   },
   "appointmentTypes": {
     "title": "Appointment types",
@@ -2643,6 +2649,16 @@
     "tabs": {
       "kpis": "KPIs",
       "blocks": "Charts & lists"
+    }
+  },
+  "workflowRunHistory": {
+    "subtitle": "How long completed workflow runs are kept",
+    "fields": {
+      "workflow_run_retention_days": {
+        "label": "Retention period",
+        "description": "Number of days a completed workflow run is kept (max. 31). The most recent run of every workflow is always kept, regardless of age.",
+        "unit": "days"
+      }
     }
   }
 }

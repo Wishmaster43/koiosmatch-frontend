@@ -101,7 +101,8 @@
     "department": "Afdeling",
     "contact": "Contactpersoon",
     "workflow": "Workflow",
-    "open": "Openen"
+    "open": "Openen",
+    "loadError": "Resultaten konden niet geladen worden."
   },
   "activity": {
     "empty": "Nog geen activiteit."
@@ -149,7 +150,9 @@
     "title": "Taken van deze kandidaat",
     "open": "Open",
     "history": "Historie",
-    "empty": "Geen taken in deze weergave."
+    "empty": "Geen taken in deze weergave.",
+    "loading": "Taken laden…",
+    "error": "Gerelateerde taken konden niet geladen worden."
   },
   "notes": {
     "title": "Notities",

@@ -4,7 +4,7 @@
  * historie van afgesloten taken"). Rows click through to that task's drawer via
  * the open-intent. Renders nothing when the task has no candidate link.
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ListChecks } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
@@ -19,23 +19,35 @@ interface Row {
 }
 
 export default function RelatedTasks({ task }: { task: TaskDetail }) {
-  const { t } = useTranslation('tasks')
+  const { t } = useTranslation(['tasks', 'common'])
   const { formatDate } = useDateFormat()
   const { openEntity } = useNavigation()
   const [rows, setRows] = useState<Row[]>([])
   const [view, setView] = useState<'open' | 'history'>('open')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
+  // Freshness guard (§9, mirrors this drawer's own NotesTab.tsx): a monotonic
+  // request id so the retry button below can never let a stale in-flight
+  // response overwrite the result of a newer one.
+  const requestIdRef = useRef(0)
 
   const candidateId = (task.links ?? []).find(l => l.type === 'candidate')?.id ?? null
 
   // Load the candidate's tasks; own task filtered out. Missing param reads as empty.
-  useEffect(() => {
-    if (!candidateId) { setRows([]); return }
-    let alive = true
+  // A failed load now surfaces as its OWN error state (audit finding 2026-08-05:
+  // this used to silently degrade to "no related tasks", indistinguishable from a
+  // candidate that genuinely has none) — mirrors the tasks page's loading/error
+  // split (useTasksData) and this drawer's own NotesTab.tsx retry pattern.
+  const fetchRelated = useCallback(() => {
+    if (!candidateId) { setRows([]); setLoading(false); setError(false); return }
+    const requestId = ++requestIdRef.current
+    setLoading(true); setError(false)
     api.get('/tasks', { params: { candidate: candidateId } })
-      .then(r => { if (alive) setRows(((unwrapList(r).rows) as Row[]).filter(x => String(x.id) !== String(task.id))) })
-      .catch(() => { if (alive) setRows([]) })
-    return () => { alive = false }
+      .then(r => { if (requestIdRef.current === requestId) setRows(((unwrapList(r).rows) as Row[]).filter(x => String(x.id) !== String(task.id))) })
+      .catch(err => { if (requestIdRef.current === requestId && err?.response?.status !== 404) setError(true) })
+      .finally(() => { if (requestIdRef.current === requestId) setLoading(false) })
   }, [candidateId, task.id])
+  useEffect(() => { fetchRelated() }, [fetchRelated])
 
   if (!candidateId) return null
   const visible = rows.filter(x => (view === 'open' ? !x.completed_at : !!x.completed_at))
@@ -55,7 +67,17 @@ export default function RelatedTasks({ task }: { task: TaskDetail }) {
         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('related.title')}</span>
         <span style={{ display: 'flex', gap: 6 }}>{chip('open', t('related.open'))}{chip('history', t('related.history'))}</span>
       </div>
-      {visible.length === 0 ? (
+      {/* Four UI states (§3): loading / error+retry / empty / success — the error
+          row mirrors NotesTab.tsx's danger-row + retry convention in this same drawer. */}
+      {loading ? (
+        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('related.loading')}</div>
+      ) : error ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger)' }}>
+          <span>{t('related.error')}</span>
+          <button onClick={fetchRelated} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
+            padding: '3px 9px', cursor: 'pointer', color: 'var(--text)' }}>{t('common:error.retry')}</button>
+        </div>
+      ) : visible.length === 0 ? (
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('related.empty')}</div>
       ) : visible.map(r => {
         const st = r.status
