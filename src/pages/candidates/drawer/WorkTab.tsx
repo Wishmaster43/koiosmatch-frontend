@@ -281,7 +281,9 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
       {/* OWNER-DEVIATION-1: candidate owner passed from this already-loaded record
           (no refetch) so the modal can flag a recruiter/owner deviation. */}
       {modal === 'apply'  && <AddApplicationModal candidateId={c.id} candidateOwnerId={c.ownerId} candidateOwnerName={c.owner} onClose={() => setModal(null)} onCreated={reload} />}
-      {modal === 'intake' && <PlanIntakeModal     candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} defaultVacancyId={soleVacancyId} />}
+      {/* RECRUITER-DEFAULT-1 (Danny 05-08): same candidate owner, threaded so the
+          intake modal's recruiter picker can prefer it over the logged-in-user fallback. */}
+      {modal === 'intake' && <PlanIntakeModal     candidateId={c.id} candidateOwnerId={c.ownerId} onClose={() => setModal(null)} onCreated={reload} defaultVacancyId={soleVacancyId} />}
       {modal === 'match'  && <MatchModal candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
       {editAppt && <PlanIntakeModal candidateId={c.id} existing={editAppt} onClose={() => setEditAppt(null)} onCreated={reload} />}
       {/* Pencil on a MatchesTab row (point 2) — same modal, in EDIT mode: prefills

@@ -40,6 +40,10 @@ export interface PlanIntakeFormOptions {
   applicationId?: Id | null
   // Prefills the vacancy select when there is no existing appointment (booking from a vacancy/application).
   defaultVacancyId?: Id | null
+  // RECRUITER-DEFAULT-1 (Danny 05-08): the candidate's own owner, passed down from the
+  // already-loaded drawer record (WorkTab's `c.ownerId`) — the highest-priority
+  // recruiter default below; mirrors AddApplicationModal's candidateOwnerId (never refetched).
+  candidateOwnerId?: Id | null
   // Generic copy ("Afspraak…") for non-candidate-drawer callers; default keeps the original intake wording.
   mode?: 'intake' | 'appointment'
 }
@@ -48,7 +52,8 @@ export interface PlanIntakeFormOptions {
 const LOC_PREFIX = 'loc:'
 
 export function usePlanIntakeForm({
-  candidateId, onClose, onCreated, existing, applicationId = null, defaultVacancyId = null, mode = 'intake',
+  candidateId, onClose, onCreated, existing, applicationId = null, defaultVacancyId = null,
+  candidateOwnerId = null, mode = 'intake',
 }: PlanIntakeFormOptions) {
   const { t } = useTranslation(['candidates', 'common'])
   const { types, intakeTypes, metaOf } = useAppointmentTypes()
@@ -134,15 +139,31 @@ export function usePlanIntakeForm({
   const apptRuleDecision = editing ? null : apptRuleDecisionRaw
   const apptRuleBlocked = apptRuleDecision?.effect === 'block'
 
-  // S24a(e): default the recruiter to the logged-in user, mirroring AddApplicationModal's
-  // meIsAssignable pattern — only on CREATE, and only while nothing is picked yet, so an
-  // edit never silently reassigns an appointment away from its stored owner.
+  // RECRUITER-DEFAULT-1 (Danny 05-08: "+ intake recruiter komt er niet standaard te
+  // staan" — measured live: the OLD effect only ever tried the logged-in-user
+  // fallback below; the modal never received the candidate's own owner at all, so
+  // the docblock's "defaults to the logged-in user" claim silently skipped the
+  // higher-priority pick whenever the recruiter opening the modal wasn't the
+  // candidate's own owner). Derivation chain, CREATE only: the candidate's own
+  // owner wins when they are a real assignable tenant user (no extra fetch — reuses
+  // this same /users lookup); otherwise the logged-in user, same meIsAssignable
+  // guard as before (never proposes a non-tenant login, e.g. a super-admin, the
+  // server would 422 on); otherwise the field stays empty for the recruiter to pick.
   const ownerOptions = users.map(u => ({ value: String(u.id), label: userName(u) }))
   const meIsAssignable = me?.id != null && ownerOptions.some(o => o.value === String(me.id))
+  const candidateOwnerAssignable = candidateOwnerId != null && ownerOptions.some(o => o.value === String(candidateOwnerId))
+  // Seeded ONCE: `ownerId` itself is the seeded-once guard (nothing in this form can
+  // ever reset a picked owner back to '', so this never re-fires after a manual pick
+  // or an earlier auto-seed) — mirrors useVacancySearch's userTouched flag, needed
+  // there instead because that value CAN revert to empty on its own. `candidateOwnerId`
+  // and `me` are read at the moment their own resolved flags (below) turn true, in the
+  // SAME render — deliberately left out of the deps array for that reason.
   useEffect(() => {
-    if (!editing && meIsAssignable && !ownerId) setOwnerId(String(me!.id))
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once meIsAssignable resolves
-  }, [meIsAssignable])
+    if (editing || ownerId) return
+    if (candidateOwnerAssignable) { setOwnerId(String(candidateOwnerId)); return }
+    if (meIsAssignable) setOwnerId(String(me!.id))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see comment above the effect
+  }, [editing, ownerId, candidateOwnerAssignable, meIsAssignable])
 
   // S24a(c) — measured live (probe found "Kies een type" with no selection): a lazy
   // useState initializer only reads `typeOptions` at MOUNT time, which is still the

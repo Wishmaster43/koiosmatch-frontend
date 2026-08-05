@@ -11,8 +11,9 @@
  * S24a (Danny 16-07): the panel no longer scrolls itself (see planIntake/styles'
  * `panel` — root-caused the clipped vacancy dropdown); the end time is shown live
  * next to Duur; the appointment TYPE and the "where" picker both preselect their
- * tenant `is_default` entry; the recruiter defaults to the logged-in user; and the
- * vacancy proposal never falls back to a raw id while its title is in flight.
+ * tenant `is_default` entry; the recruiter defaults to the candidate's own owner,
+ * else the logged-in user (RECRUITER-DEFAULT-1, Danny 05-08 — see usePlanIntakeForm);
+ * and the vacancy proposal never falls back to a raw id while its title is in flight.
  *
  * AXIS-MATRIX-2 (CMFE audit R1): wires the shared action-rule preflight for
  * `appointment.create` (mirrors MatchModal's match.create) — CREATE only,

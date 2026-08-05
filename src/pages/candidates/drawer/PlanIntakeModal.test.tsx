@@ -23,9 +23,10 @@ import { useAppointmentTypes } from '@/lib/useAppointmentTypes'
 // doesn't perfectly model) don't fight TS literal-widening on `default_modality`.
 type AppointmentTypesResult = ReturnType<typeof useAppointmentTypes>
 
-vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [{ id: 'u1', name: 'Piet Recruiter' }] }) }))
-// meIsAssignable picks the same user 'u1' the users mock returns — the recruiter
-// auto-default (S24a-e) then has no observable effect on which owner id ends up set.
+// Two assignable users — 'u1' is the logged-in user (see the useAuth mock below),
+// 'u2' is a DIFFERENT candidate owner, so RECRUITER-DEFAULT-1's priority (candidate
+// owner over the logged-in-user fallback) is actually observable in the tests below.
+vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [{ id: 'u1', name: 'Piet Recruiter' }, { id: 'u2', name: 'Els Recruiter' }] }) }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1', name: 'Piet Recruiter' } }) }))
 // One default type, DEFAULT + FIRST in the list — the common case. `vi.fn` (not a
 // plain arrow) so individual tests below can override it with `mockReturnValue`
@@ -163,6 +164,49 @@ describe('PlanIntakeModal · S24a defaults', () => {
     render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} defaultVacancyId="vac-9" />)
     expect(screen.queryByText('vac-9')).not.toBeInTheDocument()
     expect(await screen.findByText('Verzorgende IG')).toBeInTheDocument()
+  })
+})
+
+// RECRUITER-DEFAULT-1 (Danny 05-08: "+ intake recruiter komt er niet standaard te
+// staan"): the OLD effect only ever tried the logged-in-user fallback — the modal
+// never received the candidate's own owner at all. The derivation chain is now
+// candidate owner (when assignable) → logged-in user (when assignable) → empty,
+// seeded once (never clobbers a manual pick).
+describe('PlanIntakeModal · RECRUITER-DEFAULT-1 (candidate owner → logged-in user → manual pick)', () => {
+  it('preselects the candidate owner over the logged-in user when both are assignable', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: {} })
+    const user = userEvent.setup()
+    // 'u2' (Els) is the candidate's own owner; 'u1' (Piet, the logged-in user per the
+    // useAuth mock above) must lose the priority race.
+    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} candidateOwnerId="u2" />)
+    expect(await screen.findByRole('button', { name: 'Els Recruiter' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'work.createIntake' }))
+    expect(api.post).toHaveBeenCalledWith('/candidates/cand-1/appointments', expect.objectContaining({ owner_id: 'u2' }))
+  })
+
+  it('falls back to the logged-in user when the candidate has no owner', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: {} })
+    const user = userEvent.setup()
+    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    expect(await screen.findByRole('button', { name: 'Piet Recruiter' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'work.createIntake' }))
+    expect(api.post).toHaveBeenCalledWith('/candidates/cand-1/appointments', expect.objectContaining({ owner_id: 'u1' }))
+  })
+
+  it('a manual recruiter change survives the auto-seed', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: {} })
+    const user = userEvent.setup()
+    // Auto-seeds to the candidate owner ('u2'); the recruiter then manually picks 'u1' —
+    // that pick, not the seed, must be what reaches the POST body.
+    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} candidateOwnerId="u2" />)
+    await user.click(await screen.findByRole('button', { name: 'Els Recruiter' }))
+    await user.click(await screen.findByRole('button', { name: 'Piet Recruiter' }))
+    expect(await screen.findByRole('button', { name: 'Piet Recruiter' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'work.createIntake' }))
+    expect(api.post).toHaveBeenCalledWith('/candidates/cand-1/appointments', expect.objectContaining({ owner_id: 'u1' }))
   })
 })
 
