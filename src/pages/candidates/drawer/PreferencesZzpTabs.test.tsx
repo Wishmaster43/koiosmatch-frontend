@@ -1,14 +1,15 @@
 /**
- * PreferencesTab / ZzpTab — sub-tab regression tests (Danny kandidaten-ronde-2,
- * punten D/E). Both tabs' underlying EditableFieldTable pulls in useDateFormat
- * for its 'date' field type, which transitively initialises real i18n — stub it
- * so `t()` stays on raw keys, like EditableFieldTable.test.tsx and every other
- * test in this repo that doesn't deliberately opt into real i18n.
+ * PreferencesTab — sub-tab regression tests (Danny kandidaten-ronde-2, punten D/E).
+ * ZzpTab's own tests moved to ZzpTab.test.tsx alongside its new file (05-08 split).
+ * The underlying EditableFieldTable pulls in useDateFormat for its 'date' field
+ * type, which transitively initialises real i18n — stub it so `t()` stays on raw
+ * keys, like EditableFieldTable.test.tsx and every other test in this repo that
+ * doesn't deliberately opt into real i18n.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { PreferencesTab, ZzpTab } from './PreferencesZzpTabs'
+import { PreferencesTab } from './PreferencesZzpTabs'
 import type { Candidate } from '@/types/candidate'
 
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, locale: 'nl-NL' }) }))
@@ -99,7 +100,7 @@ describe('PreferencesTab · sub-tabs (kandidaten-ronde-2, punt D)', () => {
   // PREF-PENCIL-SPLIT-1 (05-08): Financieel holds TWO distinct sections
   // (Loonheffing, Gewenst tarief) — each now gets its own card + pencil, so
   // editing one must never flip the other into edit mode (same regression class
-  // as VAC-DETAILS-SPLIT-1 / the ZzpTab split above).
+  // as VAC-DETAILS-SPLIT-1 / ZzpTab's own Bedrijf/Adres/Facturatie split, see ZzpTab.test.tsx).
   it('Financieel shows Loonheffing and Gewenst tarief as two separately-editable cards', async () => {
     const user = userEvent.setup()
     render(<PreferencesTab c={candidate()} />)
@@ -152,49 +153,5 @@ describe('PreferencesTab · status edit pencil (Danny 2026-07-20)', () => {
   it('renders no pencil when onEditStatus is not passed (additive prop)', () => {
     render(<PreferencesTab c={sickCandidate()} />)
     expect(screen.queryByTitle('drawer.editStatusReason')).toBeNull()
-  })
-})
-
-// Danny 28-07: ZZP is ONE tab again — no sub-tab strip. Three blocks (Bedrijf ·
-// Adres · Facturatie), each with its own pencil and its own title ABOVE its card,
-// mirroring what the Profiel tab now does. Only the "one pencil flips everything"
-// behaviour was the complaint; the layout itself stays put.
-describe('ZzpTab · one tab, a pencil per block', () => {
-  it('shows all three blocks at once, with no sub-tab strip', () => {
-    render(<ZzpTab c={candidate()} />)
-    expect(screen.queryAllByRole('tab')).toHaveLength(0)
-    // Bedrijf, Adres and Facturatie fields are all on screen together.
-    expect(screen.getByText('zzp.companyName')).toBeInTheDocument()
-    expect(screen.getByText('zzp.street')).toBeInTheDocument()
-    expect(screen.getByText('zzp.creditor')).toBeInTheDocument()
-  })
-
-  it('titles each block once, outside its card, with its own pencil', () => {
-    render(<ZzpTab c={candidate()} />)
-    for (const title of ['zzp.groupCompany', 'zzp.groupAddress', 'zzp.groupInvoicing']) {
-      // Exactly one heading per block — no in-card repeat of the same word.
-      expect(screen.getAllByText(title)).toHaveLength(1)
-    }
-    expect(screen.getAllByTitle('edit')).toHaveLength(3)
-  })
-
-  it('editing one block leaves the other two read-only', async () => {
-    const user = userEvent.setup()
-    render(<ZzpTab c={candidate()} />)
-    await user.click(screen.getAllByTitle('edit')[0])
-    expect(screen.getByTitle('save')).toBeInTheDocument()
-    expect(screen.getAllByTitle('edit')).toHaveLength(2)
-  })
-
-  it('saving a block still sends the full ZZP payload, unchanged', async () => {
-    const user = userEvent.setup()
-    const onSave = vi.fn()
-    render(<ZzpTab c={candidate()} onSave={onSave} />)
-    await user.click(screen.getAllByTitle('edit')[2])   // Facturatie
-    await user.click(screen.getByTitle('save'))
-    // The request shape is the same one the single table produced before the split.
-    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
-      company_name: expect.anything(), street: expect.anything(), iban: expect.anything(),
-    }))
   })
 })

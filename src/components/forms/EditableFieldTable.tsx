@@ -323,7 +323,10 @@ export default function EditableFieldTable({
   // CANON-DIVIDER-1: the line between rows (and the row label's font size) are the two
   // knobs the candidate ProfileTab canon changes; both fall back to this table's
   // original look when the caller doesn't pass them.
-  const renderRow = (f: FieldRow, last: boolean) => (f.type === 'textarea' || f.type === 'chips' || f.type === 'richtext') ? (
+  // CHIP-INLINE-1 (Danny 05-08 "niet eronder maar ernaast"): chips READ as a normal
+  // label-left row (they wrap in the value area); only while EDITING do they take the
+  // full width — the option grid genuinely needs it (mirrors textarea/richtext).
+  const renderRow = (f: FieldRow, last: boolean) => (f.type === 'textarea' || (f.type === 'chips' && editing) || f.type === 'richtext') ? (
     <div key={f.key} style={dividers
       ? { padding: '7px 12px', background: 'var(--surface)', borderBottom: !last ? '1px solid var(--border)' : 'none' }
       : { padding: '4px 0' }}>

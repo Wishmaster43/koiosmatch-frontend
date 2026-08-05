@@ -701,7 +701,14 @@
     "groupCompany": "Unternehmen",
     "groupAddress": "Adresse",
     "groupInvoicing": "Rechnungsstellung",
-    "groupPayment": "Zahlung"
+    "groupPayment": "Zahlung",
+    "openKvk": "Im Handelsregister öffnen",
+    "openVies": "In VIES prüfen (EU)",
+    "businessEmailInvalid": "Geben Sie eine gültige E-Mail-Adresse ein.",
+    "businessEmailDuplicateTitle": "Diese E-Mail-Adresse wird bereits verwendet",
+    "businessEmailDuplicateBody": "{{name}} verwendet diese E-Mail-Adresse bereits. Trotzdem speichern?",
+    "businessEmailDuplicateConfirm": "Trotzdem speichern",
+    "businessEmailDuplicateCancel": "Zurück"
   },
   "certified": {
     "issued": "Ausgestellt",

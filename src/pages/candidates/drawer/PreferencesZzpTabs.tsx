@@ -1,5 +1,6 @@
 /**
- * Preferences + Freelance (ZZP) tabs — both schema-driven EditableFieldTables.
+ * PreferencesTab — schema-driven EditableFieldTables for the candidate's work
+ * preferences sub-tabs.
  *
  * Each field is still declared once with its `group`, and each sub-tab/section
  * below FILTERS that one field list by group — one source of truth, no
@@ -9,8 +10,14 @@
  * separate component instance) and its OWN narrow `onSave` that emits ONLY that
  * section's API keys (PREF-PENCIL-SPLIT-1, Danny 05-08 — the Financieel sub-tab
  * used to share one pencil/save across Loonheffing AND Gewenst tarief, the same
- * class of bug as VAC-DETAILS-SPLIT-1). ZzpTab's three blocks were already split
- * this way (28-07) and keep sending their full block payload — no bug there.
+ * class of bug as VAC-DETAILS-SPLIT-1).
+ *
+ * ZzpTab moved to its own file (§3 ~400-line split trigger, Danny 05-08 points
+ * 1.1.1-1.1.5 pushed this file over it) — re-exported below so CandidateDrawer's
+ * existing `import { PreferencesTab, ZzpTab } from './drawer/PreferencesZzpTabs'`
+ * keeps working unchanged. See ZzpTab.tsx for its own file header; its three
+ * blocks now save SEPARATELY (Bedrijf/Adres/Facturatie each narrower than before),
+ * not as one shared full-payload save.
  */
 import { useState } from 'react'
 import type { ComponentType } from 'react'
@@ -20,7 +27,6 @@ import EditableFieldTableJs from '@/components/forms/EditableFieldTable'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import { useLookups } from '@/context/LookupsContext'
 import { useDateFormat } from '@/lib/datetime'
-import { useFunctions } from '@/lib/useFunctions'
 import { useIndustries } from '@/lib/useIndustries'
 import { useDriverLicenses } from '@/lib/useDriverLicenses'
 import type { Candidate } from '@/types/candidate'
@@ -31,7 +37,8 @@ import type { Candidate } from '@/types/candidate'
 // (was inconsistently 160 on availability/travel/financial/other, 180 on the ZZP
 // company/address/invoicing blocks in the same file — that internal drift is fixed
 // even though the canon width itself is not adopted for this one tab).
-const WIDE_LABEL_WIDTH = 150
+// Exported: ZzpTab.tsx (its own file now) shares this exact width.
+export const WIDE_LABEL_WIDTH = 150
 
 type AnyProps = Record<string, unknown>
 // EditableFieldTable is still untyped JS — accept any props at the boundary.
@@ -52,7 +59,6 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   onEditStatus?: () => void }) {
   const { t } = useTranslation('candidates')
   const { locale, formatDate } = useDateFormat()
-  const { functions, allowFreeEntry } = useFunctions() as { functions: string[]; allowFreeEntry: boolean }
   const { industries } = useIndustries() as { industries: string[] }
   const { licenses } = useDriverLicenses() as { licenses: string[] }
   // Contract forms (colour per value) for the first chip row.
@@ -65,9 +71,6 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   const dayOptions = DAY_SLUGS.map((value, i) => ({ value, label: cap(new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(new Date(2024, 0, 1 + i))) }))
   const industryOptions = industries.map(name => ({ value: name, label: name }))
   const licenseOptions = licenses.map(name => ({ value: name, label: name }))
-  // Keep an existing free-entry function value selectable even if it's not in the list.
-  const fnValue = (pref.function_pref as string) ?? ''
-  const functionOptions = fnValue && !functions.includes(fnValue) ? [fnValue, ...functions] : functions
 
   // One shared field schema, sliced per section below (each with its own Save).
   // Multi-value chips sit as rows within their group: Contractvorm/Dagen/Branche
@@ -79,7 +82,6 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     beschikbaar_per: pref.available_from ?? '',
     hoursPerWeek:   pref.hours_per_week ?? '',
     dagen:           toArray(pref.preferred_days),
-    function:         fnValue,
     branche:         toArray(pref.sector_pref),
     reisafstand:     pref.max_travel_km  ?? '',
     reistijd:        pref.max_travel_min ?? '',
@@ -97,7 +99,6 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     { key: 'beschikbaar_per', label: t('preferences.availableFrom'), group: t('preferences.groupAvailability'), type: 'date' },
     { key: 'hoursPerWeek',   label: t('preferences.hoursPerWeek'),  group: t('preferences.groupAvailability'), inputType: 'number' },
     { key: 'dagen',           label: t('preferences.days'),          group: t('preferences.groupAvailability'), type: 'chips', chipOptions: dayOptions },
-    { key: 'function',         label: t('preferences.function'),      group: t('preferences.groupAvailability'), type: 'creatable', options: functionOptions, allowCreate: allowFreeEntry },
     { key: 'branche',         label: t('preferences.sector'),        group: t('preferences.groupAvailability'), type: 'chips', chipOptions: industryOptions },
     { key: 'reisafstand',     label: t('preferences.maxDistance'),   group: t('preferences.groupTravel'), inputType: 'number' },
     { key: 'reistijd',        label: t('preferences.maxTravelTime'), group: t('preferences.groupTravel'), inputType: 'number' },
@@ -118,7 +119,6 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     available_from: v.beschikbaar_per,
     hours_per_week: v.hoursPerWeek === '' ? null : Number(v.hoursPerWeek),
     preferred_days: v.dagen,
-    function_pref:  v.function,
     sector_pref:    v.branche,
   })
   const toApiTravel = (v: Record<string, unknown>) => ({
@@ -231,73 +231,7 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   )
 }
 
-export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string, unknown>) => void }) {
-  const { t } = useTranslation('candidates')
-  const zzp = c.zzp
-  // Legacy fallbacks live on the flat candidate record (not on the typed model).
-  const flat = c as unknown as Record<string, unknown>
-  const value = {
-    bedrijfsnaam:      zzp.company_name      ?? flat.company_name ?? '',
-    kvk:               zzp.kvk_number        ?? flat.kvk          ?? '',
-    btw:               zzp.vat_number        ?? flat.btw          ?? '',
-    kor:               zzp.kor               ?? flat.kor          ?? false,
-    straat:            zzp.street            ?? '',
-    huisnummer:        zzp.house_number      ?? '',
-    postcode:          zzp.postal_code       ?? '',
-    plaats:            zzp.city              ?? '',
-    land:              zzp.country           ?? '',
-    crediteur:         zzp.creditor_number   ?? '',
-    email_zakelijk:    zzp.business_email    ?? '',
-    iban:              zzp.iban              ?? flat.iban         ?? '',
-  }
-  const fields = [
-    { key: 'bedrijfsnaam',      label: t('zzp.companyName'),    group: t('zzp.groupCompany') },
-    { key: 'kvk',               label: t('zzp.kvk'),            group: t('zzp.groupCompany') },
-    { key: 'btw',               label: t('zzp.vat'),            group: t('zzp.groupCompany') },
-    { key: 'kor',               label: t('zzp.kor'),            group: t('zzp.groupCompany'), type: 'checkbox' },
-    { key: 'straat',            label: t('zzp.street'),         group: t('zzp.groupAddress') },
-    { key: 'huisnummer',        label: t('zzp.houseNumber'),    group: t('zzp.groupAddress') },
-    { key: 'postcode',          label: t('zzp.postalCode'),     group: t('zzp.groupAddress') },
-    { key: 'plaats',            label: t('zzp.city'),           group: t('zzp.groupAddress') },
-    { key: 'land',              label: t('zzp.country'),        group: t('zzp.groupAddress') },
-    { key: 'crediteur',         label: t('zzp.creditor'),       group: t('zzp.groupInvoicing') },
-    { key: 'email_zakelijk',    label: t('zzp.businessEmail'),  group: t('zzp.groupInvoicing'), inputType: 'email' },
-    { key: 'iban',              label: t('zzp.iban'),           group: t('zzp.groupInvoicing') },
-  ]
-  const toApi = (v: Record<string, unknown>) => ({
-    company_name:      v.bedrijfsnaam,
-    kvk_number:        v.kvk,
-    vat_number:        v.btw,
-    kor:               v.kor,
-    street:            v.straat,
-    house_number:      v.huisnummer,
-    postal_code:       v.postcode,
-    city:              v.plaats,
-    country:           v.land,
-    creditor_number:   v.crediteur,
-    business_email:    v.email_zakelijk,
-    iban:              v.iban,
-  })
-  const handleSave = (v: Record<string, unknown>) => onSave?.(toApi(v))
-
-  // ONE tab, three blocks — Bedrijf · Adres · Facturatie — each with its own pencil
-  // and its own title ABOVE the card (Danny 28-07: "ZZP zonder sub tabjes, 3 potlootjes
-  // per blokje en de txt erbuiten"). Same shape the Profiel tab now uses, and the same
-  // reason: the sub-tab strip changed the layout when only the "one pencil flips
-  // everything" behaviour had to go — and it discarded a draft on every switch.
-  //
-  // Each block gets the FULL `value` and the same `handleSave`, exactly as before: the
-  // table hands back its whole form, so `toApi` still produces the identical request.
-  // Editing Adres therefore never blanks Facturatie. The per-field `group` is cleared
-  // because the block's own title above the card already names it — a second in-card
-  // heading would just repeat it.
-  const blockFields = (group: string) => fields.filter(f => f.group === group).map(f => ({ ...f, group: undefined }))
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <EditableFieldTable title={t('zzp.groupCompany')}   fields={blockFields(t('zzp.groupCompany'))}   value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSave} />
-      <EditableFieldTable title={t('zzp.groupAddress')}   fields={blockFields(t('zzp.groupAddress'))}   value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSave} />
-      <EditableFieldTable title={t('zzp.groupInvoicing')} fields={blockFields(t('zzp.groupInvoicing'))} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSave} />
-    </div>
-  )
-}
+// ZzpTab lives in its own file now (see the file header above) — re-exported so
+// every existing `import { PreferencesTab, ZzpTab } from './drawer/PreferencesZzpTabs'`
+// (CandidateDrawer.tsx) keeps resolving without a second, hand-edited import path.
+export { ZzpTab } from './ZzpTab'

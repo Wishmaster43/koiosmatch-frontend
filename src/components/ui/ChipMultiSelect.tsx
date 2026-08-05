@@ -1,15 +1,21 @@
 /**
  * ChipMultiSelect — soft-chip multiselect (decision Danny 04-08), replacing raw
  * checkbox lookup-selection (preferred days, industries, driving licences, locations, …).
- * Each chip uses the exact QuickViewToggle §4 soft-tint recipe (color-mix on the chip's
- * own colour — works for both hex AND `var(--color-*)` tokens, unlike the old hex-suffix
- * trick this replaces): inactive still carries an 8% tint, active is a 16% tint +
- * fontWeight 600. Generic dumb UI — no feature logic, no i18n inside.
+ *
+ * CHIP-CONTRAST-1 (Danny 05-08: "je ziet niet duidelijk welke gekozen zijn"): in a
+ * SELECTION context every option carrying its own tint made chosen vs unchosen a
+ * colour-nuance guessing game — and colour was the ONLY signal (§6 violation). Now:
+ * unchosen = neutral (muted text, plain border, no tint); chosen = the §4 soft tint
+ * + fontWeight 600 + a check mark, so the state reads at a glance and without colour.
+ * The §4 recipe stays intact for chosen chips (color-mix works for hex AND tokens).
+ * Generic dumb UI — no feature logic, no i18n inside.
  *
  * `values`/`onValuesToggle` is the current prop API (task spec); `selected` is kept as
  * an accepted alias so the existing call sites (RolesSettings, EditUserModal, AgentForm,
  * EditableFieldTable, …) keep working unchanged — pass either.
  */
+import { Check } from 'lucide-react'
+
 export interface ChipOption { value: string; label: string; color?: string }
 
 interface ChipMultiSelectProps {
@@ -34,11 +40,16 @@ export default function ChipMultiSelect({ options, values, selected, onToggle, c
         return (
           <button key={o.value} type="button" onClick={() => onToggle(o.value)} aria-pressed={isActive}
             style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4,
               padding: '3px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer',
-              fontWeight: isActive ? 600 : 500, color: tint,
-              background: `color-mix(in srgb, ${tint} ${isActive ? 16 : 8}%, transparent)`,
-              border: `1px solid color-mix(in srgb, ${tint} ${isActive ? 50 : 28}%, transparent)`,
+              // Chosen: §4 soft tint + weight + check. Unchosen: neutral — no tint at
+              // all, so the chosen state is unmistakable (and never colour-only, §6).
+              fontWeight: isActive ? 600 : 400,
+              color: isActive ? tint : 'var(--text-muted)',
+              background: isActive ? `color-mix(in srgb, ${tint} 16%, transparent)` : 'var(--bg)',
+              border: isActive ? `1px solid color-mix(in srgb, ${tint} 50%, transparent)` : '1px solid var(--border)',
             }}>
+            {isActive && <Check size={11} strokeWidth={3} aria-hidden="true" />}
             {o.label}
           </button>
         )

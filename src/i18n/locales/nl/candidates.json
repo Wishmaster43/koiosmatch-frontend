@@ -723,7 +723,14 @@
     "groupCompany": "Bedrijf",
     "groupAddress": "Adres",
     "groupInvoicing": "Facturatie",
-    "groupPayment": "Betaling"
+    "groupPayment": "Betaling",
+    "openKvk": "Openen in KvK-register",
+    "openVies": "Controleren in VIES (EU)",
+    "businessEmailInvalid": "Voer een geldig e-mailadres in.",
+    "businessEmailDuplicateTitle": "Dit e-mailadres is al in gebruik",
+    "businessEmailDuplicateBody": "{{name}} gebruikt dit e-mailadres al. Toch opslaan?",
+    "businessEmailDuplicateConfirm": "Toch opslaan",
+    "businessEmailDuplicateCancel": "Terug"
   },
   "certified": {
     "issued": "Uitgegeven",

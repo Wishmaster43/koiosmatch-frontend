@@ -39,9 +39,13 @@ vi.mock('@/components/map/RadiusMapPanel', () => ({
   ),
 }))
 
-// Two tenant function options — mirrors useFunctions' shape without the real cache/fetch.
+// Tenant function options — mirrors useFunctions' shape without the real cache/fetch.
+// A mutable hoisted ref (not a fixed literal) so the ghost-filter-fix tests below can
+// swap in a lookup that has NO exact match for a given candidate title, mirroring the
+// real /functions data ("Verpleegkundige N4/N5", no bare "Verpleegkundige").
+const functionOptionsRef = vi.hoisted(() => ({ current: ['Verzorgende IG', 'Verpleegkundige'] }))
 vi.mock('@/lib/useFunctions', () => ({
-  useFunctions: () => ({ functions: ['Verzorgende IG', 'Verpleegkundige'], allowFreeEntry: false }),
+  useFunctions: () => ({ functions: functionOptionsRef.current, allowFreeEntry: false }),
 }))
 
 // Provider stub (renders children as-is, mirrors it being only page-scoped
@@ -109,7 +113,10 @@ function stubApi(overrides: {
   })
 }
 
-beforeEach(() => { vi.clearAllMocks(); mockGet.mockReset(); settingsRef.current = {} })
+beforeEach(() => {
+  vi.clearAllMocks(); mockGet.mockReset(); settingsRef.current = {}
+  functionOptionsRef.current = ['Verzorgende IG', 'Verpleegkundige']
+})
 
 describe('VacancySearchTab · fetch + defaults', () => {
   it('fires ONE GET to /candidates/{id}/vacancy-matches with the default filters, rows in SERVER (score) order with score pills', async () => {
@@ -341,5 +348,94 @@ describe('VacancySearchTab · live scores (CMBE MATCH-EXPLORER-1 fase 2+3 mirror
 
     expect(await screen.findByRole('button', { name: 'Probeer opnieuw' })).toBeInTheDocument()
     expect(screen.queryAllByText(/^\d+%$/)).toHaveLength(0)
+  })
+})
+
+describe('VacancySearchTab · function filter seeding (ghost-filter fix, Danny 05-08)', () => {
+  it('seeds the filter on an EXACT case-insensitive match, storing the OPTION\'s own casing', async () => {
+    functionOptionsRef.current = ['Verzorgende IG', 'Verpleegkundige N4', 'Verpleegkundige N5']
+    stubApi()
+    const candidate = { ...candidateWithLocation, title: 'verzorgende ig' } as unknown as Candidate
+    render(<VacancySearchTab candidate={candidate} />)
+
+    // Stored/sent value is the LOOKUP's casing ("Verzorgende IG"), not the candidate's
+    // own raw title casing ("verzorgende ig") — proves the option itself is stored.
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/candidates/cand1/vacancy-matches', {
+      params: { radius: 30, status: ['open'], function_title: ['Verzorgende IG'], per_page: 100 },
+      signal: expect.anything(),
+    }))
+  })
+
+  it('seeds EMPTY (searches ALL functions) when the title has no exact lookup match — no ghost selection', async () => {
+    // Mirrors the live bug: candidate.title "Verpleegkundige" has no bare entry, only
+    // the N4/N5 variants — must never fall back to a prefix match (bevoegdheid rules).
+    functionOptionsRef.current = ['Verpleegkundige N4', 'Verpleegkundige N5']
+    stubApi()
+    const candidate = { ...candidateWithLocation, title: 'Verpleegkundige' } as unknown as Candidate
+    render(<VacancySearchTab candidate={candidate} />)
+
+    // No `function_title` key at all — an honest "search every function" default,
+    // never a phantom single-value array the API can't match on.
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/candidates/cand1/vacancy-matches', {
+      params: { radius: 30, status: ['open'], per_page: 100 },
+      signal: expect.anything(),
+    }))
+    // The trigger shows the neutral "choose" prompt, never a "1 selected" ghost count.
+    expect(screen.getByText('Kies functie…')).toBeInTheDocument()
+  })
+
+  it('a manual user pick is never clobbered once the tenant lookup changes (userTouched wins)', async () => {
+    // Starts with NO exact match (seeds empty), same as the previous test.
+    functionOptionsRef.current = ['Verpleegkundige N4', 'Verpleegkundige N5']
+    stubApi()
+    const candidate = { ...candidateWithLocation, title: 'Verpleegkundige' } as unknown as Candidate
+    const { rerender } = render(<VacancySearchTab candidate={candidate} />)
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
+
+    // User manually picks ONE function via the dropdown.
+    const functionsLabel = screen.getByText(nl.vacancySearch.functions)
+    const functionsTrigger = within(functionsLabel.parentElement as HTMLElement).getByRole('button')
+    await userEvent.click(functionsTrigger)
+    await userEvent.click(await screen.findByRole('button', { name: 'Verpleegkundige N4' }))
+    await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/candidates/cand1/vacancy-matches', {
+      params: { radius: 30, status: ['open'], function_title: ['Verpleegkundige N4'], per_page: 100 },
+      signal: expect.anything(),
+    }))
+
+    // Now the tenant lookup "arrives" with an exact match for the candidate's title —
+    // if the seed were re-applied this would silently overwrite the user's own pick.
+    functionOptionsRef.current = ['Verpleegkundige', 'Verpleegkundige N4', 'Verpleegkundige N5']
+    rerender(<VacancySearchTab candidate={candidate} />)
+
+    // The user's manual selection must still be the one sent — never reverted.
+    await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/candidates/cand1/vacancy-matches', {
+      params: { radius: 30, status: ['open'], function_title: ['Verpleegkundige N4'], per_page: 100 },
+      signal: expect.anything(),
+    }))
+  })
+})
+
+describe('VacancySearchTab · browsing the open panel with prev/next (Danny 05-08, point 3)', () => {
+  it('pages through the CURRENT result list via the shared DrillPager, disabled at the ends (no cycling)', async () => {
+    stubApi({ matches: () => Promise.resolve({ data: { data: rawMatchRows } }) })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+    await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
+
+    // Select the FIRST row (v1) — prev disabled (first record), next enabled.
+    await userEvent.click(screen.getByText('Zorggroep B · Amersfoort'))
+    expect(screen.getByRole('button', { name: 'Vorige' })).toBeDisabled()
+    const nextBtn = screen.getByRole('button', { name: 'Volgende' })
+    expect(nextBtn).not.toBeDisabled()
+
+    // Next -> v2 becomes the open panel's vacancy; now the LAST record (next disabled).
+    await userEvent.click(nextBtn)
+    await waitFor(() => expect(screen.getAllByText('Verpleegkundige | Utrecht')).toHaveLength(1))
+    expect(screen.getByRole('button', { name: 'Volgende' })).toBeDisabled()
+    const prevBtn = screen.getByRole('button', { name: 'Vorige' })
+    expect(prevBtn).not.toBeDisabled()
+
+    // Prev -> back to v1, never cycling past the first/last record.
+    await userEvent.click(prevBtn)
+    await waitFor(() => expect(screen.getAllByText('Verzorgende IG | Amersfoort')).toHaveLength(1))
   })
 })

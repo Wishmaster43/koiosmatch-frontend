@@ -723,7 +723,14 @@
     "groupCompany": "Company",
     "groupAddress": "Address",
     "groupInvoicing": "Invoicing",
-    "groupPayment": "Payment"
+    "groupPayment": "Payment",
+    "openKvk": "Open in the CoC register",
+    "openVies": "Check in VIES (EU)",
+    "businessEmailInvalid": "Enter a valid e-mail address.",
+    "businessEmailDuplicateTitle": "This e-mail address is already in use",
+    "businessEmailDuplicateBody": "{{name}} already uses this e-mail address. Save anyway?",
+    "businessEmailDuplicateConfirm": "Save anyway",
+    "businessEmailDuplicateCancel": "Go back"
   },
   "certified": {
     "issued": "Issued",

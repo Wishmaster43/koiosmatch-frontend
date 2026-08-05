@@ -23,8 +23,14 @@ export async function drilldownRender({ page, errors }) {
     const row = page.locator('table tbody tr').first()
     await row.waitFor({ timeout: 10000 }).catch(() => {})
     if (!(await row.count())) { findings.push(`${nav}: geen rijen om open te klikken`); continue }
-    await row.click()
-    await sleep(1000)
+    // CLICK-RACE-1 (gemeten 06-08): de tabel her-rendert terwijl de klik onderweg is
+    // (stats/KPI's landen → rij verhangt → klik valt in het niets) — elke run miste
+    // zo een ANDERE drawer. Klikken-met-bewijs: retry tot de tabbalk er echt staat.
+    for (let poging = 0; poging < 3; poging++) {
+      await page.locator('table tbody tr').first().click()
+      await sleep(1000)
+      if (await page.locator('[role="tablist"]').first().count()) break
+    }
 
     // DrawerTabs AND SubTabBar both render role=tablist > role=tab (the shared
     // components/drawer/{DrawerTabs,SubTabBar}.tsx) — one structural selector

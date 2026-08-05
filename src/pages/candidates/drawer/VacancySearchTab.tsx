@@ -1,11 +1,12 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
+import { X, ChevronRight } from 'lucide-react'
 import MatchExplorerLayout from '@/components/match/MatchExplorerLayout'
 import ScorePill from '@/components/match/ScorePill'
 import MatchScoreBlock from '@/components/match/MatchScoreBlock'
 import RadiusMapPanel from '@/components/map/RadiusMapPanel'
+import DrillPager from '@/components/drawer/DrillPager'
 import EntityLink from '@/components/ui/EntityLink'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import SearchSelect from '@/components/ui/SearchSelect'
@@ -95,6 +96,14 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   const selectedRow = rows.find(r => r.id === selectedId) ?? null
   const selectVacancy = (id: Id) => setSelectedId(id)
 
+  // Browse (Danny 05-08, point 3): prev/next through the CURRENT result list,
+  // reusing the shared DrillPager anatomy (mirrors LocationDetail/ContactDetail).
+  // Disabled at the ends — no cycling, and undefined (never a no-op handler) is
+  // what makes DrillPager itself render the button disabled.
+  const selectedIndex = rows.findIndex(r => r.id === selectedId)
+  const goPrev = selectedIndex > 0 ? () => setSelectedId(rows[selectedIndex - 1].id) : undefined
+  const goNext = selectedIndex >= 0 && selectedIndex < rows.length - 1 ? () => setSelectedId(rows[selectedIndex + 1].id) : undefined
+
   const toggleFunction = (name: string) =>
     setFunctions(selectedFunctions.includes(name) ? selectedFunctions.filter(f => f !== name) : [...selectedFunctions, name])
   const toggleStatus = (value: string) =>
@@ -158,10 +167,15 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{[selectedRow.customer, selectedRow.city].filter(Boolean).join(' · ') || '—'}</div>
         </div>
-        <button onClick={() => setSelectedId(null)} aria-label={t('common:close')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, flexShrink: 0, display: 'flex' }}>
-          <X size={14} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          {/* Browse through the current result list (Danny 05-08, point 3) — same
+              corner as every other detail pager (ContactDetail/LocationDetail). */}
+          <DrillPager index={selectedIndex + 1} total={rows.length} onPrev={goPrev} onNext={goNext} />
+          <button onClick={() => setSelectedId(null)} aria-label={t('common:close')}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
+            <X size={14} />
+          </button>
+        </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         {selectedRow.distanceKm != null && (
@@ -229,16 +243,19 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
                 {[r.customer, r.city].filter(Boolean).join(' · ') || '—'}
               </div>
             </div>
-            {(r.score != null || r.distanceKm != null) && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                {r.score != null && <ScorePill score={r.score} />}
-                {r.distanceKm != null && (
-                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
-                    {r.distanceKm.toFixed(1)} km
-                  </span>
-                )}
-              </div>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+              {r.score != null && <ScorePill score={r.score} />}
+              {r.distanceKm != null && (
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
+                  {r.distanceKm.toFixed(1)} km
+                </span>
+              )}
+              {/* Expand affordance (Danny 05-08, point 2: "niet duidelijk dat je een
+                  vacature kan openklappen") — a visible chevron on EVERY row, on top
+                  of the row's own cursor:pointer + hover background. Decorative only
+                  (the row itself already carries the click/keyboard semantics above). */}
+              <ChevronRight size={14} aria-hidden="true" style={{ color: 'var(--text-muted)' }} />
+            </div>
           </div>
         )
       })}
