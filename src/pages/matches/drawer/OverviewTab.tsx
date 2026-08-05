@@ -11,11 +11,12 @@
  * window's duration + progress (M25/M26, MatchDurationBar — renders only once
  * both dates are set), the Koios AI advice block (M18, a pure FE heuristic —
  * buildMatchAdviceInsights, no AI/API call, mirrors every other entity's
- * KoiosAdviceBlock usage) and Opmerkingen as its own block with its own pencil
+ * KoiosAdviceBlock usage), Matchtekst (M17/optie A, MatchTextBlock — customer-
+ * facing rich text, OFFERED-IFF-READ: hidden until the fetched payload
+ * actually carries the not-yet-existing `match_text` key, ticket
+ * MATCH-TEXT-FIELD-1) and Opmerkingen as its own block with its own pencil
  * (M29, MatchRemarksBlock — separate from the Contract tab's shared-pencil
- * table). M17 "matchtekst" is NOT built here: no such field exists anywhere
- * in the FE/BE data model today (measured fact) — ticketed for Danny to name
- * the source field first, per the build brief.
+ * table).
  *
  * OVERZICHT-DATA-1 (overzicht-data cluster follow-up wave): adds the facts
  * that already ride on the LIST row (mapMatch) but never surfaced here —
@@ -44,6 +45,7 @@ import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useMatchContract } from '../hooks/useMatchContract'
 import { buildMatchAdviceInsights } from './matchAiInsights'
 import MatchDurationBar from './MatchDurationBar'
+import MatchTextBlock from './MatchTextBlock'
 import MatchRemarksBlock from './MatchRemarksBlock'
 import type { MatchRow } from '@/types/match'
 import type { MatchOrdinals } from '../matchOrdinals'
@@ -84,11 +86,12 @@ export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals }: 
   // M3/M28/M12: hours/week + cost centre + billing e-mail are DETAIL-only fields
   // (§8 — never on the list row), so this tab fetches them itself, same as every
   // other lazy per-tab fetch in this drawer (§0.19 abort/alive-guard lives inside the hook).
-  // ONE instance for the whole tab: MatchRemarksBlock (M29) reuses this same
-  // data/save pair for `remarks` instead of opening a second GET /matches/{id} —
-  // both now live on Overview together, so a second hook instance here would be
-  // a genuine duplicate fetch, not the "one per tab" pattern the comment above describes.
-  const { data: contract, loading: contractLoading, save: saveContract } = useMatchContract(match.id, onUpdate)
+  // ONE instance for the whole tab: MatchRemarksBlock (M29) and MatchTextBlock
+  // (M17) both reuse this same data/save pair (for `remarks` and `match_text`)
+  // instead of opening a second GET /matches/{id} — all three now live on
+  // Overview together, so a second hook instance here would be a genuine
+  // duplicate fetch, not the "one per tab" pattern the comment above describes.
+  const { data: contract, loading: contractLoading, save: saveContract, matchTextPresent } = useMatchContract(match.id, onUpdate)
 
   // Ordinal footnote lines — one per axis, only when that axis actually has data
   // (folded in from the old RelationsTab, unchanged — M9).
@@ -192,6 +195,10 @@ export default function OverviewTab({ match, onSetStatus, onUpdate, ordinals }: 
 
       {/* M18: Koios AI advice — pure FE heuristic (score reading + contract-window reading). */}
       <KoiosAdviceBlock namespace="matches" insights={buildMatchAdviceInsights(match, t)} />
+
+      {/* M17/optie A: Matchtekst — OFFERED-IFF-READ, hidden until the backend
+          payload actually carries the `match_text` key (see file header). */}
+      <MatchTextBlock value={contract.match_text} present={matchTextPresent} loading={contractLoading} save={saveContract} />
 
       {/* M29: Opmerkingen — its own block, its own pencil, rich text (house rule).
           Shares the contract fetch/save above — no second GET. */}

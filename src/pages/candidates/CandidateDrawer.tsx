@@ -207,6 +207,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         onEditStatus={status.canEditStatusReason ? status.openStatusEdit : undefined} />
       case 'administration': return <ZzpTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { zzp: p })} />
       case 'communication':  return <CommunicationTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { consent: p })}
+        onRefresh={onRefresh}
         onEditStatusEvent={status.canEditStatusReason ? status.openStatusEdit : undefined}
         initialSubTab={deepLink?.tab === 'communication' ? deepLink.sub : undefined} />
       case 'documents':      return <DocumentsSection c={c} />

@@ -37,11 +37,14 @@ const KNOWN_SUB_TABS = ['conversations', 'notes', 'tasks', 'timeline', 'consent'
  * Toestemmingen · Taken · Notities · Tijdlijn · Conversaties. Each section renders
  * on its own; NotesTab is reused per-section via its show* flags (no duplication).
  */
-export default function CommunicationTab({ c, onSave, onEditStatusEvent, initialSubTab }: { c: Candidate; onSave?: (consent: Record<string, unknown>) => void
+export default function CommunicationTab({ c, onSave, onEditStatusEvent, initialSubTab, onRefresh }: { c: Candidate; onSave?: (consent: Record<string, unknown>) => void
   // Optional (Danny 2026-07-20, job A): forwarded to the shared NotesTab so the
   // Tijdlijn "Statuswissel" row gets an edit pencil — only when the host (CandidateDrawer)
   // resolves the current status as reason/date-carrying. Additive prop, see NotesTab.
   onEditStatusEvent?: () => void
+  // LAST-CONTACT-REFRESH-1: pure record refresh (never a PATCH) — a channel-note
+  // stamps last_contact server-side; this pulls the fresh stamp into the drawer.
+  onRefresh?: (id: Candidate['id']) => Promise<void> | void
   // Deep-link sub-tab target (table cell click); validated below against KNOWN_SUB_TABS.
   initialSubTab?: string }) {
   const { t } = useTranslation('candidates')
@@ -51,7 +54,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   // Contact channels (last_contact_types) — picking one on a note stamps last_contact_at/_type/_by.
   const { types: channels } = useLastContactTypes()
   // Notes persist via the API (G-1) — add/edit/delete hit /candidates/{id}/notes.
-  const { notes, addNote, editNote } = useCandidateNotes(c.id)
+  const { notes, addNote, editNote } = useCandidateNotes(c.id, { onContactStamped: () => onRefresh?.(c.id) })
 
   // SYSTEM notes (status/phase changes, BE-written) are EVENTS, not notes (Danny
   // 2026-07-13): they render in the Tijdlijn, never in the Notities thread. Keep the

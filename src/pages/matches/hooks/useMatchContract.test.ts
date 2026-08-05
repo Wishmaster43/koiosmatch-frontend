@@ -75,6 +75,21 @@ describe('useMatchContract', () => {
     expect(onUpdate).toHaveBeenCalledWith('m1', { approval_status: 'pending', approval_rejected_reason: '' })
   })
 
+  it('flags matchTextPresent when the payload carries the match_text key, even when null (M17 OFFERED-IFF-READ)', async () => {
+    mockedGet.mockResolvedValue({ data: { data: { ...detailRow, match_text: null } } })
+    const { result } = renderHook(() => useMatchContract('m1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.matchTextPresent).toBe(true)
+    expect(result.current.data.match_text).toBeNull()
+  })
+
+  it('flags matchTextPresent false when the backend payload does not carry the match_text key at all', async () => {
+    mockedGet.mockResolvedValue({ data: { data: detailRow } })
+    const { result } = renderHook(() => useMatchContract('m1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.matchTextPresent).toBe(false)
+  })
+
   it('reverts to the last confirmed values and rethrows on a failed save', async () => {
     mockedGet.mockResolvedValue({ data: { data: detailRow } })
     const { result } = renderHook(() => useMatchContract('m1'))

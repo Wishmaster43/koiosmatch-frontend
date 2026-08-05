@@ -31,6 +31,10 @@ export interface MatchContract {
   cost_center: string | null
   billing_emails: string[]
   remarks: string | null
+  // M17: customer-facing match text — the backend column doesn't exist yet
+  // (MATCH-TEXT-FIELD-1), so callers must check `matchTextPresent` (below)
+  // before trusting this value: absent-key and present-but-null both map here.
+  match_text: string | null
   // Derived server-side (sell − purchase); read-only, never sent back on save.
   margin: number | null
 }
@@ -38,7 +42,7 @@ export interface MatchContract {
 const EMPTY: MatchContract = {
   function_title: null, contract_type: null, start_date: null, end_date: null, hours_per_week: null,
   cao: null, scale: null, step: null, surcharge: null, purchase_rate: null, sell_rate: null,
-  cost_center: null, billing_emails: [], remarks: null, margin: null,
+  cost_center: null, billing_emails: [], remarks: null, match_text: null, margin: null,
 }
 
 // Pull just the contract/financial keys off a raw API row (tolerant of extras).
@@ -59,6 +63,7 @@ function pick(d: Record<string, unknown>): MatchContract {
     cost_center:    (d.cost_center as string) ?? null,
     billing_emails: Array.isArray(d.billing_emails) ? (d.billing_emails as unknown[]).map(String) : [],
     remarks:        (d.remarks as string) ?? null,
+    match_text:     (d.match_text as string) ?? null,
     margin:         num(d.margin),
   }
 }
@@ -78,14 +83,23 @@ export function useMatchContract(
   const [revertTick, setRevertTick] = useState(0)
   // Bumped by retry() to re-run the load effect below.
   const [fetchTick, setFetchTick] = useState(0)
+  // M17 OFFERED-IFF-READ: whether the fetched payload actually carried the
+  // `match_text` key (present, even if null) — the backend column doesn't
+  // exist yet (MATCH-TEXT-FIELD-1), so MatchTextBlock stays hidden until it does.
+  const [matchTextPresent, setMatchTextPresent] = useState(false)
 
   // Load the contract layer once per match (detail-only fields — never on the list row).
   useEffect(() => {
-    if (!matchId) { setData(EMPTY); setLoading(false); return }
+    if (!matchId) { setData(EMPTY); setLoading(false); setMatchTextPresent(false); return }
     let alive = true
     setLoading(true); setRawError(null)
     api.get(`/matches/${matchId}`)
-      .then(r => { if (alive) setData(pick((unwrap(r) ?? {}) as Record<string, unknown>)) })
+      .then(r => {
+        if (!alive) return
+        const raw = (unwrap(r) ?? {}) as Record<string, unknown>
+        setData(pick(raw))
+        setMatchTextPresent('match_text' in raw)
+      })
       .catch(err => { if (alive) setRawError(err) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
@@ -127,5 +141,5 @@ export function useMatchContract(
     }
   }, [matchId, data, onUpdate])
 
-  return { data, loading, error, unavailable, saving, revertTick, retry, save }
+  return { data, loading, error, unavailable, saving, revertTick, retry, save, matchTextPresent }
 }

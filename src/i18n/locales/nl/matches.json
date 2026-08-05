@@ -127,6 +127,11 @@
       "client": "Match {{position}} van {{total}} bij deze klant",
       "location": "Match {{position}} van {{total}} op deze locatie",
       "department": "Match {{position}} van {{total}} bij deze afdeling"
+    },
+    "matchText": {
+      "title": "Matchtekst",
+      "saved": "Matchtekst opgeslagen.",
+      "saveError": "Opslaan van de matchtekst is mislukt."
     }
   },
   "approval": {

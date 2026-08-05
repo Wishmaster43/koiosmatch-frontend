@@ -34,7 +34,10 @@ export interface CandidateNote {
 // NotesTab hands back the editor payload on save (both add and edit).
 interface NotePayload { type: string; title: string; body: string; channel?: string }
 
-export function useCandidateNotes(candidateId: string | number | undefined) {
+// LAST-CONTACT-REFRESH-1 (Danny 05-08): a channel-note stamps last_contact server-side
+// (CandidateNote::booted → recordContact, live-proven) but the drawer kept showing the
+// stale value — the caller passes onContactStamped to refresh its record after the write.
+export function useCandidateNotes(candidateId: string | number | undefined, opts?: { onContactStamped?: () => void }) {
   const { t } = useTranslation()
   const [notes, setNotes] = useState<CandidateNote[]>([])
 
@@ -59,8 +62,9 @@ export function useCandidateNotes(candidateId: string | number | undefined) {
     }
     setNotes(prev => [temp, ...prev])
     api.post(`/candidates/${candidateId}/notes`, { type: payload.type, text: payload.body, channel: payload.channel })
-      .then(() => load())
+      .then(() => { load(); if (payload.channel) opts?.onContactStamped?.() })
       .catch(() => { setNotes(prev => prev.filter(n => n.id !== temp.id)); notifyError(t('common:actionFailed')) })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- opts is a caller-literal; the callback identity must not retrigger
   }, [candidateId, load, t])
 
   // Edit — NotesTab passes a list index; optimistic, then reload so "edited by ·when" shows.

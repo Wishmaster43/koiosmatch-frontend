@@ -127,6 +127,11 @@
       "client": "Match {{position}} of {{total}} for this client",
       "location": "Match {{position}} of {{total}} at this location",
       "department": "Match {{position}} of {{total}} in this department"
+    },
+    "matchText": {
+      "title": "Match text",
+      "saved": "Match text saved.",
+      "saveError": "Couldn't save the match text."
     }
   },
   "approval": {

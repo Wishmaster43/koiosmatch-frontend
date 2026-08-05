@@ -63,4 +63,22 @@ describe('OverviewTab · overzicht-data cluster', () => {
     // Not asserting the exact locale format — just that a real value renders, not a dash-only state.
     expect(screen.queryAllByText('—').length).toBeLessThan(8)
   })
+
+  // M17/optie A — the backend `match_text` column doesn't exist yet (MATCH-TEXT-FIELD-1),
+  // so the block must stay OFFERED-IFF-READ: hidden unless the GET payload carries the key.
+  it('keeps the match text block hidden when the payload does not carry the match_text key', async () => {
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab(baseMatch)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalled())
+    // Rendered by MatchTextBlock only once `present` is true — the missing i18n
+    // key falls back to the literal key string, so its absence proves the block
+    // never mounted (see MatchTextBlock.test.tsx for the unit-level coverage).
+    expect(screen.queryByText('drawer.matchText.title')).not.toBeInTheDocument()
+  })
+
+  it('shows the match text block once the payload carries the match_text key, even when null', async () => {
+    mockedGet.mockResolvedValue({ data: { data: { match_text: null } } })
+    renderTab(baseMatch)
+    expect(await screen.findByText('drawer.matchText.title')).toBeInTheDocument()
+  })
 })
