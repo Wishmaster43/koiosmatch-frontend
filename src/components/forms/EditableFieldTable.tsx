@@ -31,6 +31,8 @@ export interface FieldRow {
   chipOptions?: ChipOption[]
   prefix?: string
   inputType?: string
+  // HTML step for number inputs — '0.01' turns a rate field into a decimal input.
+  step?: string
   group?: string
   allowCreate?: boolean
   // Numbers/IDs render in JetBrains Mono (§4) — e.g. rates, cost codes.
@@ -246,7 +248,7 @@ export default function EditableFieldTable({
         expanded={!!richExpanded[f.key]} onToggleExpand={() => setRichExpanded(p => ({ ...p, [f.key]: !p[f.key] }))} />
     }
     // Numbers/IDs render in mono (§4) — rates, cost codes, etc.
-    return <input value={(v as string) ?? ''} type={f.inputType} onChange={e => setF(f.key, e.target.value)}
+    return <input value={(v as string) ?? ''} type={f.inputType} step={f.step} onChange={e => setF(f.key, e.target.value)}
       style={f.mono ? { ...compact, fontFamily: 'JetBrains Mono, monospace' } : compact} />
   }
 

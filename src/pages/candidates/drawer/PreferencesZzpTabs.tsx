@@ -105,8 +105,8 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     { key: 'rijbewijs',       label: t('preferences.license'),       group: t('preferences.groupTravel'), type: 'chips', chipOptions: licenseOptions },
     { key: 'loonheffing',      label: t('preferences.wageTax'),       group: t('preferences.groupPayroll'), type: 'checkbox' },
     { key: 'loonheffing_vanaf', label: t('preferences.wageTaxFrom'),  group: t('preferences.groupPayroll'), type: 'date' },
-    { key: 'desiredRateMin', label: t('preferences.desiredRateMin'), group: t('preferences.groupDesiredRate') },
-    { key: 'desiredRateMax', label: t('preferences.desiredRateMax'), group: t('preferences.groupDesiredRate') },
+    { key: 'desiredRateMin', label: t('preferences.desiredRateMin'), group: t('preferences.groupDesiredRate'), inputType: 'number', step: '0.01', mono: true },
+    { key: 'desiredRateMax', label: t('preferences.desiredRateMax'), group: t('preferences.groupDesiredRate'), inputType: 'number', step: '0.01', mono: true },
     { key: 'remarks',     label: t('preferences.remarks'),       group: t('preferences.groupOther'), type: 'richtext' },
   ]
   // PREF-PENCIL-SPLIT-1 (05-08): one payload builder PER SECTION, each emitting
@@ -135,8 +135,8 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   // drawer's onSave wrapper splits desired_rate_min/max out into their own PATCH
   // keys (see CandidateDrawer), so sending just these two here is still one request.
   const toApiDesiredRate = (v: Record<string, unknown>) => ({
-    desired_rate_min: v.desiredRateMin,
-    desired_rate_max: v.desiredRateMax,
+    desired_rate_min: v.desiredRateMin === '' ? null : Number(v.desiredRateMin),
+    desired_rate_max: v.desiredRateMax === '' ? null : Number(v.desiredRateMax),
   })
   const toApiOther = (v: Record<string, unknown>) => ({ remarks: v.remarks })
 
