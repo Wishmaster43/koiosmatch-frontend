@@ -73,12 +73,12 @@ describe('OverviewTab · overzicht-data cluster', () => {
     // Rendered by MatchTextBlock only once `present` is true — the missing i18n
     // key falls back to the literal key string, so its absence proves the block
     // never mounted (see MatchTextBlock.test.tsx for the unit-level coverage).
-    expect(screen.queryByText('drawer.matchText.title')).not.toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('matches:drawer.matchText.title'))).not.toBeInTheDocument()
   })
 
   it('shows the match text block once the payload carries the match_text key, even when null', async () => {
     mockedGet.mockResolvedValue({ data: { data: { match_text: null } } })
     renderTab(baseMatch)
-    expect(await screen.findByText('drawer.matchText.title')).toBeInTheDocument()
+    expect(await screen.findByText(i18n.t('matches:drawer.matchText.title'))).toBeInTheDocument()
   })
 })
