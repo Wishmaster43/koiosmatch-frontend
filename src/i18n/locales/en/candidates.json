@@ -897,7 +897,13 @@
     "empty": "No vacancies found within these filters.",
     "centerHome": "Candidate's home address",
     "aiAdvised": "Advised by Koios",
-    "openInApp": "Open in Koios"
+    "openInApp": "Open in Koios",
+    "contractForm": "Contract form",
+    "hoursPerWeek": "Hours per week",
+    "hoursMinPlaceholder": "Min",
+    "hoursMaxPlaceholder": "Max",
+    "availableFromFilter": "Deployable from",
+    "functionNotInLookup": "Function '{{title}}' is not in the function list — all functions will be searched."
   },
   "erase": {
     "trashView": "Trash",
@@ -1092,7 +1098,22 @@
       "appointment_confirm": "Appointment confirmation",
       "six_month_check": "Six-month check",
       "interview": "Interview"
-    }
+    },
+    "start": "Start conversation",
+    "startModalTitle": "Start WhatsApp conversation",
+    "startNoMobile": "This candidate has no mobile number",
+    "pickTemplate": "Template",
+    "templatePlaceholder": "Choose a template…",
+    "templatesEmpty": "No approved templates available",
+    "pickNumber": "Send from",
+    "numberPlaceholder": "Choose a number…",
+    "numbersEmpty": "No WhatsApp sending number configured",
+    "preview": "Preview",
+    "startFailed": "Could not start the conversation",
+    "started": "Conversation started",
+    "composerPlaceholder": "Type a message…",
+    "composerSendFailed": "Could not send the message",
+    "sessionClosedHint": "The 24-hour window is closed — start a new conversation with a template to reopen it."
   },
   "advice": {
     "reason": {

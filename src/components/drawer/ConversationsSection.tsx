@@ -13,14 +13,26 @@
  * what the screen needs.
  */
 import { useCallback, useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MessageCircle, AlertTriangle, ChevronDown, ChevronRight, Check, CheckCheck } from 'lucide-react'
+import { MessageCircle, AlertTriangle, ChevronDown, ChevronRight, Check, CheckCheck, Send } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
 import { avatarColor } from '@/lib/avatarColor'
 import type { Id } from '@/types/common'
+
+// Meta's own free-form "session" window: 24h since the candidate's last INBOUND
+// message. Mirrors the backend's own gate (WhatsAppBundleSender reads the SAME
+// `last_inbound_at` field) — never a separately invented rule.
+const SESSION_WINDOW_MS = 24 * 60 * 60 * 1000
+function isSessionOpen(lastInboundAt?: string | null): boolean {
+  if (!lastInboundAt) return false
+  return Date.now() - new Date(lastInboundAt).getTime() < SESSION_WINDOW_MS
+}
 
 // The candidate identity carried on a conversation row — drives the thread heading (name over number).
 interface ConversationCandidate {
@@ -34,6 +46,9 @@ interface ConversationRow {
   id: Id
   wa_number?: string | null
   last_message_at?: string | null
+  // WHATSAPP-COMPOSE-1: the 24h session anchor (ConversationResource / Conversation
+  // migration comment) — the ONLY signal that gates the free-text composer below.
+  last_inbound_at?: string | null
   is_active?: boolean
   escalated?: boolean
   candidate?: ConversationCandidate | null
@@ -84,11 +99,25 @@ function DeliveryTicks({ sentAt, deliveredAt, readAt }: { sentAt?: string | null
   return <Icon size={12} style={{ color, flexShrink: 0 }} role="img" aria-label={t(`conversations.delivery.${state}`)} />
 }
 
-export default function ConversationsSection({ threadsUrl, threadsParams }: {
+// WA-SEND-TRANSPORT-1 (measured 06-08): POST /conversations/{id}/messages writes a
+// message ROW but never hands it to WhatsApp (no sender call in MessageController::
+// store) — a "sent" bubble that never reaches the candidate is worse than no
+// composer (§3). The composer therefore stays OFF until CMBE wires the transport;
+// tests exercise it via the prop, callers keep the default.
+const SESSION_COMPOSER_ENABLED = false
+
+export default function ConversationsSection({ threadsUrl, threadsParams, headerAction, composerEnabled = SESSION_COMPOSER_ENABLED }: {
   // The list request the caller wants — candidate scope passes '/conversations' +
   // { candidate_id }, the contact variant passes its nested contact-conversations route.
   threadsUrl: string
   threadsParams?: Record<string, unknown>
+  // Test-only override for the WA-SEND-TRANSPORT-1 gate above.
+  composerEnabled?: boolean
+  // WHATSAPP-COMPOSE-1: an optional caller-supplied action for the section header
+  // (e.g. the candidate drawer's "Conversatie starten" trigger) — mirrors
+  // SectionCard's own action slot so this stays a candidate-only affordance without
+  // the shared component knowing WHY (a customer-contact thread has none).
+  headerAction?: ReactNode
 }) {
   // thread UI strings live in the candidates ns — ONE source, both dossiers reuse them
   const { t } = useTranslation('candidates')
@@ -100,6 +129,10 @@ export default function ConversationsSection({ threadsUrl, threadsParams }: {
   const [openId, setOpenId] = useState<Id | null>(null)
   const [messages, setMessages] = useState<Record<string, MessageRow[]>>({})
   const [msgLoading, setMsgLoading] = useState(false)
+  // WHATSAPP-COMPOSE-1: the session composer's draft text + in-flight state — a
+  // single shared slot is enough since the accordion only ever has one open thread.
+  const [composerText, setComposerText] = useState('')
+  const [sendingMsg, setSendingMsg] = useState(false)
 
   // Serialize the caller's params so a fresh object literal each render doesn't
   // retrigger the fetch — only the actual VALUES (e.g. candidate_id) matter.
@@ -142,6 +175,28 @@ export default function ConversationsSection({ threadsUrl, threadsParams }: {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- messages read only to skip a duplicate fetch, not a re-trigger
   }, [openId])
 
+  // A newly opened thread starts with a clean draft — never leaks the previous
+  // thread's unsent text into the one now expanded.
+  useEffect(() => { setComposerText('') }, [openId])
+
+  // WHATSAPP-COMPOSE-1: free-text send INSIDE the open 24h session (WhatsApp rule:
+  // outside the window only a template may open one) — the same
+  // /conversations/{id}/messages route the backend itself gates session sends on.
+  // Appends the server's own returned row (never an optimistic guess at the shape).
+  const sendMessage = useCallback((id: Id) => {
+    const text = composerText.trim()
+    if (!text) return
+    setSendingMsg(true)
+    api.post(`/conversations/${id}/messages`, { direction: 'outbound', message_content: text })
+      .then(r => {
+        const msg = (r as { data?: MessageRow }).data
+        if (msg) setMessages(m => ({ ...m, [String(id)]: [...(m[String(id)] ?? []), msg] }))
+        setComposerText('')
+      })
+      .catch(err => notifyError(extractApiError(err, t('conversations.composerSendFailed'))))
+      .finally(() => setSendingMsg(false))
+  }, [composerText, t])
+
   // Active-window badge (setting `conversation_active_weeks`) — green when active, muted otherwise.
   const activeBadge = (active?: boolean) => (
     <SoftChip label={active ? t('conversations.active') : t('conversations.inactive')}
@@ -150,7 +205,8 @@ export default function ConversationsSection({ threadsUrl, threadsParams }: {
 
   return (
     // No title: the host sub-tab bar already says "Conversaties" (Danny addendum 4).
-    <SectionCard>
+    // headerAction is the candidate drawer's own "Conversatie starten" trigger, when supplied.
+    <SectionCard action={headerAction}>
       {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('conversations.loading')}</div>}
       {!loading && error && <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('conversations.error')}</div>}
       {!loading && !error && rows.length === 0 && (
@@ -225,6 +281,28 @@ export default function ConversationsSection({ threadsUrl, threadsParams }: {
                     </div>
                   )
                 })}
+
+                {/* WHATSAPP-COMPOSE-1: the free-text composer, offered iff the payload
+                    itself shows an open 24h session (last_inbound_at) — a closed/never-
+                    opened session gets an honest explanation instead of a silently
+                    missing input. */}
+                {composerEnabled && (isSessionOpen(row.last_inbound_at) ? (
+                  <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+                    <input value={composerText} onChange={e => setComposerText(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(row.id) } }}
+                      placeholder={t('conversations.composerPlaceholder')} aria-label={t('conversations.composerPlaceholder')}
+                      style={{ flex: 1, minWidth: 0, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: 12, color: 'var(--text)' }} />
+                    <button onClick={() => sendMessage(row.id)} disabled={!composerText.trim() || sendingMsg}
+                      aria-label={t('common:send')} title={t('common:send')}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, borderRadius: 8, border: 'none',
+                        background: 'var(--color-primary)', color: '#fff', flexShrink: 0,
+                        cursor: composerText.trim() ? 'pointer' : 'default', opacity: composerText.trim() ? 1 : 0.5 }}>
+                      <Send size={13} />
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('conversations.sessionClosedHint')}</div>
+                ))}
               </div>
             )}
           </div>

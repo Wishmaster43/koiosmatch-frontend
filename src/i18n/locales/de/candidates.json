@@ -897,7 +897,13 @@
     "empty": "Keine Stellen innerhalb dieser Filter gefunden.",
     "centerHome": "Wohnadresse des Kandidaten",
     "aiAdvised": "Von Koios empfohlen",
-    "openInApp": "In Koios öffnen"
+    "openInApp": "In Koios öffnen",
+    "contractForm": "Vertragsform",
+    "hoursPerWeek": "Stunden pro Woche",
+    "hoursMinPlaceholder": "Min",
+    "hoursMaxPlaceholder": "Max",
+    "availableFromFilter": "Einsetzbar ab",
+    "functionNotInLookup": "Funktion '{{title}}' steht nicht in der Funktionsliste — es werden alle Funktionen durchsucht."
   },
   "erase": {
     "trashView": "Papierkorb",
@@ -1092,7 +1098,22 @@
       "appointment_confirm": "Terminbestätigung",
       "six_month_check": "Halbjahrescheck",
       "interview": "Interview"
-    }
+    },
+    "start": "Unterhaltung starten",
+    "startModalTitle": "WhatsApp-Unterhaltung starten",
+    "startNoMobile": "Dieser Kandidat hat keine Mobilnummer",
+    "pickTemplate": "Vorlage",
+    "templatePlaceholder": "Vorlage wählen…",
+    "templatesEmpty": "Keine genehmigten Vorlagen verfügbar",
+    "pickNumber": "Senden von",
+    "numberPlaceholder": "Nummer wählen…",
+    "numbersEmpty": "Keine WhatsApp-Absendernummer konfiguriert",
+    "preview": "Vorschau",
+    "startFailed": "Unterhaltung konnte nicht gestartet werden",
+    "started": "Unterhaltung gestartet",
+    "composerPlaceholder": "Nachricht eingeben…",
+    "composerSendFailed": "Nachricht konnte nicht gesendet werden",
+    "sessionClosedHint": "Das 24-Stunden-Fenster ist geschlossen — starten Sie eine neue Unterhaltung mit einer Vorlage, um es wieder zu öffnen."
   },
   "advice": {
     "reason": {

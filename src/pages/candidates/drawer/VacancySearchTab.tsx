@@ -21,6 +21,9 @@ import type { Id } from '@/types/common'
 
 const filterLabel: CSSProperties = { fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
 const rowStyle: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 10px', borderRadius: 8, cursor: 'pointer' }
+// Bare filter-bar input (mirrors ChangelogTab's date-range inputStyle — the one
+// established "plain input in a filter row" look, not the EditableFieldTable form field).
+const filterInput: CSSProperties = { padding: '6px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', color: 'var(--text)', outline: 'none' }
 // Snippet length cap (2-3 lines of plain text) — a short teaser, not the full description.
 const SNIPPET_MAX_LENGTH = 220
 
@@ -58,8 +61,11 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   const { statuses: statusOptions, statusMeta } = useVacancyLookups()
   const {
     rows, loading, error, retry, radiusKm, setRadiusKm,
-    functions: selectedFunctions, setFunctions,
+    functions: selectedFunctions, setFunctions, functionNotInLookup,
     statuses: selectedStatuses, setStatuses,
+    contractvorm, setContractvorm, contractvormOptions,
+    hoursMin, setHoursMin, hoursMax, setHoursMax, hasHoursData,
+    availableFrom, setAvailableFrom, hasAvailableFromData,
     noLocation,
   } = useVacancySearch(candidate)
 
@@ -108,6 +114,8 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
     setFunctions(selectedFunctions.includes(name) ? selectedFunctions.filter(f => f !== name) : [...selectedFunctions, name])
   const toggleStatus = (value: string) =>
     setStatuses(selectedStatuses.includes(value) ? selectedStatuses.filter(s => s !== value) : [...selectedStatuses, value])
+  const toggleContractvorm = (value: string) =>
+    setContractvorm(contractvorm.includes(value) ? contractvorm.filter(v => v !== value) : [...contractvorm, value])
 
   // Trigger text mirrors the shared filter-panel idiom (SearchSelectGroup / report
   // filters): a count once something is selected, else a calm "choose X" prompt.
@@ -135,7 +143,47 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
           options={functionOptions} selected={selectedFunctions} onToggle={toggleFunction}
           triggerLabel={triggerText(selectedFunctions, t('vacancySearch.functions'))}
         />
+        {/* Ghost-filter hint (Danny 06-08 live feedback): the candidate's own title has
+            no exact lookup match, so the filter above seeded empty (searches ALL functions)
+            — say so instead of leaving a silent gap. */}
+        {functionNotInLookup && (
+          <span style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, fontStyle: 'italic', display: 'block' }}>
+            {t('vacancySearch.functionNotInLookup', { title: candidate.title })}
+          </span>
+        )}
       </div>
+      <div style={{ minWidth: 180 }}>
+        <span style={filterLabel}>{t('vacancySearch.contractForm')}</span>
+        <SearchSelect
+          options={contractvormOptions} selected={contractvorm} onToggle={toggleContractvorm}
+          triggerLabel={triggerText(contractvorm, t('vacancySearch.contractForm'))}
+        />
+      </div>
+      {/* Uren-per-week range — gated (offered-iff-read): only rendered once the CMBE
+          hours_min/hours_max fields actually show up in the fetched payload. */}
+      {hasHoursData && (
+        <div style={{ minWidth: 180 }}>
+          <span style={filterLabel}>{t('vacancySearch.hoursPerWeek')}</span>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input type="number" min={0} value={hoursMin} onChange={e => setHoursMin(e.target.value)}
+              placeholder={t('vacancySearch.hoursMinPlaceholder')}
+              aria-label={`${t('vacancySearch.hoursPerWeek')} ${t('vacancySearch.hoursMinPlaceholder')}`}
+              style={{ ...filterInput, width: 70 }} />
+            <input type="number" min={0} value={hoursMax} onChange={e => setHoursMax(e.target.value)}
+              placeholder={t('vacancySearch.hoursMaxPlaceholder')}
+              aria-label={`${t('vacancySearch.hoursPerWeek')} ${t('vacancySearch.hoursMaxPlaceholder')}`}
+              style={{ ...filterInput, width: 70 }} />
+          </div>
+        </div>
+      )}
+      {/* Inzetbaar-vanaf date — gated the same way, on the CMBE start_date field. */}
+      {hasAvailableFromData && (
+        <div style={{ minWidth: 180 }}>
+          <span style={filterLabel}>{t('vacancySearch.availableFromFilter')}</span>
+          <input type="date" value={availableFrom} onChange={e => setAvailableFrom(e.target.value)}
+            aria-label={t('vacancySearch.availableFromFilter')} style={filterInput} />
+        </div>
+      )}
     </div>
   )
 
@@ -253,8 +301,10 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
               {/* Expand affordance (Danny 05-08, point 2: "niet duidelijk dat je een
                   vacature kan openklappen") — a visible chevron on EVERY row, on top
                   of the row's own cursor:pointer + hover background. Decorative only
-                  (the row itself already carries the click/keyboard semantics above). */}
-              <ChevronRight size={14} aria-hidden="true" style={{ color: 'var(--text-muted)' }} />
+                  (the row itself already carries the click/keyboard semantics above).
+                  Bold + primary-orange (Danny 06-08 screenshot feedback) — same token
+                  EntityLink's title button uses, so it reads as one affordance family. */}
+              <ChevronRight size={14} strokeWidth={3} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
             </div>
           </div>
         )

@@ -16,7 +16,7 @@ import api from '@/lib/api'
 import { avatarColor } from '@/lib/avatarColor'
 
 vi.mock('@/lib/api', () => ({
-  default: { get: vi.fn() },
+  default: { get: vi.fn(), post: vi.fn() },
   unwrapList: (r: { data?: { data?: unknown[] } }) => ({ rows: r?.data?.data ?? [] }),
 }))
 vi.mock('@/lib/datetime', () => ({
@@ -36,6 +36,7 @@ beforeEach(() => {
     if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
     return Promise.reject(new Error(`unexpected GET ${url}`))
   })
+  vi.mocked(api.post).mockReset()
 })
 
 describe('ConversationsSection', () => {
@@ -137,5 +138,106 @@ describe('ConversationsSection', () => {
     // A brand-new object literal, same shape, different value — must trigger a refetch.
     rerender(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-9' }} />)
     expect(await screen.findByText('+31600000000')).toBeInTheDocument()
+  })
+
+  it('renders the caller-supplied headerAction next to the thread list', async () => {
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }}
+      headerAction={<button>Start test action</button>} />)
+    expect(await screen.findByText('Start test action')).toBeInTheDocument()
+  })
+})
+
+// WHATSAPP-COMPOSE-1 (Danny 06-08): the free-text composer inside an OPEN thread —
+// gated on the row's own `last_inbound_at` (Meta's 24h session anchor, the same
+// field WhatsAppBundleSender gates session sends on server-side). Offered iff read:
+// no indicator in the payload → no composer, ever, never a silent guess.
+describe('ConversationsSection · session composer (WHATSAPP-COMPOSE-1)', () => {
+  const threadWith = (lastInboundAt: string | null) => [{ ...THREADS[0], last_inbound_at: lastInboundAt }]
+
+  beforeEach(() => {
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+  })
+
+  it('shows the composer when last_inbound_at is inside the 24h window', async () => {
+    const recent = new Date(Date.now() - 60_000).toISOString() // 1 minute ago
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: threadWith(recent) } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    render(<ConversationsSection composerEnabled threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    expect(await screen.findByPlaceholderText('conversations.composerPlaceholder')).toBeInTheDocument()
+    expect(screen.queryByText('conversations.sessionClosedHint')).not.toBeInTheDocument()
+  })
+
+  it('hides the composer and explains why when last_inbound_at is stale (session closed)', async () => {
+    const stale = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString() // 25h ago
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: threadWith(stale) } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    render(<ConversationsSection composerEnabled threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    expect(await screen.findByText('conversations.sessionClosedHint')).toBeInTheDocument()
+    expect(screen.queryByPlaceholderText('conversations.composerPlaceholder')).not.toBeInTheDocument()
+  })
+
+  it('hides the composer when the payload carries no last_inbound_at at all (never guess)', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: threadWith(null) } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    render(<ConversationsSection composerEnabled threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    expect(await screen.findByText('conversations.sessionClosedHint')).toBeInTheDocument()
+    expect(screen.queryByPlaceholderText('conversations.composerPlaceholder')).not.toBeInTheDocument()
+  })
+
+  it('sends via POST /conversations/{id}/messages with direction+message_content and appends the reply', async () => {
+    const recent = new Date(Date.now() - 60_000).toISOString()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: threadWith(recent) } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    vi.mocked(api.post).mockResolvedValueOnce({
+      data: { id: 'm3', direction: 'outbound', message_content: 'Tot morgen!', sent_at: '2026-08-06T10:00:00Z' },
+    })
+    const user = userEvent.setup()
+    render(<ConversationsSection composerEnabled threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+
+    const input = await screen.findByPlaceholderText('conversations.composerPlaceholder')
+    await user.type(input, 'Tot morgen!')
+    await user.click(screen.getByRole('button', { name: 'common:send' }))
+
+    // §13: the request's method/route/body, not just that a callback fired.
+    expect(api.post).toHaveBeenCalledWith('/conversations/conv-1/messages', {
+      direction: 'outbound', message_content: 'Tot morgen!',
+    })
+    expect(await screen.findByText('Tot morgen!')).toBeInTheDocument()
+    // The input clears after a successful send.
+    expect(input).toHaveValue('')
+  })
+})
+
+
+// WA-SEND-TRANSPORT-1: until the messages endpoint actually hands text to WhatsApp,
+// the composer must NOT render for real callers (default prop) — a "sent" bubble
+// that never reached the candidate is worse than no composer (§3).
+describe('ConversationsSection · composer gate (WA-SEND-TRANSPORT-1)', () => {
+  it('renders no composer by default, even inside an open 24h session', async () => {
+    const recent = new Date(Date.now() - 60_000).toISOString()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: [{ ...THREADS[0], last_inbound_at: recent }] } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: MESSAGES } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    // The thread renders; the composer must not — the default gate is OFF.
+    expect(await screen.findByText(MESSAGES[0].message_content)).toBeInTheDocument()
+    expect(screen.queryByPlaceholderText('conversations.composerPlaceholder')).toBeNull()
   })
 })

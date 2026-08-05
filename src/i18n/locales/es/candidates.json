@@ -897,7 +897,13 @@
     "empty": "No se han encontrado vacantes con estos filtros.",
     "centerHome": "Domicilio del candidato",
     "aiAdvised": "Recomendado por Koios",
-    "openInApp": "Abrir en Koios"
+    "openInApp": "Abrir en Koios",
+    "contractForm": "Tipo de contrato",
+    "hoursPerWeek": "Horas por semana",
+    "hoursMinPlaceholder": "Mín",
+    "hoursMaxPlaceholder": "Máx",
+    "availableFromFilter": "Desplegable desde",
+    "functionNotInLookup": "La función '{{title}}' no está en la lista de funciones — se buscarán todas las funciones."
   },
   "erase": {
     "trashView": "Papelera",
@@ -1092,7 +1098,22 @@
       "appointment_confirm": "Confirmación de cita",
       "six_month_check": "Revisión semestral",
       "interview": "Entrevista"
-    }
+    },
+    "start": "Iniciar conversación",
+    "startModalTitle": "Iniciar conversación de WhatsApp",
+    "startNoMobile": "Este candidato no tiene número de móvil",
+    "pickTemplate": "Plantilla",
+    "templatePlaceholder": "Elegir una plantilla…",
+    "templatesEmpty": "No hay plantillas aprobadas disponibles",
+    "pickNumber": "Enviar desde",
+    "numberPlaceholder": "Elegir un número…",
+    "numbersEmpty": "No hay número de envío de WhatsApp configurado",
+    "preview": "Vista previa",
+    "startFailed": "No se pudo iniciar la conversación",
+    "started": "Conversación iniciada",
+    "composerPlaceholder": "Escribe un mensaje…",
+    "composerSendFailed": "No se pudo enviar el mensaje",
+    "sessionClosedHint": "La ventana de 24 horas está cerrada — inicia una nueva conversación con una plantilla para reabrirla."
   },
   "advice": {
     "reason": {

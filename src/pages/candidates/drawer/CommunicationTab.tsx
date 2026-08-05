@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
+import { MessageCircle } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 import SubTabBar from '@/components/drawer/SubTabBar'
@@ -9,6 +10,8 @@ import Toggle from '@/components/ui/Toggle'
 import RetentionConsentBlock from './RetentionConsentBlock'
 import CandidateTasks from './CandidateTasks'
 import ConversationsSection from '@/components/drawer/ConversationsSection'
+import DrawerAddButton from './DrawerAddButton'
+import StartConversationModal from './StartConversationModal'
 import { useNoteTypes, SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import { useCandidateNotes } from '@/pages/candidates/hooks/useCandidateNotes'
@@ -71,6 +74,13 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   const [subTab, setSubTab] = useState(
     initialSubTab && (KNOWN_SUB_TABS as readonly string[]).includes(initialSubTab) ? initialSubTab : 'notes'
   )
+
+  // WHATSAPP-COMPOSE-1: "Conversatie starten" modal + a remount key that forces
+  // ConversationsSection's own load effect to refetch once a new thread exists
+  // (the shared component owns its fetch; a fresh key is the simplest "reload" a
+  // caller can ask for without adding a second refetch contract to it).
+  const [showStartModal, setShowStartModal] = useState(false)
+  const [convRefreshKey, setConvRefreshKey] = useState(0)
 
   // Channel consent (AVG) — nested `consent.{channel}_*` (C-11). Toggling saves the
   // full consent object; the server stamps `*_consent_at` on a flip (shown inline).
@@ -219,7 +229,22 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
       {/* Notes / timeline / conversations — one NotesTab section per sub-tab. */}
       {subTab === 'notes'         && <NotesTab {...notesProps} showTimeline={false} showConversations={false} />}
       {subTab === 'timeline'      && <NotesTab {...notesProps} showNotes={false} showConversations={false} />}
-      {subTab === 'conversations' && <ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: c.id }} />}
+      {subTab === 'conversations' && (
+        <>
+          {/* WHATSAPP-COMPOSE-1: no mobile number → an honest disabled trigger, never
+              a dead send (a cold-start template requires a real recipient number). */}
+          {showStartModal && (
+            <StartConversationModal candidateId={c.id} onClose={() => setShowStartModal(false)}
+              onStarted={() => setConvRefreshKey(k => k + 1)} />
+          )}
+          <ConversationsSection key={convRefreshKey} threadsUrl="/conversations" threadsParams={{ candidate_id: c.id }}
+            headerAction={
+              <DrawerAddButton onClick={() => setShowStartModal(true)} icon={MessageCircle}
+                label={t('conversations.start')} disabled={!c.mobile}
+                title={c.mobile ? t('conversations.start') : t('conversations.startNoMobile')} />
+            } />
+        </>
+      )}
     </div>
   )
 }

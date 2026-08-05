@@ -897,7 +897,13 @@
     "empty": "Geen vacatures gevonden binnen deze filters.",
     "centerHome": "Woonadres kandidaat",
     "aiAdvised": "Door Koios geadviseerd",
-    "openInApp": "Openen in Koios"
+    "openInApp": "Openen in Koios",
+    "contractForm": "Contractvorm",
+    "hoursPerWeek": "Uren per week",
+    "hoursMinPlaceholder": "Min",
+    "hoursMaxPlaceholder": "Max",
+    "availableFromFilter": "Inzetbaar vanaf",
+    "functionNotInLookup": "Functie '{{title}}' staat niet in de functielijst — alle functies worden doorzocht."
   },
   "erase": {
     "trashView": "Prullenbak",
@@ -1092,7 +1098,22 @@
       "appointment_confirm": "Afspraakbevestiging",
       "six_month_check": "Halfjaarcheck",
       "interview": "Interview"
-    }
+    },
+    "start": "Conversatie starten",
+    "startModalTitle": "WhatsApp-conversatie starten",
+    "startNoMobile": "Deze kandidaat heeft geen mobiel nummer",
+    "pickTemplate": "Template",
+    "templatePlaceholder": "Kies een template…",
+    "templatesEmpty": "Geen goedgekeurde templates beschikbaar",
+    "pickNumber": "Versturen vanaf",
+    "numberPlaceholder": "Kies een nummer…",
+    "numbersEmpty": "Geen WhatsApp-verzendnummer geconfigureerd",
+    "preview": "Voorbeeld",
+    "startFailed": "Kon de conversatie niet starten",
+    "started": "Conversatie gestart",
+    "composerPlaceholder": "Typ een bericht…",
+    "composerSendFailed": "Kon het bericht niet versturen",
+    "sessionClosedHint": "Het 24-uursvenster is gesloten — start een nieuwe conversatie met een template om opnieuw te openen."
   },
   "advice": {
     "reason": {

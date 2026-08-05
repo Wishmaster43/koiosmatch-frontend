@@ -325,3 +325,33 @@ describe('CommunicationTab · match.created timeline card (point 3, Danny live P
     expect(screen.queryByText(/communication\.timelineOngoing/)).toBeNull()
   })
 })
+
+// WHATSAPP-COMPOSE-1 (Danny 06-08): the "Conversatie starten" trigger next to the
+// Conversaties section — disabled with an honest title for a candidate without a
+// mobile number (no dead sends, §3), enabled + opens the modal otherwise.
+describe('CommunicationTab · WhatsApp start trigger (WHATSAPP-COMPOSE-1)', () => {
+  const goToConversations = (user: ReturnType<typeof userEvent.setup>) =>
+    user.click(screen.getByRole('tab', { name: 'sections.conversations' }))
+
+  it('disables the trigger with an honest title when the candidate has no mobile number', async () => {
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate()} />)
+    await goToConversations(user)
+    expect(screen.getByTitle('conversations.startNoMobile')).toBeDisabled()
+  })
+
+  it('enables the trigger once the candidate has a mobile number', async () => {
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate({}, { mobile: '+31612345678' })} />)
+    await goToConversations(user)
+    expect(screen.getByRole('button', { name: 'conversations.start' })).not.toBeDisabled()
+  })
+
+  it('opens the start-conversation modal on click', async () => {
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate({}, { mobile: '+31612345678' })} />)
+    await goToConversations(user)
+    await user.click(screen.getByRole('button', { name: 'conversations.start' }))
+    expect(screen.getByRole('dialog', { name: 'conversations.startModalTitle' })).toBeInTheDocument()
+  })
+})

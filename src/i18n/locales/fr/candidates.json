@@ -897,7 +897,13 @@
     "empty": "Aucun poste trouvé avec ces filtres.",
     "centerHome": "Domicile du candidat",
     "aiAdvised": "Conseillé par Koios",
-    "openInApp": "Ouvrir dans Koios"
+    "openInApp": "Ouvrir dans Koios",
+    "contractForm": "Forme de contrat",
+    "hoursPerWeek": "Heures par semaine",
+    "hoursMinPlaceholder": "Min",
+    "hoursMaxPlaceholder": "Max",
+    "availableFromFilter": "Déployable à partir du",
+    "functionNotInLookup": "La fonction '{{title}}' ne figure pas dans la liste des fonctions — toutes les fonctions seront recherchées."
   },
   "erase": {
     "trashView": "Corbeille",
@@ -1092,7 +1098,22 @@
       "appointment_confirm": "Confirmation de rendez-vous",
       "six_month_check": "Contrôle semestriel",
       "interview": "Entretien"
-    }
+    },
+    "start": "Démarrer la conversation",
+    "startModalTitle": "Démarrer une conversation WhatsApp",
+    "startNoMobile": "Ce candidat n'a pas de numéro de mobile",
+    "pickTemplate": "Modèle",
+    "templatePlaceholder": "Choisir un modèle…",
+    "templatesEmpty": "Aucun modèle approuvé disponible",
+    "pickNumber": "Envoyer depuis",
+    "numberPlaceholder": "Choisir un numéro…",
+    "numbersEmpty": "Aucun numéro d'envoi WhatsApp configuré",
+    "preview": "Aperçu",
+    "startFailed": "Impossible de démarrer la conversation",
+    "started": "Conversation démarrée",
+    "composerPlaceholder": "Écrire un message…",
+    "composerSendFailed": "Impossible d'envoyer le message",
+    "sessionClosedHint": "La fenêtre de 24 heures est fermée — démarrez une nouvelle conversation avec un modèle pour la rouvrir."
   },
   "advice": {
     "reason": {
