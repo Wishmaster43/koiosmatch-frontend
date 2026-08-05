@@ -35,7 +35,7 @@ interface UseTasksDataParams {
 // TasksPage's own client-side pageSize slicing) — to at most 25 tasks total (mirrors
 // the "84 vs 25" bug useMatches.ts already fixed for matches). Now fetches the FULL
 // set via a page loop, safety-capped at 5 pages (1000 rows), same scale as useMatches.
-export const TASKS_MAX_PER_PAGE = 200
+export const TASKS_MAX_PER_PAGE = 500
 const TASKS_MAX_PAGES = 5
 
 // Shared page-loop fetch for both the active and archived lists below — an exact

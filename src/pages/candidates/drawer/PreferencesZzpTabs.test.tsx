@@ -52,6 +52,36 @@ describe('PreferencesTab · sub-tabs (kandidaten-ronde-2, punt D)', () => {
     expect(screen.getAllByText('preferences.groupTravel')).toHaveLength(1) // the sub-tab button only
   })
 
+  // PREF-PENCIL-SPLIT-1 (05-08): the Reizen save must PATCH only its own keys —
+  // never Beschikbaarheid's (available_from/hours_per_week/…), even though the
+  // table's internal draft still carries the complete preferences object.
+  it('Reizen save sends ONLY the travel keys', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<PreferencesTab c={candidate()} onSave={onSave} />)
+    await user.click(screen.getByRole('tab', { name: 'preferences.groupTravel' }))
+    await user.click(screen.getByTitle('edit'))
+    await user.click(screen.getByTitle('save'))
+    expect(onSave).toHaveBeenCalledTimes(1)
+    const body = onSave.mock.calls[0][0] as Record<string, unknown>
+    expect(Object.keys(body).sort()).toEqual(
+      ['license_categories', 'max_travel_km', 'max_travel_min', 'own_transport'].sort(),
+    )
+  })
+
+  // EDIT-STATE-LEAK (Danny 05-08: "beschikbaarheid wijzig → Reizen ook wijzigbaar"):
+  // the sub-tab tables share one React slot, so a non-unique key let the internal
+  // editing state survive a tab switch. Guards the section-unique keys.
+  it('a pencil opened on Beschikbaarheid does NOT leave Reizen in edit mode after a tab switch', async () => {
+    const user = userEvent.setup()
+    render(<PreferencesTab c={candidate()} onSave={vi.fn()} />)
+    await user.click(screen.getByTitle('edit'))
+    expect(screen.getByTitle('save')).toBeInTheDocument()
+    await user.click(screen.getByRole('tab', { name: 'preferences.groupTravel' }))
+    expect(screen.queryByTitle('save')).toBeNull()
+    expect(screen.getByTitle('edit')).toBeInTheDocument()
+  })
+
   // Punt D update: Financieel took over Loonheffing (was under Overig) and keeps
   // its OWN "Loonheffing" group-card heading — a genuine sub-section, distinct
   // from the "Financieel" sub-tab label, so it's allowed to stay.
@@ -64,6 +94,23 @@ describe('PreferencesTab · sub-tabs (kandidaten-ronde-2, punt D)', () => {
     expect(screen.getByText('preferences.groupPayroll')).toBeInTheDocument()
     // Opmerkingen (Overig) isn't part of Financieel.
     expect(screen.queryByText('preferences.remarks')).toBeNull()
+  })
+
+  // PREF-PENCIL-SPLIT-1 (05-08): Financieel holds TWO distinct sections
+  // (Loonheffing, Gewenst tarief) — each now gets its own card + pencil, so
+  // editing one must never flip the other into edit mode (same regression class
+  // as VAC-DETAILS-SPLIT-1 / the ZzpTab split above).
+  it('Financieel shows Loonheffing and Gewenst tarief as two separately-editable cards', async () => {
+    const user = userEvent.setup()
+    render(<PreferencesTab c={candidate()} />)
+    await user.click(screen.getByRole('tab', { name: 'preferences.groupFinancial' }))
+    expect(screen.getByText('preferences.groupDesiredRate')).toBeInTheDocument()
+    expect(screen.getAllByTitle('edit')).toHaveLength(2)
+    // Editing Loonheffing leaves Gewenst tarief read-only (one pencil left).
+    await user.click(screen.getAllByTitle('edit')[0])
+    expect(screen.getByTitle('save')).toBeInTheDocument()
+    expect(screen.getAllByTitle('edit')).toHaveLength(1)
+    expect(screen.getByText('preferences.desiredRateMin')).toBeInTheDocument()
   })
 
   // Overig now holds ONLY Opmerkingen (Loonheffing moved to Financieel) — its

@@ -26,7 +26,7 @@ import type { RawMatch, MatchRow } from '@/types/match'
 // exported so MatchesPage can pass it as useListPageSize's serverCap — the dropdown
 // must never offer a size (300/400/500) disconnected from what this hook's own
 // fetch loop (and the endpoint) actually caps at.
-export const MATCHES_MAX_PER_PAGE = 200
+export const MATCHES_MAX_PER_PAGE = 500
 // Safety cap on the fetch-all loop below — same 1000-row scale as tasks/outreach
 // (MATCHES_MAX_PAGES * MATCHES_MAX_PER_PAGE), just reached in fewer, larger requests
 // now that the per-request size doubled from the old bare 100.

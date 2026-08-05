@@ -1,14 +1,16 @@
 /**
  * Preferences + Freelance (ZZP) tabs — both schema-driven EditableFieldTables.
  *
- * Each field is still declared once with its `group`, and each sub-tab below
- * simply FILTERS that one field list by group — one source of truth, no
- * duplicated field definitions. Every EditableFieldTable instance is handed the
- * SAME full `value`/`onSave` (never a group-scoped slice): its internal draft is
- * seeded from the complete value object, so saving from any one sub-tab still
- * round-trips the whole preferences/zzp set, exactly like the single-table
- * layout before it (Danny kandidaten-ronde-2, punten D/E — layout-only, no field/
- * behaviour change).
+ * Each field is still declared once with its `group`, and each sub-tab/section
+ * below FILTERS that one field list by group — one source of truth, no
+ * duplicated field definitions. Every EditableFieldTable instance is still
+ * seeded from the SAME complete `value` object (so a draft never loses sight of
+ * fields it doesn't render), but each section owns its OWN editing state (a
+ * separate component instance) and its OWN narrow `onSave` that emits ONLY that
+ * section's API keys (PREF-PENCIL-SPLIT-1, Danny 05-08 — the Financieel sub-tab
+ * used to share one pencil/save across Loonheffing AND Gewenst tarief, the same
+ * class of bug as VAC-DETAILS-SPLIT-1). ZzpTab's three blocks were already split
+ * this way (28-07) and keep sending their full block payload — no bug there.
  */
 import { useState } from 'react'
 import type { ComponentType } from 'react'
@@ -67,9 +69,10 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   const fnValue = (pref.function_pref as string) ?? ''
   const functionOptions = fnValue && !functions.includes(fnValue) ? [fnValue, ...functions] : functions
 
-  // One grouped table (one Save). Multi-value chips sit as rows within their group:
-  // Contractvorm/Dagen/Branche under Beschikbaarheid, Rijbewijs under Reizen. Chips
-  // render as coloured soft chips — Contractvorm keeps its per-value colours.
+  // One shared field schema, sliced per section below (each with its own Save).
+  // Multi-value chips sit as rows within their group: Contractvorm/Dagen/Branche
+  // under Beschikbaarheid, Rijbewijs under Reizen. Chips render as coloured soft
+  // chips — Contractvorm keeps its per-value colours.
   const candidateTypeOptions = candidateTypes.map(ct => ({ value: ct.value, label: ct.label, color: ct.color }))
   const value = {
     contractvorm:    c.candidateTypes ?? [],
@@ -92,12 +95,12 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   const fields = [
     { key: 'contractvorm',    label: t('drawer.candidateType'),      group: t('preferences.groupAvailability'), type: 'chips', chipOptions: candidateTypeOptions },
     { key: 'beschikbaar_per', label: t('preferences.availableFrom'), group: t('preferences.groupAvailability'), type: 'date' },
-    { key: 'hoursPerWeek',   label: t('preferences.hoursPerWeek'),  group: t('preferences.groupAvailability') },
+    { key: 'hoursPerWeek',   label: t('preferences.hoursPerWeek'),  group: t('preferences.groupAvailability'), inputType: 'number' },
     { key: 'dagen',           label: t('preferences.days'),          group: t('preferences.groupAvailability'), type: 'chips', chipOptions: dayOptions },
     { key: 'function',         label: t('preferences.function'),      group: t('preferences.groupAvailability'), type: 'creatable', options: functionOptions, allowCreate: allowFreeEntry },
     { key: 'branche',         label: t('preferences.sector'),        group: t('preferences.groupAvailability'), type: 'chips', chipOptions: industryOptions },
-    { key: 'reisafstand',     label: t('preferences.maxDistance'),   group: t('preferences.groupTravel') },
-    { key: 'reistijd',        label: t('preferences.maxTravelTime'), group: t('preferences.groupTravel') },
+    { key: 'reisafstand',     label: t('preferences.maxDistance'),   group: t('preferences.groupTravel'), inputType: 'number' },
+    { key: 'reistijd',        label: t('preferences.maxTravelTime'), group: t('preferences.groupTravel'), inputType: 'number' },
     { key: 'eigen_vervoer',   label: t('preferences.ownTransport'),  group: t('preferences.groupTravel'), type: 'checkbox' },
     { key: 'rijbewijs',       label: t('preferences.license'),       group: t('preferences.groupTravel'), type: 'chips', chipOptions: licenseOptions },
     { key: 'loonheffing',      label: t('preferences.wageTax'),       group: t('preferences.groupPayroll'), type: 'checkbox' },
@@ -106,26 +109,44 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     { key: 'desiredRateMax', label: t('preferences.desiredRateMax'), group: t('preferences.groupDesiredRate') },
     { key: 'remarks',     label: t('preferences.remarks'),       group: t('preferences.groupOther'), type: 'richtext' },
   ]
-  // Preferences blob — Contractvorm is routed separately (to candidateTypes, not preferences).
-  const toApi = (v: Record<string, unknown>) => ({
-    available_from:  v.beschikbaar_per,
-    hours_per_week:  v.hoursPerWeek,
-    preferred_days:  v.dagen,
-    function_pref:   v.function,
-    sector_pref:     v.branche,
-    max_travel_km:   v.reisafstand,
-    max_travel_min:  v.reistijd,
-    own_transport:   v.eigen_vervoer,
+  // PREF-PENCIL-SPLIT-1 (05-08): one payload builder PER SECTION, each emitting
+  // only the API keys its own card can edit — a Reizen save must never carry
+  // Beschikbaarheid's keys along for the ride, even though `form` (the table's
+  // internal draft) still holds the complete value object underneath. Contractvorm
+  // stays routed separately to candidateTypes (never part of the preferences blob).
+  const toApiAvailability = (v: Record<string, unknown>) => ({
+    available_from: v.beschikbaar_per,
+    hours_per_week: v.hoursPerWeek === '' ? null : Number(v.hoursPerWeek),
+    preferred_days: v.dagen,
+    function_pref:  v.function,
+    sector_pref:    v.branche,
+  })
+  const toApiTravel = (v: Record<string, unknown>) => ({
+    max_travel_km:      v.reisafstand === '' ? null : Number(v.reisafstand),
+    max_travel_min:     v.reistijd === '' ? null : Number(v.reistijd),
+    own_transport:      v.eigen_vervoer,
     license_categories: v.rijbewijs,
-    wage_tax:        v.loonheffing,
-    wage_tax_from:   v.loonheffing_vanaf,
-    remarks:         v.remarks,
-    // RATE-WISH-1: ride along in the SAME save; the drawer splits these out of the
-    // preferences blob into root-level patch keys (one PATCH, one request).
+  })
+  const toApiPayroll = (v: Record<string, unknown>) => ({
+    wage_tax:      v.loonheffing,
+    wage_tax_from: v.loonheffing_vanaf,
+  })
+  // RATE-WISH-1: root candidate fields, not part of the preferences blob — the
+  // drawer's onSave wrapper splits desired_rate_min/max out into their own PATCH
+  // keys (see CandidateDrawer), so sending just these two here is still one request.
+  const toApiDesiredRate = (v: Record<string, unknown>) => ({
     desired_rate_min: v.desiredRateMin,
     desired_rate_max: v.desiredRateMax,
   })
-  const handleSave = (v: Record<string, unknown>) => { onTypesChange?.((v.contractvorm as string[]) ?? []); onSave?.(toApi(v)) }
+  const toApiOther = (v: Record<string, unknown>) => ({ remarks: v.remarks })
+
+  // One save handler per section, mirroring the payload builders above. Only
+  // Beschikbaarheid also routes contractvorm to candidateTypes (its own field).
+  const handleSaveAvailability = (v: Record<string, unknown>) => { onTypesChange?.((v.contractvorm as string[]) ?? []); onSave?.(toApiAvailability(v)) }
+  const handleSaveTravel       = (v: Record<string, unknown>) => onSave?.(toApiTravel(v))
+  const handleSavePayroll      = (v: Record<string, unknown>) => onSave?.(toApiPayroll(v))
+  const handleSaveDesiredRate  = (v: Record<string, unknown>) => onSave?.(toApiDesiredRate(v))
+  const handleSaveOther        = (v: Record<string, unknown>) => onSave?.(toApiOther(v))
 
   // Sub-tabs (Danny kandidaten-ronde-2, punt D, updated): Beschikbaarheid · Reizen ·
   // Financieel · Overig — Danny named this exact order, NOT alphabetical (unlike
@@ -138,10 +159,14 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   // "BESCHIKBAARHEID" card title inside it): Beschikbaarheid/Reizen/Overig each
   // hold exactly one group that equals their own sub-tab label, so `group` is
   // cleared for their filtered rows (EditableFieldTable then renders one calm,
-  // un-headed card — same branch as ZzpTab's Facturatie below). Financieel keeps
-  // "Loonheffing" as a real, DISTINCT sub-section heading (it isn't the same text
-  // as "Financieel"), which will read clearly once RATE-WISH-1 adds the second
-  // (desired-rate) group next to it — see the seam comment in the render below.
+  // un-headed card — same branch as ZzpTab's Facturatie below).
+  //
+  // Financieel is the one sub-tab that genuinely holds TWO distinct sections —
+  // Loonheffing and Gewenst tarief — so it renders TWO stacked EditableFieldTables
+  // (mirrors ZzpTab's Bedrijf/Adres/Facturatie blocks), each with its OWN title,
+  // pencil and editing state. Before PREF-PENCIL-SPLIT-1 both groups lived inside
+  // ONE EditableFieldTable, which drew two group headings under a single shared
+  // pencil — editing Loonheffing silently flipped Gewenst tarief into edit mode too.
   const SUB_TABS = [
     { id: 'availability', label: t('preferences.groupAvailability') },
     { id: 'travel',       label: t('preferences.groupTravel') },
@@ -151,7 +176,8 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   const [subTab, setSubTab] = useState('availability')
   const availabilityFields = fields.filter(f => f.group === t('preferences.groupAvailability')).map(f => ({ ...f, group: undefined }))
   const travelFields       = fields.filter(f => f.group === t('preferences.groupTravel')).map(f => ({ ...f, group: undefined }))
-  const financialFields    = fields.filter(f => f.group === t('preferences.groupPayroll') || f.group === t('preferences.groupDesiredRate'))
+  const payrollFields      = fields.filter(f => f.group === t('preferences.groupPayroll')).map(f => ({ ...f, group: undefined }))
+  const desiredRateFields  = fields.filter(f => f.group === t('preferences.groupDesiredRate')).map(f => ({ ...f, group: undefined }))
   const otherFields        = fields.filter(f => f.group === t('preferences.groupOther')).map(f => ({ ...f, group: undefined }))
 
   // Current unavailability window (status axis) — read-only next to "Inzetbaar vanaf"
@@ -184,16 +210,23 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
         </div>
       )}
       <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
-      {/* One EditableFieldTable per sub-tab, all fed the SAME full value/onSave (see
-          file comment) — on Save, Contractvorm → candidateTypes, the rest → preferences. */}
-      {subTab === 'availability' && <EditableFieldTable key={c.id} fields={availabilityFields} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSave} />}
-      {subTab === 'travel'       && <EditableFieldTable key={c.id} fields={travelFields}       value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSave} />}
+      {/* Each section is its OWN EditableFieldTable instance — its own pencil, its own
+          editing state, its own narrow onSave (see the toApiXxx / handleSaveXxx
+          builders above). On Save, Contractvorm goes to candidateTypes, the rest
+          to preferences. Keys are SECTION-unique: the sub-tabs share one React slot,
+          so a bare c.id key let the editing state survive a tab switch — pencil on
+          Beschikbaarheid made Reizen arrive in edit mode (Danny 05-08). */}
+      {subTab === 'availability' && <EditableFieldTable key={`${c.id}-availability`} fields={availabilityFields} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveAvailability} />}
+      {subTab === 'travel'       && <EditableFieldTable key={`${c.id}-travel`} fields={travelFields}       value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveTravel} />}
       {subTab === 'financial' && (
-        <>
-          <EditableFieldTable key={c.id} fields={financialFields} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSave} />
-        </>
+        // Two genuinely distinct sections sharing one sub-tab (see the comment above
+        // SUB_TABS) — stacked with the canon gap-10, exactly like ZzpTab's blocks.
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <EditableFieldTable key={`${c.id}-payroll`} title={t('preferences.groupPayroll')}     fields={payrollFields}     value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSavePayroll} />
+          <EditableFieldTable key={`${c.id}-rate`}    title={t('preferences.groupDesiredRate')} fields={desiredRateFields} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveDesiredRate} />
+        </div>
       )}
-      {subTab === 'other'        && <EditableFieldTable key={c.id} fields={otherFields}        value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSave} />}
+      {subTab === 'other'        && <EditableFieldTable key={`${c.id}-other`} fields={otherFields}        value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveOther} />}
     </>
   )
 }

@@ -1,7 +1,7 @@
 /**
  * useCustomersData · per_page clamp (customers-500-leak) — the seam-harness
  * measured a REAL 422 on the archived quick-view: CustomerController::index caps
- * per_page at `between:1,200`, but a stored `default_per_page` preference of 500
+ * per_page at `between:1,500`, but a stored `default_per_page` preference of 500
  * (the seeded/profile default, see useProfileForm.ts) reached the outgoing request
  * unclamped. useListPageSize already clamps what CustomersPage PASSES IN, but this
  * hook's own queryFn is the last line of defense (the "defensive re-clamp" comment
@@ -31,7 +31,7 @@ const t = ((k: string) => k) as unknown as import('i18next').TFunction
 beforeEach(() => vi.clearAllMocks())
 
 describe('useCustomersData · per_page never exceeds the endpoint cap', () => {
-  it('clamps a stored 500 preference to 200 on the plain list request', async () => {
+  it('clamps a stored 900 preference to 500 on the plain list request', async () => {
     vi.mocked(api.get).mockImplementation((url: string) =>
       url === '/customers/stats' ? Promise.resolve({ data: { data: null } }) : Promise.resolve({ data: { data: [] } }))
     renderHook(() => useCustomersData({ filterParams: {}, page: 1, pageSize: 500, t }), { wrapper })
@@ -40,10 +40,10 @@ describe('useCustomersData · per_page never exceeds the endpoint cap', () => {
     const call = vi.mocked(api.get).mock.calls.find(([url]) => url === '/customers')
     const params = call?.[1]?.params as { per_page?: number } | undefined
     expect(params?.per_page).toBe(CUSTOMERS_MAX_PER_PAGE)
-    expect(params?.per_page).toBeLessThanOrEqual(200)
+    expect(params?.per_page).toBeLessThanOrEqual(500)
   })
 
-  it('clamps a stored 500 preference to 200 on the archived quick-view request (the exact 422 the seam harness caught)', async () => {
+  it('clamps a stored 900 preference to 500 on the archived quick-view request (the exact 422 the seam harness caught)', async () => {
     vi.mocked(api.get).mockImplementation((url: string) =>
       url === '/customers/stats' ? Promise.resolve({ data: { data: null } }) : Promise.resolve({ data: { data: [] } }))
     renderHook(() => useCustomersData({ filterParams: { include_archived: 1 }, page: 1, pageSize: 500, t }), { wrapper })
@@ -54,7 +54,7 @@ describe('useCustomersData · per_page never exceeds the endpoint cap', () => {
     // Both must hold at once — the archived param survives AND per_page stays capped.
     expect(params?.include_archived).toBe(1)
     expect(params?.per_page).toBe(CUSTOMERS_MAX_PER_PAGE)
-    expect(params?.per_page).toBeLessThanOrEqual(200)
+    expect(params?.per_page).toBeLessThanOrEqual(500)
   })
 
   it('passes a pageSize already within the cap through unchanged', async () => {

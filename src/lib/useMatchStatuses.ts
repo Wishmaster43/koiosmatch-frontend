@@ -20,7 +20,9 @@ export interface MatchStatus { value: string; label: string; color?: string; is_
 
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 export const DEFAULT_MATCH_STATUSES: MatchStatus[] = [
-  { value: 'open',   label: 'Open',       color: '#6FA8C4', is_closed: false },
+  // M30 (Danny 05-08): label "Actief" — "Open" read as a to-do state; the slug stays
+  // `open` (the stable machine key the BE core keys off, labels are tenant-editable).
+  { value: 'open',   label: 'Actief',     color: '#6FA8C4', is_closed: false },
   { value: 'closed', label: 'Afgesloten', color: '#79B58E', is_closed: true },
 ]
 /* eslint-enable no-restricted-syntax */

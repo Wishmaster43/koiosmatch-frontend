@@ -32,7 +32,7 @@ const EMPTY_CUSTOMERS: Customer[] = []
 // 422; per_page=200 succeeds). Exported so CustomersPage can clamp the pageSize
 // picker to the SAME ceiling — mirrors useApplicationsData/useVacanciesData's
 // identical constant + defensive re-clamp below.
-export const CUSTOMERS_MAX_PER_PAGE = 200
+export const CUSTOMERS_MAX_PER_PAGE = 500
 
 export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
   const queryClient = useQueryClient()

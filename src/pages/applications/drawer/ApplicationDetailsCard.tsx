@@ -5,6 +5,7 @@ import { Edit2, Save, X } from 'lucide-react'
 import EntityLink from '@/components/ui/EntityLink'
 import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
+import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import { useDateFormat } from '@/lib/datetime'
 import VacancyLinkField from './VacancyLinkField'
 import { useVacancyLinkOptions } from '../hooks/useVacancyLinkOptions'
@@ -13,13 +14,20 @@ import { rememberReturnTab } from './constants'
 import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
 
-// A small label-above-value field. Canon (05-08): label 11px muted, value 12px
-// (candidate FieldRow convention).
-function Field({ label, children }: { label: ReactNode; children: ReactNode }) {
+// The card's inner block, overriding SectionCard's default padding/layout with
+// the candidate ProfileTab's calm-card shape (CANON-BOX, fieldRowCanon):
+// tighter padding, rows stacked with gap 2 instead of a loose grid.
+const calmCardStyle = { padding: '6px 12px', display: 'flex', flexDirection: 'column' as const, gap: 2, overflow: 'hidden' as const }
+
+// One label-LEFT field row (fieldRowCanon): fixed 120px muted label, value at
+// 12px filling the rest — mirrors the candidate drawer's FieldRow byte-for-byte
+// (Danny 05-08: this card was the last label-above holdout, §3A blueprint).
+function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
   return (
-    <div style={{ minWidth: 0 }}>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 3 }}>{label}</div>
-      <div style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.4 }}>{children}</div>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
+      <span style={{ ...CANON_LABEL_STYLE, display: 'flex', alignItems: 'center', gap: 5 }}>{label}</span>
+      {/* minWidth: 0 lets a long value truncate/wrap instead of widening the label column. */}
+      <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)', lineHeight: 1.4 }}>{children}</div>
     </div>
   )
 }
@@ -61,6 +69,12 @@ interface ApplicationDetailsCardProps {
  * session) and sources all three rows from there, mirroring DetailsGeneralTab's
  * own EntityLink treatment byte-for-byte (customers page — locations/
  * departments/contacts have no page of their own).
+ *
+ * LABEL-LEFT-1 (Danny 05-08): converted from the label-above grid to the
+ * candidate drawer's label-left row canon (fieldRowCanon) — this was the last
+ * label-above holdout (§3A: the candidate drill-down leads, every other drawer
+ * mirrors it). Content is unchanged, only row anatomy: every field below is now
+ * one `Row`, stacked in the calm card instead of laid out in a 2-column grid.
  */
 export default function ApplicationDetailsCard({ application: a, onLinkVacancy, onUpdateSource }: ApplicationDetailsCardProps) {
   const { t } = useTranslation(['applications', 'common', 'vacancies'])
@@ -105,113 +119,100 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
   ))
 
   return (
-    <SectionCard title={t('drawer.detailsTitle')} action={action}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 20px' }}>
-        {/* S7: Bron is editable in-place, sharing the Details block's pencil. */}
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 3 }}>{t('drawer.source')}</div>
-          {editing ? (
-            <input value={source} onChange={e => setSource(e.target.value)} style={inputStyle} placeholder={t('drawer.source')} />
-          ) : (
-            <div style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.4 }}>{a.source || '—'}</div>
-          )}
-        </div>
-        {/* S12/13: the customer is a real linkable entity (customer_id, the
-            vacancy's client) — EntityLink gives in-app click + new-tab icon,
-            mirrors the vacancy link below and KlantTab/vacancy DetailsTab's
-            own customer link. Klant itself is never an edit target — it
-            derives from the vacancy. */}
-        <Field label={t('drawer.client')}>
-          <EntityLink page="customers" id={a.customerId} title={t('drawer.openCustomer')}>{a.client || '—'}</EntityLink>
-        </Field>
-        {/* Klantlocatie (VAC-CASCADE-MIRROR-1) — the linked vacancy's own
-            customer_location, sourced from the shared vacancy-detail fetch (see the
-            file comment above), never the application's own fields (it has none).
-            EntityLink opens the OWNING CUSTOMER (locations have no page of their
-            own), same as DetailsGeneralTab's row for this exact field. Dash while
-            the vacancy detail is loading, absent, or has no location picked. */}
-        <Field label={t('vacancies:details.customerLocation')}>
-          {vac?.customerLocationName ? <EntityLink page="customers" id={vac.clientId}>{vac.customerLocationName}</EntityLink> : '—'}
-        </Field>
-        {/* Afdeling — was missing entirely from this summary; the vacancy carries
-            it (customer_department), so it is added here mirroring Klantlocatie. */}
-        <Field label={t('vacancies:details.customerDepartment')}>
-          {vac?.customerDepartmentName ? <EntityLink page="customers" id={vac.clientId}>{vac.customerDepartmentName}</EntityLink> : '—'}
-        </Field>
-        {/* Contactpersoon (CONTACT-PERSON-1 + VAC-CASCADE-MIRROR-1) — the name +
-            EntityLink come from the same shared vacancy-detail fetch as the two
-            rows above (guaranteed to match the Vacature tab); phone/email ride
-            along from ApplicationDetailResource's own `contact` block as a
-            best-effort second line (that contract carries them, the vacancy
-            detail's contact does not) — shown only when present, never fabricated.
-            Deliberately outside the pencil's edit mode: the field is derived from
-            the vacancy's contact_id, and UpdateApplicationRequest has no contact
-            field, so a picker here would PATCH nothing — changing it happens on
-            the vacancy (Vacature tab → Details → Contactpersoon), which is also
-            where the vacancies.update permission is checked. */}
-        {/* Full-width (§ layout): a 5th field would otherwise leave a dangling
-            empty half-row in the 2-column grid — spanning it reads cleanly and
-            matches the Vacature/Match rows below, which are already full-width. */}
-        <div style={{ gridColumn: '1 / -1' }}>
-          <Field label={t('vacancies:details.contactPerson')}>
-            {vac?.contactName ? (
-              <>
-                <EntityLink page="customers" id={vac.clientId}>{vac.contactName}</EntityLink>
-                {(a.contact?.phone || a.contact?.email) && (
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                    {[a.contact.phone, a.contact.email].filter(Boolean).join(' · ')}
-                  </div>
-                )}
-              </>
-            ) : '—'}
-          </Field>
-        </div>
-        <div style={{ gridColumn: '1 / -1' }}>
-          {editing ? (
-            <div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 3 }}>{t('drawer.vacancy')}</div>
-              <VacancyLinkField value={vacancyId} options={vacancyOptions} onChange={setVacancyId} />
-            </div>
-          ) : (
-            <Field label={t('drawer.vacancy')}>
-              {/* S12/S13: the vacancy is a real linkable entity (id available) —
-                  EntityLink gives in-app click + new-tab icon; the return-tab
-                  stash (S14/S22) makes browser BACK land back on this Sollicitatie
-                  tab instead of resetting to the drawer's first tab. */}
-              <span onClickCapture={() => { if (a.id != null) rememberReturnTab(a.id, 'application') }}>
-                <EntityLink page="vacancies" id={a.vacancyId} title={t('drawer.openVacancy')}>
-                  {a.vacancyTitle || '—'}
-                </EntityLink>
-              </span>
-            </Field>
-          )}
-        </div>
-        {/* APP-MATCH-SUMMARY-1: the linked Match (Hired -> match) — renders
-            NOTHING when the application has no Match at all, never a dash row
-            for an absent relation (mirrors the honest-gate convention above). */}
-        {a.match && (
-          <div style={{ gridColumn: '1 / -1' }}>
-            {/* The key is matchLabel, not match: 'drawer.match' does not exist and would
-                have rendered the literal key on screen (seam between two parallel changes). */}
-            <Field label={t('drawer.matchLabel')}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <EntityLink page="matches" id={a.match.id} title={t('drawer.openMatch')}>
-                  {a.match.referenceNumber || '—'}
-                </EntityLink>
-                <SoftChip label={a.match.statusLabel} color={a.match.statusColor} />
-              </div>
-              {a.match.matchStart && (
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>
-                  {t('drawer.placementPeriod', {
-                    start: formatDate(a.match.matchStart),
-                    end: a.match.matchEnd ? formatDate(a.match.matchEnd) : t('drawer.placementOngoing'),
-                  })}
-                </div>
-              )}
-            </Field>
-          </div>
+    <SectionCard title={t('drawer.detailsTitle')} action={action} style={calmCardStyle}>
+      {/* S7: Bron is editable in-place, sharing the Details block's pencil. */}
+      <Row label={t('drawer.source')}>
+        {editing ? (
+          <input value={source} onChange={e => setSource(e.target.value)} style={inputStyle} placeholder={t('drawer.source')} />
+        ) : (
+          a.source || '—'
         )}
-      </div>
+      </Row>
+      {/* S12/13: the customer is a real linkable entity (customer_id, the
+          vacancy's client) — EntityLink gives in-app click + new-tab icon,
+          mirrors the vacancy link below and KlantTab/vacancy DetailsTab's
+          own customer link. Klant itself is never an edit target — it
+          derives from the vacancy. */}
+      <Row label={t('drawer.client')}>
+        <EntityLink page="customers" id={a.customerId} title={t('drawer.openCustomer')}>{a.client || '—'}</EntityLink>
+      </Row>
+      {/* Klantlocatie (VAC-CASCADE-MIRROR-1) — the linked vacancy's own
+          customer_location, sourced from the shared vacancy-detail fetch (see the
+          file comment above), never the application's own fields (it has none).
+          EntityLink opens the OWNING CUSTOMER (locations have no page of their
+          own), same as DetailsGeneralTab's row for this exact field. Dash while
+          the vacancy detail is loading, absent, or has no location picked. */}
+      <Row label={t('vacancies:details.customerLocation')}>
+        {vac?.customerLocationName ? <EntityLink page="customers" id={vac.clientId}>{vac.customerLocationName}</EntityLink> : '—'}
+      </Row>
+      {/* Afdeling — was missing entirely from this summary; the vacancy carries
+          it (customer_department), so it is added here mirroring Klantlocatie. */}
+      <Row label={t('vacancies:details.customerDepartment')}>
+        {vac?.customerDepartmentName ? <EntityLink page="customers" id={vac.clientId}>{vac.customerDepartmentName}</EntityLink> : '—'}
+      </Row>
+      {/* Contactpersoon (CONTACT-PERSON-1 + VAC-CASCADE-MIRROR-1) — the name +
+          EntityLink come from the same shared vacancy-detail fetch as the two
+          rows above (guaranteed to match the Vacature tab); phone/email ride
+          along from ApplicationDetailResource's own `contact` block as a
+          best-effort second line (that contract carries them, the vacancy
+          detail's contact does not) — shown only when present, never fabricated.
+          Deliberately outside the pencil's edit mode: the field is derived from
+          the vacancy's contact_id, and UpdateApplicationRequest has no contact
+          field, so a picker here would PATCH nothing — changing it happens on
+          the vacancy (Vacature tab → Details → Contactpersoon), which is also
+          where the vacancies.update permission is checked. */}
+      <Row label={t('vacancies:details.contactPerson')}>
+        {vac?.contactName ? (
+          <>
+            <EntityLink page="customers" id={vac.clientId}>{vac.contactName}</EntityLink>
+            {(a.contact?.phone || a.contact?.email) && (
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                {[a.contact.phone, a.contact.email].filter(Boolean).join(' · ')}
+              </div>
+            )}
+          </>
+        ) : '—'}
+      </Row>
+      {editing ? (
+        <Row label={t('drawer.vacancy')}>
+          <VacancyLinkField value={vacancyId} options={vacancyOptions} onChange={setVacancyId} />
+        </Row>
+      ) : (
+        <Row label={t('drawer.vacancy')}>
+          {/* S12/S13: the vacancy is a real linkable entity (id available) —
+              EntityLink gives in-app click + new-tab icon; the return-tab
+              stash (S14/S22) makes browser BACK land back on this Sollicitatie
+              tab instead of resetting to the drawer's first tab. */}
+          <span onClickCapture={() => { if (a.id != null) rememberReturnTab(a.id, 'application') }}>
+            <EntityLink page="vacancies" id={a.vacancyId} title={t('drawer.openVacancy')}>
+              {a.vacancyTitle || '—'}
+            </EntityLink>
+          </span>
+        </Row>
+      )}
+      {/* APP-MATCH-SUMMARY-1: the linked Match (Hired -> match) — renders
+          NOTHING when the application has no Match at all, never a dash row
+          for an absent relation (mirrors the honest-gate convention above). */}
+      {a.match && (
+        // The key is matchLabel, not match: 'drawer.match' does not exist and would
+        // have rendered the literal key on screen (seam between two parallel changes).
+        <Row label={t('drawer.matchLabel')}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <EntityLink page="matches" id={a.match.id} title={t('drawer.openMatch')}>
+              {a.match.referenceNumber || '—'}
+            </EntityLink>
+            <SoftChip label={a.match.statusLabel} color={a.match.statusColor} />
+          </div>
+          {a.match.matchStart && (
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>
+              {t('drawer.placementPeriod', {
+                start: formatDate(a.match.matchStart),
+                end: a.match.matchEnd ? formatDate(a.match.matchEnd) : t('drawer.placementOngoing'),
+              })}
+            </div>
+          )}
+        </Row>
+      )}
     </SectionCard>
   )
 }

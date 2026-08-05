@@ -40,7 +40,7 @@ const EMPTY_CUSTOMERS: VacancyCustomer[] = []
 // default_per_page straight through with no clamp, so a 500 preference 422'd).
 // Exported so VacanciesPage can clamp the pageSize picker to the SAME ceiling —
 // one source of truth for both the table's page size and this defensive re-clamp.
-export const VACANCIES_MAX_PER_PAGE = 200
+export const VACANCIES_MAX_PER_PAGE = 500
 
 export function useVacanciesData({ filterParams, page, pageSize, t }: UseVacanciesDataArgs): UseVacanciesDataResult {
   const queryClient = useQueryClient()

@@ -135,15 +135,15 @@ describe('useMatches · MATCH-ARCHIVED-LIST-1', () => {
   })
 })
 
-// §13 seam guard: GET /matches 422s above per_page=200 (MatchQuery::rules()) while
+// §13 seam guard: GET /matches 422s above per_page=500 (MatchQuery::rules()) while
 // the FE's shared page-size dropdown (useListPageSize, PAGE_SIZE_OPTIONS) offers up
 // to 500 — this hook is the only thing that ever calls GET /matches, and it never
 // takes the UI's pageSize as an argument (MatchesPage slices the already-fetched
 // full set in-memory instead, see MatchesPage.tsx), so the request itself must
 // always stay pinned to MATCHES_MAX_PER_PAGE regardless of any stored preference.
 describe('useMatches · per_page cap (MATCHES_MAX_PER_PAGE, seam-harness 2026-08-05)', () => {
-  it('names the cap 200 — the measured MatchQuery ceiling', () => {
-    expect(MATCHES_MAX_PER_PAGE).toBe(200)
+  it('names the cap 500 — the measured MatchQuery ceiling', () => {
+    expect(MATCHES_MAX_PER_PAGE).toBe(500)
   })
 
   it('sends exactly MATCHES_MAX_PER_PAGE on the first page of the fetch-all loop', async () => {
@@ -153,7 +153,7 @@ describe('useMatches · per_page cap (MATCHES_MAX_PER_PAGE, seam-harness 2026-08
     expect(mockedGet).toHaveBeenCalledWith('/matches', { params: { per_page: MATCHES_MAX_PER_PAGE, page: 1 } })
   })
 
-  it('never exceeds per_page=200 across a multi-page fetch, even with many pages available', async () => {
+  it('never exceeds per_page=500 across a multi-page fetch, even with many pages available', async () => {
     // Three server pages available — the loop must keep requesting at exactly the
     // capped per_page on every page, never creep upward.
     mockedGet.mockResolvedValue({ data: { data: [], meta: { last_page: 3 } } })
@@ -163,12 +163,12 @@ describe('useMatches · per_page cap (MATCHES_MAX_PER_PAGE, seam-harness 2026-08
     expect(matchCalls).toHaveLength(3)
     matchCalls.forEach(call => {
       const params = (call[1] as { params?: Record<string, unknown> })?.params
-      expect(params?.per_page).toBe(200)
-      expect(Number(params?.per_page)).toBeLessThanOrEqual(200)
+      expect(params?.per_page).toBe(500)
+      expect(Number(params?.per_page)).toBeLessThanOrEqual(500)
     })
   })
 
-  it('keeps the request pinned at 200 even with a 500 stored user preference (default_per_page)', async () => {
+  it('keeps the request pinned at 500 even with a 900 stored user preference (default_per_page)', async () => {
     // useMatches doesn't accept a pageSize/serverCap argument at all — the stored
     // preference lives entirely in useListPageSize/MatchesPage and never reaches
     // this hook. Calling it exactly as MatchesPage does (no pageSize passed
@@ -178,7 +178,7 @@ describe('useMatches · per_page cap (MATCHES_MAX_PER_PAGE, seam-harness 2026-08
     const { result } = renderHook(() => useMatches())
     await waitFor(() => expect(result.current.loading).toBe(false))
     const matchCall = mockedGet.mock.calls.find(c => c[0] === '/matches')
-    expect(matchCall?.[1]?.params).toMatchObject({ per_page: 200 })
-    expect(matchCall?.[1]?.params).not.toMatchObject({ per_page: 500 })
+    expect(matchCall?.[1]?.params).toMatchObject({ per_page: 500 })
+    expect(matchCall?.[1]?.params).not.toMatchObject({ per_page: 900 })
   })
 })

@@ -48,7 +48,7 @@ const EMPTY_OPPORTUNITIES: Opportunity[] = []
 // (mirrors the "84 vs 25" bug useMatches.ts already fixed for matches). Now fetches
 // the FULL set via a page loop, safety-capped at 5 pages (1000 rows), same scale as
 // useMatches.ts's fetch-all.
-export const OPPORTUNITIES_MAX_PER_PAGE = 200
+export const OPPORTUNITIES_MAX_PER_PAGE = 500
 const OPPORTUNITIES_MAX_PAGES = 5
 
 // includeArchived (ARCHIVE-1): reveal soft-deleted opportunities alongside the
