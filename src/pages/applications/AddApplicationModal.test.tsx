@@ -30,7 +30,19 @@ const stageState = vi.hoisted(() => ({
   ] as Array<{ id: string; value: string; label: string; is_default: boolean }>,
 }))
 
-vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [{ id: 'u1', name: 'Piet Recruiter' }] }) }))
+// APP-OWNER-1: mutable candidate/vacancy rows (each can carry an `owner`, mirroring
+// CandidateListResource/VacancyListResource) so the derivation-chain tests below can
+// vary who owns what per test; `lockedVacancyOwner` feeds the separate GET
+// /vacancies/{id} fetch the LOCKED path uses (it never loads the `/vacancies` list).
+const rowState = vi.hoisted(() => ({
+  candidates: [{ id: 'c1', name: 'Anna Kandidaat' }] as Array<{ id: string; name: string; owner?: { id: string; name: string } | null }>,
+  vacancies: [{ id: 'v1', title: 'Verzorgende IG', client_name: 'Zorggroep A' }] as Array<{ id: string; title: string; client_name?: string; owner?: { id: string; name: string } | null }>,
+  lockedVacancyOwner: null as { id: string; name: string } | null,
+}))
+
+vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [
+  { id: 'u1', name: 'Piet Recruiter' }, { id: 'u2', name: 'Klaas Anders' }, { id: 'u3', name: 'Anna Derde' },
+] }) }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1', name: 'Piet Recruiter' } }) }))
 vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ funnelTypes: [] }) }))
 vi.mock('@/hooks/useApplicationStages', () => ({
@@ -41,11 +53,15 @@ vi.mock('@/hooks/useApplicationStages', () => ({
 }))
 vi.mock('@/lib/api', () => ({
   default: {
-    // Per-URL option rows so the candidate/vacancy pickers have something to pick.
-    get: vi.fn((url: string) => Promise.resolve({ data: { data:
-      url === '/candidates' ? [{ id: 'c1', name: 'Anna Kandidaat' }]
-        : url === '/vacancies' ? [{ id: 'v1', title: 'Verzorgende IG', client_name: 'Zorggroep A' }]
-          : [] } })),
+    // Per-URL option rows so the candidate/vacancy pickers have something to pick;
+    // /vacancies/{id} (the LOCKED path's own recruiter fetch) resolves from
+    // rowState.lockedVacancyOwner, decoupled from the picker list above.
+    get: vi.fn((url: string) => {
+      if (url === '/candidates') return Promise.resolve({ data: { data: rowState.candidates } })
+      if (url === '/vacancies') return Promise.resolve({ data: { data: rowState.vacancies } })
+      if (url.startsWith('/vacancies/')) return Promise.resolve({ data: { data: { owner: rowState.lockedVacancyOwner } } })
+      return Promise.resolve({ data: { data: [] } })
+    }),
     post: vi.fn(() => Promise.resolve({ data: { data: { id: 'a1' } } })),
   },
   unwrap: (r: { data?: { data?: unknown } }) => r?.data?.data,
@@ -53,13 +69,16 @@ vi.mock('@/lib/api', () => ({
     ({ rows: res?.data?.data ?? [], total: 0, page: 1, lastPage: 1, perPage: 0 }),
 }))
 
-// Restore the default (real, uuid-id) stage lookup before every test.
+// Restore the default (real, uuid-id) stage lookup + owner-less rows before every test.
 beforeEach(() => {
   vi.mocked(api.post).mockClear()
   stageState.stages = [
     { id: APPLIED, value: 'applied', label: 'Gesolliciteerd', is_default: true },
     { id: INVITED, value: 'invited', label: 'Uitgenodigd/Intake', is_default: false },
   ]
+  rowState.candidates = [{ id: 'c1', name: 'Anna Kandidaat' }]
+  rowState.vacancies = [{ id: 'v1', title: 'Verzorgende IG', client_name: 'Zorggroep A' }]
+  rowState.lockedVacancyOwner = null
 })
 
 // Pick candidate + vacancy through the real CreatableSelect popovers.
@@ -156,5 +175,71 @@ describe('AddApplicationModal · start stage (V17)', () => {
     const phasePicker = await screen.findByRole('button', { name: /add\.phase Gesolliciteerd/ })
     await waitFor(() => expect(phasePicker.getAttribute('style')).toContain('var(--color-danger)'))
     expect(screen.getByRole('alert')).toBeInTheDocument()
+  })
+})
+
+describe('AddApplicationModal · APP-OWNER-1 recruiter derivation chain', () => {
+  it('the picked vacancy\'s recruiter wins over the picked candidate\'s owner', async () => {
+    rowState.candidates = [{ id: 'c1', name: 'Anna Kandidaat', owner: { id: 'u2', name: 'Klaas Anders' } }]
+    rowState.vacancies = [{ id: 'v1', title: 'Verzorgende IG', client_name: 'Zorggroep A', owner: { id: 'u3', name: 'Anna Derde' } }]
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+    await pickCandidateAndVacancy(user)
+
+    // The vacancy's own recruiter (u3) wins over the candidate's own owner (u2).
+    expect(screen.getByRole('button', { name: /Anna Derde/ })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'add.create' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/applications', expect.objectContaining({ owner_id: 'u3' })))
+  })
+
+  it('falls back to the candidate owner, then further to the logged-in user', async () => {
+    rowState.candidates = [{ id: 'c1', name: 'Anna Kandidaat', owner: { id: 'u2', name: 'Klaas Anders' } }]
+    const user = userEvent.setup()
+    const { unmount } = render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+
+    // Pick only the candidate (no vacancy) -> its own owner wins.
+    await user.click(screen.getByRole('button', { name: /add\.candidatePlaceholder/ }))
+    await user.click(await screen.findByRole('button', { name: 'Anna Kandidaat' }))
+    expect(screen.getByRole('button', { name: /Klaas Anders/ })).toBeInTheDocument()
+    unmount()
+
+    // Neither a candidate owner nor a vacancy known -> falls back to the logged-in user.
+    rowState.candidates = [{ id: 'c1', name: 'Anna Kandidaat' }]
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+    expect(screen.getByRole('button', { name: /Piet Recruiter/ })).toBeInTheDocument()
+  })
+
+  it('a manual pick survives a later vacancy pick', async () => {
+    rowState.candidates = [{ id: 'c1', name: 'Anna Kandidaat', owner: { id: 'u2', name: 'Klaas Anders' } }]
+    rowState.vacancies = [{ id: 'v1', title: 'Verzorgende IG', client_name: 'Zorggroep A', owner: { id: 'u3', name: 'Anna Derde' } }]
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+
+    // Pick the candidate first (auto-seeds to u2), then manually override the owner.
+    await user.click(screen.getByRole('button', { name: /add\.candidatePlaceholder/ }))
+    await user.click(await screen.findByRole('button', { name: 'Anna Kandidaat' }))
+    await user.click(screen.getByRole('button', { name: /Klaas Anders/ }))
+    await user.click(await screen.findByRole('button', { name: 'Piet Recruiter' }))
+
+    // Picking the vacancy afterwards must NOT reseed the manual pick, even though
+    // the vacancy's own recruiter (u3) would otherwise outrank it.
+    await user.click(screen.getByRole('button', { name: /add\.vacancyPlaceholder/ }))
+    await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
+    expect(screen.getByRole('button', { name: /Piet Recruiter/ })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'add.create' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/applications', expect.objectContaining({ owner_id: 'u1' })))
+  })
+
+  it('the LOCKED vacancy path fetches its own recruiter, which still wins over the candidate owner', async () => {
+    rowState.candidates = [{ id: 'c1', name: 'Anna Kandidaat', owner: { id: 'u2', name: 'Klaas Anders' } }]
+    rowState.lockedVacancyOwner = { id: 'u3', name: 'Anna Derde' }
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} lockedVacancy={{ id: 'v1', title: 'Verpleegkundige', client: 'Yesway' }} />)
+
+    await user.click(screen.getByRole('button', { name: /add\.candidatePlaceholder/ }))
+    await user.click(await screen.findByRole('button', { name: 'Anna Kandidaat' }))
+
+    await waitFor(() => expect(screen.getByRole('button', { name: /Anna Derde/ })).toBeInTheDocument())
   })
 })

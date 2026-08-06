@@ -180,9 +180,19 @@ describe('AddApplicationModal · OWNER-DEVIATION-1 recruiter default', () => {
 })
 
 describe('AddApplicationModal · OWNER-DEVIATION-1 deviation notice (soft warning, never a block)', () => {
-  it('shows the candidate-owner line when the recruiter differs from the candidate owner', async () => {
+  // APP-OWNER-1 note: the derivation chain now auto-seeds the recruiter TO the
+  // candidate/vacancy owner whenever one is known+assignable, so the deviation
+  // these three tests probe can only still occur after a MANUAL override away
+  // from that auto-seeded value (previously the default was always "me", so any
+  // known candidate/vacancy owner already deviated from it without a manual step).
+  it('shows the candidate-owner line once the recruiter is manually changed away from the candidate owner', async () => {
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" candidateOwnerId="u2" candidateOwnerName="Klaas Anders" onClose={noop} onCreated={noop} />)
+    // Auto-seeded to the candidate's own owner (u2, no vacancy known) — no deviation yet.
+    expect(screen.queryByText('work.ownerDeviationCandidate')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /Klaas Anders/ }))
+    await user.click(await screen.findByRole('button', { name: 'Piet Recruiter' }))
     expect(screen.getByText('work.ownerDeviationCandidate')).toBeInTheDocument()
     expect(screen.queryByText('work.ownerDeviationVacancy')).not.toBeInTheDocument()
 
@@ -192,26 +202,34 @@ describe('AddApplicationModal · OWNER-DEVIATION-1 deviation notice (soft warnin
     expect(screen.getByRole('button', { name: 'work.createApplication' })).toBeEnabled()
   })
 
-  it('shows the vacancy-owner line when the recruiter differs from the picked vacancy\'s owner', async () => {
+  it('shows the vacancy-owner line once the recruiter is manually changed away from the picked vacancy\'s owner', async () => {
     vi.mocked(useVacancyOptions).mockReturnValue([{ value: 'vac-1', label: 'Verzorgende IG', client: 'Zorggroep A', ownerId: 'u3', ownerName: 'Anna Derde' }])
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    expect(screen.queryByText('work.ownerDeviationVacancy')).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'work.pickVacancy' }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
+    // Auto-seeded to the vacancy's own recruiter (u3) — no deviation yet.
+    expect(screen.queryByText('work.ownerDeviationVacancy')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /Anna Derde/ }))
+    await user.click(await screen.findByRole('button', { name: 'Piet Recruiter' }))
 
     expect(screen.getByText('work.ownerDeviationVacancy')).toBeInTheDocument()
     expect(screen.queryByText('work.ownerDeviationCandidate')).not.toBeInTheDocument()
   })
 
-  it('shows BOTH lines when both the candidate and the vacancy owner differ', async () => {
+  it('shows BOTH lines when a manual pick differs from both the candidate and the vacancy owner', async () => {
     vi.mocked(useVacancyOptions).mockReturnValue([{ value: 'vac-1', label: 'Verzorgende IG', client: 'Zorggroep A', ownerId: 'u3', ownerName: 'Anna Derde' }])
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" candidateOwnerId="u2" candidateOwnerName="Klaas Anders" onClose={noop} onCreated={noop} />)
 
     await user.click(screen.getByRole('button', { name: 'work.pickVacancy' }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
+
+    // Manually override to a THIRD user — differs from both record owners.
+    await user.click(screen.getByRole('button', { name: /Anna Derde/ }))
+    await user.click(await screen.findByRole('button', { name: 'Piet Recruiter' }))
 
     expect(screen.getByText('work.ownerDeviationCandidate')).toBeInTheDocument()
     expect(screen.getByText('work.ownerDeviationVacancy')).toBeInTheDocument()
@@ -235,5 +253,51 @@ describe('AddApplicationModal · OWNER-DEVIATION-1 deviation notice (soft warnin
     render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
     expect(screen.queryByText('work.ownerDeviationCandidate')).not.toBeInTheDocument()
     expect(screen.queryByText('work.ownerDeviationVacancy')).not.toBeInTheDocument()
+  })
+})
+
+describe('AddApplicationModal · APP-OWNER-1 recruiter derivation chain', () => {
+  it('the picked vacancy\'s recruiter wins over the candidate owner', async () => {
+    vi.mocked(useVacancyOptions).mockReturnValue([{ value: 'vac-1', label: 'Verzorgende IG', client: 'Zorggroep A', ownerId: 'u3', ownerName: 'Anna Derde' }])
+    const user = userEvent.setup()
+    render(<AddApplicationModal candidateId="cand-1" candidateOwnerId="u2" candidateOwnerName="Klaas Anders" onClose={noop} onCreated={noop} />)
+
+    await user.click(screen.getByRole('button', { name: 'work.pickVacancy' }))
+    await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
+
+    // The vacancy's own recruiter (u3) wins over the candidate's own owner (u2).
+    expect(screen.getByRole('button', { name: /Anna Derde/ })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'work.createApplication' }))
+    expect(api.post).toHaveBeenCalledWith('/applications', expect.objectContaining({ owner_id: 'u3' }))
+  })
+
+  it('falls back to the candidate owner, then further to the logged-in user', () => {
+    // Candidate owner known + assignable, no vacancy picked yet -> candidate owner wins.
+    const { unmount } = render(<AddApplicationModal candidateId="cand-1" candidateOwnerId="u2" candidateOwnerName="Klaas Anders" onClose={noop} onCreated={noop} />)
+    expect(screen.getByRole('button', { name: /Klaas Anders/ })).toBeInTheDocument()
+    unmount()
+
+    // Neither a candidate owner nor a vacancy -> falls all the way to the logged-in user.
+    render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    expect(screen.getByRole('button', { name: /Piet Recruiter/ })).toBeInTheDocument()
+  })
+
+  it('a manual pick survives a later vacancy pick', async () => {
+    vi.mocked(useVacancyOptions).mockReturnValue([{ value: 'vac-1', label: 'Verzorgende IG', client: 'Zorggroep A', ownerId: 'u3', ownerName: 'Anna Derde' }])
+    const user = userEvent.setup()
+    render(<AddApplicationModal candidateId="cand-1" candidateOwnerId="u2" candidateOwnerName="Klaas Anders" onClose={noop} onCreated={noop} />)
+
+    // Manually pick a recruiter BEFORE the vacancy is chosen.
+    await user.click(screen.getByRole('button', { name: /Klaas Anders/ }))
+    await user.click(await screen.findByRole('button', { name: 'Piet Recruiter' }))
+
+    // Picking the vacancy afterwards must NOT reseed the manual pick, even though
+    // the vacancy's own recruiter (u3) would otherwise outrank it.
+    await user.click(screen.getByRole('button', { name: 'work.pickVacancy' }))
+    await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
+    expect(screen.getByRole('button', { name: /Piet Recruiter/ })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'work.createApplication' }))
+    expect(api.post).toHaveBeenCalledWith('/applications', expect.objectContaining({ owner_id: 'u1' }))
   })
 })

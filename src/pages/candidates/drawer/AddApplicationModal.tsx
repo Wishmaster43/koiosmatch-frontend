@@ -19,23 +19,28 @@
  * backend's own ApplicationController::store guard will refuse anyway.
  *
  * OWNER-DEVIATION-1 (Danny: "de recruiter moet default zijn degene die de plus
- * drukt"): a Recruiter picker defaults to the logged-in user (mirrors
- * pages/applications/AddApplicationModal.tsx's identical owner-default guard — the
- * "+ Sollicitatie" flow from the vacancy side, StoreApplicationRequest.php:28
- * accepts `owner_id` for both entry points) — but ONLY when they are an
- * assignable tenant user, never a super-admin the server would 422 on. Danny said
- * a MELDING, not a block: when the chosen recruiter differs from the candidate's
- * own owner (prop from the drawer's already-loaded record) or the picked vacancy's
- * owner (VacancyListResource already resolves it on the same /vacancies row
- * useVacancyOptions reads — no extra fetch), an inline warning names who owns
- * what; Create stays enabled either way.
+ * drukt"): the original shape — a Recruiter picker defaulted straight to the
+ * logged-in user — is now the LAST rung of APP-OWNER-1's derivation chain below.
+ * The soft warning (never a block) stays: when the FINAL chosen recruiter still
+ * differs from the candidate's own owner (prop from the drawer's already-loaded
+ * record) or the picked vacancy's owner, an inline notice names who owns what;
+ * Create stays enabled either way.
+ *
+ * APP-OWNER-1 (Danny's GO): the owner picker now seeds from a priority chain —
+ * (1) the picked vacancy's own recruiter (owner) — VacancyListResource already
+ * resolves it on the same /vacancies row useVacancyOptions reads, no extra fetch;
+ * (2) else the candidate's own owner (`candidateOwnerId` prop); (3) else the
+ * logged-in user (the old OWNER-DEVIATION-1 default). Every rung only proposes a
+ * real, ASSIGNABLE tenant user (never a super-admin the server would 422 on).
+ * Seeded once: a manual pick is never overwritten, and picking/changing the
+ * vacancy AFTER a manual owner change never reseeds it.
  *
  * VACANCY-PREFILL-1 (Danny 06-08, "Solliciteren" from the vacancy-search score
  * panel): `initialVacancyId` seeds the vacancy picker once on mount — a soft
  * prefill, not a lock, so a misklik stays recoverable via the same searchable
  * combobox.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 import api from '@/lib/api'
@@ -77,16 +82,14 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
   // S24b: the real stage id (not just the slug) — needed to submit application_stage_id.
   const { stages, defaultStage } = useApplicationStages()
 
-  // OWNER-DEVIATION-1: recruiter picker, defaulted to the logged-in user — but only
-  // once they are confirmed to be an assignable tenant user (mirrors
-  // pages/applications/AddApplicationModal.tsx's meIsAssignable guard; a non-tenant
-  // login, e.g. a super-admin, is never proposed as the default owner).
+  // APP-OWNER-1: recruiter default inputs — the tenant's assignable users list and
+  // the logged-in user (chain's last rung; mirrors pages/applications/
+  // AddApplicationModal.tsx's identical meIsAssignable guard, a non-tenant login,
+  // e.g. a super-admin, is never proposed as an owner).
   const { user: me } = useAuth() as unknown as { user: { id?: Id; name?: string } | null }
   const { data: users = [] } = useUsers() as { data?: { id: Id; name: string }[] }
   const userOptions = users.map(u => ({ value: String(u.id), label: u.name }))
   const meIsAssignable = me?.id != null && userOptions.some(o => o.value === String(me.id))
-  const [ownerId, setOwnerId] = useState('')
-  useEffect(() => { if (meIsAssignable && !ownerId) setOwnerId(String(me!.id)) }, [meIsAssignable]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // AXIS-MATRIX-2 preflight (mirrors MatchModal's match.create wiring, the
   // reference implementation): POST /applications enforces application.create against
@@ -105,12 +108,43 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
 
-  // OWNER-DEVIATION-1: a soft warning, never a block (Danny: "wel een melding") —
-  // the picked recruiter differs from the candidate's own owner and/or the picked
-  // vacancy's owner. Both sides must be a KNOWN owner to compare (an unowned
-  // candidate/vacancy is not a "deviation", mirroring useBranchMismatch's own
-  // "both sides nullable" rule) — never claims a mismatch against an unknown "—".
+  // The picked vacancy's own option row — carries ownerId/ownerName (useVacancyOptions
+  // reads it straight off VacancyListResource's `owner`, no extra fetch, see that hook).
   const pickedVacancy = vacancyOptions.find(v => String(v.value) === String(vacancyId))
+
+  // APP-OWNER-1: derivation chain, highest priority first — the picked vacancy's
+  // own recruiter (owner) > the candidate's own owner (prop) > the logged-in user
+  // (the old OWNER-DEVIATION-1 default). Every rung only proposes a real,
+  // ASSIGNABLE tenant user. Evaluated fresh every render from its three inputs.
+  const vacancyOwnerId = pickedVacancy?.ownerId
+  const vacancyOwnerAssignable = vacancyOwnerId != null && userOptions.some(o => o.value === String(vacancyOwnerId))
+  const candidateOwnerAssignable = candidateOwnerId != null && userOptions.some(o => o.value === String(candidateOwnerId))
+  const derivedOwnerId = vacancyOwnerAssignable ? String(vacancyOwnerId)
+    : candidateOwnerAssignable ? String(candidateOwnerId)
+    : meIsAssignable ? String(me?.id)
+    : ''
+
+  // Seeded from the chain above, never re-seeded once the recruiter makes a MANUAL
+  // pick (tracked by a ref, not by "ownerId is already set" — unlike
+  // usePlanIntakeForm's RECRUITER-DEFAULT-1, whose two inputs both resolve together
+  // off the same /users load, this chain's highest-priority input — the vacancy
+  // pick — can arrive LATER than a lower-priority auto-seed already did, and it
+  // still must be able to promote itself over that earlier auto-seed).
+  const [ownerId, setOwnerIdState] = useState('')
+  const ownerManualRef = useRef(false)
+  useEffect(() => {
+    if (ownerManualRef.current) return
+    if (derivedOwnerId && derivedOwnerId !== ownerId) setOwnerIdState(derivedOwnerId)
+  }, [derivedOwnerId]) // eslint-disable-line react-hooks/exhaustive-deps
+  // The picker's own onChange — any explicit pick permanently stops the auto-seed above.
+  const setOwnerId = (v: string) => { ownerManualRef.current = true; setOwnerIdState(v) }
+
+  // OWNER-DEVIATION-1: a soft warning, never a block (Danny: "wel een melding") —
+  // the FINAL recruiter still differs from the candidate's own owner and/or the
+  // picked vacancy's owner (e.g. after a manual override). Both sides must be a
+  // KNOWN owner to compare (an unowned candidate/vacancy is not a "deviation",
+  // mirroring useBranchMismatch's own "both sides nullable" rule) — never claims a
+  // mismatch against an unknown "—".
   const ownerDiffersFromCandidate = Boolean(
     ownerId && candidateOwnerId != null && String(candidateOwnerId) !== String(ownerId))
   const ownerDiffersFromVacancy = Boolean(
@@ -184,9 +218,9 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
             style={fieldFootprint} options={stages.map(s => ({ value: s.id, label: s.label }))} />
           {errors.phase && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
         </div>
-        {/* OWNER-DEVIATION-1: recruiter picker, defaulted to the logged-in user (see
-            the meIsAssignable effect above) but always changeable via the house
-            user-picker, same searchable-combobox footprint as the fields above. */}
+        {/* APP-OWNER-1: recruiter picker, seeded from the derivation chain above
+            (vacancy recruiter > candidate owner > logged-in user) but always
+            changeable via the house user-picker, same footprint as the fields above. */}
         <div style={{ marginBottom: 14 }}>
           <div style={fieldLabel}>{t('work.owner')}</div>
           <CreatableSelect value={ownerId || null} onChange={setOwnerId} placeholder={t('work.pickOwner')}

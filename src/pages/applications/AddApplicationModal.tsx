@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useId } from 'react'
+import { useState, useEffect, useMemo, useId, useRef } from 'react'
 import type { ComponentType, ReactNode, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
@@ -22,7 +22,11 @@ import { isUuid } from '@/lib/uuid'
 type AnyProps = Record<string, unknown>
 const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
 
-interface PickOption { value: Id; label: string; client?: string }
+// ownerId/ownerName (APP-OWNER-1): both /candidates and /vacancies already carry
+// an `owner` object (CandidateListResource / VacancyListResource) — captured here
+// so the owner-derivation chain below can read it straight off the picked option,
+// no extra fetch for either the candidate or the non-locked vacancy pick.
+interface PickOption { value: Id; label: string; client?: string; ownerId?: Id; ownerName?: string }
 interface AppUser { id: Id; name?: string }
 
 // 422 field-error keys are snake_case; map them back to this form's field names
@@ -70,6 +74,20 @@ function PickField({ label, style, value, ...rest }: { label: ReactNode; style?:
  * vacancies/drawer/ApplicantsTab) — only the candidate needs picking then
  * (mirrors PlanIntakeModal's defaultVacancyId, but locked rather than editable
  * since the whole point of that entry point is "for THIS vacancy").
+ *
+ * APP-OWNER-1 (Danny's GO — supersedes this file's own earlier "default to me"
+ * APP-OWNER-1 note below): the owner picker now seeds from a priority chain,
+ * mirroring the candidate-drawer variant (pages/candidates/drawer/
+ * AddApplicationModal.tsx) — (1) the picked vacancy's own recruiter (owner); (2)
+ * else the picked candidate's own owner; (3) else the logged-in user. Both the
+ * candidate and the non-locked vacancy list already carry `owner` on their API
+ * rows (captured into PickOption above), so neither rung needs an extra fetch.
+ * The ONE case that does: the LOCKED vacancy path only receives {id, title,
+ * client} from its caller (ApplicantsTab, out of scope here) — its recruiter is
+ * fetched once via GET /vacancies/{id}, alive-guarded. Every rung only proposes a
+ * real, ASSIGNABLE tenant user (never a super-admin the server would 422 on).
+ * Seeded once: a manual pick is never overwritten, and picking/changing the
+ * candidate or vacancy AFTER a manual owner change never reseeds it.
  */
 export default function AddApplicationModal({ onClose, onCreated, lockedVacancy }: {
   onClose: () => void
@@ -92,13 +110,50 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   const [vacancies, setVacancies]   = useState<PickOption[]>([])
   const [candidateId, setCandidateId] = useState('')
   const [vacancyId, setVacancyId]     = useState(lockedVacancy ? String(lockedVacancy.id) : '')
-  // Default owner = the logged-in user, so a new application isn't ownerless by
-  // default (APP-OWNER-1 — Danny: applications were created with "Geen eigenaar")
-  // — but ONLY when they are actually an assignable tenant user; otherwise leave
-  // it empty and let the backend's own default apply once it lands.
-  const [ownerId, setOwnerId]         = useState('')
-  useEffect(() => { if (meIsAssignable && !ownerId) setOwnerId(String(me!.id)) }, [meIsAssignable]) // eslint-disable-line react-hooks/exhaustive-deps
   const [saving, setSaving]           = useState(false)
+
+  // APP-OWNER-1: the LOCKED vacancy path only receives {id, title, client} from
+  // its caller — its own recruiter is fetched once, alive-guarded, since the
+  // non-locked list mapping below (which DOES carry owner) never runs for it.
+  const [lockedVacancyOwnerId, setLockedVacancyOwnerId] = useState<Id | undefined>(undefined)
+  useEffect(() => {
+    if (!lockedVacancy?.id) return
+    let alive = true
+    api.get(`/vacancies/${lockedVacancy.id}`)
+      .then(r => { if (alive) setLockedVacancyOwnerId(unwrap<{ owner?: { id?: Id } | null }>(r)?.owner?.id) })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [lockedVacancy?.id])
+
+  // The picked candidate/vacancy's own option row — carries ownerId (see PickOption).
+  const pickedCandidate = candidates.find(c => String(c.value) === String(candidateId))
+  const pickedVacancy = vacancies.find(v => String(v.value) === String(vacancyId))
+  const vacancyOwnerId = lockedVacancy ? lockedVacancyOwnerId : pickedVacancy?.ownerId
+
+  // APP-OWNER-1: derivation chain, highest priority first — the picked vacancy's
+  // own recruiter (owner) > the picked candidate's own owner > the logged-in user
+  // (this file's own earlier "default to me" behaviour). Every rung only proposes
+  // a real, ASSIGNABLE tenant user (never a super-admin the server would 422 on).
+  const candidateOwnerId = pickedCandidate?.ownerId
+  const vacancyOwnerAssignable = vacancyOwnerId != null && ownerOptions.some(o => o.value === String(vacancyOwnerId))
+  const candidateOwnerAssignable = candidateOwnerId != null && ownerOptions.some(o => o.value === String(candidateOwnerId))
+  const derivedOwnerId = vacancyOwnerAssignable ? String(vacancyOwnerId)
+    : candidateOwnerAssignable ? String(candidateOwnerId)
+    : meIsAssignable ? String(me?.id)
+    : ''
+
+  // Seeded from the chain above, never re-seeded once the recruiter makes a MANUAL
+  // pick (tracked by a ref — the vacancy/candidate pick can arrive AFTER a
+  // lower-priority auto-seed already landed and still must be able to promote
+  // itself over it; mirrors the candidate-drawer variant's identical guard).
+  const [ownerId, setOwnerIdState] = useState('')
+  const ownerManualRef = useRef(false)
+  useEffect(() => {
+    if (ownerManualRef.current) return
+    if (derivedOwnerId && derivedOwnerId !== ownerId) setOwnerIdState(derivedOwnerId)
+  }, [derivedOwnerId]) // eslint-disable-line react-hooks/exhaustive-deps
+  // The picker's own onChange — any explicit pick permanently stops the auto-seed above.
+  const setOwnerId = (v: string) => { ownerManualRef.current = true; setOwnerIdState(v) }
 
   // Start stage ("fase") — V17: "+ Sollicitant" used to POST candidate/vacancy/owner only,
   // so a recruiter adding an applicant from a vacancy could not say where they enter.
@@ -121,11 +176,17 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   // minimisation, §8/§9 — a locked value never needs the full option list).
   useEffect(() => {
     api.get('/candidates', { params: { per_page: 100 } })
-      .then(r => setCandidates(unwrapList<{ id?: Id; name?: string; first_name?: string; last_name?: string }>(r).rows.map(c => ({ value: c.id ?? '', label: c.name ?? [c.first_name, c.last_name].filter(Boolean).join(' ') }))))
+      .then(r => setCandidates(unwrapList<{ id?: Id; name?: string; first_name?: string; last_name?: string; owner?: { id?: Id; name?: string } | null }>(r).rows.map(c => ({
+        value: c.id ?? '', label: c.name ?? [c.first_name, c.last_name].filter(Boolean).join(' '),
+        ownerId: c.owner?.id, ownerName: c.owner?.name,
+      }))))
       .catch(() => setCandidates([]))
     if (lockedVacancy) return
     api.get('/vacancies', { params: { per_page: 100 } })
-      .then(r => setVacancies(unwrapList<{ id?: Id; title?: string; titel?: string; client_name?: string; client?: string }>(r).rows.map(v => ({ value: v.id ?? '', label: v.title ?? v.titel ?? '', client: v.client_name ?? v.client }))))
+      .then(r => setVacancies(unwrapList<{ id?: Id; title?: string; titel?: string; client_name?: string; client?: string; owner?: { id?: Id; name?: string } | null }>(r).rows.map(v => ({
+        value: v.id ?? '', label: v.title ?? v.titel ?? '', client: v.client_name ?? v.client,
+        ownerId: v.owner?.id, ownerName: v.owner?.name,
+      }))))
       .catch(() => setVacancies([]))
     // Only the presence of a locked vacancy matters (checked once, on mount).
     // eslint-disable-next-line react-hooks/exhaustive-deps
