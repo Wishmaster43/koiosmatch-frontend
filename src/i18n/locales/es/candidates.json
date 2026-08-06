@@ -740,7 +740,9 @@
     "businessEmailDuplicateTitle": "Esta dirección de correo ya está en uso",
     "businessEmailDuplicateBody": "{{name}} ya utiliza esta dirección de correo. ¿Guardar de todos modos?",
     "businessEmailDuplicateConfirm": "Guardar de todos modos",
-    "businessEmailDuplicateCancel": "Volver"
+    "businessEmailDuplicateCancel": "Volver",
+    "creditorAutoHint": "Se asigna automáticamente si se deja vacío.",
+    "creditorAutoLocked": "Numerado automáticamente mediante Configuración → Numeración."
   },
   "certified": {
     "issued": "Emitido",
@@ -1068,7 +1070,8 @@
     "pickCandidate": "Elige un candidato...",
     "duplicateMatchWarning": "Ya existe un Match ({{label}}) para este candidato en este cliente — ¿quieres crear una renovación?",
     "overlapWarning": "El período indicado se solapa con un Match activo en {{label}} ({{period}}).",
-    "overlapOngoing": "desde {{start}}"
+    "overlapOngoing": "desde {{start}}",
+    "overlapWarningHours": "El período indicado se solapa con un Match activo en {{label}}: juntos {{hours}} horas por semana en el período solapado ({{period}})."
   },
   "merge": {
     "title": "Fusionar candidato",

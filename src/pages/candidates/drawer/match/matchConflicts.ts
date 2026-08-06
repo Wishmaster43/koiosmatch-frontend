@@ -7,8 +7,14 @@
  * in isolation, mirroring the house's `cascadeValue`/`findDuplicateContact` idiom
  * in this same folder's helpers.ts.
  *
+ * `overlapHoursSum` (below) is the hours-sum escalation on point 6: once
+ * MATCH-LIST-HOURS-1 put `hours_per_week` on the /matches list row, an overlap
+ * where the drafted hours + the existing match's hours together exceed a
+ * full-time week reads as a real double-booking risk, not just an overlapping
+ * date range — the caller (MatchConflictBanners) swaps in stronger wording.
+ *
  * WARN, NEVER BLOCK (house rule, §3A action-matrix spirit + Danny's explicit
- * "never block" here): both functions only ever produce data for an inline
+ * "never block" here): every function here only ever produces data for an inline
  * banner — nothing here gates `handleSubmitClick`.
  */
 import type { Id } from '@/types/common'
@@ -27,6 +33,12 @@ export interface ExistingMatchRow {
   status: string | null
   startDate: string | null
   endDate: string | null
+  // Contracted hours/week (MATCH-LIST-HOURS-1 — the list resource now serialises
+  // it, tolerant-decimal-coerced by useExistingCandidateMatches). Null when the
+  // row predates the field or the match simply has none — the hours-sum
+  // escalation below only ever fires when BOTH sides of an overlap carry a
+  // value; a null here keeps that overlap on the plain date-only wording.
+  hoursPerWeek: number | null
 }
 
 /**
@@ -70,4 +82,22 @@ export function findOverlappingMatches(
 ): ExistingMatchRow[] {
   if (!startDate) return []
   return matches.filter(m => isActiveStatus(m.status) && rangesOverlap(startDate, endDate || null, m.startDate, m.endDate))
+}
+
+// A standard full-time week — the threshold for Danny's hours-sum escalation.
+export const FULL_TIME_HOURS_PER_WEEK = 40
+
+/**
+ * overlapHoursSum — Danny's hours-sum escalation on top of `findOverlappingMatches`.
+ * When the drafted match's own hours AND the overlapping existing match's hours
+ * are BOTH known, a combined week over `FULL_TIME_HOURS_PER_WEEK` is a real
+ * double-booking risk, not just a date coincidence — the banner escalates its
+ * wording. "Offered-iff-read": either side missing (older row without the
+ * field, or the recruiter hasn't entered hours yet) returns null so the caller
+ * keeps the calm, existing date-only note — never guess at a hidden overcommitment.
+ */
+export function overlapHoursSum(draftHours: number | null, rowHours: number | null): number | null {
+  if (draftHours == null || rowHours == null) return null
+  const sum = draftHours + rowHours
+  return sum > FULL_TIME_HOURS_PER_WEEK ? sum : null
 }

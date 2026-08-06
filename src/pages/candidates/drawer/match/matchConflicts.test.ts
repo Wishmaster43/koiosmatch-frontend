@@ -4,14 +4,14 @@
  * tests the exact date-range and cascade-scope math in isolation.
  */
 import { describe, it, expect } from 'vitest'
-import { findDuplicateMatch, findOverlappingMatches } from './matchConflicts'
+import { findDuplicateMatch, findOverlappingMatches, overlapHoursSum } from './matchConflicts'
 import type { ExistingMatchRow } from './matchConflicts'
 
 // A minimal existing-match fixture — only the fields the two functions read.
 const row = (overrides: Partial<ExistingMatchRow> = {}): ExistingMatchRow => ({
   id: 'm-1', vacancyTitle: 'Verzorgende IG', client: 'Zorggroep A',
   customerId: 'cust-1', customerLocationId: null, customerDepartmentId: null,
-  status: 'open', startDate: '2026-01-01', endDate: '2026-06-30',
+  status: 'open', startDate: '2026-01-01', endDate: '2026-06-30', hoursPerWeek: null,
   ...overrides,
 })
 
@@ -83,5 +83,31 @@ describe('findOverlappingMatches', () => {
   it('an open-ended DRAFT (no end date) still overlaps a match starting later within the draft period', () => {
     const later = row({ startDate: '2026-09-01', endDate: '2026-10-01' })
     expect(findOverlappingMatches([later], '2026-01-01', '', isActiveStatus)).toEqual([later])
+  })
+})
+
+// Danny's hours-sum escalation on top of point 6 (§3B): both sides must carry
+// hours AND the sum must exceed a full-time week — "offered-iff-read", never a
+// guess when either side is unset.
+describe('overlapHoursSum', () => {
+  it('returns the combined sum once it exceeds a full-time week', () => {
+    expect(overlapHoursSum(24, 20)).toBe(44)
+  })
+
+  it('returns null when the combined sum stays at or under a full-time week (the mild note stands)', () => {
+    expect(overlapHoursSum(20, 20)).toBeNull() // exactly 40 — not "exceeds"
+    expect(overlapHoursSum(16, 20)).toBeNull()
+  })
+
+  it('returns null when the DRAFT has no hours yet, even if the existing match does', () => {
+    expect(overlapHoursSum(null, 40)).toBeNull()
+  })
+
+  it('returns null when the EXISTING match row predates hours_per_week (older row, MATCH-LIST-HOURS-1)', () => {
+    expect(overlapHoursSum(40, null)).toBeNull()
+  })
+
+  it('returns null when neither side carries hours', () => {
+    expect(overlapHoursSum(null, null)).toBeNull()
   })
 })

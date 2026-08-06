@@ -38,6 +38,26 @@ vi.mock('../hooks/useBusinessEmailDuplicateCheck', () => ({
   useBusinessEmailDuplicateCheck: () => ({ checkDuplicate: (email: string) => checkDuplicateMock(email) }),
 }))
 
+// CREDITOR-AUTO-1: the numbering-entities lookup (real "on auto" signal) and the
+// full-record re-fetch (adopts a BE-assigned creditor number) are both mocked
+// per-test so the gating + re-read behaviour is deterministic.
+const numberingEntitiesMock = vi.fn()
+vi.mock('@/lib/useNumberingEntities', () => ({
+  useNumberingEntities: () => numberingEntitiesMock(),
+}))
+const fetchDetailMock = vi.fn()
+vi.mock('../hooks/useCandidateMutations', () => ({
+  useCandidateRecord: () => ({ fetchDetail: (id: string) => fetchDetailMock(id), patchCandidate: vi.fn() }),
+}))
+// Default: no `zzp_creditor` numbering entity yet (today's live backend reality,
+// see the ZzpTab.tsx file header) — a test that needs the locked-row branch
+// overrides this with its own mockReturnValue.
+beforeEach(() => {
+  numberingEntitiesMock.mockReset()
+  numberingEntitiesMock.mockReturnValue({ entities: [{ key: 'candidate', prefix: 'K', pad: 5, start: 1, label: 'Kandidaat' }], loading: false })
+  fetchDetailMock.mockReset()
+})
+
 const candidate = (zzp: Record<string, unknown> = {}): Candidate => ({
   id: 'cand-1', candidateTypes: [], preferences: {}, archived: false, status: 'available',
   zzp: {
@@ -231,5 +251,73 @@ describe('ZzpTab · business e-mail validation + duplicate check (1.1.5)', () =>
     const dialog = await screen.findByRole('dialog')
     await user.click(within(dialog).getByRole('button', { name: 'zzp.businessEmailDuplicateCancel' }))
     expect(onSave).not.toHaveBeenCalled()
+  })
+})
+
+// CREDITOR-AUTO-1 (job fe-creditor-auto): the FE cannot confirm the tenant's
+// numbering state today (no `zzp_creditor` entity in the live numbering-entities
+// response, see the ZzpTab.tsx file header) — this asserts BOTH branches so the
+// day the backend adds that entity, the locked-row branch is already proven.
+describe('ZzpTab · CREDITOR-AUTO-1 numbering gate', () => {
+  beforeEach(() => { checkDuplicateMock.mockReset(); notifyErrorMock.mockReset() })
+
+  it('keeps the creditor field editable, with a muted auto-assign hint, when it is empty and no zzp_creditor numbering entity exists', async () => {
+    const user = userEvent.setup()
+    render(<ZzpTab c={candidate({ creditor_number: '' })} />)
+    expect(screen.getByText('zzp.creditorAutoHint')).toBeInTheDocument()
+    // No locked-row note in this branch.
+    expect(screen.queryByText('zzp.creditorAutoLocked')).toBeNull()
+    await user.click(screen.getAllByTitle('edit')[2]) // Facturatie
+    const crediteurRow = screen.getByText('zzp.creditor').parentElement as HTMLElement
+    expect(within(crediteurRow).getByRole('textbox')).toBeInTheDocument()
+  })
+
+  it('hides the auto-assign hint once a creditor number is already stored', () => {
+    render(<ZzpTab c={candidate()} />) // default fixture: creditor_number 'CR-1'
+    expect(screen.queryByText('zzp.creditorAutoHint')).toBeNull()
+  })
+
+  it('renders the creditor number as a locked, read-only row once the numbering-entities lookup reports zzp_creditor', async () => {
+    numberingEntitiesMock.mockReturnValue({ entities: [{ key: 'zzp_creditor', prefix: 'CR', pad: 5, start: 1, label: 'Crediteur' }], loading: false })
+    const user = userEvent.setup()
+    render(<ZzpTab c={candidate()} />)
+    expect(screen.queryByText('zzp.creditorAutoHint')).toBeNull()
+    expect(screen.getByText('zzp.creditorAutoLocked')).toBeInTheDocument()
+    expect(screen.getByText('CR-1')).toBeInTheDocument()
+    // Editing Facturatie must NOT offer an input for it — only e-mail/IBAN do.
+    await user.click(screen.getAllByTitle('edit')[2])
+    expect(screen.queryByDisplayValue('CR-1')).toBeNull()
+    expect(screen.getByDisplayValue('old@example.com')).toBeInTheDocument()
+  })
+})
+
+// CREDITOR-AUTO-1: the backend auto-assigns a BLANK creditor number on save (its
+// own numbering sequence) — the optimistic onSave above only echoes back what was
+// typed, so this tab must re-read the record itself to pick up the real number.
+describe('ZzpTab · CREDITOR-AUTO-1 re-reads a blank creditor number after save', () => {
+  beforeEach(() => { checkDuplicateMock.mockReset(); notifyErrorMock.mockReset() })
+
+  const openInvoicing = async (user: ReturnType<typeof userEvent.setup>) => {
+    await user.click(screen.getAllByTitle('edit')[2]) // Facturatie
+  }
+
+  it('re-fetches the record and adopts the BE-assigned number when the field was saved blank', async () => {
+    fetchDetailMock.mockResolvedValue(candidate({ creditor_number: 'CR-99' }))
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ZzpTab c={candidate({ creditor_number: '' })} onSave={onSave} />)
+    await openInvoicing(user)
+    await user.click(screen.getByTitle('save')) // saved blank — nothing typed
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ creditor_number: '' }))
+    await vi.waitFor(() => expect(fetchDetailMock).toHaveBeenCalledWith('cand-1'))
+    await vi.waitFor(() => expect(screen.getByText('CR-99')).toBeInTheDocument())
+  })
+
+  it('never re-fetches when a creditor number was already present at save time', async () => {
+    const user = userEvent.setup()
+    render(<ZzpTab c={candidate()} />) // default fixture: creditor_number 'CR-1'
+    await openInvoicing(user)
+    await user.click(screen.getByTitle('save'))
+    expect(fetchDetailMock).not.toHaveBeenCalled()
   })
 })

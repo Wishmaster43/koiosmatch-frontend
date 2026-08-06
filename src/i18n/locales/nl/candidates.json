@@ -762,7 +762,9 @@
     "businessEmailDuplicateTitle": "Dit e-mailadres is al in gebruik",
     "businessEmailDuplicateBody": "{{name}} gebruikt dit e-mailadres al. Toch opslaan?",
     "businessEmailDuplicateConfirm": "Toch opslaan",
-    "businessEmailDuplicateCancel": "Terug"
+    "businessEmailDuplicateCancel": "Terug",
+    "creditorAutoHint": "Wordt automatisch toegekend indien leeg.",
+    "creditorAutoLocked": "Wordt automatisch genummerd via Instellingen → Nummering."
   },
   "certified": {
     "issued": "Uitgegeven",
@@ -1068,7 +1070,8 @@
     "pickCandidate": "Kies een kandidaat...",
     "duplicateMatchWarning": "Er bestaat al een match ({{label}}) voor deze kandidaat bij deze klant — wil je een verlenging maken?",
     "overlapWarning": "De opgegeven periode overlapt met een actieve match bij {{label}} ({{period}}).",
-    "overlapOngoing": "vanaf {{start}}"
+    "overlapOngoing": "vanaf {{start}}",
+    "overlapWarningHours": "De opgegeven periode overlapt met een actieve match bij {{label}}: samen {{hours}} uur per week in de overlappende periode ({{period}})."
   },
   "merge": {
     "title": "Kandidaat samenvoegen",

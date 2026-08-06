@@ -113,7 +113,10 @@ export default function MatchModal({
 
         {/* Duplicate + overlap preflight (points 5/6, Danny's ten-point round) —
             calm, non-blocking heads-up over the candidate's OWN existing matches. */}
-        <MatchConflictBanners duplicateMatch={form.duplicateMatch} overlappingMatches={form.overlappingMatches} formatDate={formatDate} />
+        {/* Hours-sum escalation (Danny 1.11): the drafted hours feed the overlap check —
+            2×20 stays a mild note, together above 40 escalates the wording. */}
+        <MatchConflictBanners duplicateMatch={form.duplicateMatch} overlappingMatches={form.overlappingMatches} formatDate={formatDate}
+          draftHours={form.hours ? Number(form.hours) : null} />
 
         {/* ── Titled cards (Danny 24-07 point 3) — the addmodal card idiom: an
             11px uppercase muted heading above a bordered surface, mirroring the

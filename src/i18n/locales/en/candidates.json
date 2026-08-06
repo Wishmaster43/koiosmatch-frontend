@@ -762,7 +762,9 @@
     "businessEmailDuplicateTitle": "This e-mail address is already in use",
     "businessEmailDuplicateBody": "{{name}} already uses this e-mail address. Save anyway?",
     "businessEmailDuplicateConfirm": "Save anyway",
-    "businessEmailDuplicateCancel": "Go back"
+    "businessEmailDuplicateCancel": "Go back",
+    "creditorAutoHint": "Automatically assigned if left empty.",
+    "creditorAutoLocked": "Automatically numbered via Settings → Numbering."
   },
   "certified": {
     "issued": "Issued",
@@ -1068,7 +1070,8 @@
     "pickCandidate": "Pick a candidate...",
     "duplicateMatchWarning": "A match already exists ({{label}}) for this candidate at this customer — do you want to create a renewal?",
     "overlapWarning": "The entered period overlaps with an active match at {{label}} ({{period}}).",
-    "overlapOngoing": "from {{start}}"
+    "overlapOngoing": "from {{start}}",
+    "overlapWarningHours": "The entered period overlaps with an active match at {{label}}: together {{hours}} hours per week in the overlapping period ({{period}})."
   },
   "merge": {
     "title": "Merge candidate",

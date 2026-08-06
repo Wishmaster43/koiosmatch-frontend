@@ -14,19 +14,34 @@
  * 1.1.5 — the business e-mail gets a client-side format check plus an async,
  * ON-SAVE-ONLY duplicate warning (never a hard block, §3 "prompt, don't
  * hard-block") via useBusinessEmailDuplicateCheck.
- * 1.1.4 (creditor number) is explicitly OUT of scope here — separate backend
- * sequence ticket.
+ *
+ * 1.1.4 (creditor number, ZZP-CREDITOR-SEQ-1) — CREDITOR-AUTO-1: the field
+ * becomes READ-ONLY once the tenant's own numbering sequence owns it
+ * (Settings → Nummering, `useNumberingEntities`, entity key `zzp_creditor`).
+ * That entity does not exist in the numbering-entities list yet (confirmed
+ * live 2026-08 — the backend hasn't wired it up there), so the FE genuinely
+ * cannot assert "on auto" today; the field stays EDITABLE with a muted
+ * "auto-assigned if left empty" hint instead of guessing. The check itself
+ * stays live so the day the backend adds that entity, this tab reacts with
+ * zero further FE change. Separately: the backend auto-fills a BLANK creditor
+ * number on save (its own numbering sequence) — the optimistic onUpdate above
+ * only echoes back what was TYPED, so a still-empty field would keep showing
+ * blank until the drawer is reopened. This tab re-reads the record itself in
+ * that one case (fetchDetail) and shows the fresh number locally until the
+ * parent's own state catches up.
  */
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import EditableFieldTableJs from '@/components/forms/EditableFieldTable'
 import { kvkValue, vatValue } from '@/components/drawer/contactLinks'
 import { useConfirm } from '@/hooks/useConfirm'
 import { notifyError } from '@/lib/notify'
+import { useNumberingEntities } from '@/lib/useNumberingEntities'
 import ZzpAddressCard from './ZzpAddressCard'
 import type { ZzpAddressValues } from './ZzpAddressCard'
 import { useBusinessEmailDuplicateCheck } from '../hooks/useBusinessEmailDuplicateCheck'
+import { useCandidateRecord } from '../hooks/useCandidateMutations'
 import { WIDE_LABEL_WIDTH } from './PreferencesZzpTabs'
 import type { Candidate } from '@/types/candidate'
 
@@ -44,6 +59,42 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
   const zzp = c.zzp
   // Legacy fallbacks live on the flat candidate record (not on the typed model).
   const flat = c as unknown as Record<string, unknown>
+
+  // CREDITOR-AUTO-1: "is the creditor number on the tenant's numbering sequence?"
+  // — the only place the FE can check is the numbering-entities lookup; a
+  // `zzp_creditor` entry there is the honest signal (see the file header).
+  const { entities: numberingEntities } = useNumberingEntities()
+  const creditorAutoNumbered = numberingEntities.some(e => e.key === 'zzp_creditor')
+
+  // Local override for a creditor number the BACKEND filled in on a blank save —
+  // reset the moment a different candidate is shown so a stale fetched number can
+  // never leak onto the next dossier (mirrors CandidateDrawer's own prevId reset).
+  const [creditorOverride, setCreditorOverride] = useState<string | null>(null)
+  const [prevCandidateId, setPrevCandidateId] = useState(c.id)
+  if (c.id !== prevCandidateId) { setPrevCandidateId(c.id); setCreditorOverride(null) }
+  // Always-current candidate id for the async resolution below — a plain closure
+  // over `c.id` would still read the id from the render the save happened in.
+  // Updated in an effect (never during render — refs are for event handlers/effects).
+  const candidateIdRef = useRef(c.id)
+  useEffect(() => { candidateIdRef.current = c.id }, [c.id])
+  // Re-armed in effect SETUP (§9): StrictMode's setup→cleanup→setup must never
+  // leave this permanently false.
+  const mountedRef = useRef(false)
+  useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false } }, [])
+  const { fetchDetail } = useCandidateRecord()
+  // Re-read just this one record and adopt the fresh creditor number, if any —
+  // ignored if the drawer moved to another candidate or unmounted meanwhile.
+  const refreshCreditorNumber = (forId: typeof c.id) => {
+    void (async () => {
+      const fresh = await fetchDetail(forId)
+      if (!mountedRef.current || candidateIdRef.current !== forId) return
+      if (fresh && fresh !== 'gone') {
+        const num = (fresh.zzp as Record<string, unknown> | undefined)?.creditor_number
+        if (num) setCreditorOverride(String(num))
+      }
+    })()
+  }
+
   // Bedrijf/Facturatie values — the address block below owns its own values now
   // (ZzpAddressCard), so this object no longer carries street/postcode/etc.
   const value = {
@@ -51,7 +102,7 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
     kvk:            zzp.kvk_number      ?? flat.kvk          ?? '',
     btw:            zzp.vat_number      ?? flat.btw          ?? '',
     kor:            zzp.kor             ?? flat.kor          ?? false,
-    crediteur:      zzp.creditor_number ?? '',
+    crediteur:      creditorOverride    ?? zzp.creditor_number ?? '',
     email_zakelijk: zzp.business_email  ?? '',
     iban:           zzp.iban            ?? flat.iban         ?? '',
   }
@@ -64,8 +115,10 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
     { key: 'btw', label: t('zzp.vat'), group: t('zzp.groupCompany'),
       renderValue: (v: unknown) => vatValue(v, t('zzp.openVies')) },
     { key: 'kor', label: t('zzp.kor'), group: t('zzp.groupCompany'), type: 'checkbox' },
-    // 1.1.4 (creditor number) is a separate backend sequence ticket — left untouched.
-    { key: 'crediteur', label: t('zzp.creditor'), group: t('zzp.groupInvoicing') },
+    // CREDITOR-AUTO-1: only offered as an editable row while the tenant does NOT
+    // run it through the numbering sequence — once it does, it renders as its
+    // own read-only row instead (see the JSX below), never as an input here.
+    ...(creditorAutoNumbered ? [] : [{ key: 'crediteur', label: t('zzp.creditor'), group: t('zzp.groupInvoicing') }]),
     { key: 'email_zakelijk', label: t('zzp.businessEmail'), group: t('zzp.groupInvoicing'), inputType: 'email' },
     { key: 'iban', label: t('zzp.iban'), group: t('zzp.groupInvoicing') },
   ]
@@ -108,7 +161,12 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
   const originalEmail = String(value.email_zakelijk ?? '').trim()
 
   const handleSaveInvoicing = (v: Record<string, unknown>) => {
-    const commit = () => onSave?.({ creditor_number: v.crediteur, business_email: v.email_zakelijk, iban: v.iban })
+    const commit = () => {
+      onSave?.({ creditor_number: v.crediteur, business_email: v.email_zakelijk, iban: v.iban })
+      // CREDITOR-AUTO-1: only worth a re-read when it was submitted BLANK — that
+      // is the one case the backend fills in behind the optimistic patch above.
+      if (!String(v.crediteur ?? '').trim()) refreshCreditorNumber(c.id)
+    }
     const email = String(v.email_zakelijk ?? '').trim()
     if (!email) { commit(); return }
     if (!EMAIL_FORMAT_RE.test(email)) {
@@ -136,7 +194,28 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <EditableFieldTable title={t('zzp.groupCompany')} fields={blockFields(t('zzp.groupCompany'))} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveCompany} />
       <ZzpAddressCard value={addressValue} onSave={handleSaveAddress} />
+      {/* CREDITOR-AUTO-1 locked row — only rendered once the tenant's numbering
+          sequence actually owns this field (see creditorAutoNumbered above);
+          styled to match the calm EditableFieldTable card look (CANON-BOX). */}
+      {creditorAutoNumbered && (
+        <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)',
+          padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', width: WIDE_LABEL_WIDTH, flexShrink: 0 }}>{t('zzp.creditor')}</span>
+            <span style={{ fontSize: 12, color: value.crediteur ? 'var(--text)' : 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>
+              {(value.crediteur as string) || '-'}
+            </span>
+          </div>
+          <div style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)' }}>{t('zzp.creditorAutoLocked')}</div>
+        </div>
+      )}
       <EditableFieldTable key={`invoicing-${invoicingEpoch}`} title={t('zzp.groupInvoicing')} fields={blockFields(t('zzp.groupInvoicing'))} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveInvoicing} />
+      {/* Honest fallback (CREDITOR-AUTO-1): the FE cannot confirm the tenant's
+          numbering state yet (see file header), so the field stays editable and
+          this is the whole story — no guessing at a mode that isn't exposed. */}
+      {!creditorAutoNumbered && !value.crediteur && (
+        <div style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)', padding: '0 12px' }}>{t('zzp.creditorAutoHint')}</div>
+      )}
       {dialog}
     </div>
   )
