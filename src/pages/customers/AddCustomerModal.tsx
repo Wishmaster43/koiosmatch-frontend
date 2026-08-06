@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
-import { X, Building2 } from 'lucide-react'
+import { Building2 } from 'lucide-react'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import { useIndustries } from '@/lib/useIndustries'
 import { useLocations } from '@/lib/useLocations'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
@@ -111,7 +111,6 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
   users?: ModalUser[]; statuses?: LookupOption[]
 }) {
   const { t } = useTranslation(['customers', 'common'])
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { industries } = useIndustries()
   // KLANT-FASE-1: the lifecycle-phase lookup + the is_default phase a new customer starts in.
   const { phases, defaultPhase } = useCustomerPhases()
@@ -218,30 +217,26 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
   const userOptions = users.map(u => ({ value: String(u.id), label: u.name }))
 
   return (
-    <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('modal.title')} tabIndex={-1}
-        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', ...WIDE_MODAL,
-        boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-
-        {/* Header */}
-        <div style={{ padding: '20px 24px 14px', borderBottom: '1px solid var(--border)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Building2 size={16} color="var(--color-primary)" />
+    // POPUP-SLEEP-1: swapped the bespoke overlay/panel shell for the shared
+    // draggable FloatingPanel; the bespoke header (icon + phase-in-title + phase
+    // pills) rides along inside the drag handle via the `header` slot.
+    <FloatingPanel open onClose={onClose} ariaLabel={t('modal.title')}
+      persistKey="customer-add" scrollBody={false}
+      width="min(calc(100vw - 48px), 1060px)" maxWidth={`${WIDE_MODAL.maxWidth}px`}
+      header={
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+          <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Building2 size={16} color="var(--color-primary)" />
+          </div>
+          <div>
+            {/* The chosen phase is in the TITLE, exactly as the candidate modal reads
+                "Nieuwe — Lead" (Danny 02-08: "die fase moet zijn zoals + nieuwe
+                kandidaat"). A phase buried in a card is a phase nobody notices. */}
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>
+              {selectedPhase ? `${t('modal.title')} — ${selectedPhase.label}` : t('modal.title')}
             </div>
-            <div>
-              {/* The chosen phase is in the TITLE, exactly as the candidate modal reads
-                  "Nieuwe — Lead" (Danny 02-08: "die fase moet zijn zoals + nieuwe
-                  kandidaat"). A phase buried in a card is a phase nobody notices. */}
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>
-                {selectedPhase ? `${t('modal.title')} — ${selectedPhase.label}` : t('modal.title')}
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('modal.subtitle')}</div>
-            </div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('modal.subtitle')}</div>
           </div>
           {/* Phase choice — two compact pills, the same control the candidate uses. */}
           <div style={{ display: 'flex', gap: 8, marginLeft: 'auto', marginRight: 12, flexShrink: 0 }}>
@@ -261,10 +256,8 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
               )
             })}
           </div>
-          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
-            <X size={18} />
-          </button>
         </div>
+      }>
 
         {/* Body — KLANT-LAYOUT-2 (Danny 03-08 A+D decision): these cards used to
             stack in ONE column inside this WIDE_MODAL frame, wasting half its
@@ -328,7 +321,6 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
             {saving ? t('common:saving') : t('modal.create')}
           </button>
         </div>
-      </div>
-    </div>
+    </FloatingPanel>
   )
 }

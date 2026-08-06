@@ -30,7 +30,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Search, GitMerge, Loader2 } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
+import FloatingPanel from '@/components/ui/FloatingPanel'
+import { Z } from '@/lib/zIndexScale'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { Id } from '@/types/common'
 
@@ -54,7 +55,6 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
 }) {
   const { t } = useTranslation('customers')
   const queryClient = useQueryClient()
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
   // Step 1: debounced duplicate search across the whole tenant (excluding the open record).
   const [query, setQuery] = useState('')
@@ -116,13 +116,17 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
   )
 
   return (
-    <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('merge.title')} tabIndex={-1}
-        onClick={e => e.stopPropagation()} style={{ background: 'var(--surface)', borderRadius: 12, padding: 20, width: 460, boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>
+    // POPUP-SLEEP-1: swapped the bespoke overlay/panel shell for the shared
+    // draggable FloatingPanel. Opened on top of the drawer/modal band, so it
+    // keeps its elevated layer via Z.confirm.
+    <FloatingPanel open onClose={onClose} ariaLabel={t('merge.title')}
+      persistKey="customer-merge" zIndex={Z.confirm} width={460}
+      bodyStyle={{ padding: 20 }}
+      header={
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>
           <GitMerge size={15} /> {t('merge.title')}
         </div>
+      }>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 12 }}>{t('merge.intro', { name: current.name })}</div>
 
         {/* Step 1 — find the duplicate to absorb. */}
@@ -182,7 +186,6 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
             </button>
           </div>
         </div>
-      </div>
-    </div>
+    </FloatingPanel>
   )
 }

@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { XCircle, X, Edit2, Save } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import RichTextEditor from '@/components/ui/RichTextEditor'
@@ -15,14 +14,6 @@ interface RejectionReason { id?: Id; name?: string; label?: string }
 // Moved from RejectionBlock (now deleted) — the shape the confirm submits.
 export interface RejectPayload { reason_id: string; note: string; reason_label: string }
 
-// Overlay/panel frame mirrors DetachReasonModal (§ house rule) — wider (520 vs
-// 420) because this one also holds a rich-text editor.
-const overlay: CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 70 }
-const panel: CSSProperties = {
-  position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 71,
-  width: 520, maxWidth: '92vw', background: 'var(--surface)', borderRadius: 12, padding: 20,
-  boxShadow: '0 20px 60px rgba(0,0,0,0.2)', maxHeight: '86vh', overflowY: 'auto',
-}
 const iconBtn = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' } as const
 // The collapsed read-only note card (mirrors ProfileTab's profile-text block).
 const noteBlock = { borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', padding: '8px 10px' } as const
@@ -45,7 +36,6 @@ interface Props {
  */
 export default function RejectionModal({ application: a, onCancel, onConfirm, submitting }: Props) {
   const { t } = useTranslation(['applications', 'common'])
-  const panelRef = useFocusTrap<HTMLDivElement>(onCancel)
   const aliveRef = useRef(true)
   const [reasons, setReasons] = useState<RejectionReason[]>([])
   const [reasonId, setReasonId] = useState('')
@@ -80,17 +70,18 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
   }
 
   return (
-    <>
-      <div style={overlay} onClick={onCancel} />
-      <div ref={panelRef} style={panel} role="dialog" aria-modal="true" aria-label={t('rejection.modalTitle')} tabIndex={-1}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+    // POPUP-SLEEP-1: shell swapped onto the shared FloatingPanel (draggable/
+    // resizable, remembered position) — body/footer and flows unchanged.
+    <FloatingPanel open onClose={onCancel} ariaLabel={t('rejection.modalTitle')}
+      persistKey="application-rejection" width={520} maxWidth="92vw"
+      bodyStyle={{ padding: 20 }}
+      header={
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
             background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}><XCircle size={16} /></span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{t('rejection.modalTitle')}</span>
-          <button onClick={onCancel} aria-label={t('common:close')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
-        </div>
-
+          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('rejection.modalTitle')}</span>
+        </span>
+      }>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {/* AI advice */}
           {a.ai?.advice === 'reject' && (
@@ -158,7 +149,6 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
             {t('rejection.confirm')}
           </button>
         </div>
-      </div>
-    </>
+    </FloatingPanel>
   )
 }

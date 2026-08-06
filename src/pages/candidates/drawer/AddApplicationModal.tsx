@@ -37,20 +37,18 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, AlertTriangle } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import { useVacancyOptions } from '../hooks/useVacancyOptions'
 import { useApplicationStages } from '@/hooks/useApplicationStages'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrules'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
 import type { Id } from '@/types/common'
 
-const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 60 }
-const panel: React.CSSProperties = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 61, width: 420, maxWidth: '92vw', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: '0 20px 60px rgba(0,0,0,0.18)' }
 const fieldLabel: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }
 // Consistent searchable-menu width (mirrors PlanIntakeModal/MatchModal's vacancy picker).
 const pickerMenuWidth = 340
@@ -158,16 +156,11 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
     } finally { setSaving(false) }
   }
 
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
-
   return (
-    <>
-      <div style={overlay} onClick={onClose} />
-      <div ref={panelRef} style={panel} role="dialog" aria-modal="true" aria-label={t('work.addApplication')} tabIndex={-1}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('work.addApplication')}</span>
-          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
-        </div>
+    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
+    // SE-resize, remembered position; same overlay/Esc/backdrop semantics as before.
+    <FloatingPanel open onClose={onClose} title={t('work.addApplication')} ariaLabel={t('work.addApplication')}
+      persistKey="candidate-add-application" width={420} maxWidth="92vw" bodyStyle={{ padding: 22 }}>
 
         {/* AXIS-MATRIX-2 preflight — warn/block on this candidate before the recruiter picks a vacancy. */}
         {appRuleDecision && appRuleDecision.effect !== 'allow' && (
@@ -231,7 +224,6 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
             {saving ? t('common:saving') : t('work.createApplication')}
           </button>
         </div>
-      </div>
-    </>
+    </FloatingPanel>
   )
 }

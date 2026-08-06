@@ -38,14 +38,13 @@
  * per-row section components, since each would need most of the form threaded
  * through it as props to exist (CLAUDE.md §3: single-purpose, not line-count).
  */
-import { X } from 'lucide-react'
 import SelectMenu from '@/components/ui/SelectMenu'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import { ActionRuleBanner } from '@/components/actionrules'
 import { usePlanIntakeForm } from './planIntake/usePlanIntakeForm'
 import type { PlanIntakeFormOptions } from './planIntake/usePlanIntakeForm'
-import { overlay, panel, fieldLabel, input, fieldFootprint, errMsg } from './planIntake/styles'
+import { fieldLabel, input, fieldFootprint, errMsg } from './planIntake/styles'
 
 // Re-exported from their new homes so every caller/test keeps importing them from
 // this module (WorkTab + AppointmentsTab take the type, the unit test the helper).
@@ -58,16 +57,12 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
   // only wires it to the shared chrome and renders the form below.
   const form = usePlanIntakeForm(props)
   const { t, errors, heading } = form
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
   return (
-    <>
-      <div style={overlay} onClick={onClose} />
-      <div ref={panelRef} style={panel} role="dialog" aria-modal="true" aria-label={heading} tabIndex={-1}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{heading}</span>
-          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
-        </div>
+    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
+    // remembered position; same 440px footprint as the old panel.
+    <FloatingPanel open onClose={onClose} title={heading} ariaLabel={heading}
+      persistKey="plan-intake" width={440} maxWidth="92vw" bodyStyle={{ padding: 22 }}>
 
         {/* AXIS-MATRIX-2 preflight — warn/block on this candidate before scheduling (create only). */}
         {form.apptRuleDecision && form.apptRuleDecision.effect !== 'allow' && (
@@ -158,7 +153,6 @@ export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
             {form.saving ? t('common:saving') : form.submitLabel}
           </button>
         </div>
-      </div>
-    </>
+    </FloatingPanel>
   )
 }

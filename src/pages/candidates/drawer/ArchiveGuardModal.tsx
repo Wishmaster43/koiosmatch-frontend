@@ -9,18 +9,12 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, AlertTriangle } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import { resolveApplication, resolveMatch } from '../data/archiveGuard'
 import type { BlockingApplication, BlockingMatch } from '../data/archiveGuard'
 
-const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 70 }
-const panel: React.CSSProperties = {
-  position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 71,
-  width: 460, maxWidth: '92vw', maxHeight: '82vh', overflowY: 'auto',
-  background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
-}
 const sectionHeader: React.CSSProperties = {
   display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, gap: 8,
 }
@@ -54,7 +48,6 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
 
   const hasBlockers = applications.length > 0 || matches.length > 0
   const anyConflict = Object.values(matchErrors).some(Boolean)
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
   // Resolve every listed blocker: applications → reject, matches → soft-delete.
   // Whatever fails (e.g. a HelloFlex-conflict match) stays listed + errored; the
@@ -77,14 +70,16 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
   }
 
   return (
-    <>
-      <div style={overlay} onClick={onClose} />
-      <div ref={panelRef} style={panel} role="dialog" aria-modal="true" aria-label={t('archiveGuard.title')} tabIndex={-1}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
+    // SE-resize, remembered position; the danger-icon title moves into the drag handle.
+    <FloatingPanel open onClose={onClose} ariaLabel={t('archiveGuard.title')}
+      persistKey="archive-guard" width={460} maxWidth="92vw" bodyStyle={{ padding: 22 }}
+      header={
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center', background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}><AlertTriangle size={16} /></span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{t('archiveGuard.title')}</span>
-          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
+          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('archiveGuard.title')}</span>
         </div>
+      }>
 
         <p style={{ fontSize: 13, color: 'var(--text)', marginBottom: 14, lineHeight: 1.5 }}>
           {aggregate
@@ -150,7 +145,6 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
             {resolving ? t('archiveGuard.resolving') : t(mode === 'trash' ? 'archiveGuard.resolveButtonTrash' : 'archiveGuard.resolveButtonArchive')}
           </button>
         </div>
-      </div>
-    </>
+    </FloatingPanel>
   )
 }

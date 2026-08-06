@@ -45,7 +45,6 @@ import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Save, Search, Info } from 'lucide-react'
 import { formatDate } from './helpers'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useFunctions } from '@/lib/useFunctions'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useShiftCustomers, useShiftDepartments, useShiftCandidateSearch } from './hooks/useShiftLookups'
@@ -53,6 +52,7 @@ import type { ShiftCandidateOption } from './hooks/useShiftLookups'
 import { Field, Avatar, CandidateRow, colorFor, getInitials } from './AddShiftModalFields'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import type { ShiftInput } from '@/types/planning'
 
@@ -65,7 +65,6 @@ const INPUT: CSSProperties = { padding: '8px 11px', fontSize: 13, border: '1px s
 // ── Add Shift Modal ───────────────────────────────────────────────────────────
 export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; onClose: () => void; onAdd: (shift: ShiftInput) => void }) {
   const { t } = useTranslation('planning')
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const [title,       setTitle]       = useState('')
   const [start,       setStart]       = useState('07:00')
   const [end,         setEnd]         = useState('15:00')
@@ -103,48 +102,34 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000,
-      display: 'flex', alignItems: 'stretch' }}>
-      <div style={{ display: 'flex', width: '100%', height: '100%' }}
-        onClick={e => e.target === e.currentTarget && onClose()}>
-
-        {/* ── Modal wrapper gecentreerd — house WIDE_MODAL footprint (Danny 27-07:
-            every create modal shares one frame). This panel genuinely has more to
-            show than the single-form modals (a live 3-column planner, not a form),
-            so it keeps its own 92vw responsive width; only the 1100/90vh numbers
-            were bespoke and are now the shared constant (1060/94vh). ── */}
-        <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('addShift')} tabIndex={-1}
-          style={{ margin: 'auto', width: '92%', ...WIDE_MODAL,
-          background: 'var(--bg)', borderRadius: 14, overflow: 'hidden',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column',
-          border: '1px solid var(--border)' }}>
-
-          {/* Header balk */}
-          <div style={{ display: 'flex', alignItems: 'center', padding: '12px 20px',
-            background: 'var(--sidebar-bg)', borderBottom: '1px solid var(--sidebar-border)', flexShrink: 0 }}>
-            <div>
-              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--sidebar-text)' }}>{t('addShift')}</span>
-              <span style={{ fontSize: 12, color: 'var(--sidebar-muted)', marginLeft: 10 }}>{formatDate(date)}</span>
-            </div>
-            <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-              {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
-                  PLANNING-PERSIST-1 (§3) — disabled + an honest title until a real save
-                  path exists (see the file header); onClick stays wired so it reactivates
-                  for free the moment that path lands. */}
-              <button onClick={handleSave} disabled title={t('previewSaveTitle')}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 16px', fontSize: 12,
-                  fontWeight: 600, background: 'var(--color-primary)', color: '#fff', opacity: 0.5,
-                  border: 'none', borderRadius: 8, cursor: 'not-allowed' }}>
-                <Save size={13} /> {t('common:save')}
-              </button>
-              <button onClick={onClose} aria-label={t('common:close')}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  width: 32, height: 32, background: 'none', border: '1px solid var(--sidebar-border)',
-                  borderRadius: 8, cursor: 'pointer', color: 'var(--sidebar-muted)' }}>
-                <X size={15} />
-              </button>
-            </div>
+    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel shell — draggable
+    // header, SE-resize, remembered position. The bespoke header (title + date +
+    // the honest disabled Save) rides in the panel's drag handle; the panel's own
+    // X replaces the old bespoke close button (same onClose flow). The 3-column
+    // planner keeps its own layout via scrollBody={false}.
+    <FloatingPanel open onClose={onClose} ariaLabel={t('addShift')}
+      persistKey="add-shift" scrollBody={false}
+      width="92vw" maxWidth={`${WIDE_MODAL.maxWidth}px`}
+      header={
+        <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+          <div>
+            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('addShift')}</span>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 10 }}>{formatDate(date)}</span>
           </div>
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+            {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
+                PLANNING-PERSIST-1 (§3) — disabled + an honest title until a real save
+                path exists (see the file header); onClick stays wired so it reactivates
+                for free the moment that path lands. */}
+            <button onClick={handleSave} disabled title={t('previewSaveTitle')}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 16px', fontSize: 12,
+                fontWeight: 600, background: 'var(--color-primary)', color: '#fff', opacity: 0.5,
+                border: 'none', borderRadius: 8, cursor: 'not-allowed' }}>
+              <Save size={13} /> {t('common:save')}
+            </button>
+          </div>
+        </div>
+      }>
 
           {/* Not-yet-persisted gate (PLANNING-PERSIST-1, §3) — mirrors the calm notice
               pattern from candidates/drawer/PlanningTab.tsx: Info icon + italic muted
@@ -369,8 +354,6 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
+    </FloatingPanel>
   )
 }

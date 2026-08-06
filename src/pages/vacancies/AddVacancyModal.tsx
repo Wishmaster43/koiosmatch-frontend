@@ -11,8 +11,8 @@
  * uploads/note run AFTER create via the separate usePostCreateAttachments hook
  * — nothing pending keeps the exact pre-SLICE-2 immediate-close behaviour.
  */
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import { BTN_H } from '@/config/buttonMetrics'
 import { modalColumns } from '@/components/ui/modalCards'
 import CollapsedCard from '@/components/ui/CollapsedCard'
@@ -56,7 +56,6 @@ export default function AddVacancyModal({
   // would 422, so it silently falls back to empty instead.
   initialIndustry?: string
 }) {
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   // Punten 21+22: a SEPARATE hook (own lifecycle: pick now, run after create) —
   // handed into useAddVacancyForm only so submit can sequence it (§ own hook).
   const attachments = usePostCreateAttachments()
@@ -70,31 +69,32 @@ export default function AddVacancyModal({
   // per-item post-create outcome instead of the form, Close is the recruiter's call.
   if (f.postCreatePhase) {
     return (
-      <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
-        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <div role="dialog" aria-modal="true" aria-label={f.t('modal.attachments.resultsTitle')} tabIndex={-1}
-          style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', ...WIDE_MODAL,
-          boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      // POPUP-SLEEP-1: the post-create results dialog rides the same shared
+      // FloatingPanel shell (its own persistKey — it is its own window).
+      <FloatingPanel open onClose={onClose} title={f.t('modal.attachments.resultsTitle')}
+        ariaLabel={f.t('modal.attachments.resultsTitle')} persistKey="add-vacancy-results"
+        scrollBody={false} width="min(calc(100vw - 48px), 1060px)" maxWidth={`${WIDE_MODAL.maxWidth}px`}>
           <PostCreateResultsPanel files={attachments.files} noteText={attachments.noteText}
             noteStatus={attachments.noteStatus} noteError={attachments.noteError} running={attachments.running}
             onRetryFile={attachments.retryFile} onRetryNote={attachments.retryNote} onClose={onClose} />
-        </div>
-      </div>
+      </FloatingPanel>
     )
   }
 
   return (
-    <div
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={f.t('modal.title')} tabIndex={-1}
-        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', ...WIDE_MODAL,
-        boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-
-        <ModalHeader status={f.form.status} statusOptions={f.statusOptions}
-          onSelectStatus={v => f.set('status', v)} onClose={onClose} />
+    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel shell — draggable
+    // header, SE-resize, remembered position; same WIDE_MODAL footprint. The
+    // bespoke ModalHeader (title + status pills + its own X) fills the drag
+    // handle via negative margins, so the panel's built-in X is hidden.
+    <FloatingPanel open onClose={onClose} ariaLabel={f.t('modal.title')}
+      persistKey="add-vacancy" scrollBody={false} hideClose
+      width="min(calc(100vw - 48px), 1060px)" maxWidth={`${WIDE_MODAL.maxWidth}px`}
+      header={
+        <div style={{ flex: 1, margin: '-12px -16px -13px' }}>
+          <ModalHeader status={f.form.status} statusOptions={f.statusOptions}
+            onSelectStatus={v => f.set('status', v)} onClose={onClose} />
+        </div>
+      }>
 
         {/* Form — A+D layout (Danny 03-08 decision, shared primitives from
             components/ui/modalCards + CollapsedCard, commit 4845a6ee): required-core
@@ -204,7 +204,6 @@ export default function AddVacancyModal({
             {f.saving ? f.t('modal.creating') : f.t('modal.create')}
           </button>
         </div>
-      </div>
-    </div>
+    </FloatingPanel>
   )
 }

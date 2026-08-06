@@ -22,20 +22,17 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import { templateTexts, type WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
 import type { Id } from '@/types/common'
 
 // GET /whatsapp-phone-numbers option shape — the tenant's active WhatsApp senders.
 interface PhoneNumberOption { value: string; label: string }
 
-const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 60 }
-const panel: React.CSSProperties = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 61, width: 420, maxWidth: '92vw', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: '0 20px 60px rgba(0,0,0,0.18)' }
 const fieldLabel: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }
 // Consistent searchable-menu footprint (mirrors AddApplicationModal's pickers).
 const pickerMenuWidth = 340
@@ -96,16 +93,11 @@ export default function StartConversationModal({ candidateId, onClose, onStarted
     } finally { setSending(false) }
   }
 
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
-
   return (
-    <>
-      <div style={overlay} onClick={onClose} />
-      <div ref={panelRef} style={panel} role="dialog" aria-modal="true" aria-label={t('conversations.startModalTitle')} tabIndex={-1}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('conversations.startModalTitle')}</span>
-          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
-        </div>
+    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
+    // remembered position; same 420px footprint as the old panel.
+    <FloatingPanel open onClose={onClose} title={t('conversations.startModalTitle')} ariaLabel={t('conversations.startModalTitle')}
+      persistKey="start-conversation" width={420} maxWidth="92vw" bodyStyle={{ padding: 22 }}>
 
         {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t('common:loading')}</div>}
 
@@ -154,7 +146,6 @@ export default function StartConversationModal({ candidateId, onClose, onStarted
             {sending ? t('common:saving') : t('conversations.start')}
           </button>
         </div>
-      </div>
-    </>
+    </FloatingPanel>
   )
 }

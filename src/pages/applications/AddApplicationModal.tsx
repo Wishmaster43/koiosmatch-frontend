@@ -1,8 +1,6 @@
 import { useState, useEffect, useMemo, useId } from 'react'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ComponentType, ReactNode, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { extractApiError } from '@/lib/extractApiError'
 import { useUsers } from '@/lib/queries'
@@ -16,6 +14,7 @@ import { useApplicationStages } from '@/hooks/useApplicationStages'
 import { mapApplication } from './data/mapApplication'
 import { BTN_H } from '@/config/buttonMetrics'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 import { isUuid } from '@/lib/uuid'
@@ -77,7 +76,6 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   onCreated: (app: Application) => void
   lockedVacancy?: { id: Id; title: string; client?: string }
 }) {
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('applications')
   // Funnel lookup — drives the flag-based bucket resolution in mapApplication (A1).
   const { funnelTypes } = useLookups()
@@ -174,18 +172,10 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   )
 
   return (
-    <>
-      <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={onClose} />
-      {/* S2 (Danny): widened to the same 720px two-column pattern as
-          MatchModal — the 440px panel read cramped for a full
-          candidate/vacancy "title · client" label + its search box. */}
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('add.title')} tabIndex={-1}
-        className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)',
-        borderRadius: 12, width: 720, maxWidth: '94vw', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 70px rgba(0,0,0,0.22)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('add.title')}</span>
-          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
-        </div>
+    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
+    // remembered position; keeps the S2 720px two-column footprint.
+    <FloatingPanel open onClose={onClose} title={t('add.title')} ariaLabel={t('add.title')}
+      persistKey="add-application" width={720} maxWidth="94vw">
 
         {/* Candidate + vacancy side by side — the two "big" relational pickers get
             equal, comfortable room; owner (+ start stage) sit on the row below. */}
@@ -240,7 +230,6 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
             {t('add.create')}
           </button>
         </div>
-      </div>
-    </>
+    </FloatingPanel>
   )
 }

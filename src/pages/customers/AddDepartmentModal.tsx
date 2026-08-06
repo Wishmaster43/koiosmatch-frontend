@@ -27,10 +27,10 @@
  * (customer_department_required_fields, FlatRequiredFieldsGuard catalog).
  */
 import { useState, useEffect } from 'react'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
-import { X, Building } from 'lucide-react'
+import { Building } from 'lucide-react'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import { Field, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
@@ -67,7 +67,6 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
   lockLocationId?: Id
 }) {
   const { t } = useTranslation(['customers', 'common'])
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const authCtx = useAuth() as unknown as { hasPermission?: (permName: string) => boolean } | null
   // SUBENTITY-IMPORT-1: falls back to "no permission" rather than crashing when the
   // context is mid-boot OR genuinely absent (this modal is also mounted from screens
@@ -149,23 +148,23 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
   const showLocationPicker = !lockLocationId
 
   return (
-    <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 210, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={isEdit ? t('subModal.editDepartment') : t('subModal.addDepartment')} tabIndex={-1}
-        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', ...WIDE_MODAL, boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '18px 22px 12px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--color-violet-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Building size={15} color="var(--color-violet)" />
-            </div>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{isEdit ? t('subModal.editDepartment') : t('subModal.addDepartment')}</div>
-              {customerName && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{customerName}</div>}
-            </div>
+    // POPUP-SLEEP-1: swapped the bespoke overlay/panel shell for the shared
+    // draggable FloatingPanel — same focus-trap/backdrop/Esc semantics.
+    <FloatingPanel open onClose={onClose}
+      ariaLabel={isEdit ? t('subModal.editDepartment') : t('subModal.addDepartment')}
+      persistKey="customer-add-department" scrollBody={false}
+      width="min(calc(100vw - 48px), 1060px)" maxWidth={`${WIDE_MODAL.maxWidth}px`}
+      header={
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--color-violet-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Building size={15} color="var(--color-violet)" />
           </div>
-          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}><X size={18} /></button>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{isEdit ? t('subModal.editDepartment') : t('subModal.addDepartment')}</div>
+            {customerName && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{customerName}</div>}
+          </div>
         </div>
-
+      }>
         <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Algemeen — name, locatie (searchable, hidden when locked), status.
               Location+status pair in one row when both show; status alone stays
@@ -284,7 +283,6 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
             {isEdit ? t('subModal.save') : t('subModal.create')}
           </button>
         </div>
-      </div>
-    </div>
+    </FloatingPanel>
   )
 }

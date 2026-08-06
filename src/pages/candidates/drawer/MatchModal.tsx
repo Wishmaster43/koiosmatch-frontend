@@ -45,9 +45,7 @@
  * blocks — on the candidate's own existing matches, right under the AXIS-MATRIX
  * preflight so it's visible before the recruiter fills in the rest.
  */
-import { X } from 'lucide-react'
 import { RateDeviationWarning } from './RateProposalNotice'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useDateFormat } from '@/lib/datetime'
 import { ActionRuleBanner } from '@/components/actionrules'
 import { useMatchForm } from './match/useMatchForm'
@@ -59,7 +57,9 @@ import MatchConflictBanners from './match/MatchConflictBanners'
 // agnostic component (components/ui) so candidate/customer/location/department
 // create modals get the same collapsed-ghost prose block — see its own docblock.
 import CollapsibleRichText from '@/components/ui/CollapsibleRichText'
-import { overlay, panel, twoColSections } from './match/styles'
+import FloatingPanel from '@/components/ui/FloatingPanel'
+import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import { twoColSections } from './match/styles'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import type { Id } from '@/types/common'
 
@@ -95,19 +95,16 @@ export default function MatchModal({
     candidateOwnerId,
   })
   const { t, editing } = form
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const title = t(editing ? 'placement.editTitle' : 'placement.title')
   // DD-MM-YYYY everywhere (§3B) — used only for the overlap banner's period text.
   const { formatDate } = useDateFormat()
 
   return (
-    <>
-      <div style={overlay} onClick={onClose} />
-      <div ref={panelRef} style={panel} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-          <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>{title}</span>
-          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
-        </div>
+    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
+    // SE-resize, remembered position; same WIDE_MODAL footprint as before.
+    <FloatingPanel open onClose={onClose} title={title} ariaLabel={title}
+      persistKey="candidate-match" width="94vw" maxWidth={`${WIDE_MODAL.maxWidth}px`}
+      bodyStyle={{ padding: 22 }}>
 
         {/* AXIS-MATRIX-2 preflight — warn/block on this candidate before the recruiter fills in the rest. */}
         {form.matchRuleDecision && form.matchRuleDecision.effect !== 'allow' && (
@@ -215,7 +212,6 @@ export default function MatchModal({
             {form.saving ? t('common:saving') : (form.deviatesFromProposal && form.confirmDeviation ? t('placement.rateProposal.deviationConfirm') : t(editing ? 'common:save' : 'placement.create'))}
           </button>
         </div>
-      </div>
-    </>
+    </FloatingPanel>
   )
 }

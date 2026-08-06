@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Ban, X } from 'lucide-react'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { Ban } from 'lucide-react'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
@@ -10,13 +10,6 @@ import { useMatchStopReasons } from '../hooks/useMatchStopReasons'
 import { useMatchTerminate } from '../hooks/useMatchTerminate'
 import type { MatchRow } from '@/types/match'
 
-// Overlay/panel frame mirrors DetachReasonModal/RejectionModal (§ house rule).
-const overlay: CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 70 }
-const panel: CSSProperties = {
-  position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 71,
-  width: 460, maxWidth: '92vw', background: 'var(--surface)', borderRadius: 12, padding: 20,
-  boxShadow: '0 20px 60px rgba(0,0,0,0.2)', maxHeight: '86vh', overflowY: 'auto',
-}
 const fieldBox: CSSProperties = { width: '100%', boxSizing: 'border-box', padding: '8px 10px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', outline: 'none', fontFamily: 'inherit' }
 const errorText: CSSProperties = { fontSize: 11, color: 'var(--color-danger)', marginTop: 4 }
 const NOTE_MAX = 2000
@@ -50,7 +43,6 @@ interface Props {
  */
 export default function TerminateMatchModal({ match, onClose, onUpdate }: Props) {
   const { t } = useTranslation(['matches', 'common'])
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   // Reason lookup — tenant-managed, no seed (see useMatchStopReasons doc comment).
   const { reasons, loading: reasonsLoading } = useMatchStopReasons()
   const { terminate, saving } = useMatchTerminate(match.id, onUpdate)
@@ -86,17 +78,18 @@ export default function TerminateMatchModal({ match, onClose, onUpdate }: Props)
   }
 
   return (
-    <>
-      <div style={overlay} onClick={onClose} />
-      <div ref={panelRef} style={panel} role="dialog" aria-modal="true" aria-label={t('drawer.terminate.modalTitle')} tabIndex={-1}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+    // POPUP-SLEEP-1: shell swapped onto the shared FloatingPanel (draggable/
+    // resizable, remembered position) — body/footer and flows unchanged.
+    <FloatingPanel open onClose={onClose} ariaLabel={t('drawer.terminate.modalTitle')}
+      persistKey="match-terminate" width={460} maxWidth="92vw"
+      bodyStyle={{ padding: 20 }}
+      header={
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
             background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}><Ban size={16} /></span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{t('drawer.terminate.modalTitle')}</span>
-          <button onClick={onClose} aria-label={t('common:close')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
-        </div>
-
+          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('drawer.terminate.modalTitle')}</span>
+        </span>
+      }>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {/* Reason — searchable tenant lookup (allowCreate off: a stop reason is
               picked, never free-typed). No seed fallback: an honest disabled
@@ -151,7 +144,6 @@ export default function TerminateMatchModal({ match, onClose, onUpdate }: Props)
             {t('drawer.terminate.confirm')}
           </button>
         </div>
-      </div>
-    </>
+    </FloatingPanel>
   )
 }

@@ -6,11 +6,11 @@
  * UsersPage.
  */
 import { useState, useEffect } from 'react'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ChangeEvent, CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { ManagedUser } from '@/types/api'
 import { useAssignableRoles } from './hooks/useAssignableRoles'
@@ -33,7 +33,6 @@ export default function NewUserModal({ onClose, onCreated }: {
   onCreated: (user: ManagedUser) => void
 }) {
   const { t } = useTranslation('users')
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { roles, loading: rolesLoading } = useAssignableRoles()
   const [form, setForm]     = useState({ firstname: '', lastname: '', email: '', password: '', role: '' })
   const [saving, setSaving] = useState(false)
@@ -105,21 +104,10 @@ export default function NewUserModal({ onClose, onCreated }: {
   const label: CSSProperties = { display: 'block', fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5 }
 
   return (
-    <>
-      <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={onClose} />
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('newUser')} tabIndex={-1}
-        className="fixed z-50" style={{
-        top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-        background: 'var(--surface)', borderRadius: 14, boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
-        width: 420, padding: 24,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('newUser')}</h3>
-          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
-            <X size={16} />
-          </button>
-        </div>
-
+    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel shell — draggable
+    // header, SE-resize, remembered position; same 420px footprint as before.
+    <FloatingPanel open onClose={onClose} title={t('newUser')} ariaLabel={t('newUser')}
+      persistKey="new-user" width={420} bodyStyle={{ padding: '20px 24px 24px' }}>
         <form onSubmit={handleSubmit}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
             <div>
@@ -202,7 +190,6 @@ export default function NewUserModal({ onClose, onCreated }: {
             </button>
           </div>
         </form>
-      </div>
-    </>
+    </FloatingPanel>
   )
 }

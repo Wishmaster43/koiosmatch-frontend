@@ -14,9 +14,9 @@
  * come from Intl (locale-aware) so there are no hardcoded NL arrays.
  */
 import { useTranslation } from 'react-i18next'
-import { X, CalendarDays, Play, Zap, Bell, Webhook } from 'lucide-react'
+import { CalendarDays, Play, Zap, Bell, Webhook } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import type { ScheduleConfig } from '@/types/workflow'
 import { EventCombobox } from './EventCombobox'
 import { WebhookAgentSelect } from './WebhookAgentSelect'
@@ -35,24 +35,18 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
   const locale = i18n.language
   const form = useScheduleForm(trigger, scheduleConfig, onSave)
   const { type, setType } = form
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)' }}
-      onClick={onClose}>
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('scheduleModal.title')} tabIndex={-1}
-        style={{ width: 'min(820px, 94vw)', background: 'var(--surface)', borderRadius: 16, boxShadow: '0 8px 40px rgba(0,0,0,0.2)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}
-        onClick={e => e.stopPropagation()}>
-
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <CalendarDays size={16} color="var(--color-primary)" />
-            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('scheduleModal.title')}</span>
-          </div>
-          <button onClick={onClose} aria-label={t('scheduleModal.cancel')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
+    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel shell — draggable
+    // header, SE-resize, remembered position; same 820px footprint as before.
+    <FloatingPanel open onClose={onClose} ariaLabel={t('scheduleModal.title')}
+      persistKey="workflow-schedule" scrollBody={false} width="min(820px, 94vw)"
+      header={
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <CalendarDays size={16} color="var(--color-primary)" />
+          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('scheduleModal.title')}</span>
         </div>
-
+      }>
         <div style={{ overflowY: 'auto', flex: 1, padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
 
           {/* Trigger type selector — roomier cards in the wider modal (TRIGGER-POPUP-2) */}
@@ -125,7 +119,6 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
               cursor: form.canSave ? 'pointer' : 'not-allowed',
             }}>{t('scheduleModal.save')}</button>
         </div>
-      </div>
-    </div>
+    </FloatingPanel>
   )
 }

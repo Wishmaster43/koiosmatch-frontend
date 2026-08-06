@@ -15,7 +15,8 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import api, { unwrapList } from '@/lib/api'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
+import FloatingPanel from '@/components/ui/FloatingPanel'
+import { Z } from '@/lib/zIndexScale'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { VacancyOption } from '../hooks/useVacancyOptions'
 
@@ -50,12 +51,11 @@ function MatchPickModal({
   onCloseMatch, matches, matchChoice, setMatchChoice, newMatchVacancyId, setNewMatchVacancyId,
   vacancyOptions, creatingMatch, onConfirmMatch, t,
 }: Pick<Props, 'onCloseMatch' | 'matches' | 'matchChoice' | 'setMatchChoice' | 'newMatchVacancyId' | 'setNewMatchVacancyId' | 'vacancyOptions' | 'creatingMatch' | 'onConfirmMatch'> & { t: TFunction }) {
-  const panelRef = useFocusTrap<HTMLDivElement>(onCloseMatch)
   return (
-    <div onClick={onCloseMatch} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('drawer.placedPickMatch')} tabIndex={-1}
-        onClick={e => e.stopPropagation()} style={{ background: 'var(--surface)', borderRadius: 12, padding: 20, width: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>{t('drawer.placedPickMatch')}</div>
+    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
+    // SE-resize, remembered position; keeps its above-the-drawer layer via Z.confirm.
+    <FloatingPanel open onClose={onCloseMatch} title={t('drawer.placedPickMatch')} ariaLabel={t('drawer.placedPickMatch')}
+      persistKey="candidate-match-pick" width={400} zIndex={Z.confirm} bodyStyle={{ padding: 20 }}>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 12 }}>{t('drawer.placedPickMatchBody')}</div>
 
         {/* Pick one of the candidate's existing matches (dropdown). */}
@@ -87,8 +87,7 @@ function MatchPickModal({
           <button disabled={(!matchChoice && !newMatchVacancyId) || creatingMatch} onClick={onConfirmMatch}
             style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer', opacity: ((matchChoice || newMatchVacancyId) && !creatingMatch) ? 1 : 0.5 }}>{t('drawer.placedConfirm')}</button>
         </div>
-      </div>
-    </div>
+    </FloatingPanel>
   )
 }
 
@@ -97,12 +96,11 @@ function StatusReasonModal({
   statusModal, setStatusModal, onConfirmStatus, blReasons, t,
 }: Pick<Props, 'setStatusModal' | 'onConfirmStatus'> & { statusModal: StatusModalState; blReasons: string[]; t: TFunction }) {
   const close = () => setStatusModal(null)
-  const panelRef = useFocusTrap<HTMLDivElement>(close)
   return (
-    <div onClick={close} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('drawer.statusReasonTitle')} tabIndex={-1}
-        onClick={e => e.stopPropagation()} style={{ background: 'var(--surface)', borderRadius: 12, padding: 20, width: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>{t('drawer.statusReasonTitle')}</div>
+    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
+    // SE-resize, remembered position; keeps its above-the-drawer layer via Z.confirm.
+    <FloatingPanel open onClose={close} title={t('drawer.statusReasonTitle')} ariaLabel={t('drawer.statusReasonTitle')}
+      persistKey="candidate-status-reason" width={400} zIndex={Z.confirm} bodyStyle={{ padding: 20 }}>
         {statusModal.needReason && (
           <div style={{ marginBottom: 12 }}>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>
@@ -143,8 +141,7 @@ function StatusReasonModal({
           <button onClick={onConfirmStatus} disabled={statusModal.needReason && !statusModal.reason.trim()}
             style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer', opacity: (statusModal.needReason && !statusModal.reason.trim()) ? 0.5 : 1 }}>{t('common:save')}</button>
         </div>
-      </div>
-    </div>
+    </FloatingPanel>
   )
 }
 

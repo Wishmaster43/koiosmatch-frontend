@@ -7,11 +7,11 @@
  * Role is changed inline in the table.
  */
 import { useState } from 'react'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ChangeEvent, CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Loader2, RefreshCw } from 'lucide-react'
+import { Loader2, RefreshCw } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import { BTN_H } from '@/config/buttonMetrics'
 import { useLocations } from '@/lib/useLocations'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
@@ -24,7 +24,6 @@ export default function EditUserModal({ user, onClose, onSaved }: {
   onSaved: (updated: ManagedUser) => void
 }) {
   const { t } = useTranslation('users')
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const locationOptions = useLocations()
   const { branches, loading: branchesLoading, saving: branchesSaving, toggle: toggleBranch } = useUserBranches(user.id)
   // Fallback: split `name` when firstname/lastname arrive as a single string.
@@ -80,29 +79,20 @@ export default function EditUserModal({ user, onClose, onSaved }: {
   }
 
   return (
-    <>
-      <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={onClose} />
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('editUser')} tabIndex={-1}
-        className="fixed z-50" style={{
-        top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-        background: 'var(--surface)', borderRadius: 14, boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
-        width: 420, padding: 24,
-      }}>
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>
-            {t('editUser')}
-            {(user.firstname || user.name) && (
-              <span style={{ fontWeight: 400, color: 'var(--text-muted)', marginLeft: 8, fontSize: 13 }}>
-                {user.firstname ? `${user.firstname} ${user.lastname ?? ''}`.trim() : user.name}
-              </span>
-            )}
-          </h3>
-          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
-            <X size={16} />
-          </button>
-        </div>
-
+    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel shell — draggable
+    // header, SE-resize, remembered position; same 420px footprint as before.
+    <FloatingPanel open onClose={onClose} ariaLabel={t('editUser')}
+      persistKey="edit-user" width={420} bodyStyle={{ padding: '20px 24px 24px' }}
+      header={
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', flex: 1 }}>
+          {t('editUser')}
+          {(user.firstname || user.name) && (
+            <span style={{ fontWeight: 400, color: 'var(--text-muted)', marginLeft: 8, fontSize: 13 }}>
+              {user.firstname ? `${user.firstname} ${user.lastname ?? ''}`.trim() : user.name}
+            </span>
+          )}
+        </h3>
+      }>
         <form onSubmit={handleSubmit}>
           {/* Name row */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
@@ -187,7 +177,6 @@ export default function EditUserModal({ user, onClose, onSaved }: {
             </button>
           </div>
         </form>
-      </div>
-    </>
+    </FloatingPanel>
   )
 }

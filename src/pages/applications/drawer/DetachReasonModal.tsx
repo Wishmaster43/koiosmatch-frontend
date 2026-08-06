@@ -1,15 +1,8 @@
 import { useState } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Unlink } from 'lucide-react'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { Unlink } from 'lucide-react'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 
-const overlay: CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 70 }
-const panel: CSSProperties = {
-  position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 71,
-  width: 420, maxWidth: '92vw', background: 'var(--surface)', borderRadius: 12, padding: 20,
-  boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
-}
 const REASON_MAX = 1000
 
 interface Props {
@@ -29,21 +22,21 @@ interface Props {
 export default function DetachReasonModal({ onCancel, onConfirm, submitting }: Props) {
   const { t } = useTranslation(['applications', 'common'])
   const [reason, setReason] = useState('')
-  const panelRef = useFocusTrap<HTMLDivElement>(onCancel)
   const trimmed = reason.trim()
 
   return (
-    <>
-      <div style={overlay} onClick={onCancel} />
-      <div ref={panelRef} style={panel} role="dialog" aria-modal="true" aria-label={t('detach.reasonTitle')} tabIndex={-1}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+    // POPUP-SLEEP-1: shell swapped onto the shared FloatingPanel (draggable/
+    // resizable, remembered position) — body/footer and flows unchanged.
+    <FloatingPanel open onClose={onCancel} ariaLabel={t('detach.reasonTitle')}
+      persistKey="application-detach-reason" width={420} maxWidth="92vw"
+      bodyStyle={{ padding: 20 }}
+      header={
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
             background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}><Unlink size={16} /></span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{t('detach.reasonTitle')}</span>
-          <button onClick={onCancel} aria-label={t('common:close')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
-        </div>
-
+          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('detach.reasonTitle')}</span>
+        </span>
+      }>
         <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>{t('detach.reasonLabel')}</label>
         <textarea autoFocus value={reason} maxLength={REASON_MAX} onChange={e => setReason(e.target.value)}
           placeholder={t('detach.reasonPlaceholder')} rows={3}
@@ -62,7 +55,6 @@ export default function DetachReasonModal({ onCancel, onConfirm, submitting }: P
             {t('detach.confirm')}
           </button>
         </div>
-      </div>
-    </>
+    </FloatingPanel>
   )
 }

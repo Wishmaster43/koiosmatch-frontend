@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { Field, TextField, DateField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useAuth } from '@/context/AuthContext'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
 import { useOpportunityServiceTypes, useOpportunityAgreementTypes } from '@/lib/useOpportunityLookups'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useCustomerCascade } from './hooks/useCustomerCascade'
 // The shared "Name — Function" contact-option label (§11 — one shared builder,
 // not a per-screen copy); imported straight from the real implementation since
@@ -16,6 +14,7 @@ import { contactOptionLabel } from '@/lib/contactLabel'
 import { mapOpportunity } from './data/mapOpportunity'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import { cardHead, cardBox, row2, cardPair } from '@/components/ui/modalCards'
 import type { ApiOpportunity, Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
@@ -82,9 +81,6 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
   const { agreementTypes } = useOpportunityAgreementTypes()
   // Owner defaults to the logged-in user (still changeable below).
   const { user: me } = useAuth() as unknown as { user: { id?: Id; name?: string } | null }
-  // Esc closes + Tab-trap + focus-restore (house dialog pattern, §6 — this modal
-  // lacked it before; adding it is part of bringing it onto the house frame).
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [saving, setSaving] = useState(false)
@@ -215,25 +211,11 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
   const title = t(isEdit ? 'modal.editTitle' : 'modal.title')
 
   return (
-    <div
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      {/* House wide-form frame (Danny 27-07: same footprint as +Match/+Kandidaat —
-          src/components/ui/modalMetrics.ts is the one place to resize any of them). */}
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}
-        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', ...WIDE_MODAL,
-          boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-
-        {/* Header */}
-        <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border)', flexShrink: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{title}</span>
-          <button onClick={onClose} aria-label={t('common:cancel')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
-            <X size={18} />
-          </button>
-        </div>
+    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel shell — draggable header,
+    // SE-resize, remembered position; same WIDE_MODAL footprint as before.
+    <FloatingPanel open onClose={onClose} title={title} ariaLabel={title}
+      persistKey="add-opportunity" scrollBody={false}
+      width="min(calc(100vw - 48px), 1060px)" maxWidth={`${WIDE_MODAL.maxWidth}px`}>
 
         {/* Form — two titled cards side by side (house wide-frame idiom, mirrors
             the +Match modal's Relaties/Contract/Financieel cards).
@@ -359,7 +341,6 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
               : (saving ? t('modal.creating') : t('modal.create'))}
           </button>
         </div>
-      </div>
-    </div>
+    </FloatingPanel>
   )
 }

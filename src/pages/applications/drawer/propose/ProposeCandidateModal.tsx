@@ -1,7 +1,6 @@
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Info, Send, TriangleAlert, X } from 'lucide-react'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { Info, Send, TriangleAlert } from 'lucide-react'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import { useActionRulePreflight, ActionRuleBanner, ActionRuleDialog } from '@/components/actionrules'
 import type { ActionRuleDecision } from '@/components/actionrules'
 import CreatableSelect from '@/components/ui/CreatableSelect'
@@ -11,14 +10,6 @@ import { contactOptionLabel } from '@/lib/contactLabel'
 import { useProposeForm } from './useProposeForm'
 import type { ApplicationDetail } from '@/types/application'
 
-// Overlay/panel frame mirrors RejectionModal (§ house rule) — a touch wider
-// (560) to hold the recipient picker, variant choice and message composer.
-const overlay: CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 70 }
-const panel: CSSProperties = {
-  position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 71,
-  width: 560, maxWidth: '92vw', background: 'var(--surface)', borderRadius: 12, padding: 20,
-  boxShadow: '0 20px 60px rgba(0,0,0,0.2)', maxHeight: '88vh', overflowY: 'auto',
-}
 const sectionTitle = { fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 6 } as const
 const muted = { fontSize: 11, color: 'var(--text-muted)' } as const
 const inputBase = { width: '100%', boxSizing: 'border-box' as const, padding: '7px 10px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', outline: 'none' }
@@ -47,7 +38,6 @@ interface Props {
  */
 export default function ProposeCandidateModal({ application: a, onClose }: Props) {
   const { t } = useTranslation(['applications', 'common'])
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const form = useProposeForm(a)
 
   // Guard both axes this action touches — candidate.propose (sharing a health-
@@ -79,17 +69,18 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
   }
 
   return (
-    <>
-      <div style={overlay} onClick={onClose} />
-      <div ref={panelRef} style={panel} role="dialog" aria-modal="true" aria-label={t('propose.title')} tabIndex={-1}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+    // POPUP-SLEEP-1: shell swapped onto the shared FloatingPanel (draggable/
+    // resizable, remembered position) — body/footer and flows unchanged.
+    <FloatingPanel open onClose={onClose} ariaLabel={t('propose.title')}
+      persistKey="application-propose" width={560} maxWidth="92vw"
+      bodyStyle={{ padding: 20 }}
+      header={
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
             background: 'var(--color-primary-bg)', color: 'var(--color-primary)' }}><Send size={16} /></span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{t('propose.title')}</span>
-          <button onClick={onClose} aria-label={t('common:close')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
-        </div>
-
+          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('propose.title')}</span>
+        </span>
+      }>
         {decision?.effect === 'warn' && <div style={{ marginBottom: 12 }}><ActionRuleBanner decision={decision} /></div>}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -200,7 +191,6 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
             {t('propose.submit')}
           </button>
         </div>
-      </div>
-    </>
+    </FloatingPanel>
   )
 }

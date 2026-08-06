@@ -13,7 +13,8 @@
  */
 import { useTranslation } from 'react-i18next'
 import { Archive, Loader2 } from 'lucide-react'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
+import FloatingPanel from '@/components/ui/FloatingPanel'
+import { Z } from '@/lib/zIndexScale'
 
 // Relation keys the backend's usageCounts() may send (location: 7 keys incl.
 // `departments`; department: same minus `departments` plus `tasks` — both
@@ -49,22 +50,17 @@ export interface InUseCountsDialogProps {
 export default function InUseCountsDialog({ open, counts, onClose, onArchive, archiving = false }: InUseCountsDialogProps) {
   const { t } = useTranslation('customers')
   const relationLabel = useRelationLabel()
-  // useFocusTrap must run every render (hooks can't be conditional) — it no-ops
-  // internally while its ref never attaches (the panel below is unmounted).
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
-  if (!open) return null
 
   const rows = Object.entries(counts).filter(([, n]) => n > 0)
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex',
-      alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.45)' }}
-      onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('inUse.title')} tabIndex={-1}
-        style={{ width: 'auto', minWidth: 320, maxWidth: 'min(480px, 90vw)', background: 'var(--surface)',
-          borderRadius: 14, border: '1px solid var(--border)', boxShadow: '0 20px 60px rgba(0,0,0,0.22)',
-          padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('inUse.title')}</div>
+    // POPUP-SLEEP-1: swapped the bespoke overlay/panel shell for the shared
+    // draggable FloatingPanel. A blocking dialog above the drawer/modal band,
+    // so it keeps its elevated layer via Z.confirm.
+    <FloatingPanel open={open} onClose={onClose} title={t('inUse.title')}
+      ariaLabel={t('inUse.title')} persistKey="in-use-counts" zIndex={Z.confirm}
+      width={360} maxWidth="min(480px, 90vw)"
+      bodyStyle={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {rows.map(([key, n]) => (
             <div key={key} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 13, color: 'var(--text)' }}>
@@ -92,7 +88,6 @@ export default function InUseCountsDialog({ open, counts, onClose, onArchive, ar
             {t('inUse.close')}
           </button>
         </div>
-      </div>
-    </div>
+    </FloatingPanel>
   )
 }
