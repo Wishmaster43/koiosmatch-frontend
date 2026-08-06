@@ -1,0 +1,112 @@
+/**
+ * FloatingPanel (POPUP-SLEEP-1, Danny GO 06-08 "alle popups sleepbaar") — the ONE
+ * shared draggable/resizable dialog shell every modal migrates onto. Keeps the
+ * exact house modal semantics (overlay, backdrop-click closes, useFocusTrap for
+ * Esc/tab/focus-restore, token colours) and adds: drag by header, SE-corner
+ * resize, per-window position/size memory, double-click-header reset, and
+ * bring-to-front stacking via the shared zIndexScale. Mounted only while `open`
+ * (useFocusTrap needs a fresh mount — house rule, mirrors ConfirmDialog).
+ */
+import { type CSSProperties, type ReactNode, useState } from 'react'
+import { X } from 'lucide-react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useDraggablePanel } from '@/hooks/useDraggablePanel'
+import { nextFloatingZ } from '@/lib/zIndexScale'
+
+export interface FloatingPanelProps {
+  open: boolean
+  onClose: () => void
+  /** Accessible name; falls back to `title`. */
+  ariaLabel?: string
+  /** Simple header text — or pass a bespoke `header` node instead. */
+  title?: string
+  /** Bespoke header content (rendered INSIDE the drag handle, before the X). */
+  header?: ReactNode
+  children: ReactNode
+  /** Panel width before any user resize (defaults follow the old modal sizes). */
+  width?: number | string
+  maxWidth?: string
+  /** Remember position/size under this key (omit = always opens centered). */
+  persistKey?: string
+  resizable?: boolean
+  /** Stack above the normal modal band (e.g. a dialog opened from a dialog). */
+  zIndex?: number
+  /** Extra style on the panel body wrapper (padding etc.). */
+  bodyStyle?: CSSProperties
+  /** Hide the built-in close X (when the bespoke header has its own). */
+  hideClose?: boolean
+  /**
+   * true (default): the body wrapper scrolls. false: the children own their layout
+   * (flex column) — for migrated modals with their own scroll area + pinned footer.
+   */
+  scrollBody?: boolean
+}
+
+function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, persistKey, resizable, zIndex, bodyStyle, hideClose, scrollBody = true }: Omit<FloatingPanelProps, 'open'>) {
+  const panelTrapRef = useFocusTrap<HTMLDivElement>(onClose)
+  const { panelRef, placement, onDragPointerDown, onResizePointerDown, onDragHandleDoubleClick } = useDraggablePanel(persistKey, resizable !== false)
+  // Claim a fresh slot in the floating band once per mount; pointerdown re-claims
+  // so the last-touched window wins (multi-window ready, harmless for one).
+  const [z, setZ] = useState(() => zIndex ?? nextFloatingZ())
+
+  // Before any drag: CSS-centered exactly like every modal today. After: absolute.
+  const positioned: CSSProperties = placement
+    ? { position: 'fixed', left: placement.x, top: placement.y, ...(placement.w ? { width: placement.w } : { width }), ...(placement.h ? { height: placement.h } : {}) }
+    : { position: 'relative', width }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: z, display: 'flex',
+      alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.45)' }}
+      onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div
+        // Two refs on one node: the focus trap + the drag geometry.
+        ref={node => {
+          panelTrapRef.current = node
+          panelRef.current = node
+        }}
+        role="dialog" aria-modal="true" aria-label={ariaLabel ?? title ?? 'dialog'} tabIndex={-1}
+        onPointerDown={() => { if (!zIndex) setZ(nextFloatingZ()) }}
+        style={{ ...positioned, maxWidth: maxWidth ?? 'min(94vw, 1100px)', maxHeight: '92vh',
+          display: 'flex', flexDirection: 'column', background: 'var(--surface)',
+          borderRadius: 14, border: '1px solid var(--border)',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden' }}>
+        {/* Drag handle: the whole header row. Double-click = reset to center. */}
+        <div onPointerDown={onDragPointerDown} onDoubleClick={onDragHandleDoubleClick}
+          style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px',
+            cursor: 'move', userSelect: 'none', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+          {header ?? <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{title}</div>}
+          {header && <div style={{ flex: 1 }} />}
+          {!hideClose && (
+            <button onClick={onClose} aria-label="Sluiten"
+              style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)',
+                display: 'inline-flex', padding: 4, borderRadius: 6 }}>
+              <X size={16} />
+            </button>
+          )}
+        </div>
+        {/* Body scrolls inside the panel so a resized-small window never clips chrome —
+            unless the children bring their own scroll area + pinned footer. */}
+        <div style={scrollBody
+          ? { overflow: 'auto', flex: 1, ...bodyStyle }
+          : { display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1, minHeight: 0, ...bodyStyle }}>
+          {children}
+        </div>
+        {resizable !== false && (
+          // SE resize grip — same pointer pattern as the drag handle.
+          <div onPointerDown={onResizePointerDown} aria-hidden
+            style={{ position: 'absolute', right: 0, bottom: 0, width: 16, height: 16,
+              cursor: 'nwse-resize',
+              background: 'linear-gradient(135deg, transparent 50%, var(--border) 50%)' }} />
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default function FloatingPanel(props: FloatingPanelProps) {
+  if (!props.open) return null
+  // Strip `open` — Panel mounts fresh per open (house rule for useFocusTrap).
+  const rest = { ...props }
+  delete (rest as Partial<FloatingPanelProps>).open
+  return <Panel {...rest} />
+}

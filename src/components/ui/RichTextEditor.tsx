@@ -20,6 +20,10 @@ import { Bold, Italic, List, ListOrdered, Heading2, AlignLeft, AlignCenter, Alig
 const LABEL_KEYS = ['bold', 'italic', 'bulletList', 'orderedList', 'heading', 'alignLeft', 'alignCenter', 'alignRight', 'undo', 'redo', 'expand', 'collapse', 'html'] as const
 type EditorLabels = Record<(typeof LABEL_KEYS)[number], string>
 
+// TAAL-SPELL-1 (Danny 06-08): the language menu on EVERY editor — codes match the
+// note `language` field contract (BE max:8) and the app locales.
+const EDITOR_LANGS = ['nl', 'en', 'de', 'fr', 'es'] as const
+
 interface RichTextEditorProps {
   value?: string
   onChange: (html: string) => void
@@ -33,11 +37,24 @@ interface RichTextEditorProps {
   // Collapsed content height; inline row editors (experience/education desc) pass a
   // compact value so a one-line note doesn't open a huge block (Danny punt 48).
   minHeight?: number
+  // TAAL-SPELL-1: spellcheck language. Controlled (language + onLanguageChange, e.g.
+  // notes persist it) or uncontrolled (defaults to the app language). The picker
+  // shows on every editor unless a caller opts out.
+  language?: string
+  onLanguageChange?: (lang: string) => void
+  showLanguage?: boolean
 }
 
-export default function RichTextEditor({ value, onChange, expanded, onToggleExpand, labels = {}, fill = false, minHeight = 120, resizable = false }: RichTextEditorProps) {
+export default function RichTextEditor({ value, onChange, expanded, onToggleExpand, labels = {}, fill = false, minHeight = 120, resizable = false, language, onLanguageChange, showLanguage = true }: RichTextEditorProps) {
   // Merge caller overrides over the i18n'd defaults (common:editor.*).
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
+  // Effective spellcheck language: caller-controlled wins, else local choice, else app language.
+  const [innerLang, setInnerLang] = useState<string | null>(null)
+  const lang = language ?? innerLang ?? (i18n.language || 'nl').slice(0, 2)
+  const pickLang = (l: string) => {
+    setInnerLang(l)
+    onLanguageChange?.(l)
+  }
   const lab = useMemo(() => ({
     ...Object.fromEntries(LABEL_KEYS.map(k => [k, t(`editor.${k}`)])) as EditorLabels,
     ...labels,
@@ -49,12 +66,22 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
     // StarterKit already includes underline; adding it again triggers a duplicate-extension warning.
     extensions: [StarterKit, TextAlign.configure({ types: ['heading', 'paragraph'] })],
     content: value || '',
+    // TAAL-SPELL-1: native browser spellcheck in the CHOSEN language — local and
+    // free; never a third-party spell cloud (§9: notes hold health-adjacent text).
+    editorProps: { attributes: { spellcheck: 'true', lang } },
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
   })
 
   useEffect(() => {
     if (editor && !editor.isDestroyed && value === '') editor.commands.clearContent()
   }, [value, editor])
+
+  // Language switch re-applies the content attributes (TipTap has no reactive prop).
+  useEffect(() => {
+    if (editor && !editor.isDestroyed) {
+      editor.setOptions({ editorProps: { attributes: { spellcheck: 'true', lang } } })
+    }
+  }, [lang, editor])
 
   if (!editor) return null
 
@@ -93,6 +120,16 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
           </>
         )}
         <div style={{ flex: 1 }} />
+        {/* TAAL-SPELL-1: compact spellcheck-language picker (uppercase codes). */}
+        {showLanguage && (
+          <select value={lang} onChange={e => pickLang(e.target.value)}
+            title={t('editor.language', { defaultValue: 'Taal' })}
+            aria-label={t('editor.language', { defaultValue: 'Taal' })}
+            style={{ fontSize: 11, padding: '2px 4px', borderRadius: 5, cursor: 'pointer',
+              border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)' }}>
+            {EDITOR_LANGS.map(l => <option key={l} value={l}>{l.toUpperCase()}</option>)}
+          </select>
+        )}
         {/* HTML source toggle */}
         <button style={btn(htmlMode)} onClick={toggleHtml} title={lab.html ?? 'HTML'}><Code size={13} /></button>
         {onToggleExpand && (

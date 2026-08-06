@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
 import { useAuth } from '@/context/AuthContext'
@@ -10,6 +8,7 @@ import { notifyError } from '@/lib/notify'
 import { mapTaskDetail } from './data/mapTask'
 import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import { cardPair } from '@/components/ui/modalCards'
 import TaskCard from './addmodal/TaskCard'
 import PlanningCard from './addmodal/PlanningCard'
@@ -115,7 +114,6 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   lockCustomerId?: string; lockCustomerName?: string
 }) {
   const { t } = useTranslation('tasks')
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { types, statuses, priorities, defaultPriority } = useTaskLookups()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   const auth = useAuth()
@@ -311,24 +309,13 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   const modalTitle = isEdit ? t('modal.editTitle') : t('modal.title')
 
   return (
-    <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={modalTitle} tabIndex={-1}
-        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', ...WIDE_MODAL,
-        // Shared footprint (Danny 27-07): same frame as +Kandidaat/+Match — the
-        // ONE place to resize any of the three is components/ui/modalMetrics.ts.
-        boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-
-        {/* Header */}
-        <div style={{ padding: '18px 24px', borderBottom: '1px solid var(--border)', display: 'flex',
-          alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{modalTitle}</span>
-          <button onClick={onClose} aria-label={t('modal.cancel')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
-            <X size={18} />
-          </button>
-        </div>
+    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel — draggable header,
+    // SE-resize, remembered position, same overlay/Esc/backdrop semantics as before.
+    // Shared footprint (Danny 27-07): WIDE_MODAL still caps the frame; the ONE place
+    // to resize the wide trio stays components/ui/modalMetrics.ts.
+    <FloatingPanel open onClose={onClose} title={modalTitle} ariaLabel={modalTitle}
+      persistKey="add-task" scrollBody={false}
+      width="min(calc(100vw - 48px), 1060px)" maxWidth={`${WIDE_MODAL.maxWidth}px`}>
 
         {/* Body: titled cards — Taak full-width, then Planning+Toewijzing (left,
             stacked) paired against Koppelingen (right) — mirrors +Match's
@@ -376,7 +363,6 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
             {saving ? t('modal.saving') : isEdit ? t('modal.save') : t('modal.create')}
           </button>
         </div>
-      </div>
-    </div>
+    </FloatingPanel>
   )
 }

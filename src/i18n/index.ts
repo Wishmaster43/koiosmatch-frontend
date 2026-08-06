@@ -36,6 +36,12 @@ i18n.use(initReactI18next).init({
   returnEmptyString: false,
 })
 
+// TAAL-LANG-1 (Danny 06-08): index.html hardcodes lang="en", so the browser
+// spellchecked every Dutch tenant as English. The document language must follow
+// the app language — on boot AND on every runtime switch.
+document.documentElement.lang = i18n.language
+i18n.on('languageChanged', lng => { document.documentElement.lang = lng })
+
 export default i18n
 
 /** Maps the app's language code to a BCP-47 locale for Intl date/number formatting. */
