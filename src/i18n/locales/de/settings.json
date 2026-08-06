@@ -223,7 +223,11 @@
     "customer_blacklist_reasons": "Blacklist-Gründe",
     "match_stop_reasons": "Beendigungsgründe",
     "outreach_outcomes": "Ergebnisse",
-    "workflow_run_history": "Laufverlauf"
+    "workflow_run_history": "Laufverlauf",
+    "candidate_education_levels": "Bildungsniveaus",
+    "notif_kandidaten": "Kandidaten",
+    "notif_matches": "Matches",
+    "notif_taken": "Aufgaben"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -704,6 +708,18 @@
       "facturering": {
         "title": "Abrechnung",
         "desc": "Benachrichtigungen über Rechnungen, Zahlungen und Abos."
+      },
+      "kandidaten": {
+        "title": "Kandidaten",
+        "desc": "Benachrichtigungen über neue und aktualisierte Kandidaten."
+      },
+      "matches": {
+        "title": "Matches",
+        "desc": "Benachrichtigungen über neue Matches und Statusänderungen."
+      },
+      "taken": {
+        "title": "Aufgaben",
+        "desc": "Benachrichtigungen über neue und aktualisierte Aufgaben."
       }
     }
   },
@@ -1322,11 +1338,12 @@
       "audit": "Audit-Protokoll",
       "privacy": "Datenschutz (DSGVO)",
       "koios": "Koios AI",
-      "page": "Seitenzugriff",
+      "page": "Menüzugriff",
       "locations": "Standorte",
       "departments": "Abteilungen",
       "details": "Details",
-      "aiagents": "KI-Agenten"
+      "aiagents": "KI-Agenten",
+      "vacancy_generation": "Stellengenerierung"
     },
     "actions": {
       "view": "Anzeigen",
@@ -1342,7 +1359,11 @@
       "manage": "Verwalten",
       "erase": "DSGVO-Löschung",
       "use": "Nutzen",
-      "send": "Senden"
+      "send": "Senden",
+      "archive": "Archivieren",
+      "candidatesDocumentsManage": "Dokumente verwalten",
+      "candidatesNotesManageAll": "Alle Notizen verwalten",
+      "details": "Berichtsdetails (SM/KI)"
     },
     "color": "Farbe",
     "icon": "Symbol",
@@ -1353,7 +1374,11 @@
     "branchesEmptyHint": "Keine Niederlassungen ausgewählt — neue Benutzer mit dieser Rolle starten ohne Niederlassungs-Zuordnung und sehen ALLE Kandidaten. Mit zugeordneten Niederlassungen sieht ein Benutzer nur Kandidaten dieser Niederlassungen.",
     "branchesNoLocations": "Noch keine Standorte angelegt.",
     "branchesSaveFailed": "Die Standortvorlage konnte nicht gespeichert werden. Bitte erneut versuchen.",
-    "appearanceSaveFailed": "Das Erscheinungsbild konnte nicht gespeichert werden. Bitte erneut versuchen."
+    "appearanceSaveFailed": "Das Erscheinungsbild konnte nicht gespeichert werden. Bitte erneut versuchen.",
+    "pageAccess": "Seite: {{label}}",
+    "hints": {
+      "candidatesSync": "SM-Spiegel"
+    }
   },
   "audit": {
     "title": "Audit-Log",
@@ -1653,7 +1678,11 @@
   "lastContactTypes": {
     "title": "Letzter-Kontakt-Typen",
     "subtitle": "Kanäle für 'letzter Kontakt' (E-Mail, Telefon, WhatsApp).",
-    "add": "Typ hinzufügen"
+    "add": "Typ hinzufügen",
+    "noContactDaysTitle": "Erinnerung bei fehlendem Kontakt",
+    "noContactDaysHint": "Nach wie vielen Tagen ohne registrierten letzten Kontakt ein Kandidat für die Automatisierung (Workflows und Webhooks) als 'nicht kontaktiert' markiert wird.",
+    "noContactDaysLabel": "Tage (1-365)",
+    "noContactDaysSaveFailed": "Speichern des Zeitfensters für fehlenden Kontakt fehlgeschlagen."
   },
   "noteTypes": {
     "title": "Notiztypen — {{entity}}",
@@ -1711,7 +1740,9 @@
     "priorityAdd": "Priorität hinzufügen",
     "priorityDefault": "Standard",
     "flagDone": "Zählt als erledigt",
-    "flagDoneDesc": "Aufgaben mit diesem Status zählen zur Kennzahl „Erledigt\" und werden nicht mehr als offen oder überfällig angezeigt."
+    "flagDoneDesc": "Aufgaben mit diesem Status zählen zur Kennzahl „Erledigt\" und werden nicht mehr als offen oder überfällig angezeigt.",
+    "typeCountsAsContact": "Zählt als Kontakt",
+    "typeCountsAsContactDesc": "Das Abschließen einer Aufgabe dieses Typs aktualisiert das Datum des letzten Kontakts des Kandidaten."
   },
   "taskDisplay": {
     "title": "Tabellenansicht",
@@ -1844,7 +1875,15 @@
     "title": "Dokumenttypen — {{entity}}",
     "subtitle": "Kategorien, Farben und Symbole für Dokumente in diesem Bereich.",
     "add": "Typ hinzufügen",
-    "icon": "Symbol"
+    "icon": "Symbol",
+    "requiresExpiry": "Hat ein Ablaufdatum",
+    "requiresExpiryDesc": "Dokumente dieses Typs erhalten ein Ablaufdatum, berechnet aus der Standardgültigkeit unten (oder pro Dokument festgelegt, falls keine vorhanden ist).",
+    "defaultValidityMonths": "Standardgültigkeit (Monate)",
+    "validityMonthsSuffix": "Monate",
+    "expiringAlertDaysTitle": "Ablauf-Warnfenster",
+    "expiringAlertDaysHint": "Wie viele Tage vor dem Ablaufdatum eines Kandidatendokuments die Ablauf-Automatisierung ausgelöst wird.",
+    "expiringAlertDaysLabel": "Tage (1-365)",
+    "expiringAlertDaysSaveFailed": "Speichern des Ablauf-Warnfensters fehlgeschlagen."
   },
   "requiredFields": {
     "title": "Pflichtfelder",
@@ -2594,7 +2633,9 @@
     "title": "Nationalitäten",
     "subtitle": "Verwalten Sie die Nationalitäten, die Kandidaten auswählen können.",
     "add": "Nationalität hinzufügen",
-    "countryCode": "Land"
+    "countryCode": "Land",
+    "isEu": "EU/EWR",
+    "isEuDesc": "Kandidaten mit dieser Nationalität müssen keine Angaben zur Arbeitserlaubnis machen."
   },
   "escalationReasons": {
     "title": "Eskalationsgründe",
@@ -2660,5 +2701,10 @@
         "unit": "Tage"
       }
     }
+  },
+  "educationLevels": {
+    "title": "Bildungsniveaus",
+    "subtitle": "Stufen für das Bildungs-Dropdown des Kandidaten.",
+    "add": "Stufe hinzufügen"
   }
 }

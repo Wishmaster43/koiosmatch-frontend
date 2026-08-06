@@ -10,8 +10,8 @@ import type { Candidate } from '@/types/candidate'
 const StatsTab = StatsTabJs as ComponentType<{ kpisTitle?: unknown; kpis?: unknown[]; overview?: unknown; activity?: unknown }>
 
 // Empty-state value: an italic muted em-dash (§4 — italic reserved for
-// secondary/placeholder text, never data) for the two fields below that may be
-// unset on legacy rows (no stamped creator / no acquisition channel recorded).
+// secondary/placeholder text, never data) for overview fields that may be
+// unset — never contacted, no stamped creator, no acquisition channel, …
 const emptyValue = <span style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>—</span>
 
 /** Statistics tab — maps the candidate onto the generic StatsTab. */
@@ -37,8 +37,13 @@ export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (t
         title: t('statistics.statusOverview'),
         rows: [
           [t('statistics.status'),      c.status ? statusMeta(c.status).label : '-'],
-          [t('statistics.lastContact'), c.lastContactDate ? formatDate(c.lastContactDate) : '-'],
-          [t('statistics.contactType'), c.lastContactType ? lastContactLabel(c.lastContactType) : '-'],
+          // LAST-CONTACT-LIVE-1: date + "door {name}" once the BE stamps land
+          // (last_contact_at/_by) — an honest italic em-dash when never contacted,
+          // matching the createdBy/source rows below (§4).
+          [t('statistics.lastContact'), c.lastContactDate
+            ? <>{formatDate(c.lastContactDate)}{c.lastContactBy && <> · {t('drawer.byWho', { name: c.lastContactBy })}</>}</>
+            : emptyValue],
+          [t('statistics.contactType'), c.lastContactType ? lastContactLabel(c.lastContactType) : emptyValue],
           [t('statistics.memberSince'), c.created ? formatDate(c.created) : '-'],
           [t('statistics.branch'),      (c.branches ?? []).map(b => b.name).filter(Boolean).join(', ') || '-'],
           // CREATED-BY-SOURCE-1 (Danny: "wil ik ook zien aangemaakt door wie en de bron").

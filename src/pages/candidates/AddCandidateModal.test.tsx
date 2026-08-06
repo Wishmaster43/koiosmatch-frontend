@@ -139,6 +139,8 @@ describe('AddCandidateModal · submit body unchanged by the layout rework', () =
       // untouched here, so it POSTs as null (never omitted, mirrors every other
       // optional field on this same body).
       summary: null,
+      // CONTACT-LINKEDIN-1 (Danny 06-08): untouched here, so it POSTs as null too.
+      linkedin_slug: null,
       phase: 'lead', status: 'available', candidate_types: [],
       location_ids: ['b1'],
     })
@@ -201,6 +203,78 @@ describe('AddCandidateModal · Mobiel field (job B)', () => {
     await user.type(screen.getByPlaceholderText('modal.fields.mobilePlaceholder'), '0612345678')
     await user.click(screen.getByRole('button', { name: 'modal.create' }))
     expect(createCandidate.mock.calls[0][0]).toMatchObject({ mobile: '0612345678' })
+  })
+})
+
+// CONTACT-LINKEDIN-1 (Danny 06-08): the Contact card gets a LinkedIn field
+// mirroring the customer contact modal and the drawer's own Contact tab.
+describe('AddCandidateModal · LinkedIn field (CONTACT-LINKEDIN-1)', () => {
+  it('renders a LinkedIn field in the Contact card', () => {
+    render(<AddCandidateModal onClose={noop} />)
+    expect(screen.getByPlaceholderText('modal.fields.linkedinPlaceholder')).toBeInTheDocument()
+  })
+
+  it('normalises a pasted full profile URL to its bare slug AT THE SAVE BOUNDARY', async () => {
+    const user = userEvent.setup()
+    render(<AddCandidateModal onClose={noop} onCreated={noop} />)
+    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
+    await user.type(screen.getByPlaceholderText('modal.fields.linkedinPlaceholder'), 'https://www.linkedin.com/in/jane-doe/')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+    expect(createCandidate.mock.calls[0][0]).toMatchObject({ linkedin_slug: 'jane-doe' })
+  })
+})
+
+// VALIDATIE-LIVE-1 (Danny 06-08): the ZZP-tab pattern becomes the standard — live,
+// on-blur/typing format checks for email/phone/mobile/linkedin_slug, mirroring
+// ProfileContactTab's own behaviour. A malformed value blocks the create instead
+// of only bouncing back as a 422 after a round trip.
+describe('AddCandidateModal · live format validation (VALIDATIE-LIVE-1)', () => {
+  const fillRequired = async (user: ReturnType<typeof userEvent.setup>) => {
+    await user.type(screen.getByPlaceholderText('modal.fields.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('modal.fields.lastName'), 'Jansen')
+  }
+
+  it('shows an inline error under e-mail once blurred with a malformed value, and disables Create', async () => {
+    const user = userEvent.setup()
+    render(<AddCandidateModal onClose={noop} onCreated={noop} />)
+    await fillRequired(user)
+    const emailField = screen.getByPlaceholderText('modal.fields.emailPlaceholder')
+    await user.type(emailField, 'not-an-email')
+    // fireEvent.focusOut (not user.tab()): this modal's dialog shell traps Tab via an
+    // `offsetParent !== null` focusable-items check, which jsdom never sets (no real
+    // layout) — it sees zero focusable items and swallows the Tab keydown, an
+    // environment limitation of the shell, not of the field under test.
+    fireEvent.focusOut(emailField)
+    expect(await screen.findByText('validation.emailFormat')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'modal.create' })).toBeDisabled()
+  })
+
+  it('blocks the create call on a malformed phone number — value stays, nothing is sent', async () => {
+    const user = userEvent.setup()
+    render(<AddCandidateModal onClose={noop} onCreated={noop} />)
+    await fillRequired(user)
+    const phoneInput = screen.getByPlaceholderText('modal.fields.phonePlaceholder') as HTMLInputElement
+    await user.type(phoneInput, '06-12')
+    fireEvent.focusOut(phoneInput)
+    expect(await screen.findByText('validation.phoneFormat')).toBeInTheDocument()
+    expect(phoneInput.value).toBe('06-12')
+    expect(createCandidate).not.toHaveBeenCalled()
+  })
+
+  it('a 422 field message renders under the field and the typed value is never wiped', async () => {
+    createCandidate.mockRejectedValue({
+      response: { status: 422, data: { errors: { email: ['Dit e-mailadres is al in gebruik.'] } } },
+    })
+    const user = userEvent.setup()
+    render(<AddCandidateModal onClose={noop} onCreated={noop} />)
+    await fillRequired(user)
+    const emailInput = screen.getByPlaceholderText('modal.fields.emailPlaceholder') as HTMLInputElement
+    await user.type(emailInput, 'jan@example.nl')
+    await user.click(screen.getByRole('button', { name: 'modal.create' }))
+    expect(await screen.findByText('Dit e-mailadres is al in gebruik.')).toBeInTheDocument()
+    // The typed value is untouched — nothing was cleared on the rejected save.
+    expect(emailInput.value).toBe('jan@example.nl')
   })
 })
 

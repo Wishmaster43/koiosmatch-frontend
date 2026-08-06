@@ -62,7 +62,8 @@ beforeEach(() => vi.clearAllMocks())
 describe('AddOpportunityModal · house wide frame (Danny 27-07)', () => {
   it('renders on the shared WIDE_MODAL frame with the two titled cards', () => {
     render(<AddOpportunityModal onClose={noop} />)
-    expect(screen.getByRole('dialog')).toHaveStyle({ maxWidth: '1060px', maxHeight: '94vh' })
+    // POPUP-SLEEP-1: FloatingPanel owns the footprint — WIDE_MODAL width, panel's 92vh cap.
+    expect(screen.getByRole('dialog')).toHaveStyle({ maxWidth: '1060px', maxHeight: '92vh' })
     expect(screen.getByText('modal.groups.general')).toBeInTheDocument()
     expect(screen.getByText('modal.groups.dealStage')).toBeInTheDocument()
   })

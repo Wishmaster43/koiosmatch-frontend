@@ -847,7 +847,7 @@ describe('LocationDetail · honest delete (SUBENTITEIT-DELETE-1)', () => {
     expect(within(dialog).getByText('1')).toBeInTheDocument()
     expect(close).not.toHaveBeenCalled()
 
-    await user.click(within(dialog).getByRole('button', { name: ct('inUse.close') }))
+    await user.click(within(dialog).getAllByRole('button', { name: ct('inUse.close') }).at(-1)!)
     expect(screen.queryByRole('dialog', { name: ct('inUse.title') })).not.toBeInTheDocument()
   })
 

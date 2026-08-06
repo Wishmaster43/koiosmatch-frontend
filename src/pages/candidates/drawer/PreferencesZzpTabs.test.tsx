@@ -125,6 +125,53 @@ describe('PreferencesTab · sub-tabs (kandidaten-ronde-2, punt D)', () => {
     expect(screen.queryByText('preferences.wageTax')).toBeNull()
     expect(screen.getAllByText('preferences.groupOther')).toHaveLength(1) // the sub-tab button only
   })
+
+  // Job "noodcontact-opzeg": Overig gained two more independently-editable cards
+  // above Opmerkingen — Noodcontact and Opzegtermijn — each with their OWN pencil,
+  // same PREF-PENCIL-SPLIT-1 stacking as Financieel's Loonheffing/Gewenst tarief.
+  it('Overig shows Noodcontact and Opzegtermijn as their own cards, each with its own pencil', async () => {
+    const user = userEvent.setup()
+    render(<PreferencesTab c={candidate()} />)
+    await user.click(screen.getByRole('tab', { name: 'preferences.groupOther' }))
+    expect(screen.getByText('preferences.groupEmergencyContact')).toBeInTheDocument()
+    expect(screen.getByText('preferences.emergencyContactName')).toBeInTheDocument()
+    expect(screen.getByText('preferences.emergencyContactPhone')).toBeInTheDocument()
+    expect(screen.getByText('preferences.groupNoticePeriod')).toBeInTheDocument()
+    expect(screen.getByText('preferences.noticePeriodWeeks')).toBeInTheDocument()
+    // Noodcontact · Opzegtermijn · Opmerkingen — three cards, three own pencils.
+    expect(screen.getAllByTitle('edit')).toHaveLength(3)
+  })
+
+  it('editing Opzegtermijn leaves Noodcontact and Opmerkingen read-only', async () => {
+    const user = userEvent.setup()
+    render(<PreferencesTab c={candidate()} />)
+    await user.click(screen.getByRole('tab', { name: 'preferences.groupOther' }))
+    await user.click(screen.getAllByTitle('edit')[1]) // Opzegtermijn is the middle card
+    expect(screen.getByTitle('save')).toBeInTheDocument()
+    expect(screen.getAllByTitle('edit')).toHaveLength(2)
+  })
+
+  it('Opzegtermijn save sends ONLY notice_period_weeks', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<PreferencesTab c={candidate()} onSave={onSave} />)
+    await user.click(screen.getByRole('tab', { name: 'preferences.groupOther' }))
+    await user.click(screen.getAllByTitle('edit')[1]) // Opzegtermijn
+    await user.type(screen.getByRole('spinbutton'), '4')
+    await user.click(screen.getByTitle('save'))
+    expect(onSave).toHaveBeenCalledTimes(1)
+    expect(onSave).toHaveBeenCalledWith({ notice_period_weeks: 4 })
+  })
+
+  it('Noodcontact save flows through the tab onSave with the emergency-contact API keys', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<PreferencesTab c={candidate()} onSave={onSave} />)
+    await user.click(screen.getByRole('tab', { name: 'preferences.groupOther' }))
+    await user.click(screen.getAllByTitle('edit')[0]) // Noodcontact
+    await user.click(screen.getByTitle('save'))
+    expect(onSave).toHaveBeenCalledWith({ emergency_contact_name: '', emergency_contact_phone: '' })
+  })
 })
 
 // "Potlood op de statuswissel" (Danny 2026-07-20, job A): the status banner gets

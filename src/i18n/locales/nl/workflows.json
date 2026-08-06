@@ -222,7 +222,8 @@
     "facebook_send": "Facebook terugkoppeling",
     "candidates_fetch": "Koios Match kandidaten",
     "pdok_geocode": "Adres geocoderen (PDOK)",
-    "backoffice_sync": "Backoffice koppelen"
+    "backoffice_sync": "Backoffice koppelen",
+    "interview_start": "AI-interview starten"
   },
   "categories": {
     "all": "Alle",
@@ -997,7 +998,17 @@
       "candidate_phase_changed": "Fase kandidaat gewijzigd",
       "candidate_status_changed": "Status kandidaat gewijzigd",
       "candidate_type_changed": "Contractvorm kandidaat gewijzigd",
-      "contract_signed": "Contract getekend"
+      "contract_signed": "Contract getekend",
+      "application_created": "Sollicitatie aangemaakt",
+      "vacancy_status_changed": "Status vacature gewijzigd",
+      "candidate_availability_changed": "Beschikbaarheid kandidaat gewijzigd",
+      "candidate_no_contact": "Kandidaat niet gecontacteerd",
+      "candidate_document_expiring": "Document kandidaat verloopt",
+      "match_expiring": "Match verloopt",
+      "match_terminated": "Match beëindigd",
+      "appointment_created": "Afspraak aangemaakt",
+      "whatsapp_connection_down": "WhatsApp-verbinding verbroken",
+      "whatsapp_connection_restored": "WhatsApp-verbinding hersteld"
     }
   }
 }

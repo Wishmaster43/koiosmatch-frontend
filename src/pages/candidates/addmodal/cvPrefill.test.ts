@@ -16,7 +16,7 @@ const emptyForm = (over: Partial<FormState> = {}): FormState => ({
   firstName: '', middleName: '', lastName: '', functionTitle: '',
   email: '', phone: '', mobile: '', dateOfBirth: '', gender: '',
   street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', city: '', province: '', country: '',
-  ownerId: '', summary: '', ...over,
+  ownerId: '', summary: '', linkedin: '', ...over,
 })
 
 describe('toIsoBirthDate', () => {

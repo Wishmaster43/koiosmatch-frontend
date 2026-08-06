@@ -72,10 +72,12 @@ describe('ProfileContactTab · own fields, own pencil, own request shape', () =>
     await user.click(screen.getByTitle('Bewerken'))
     const linkedinRow = screen.getByText('LinkedIn').parentElement as HTMLElement
     const linkedinInput = within(linkedinRow).getByRole('textbox') as HTMLInputElement
+    // A pasted full profile URL is normalised down to its bare slug AT THE SAVE
+    // BOUNDARY (CONTACT-LINKEDIN-1) — the request carries `test`, not the raw typed URL.
     await user.type(linkedinInput, 'linkedin.com/in/test')
     await user.click(screen.getByTitle('Opslaan'))
     expect(onSave).toHaveBeenCalledTimes(1)
-    expect(onSave).toHaveBeenCalledWith({ email: 'a@b.nl', mobile: '0612345678', phone: '0301234567', linkedin: 'linkedin.com/in/test' })
+    expect(onSave).toHaveBeenCalledWith({ email: 'a@b.nl', mobile: '0612345678', phone: '0301234567', linkedin: 'test' })
   })
 
   it('blocks save and flags email/phone when the tenant requires them', async () => {
@@ -88,5 +90,73 @@ describe('ProfileContactTab · own fields, own pencil, own request shape', () =>
     await user.click(screen.getByTitle('Opslaan'))
     expect(onSave).not.toHaveBeenCalled()
     expect(screen.getAllByText('Verplicht veld').length).toBe(2)
+  })
+})
+
+// VALIDATIE-LIVE-1 (Danny 06-08): the ZZP-tab pattern becomes the standard — live,
+// on-blur/typing format checks for email/phone/mobile/linkedin. A malformed value
+// never leaves the field: edit mode stays open, the typed value is untouched, and
+// onSave is never called.
+describe('ProfileContactTab · live format validation (VALIDATIE-LIVE-1)', () => {
+  beforeEach(() => { vi.mocked(useProfileRequiredKeys).mockReturnValue([]) })
+
+  const candidate = { id: 1, phone: '0301234567', mobile: '0612345678', email: 'a@b.nl', linkedin: '', phase: 'candidate' } as unknown as Candidate
+
+  it('shows an inline error under email once the field is blurred with a malformed value', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ProfileContactTab c={candidate} onSave={onSave} />)
+    await user.click(screen.getByTitle('Bewerken'))
+    const emailRow = screen.getByText('E-mailadres').parentElement as HTMLElement
+    const emailInput = within(emailRow).getByRole('textbox')
+    await user.clear(emailInput)
+    await user.type(emailInput, 'not-an-email')
+    await user.tab() // blur
+    expect(await screen.findByText(/validation.emailFormat|Voer een geldig e-mailadres/)).toBeInTheDocument()
+  })
+
+  it('blocks save (typed value kept, onSave never called) on a malformed phone number', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ProfileContactTab c={candidate} onSave={onSave} />)
+    await user.click(screen.getByTitle('Bewerken'))
+    const phoneRow = screen.getByText('Telefoon').parentElement as HTMLElement
+    const phoneInput = within(phoneRow).getByRole('textbox') as HTMLInputElement
+    await user.clear(phoneInput)
+    await user.type(phoneInput, '06-12')
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(onSave).not.toHaveBeenCalled()
+    expect(phoneInput.value).toBe('06-12')
+    expect(await screen.findByText(/validation.phoneFormat|Voer een geldig telefoonnummer/)).toBeInTheDocument()
+    // Still in edit mode — nothing was silently discarded.
+    expect(screen.getByTitle('Opslaan')).toBeInTheDocument()
+  })
+
+  it('the error clears live as soon as the value becomes valid again, without a second blur', async () => {
+    const user = userEvent.setup()
+    render(<ProfileContactTab c={candidate} onSave={vi.fn()} />)
+    await user.click(screen.getByTitle('Bewerken'))
+    const mobileRow = screen.getByText('Mobiel').parentElement as HTMLElement
+    const mobileInput = within(mobileRow).getByRole('textbox')
+    await user.clear(mobileInput)
+    await user.type(mobileInput, '123')
+    await user.tab()
+    expect(await screen.findByText(/validation.phoneFormat|Voer een geldig telefoonnummer/)).toBeInTheDocument()
+    await user.click(mobileInput)
+    await user.type(mobileInput, '45678')
+    expect(screen.queryByText(/validation.phoneFormat|Voer een geldig telefoonnummer/)).toBeNull()
+  })
+
+  it('rejects a LinkedIn value with a stray space', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ProfileContactTab c={candidate} onSave={onSave} />)
+    await user.click(screen.getByTitle('Bewerken'))
+    const linkedinRow = screen.getByText('LinkedIn').parentElement as HTMLElement
+    const linkedinInput = within(linkedinRow).getByRole('textbox')
+    await user.type(linkedinInput, 'jane doe')
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(onSave).not.toHaveBeenCalled()
+    expect(await screen.findByText(/validation.linkedinFormat|geldige LinkedIn|LinkedIn-/)).toBeInTheDocument()
   })
 })

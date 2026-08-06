@@ -48,6 +48,13 @@ vi.mock('@/lib/datetime', () => ({
 }))
 // Preview modal only ever mounts on click — stub it so its own deps (pdf.js) never load here.
 vi.mock('@/components/drawer/DocPreviewModal', () => ({ default: () => null }))
+// Point 4: every manage action (upload/rename/replace/delete) gates on
+// candidates.documents.manage. DEFAULT here is a manager (matches every
+// pre-existing test's assumption of full rights) — the dedicated gating
+// describe block below overrides this per-test to prove the OFF path too.
+const mockUseAuth = vi.fn()
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
+mockUseAuth.mockReturnValue({ hasPermission: () => true })
 
 // Minimal candidate: only `id` + `documents` matter to this section.
 const candidate = (): Candidate => ({ id: 'c1', documents: [] } as unknown as Candidate)
@@ -57,6 +64,9 @@ const fileA = new File(['a-content'], 'a.pdf', { type: 'application/pdf' })
 const fileB = new File(['b-content'], 'b.pdf', { type: 'application/pdf' })
 
 const getFileInput = (container: HTMLElement) => container.querySelector('input[type="file"]') as HTMLInputElement
+// DOC-VERSIE-1: the replace input is the single-file one (no `multiple` attr) —
+// distinguishes it from the main upload input once both are in the DOM.
+const getReplaceFileInput = (container: HTMLElement) => container.querySelector('input[type="file"]:not([multiple])') as HTMLInputElement
 
 describe('DocumentsSection · multi-file upload queue', () => {
   beforeEach(() => {
@@ -403,5 +413,155 @@ describe('DocumentsSection · DOC-ENTRY-LINK-1 upload + link', () => {
     await user.click(screen.getAllByRole('button', { name: 'common:add' }).at(-1)!)
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith('Koppelen mislukt'))
     expect(onRefresh).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * Documents punchlist point 1 (DOC-EXPIRY-1): a document carrying `expires_at`
+ * shows a danger chip once past due, a warning chip inside the 30-day window
+ * (mirrors pages/matches/matchExpiry.ts's own window), and no chip otherwise.
+ * Dates are computed relative to the real clock (±10/90 days) so the assertion
+ * never depends on injecting a fake `now` and stays clear of the day-0 boundary.
+ */
+describe('DocumentsSection · DOC-EXPIRY-1 expiry chip', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockUseAuth.mockReturnValue({ hasPermission: () => true })
+    vi.stubGlobal('URL', { createObjectURL: vi.fn(), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  const isoDaysFromNow = (days: number) => {
+    const d = new Date()
+    d.setDate(d.getDate() + days)
+    return d.toISOString().slice(0, 10)
+  }
+
+  it('shows the DANGER "expired" chip for a document past its expires_at', () => {
+    const doc = { id: 'd1', name: 'vog.pdf', type: 'CV', size: '10 KB', url: '/x', expires_at: isoDaysFromNow(-10) }
+    render(<DocumentsSection c={{ id: 'c1', documents: [doc] } as unknown as Candidate} />)
+    expect(screen.getByText('documents.expiredOn')).toBeInTheDocument()
+  })
+
+  it('shows the WARNING "expiring soon" chip for a document inside the 30-day window', () => {
+    const doc = { id: 'd1', name: 'vog.pdf', type: 'CV', size: '10 KB', url: '/x', expires_at: isoDaysFromNow(10) }
+    render(<DocumentsSection c={{ id: 'c1', documents: [doc] } as unknown as Candidate} />)
+    expect(screen.getByText('documents.expiresOn')).toBeInTheDocument()
+  })
+
+  it('shows no expiry chip for a document expiring far in the future', () => {
+    const doc = { id: 'd1', name: 'vog.pdf', type: 'CV', size: '10 KB', url: '/x', expires_at: isoDaysFromNow(90) }
+    render(<DocumentsSection c={{ id: 'c1', documents: [doc] } as unknown as Candidate} />)
+    expect(screen.queryByText('documents.expiredOn')).not.toBeInTheDocument()
+    expect(screen.queryByText('documents.expiresOn')).not.toBeInTheDocument()
+  })
+
+  it('shows no expiry chip when the document carries no expires_at at all', () => {
+    const doc = { id: 'd1', name: 'cv.pdf', type: 'CV', size: '10 KB', url: '/x' }
+    render(<DocumentsSection c={{ id: 'c1', documents: [doc] } as unknown as Candidate} />)
+    expect(screen.queryByText('documents.expiredOn')).not.toBeInTheDocument()
+    expect(screen.queryByText('documents.expiresOn')).not.toBeInTheDocument()
+  })
+})
+
+/**
+ * Documents punchlist point 3 (DOC-VERSIE-1): replace swaps the file on the SAME
+ * document id via a dedicated multipart POST, and the version history the list
+ * response carries per document renders as a collapsible list with its own
+ * per-version download link. Asserts the REQUEST (§13), not just a fired callback.
+ */
+describe('DocumentsSection · DOC-VERSIE-1 replace + version history', () => {
+  const uuidDoc = { id: 'a1b2c3d4-uuid', name: 'cv.pdf', type: 'CV', size: '44 KB', url: '/api/candidates/c1/documents/a1b2c3d4-uuid/download' }
+  const withDoc = (): Candidate => ({ id: 'c1', documents: [uuidDoc] } as unknown as Candidate)
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockUseAuth.mockReturnValue({ hasPermission: () => true })
+    vi.stubGlobal('URL', { createObjectURL: vi.fn(), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('POSTs the replacement file to the per-id /replace route as multipart, keyed on the SAME document id', async () => {
+    const replacement = new File(['new-bytes'], 'cv-v2.pdf', { type: 'application/pdf' })
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { data: { id: 'a1b2c3d4-uuid', name: 'cv.pdf', type: 'CV', size: 51200, versions: [] } } })
+    const user = userEvent.setup()
+    const { container } = render(<DocumentsSection c={withDoc()} />)
+    await user.click(screen.getByRole('button', { name: 'documents.replace' }))
+    fireEvent.change(getReplaceFileInput(container), { target: { files: [replacement] } })
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith(
+      '/candidates/c1/documents/a1b2c3d4-uuid/replace',
+      expect.any(FormData),
+      { headers: { 'Content-Type': 'multipart/form-data' } },
+    ))
+    const fd = vi.mocked(api.post).mock.calls[0][1] as FormData
+    expect(fd.get('file')).toBe(replacement)
+  })
+
+  it('shows the collapsible "N previous versions" list with a per-version download link', async () => {
+    const docWithVersions = {
+      ...uuidDoc,
+      versions: [{ id: 'v1', file_size: 40000, replaced_by_name: 'Jan Jansen', created_at: '2026-07-01T10:00:00Z', download_url: 'https://files.example.test/v1' }],
+    }
+    const user = userEvent.setup()
+    render(<DocumentsSection c={{ id: 'c1', documents: [docWithVersions] } as unknown as Candidate} />)
+    await user.click(screen.getByRole('button', { name: 'documents.versionCount' }))
+    expect(screen.getByText('Jan Jansen', { exact: false })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'documents.downloadVersion' })).toHaveAttribute('href', 'https://files.example.test/v1')
+  })
+
+  it('never shows the version-history toggle for a document with no versions yet', () => {
+    render(<DocumentsSection c={withDoc()} />)
+    expect(screen.queryByText('documents.versionCount')).not.toBeInTheDocument()
+  })
+})
+
+/**
+ * Documents punchlist point 4: EVERY manage action (upload/rename/replace/delete,
+ * single or bulk) gates on candidates.documents.manage; read + download (preview,
+ * bulk-download) stay available regardless — never double-gated behind manage.
+ */
+describe('DocumentsSection · point 4 permission gating (candidates.documents.manage)', () => {
+  const uuidDoc = { id: 'a1b2c3d4-uuid', name: 'cv.pdf', type: 'CV', size: '44 KB', url: '/api/candidates/c1/documents/a1b2c3d4-uuid/download', download_url: 'https://files.example.test/dl' }
+  const withDoc = (): Candidate => ({ id: 'c1', documents: [uuidDoc] } as unknown as Candidate)
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal('URL', { createObjectURL: vi.fn(), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    // Restore the file-wide manager default for every OTHER describe block.
+    mockUseAuth.mockReturnValue({ hasPermission: () => true })
+  })
+
+  it('hides every manage action without the permission, but keeps preview available', () => {
+    mockUseAuth.mockReturnValue({ hasPermission: () => false })
+    render(<DocumentsSection c={withDoc()} />)
+    expect(screen.queryByRole('button', { name: 'common:add' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'common:edit' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'documents.replace' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'common:remove' })).not.toBeInTheDocument()
+    // Read stays available regardless — never double-gated behind manage.
+    expect(screen.getByRole('button', { name: 'documents.preview' })).toBeInTheDocument()
+  })
+
+  it('shows every manage action WITH the permission', () => {
+    mockUseAuth.mockReturnValue({ hasPermission: () => true })
+    render(<DocumentsSection c={withDoc()} />)
+    expect(screen.getByRole('button', { name: 'common:add' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'common:edit' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'documents.replace' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'common:remove' })).toBeInTheDocument()
+  })
+
+  it('hides bulk-delete without the permission but keeps bulk-download', async () => {
+    mockUseAuth.mockReturnValue({ hasPermission: () => false })
+    const user = userEvent.setup()
+    render(<DocumentsSection c={withDoc()} />)
+    // Row checkbox (index 0 is the header select-all checkbox).
+    await user.click(screen.getAllByRole('checkbox')[1])
+    expect(screen.getByRole('button', { name: 'documents.downloadSelected' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'documents.deleteSelected' })).not.toBeInTheDocument()
   })
 })

@@ -93,6 +93,34 @@ describe('DocumentTypesSettings — per-entity tab', () => {
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/document-types/row-1', expect.objectContaining({ icon: 'id-card' })))
   })
 
+  // DOC-GELDIGHEID-1: the requires_expiry flag + default_validity_months number both
+  // render as row badges, mirroring TaskStatusSettings' is_done badge assertion.
+  it('shows the requires_expiry flag badge and validity-months badge on a configured row', async () => {
+    api.get.mockResolvedValue({ data: [row({ requires_expiry: true, default_validity_months: 6 })] })
+    render(<DocumentTypesSettings entity="candidate" />)
+
+    await screen.findByText('CV')
+    expect(screen.getByText(st('documentTypes.requiresExpiry'))).toBeInTheDocument()
+    expect(screen.getByText(`6 ${st('documentTypes.validityMonthsSuffix')}`)).toBeInTheDocument()
+  })
+
+  it('creating a type with requires_expiry + a validity POSTs both keys', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    api.post.mockResolvedValue({ data: row({ id: 'row-4', name: 'VOG', requires_expiry: true, default_validity_months: 12 }) })
+    const user = userEvent.setup()
+    render(<DocumentTypesSettings entity="candidate" />)
+
+    await screen.findByText('CV')
+    await user.click(screen.getByRole('button', { name: st('documentTypes.add') }))
+    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'VOG')
+    await user.click(screen.getByRole('switch'))
+    await user.type(screen.getByDisplayValue(''), '12')
+    await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/document-types',
+      expect.objectContaining({ entity: 'candidate', name: 'VOG', requires_expiry: true, default_validity_months: 12 })))
+  })
+
   it('keeps an in-use row on a 409 delete instead of removing it', async () => {
     api.get.mockResolvedValue({ data: [row({ in_use: false })] })
     api.delete.mockRejectedValue({ response: { status: 409 } })

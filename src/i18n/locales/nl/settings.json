@@ -223,7 +223,11 @@
     "customer_blacklist_reasons": "Blacklistredenen",
     "match_stop_reasons": "Beëindigingsredenen",
     "outreach_outcomes": "Uitkomsten",
-    "workflow_run_history": "Rungeschiedenis"
+    "workflow_run_history": "Rungeschiedenis",
+    "candidate_education_levels": "Opleidingsniveaus",
+    "notif_kandidaten": "Kandidaten",
+    "notif_matches": "Matches",
+    "notif_taken": "Taken"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -673,7 +677,9 @@
     "priorityAdd": "Prioriteit toevoegen",
     "priorityDefault": "Standaard",
     "flagDone": "Telt als afgerond",
-    "flagDoneDesc": "Taken in deze status tellen mee voor de KPI 'afgerond' en tonen niet meer als open of te laat."
+    "flagDoneDesc": "Taken in deze status tellen mee voor de KPI 'afgerond' en tonen niet meer als open of te laat.",
+    "typeCountsAsContact": "Telt als contact",
+    "typeCountsAsContactDesc": "Het afronden van een taak van dit type werkt de laatst-contactdatum van de kandidaat bij."
   },
   "taskDisplay": {
     "title": "Tabelweergave",
@@ -934,6 +940,18 @@
       "facturering": {
         "title": "Facturering",
         "desc": "Meldingen over facturen, betalingen en abonnementen."
+      },
+      "kandidaten": {
+        "title": "Kandidaten",
+        "desc": "Meldingen over nieuwe en bijgewerkte kandidaten."
+      },
+      "matches": {
+        "title": "Matches",
+        "desc": "Meldingen over nieuwe matches en statuswijzigingen."
+      },
+      "taken": {
+        "title": "Taken",
+        "desc": "Meldingen over nieuwe en bijgewerkte taken."
       }
     }
   },
@@ -1552,11 +1570,12 @@
       "audit": "Audit log",
       "privacy": "Privacy (AVG)",
       "koios": "Koios AI",
-      "page": "Paginatoegang",
+      "page": "Menu-toegang",
       "locations": "Locaties",
       "departments": "Afdelingen",
       "details": "Details",
-      "aiagents": "AI-agents"
+      "aiagents": "AI-agents",
+      "vacancy_generation": "Vacature-generatie"
     },
     "actions": {
       "view": "Bekijken",
@@ -1572,7 +1591,11 @@
       "manage": "Beheren",
       "erase": "AVG-verwijdering",
       "use": "Gebruiken",
-      "send": "Verzenden"
+      "send": "Verzenden",
+      "archive": "Archiveren",
+      "candidatesDocumentsManage": "Documenten beheren",
+      "candidatesNotesManageAll": "Alle notities beheren",
+      "details": "Rapportdetails (SM/AI)"
     },
     "color": "Kleur",
     "icon": "Icoon",
@@ -1583,7 +1606,11 @@
     "branchesEmptyHint": "Geen vestigingen geselecteerd — nieuwe gebruikers met deze rol starten zonder vestiging-koppeling en zien álle kandidaten. Mét gekoppelde vestigingen ziet een gebruiker alleen kandidaten van die vestigingen.",
     "branchesNoLocations": "Nog geen vestigingen ingericht.",
     "branchesSaveFailed": "Opslaan van de vestiging-template is mislukt. Probeer het opnieuw.",
-    "appearanceSaveFailed": "Opslaan van het uiterlijk is mislukt. Probeer het opnieuw."
+    "appearanceSaveFailed": "Opslaan van het uiterlijk is mislukt. Probeer het opnieuw.",
+    "pageAccess": "Pagina: {{label}}",
+    "hints": {
+      "candidatesSync": "SM-spiegel"
+    }
   },
   "audit": {
     "title": "Audit log",
@@ -1855,7 +1882,11 @@
   "lastContactTypes": {
     "title": "Laatste-contacttypes",
     "subtitle": "Kanalen voor 'laatste contact' (Email, Telefonisch, WhatsApp).",
-    "add": "Type toevoegen"
+    "add": "Type toevoegen",
+    "noContactDaysTitle": "Geen-contact-signalering",
+    "noContactDaysHint": "Na hoeveel dagen zonder geregistreerd laatste contact een kandidaat als 'niet gecontacteerd' geldt voor automatisering (workflows en webhooks).",
+    "noContactDaysLabel": "Dagen (1-365)",
+    "noContactDaysSaveFailed": "Opslaan van de geen-contact-periode is mislukt."
   },
   "noteTypes": {
     "title": "Notitietypes — {{entity}}",
@@ -1866,7 +1897,15 @@
     "title": "Documenttypes — {{entity}}",
     "subtitle": "Categorieën, kleuren en iconen voor documenten bij dit onderdeel.",
     "add": "Type toevoegen",
-    "icon": "Icoon"
+    "icon": "Icoon",
+    "requiresExpiry": "Heeft een vervaldatum",
+    "requiresExpiryDesc": "Documenten van dit type krijgen een vervaldatum, berekend uit de standaardgeldigheid hieronder (of per document ingesteld als die ontbreekt).",
+    "defaultValidityMonths": "Standaardgeldigheid (maanden)",
+    "validityMonthsSuffix": "maanden",
+    "expiringAlertDaysTitle": "Vervalwaarschuwing",
+    "expiringAlertDaysHint": "Hoeveel dagen vóór de vervaldatum van een kandidaatdocument de vervalwaarschuwing-automatisering afgaat.",
+    "expiringAlertDaysLabel": "Dagen (1-365)",
+    "expiringAlertDaysSaveFailed": "Opslaan van de vervalwaarschuwing is mislukt."
   },
   "requiredFields": {
     "title": "Verplichte velden",
@@ -2594,7 +2633,9 @@
     "title": "Nationaliteiten",
     "subtitle": "Beheer de nationaliteiten die kandidaten kunnen kiezen.",
     "add": "Nationaliteit toevoegen",
-    "countryCode": "Land"
+    "countryCode": "Land",
+    "isEu": "EU/EER",
+    "isEuDesc": "Kandidaten met deze nationaliteit hoeven geen werkvergunningsvelden in te vullen."
   },
   "escalationReasons": {
     "title": "Escalatieredenen",
@@ -2660,5 +2701,10 @@
         "unit": "dagen"
       }
     }
+  },
+  "educationLevels": {
+    "title": "Opleidingsniveaus",
+    "subtitle": "Niveaus voor het opleidingen-dropdown bij de kandidaat.",
+    "add": "Niveau toevoegen"
   }
 }

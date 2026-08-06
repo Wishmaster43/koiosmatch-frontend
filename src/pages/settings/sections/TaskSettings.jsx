@@ -32,14 +32,20 @@ export function TaskStatusSettings() {
   )
 }
 
-/** Activity types — the "Activiteit type" lookup. Backend /task-types. */
+/** Activity types — the "Activiteit type" lookup. Backend /task-types.
+ * `counts_as_contact` (KAND-CONTACT-STEMPELS-1) marks a type whose completed tasks
+ * stamp the candidate's last_contact_at; `is_default` (TASKTYPE-DEFAULT-1) is the
+ * singleton TaskController assigns to a newly created task with no type — both
+ * validated on TaskTypeController::store/update (verified against the backend). */
 export function TaskTypeSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
       <StatusListEditor compact withColor title={t('tasks.typeTitle')} subtitle={t('tasks.typeSubtitle')}
         endpoint="/task-types" addLabel={t('tasks.typeAdd')}
-        iconPicker={{ icons: TASK_TYPE_ICON_NAMES, resolve: resolveGenericLookupIcon }} />
+        iconPicker={{ icons: TASK_TYPE_ICON_NAMES, resolve: resolveGenericLookupIcon }}
+        flagField={{ key: 'counts_as_contact', label: t('tasks.typeCountsAsContact'), description: t('tasks.typeCountsAsContactDesc') }}
+        defaultField={{ key: 'is_default' }} />
     </div>
   )
 }

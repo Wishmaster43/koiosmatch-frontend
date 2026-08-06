@@ -223,7 +223,11 @@
     "customer_blacklist_reasons": "Blacklist reasons",
     "match_stop_reasons": "Termination reasons",
     "outreach_outcomes": "Outcomes",
-    "workflow_run_history": "Run history"
+    "workflow_run_history": "Run history",
+    "candidate_education_levels": "Education levels",
+    "notif_kandidaten": "Candidates",
+    "notif_matches": "Matches",
+    "notif_taken": "Tasks"
   },
   "kpis": {
     "title": "KPI settings",
@@ -673,7 +677,9 @@
     "priorityAdd": "Add priority",
     "priorityDefault": "Default",
     "flagDone": "Counts as completed",
-    "flagDoneDesc": "Tasks in this status count toward the completed KPI and no longer show as open or overdue."
+    "flagDoneDesc": "Tasks in this status count toward the completed KPI and no longer show as open or overdue.",
+    "typeCountsAsContact": "Counts as contact",
+    "typeCountsAsContactDesc": "Completing a task of this type updates the candidate's last-contact date."
   },
   "taskDisplay": {
     "title": "Table display",
@@ -934,6 +940,18 @@
       "facturering": {
         "title": "Billing",
         "desc": "Notifications about invoices, payments and subscriptions."
+      },
+      "kandidaten": {
+        "title": "Candidates",
+        "desc": "Notifications about new and updated candidates."
+      },
+      "matches": {
+        "title": "Matches",
+        "desc": "Notifications about new matches and status changes."
+      },
+      "taken": {
+        "title": "Tasks",
+        "desc": "Notifications about new and updated tasks."
       }
     }
   },
@@ -1552,11 +1570,12 @@
       "audit": "Audit log",
       "privacy": "Privacy (GDPR)",
       "koios": "Koios AI",
-      "page": "Page access",
+      "page": "Menu access",
       "locations": "Locations",
       "departments": "Departments",
       "details": "Details",
-      "aiagents": "AI agents"
+      "aiagents": "AI agents",
+      "vacancy_generation": "Vacancy generation"
     },
     "actions": {
       "view": "View",
@@ -1572,7 +1591,11 @@
       "manage": "Manage",
       "erase": "GDPR erasure",
       "use": "Use",
-      "send": "Send"
+      "send": "Send",
+      "archive": "Archive",
+      "candidatesDocumentsManage": "Manage documents",
+      "candidatesNotesManageAll": "Manage all notes",
+      "details": "Report details (SM/AI)"
     },
     "color": "Colour",
     "icon": "Icon",
@@ -1583,7 +1606,11 @@
     "branchesEmptyHint": "No branches selected — new users with this role start without a branch link and see ALL candidates. With linked branches, a user only sees candidates from those branches.",
     "branchesNoLocations": "No branches configured yet.",
     "branchesSaveFailed": "Couldn't save the branch template. Please try again.",
-    "appearanceSaveFailed": "Couldn't save the appearance. Please try again."
+    "appearanceSaveFailed": "Couldn't save the appearance. Please try again.",
+    "pageAccess": "Page: {{label}}",
+    "hints": {
+      "candidatesSync": "SM mirror"
+    }
   },
   "audit": {
     "title": "Audit log",
@@ -1855,7 +1882,11 @@
   "lastContactTypes": {
     "title": "Last-contact types",
     "subtitle": "Channels for 'last contact' (Email, Phone, WhatsApp).",
-    "add": "Add type"
+    "add": "Add type",
+    "noContactDaysTitle": "No-contact reminder",
+    "noContactDaysHint": "How many days without a recorded last contact before a candidate is flagged as 'not contacted' for automation (workflows and webhooks).",
+    "noContactDaysLabel": "Days (1-365)",
+    "noContactDaysSaveFailed": "Saving the no-contact window failed."
   },
   "noteTypes": {
     "title": "Note types — {{entity}}",
@@ -1866,7 +1897,15 @@
     "title": "Document types — {{entity}}",
     "subtitle": "Categories, colours and icons for documents on this entity.",
     "add": "Add type",
-    "icon": "Icon"
+    "icon": "Icon",
+    "requiresExpiry": "Has an expiry date",
+    "requiresExpiryDesc": "Documents of this type get an expiry date, computed from the default validity below (or set per document when there is none).",
+    "defaultValidityMonths": "Default validity (months)",
+    "validityMonthsSuffix": "months",
+    "expiringAlertDaysTitle": "Expiry alert window",
+    "expiringAlertDaysHint": "How many days before a candidate document's expiry date the expiring-document automation fires.",
+    "expiringAlertDaysLabel": "Days (1-365)",
+    "expiringAlertDaysSaveFailed": "Saving the expiry alert window failed."
   },
   "requiredFields": {
     "title": "Required fields",
@@ -2594,7 +2633,9 @@
     "title": "Nationalities",
     "subtitle": "Manage the nationalities candidates can pick.",
     "add": "Add nationality",
-    "countryCode": "Country"
+    "countryCode": "Country",
+    "isEu": "EU/EEA",
+    "isEuDesc": "Candidates with this nationality are not asked for work-permit fields."
   },
   "escalationReasons": {
     "title": "Escalation reasons",
@@ -2660,5 +2701,10 @@
         "unit": "days"
       }
     }
+  },
+  "educationLevels": {
+    "title": "Education levels",
+    "subtitle": "Levels for the candidate's education dropdown.",
+    "add": "Add level"
   }
 }

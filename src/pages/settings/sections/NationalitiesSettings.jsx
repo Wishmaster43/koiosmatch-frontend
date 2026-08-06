@@ -21,6 +21,12 @@ import { getFlagEmoji } from '@/lib/countries'
  * hideRowBadge suppresses the generic text badge StatusListEditor would otherwise
  * also render for it, so the flag is the ONE adornment, not flag + a redundant
  * "Nederland" chip.
+ *
+ * KAND-WERKVERGUNNING-2 (backend landed 05-08): an `is_eu` flag rides the same
+ * create/edit payload (NationalityController::validatePayload) — drives whether a
+ * candidate holding this nationality is asked for work-permit fields (EU/EEA
+ * nationals never are). Wired as a flagField (checkbox + row badge), independent
+ * of the country-code extraField above.
  */
 export default function NationalitiesSettings() {
   const { t } = useTranslation('settings')
@@ -31,6 +37,7 @@ export default function NationalitiesSettings() {
       <StatusListEditor reorderable={false} withColor={false} title={t('nationalities.title')} subtitle={t('nationalities.subtitle')}
         endpoint="/nationalities" addLabel={t('nationalities.add')}
         extraField={{ key: 'country_code', label: t('nationalities.countryCode'), options: countryOptions, default: null, hideRowBadge: true }}
+        flagField={{ key: 'is_eu', label: t('nationalities.isEu'), description: t('nationalities.isEuDesc') }}
         rowPrefix={(item) => item.country_code ? (
           <span aria-hidden="true" style={{ fontSize: 15, lineHeight: 1 }}>{getFlagEmoji(item.country_code)}</span>
         ) : null} />

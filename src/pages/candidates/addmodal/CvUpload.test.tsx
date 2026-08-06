@@ -22,7 +22,7 @@ const PARSE_URL = '/candidates/parse-cv'
 const POLL_URL = `${PARSE_URL}/${TOKEN}`
 
 const { state, createCandidate, getMock, postMock } = vi.hoisted(() => ({
-  state: { permissions: ['candidates.update'] as string[] },
+  state: { permissions: ['candidates.create'] as string[] },
   createCandidate: vi.fn<(body: Record<string, unknown>) => Promise<{ id: string }>>(async () => ({ id: 'cand-new' })),
   getMock: vi.fn(),
   postMock: vi.fn(),
@@ -69,7 +69,7 @@ const upload = async (file: File) => {
 const accepted = { data: { status: 'processing', token: TOKEN } }
 
 beforeEach(() => {
-  state.permissions = ['candidates.update']
+  state.permissions = ['candidates.create']
   createCandidate.mockReset()
   createCandidate.mockResolvedValue({ id: 'cand-new' })
   getMock.mockReset()
@@ -110,7 +110,7 @@ describe('CV upload · the request', () => {
     expect(await screen.findByText('modal.cv.error.notPdf')).toBeInTheDocument()
   })
 
-  it('hides the whole control without candidates.update (both routes need it)', async () => {
+  it('hides the whole control without candidates.create (both routes need it)', async () => {
     state.permissions = []
     render(<AddCandidateModal onClose={noop} />)
     expect(screen.queryByText('modal.cv.title')).not.toBeInTheDocument()

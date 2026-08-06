@@ -6,14 +6,23 @@
  * add/edit/delete that reconcile against the server so a note actually persists.
  *
  * Contract (mirror of the other entities' note endpoints):
- *   GET    /candidates/{id}/notes          → { data: [ { id, type, channel, body, author, created_at } ] } (newest first)
+ *   GET    /candidates/{id}/notes          → { data: [ { id, type, channel, body, author, author_id, created_at } ] } (newest first)
  *   POST   /candidates/{id}/notes          { text, type?, channel? } → 201 { …note }
  *   PATCH  /candidates/{id}/notes/{note}   { text?, type?, channel? } → 200 { …note }
  *   DELETE /candidates/{id}/notes/{note}   → 204
  * author is set server-side (logged-in user); body is encrypted-at-rest (plain text
  * over the wire); type is a value from /note-types. `channel` is a value from
  * /last-contact-types — when present the backend stamps the candidate's
- * last_contact_at/_type/_by (C-21). Reads/writes are perm-gated + IDOR-safe BE-side.
+ * last_contact_at/_type/_by (C-21).
+ *
+ * RECHTEN-DETAIL-1 (Danny 06-08, "notitie-eigenaarschap"): every note now also
+ * carries `author_id` (the creator's central user id; null on a legacy pre-
+ * migration note). PATCH/DELETE 403 server-side unless the note is the caller's
+ * own or the caller holds `candidates.notes.manage_all` — the shared NotesTab
+ * reads `author_id` off each note (see its NoteItem/canManageNote) to hide the
+ * edit/delete buttons before that 403 can ever happen; this hook just has to keep
+ * threading the field through, which unwrapList already does structurally (no
+ * per-field mapping here) — declared explicitly below for type safety.
  */
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -27,6 +36,8 @@ export interface CandidateNote {
   channel?: string
   body?: string
   author?: string
+  // RECHTEN-DETAIL-1: creator's user id — null = system/legacy note (not self-claimable).
+  author_id?: string | number | null
   created_at?: string
   [k: string]: unknown
 }
@@ -79,7 +90,10 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
       .catch(() => { setNotes(snapshot); notifyError(t('common:actionFailed')) })
   }, [candidateId, notes, load, t])
 
-  // Delete — optimistic remove with revert (ready for a NotesTab delete affordance).
+  // Delete — optimistic remove with revert. NotesTab now has the gated delete
+  // button (RECHTEN-DETAIL-1); the host still needs to pass this as onDeleteNote
+  // (mirrors editUserNote's index-remapping past the filtered system notes) for
+  // the button to actually appear on a candidate's Notities tab.
   const deleteNote = useCallback((index: number) => {
     if (!candidateId) return
     const target = notes[index]

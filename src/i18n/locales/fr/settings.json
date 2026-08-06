@@ -223,7 +223,11 @@
     "customer_blacklist_reasons": "Motifs de liste noire",
     "match_stop_reasons": "Motifs de résiliation",
     "outreach_outcomes": "Résultats",
-    "workflow_run_history": "Historique des exécutions"
+    "workflow_run_history": "Historique des exécutions",
+    "candidate_education_levels": "Niveaux d'études",
+    "notif_kandidaten": "Candidats",
+    "notif_matches": "Matchs",
+    "notif_taken": "Tâches"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -704,6 +708,18 @@
       "facturering": {
         "title": "Facturation",
         "desc": "Notifications sur les factures, paiements et abonnements."
+      },
+      "kandidaten": {
+        "title": "Candidats",
+        "desc": "Notifications sur les candidats nouveaux et mis à jour."
+      },
+      "matches": {
+        "title": "Matchs",
+        "desc": "Notifications sur les nouveaux matchs et changements de statut."
+      },
+      "taken": {
+        "title": "Tâches",
+        "desc": "Notifications sur les tâches nouvelles et mises à jour."
       }
     }
   },
@@ -1322,11 +1338,12 @@
       "audit": "Journal d'audit",
       "privacy": "Confidentialité (RGPD)",
       "koios": "Koios AI",
-      "page": "Accès aux pages",
+      "page": "Accès au menu",
       "locations": "Sites",
       "departments": "Services",
       "details": "Détails",
-      "aiagents": "Agents IA"
+      "aiagents": "Agents IA",
+      "vacancy_generation": "Génération d'offres"
     },
     "actions": {
       "view": "Consulter",
@@ -1342,7 +1359,11 @@
       "manage": "Gérer",
       "erase": "Effacement RGPD",
       "use": "Utiliser",
-      "send": "Envoyer"
+      "send": "Envoyer",
+      "archive": "Archiver",
+      "candidatesDocumentsManage": "Gérer les documents",
+      "candidatesNotesManageAll": "Gérer toutes les notes",
+      "details": "Détails du rapport (SM/IA)"
     },
     "color": "Couleur",
     "icon": "Icône",
@@ -1353,7 +1374,11 @@
     "branchesEmptyHint": "Aucune agence sélectionnée — les nouveaux utilisateurs avec ce rôle démarrent sans rattachement et voient TOUS les candidats. Avec des agences rattachées, un utilisateur ne voit que les candidats de ces agences.",
     "branchesNoLocations": "Aucun site configuré pour le moment.",
     "branchesSaveFailed": "Impossible d'enregistrer le modèle de sites. Veuillez réessayer.",
-    "appearanceSaveFailed": "Impossible d'enregistrer l'apparence. Veuillez réessayer."
+    "appearanceSaveFailed": "Impossible d'enregistrer l'apparence. Veuillez réessayer.",
+    "pageAccess": "Page : {{label}}",
+    "hints": {
+      "candidatesSync": "Miroir SM"
+    }
   },
   "audit": {
     "title": "Journal d'audit",
@@ -1653,7 +1678,11 @@
   "lastContactTypes": {
     "title": "Types de dernier contact",
     "subtitle": "Canaux du 'dernier contact' (E-mail, Téléphone, WhatsApp).",
-    "add": "Ajouter un type"
+    "add": "Ajouter un type",
+    "noContactDaysTitle": "Rappel d'absence de contact",
+    "noContactDaysHint": "Au bout de combien de jours sans dernier contact enregistré un candidat est marqué « non contacté » pour l'automatisation (workflows et webhooks).",
+    "noContactDaysLabel": "Jours (1-365)",
+    "noContactDaysSaveFailed": "Échec de l'enregistrement du délai d'absence de contact."
   },
   "noteTypes": {
     "title": "Types de note — {{entity}}",
@@ -1711,7 +1740,9 @@
     "priorityAdd": "Ajouter une priorité",
     "priorityDefault": "Par défaut",
     "flagDone": "Compte comme terminée",
-    "flagDoneDesc": "Les tâches dans ce statut comptent pour le KPI « terminées » et n'apparaissent plus comme ouvertes ou en retard."
+    "flagDoneDesc": "Les tâches dans ce statut comptent pour le KPI « terminées » et n'apparaissent plus comme ouvertes ou en retard.",
+    "typeCountsAsContact": "Compte comme contact",
+    "typeCountsAsContactDesc": "La complétion d'une tâche de ce type met à jour la date de dernier contact du candidat."
   },
   "taskDisplay": {
     "title": "Affichage tableau",
@@ -1844,7 +1875,15 @@
     "title": "Types de document — {{entity}}",
     "subtitle": "Catégories, couleurs et icônes pour les documents de cette section.",
     "add": "Ajouter un type",
-    "icon": "Icône"
+    "icon": "Icône",
+    "requiresExpiry": "A une date d'expiration",
+    "requiresExpiryDesc": "Les documents de ce type reçoivent une date d'expiration, calculée à partir de la validité par défaut ci-dessous (ou définie par document si elle est absente).",
+    "defaultValidityMonths": "Validité par défaut (mois)",
+    "validityMonthsSuffix": "mois",
+    "expiringAlertDaysTitle": "Fenêtre d'alerte d'expiration",
+    "expiringAlertDaysHint": "Combien de jours avant la date d'expiration d'un document de candidat l'automatisation d'alerte d'expiration se déclenche.",
+    "expiringAlertDaysLabel": "Jours (1-365)",
+    "expiringAlertDaysSaveFailed": "Échec de l'enregistrement de la fenêtre d'alerte d'expiration."
   },
   "requiredFields": {
     "title": "Champs requis",
@@ -2594,7 +2633,9 @@
     "title": "Nationalités",
     "subtitle": "Gérez les nationalités que les candidats peuvent choisir.",
     "add": "Ajouter une nationalité",
-    "countryCode": "Pays"
+    "countryCode": "Pays",
+    "isEu": "UE/EEE",
+    "isEuDesc": "Les candidats de cette nationalité ne sont pas invités à renseigner les champs de permis de travail."
   },
   "escalationReasons": {
     "title": "Motifs d'escalade",
@@ -2660,5 +2701,10 @@
         "unit": "jours"
       }
     }
+  },
+  "educationLevels": {
+    "title": "Niveaux d'études",
+    "subtitle": "Niveaux pour la liste déroulante des formations du candidat.",
+    "add": "Ajouter un niveau"
   }
 }

@@ -7,7 +7,8 @@
     "filterUnsupported": "Dit filter wordt (nog) niet door de server ondersteund.",
     "searchPlaceholder": "Zoek kandidaat, notitie, document…",
     "empty": "Geen kandidaten gevonden.",
-    "loading": "Laden…"
+    "loading": "Laden…",
+    "createForbidden": "Je hebt geen rechten om een nieuwe kandidaat aan te maken."
   },
   "columns": {
     "name": "Naam",
@@ -186,7 +187,15 @@
     "pool": "Talentenpool",
     "city": "Woonplaats",
     "source": "Bron",
-    "phase": "Fase"
+    "phase": "Fase",
+    "preferences": {
+      "title": "Voorkeuren",
+      "contractTypes": "Contractvorm",
+      "hoursPerWeek": "Uren per week",
+      "hoursMinPlaceholder": "Min",
+      "hoursMaxPlaceholder": "Max",
+      "availableFromBefore": "Beschikbaar vóór"
+    }
   },
   "modal": {
     "title": "Nieuwe kandidaat",
@@ -234,7 +243,8 @@
       "cardContact": "Contact",
       "cardWork": "Werk",
       "cardAddress": "Adres",
-      "addressExpand": "Adres toevoegen"
+      "addressExpand": "Adres toevoegen",
+      "linkedinPlaceholder": "linkedin.com/in/gebruikersnaam"
     },
     "gender": {
       "male": "Man",
@@ -417,7 +427,11 @@
     "birthdayTomorrow": "Morgen jarig!",
     "birthdaySoon": "Bijna jarig · over {{count}} dagen",
     "sendEmail": "E-mail sturen",
-    "callPhone": "Bellen"
+    "callPhone": "Bellen",
+    "groupWorkPermit": "Werkvergunning",
+    "workPermitType": "Type werkvergunning",
+    "workPermitValidUntil": "Geldig tot",
+    "linkedinPlaceholder": "linkedin.com/in/gebruikersnaam"
   },
   "addFields": {
     "functionTitle": "Functietitel",
@@ -444,7 +458,14 @@
     "present": "heden",
     "alwaysValid": "Altijd geldig (geen einddatum)",
     "diplomaDate": "Diploma-/afgiftedatum",
-    "linkedDocument": "Gekoppeld document"
+    "linkedDocument": "Gekoppeld document",
+    "referenceName": "Naam",
+    "relation": "Relatie",
+    "employer": "Werkgever",
+    "phone": "Telefoon",
+    "email": "E-mailadres",
+    "note": "Notitie",
+    "educationLevel": "Niveau"
   },
   "work": {
     "client": "Klant",
@@ -541,7 +562,9 @@
     "timelinePlacedAt": "Geplaatst bij {{customer}}",
     "timelineOngoing": "heden",
     "timelineVia": "via {{name}}",
-    "searchPlaceholder": "Zoek notities…"
+    "searchPlaceholder": "Zoek notities…",
+    "deleteNote": "Notitie verwijderen",
+    "deleteConfirm": "Weet je zeker dat je deze notitie wilt verwijderen?"
   },
   "statistics": {
     "placements": "Matches",
@@ -672,7 +695,9 @@
     "timelineEmpty": "Nog geen activiteiten.",
     "conversations": "Conversaties",
     "conversationsEmpty": "Nog geen conversaties.",
-    "branchEmpty": "Nog geen vestiging gekoppeld."
+    "branchEmpty": "Nog geen vestiging gekoppeld.",
+    "references": "Referenties",
+    "referencesEmpty": "Nog geen referenties."
   },
   "preferences": {
     "title": "Voorkeuren",
@@ -699,7 +724,13 @@
     "moreTitle": "Overige voorkeuren",
     "groupDesiredRate": "Gewenst uurloon",
     "desiredRateMin": "Van (€ per uur)",
-    "desiredRateMax": "Tot (€ per uur)"
+    "desiredRateMax": "Tot (€ per uur)",
+    "groupEmergencyContact": "Noodcontact",
+    "emergencyContactName": "Naam",
+    "emergencyContactPhone": "Telefoonnummer",
+    "emergencyContactPhoneInvalid": "Voer een geldig telefoonnummer in (8 t/m 15 cijfers, spaties/streepjes toegestaan).",
+    "groupNoticePeriod": "Opzegtermijn",
+    "noticePeriodWeeks": "Opzegtermijn (weken)"
   },
   "zzp": {
     "title": "ZZP'er",
@@ -771,7 +802,13 @@
     },
     "linkTo": "Koppelen aan",
     "linkToFor": "Koppelen aan voor {{name}}",
-    "jumpToDocuments": "Naar documenten"
+    "jumpToDocuments": "Naar documenten",
+    "expiresOn": "Loopt af op {{date}}",
+    "expiredOn": "Afgelopen op {{date}}",
+    "replace": "Bestand vervangen",
+    "versionCount_one": "{{count}} eerdere versie",
+    "versionCount_other": "{{count}} eerdere versies",
+    "downloadVersion": "Deze versie downloaden"
   },
   "ai": {
     "title": "Koios AI adviseert",
@@ -1130,5 +1167,14 @@
       "lead_without_funnel": "Lead zonder sollicitatie — plan een intake om te kwalificeren.",
       "no_pool": "Zit nog in geen enkele talentenpool — voeg toe zodat de kandidaat vindbaar is."
     }
+  },
+  "references": {
+    "verify": "Verifiëren",
+    "verified": "Geverifieerd"
+  },
+  "validation": {
+    "emailFormat": "Voer een geldig e-mailadres in.",
+    "phoneFormat": "Voer een geldig telefoonnummer in (8 t/m 15 cijfers, bv. 0612345678 of +31612345678).",
+    "linkedinFormat": "Gebruik alleen de LinkedIn-gebruikersnaam, zonder spaties of schuine strepen (bijv. jan-jansen-12345)."
   }
 }

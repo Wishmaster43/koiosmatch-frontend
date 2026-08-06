@@ -58,4 +58,23 @@ describe('canAccessPage — standard ATS pages', () => {
     expect(canAccessPage('candidates', auth)).toBe(false)
     expect(canAccessPage('customers', auth)).toBe(true)
   })
+
+  // RECHTEN-UI-1 #2: PAGE_RESTRICTABLE used to list only 5 of the 15 page.* ids
+  // the backend seeds (RoleAndPermissionSeeder) — a role's other page.* toggles
+  // looked real in the Roles UI but never gated navigation. Assert the whitelist
+  // now bites on every seeded id, not just the original five.
+  it('respects page.* whitelists on every backend-seeded page id, not just the original five', () => {
+    const auth = {
+      user: { permissions: ['page.candidates', 'page.tasks'] },
+      activeTenant: { package: 'ats_crm', modules: ['ats', 'plan', 'whatsapp'] },
+    }
+    expect(canAccessPage('tasks', auth)).toBe(true)
+    // Held module access (plan) but no page.planning in the whitelist -> still blocked.
+    expect(canAccessPage('planning', auth)).toBe(false)
+    expect(canAccessPage('vacancies', auth)).toBe(false)
+    expect(canAccessPage('opportunities', auth)).toBe(false)
+    expect(canAccessPage('outreach', auth)).toBe(false)
+    expect(canAccessPage('users', auth)).toBe(false)
+    expect(canAccessPage('settings', auth)).toBe(false)
+  })
 })

@@ -7,7 +7,8 @@
     "filterUnsupported": "Ce filtre n'est pas (encore) pris en charge par le serveur.",
     "searchPlaceholder": "Rechercher un candidat, une note, un document…",
     "empty": "Aucun candidat trouvé.",
-    "loading": "Chargement…"
+    "loading": "Chargement…",
+    "createForbidden": "Vous n'êtes pas autorisé à créer un nouveau candidat."
   },
   "columns": {
     "name": "Nom",
@@ -164,7 +165,15 @@
     "pool": "Vivier",
     "city": "Ville",
     "source": "Source",
-    "phase": "Phase"
+    "phase": "Phase",
+    "preferences": {
+      "title": "Préférences",
+      "contractTypes": "Forme contractuelle",
+      "hoursPerWeek": "Heures par semaine",
+      "hoursMinPlaceholder": "Min",
+      "hoursMaxPlaceholder": "Max",
+      "availableFromBefore": "Disponible avant"
+    }
   },
   "modal": {
     "title": "Nouveau candidat",
@@ -212,7 +221,8 @@
       "cardContact": "Contact",
       "cardWork": "Travail",
       "cardAddress": "Adresse",
-      "addressExpand": "Ajouter une adresse"
+      "addressExpand": "Ajouter une adresse",
+      "linkedinPlaceholder": "linkedin.com/in/nomdutilisateur"
     },
     "gender": {
       "male": "Homme",
@@ -395,7 +405,11 @@
     "birthdayTomorrow": "Anniversaire demain !",
     "birthdaySoon": "Anniversaire dans {{count}} jours",
     "sendEmail": "Envoyer un e-mail",
-    "callPhone": "Appeler"
+    "callPhone": "Appeler",
+    "groupWorkPermit": "Permis de travail",
+    "workPermitType": "Type de permis de travail",
+    "workPermitValidUntil": "Valable jusqu'au",
+    "linkedinPlaceholder": "linkedin.com/in/nomdutilisateur"
   },
   "addFields": {
     "functionTitle": "Intitulé du poste",
@@ -422,7 +436,14 @@
     "present": "présent",
     "alwaysValid": "Toujours valide (sans expiration)",
     "diplomaDate": "Date de diplôme / délivrance",
-    "linkedDocument": "Document lié"
+    "linkedDocument": "Document lié",
+    "referenceName": "Nom",
+    "relation": "Relation",
+    "employer": "Employeur",
+    "phone": "Téléphone",
+    "email": "Adresse e-mail",
+    "note": "Note",
+    "educationLevel": "Niveau"
   },
   "work": {
     "client": "Client",
@@ -519,7 +540,9 @@
     "timelinePlacedAt": "Placé chez {{customer}}",
     "timelineOngoing": "aujourd'hui",
     "timelineVia": "via {{name}}",
-    "searchPlaceholder": "Rechercher des notes…"
+    "searchPlaceholder": "Rechercher des notes…",
+    "deleteNote": "Supprimer la note",
+    "deleteConfirm": "Voulez-vous vraiment supprimer cette note ?"
   },
   "statistics": {
     "placements": "Matchs",
@@ -650,7 +673,9 @@
     "poolAdd": "Ajouter à un vivier",
     "poolsEmpty": "Aucun vivier configuré pour le moment.",
     "poolKoios": "Suggéré par Koios",
-    "branchEmpty": "Aucune agence rattachée."
+    "branchEmpty": "Aucune agence rattachée.",
+    "references": "Références",
+    "referencesEmpty": "Aucune référence pour le moment."
   },
   "preferences": {
     "title": "Préférences",
@@ -677,7 +702,13 @@
     "moreTitle": "Autres préférences",
     "groupDesiredRate": "Taux horaire souhaité",
     "desiredRateMin": "De (€ par heure)",
-    "desiredRateMax": "À (€ par heure)"
+    "desiredRateMax": "À (€ par heure)",
+    "groupEmergencyContact": "Contact d'urgence",
+    "emergencyContactName": "Nom",
+    "emergencyContactPhone": "Numéro de téléphone",
+    "emergencyContactPhoneInvalid": "Saisissez un numéro de téléphone valide (8 à 15 chiffres, espaces/tirets autorisés).",
+    "groupNoticePeriod": "Préavis",
+    "noticePeriodWeeks": "Préavis (semaines)"
   },
   "zzp": {
     "title": "Indépendant",
@@ -749,7 +780,13 @@
     },
     "linkTo": "Lier à",
     "linkToFor": "Lier à pour {{name}}",
-    "jumpToDocuments": "Aller aux documents"
+    "jumpToDocuments": "Aller aux documents",
+    "expiresOn": "Expire le {{date}}",
+    "expiredOn": "Expiré le {{date}}",
+    "replace": "Remplacer le fichier",
+    "versionCount_one": "{{count}} version précédente",
+    "versionCount_other": "{{count}} versions précédentes",
+    "downloadVersion": "Télécharger cette version"
   },
   "ai": {
     "title": "Koios AI conseille",
@@ -1130,5 +1167,14 @@
       "lead_without_funnel": "Lead sans candidature — planifiez un entretien pour le qualifier.",
       "no_pool": "Pas encore dans un vivier de talents — ajoutez-le pour qu'il soit trouvable."
     }
+  },
+  "references": {
+    "verify": "Vérifier",
+    "verified": "Vérifié"
+  },
+  "validation": {
+    "emailFormat": "Saisissez une adresse e-mail valide.",
+    "phoneFormat": "Saisissez un numéro de téléphone valide (8 à 15 chiffres, par ex. 0612345678 ou +31612345678).",
+    "linkedinFormat": "Utilisez uniquement le nom d'utilisateur LinkedIn, sans espaces ni barres obliques (par ex. jan-jansen-12345)."
   }
 }

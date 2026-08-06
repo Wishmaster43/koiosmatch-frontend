@@ -91,7 +91,7 @@ export default function DocPreviewModal({ doc, onClose, docTypeScope = 'candidat
     if (!doc) return null
     const abs = (u?: string) => (u && /^https?:\/\//.test(u) ? u : null)
     const rel = (u?: string) => (u && u.startsWith('/') ? new URL(u, API_ORIGIN).toString() : null)
-    return abs(doc.url) ?? abs(doc.download_url) ?? rel(doc.url) ?? rel(doc.download_url)
+    return abs(doc.download_url) ?? abs(doc.url) ?? rel(doc.download_url) ?? rel(doc.url)
   })()
   useEffect(() => {
     setPdfFailed(false)

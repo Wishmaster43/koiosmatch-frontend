@@ -183,7 +183,8 @@
     "facebook_send": "Retroalimentación de Facebook",
     "candidates_fetch": "Candidatos de Koios Match",
     "pdok_geocode": "Geocodificar dirección (PDOK)",
-    "backoffice_sync": "Vincular con el backoffice"
+    "backoffice_sync": "Vincular con el backoffice",
+    "interview_start": "Iniciar entrevista IA"
   },
   "status": {
     "active": "Activo",
@@ -997,7 +998,17 @@
       "candidate_phase_changed": "Fase del candidato cambiada",
       "candidate_status_changed": "Estado del candidato cambiado",
       "candidate_type_changed": "Tipo de contrato del candidato cambiado",
-      "contract_signed": "Contrato firmado"
+      "contract_signed": "Contrato firmado",
+      "application_created": "Solicitud creada",
+      "vacancy_status_changed": "Estado de la vacante cambiado",
+      "candidate_availability_changed": "Disponibilidad del candidato cambiada",
+      "candidate_no_contact": "Candidato sin contactar",
+      "candidate_document_expiring": "Documento del candidato por vencer",
+      "match_expiring": "Match por vencer",
+      "match_terminated": "Match finalizado",
+      "appointment_created": "Cita creada",
+      "whatsapp_connection_down": "Conexión de WhatsApp caída",
+      "whatsapp_connection_restored": "Conexión de WhatsApp restablecida"
     }
   }
 }

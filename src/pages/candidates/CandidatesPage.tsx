@@ -17,6 +17,7 @@ import CandidateDrawerJs from './CandidateDrawer'
 import CandidateLifecycleModals from './CandidateLifecycleModals'
 import AddCandidateModal from './AddCandidateModal'
 import CandidatesListPanel from './CandidatesListPanel'
+import CandidatesPreferenceFilters from './CandidatesPreferenceFilters'
 import type { ActionMessage } from '@/components/ui/ActionMessageBanner'
 import { toggleOneValue, isStale, isNeverContacted, optsFrom } from './data/candidatesShared'
 import { usePools } from '@/lib/usePools'
@@ -24,6 +25,7 @@ import { usePageMemory } from '@/lib/usePageMemory'
 import { useListPageSize } from '@/hooks/useListPageSize'
 import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
 import { useCandidateFilters } from './hooks/useCandidateFilters'
+import { useCandidatePreferenceFilters } from './hooks/useCandidatePreferenceFilters'
 import { buildCandidateFilterGroups } from './data/candidateFilterGroups'
 import { useCandidatesData, CANDIDATES_MAX_PER_PAGE } from './hooks/useCandidatesData'
 import { useCandidateOptions } from './hooks/useCandidateOptions'
@@ -103,9 +105,19 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     selectedSource, setSelectedSource,
     globalSearch, setGlobalSearch, attentionFilter, setAttentionFilter,
     dateRange, setDateRange, geoFilter, geoHint, applyGeo, clearGeo,
-    anyFilterActive, clearAllFilters, searchEpoch, filterParams, filterKey,
+    // Renamed on destructure — the Voorkeuren hook below widens these back to the
+    // plain names (KAND-FILTERS-1), so the rest of the file is unaffected.
+    anyFilterActive: baseAnyFilterActive, clearAllFilters: baseClearAllFilters,
+    searchEpoch, filterParams: baseFilterParams,
   } = useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius, setMapCenter, setMapRadius })
 
+  // KAND-FILTERS-1 "Voorkeuren" dims (contract form / hours range / available-before) — own hook (§0.3 split).
+  const {
+    selectedContractTypes, toggleContractType,
+    hoursMin, setHoursMin, hoursMax, setHoursMax,
+    availableFromBefore, setAvailableFromBefore,
+    filterParams, filterKey, anyFilterActive, clearAllFilters,
+  } = useCandidatePreferenceFilters({ baseFilterParams, baseAnyFilterActive, baseClearAllFilters })
 
   // Seed filters from a navigation intent (e.g. a dashboard KPI/chart click).
   useEffect(() => {
@@ -132,6 +144,16 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     msgTimer.current = setTimeout(() => setActionMsg(null), 4000)
   }
   useEffect(() => () => { if (msgTimer.current) clearTimeout(msgTimer.current) }, [])
+
+  // RECHTEN-1: "+ Nieuwe kandidaat" gates on candidates.create (measured — POST
+  // /candidates requires it). CandidatesToolbar always renders the button, so the
+  // gate lives on the open handler: an unauthorized click gets an honest reason
+  // via the message banner instead of a silent no-op.
+  const canCreateCandidate = hasPermission('candidates.create')
+  const handleAddOpen = () => {
+    if (!canCreateCandidate) { notify('error', t('page.createForbidden')); return }
+    setAddOpen(true)
+  }
 
   // ── Data layer ──
   const { candidates, setCandidates, loading, error, total, setTotal, lastPage, stats, statsFailed, locations } =
@@ -297,43 +319,57 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
       {addOpen && <AddCandidateModal onClose={() => setAddOpen(false)} onCreated={handleCreated} />}
       <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
 
-        {/* Table area — insights row, action banner, toolbar and the table⇄map
-            ViewSwitch all live in one thin panel component (§0.3 size split). */}
-        <CandidatesListPanel
-          insightDonuts={insightDonuts} insightKpis={insightKpis}
-          statsFailed={statsFailed} total={total} loadedCount={candidates.length}
-          actionMsg={actionMsg} onDismissMessage={() => setActionMsg(null)}
-          selectedCount={selectedIds.size}
-          onClearSelection={() => setSelectedIds(new Set())}
-          bulkBar={{
-            onAddToPool: bulkAddToPool, onRemoveFromPool: bulkRemoveFromPool,
-            onSetOwner: bulkSetOwner, onSetStage: bulkSetStage, onSetTypes: bulkSetTypes, onSetConsent: bulkSetConsent,
-            onConvertPhase: bulkConvertPhase, onSetStatus: bulkSetStatus, onAddTag: bulkAddTag,
-            onRemoveTag: bulkRemoveTag, onAddNote: bulkAddNote, onArchive: bulkArchive,
-            canArchive: hasPermission('candidates.delete'),
-            onMerge: bulkMergePrompt, canMerge: hasPermission('candidates.delete'),
-            onManageByApplication: manageByApplication,
-            onGeocode: bulkGeocode, canGeocode: hasPermission('candidates.update'),
-            onCoupleBackoffice: bulkCoupleBackoffice,
-            users, funnelTypes, candidateTypes, phases, statuses, selectedTags,
-          }}
-          onAddOpen={() => setAddOpen(true)}
-          searchEpoch={searchEpoch} globalSearch={globalSearch} onSearch={setGlobalSearch}
-          anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters}
-          blacklistActive={blacklistActive} onToggleBlacklist={toggleBlacklist}
-          showArchived={showArchived} onToggleArchived={() => { setShowArchived(v => !v); setShowTrash(false) }}
-          showTrash={showTrash} onToggleTrash={() => { setShowTrash(v => !v); setShowArchived(false) }}
-          view={view} onToggleView={() => setView(v => (v === 'map' ? 'table' : 'map'))}
-          tableScrollRef={tableScrollRef} error={error} filtered={filtered} loading={loading}
-          selectedId={selected?.id} onSelectCandidate={selectCandidate}
-          selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
-          page={page} lastPage={lastPage} pageSize={pageSize} pageSizeOptions={pageSizeOptions}
-          onPageChange={setPage} onPageSizeChange={handlePageSizeChange}
-          mapCenter={mapCenter} mapRadius={mapRadius} mapStraalActive={mapStraalActive}
-          onMapCenterChange={(lat, lng) => { setMapCenter({ lat, lng }); setMapStraalActive(true) }}
-          onMapRadiusChange={(km) => { setMapRadius(km); setMapStraalActive(true) }}
-          onMapClearRadius={mapStraalActive ? () => setMapStraalActive(false) : undefined}
-        />
+        {/* Voorkeuren filter row (KAND-FILTERS-1) above the list panel; wrapping here
+            keeps CandidatesListPanel's own flex:1 sizing unchanged. */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+          <CandidatesPreferenceFilters
+            contractTypeOptions={candidateTypes}
+            selectedContractTypes={selectedContractTypes} onToggleContractType={toggleContractType}
+            hoursMin={hoursMin} onHoursMinChange={setHoursMin}
+            hoursMax={hoursMax} onHoursMaxChange={setHoursMax}
+            availableFromBefore={availableFromBefore} onAvailableFromBeforeChange={setAvailableFromBefore}
+          />
+
+          {/* Table area — insights row, action banner, toolbar and the table⇄map
+              ViewSwitch all live in one thin panel component (§0.3 size split). */}
+          <CandidatesListPanel
+            insightDonuts={insightDonuts} insightKpis={insightKpis}
+            statsFailed={statsFailed} total={total} loadedCount={candidates.length}
+            actionMsg={actionMsg} onDismissMessage={() => setActionMsg(null)}
+            selectedCount={selectedIds.size}
+            onClearSelection={() => setSelectedIds(new Set())}
+            bulkBar={{
+              onAddToPool: bulkAddToPool, onRemoveFromPool: bulkRemoveFromPool,
+              onSetOwner: bulkSetOwner, onSetStage: bulkSetStage, onSetTypes: bulkSetTypes, onSetConsent: bulkSetConsent,
+              onConvertPhase: bulkConvertPhase, onSetStatus: bulkSetStatus, onAddTag: bulkAddTag,
+              onRemoveTag: bulkRemoveTag, onAddNote: bulkAddNote, onArchive: bulkArchive,
+              // RECHTEN-1: archive/restore own permission is candidates.archive (measured —
+              // POST candidates/bulk/archive + /restore), distinct from merge's candidates.delete below.
+              canArchive: hasPermission('candidates.archive'),
+              onMerge: bulkMergePrompt, canMerge: hasPermission('candidates.delete'),
+              onManageByApplication: manageByApplication,
+              onGeocode: bulkGeocode, canGeocode: hasPermission('candidates.update'),
+              onCoupleBackoffice: bulkCoupleBackoffice,
+              users, funnelTypes, candidateTypes, phases, statuses, selectedTags,
+            }}
+            onAddOpen={handleAddOpen}
+            searchEpoch={searchEpoch} globalSearch={globalSearch} onSearch={setGlobalSearch}
+            anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters}
+            blacklistActive={blacklistActive} onToggleBlacklist={toggleBlacklist}
+            showArchived={showArchived} onToggleArchived={() => { setShowArchived(v => !v); setShowTrash(false) }}
+            showTrash={showTrash} onToggleTrash={() => { setShowTrash(v => !v); setShowArchived(false) }}
+            view={view} onToggleView={() => setView(v => (v === 'map' ? 'table' : 'map'))}
+            tableScrollRef={tableScrollRef} error={error} filtered={filtered} loading={loading}
+            selectedId={selected?.id} onSelectCandidate={selectCandidate}
+            selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
+            page={page} lastPage={lastPage} pageSize={pageSize} pageSizeOptions={pageSizeOptions}
+            onPageChange={setPage} onPageSizeChange={handlePageSizeChange}
+            mapCenter={mapCenter} mapRadius={mapRadius} mapStraalActive={mapStraalActive}
+            onMapCenterChange={(lat, lng) => { setMapCenter({ lat, lng }); setMapStraalActive(true) }}
+            onMapRadiusChange={(km) => { setMapRadius(km); setMapStraalActive(true) }}
+            onMapClearRadius={mapStraalActive ? () => setMapStraalActive(false) : undefined}
+          />
+        </div>
 
         {/* Drawer — remounts (key) when the full detail arrives so the tabs
             re-initialise from the complete record instead of the light row. */}
@@ -349,8 +385,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
           onRestore={restoreOne}
           onHardDelete={hardDeleteOne}
           onRefresh={refreshRecord}
-          // Merge (punt 4): same permission as archive; after the merge the survivor
-          // reopens fresh (selectCandidate refetches the full detail).
+          // Merge (punt 4): candidates.delete (distinct from archive/restore's candidates.archive
+          // above); after the merge the survivor reopens fresh.
           onMerged={hasPermission('candidates.delete') ? (id) => selectCandidate({ id } as Candidate) : undefined}
           users={users}
           initialTab={drawerTab}

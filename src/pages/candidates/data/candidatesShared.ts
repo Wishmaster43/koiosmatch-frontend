@@ -86,6 +86,10 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   // COUNTRY-1: home-address country (ISO-2 code); '' clears it (never send an empty string).
   if ('country'           in patch) body.country           = patch.country === '' ? null : patch.country
   if ('linkedin'          in patch) body.linkedin_slug     = patch.linkedin
+  // WORK-PERMIT-1: plain columns on candidates (CandidateProfileRequest validates both) —
+  // without this mapping the WorkPermitBlock's save silently dropped its fields.
+  if ('workPermitType'       in patch) body.work_permit_type        = patch.workPermitType || null
+  if ('workPermitValidUntil' in patch) body.work_permit_valid_until = patch.workPermitValidUntil || null
   if ('summary'           in patch) body.summary           = patch.summary
   if ('languages'         in patch) body.languages         = patch.languages
   if ('preferences'       in patch) body.preferences       = patch.preferences

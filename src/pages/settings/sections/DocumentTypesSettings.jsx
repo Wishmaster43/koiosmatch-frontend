@@ -1,6 +1,9 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 import { DOC_TYPE_ICON_NAMES, resolveDocTypeIcon } from '@/lib/useDocumentTypes'
+import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getNumberSetting } from '@/lib/settings/useAllSettings'
+import { notifyError } from '@/lib/notify'
 
 // entity → the nav.<id> label already registered for this tab (registry.jsx dt_*
 // items), reused so each entity name is translated once (mirrors NoteTypesSettings'
@@ -11,6 +14,59 @@ import { DOC_TYPE_ICON_NAMES, resolveDocTypeIcon } from '@/lib/useDocumentTypes'
 const ENTITY_NAV_ID = {
   candidate: 'dt_candidate', customer: 'dt_customer', customer_location: 'dt_customer_location',
   customer_department: 'dt_customer_department', vacancy: 'dt_vacancy',
+}
+
+// Tenant-setting key — the generic /settings key/value store (no dedicated column,
+// SettingController::store accepts any string key up to 10000 chars, no whitelist —
+// verified against koiosmatch-api). Consumed by the backend `documents:expiring-alerts`
+// command (DispatchExpiringDocumentAlerts::SETTING_KEY) to decide how many days before
+// a requires_expiry document's expires_at the `candidate.document_expiring` automation
+// event fires (workflows + webhooks). Same commit-on-blur / optimistic / revert pattern
+// as the Koios conversation-memory field (WhatsAppLog.tsx).
+export const DOCUMENT_EXPIRING_ALERT_DAYS_KEY = 'document_expiring_alert_days'
+const EXPIRING_ALERT_DAYS_DEFAULT = 30
+const EXPIRING_ALERT_DAYS_MIN = 1
+const EXPIRING_ALERT_DAYS_MAX = 365
+
+// How many days before expiry the expiring-document alert fires. Only meaningful for
+// the candidate scope — the backend command queries CandidateDocument only, so this
+// field is shown on that sub-tab alone (see the entity check in the component below).
+// Commits on blur (not per keystroke), optimistic with revert-on-failure.
+function ExpiringAlertDaysField() {
+  const { t } = useTranslation('settings')
+  const settings = useAllSettings()
+  const saved = getNumberSetting(settings, DOCUMENT_EXPIRING_ALERT_DAYS_KEY, EXPIRING_ALERT_DAYS_DEFAULT)
+  const [value, setValue] = useState(saved)
+
+  // Persist one clamped value — optimistic, revert + toast on failure (house pattern).
+  const commit = async (raw) => {
+    const clamped = Math.min(EXPIRING_ALERT_DAYS_MAX, Math.max(EXPIRING_ALERT_DAYS_MIN, Number(raw) || EXPIRING_ALERT_DAYS_DEFAULT))
+    if (clamped === saved) { setValue(clamped); return }
+    setValue(clamped)
+    try {
+      await saveSettingsKeys({ [DOCUMENT_EXPIRING_ALERT_DAYS_KEY]: clamped })
+      invalidateAllSettingsCache()
+    } catch {
+      setValue(saved)
+      notifyError(t('documentTypes.expiringAlertDaysSaveFailed'))
+    }
+  }
+
+  return (
+    <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('documentTypes.expiringAlertDaysTitle')}</div>
+      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{t('documentTypes.expiringAlertDaysHint')}</div>
+      <label htmlFor="document-expiring-alert-days" style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
+        {t('documentTypes.expiringAlertDaysLabel')}
+      </label>
+      <input id="document-expiring-alert-days" type="number" min={EXPIRING_ALERT_DAYS_MIN} max={EXPIRING_ALERT_DAYS_MAX}
+        value={value}
+        onChange={e => setValue(Number(e.target.value))}
+        onBlur={e => commit(Number(e.target.value))}
+        style={{ width: 100, height: 32, padding: '0 8px', borderRadius: 6, border: '1px solid var(--border)',
+          background: 'var(--surface)', color: 'var(--text)', fontSize: 12 }} />
+    </div>
+  )
 }
 
 /**
@@ -33,16 +89,29 @@ const ENTITY_NAV_ID = {
  *
  * Document types carry BOTH a colour (`withColor`, backend `hasColor = true`) and a
  * curated icon (`iconPicker`, backend DOCTYPE-ICON-1) — note types have neither.
+ *
+ * DOC-GELDIGHEID-1: a type also carries an optional expiry configuration —
+ * `requires_expiry` (flagField) marks a type whose documents carry an expiry date,
+ * and `default_validity_months` (numberField) is the fallback validity
+ * CandidateDocumentController/DocumentExpiryResolver auto-computes expires_at from
+ * on upload when the client sends none (or 422s when neither exists). Both keys are
+ * accepted by CandidateDocumentTypeController::extraRules() — verified against the
+ * backend controller before wiring.
  */
 export default function DocumentTypesSettings({ entity }) {
   const { t } = useTranslation('settings')
   const entityLabel = t(`nav.${ENTITY_NAV_ID[entity] ?? entity}`)
   return (
     <div style={{ maxWidth: 640 }}>
+      {/* Tenant-wide expiry-alert window — candidate scope only (see the field's own comment). */}
+      {entity === 'candidate' && <ExpiringAlertDaysField />}
       <StatusListEditor withColor entity={entity}
         title={t('documentTypes.title', { entity: entityLabel })} subtitle={t('documentTypes.subtitle')}
         endpoint="/document-types" addLabel={t('documentTypes.add')}
-        iconPicker={{ icons: DOC_TYPE_ICON_NAMES, resolve: resolveDocTypeIcon }} />
+        iconPicker={{ icons: DOC_TYPE_ICON_NAMES, resolve: resolveDocTypeIcon }}
+        numberField={{ key: 'default_validity_months', label: t('documentTypes.defaultValidityMonths'),
+          default: null, min: 1, max: 1200, suffix: t('documentTypes.validityMonthsSuffix') }}
+        flagField={{ key: 'requires_expiry', label: t('documentTypes.requiresExpiry'), description: t('documentTypes.requiresExpiryDesc') }} />
     </div>
   )
 }

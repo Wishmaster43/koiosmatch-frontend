@@ -37,8 +37,10 @@ describe('BackgroundTab · sub-tabs (kandidaten-ronde-2, punt B)', () => {
   it('renders exactly one sub-tab per section, sorted alphabetically by translated label', () => {
     render(<BackgroundTab c={candidate()} />)
     const tabs = screen.getAllByRole('tab').map(el => el.textContent)
-    // Dutch alphabetical order: Certificeringen · Ervaring · Opleiding · Talen · Vaardigheden.
-    expect(tabs).toEqual(['Certificeringen', 'Ervaring', 'Opleiding', 'Talen', 'Vaardigheden'])
+    // Dutch alphabetical order: Certificeringen · Ervaring · Opleiding · Referenties
+    // (KAND-REFERENTIES-1, defaultValue-rendered until the key lands in nl.json) ·
+    // Talen · Vaardigheden.
+    expect(tabs).toEqual(['Certificeringen', 'Ervaring', 'Opleiding', 'Referenties', 'Talen', 'Vaardigheden'])
   })
 
   it('defaults the open sub-tab to Ervaring, not the first alphabetically (Certificeringen)', () => {
@@ -62,6 +64,61 @@ describe('BackgroundTab · sub-tabs (kandidaten-ronde-2, punt B)', () => {
     render(<BackgroundTab c={candidate()} />)
     await user.click(screen.getByRole('tab', { name: 'Certificeringen' }))
     expect(screen.getByText('Nog geen certificeringen.')).toBeInTheDocument()
+  })
+
+  it('Referenties renders on its own sub-tab (KAND-REFERENTIES-1)', async () => {
+    const user = userEvent.setup()
+    render(<BackgroundTab c={candidate()} />)
+    await user.click(screen.getByRole('tab', { name: 'Referenties' }))
+    expect(screen.getByText('Nog geen referenties.')).toBeInTheDocument()
+  })
+})
+
+/**
+ * KAND-REFERENTIES-1: BackgroundTab owns the actual verify REQUEST (§13 — assert
+ * method/route, never only that a callback fired) — ReferencesTab.test.tsx covers
+ * the presentational badge/action swap in isolation with a stub onVerify.
+ */
+describe('BackgroundTab · references verify wiring (KAND-REFERENTIES-1)', () => {
+  beforeEach(() => {
+    vi.mocked(api.post).mockReset()
+  })
+
+  it('verify POSTs the real route and merges the returned verified_at into the row', async () => {
+    const user = userEvent.setup()
+    // This file's own `unwrap` mock is the identity function (see the vi.mock
+    // block above) — so the resolved value IS the already-unwrapped item, not an
+    // axios-response envelope.
+    vi.mocked(api.post).mockResolvedValue({ id: 'r1', verified_at: '2026-08-01T10:00:00Z', verified_by: 'u1' })
+    const c = {
+      ...candidate(),
+      references: [{ id: 'r1', name: 'Jan Jansen', relation: 'Manager', employer: 'Zorggroep X' }],
+    } as unknown as Candidate
+    render(<BackgroundTab c={c} />)
+    await user.click(screen.getByRole('tab', { name: 'Referenties' }))
+    expect(screen.getByText('Jan Jansen')).toBeInTheDocument()
+
+    await user.click(screen.getByTitle('Verifiëren'))
+    expect(api.post).toHaveBeenCalledWith('/candidates/1/references/r1/verify')
+    await waitFor(() => expect(screen.getByText(/Geverifieerd/)).toBeInTheDocument())
+    expect(screen.queryByTitle('Verifiëren')).toBeNull()
+  })
+
+  it('does not offer verify for an unpersisted (temp id) row', async () => {
+    const user = userEvent.setup()
+    // The add flow's own POST never needs to resolve for this assertion — just
+    // must not reject synchronously (undefined has no .then otherwise). Identity
+    // `unwrap` (see the vi.mock block above) means this value IS the "item".
+    vi.mocked(api.post).mockResolvedValue({})
+    const c = { ...candidate(), references: [] } as unknown as Candidate
+    render(<BackgroundTab c={c} />)
+    await user.click(screen.getByRole('tab', { name: 'Referenties' }))
+    await user.click(screen.getByRole('button', { name: 'Toevoegen' }))
+    await user.type(screen.getByPlaceholderText('Naam'), 'Piet Pietersen')
+    fireEvent.click(screen.getByTitle('Opslaan'))
+    // The optimistic row (negative temp id) renders with no verify action at all.
+    expect(screen.getByText('Piet Pietersen')).toBeInTheDocument()
+    expect(screen.queryByTitle('Verifiëren')).toBeNull()
   })
 })
 
@@ -175,7 +232,7 @@ describe('BackgroundTab · DOC-ENTRY-LINK-1 document_id round-trips through the 
     await user.click(screen.getByRole('tab', { name: 'Opleiding' }))
     await user.click(screen.getByTitle('Bewerken'))
     // The document_id select is the ONLY combobox in the education edit form.
-    await user.selectOptions(screen.getByRole('combobox'), 'doc2')
+    await user.selectOptions(screen.getAllByRole('combobox').find(el => el.querySelector('option[value="doc2"]'))!, 'doc2')
     await user.click(screen.getByTitle('Opslaan'))
     expect(api.patch).toHaveBeenCalledWith('/candidates/1/educations/e1', expect.objectContaining({ document_id: 'doc2' }))
   })
@@ -190,7 +247,7 @@ describe('BackgroundTab · DOC-ENTRY-LINK-1 document_id round-trips through the 
     render(<BackgroundTab c={c} />)
     await user.click(screen.getByRole('tab', { name: 'Certificeringen' }))
     await user.click(screen.getByTitle('Bewerken'))
-    await user.selectOptions(screen.getByRole('combobox'), 'doc2')
+    await user.selectOptions(screen.getAllByRole('combobox').find(el => el.querySelector('option[value="doc2"]'))!, 'doc2')
     await user.click(screen.getByTitle('Opslaan'))
     expect(api.patch).toHaveBeenCalledWith('/candidates/1/certifications/c1', expect.objectContaining({ document_id: 'doc2' }))
   })
@@ -205,7 +262,7 @@ describe('BackgroundTab · DOC-ENTRY-LINK-1 document_id round-trips through the 
     render(<BackgroundTab c={c} />)
     await user.click(screen.getByRole('tab', { name: 'Opleiding' }))
     await user.click(screen.getByTitle('Bewerken'))
-    await user.selectOptions(screen.getByRole('combobox'), '')
+    await user.selectOptions(screen.getAllByRole('combobox').find(el => el.querySelector('option[value="doc1"]'))!, '')
     await user.click(screen.getByTitle('Opslaan'))
     expect(api.patch).toHaveBeenCalledWith('/candidates/1/educations/e1', expect.objectContaining({ document_id: null }))
   })

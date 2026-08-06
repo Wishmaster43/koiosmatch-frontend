@@ -158,7 +158,10 @@ describe('MatchModal · layout (job 17; standardized frame, Danny 24-07 point 6)
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
     // Let the candidate-branch lookup effect settle before asserting (avoids an
     // act() warning from its microtask resolving after the test body returns).
-    expect(await screen.findByRole('dialog')).toHaveStyle({ maxWidth: '1060px', maxHeight: '94vh' })
+    const dialogs = await screen.findAllByRole('dialog')
+    // POPUP-SLEEP-1: the shared FloatingPanel frame owns the footprint now —
+    // WIDE_MODAL width, the panel's own 92vh height cap.
+    expect(dialogs.some(d => d.style.maxWidth === '1060px' && d.style.maxHeight === '92vh')).toBe(true)
   })
 })
 

@@ -7,7 +7,8 @@
     "filterUnsupported": "This filter isn't supported by the server yet.",
     "searchPlaceholder": "Search candidate, note, document…",
     "empty": "No candidates found.",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "createForbidden": "You don't have permission to create a new candidate."
   },
   "columns": {
     "name": "Name",
@@ -186,7 +187,15 @@
     "pool": "Talent pool",
     "city": "City",
     "source": "Source",
-    "phase": "Phase"
+    "phase": "Phase",
+    "preferences": {
+      "title": "Preferences",
+      "contractTypes": "Contract form",
+      "hoursPerWeek": "Hours per week",
+      "hoursMinPlaceholder": "Min",
+      "hoursMaxPlaceholder": "Max",
+      "availableFromBefore": "Available before"
+    }
   },
   "modal": {
     "title": "New candidate",
@@ -234,7 +243,8 @@
       "cardContact": "Contact",
       "cardWork": "Work",
       "cardAddress": "Address",
-      "addressExpand": "Add address"
+      "addressExpand": "Add address",
+      "linkedinPlaceholder": "linkedin.com/in/username"
     },
     "gender": {
       "male": "Male",
@@ -417,7 +427,11 @@
     "birthdayTomorrow": "Birthday tomorrow!",
     "birthdaySoon": "Birthday in {{count}} days",
     "sendEmail": "Send email",
-    "callPhone": "Call"
+    "callPhone": "Call",
+    "groupWorkPermit": "Work permit",
+    "workPermitType": "Work permit type",
+    "workPermitValidUntil": "Valid until",
+    "linkedinPlaceholder": "linkedin.com/in/username"
   },
   "addFields": {
     "functionTitle": "Job title",
@@ -444,7 +458,14 @@
     "present": "present",
     "alwaysValid": "Always valid (no expiry)",
     "diplomaDate": "Diploma / issue date",
-    "linkedDocument": "Linked document"
+    "linkedDocument": "Linked document",
+    "referenceName": "Name",
+    "relation": "Relation",
+    "employer": "Employer",
+    "phone": "Phone",
+    "email": "Email address",
+    "note": "Note",
+    "educationLevel": "Level"
   },
   "work": {
     "client": "Client",
@@ -541,7 +562,9 @@
     "timelinePlacedAt": "Placed at {{customer}}",
     "timelineOngoing": "present",
     "timelineVia": "via {{name}}",
-    "searchPlaceholder": "Search notes…"
+    "searchPlaceholder": "Search notes…",
+    "deleteNote": "Delete note",
+    "deleteConfirm": "Are you sure you want to delete this note?"
   },
   "statistics": {
     "placements": "Matches",
@@ -672,7 +695,9 @@
     "timelineEmpty": "No activity yet.",
     "conversations": "Conversations",
     "conversationsEmpty": "No conversations yet.",
-    "branchEmpty": "No branch linked yet."
+    "branchEmpty": "No branch linked yet.",
+    "references": "References",
+    "referencesEmpty": "No references yet."
   },
   "preferences": {
     "title": "Preferences",
@@ -699,7 +724,13 @@
     "moreTitle": "Other preferences",
     "groupDesiredRate": "Desired hourly rate",
     "desiredRateMin": "From (€ per hour)",
-    "desiredRateMax": "To (€ per hour)"
+    "desiredRateMax": "To (€ per hour)",
+    "groupEmergencyContact": "Emergency contact",
+    "emergencyContactName": "Name",
+    "emergencyContactPhone": "Phone number",
+    "emergencyContactPhoneInvalid": "Enter a valid phone number (8 to 15 digits, spaces/dashes allowed).",
+    "groupNoticePeriod": "Notice period",
+    "noticePeriodWeeks": "Notice period (weeks)"
   },
   "zzp": {
     "title": "Freelancer",
@@ -771,7 +802,13 @@
     },
     "linkTo": "Link to",
     "linkToFor": "Link to for {{name}}",
-    "jumpToDocuments": "Go to documents"
+    "jumpToDocuments": "Go to documents",
+    "expiresOn": "Expires on {{date}}",
+    "expiredOn": "Expired on {{date}}",
+    "replace": "Replace file",
+    "versionCount_one": "{{count}} previous version",
+    "versionCount_other": "{{count}} previous versions",
+    "downloadVersion": "Download this version"
   },
   "ai": {
     "title": "Koios AI advises",
@@ -1130,5 +1167,14 @@
       "lead_without_funnel": "Lead with no application — plan an intake to qualify them.",
       "no_pool": "Not yet in any talent pool — add them so they can be found."
     }
+  },
+  "references": {
+    "verify": "Verify",
+    "verified": "Verified"
+  },
+  "validation": {
+    "emailFormat": "Enter a valid e-mail address.",
+    "phoneFormat": "Enter a valid phone number (8 to 15 digits, e.g. 0612345678 or +31612345678).",
+    "linkedinFormat": "Use only the LinkedIn username, without spaces or slashes (e.g. jan-jansen-12345)."
   }
 }

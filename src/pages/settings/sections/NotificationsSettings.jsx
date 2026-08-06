@@ -1,6 +1,7 @@
-/** NotificationsSettings — per-context (applications / vacancies / billing) email +
- * in-app notification preferences, stored as `notif_<context>_<channel>`.
- * Migrated to the settings kit; the scaffold owns the header + dirty-aware save. */
+/** NotificationsSettings — per-context (applications / vacancies / billing / candidates /
+ * matches / tasks — mirrors api Notifier::TYPE_CONTEXT_MAP) in-app notification preference,
+ * stored as `notif_<context>_in_app`. Migrated to the settings kit; the scaffold owns the
+ * header + dirty-aware save. */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettingsForm } from '../lib/useSettingsForm'
@@ -8,18 +9,20 @@ import { SettingsScaffold, SettingCardList, SettingRow, Toggle } from '../compon
 
 export default function NotificationsSettings({ context }) {
   const { t } = useTranslation('settings')
-  const emailKey = `notif_${context}_email`
   const inAppKey = `notif_${context}_in_app`
 
-  const defaults = useMemo(() => ({ [emailKey]: true, [inAppKey]: true }), [emailKey, inAppKey])
+  const defaults = useMemo(() => ({ [inAppKey]: true }), [inAppKey])
   const form = useSettingsForm(defaults)
 
-  // Honest gate (§3, verified 05-08 against api Notifier.php:24-35): the backend gate
-  // reads ONLY `notif_<context>_in_app`; the `_email` twin has no delivery mechanism yet
-  // ("intentionally not consulted"). The email row renders DISABLED with a notice until
-  // an email channel exists — a live toggle here would promise mail that never comes.
+  // Email column HIDDEN, not disabled (verified 06-08 against api Notifier.php + the
+  // settings-messaging routes): the gate only ever reads `notif_<context>_in_app` — there
+  // is no `mail_capability`/`email.status` signal anywhere the FE could key off, and the
+  // per-context EmailSettingsController is transactional outbound mail (candidates/
+  // customers/planning), unrelated to this in-app Notifier gate. No signal to render an
+  // honest ON/OFF state for, so the row does not render at all until a real mail channel
+  // (and a capability flag) exists — a disabled toggle still promised a feature that has
+  // no backend concept behind it.
   const options = [
-    { key: emailKey, label: t('notifications.email.label'), desc: t('notifications.email.notYetDelivered'), disabled: true },
     { key: inAppKey, label: t('notifications.inApp.label'), desc: t('notifications.inApp.desc') },
   ]
 
@@ -31,7 +34,7 @@ export default function NotificationsSettings({ context }) {
       <SettingCardList>
         {options.map(opt => (
           <SettingRow key={opt.key} label={opt.label} description={opt.desc}>
-            <Toggle checked={!!form.values[opt.key]} onChange={v => form.set(opt.key, v)} disabled={opt.disabled} />
+            <Toggle checked={!!form.values[opt.key]} onChange={v => form.set(opt.key, v)} />
           </SettingRow>
         ))}
       </SettingCardList>

@@ -1,12 +1,13 @@
 /**
  * RolesSettings — the rights matrix (Danny 2026-07-20 "the permission list is too
- * long now"). Covers: CRUD toggles + the non-CRUD "Other" column render correctly
- * from a raw /permissions grouping, a CRUD toggle click PUTs the real request
- * (§13 — mutation tests assert the request, not just that a callback fired), and
- * module-gated rows (planning/shifts/outreach/reports/whatsapp/workflows/sync)
- * follow the ONE sidebar gate (lib/access canAccessPage): the tenant module flag
- * hides a row for everyone (incl. super admins — Danny 2026-07-02), while an
- * empty accessiblePages list fails OPEN for module-free pages like outreach.
+ * long now"; RECHTEN-UI-1 06-08 turned the "Other" column into a per-row expand).
+ * Covers: CRUD toggles render, non-CRUD actions stay hidden until the row's expand
+ * is opened, a CRUD toggle click PUTs the real request (§13 — mutation tests assert
+ * the request, not just that a callback fired), and module-gated rows (planning/
+ * outreach/reports/whatsapp/workflows) follow the ONE sidebar gate (lib/access
+ * canAccessPage): the tenant module flag hides a row for everyone (incl. super
+ * admins — Danny 2026-07-02), while an empty accessiblePages list fails OPEN for
+ * module-free pages like outreach.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -34,16 +35,20 @@ vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() })
 afterEach(() => vi.clearAllMocks())
 
 // Minimal fixture mirroring the real GET /permissions grouping (name split on
-// the first '.'). "shifts" and "planning" are both gated behind the 'planning'
-// sidebar page (GROUP_MODULE_PAGE in RolesPermissionMatrix.jsx).
+// the first '.'). Mirrors the real "candidates" group shape end to end (RECHTEN-
+// UI-1: archive/documents.manage/notes.manage_all/sync are exactly its detail
+// entries). "planning" is gated behind the 'planning' sidebar page (GROUP_MODULE_
+// PAGE in RolesPermissionMatrix.jsx) and has no detail entries (dash, no expand).
 const GROUPS = [
   ['candidates', [
     { name: 'candidates.view' }, { name: 'candidates.create' },
-    { name: 'candidates.update' }, { name: 'candidates.delete' }, { name: 'candidates.sync' },
+    { name: 'candidates.update' }, { name: 'candidates.delete' },
+    { name: 'candidates.archive' }, { name: 'candidates.documents.manage' },
+    { name: 'candidates.notes.manage_all' }, { name: 'candidates.sync' },
   ]],
-  ['shifts',   [{ name: 'shifts.view' }, { name: 'shifts.offer' }, { name: 'shifts.manage' }]],
   ['planning', [{ name: 'planning.view' }, { name: 'planning.create' }]],
   ['outreach', [{ name: 'outreach.view' }]],
+  ['page',     [{ name: 'page.candidates' }, { name: 'page.details' }]],
 ]
 // canAccessPage-shaped auth values: the planning page needs the tenant 'plan'
 // module; outreach has no module requirement (page-layer only, fail-open).
@@ -52,19 +57,43 @@ const AUTH_WITHOUT_PLAN = { user: { is_super_admin: false }, activeTenant: { mod
 const activePerms = new Set(['candidates.view', 'candidates.update'])
 const hasPermission = (name) => activePerms.has(name)
 
-describe('PermissionMatrix — CRUD grid + Other column', () => {
-  it('renders one row per group: CRUD cells + non-CRUD actions in the Other column', () => {
+describe('PermissionMatrix — CRUD grid + per-row expand (RECHTEN-UI-1)', () => {
+  it('renders CRUD cells always; non-CRUD detail toggles stay hidden until the row expand opens', () => {
     mockAuth.mockReturnValue(AUTH_WITH_PLAN)
     render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={vi.fn()} />)
 
-    // Group label + "active/total" count.
+    // Group label + "active/total" count (8 candidates perms, 2 active).
     expect(screen.getByText(st('roles.groups.candidates'))).toBeInTheDocument()
-    expect(screen.getByText('2/5')).toBeInTheDocument()
-    // Non-CRUD actions (shifts.offer/manage) get their own visible label in Other.
-    expect(screen.getByText(st('roles.actions.offer'))).toBeInTheDocument()
-    expect(screen.getByText(st('roles.actions.manage'))).toBeInTheDocument()
-    // A CRUD verb the group doesn't have (candidates.export doesn't exist) stays a dash.
-    expect(screen.getAllByText('—').length).toBeGreaterThan(0)
+    expect(screen.getByText('2/8')).toBeInTheDocument()
+    // Detail entries are NOT rendered yet — the row's expand starts collapsed
+    // (no fake affordance: nothing pre-clutters the row).
+    expect(screen.queryByText('Archiveren')).not.toBeInTheDocument()
+    expect(screen.queryByText('Documenten beheren')).not.toBeInTheDocument()
+    // The expand trigger itself carries the count + an accessible name.
+    const trigger = screen.getByRole('button', { name: `4 ${st('roles.matrixOther')} — ${st('roles.groups.candidates')}` })
+    expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    // planning has no detail entries -> its "Other" cell is a plain dash, no button.
+    expect(screen.queryByRole('button', { name: new RegExp(`— ${st('roles.groups.planning')}$`) })).not.toBeInTheDocument()
+  })
+
+  it('opening the expand reveals the candidates detail toggles in the documented order + labels', async () => {
+    mockAuth.mockReturnValue(AUTH_WITH_PLAN)
+    const user = userEvent.setup()
+    render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={vi.fn()} />)
+
+    const trigger = screen.getByRole('button', { name: `4 ${st('roles.matrixOther')} — ${st('roles.groups.candidates')}` })
+    await user.click(trigger)
+    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+
+    // RECHTEN-UI-1 #1: Archiveren, Documenten beheren, Alle notities beheren, Synchroniseren.
+    expect(screen.getByText('Archiveren')).toBeInTheDocument()
+    expect(screen.getByText('Documenten beheren')).toBeInTheDocument()
+    expect(screen.getByText('Alle notities beheren')).toBeInTheDocument()
+    expect(screen.getByText(st('roles.actions.sync'))).toBeInTheDocument()
+
+    // The sync toggle carries the "SM-spiegel" hint, not the raw permission name.
+    const syncToggle = screen.getByRole('switch', { name: `${st('roles.groups.candidates')} — ${st('roles.actions.sync')}` })
+    expect(syncToggle).toHaveAttribute('title', 'SM-spiegel')
   })
 
   it('clicking a CRUD toggle calls onToggle with that permission name', async () => {
@@ -82,31 +111,45 @@ describe('PermissionMatrix — CRUD grid + Other column', () => {
     expect(onToggle).toHaveBeenCalledWith('candidates.create')
   })
 
-  it('clicking an Other-column toggle calls onToggle with that permission name', async () => {
+  it('clicking an expanded detail toggle calls onToggle with that permission name', async () => {
     mockAuth.mockReturnValue(AUTH_WITH_PLAN)
     const onToggle = vi.fn()
     const user = userEvent.setup()
     render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={onToggle} />)
 
-    const toggle = screen.getByRole('switch', { name: `${st('roles.groups.shifts')} — ${st('roles.actions.offer')}` })
+    await user.click(screen.getByRole('button', { name: `4 ${st('roles.matrixOther')} — ${st('roles.groups.candidates')}` }))
+    const toggle = screen.getByRole('switch', { name: `${st('roles.groups.candidates')} — Archiveren` })
     await user.click(toggle)
-    expect(onToggle).toHaveBeenCalledWith('shifts.offer')
+    expect(onToggle).toHaveBeenCalledWith('candidates.archive')
+  })
+
+  it('page.* detail toggles get a "Pagina: …" prefix so they never read the same as their CRUD group row', async () => {
+    mockAuth.mockReturnValue(AUTH_WITH_PLAN)
+    const user = userEvent.setup()
+    render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={vi.fn()} />)
+
+    await user.click(screen.getByRole('button', { name: `2 ${st('roles.matrixOther')} — ${st('roles.groups.page')}` }))
+    // "Kandidaten" (the candidates CRUD row header) stays a single exact match —
+    // the nav toggle reads "Pagina: Kandidaten" instead, a genuinely different
+    // string, so the two never collide (RECHTEN-UI-1 #4).
+    expect(screen.getAllByText(st('roles.groups.candidates'), { exact: true })).toHaveLength(1)
+    expect(screen.getByText(`Pagina: ${st('roles.groups.candidates')}`)).toBeInTheDocument()
+    // page.details is renamed away from the generic "Details" label.
+    expect(screen.getByText('Pagina: Rapportdetails (SM/AI)')).toBeInTheDocument()
   })
 })
 
 describe('PermissionMatrix — module gating (canAccessPage, same gate as the sidebar)', () => {
-  it('hides planning + shifts rows when the tenant lacks the plan module', () => {
+  it('hides the planning row when the tenant lacks the plan module', () => {
     mockAuth.mockReturnValue(AUTH_WITHOUT_PLAN)
     render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={vi.fn()} />)
     expect(screen.queryByText(st('roles.groups.planning'))).not.toBeInTheDocument()
-    expect(screen.queryByText(st('roles.groups.shifts'))).not.toBeInTheDocument()
   })
 
-  it('shows planning + shifts rows when the tenant has the plan module', () => {
+  it('shows the planning row when the tenant has the plan module', () => {
     mockAuth.mockReturnValue(AUTH_WITH_PLAN)
     render(<PermissionMatrix groups={GROUPS} hasPermission={hasPermission} onToggle={vi.fn()} />)
     expect(screen.getByText(st('roles.groups.planning'))).toBeInTheDocument()
-    expect(screen.getByText(st('roles.groups.shifts'))).toBeInTheDocument()
   })
 
   it('hides an off module even for a super admin (module gate applies to everyone)', () => {

@@ -7,7 +7,8 @@
     "filterUnsupported": "Este filtro (todavía) no es compatible con el servidor.",
     "searchPlaceholder": "Buscar candidato, nota, documento…",
     "empty": "No se encontraron candidatos.",
-    "loading": "Cargando…"
+    "loading": "Cargando…",
+    "createForbidden": "No tienes permiso para crear un nuevo candidato."
   },
   "columns": {
     "name": "Nombre",
@@ -164,7 +165,15 @@
     "pool": "Grupo de talento",
     "city": "Ciudad",
     "source": "Fuente",
-    "phase": "Fase"
+    "phase": "Fase",
+    "preferences": {
+      "title": "Preferencias",
+      "contractTypes": "Forma de contrato",
+      "hoursPerWeek": "Horas por semana",
+      "hoursMinPlaceholder": "Mín",
+      "hoursMaxPlaceholder": "Máx",
+      "availableFromBefore": "Disponible antes de"
+    }
   },
   "modal": {
     "title": "Nuevo candidato",
@@ -212,7 +221,8 @@
       "cardContact": "Contacto",
       "cardWork": "Trabajo",
       "cardAddress": "Dirección",
-      "addressExpand": "Añadir dirección"
+      "addressExpand": "Añadir dirección",
+      "linkedinPlaceholder": "linkedin.com/in/usuario"
     },
     "gender": {
       "male": "Hombre",
@@ -395,7 +405,11 @@
     "birthdayTomorrow": "¡Cumpleaños mañana!",
     "birthdaySoon": "Cumpleaños en {{count}} días",
     "sendEmail": "Enviar correo",
-    "callPhone": "Llamar"
+    "callPhone": "Llamar",
+    "groupWorkPermit": "Permiso de trabajo",
+    "workPermitType": "Tipo de permiso de trabajo",
+    "workPermitValidUntil": "Válido hasta",
+    "linkedinPlaceholder": "linkedin.com/in/usuario"
   },
   "addFields": {
     "functionTitle": "Puesto",
@@ -422,7 +436,14 @@
     "present": "actualidad",
     "alwaysValid": "Siempre válido (sin caducidad)",
     "diplomaDate": "Fecha de diploma / emisión",
-    "linkedDocument": "Documento vinculado"
+    "linkedDocument": "Documento vinculado",
+    "referenceName": "Nombre",
+    "relation": "Relación",
+    "employer": "Empleador",
+    "phone": "Teléfono",
+    "email": "Correo electrónico",
+    "note": "Nota",
+    "educationLevel": "Nivel"
   },
   "work": {
     "client": "Cliente",
@@ -519,7 +540,9 @@
     "timelinePlacedAt": "Colocado en {{customer}}",
     "timelineOngoing": "hoy",
     "timelineVia": "vía {{name}}",
-    "searchPlaceholder": "Buscar notas…"
+    "searchPlaceholder": "Buscar notas…",
+    "deleteNote": "Eliminar nota",
+    "deleteConfirm": "¿Seguro que quieres eliminar esta nota?"
   },
   "statistics": {
     "placements": "Matches",
@@ -650,7 +673,9 @@
     "poolAdd": "Añadir a un grupo",
     "poolsEmpty": "Aún no hay grupos configurados.",
     "poolKoios": "Sugerido por Koios",
-    "branchEmpty": "Aún no hay sede vinculada."
+    "branchEmpty": "Aún no hay sede vinculada.",
+    "references": "Referencias",
+    "referencesEmpty": "Aún no hay referencias."
   },
   "preferences": {
     "title": "Preferencias",
@@ -677,7 +702,13 @@
     "moreTitle": "Otras preferencias",
     "groupDesiredRate": "Tarifa por hora deseada",
     "desiredRateMin": "Desde (€ por hora)",
-    "desiredRateMax": "Hasta (€ por hora)"
+    "desiredRateMax": "Hasta (€ por hora)",
+    "groupEmergencyContact": "Contacto de emergencia",
+    "emergencyContactName": "Nombre",
+    "emergencyContactPhone": "Número de teléfono",
+    "emergencyContactPhoneInvalid": "Introduce un número de teléfono válido (8 a 15 dígitos, se permiten espacios/guiones).",
+    "groupNoticePeriod": "Periodo de preaviso",
+    "noticePeriodWeeks": "Periodo de preaviso (semanas)"
   },
   "zzp": {
     "title": "Autónomo",
@@ -749,7 +780,13 @@
     },
     "linkTo": "Vincular a",
     "linkToFor": "Vincular a para {{name}}",
-    "jumpToDocuments": "Ir a documentos"
+    "jumpToDocuments": "Ir a documentos",
+    "expiresOn": "Vence el {{date}}",
+    "expiredOn": "Venció el {{date}}",
+    "replace": "Reemplazar archivo",
+    "versionCount_one": "{{count}} versión anterior",
+    "versionCount_other": "{{count}} versiones anteriores",
+    "downloadVersion": "Descargar esta versión"
   },
   "ai": {
     "title": "Koios AI aconseja",
@@ -1130,5 +1167,14 @@
       "lead_without_funnel": "Lead sin solicitud — planifique una entrevista para calificarlo.",
       "no_pool": "Aún no está en ningún grupo de talento — añádalo para que sea localizable."
     }
+  },
+  "references": {
+    "verify": "Verificar",
+    "verified": "Verificado"
+  },
+  "validation": {
+    "emailFormat": "Introduce una dirección de correo electrónico válida.",
+    "phoneFormat": "Introduce un número de teléfono válido (8 a 15 dígitos, p. ej. 0612345678 o +31612345678).",
+    "linkedinFormat": "Utiliza solo el nombre de usuario de LinkedIn, sin espacios ni barras (p. ej. jan-jansen-12345)."
   }
 }

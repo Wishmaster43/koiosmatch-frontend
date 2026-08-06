@@ -413,7 +413,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
               <div style={{ marginBottom: 14 }}>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{numberField.label}</div>
                 <input type="number" min={numberField.min ?? 1} max={numberField.max ?? 999} value={draft[numberField.key] ?? ''}
-                  onChange={e => setDraft(d => ({ ...d, [numberField.key]: Number(e.target.value) || 0 }))}
+                  onChange={e => setDraft(d => ({ ...d, [numberField.key]: e.target.value === '' ? null : Number(e.target.value) }))}
                   style={{ width: 120, height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }} />
               </div>
             )}

@@ -12,16 +12,29 @@
  * host's already-loaded `notes` array as-is — if a host ever paginates that list
  * server-side, this search only ever narrows what is ALREADY loaded, same as
  * every other client-side list filter in this app.
+ *
+ * RIGHTS (Danny 06-08, RECHTEN-DETAIL-1 "notitie-eigenaarschap") — also added
+ * HERE: edit/delete on a regular note render ONLY when the logged-in user IS the
+ * author (`note.author_id`) or holds `managePermission` (defaults to
+ * 'candidates.notes.manage_all', the only entity with this rights model today).
+ * A note whose host doesn't send `author_id` at all (matches/tasks/vacancies/
+ * opportunities — not yet migrated) keeps the previous unrestricted behaviour:
+ * `undefined` is NOT the same as an explicit `null` (a legacy note, pre-migration,
+ * which is not self-claimable and needs managePermission like a colleague's note).
+ * System notes never get these buttons regardless — see systemRow, which never
+ * renders them.
  */
 import { useState, useEffect } from 'react'
 import type { CSSProperties, ReactNode, ComponentType } from 'react'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
-import { Edit2, Save, X, Mail, PhoneCall, MessageCircle, Building2, Video, FileText, History, Search } from 'lucide-react'
+import { Edit2, Save, X, Mail, PhoneCall, MessageCircle, Building2, Video, FileText, History, Search, Trash2 } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import SafeHtml from '@/components/ui/SafeHtml'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
 import TimelineRail from '@/components/ui/TimelineRail'
+import { useAuth } from '@/context/AuthContext'
+import { useConfirm } from '@/hooks/useConfirm'
 import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
 import { SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
@@ -31,13 +44,22 @@ import { SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ')
 
 interface NoteType { value: string; label: string; color?: string }
-interface NoteItem { type?: string; channel?: string; title?: string; author?: string; author_name?: string; created_by?: string | { name?: string }; updated_by?: string | { name?: string }; edited_by?: string; text?: string; body?: string; ago?: string; created_at?: string; updated_at?: string; [k: string]: unknown }
+// author_id (RECHTEN-DETAIL-1): the note creator's user id, present only on hosts that
+// implement the rights model — undefined (key absent) vs. explicit null are DIFFERENT
+// states, see the RIGHTS comment above.
+interface NoteItem { type?: string; channel?: string; title?: string; author?: string; author_name?: string; author_id?: string | number | null; created_by?: string | { name?: string }; updated_by?: string | { name?: string }; edited_by?: string; text?: string; body?: string; ago?: string; created_at?: string; updated_at?: string; [k: string]: unknown }
 interface TimelineItem { time?: string; created_at?: string; text?: string; description?: string; [k: string]: unknown }
 interface NotesLabels {
   notes?: ReactNode; newNote?: ReactNode; type?: ReactNode; channel?: ReactNode; channelNone?: ReactNode; save?: string; cancel?: string; edit?: string; openChangelog?: string
   notesEmpty?: ReactNode; timeline?: ReactNode; timelineEmpty?: ReactNode
   conversations?: ReactNode; conversationsEmpty?: ReactNode
   notePlaceholder?: (typeLabel: string) => string
+  // Delete affordance (RECHTEN-DETAIL-1) — icon title/aria-label + the shared
+  // confirm dialog's message. A host that omits these while still passing
+  // onDeleteNote gets a working button with blank copy (honest partial state,
+  // never a crash) until it wires the label too.
+  deleteNote?: string
+  deleteConfirm?: string
   // Tooltip/aria-label for the optional "edit status event" pencil (see onEditStatusEvent below).
   editStatusEvent?: string
   // Placeholder/aria-label for the notes search box (optional — a host that omits
@@ -77,6 +99,16 @@ interface NotesTabProps {
   timelineInitials?: string
   onAddNote?: (payload: NotePayload) => void
   onEditNote?: (i: number, payload: NotePayload) => void
+  // Delete a note by its index in the full `notes` array (mirrors onEditNote).
+  // Omitted (every current host) → no delete button renders at all — no fake
+  // affordance (§3). RECHTEN-DETAIL-1 gating (see canManageNote) applies to it
+  // exactly like the edit pencil.
+  onDeleteNote?: (i: number) => void
+  // Permission key checked when a note isn't the current user's own (RECHTEN-
+  // DETAIL-1). Defaults to the one manage-all permission that exists today
+  // (candidates); a future entity that ships its own author_id + rights model
+  // overrides this per its own permission name.
+  managePermission?: string
   // Optional section toggles — hosts with their own sub-tabs render one section at a time.
   showNotes?: boolean
   // Optional host-supplied row rendered at the TOP of the composer (Danny 05-08:
@@ -112,7 +144,8 @@ interface NotesTabProps {
 
 export default function NotesTab({
   notes = [], systemNotes = [], timeline = [], noteTypes = [], chipTypes, channels = [], labels = {}, editorLabels,
-  authorInitials, timelineName, timelineInitials, onAddNote, onEditNote,
+  authorInitials, timelineName, timelineInitials, onAddNote, onEditNote, onDeleteNote,
+  managePermission = 'candidates.notes.manage_all',
   showNotes = true, showTimeline = true, showConversations = true, onEditStatusEvent, renderTimelineContent,
   error, onRetry, composerExtra,
 }: NotesTabProps) {
@@ -135,6 +168,15 @@ export default function NotesTab({
   // Notes search (Danny 03-08) — client-side over the already-loaded `notes` prop.
   const [search, setSearch] = useState('')
   const { formatDate, formatDateTime } = useDateFormat()
+  // Rights model (RECHTEN-DETAIL-1): current user id + the UI-gate permission check
+  // (never security — the BE re-checks). Null-safe: a host with no AuthProvider in
+  // its render tree (existing tests, hosts that haven't migrated) still works —
+  // hasPermission just always says no, matching the pre-existing GeocodeButton pattern.
+  const auth = useAuth()
+  const currentUserId = auth?.user?.id
+  const hasPermission = auth?.hasPermission ?? (() => false)
+  // Delete goes through the shared confirm dialog, never a native window.confirm() (§0).
+  const { confirm, dialog } = useConfirm()
 
   // Load-error state (see NotesTabProps.error) — a calm danger row replaces the
   // whole tab body, same shape as MatchContractSection's error+retry; no button
@@ -161,6 +203,14 @@ export default function NotesTab({
   const noteEditor = (n: NoteItem) =>
     (typeof n.updated_by === 'object' ? n.updated_by?.name : n.updated_by) ?? n.edited_by ?? ''
   const noteEdited = (n: NoteItem) => Boolean(noteEditor(n) && n.updated_at && n.updated_at !== n.created_at)
+  // Ownership gate (RECHTEN-DETAIL-1) — see the RIGHTS doc comment at the top of
+  // this file for the undefined-vs-null distinction that keeps non-migrated hosts
+  // unrestricted while candidates get the real BE-mirrored rule.
+  const canManageNote = (n: NoteItem) => {
+    if (n.author_id === undefined) return true
+    const isOwn = n.author_id !== null && currentUserId != null && String(n.author_id) === String(currentUserId)
+    return isOwn || hasPermission(managePermission)
+  }
   // Search narrows on body text (HTML stripped) + author name. The original index
   // is kept alongside each note (not just filtered away) because openEdit/
   // onEditNote key off a note's position in the FULL `notes` array, not the
@@ -185,6 +235,8 @@ export default function NotesTab({
     else onEditNote?.(editingIdx, payload)
     reset()
   }
+  // Delete — staged behind the shared confirm dialog; index mirrors openEdit/onEditNote.
+  const requestDelete = (i: number) => confirm(labels.deleteConfirm ?? '', () => onDeleteNote?.(i), { danger: true })
   const typeLabel = noteTypes.find(n => n.value === type)?.label ?? ''
   const iconBtn: CSSProperties = { width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, cursor: 'pointer' }
 
@@ -347,10 +399,17 @@ export default function NotesTab({
                         </span>
                       )}
                     </span>
-                    {onEditNote && (
-                      <button onClick={() => openEdit(i)} title={labels.edit}
+                    {/* RECHTEN-DETAIL-1: own note or manage_all — never a button the BE will 403. */}
+                    {onEditNote && canManageNote(n) && (
+                      <button onClick={() => openEdit(i)} title={labels.edit} aria-label={labels.edit}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0 0 0 6px', display: 'flex' }}>
                         <Edit2 size={13} />
+                      </button>
+                    )}
+                    {onDeleteNote && canManageNote(n) && (
+                      <button onClick={() => requestDelete(i)} title={labels.deleteNote} aria-label={labels.deleteNote}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0 0 0 6px', display: 'flex' }}>
+                        <Trash2 size={13} />
                       </button>
                     )}
                   </div>
@@ -398,6 +457,9 @@ export default function NotesTab({
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{labels.conversationsEmpty}</div>
       </SectionCard>
       )}
+
+      {/* Staged delete confirmation (requestDelete above) — fixed-position overlay, safe anywhere in the tree. */}
+      {dialog}
     </div>
   )
 }

@@ -7,7 +7,8 @@
     "filterUnsupported": "Dieser Filter wird (noch) nicht vom Server unterstützt.",
     "searchPlaceholder": "Kandidat, Notiz, Dokument suchen…",
     "empty": "Keine Kandidaten gefunden.",
-    "loading": "Laden…"
+    "loading": "Laden…",
+    "createForbidden": "Sie sind nicht berechtigt, einen neuen Kandidaten anzulegen."
   },
   "columns": {
     "name": "Name",
@@ -164,7 +165,15 @@
     "pool": "Talentpool",
     "city": "Wohnort",
     "source": "Quelle",
-    "phase": "Phase"
+    "phase": "Phase",
+    "preferences": {
+      "title": "Präferenzen",
+      "contractTypes": "Vertragsform",
+      "hoursPerWeek": "Stunden pro Woche",
+      "hoursMinPlaceholder": "Min",
+      "hoursMaxPlaceholder": "Max",
+      "availableFromBefore": "Verfügbar vor"
+    }
   },
   "modal": {
     "title": "Neuer Kandidat",
@@ -212,7 +221,8 @@
       "cardContact": "Kontakt",
       "cardWork": "Arbeit",
       "cardAddress": "Adresse",
-      "addressExpand": "Adresse hinzufügen"
+      "addressExpand": "Adresse hinzufügen",
+      "linkedinPlaceholder": "linkedin.com/in/benutzername"
     },
     "gender": {
       "male": "Männlich",
@@ -395,7 +405,11 @@
     "birthdayTomorrow": "Morgen Geburtstag!",
     "birthdaySoon": "Bald Geburtstag · in {{count}} Tagen",
     "sendEmail": "E-Mail senden",
-    "callPhone": "Anrufen"
+    "callPhone": "Anrufen",
+    "groupWorkPermit": "Arbeitserlaubnis",
+    "workPermitType": "Art der Arbeitserlaubnis",
+    "workPermitValidUntil": "Gültig bis",
+    "linkedinPlaceholder": "linkedin.com/in/benutzername"
   },
   "addFields": {
     "functionTitle": "Berufsbezeichnung",
@@ -422,7 +436,14 @@
     "present": "heute",
     "alwaysValid": "Immer gültig (kein Ablauf)",
     "diplomaDate": "Diplom-/Ausstellungsdatum",
-    "linkedDocument": "Verknüpftes Dokument"
+    "linkedDocument": "Verknüpftes Dokument",
+    "referenceName": "Name",
+    "relation": "Beziehung",
+    "employer": "Arbeitgeber",
+    "phone": "Telefon",
+    "email": "E-Mail-Adresse",
+    "note": "Notiz",
+    "educationLevel": "Niveau"
   },
   "work": {
     "client": "Kunde",
@@ -519,7 +540,9 @@
     "timelinePlacedAt": "Platziert bei {{customer}}",
     "timelineOngoing": "heute",
     "timelineVia": "über {{name}}",
-    "searchPlaceholder": "Notizen suchen…"
+    "searchPlaceholder": "Notizen suchen…",
+    "deleteNote": "Notiz löschen",
+    "deleteConfirm": "Möchten Sie diese Notiz wirklich löschen?"
   },
   "statistics": {
     "placements": "Matches",
@@ -650,7 +673,9 @@
     "poolAdd": "Zu Pool hinzufügen",
     "poolsEmpty": "Noch keine Pools eingerichtet.",
     "poolKoios": "Von Koios vorgeschlagen",
-    "branchEmpty": "Noch keine Niederlassung verknüpft."
+    "branchEmpty": "Noch keine Niederlassung verknüpft.",
+    "references": "Referenzen",
+    "referencesEmpty": "Noch keine Referenzen."
   },
   "preferences": {
     "title": "Präferenzen",
@@ -677,7 +702,13 @@
     "moreTitle": "Weitere Präferenzen",
     "groupDesiredRate": "Gewünschter Stundenlohn",
     "desiredRateMin": "Von (€ pro Stunde)",
-    "desiredRateMax": "Bis (€ pro Stunde)"
+    "desiredRateMax": "Bis (€ pro Stunde)",
+    "groupEmergencyContact": "Notfallkontakt",
+    "emergencyContactName": "Name",
+    "emergencyContactPhone": "Telefonnummer",
+    "emergencyContactPhoneInvalid": "Geben Sie eine gültige Telefonnummer ein (8 bis 15 Ziffern, Leerzeichen/Bindestriche erlaubt).",
+    "groupNoticePeriod": "Kündigungsfrist",
+    "noticePeriodWeeks": "Kündigungsfrist (Wochen)"
   },
   "zzp": {
     "title": "Freiberufler",
@@ -749,7 +780,13 @@
     },
     "linkTo": "Verknüpfen mit",
     "linkToFor": "Verknüpfen mit für {{name}}",
-    "jumpToDocuments": "Zu Dokumenten"
+    "jumpToDocuments": "Zu Dokumenten",
+    "expiresOn": "Läuft ab am {{date}}",
+    "expiredOn": "Abgelaufen am {{date}}",
+    "replace": "Datei ersetzen",
+    "versionCount_one": "{{count}} vorherige Version",
+    "versionCount_other": "{{count}} vorherige Versionen",
+    "downloadVersion": "Diese Version herunterladen"
   },
   "ai": {
     "title": "Koios AI empfiehlt",
@@ -1130,5 +1167,14 @@
       "lead_without_funnel": "Lead ohne Bewerbung — planen Sie ein Intake-Gespräch zur Qualifizierung.",
       "no_pool": "Noch in keinem Talentpool — hinzufügen, damit der Kandidat auffindbar ist."
     }
+  },
+  "references": {
+    "verify": "Verifizieren",
+    "verified": "Verifiziert"
+  },
+  "validation": {
+    "emailFormat": "Geben Sie eine gültige E-Mail-Adresse ein.",
+    "phoneFormat": "Geben Sie eine gültige Telefonnummer ein (8 bis 15 Ziffern, z. B. 0612345678 oder +31612345678).",
+    "linkedinFormat": "Verwenden Sie nur den LinkedIn-Benutzernamen, ohne Leerzeichen oder Schrägstriche (z. B. jan-jansen-12345)."
   }
 }

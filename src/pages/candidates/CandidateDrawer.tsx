@@ -117,9 +117,15 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   // back to seed defaults.
   const { phases: tenantPhases, statuses: tenantStatuses, candidateTypes: tenantCandidateTypes } = useLookups()
   const vacancyTabCfg = getJsonSetting<VacancyTabConfig | null>(allSettings, 'candidate_vacancy_tab', null)
-  const { hasModule, isSuperAdmin, hasRole } = useAuth() as unknown as { hasModule: (m: string) => boolean; isSuperAdmin: () => boolean; hasRole: (r: string) => boolean }
+  const { hasModule, isSuperAdmin, hasRole, hasPermission } = useAuth() as unknown as { hasModule: (m: string) => boolean; isSuperAdmin: () => boolean; hasRole: (r: string) => boolean; hasPermission: (p: string) => boolean }
   // Hard delete is admin-only (Danny 2026-07-03) — the backend re-checks (§7: UI gating is UX).
   const canHardDelete = isSuperAdmin() || hasRole('admin')
+  // RECHTEN-DETAIL-1 (Danny GO 06-08): archive/restore/mark-deletion carry their OWN
+  // candidates.archive permission now (split off candidates.update) — gate the trash
+  // icon and the archived-banner's restore/mark-deletion buttons on it, mirroring
+  // CustomerDrawer's DELETE-ICON-1. The backend 403s regardless; this just hides the
+  // affordance for a role that has update but not archive.
+  const canArchive = hasPermission('candidates.archive')
 
   // Merge-duplicate overlay (punt 4) — opened from the title-row GitMerge icon.
   const [showMerge, setShowMerge] = useState(false)
@@ -302,8 +308,9 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
             )}
             {/* Soft-delete → Gearchiveerd (§3B: soft-delete only). The confirm (or, when
                 live applications/matches hang on the candidate, the ArchiveGuardModal)
-                lives in useCandidateDrawerActions.archiveOne — never re-confirm here. */}
-            {onArchive && !c.archived && (
+                lives in useCandidateDrawerActions.archiveOne — never re-confirm here.
+                candidates.archive-gated (RECHTEN-DETAIL-1, was update-driven). */}
+            {onArchive && canArchive && !c.archived && (
               <button onClick={() => onArchive(c.id)}
                 title={t('drawer.archive')} aria-label={t('drawer.archive')}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger)', opacity: 0.7 }}>
@@ -326,10 +333,15 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           tags={{ items: currentTags, onAdd: (tag: string) => setTags([...currentTags, tag]), onRemove: (tag: string) => setTags(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
           tagsLabel={t('drawer.tags')}
         >
-          {/* Archived banner (Danny 2026-07-03): when/by whom/why + restore + hard delete. */}
+          {/* Archived banner (Danny 2026-07-03): when/by whom/why + restore + hard delete.
+              Restore/mark-deletion are candidates.archive-gated (RECHTEN-DETAIL-1) —
+              withhold the callbacks so the banner never renders those buttons for a
+              user without the permission; hard delete keeps its own admin-role gate. */}
           {c.archived && (
             <ArchivedBanner c={c} canHardDelete={canHardDelete}
-              onRestore={onRestore} onMarkDeletion={onMarkDeletion} onHardDelete={onHardDelete} />
+              onRestore={canArchive ? onRestore : undefined}
+              onMarkDeletion={canArchive ? onMarkDeletion : undefined}
+              onHardDelete={onHardDelete} />
           )}
         </EntityHeader>
       )}

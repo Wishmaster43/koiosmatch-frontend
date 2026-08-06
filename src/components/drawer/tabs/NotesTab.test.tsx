@@ -5,7 +5,7 @@
  * name; edit still targets the note's ORIGINAL index in the full list after a
  * search narrows what is rendered (openEdit/onEditNote key off that index).
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import NotesTab from './NotesTab'
@@ -16,6 +16,15 @@ import NotesTab from './NotesTab'
 vi.mock('@/lib/datetime', () => ({
   useDateFormat: () => ({ formatDate: (v: string) => `d(${v})`, formatDateTime: (v?: string | null) => (v ? `dt(${v})` : '—') }),
 }))
+// Auth mock (RECHTEN-DETAIL-1 rights gate below) — module-level, mirrors the
+// GeocodeButton/SmSyncButton convention so vi.mock's hoist never races the
+// `const` it closes over. Defaults to "no user" so every OTHER describe block
+// in this file (search/error/timeline) renders exactly as before — none of
+// their notes carry author_id, so canManageNote short-circuits to permissive
+// regardless of what this mock returns.
+const mockUseAuth = vi.fn()
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
+beforeEach(() => { mockUseAuth.mockReturnValue(null) })
 
 const labels = {
   notes: 'Notities', newNote: 'Nieuwe notitie', notesEmpty: 'Geen notities',
@@ -105,6 +114,71 @@ describe('NotesTab · load-error retry', () => {
 // Timeline section (candidates' + customers' Tijdlijn sub-tab, Danny 05-08): raw
 // ISO strings rendered and the dots had no connecting line. Regression-guarded here
 // since both hosts render THIS shared block, not their own fork.
+// Ownership gate (RECHTEN-DETAIL-1, Danny 06-08 "notitie-eigenaarschap"): edit/delete
+// render only for the note's own author or a manage_all permission holder — the BE
+// 403s otherwise, so the FE must never show a button that will fail.
+describe('NotesTab · rights (RECHTEN-DETAIL-1)', () => {
+  const rightsLabels = { ...labels, deleteNote: 'Verwijderen' }
+
+  it('shows edit + delete on the CURRENT USER\'s own note', () => {
+    mockUseAuth.mockReturnValue({ user: { id: 'u1' }, hasPermission: () => false })
+    render(<NotesTab notes={[note({ author_id: 'u1' })]} labels={rightsLabels}
+      onEditNote={vi.fn()} onDeleteNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    expect(screen.getByTitle('Bewerken')).toBeInTheDocument()
+    expect(screen.getByTitle('Verwijderen')).toBeInTheDocument()
+  })
+
+  it('hides edit + delete on SOMEONE ELSE\'s note without manage_all', () => {
+    mockUseAuth.mockReturnValue({ user: { id: 'u1' }, hasPermission: () => false })
+    render(<NotesTab notes={[note({ author_id: 'u2' })]} labels={rightsLabels}
+      onEditNote={vi.fn()} onDeleteNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    expect(screen.queryByTitle('Bewerken')).toBeNull()
+    expect(screen.queryByTitle('Verwijderen')).toBeNull()
+  })
+
+  it('a manage_all holder sees edit + delete on EVERY note, including a legacy null-author one', () => {
+    mockUseAuth.mockReturnValue({ user: { id: 'u1' }, hasPermission: (p: string) => p === 'candidates.notes.manage_all' })
+    render(<NotesTab
+      notes={[note({ author_id: 'u2' }), note({ text: '<p>Legacy</p>', author_id: null })]}
+      labels={rightsLabels} onEditNote={vi.fn()} onDeleteNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    expect(screen.getAllByTitle('Bewerken')).toHaveLength(2)
+    expect(screen.getAllByTitle('Verwijderen')).toHaveLength(2)
+  })
+
+  it('a SYSTEM note never gets edit/delete, even for a manage_all holder', () => {
+    mockUseAuth.mockReturnValue({ user: { id: 'u1' }, hasPermission: () => true })
+    render(<NotesTab
+      systemNotes={[note({ type: 'status_change', author_id: null, text: '<p>Status changed</p>' })]}
+      labels={rightsLabels} onEditNote={vi.fn()} onDeleteNote={vi.fn()} showNotes={false} showConversations={false} />)
+    expect(screen.getByText('Status changed')).toBeInTheDocument()
+    expect(screen.queryByTitle('Bewerken')).toBeNull()
+    expect(screen.queryByTitle('Verwijderen')).toBeNull()
+  })
+
+  it('keeps the OLD unrestricted behaviour for a host that sends no author_id at all', () => {
+    mockUseAuth.mockReturnValue({ user: { id: 'u1' }, hasPermission: () => false })
+    render(<NotesTab notes={[note()]} labels={rightsLabels}
+      onEditNote={vi.fn()} onDeleteNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    expect(screen.getByTitle('Bewerken')).toBeInTheDocument()
+    expect(screen.getByTitle('Verwijderen')).toBeInTheDocument()
+  })
+
+  it('clicking delete stages the shared confirm dialog and only calls onDeleteNote on confirm', async () => {
+    const user = userEvent.setup()
+    const onDeleteNote = vi.fn()
+    mockUseAuth.mockReturnValue({ user: { id: 'u1' }, hasPermission: () => false })
+    render(<NotesTab notes={[note({ author_id: 'u1' })]} labels={{ ...rightsLabels, deleteConfirm: 'Delete this note?' }}
+      onEditNote={vi.fn()} onDeleteNote={onDeleteNote} showTimeline={false} showConversations={false} />)
+    await user.click(screen.getByTitle('Verwijderen'))
+    expect(onDeleteNote).not.toHaveBeenCalled()
+    expect(screen.getByText('Delete this note?')).toBeInTheDocument()
+    // ConfirmDialog's own buttons fall back to the raw i18next key (no instance in
+    // this test tree) — "confirm", not "Confirm"; see ConfirmDialog.tsx.
+    await user.click(screen.getByRole('button', { name: 'confirm' }))
+    expect(onDeleteNote).toHaveBeenCalledWith(0)
+  })
+})
+
 describe('NotesTab · timeline', () => {
   const timelineItem = (over: Record<string, unknown> = {}) => ({ time: '2026-08-04T17:30:00+00:00', text: 'Fase gewijzigd', ...over })
 

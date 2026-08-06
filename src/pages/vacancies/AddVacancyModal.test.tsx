@@ -511,6 +511,7 @@ describe('AddVacancyModal · post-create attachments sequencing gate (punten 21+
 
     expect(runSequence).toHaveBeenCalledWith('v-new')
     expect(onClose).not.toHaveBeenCalled()
-    expect(screen.getByText('modal.attachments.resultsTitle')).toBeInTheDocument()
+    // POPUP-SLEEP-1: the panel title bar repeats the results heading — assert presence, not uniqueness.
+    expect(screen.getAllByText('modal.attachments.resultsTitle').length).toBeGreaterThan(0)
   })
 })

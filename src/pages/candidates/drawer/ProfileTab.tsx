@@ -7,6 +7,7 @@ import SafeHtmlJs from '@/components/ui/SafeHtml'
 import ProfilePersonalTab from './ProfilePersonalTab'
 import ProfileAddressTab from './ProfileAddressTab'
 import ProfileContactTab from './ProfileContactTab'
+import WorkPermitBlock from './WorkPermitBlock'
 import type { Candidate } from '@/types/candidate'
 
 type AnyProps = Record<string, unknown>
@@ -59,6 +60,9 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
              editing one never discards another's draft. Order matches the old
              single-card layout: Persoonlijk, Adres, Contact. ── */}
       <ProfilePersonalTab c={c} onSave={onEditSave} autoEditSignal={autoEditSignal} />
+      {/* KAND-WERKVERGUNNING-2: only renders for a non-EU/EEA candidate — see the
+          component's own doc comment for the visibility rule + data-plumbing status. */}
+      <WorkPermitBlock    c={c} onSave={onEditSave} autoEditSignal={autoEditSignal} />
       <ProfileAddressTab  c={c} onSave={onEditSave} autoEditSignal={autoEditSignal} />
       <ProfileContactTab  c={c} onSave={onEditSave} autoEditSignal={autoEditSignal} />
 

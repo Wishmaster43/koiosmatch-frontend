@@ -223,7 +223,11 @@
     "customer_blacklist_reasons": "Motivos de lista negra",
     "match_stop_reasons": "Motivos de finalización",
     "outreach_outcomes": "Resultados",
-    "workflow_run_history": "Historial de ejecuciones"
+    "workflow_run_history": "Historial de ejecuciones",
+    "candidate_education_levels": "Niveles educativos",
+    "notif_kandidaten": "Candidatos",
+    "notif_matches": "Coincidencias",
+    "notif_taken": "Tareas"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -704,6 +708,18 @@
       "facturering": {
         "title": "Facturación",
         "desc": "Notificaciones sobre facturas, pagos y suscripciones."
+      },
+      "kandidaten": {
+        "title": "Candidatos",
+        "desc": "Notificaciones sobre candidatos nuevos y actualizados."
+      },
+      "matches": {
+        "title": "Coincidencias",
+        "desc": "Notificaciones sobre nuevas coincidencias y cambios de estado."
+      },
+      "taken": {
+        "title": "Tareas",
+        "desc": "Notificaciones sobre tareas nuevas y actualizadas."
       }
     }
   },
@@ -1322,11 +1338,12 @@
       "audit": "Registro de auditoría",
       "privacy": "Privacidad (RGPD)",
       "koios": "Koios AI",
-      "page": "Acceso a páginas",
+      "page": "Acceso al menú",
       "locations": "Ubicaciones",
       "departments": "Departamentos",
       "details": "Detalles",
-      "aiagents": "Agentes IA"
+      "aiagents": "Agentes IA",
+      "vacancy_generation": "Generación de vacantes"
     },
     "actions": {
       "view": "Ver",
@@ -1342,7 +1359,11 @@
       "manage": "Gestionar",
       "erase": "Borrado RGPD",
       "use": "Usar",
-      "send": "Enviar"
+      "send": "Enviar",
+      "archive": "Archivar",
+      "candidatesDocumentsManage": "Gestionar documentos",
+      "candidatesNotesManageAll": "Gestionar todas las notas",
+      "details": "Detalles del informe (SM/IA)"
     },
     "color": "Color",
     "icon": "Icono",
@@ -1353,7 +1374,11 @@
     "branchesEmptyHint": "Sin sedes seleccionadas — los nuevos usuarios con este rol empiezan sin vinculación y ven TODOS los candidatos. Con sedes vinculadas, un usuario solo ve candidatos de esas sedes.",
     "branchesNoLocations": "Todavía no hay sedes configuradas.",
     "branchesSaveFailed": "No se pudo guardar la plantilla de sedes. Inténtalo de nuevo.",
-    "appearanceSaveFailed": "No se pudo guardar la apariencia. Inténtalo de nuevo."
+    "appearanceSaveFailed": "No se pudo guardar la apariencia. Inténtalo de nuevo.",
+    "pageAccess": "Página: {{label}}",
+    "hints": {
+      "candidatesSync": "Espejo SM"
+    }
   },
   "audit": {
     "title": "Registro de auditoría",
@@ -1653,7 +1678,11 @@
   "lastContactTypes": {
     "title": "Tipos de último contacto",
     "subtitle": "Canales para 'último contacto' (Email, Teléfono, WhatsApp).",
-    "add": "Añadir tipo"
+    "add": "Añadir tipo",
+    "noContactDaysTitle": "Aviso de falta de contacto",
+    "noContactDaysHint": "Después de cuántos días sin un último contacto registrado se marca a un candidato como 'no contactado' para la automatización (flujos de trabajo y webhooks).",
+    "noContactDaysLabel": "Días (1-365)",
+    "noContactDaysSaveFailed": "No se pudo guardar el periodo de falta de contacto."
   },
   "noteTypes": {
     "title": "Tipos de nota — {{entity}}",
@@ -1711,7 +1740,9 @@
     "priorityAdd": "Añadir prioridad",
     "priorityDefault": "Predeterminado",
     "flagDone": "Cuenta como completada",
-    "flagDoneDesc": "Las tareas en este estado cuentan para el KPI de completadas y ya no aparecen como abiertas o vencidas."
+    "flagDoneDesc": "Las tareas en este estado cuentan para el KPI de completadas y ya no aparecen como abiertas o vencidas.",
+    "typeCountsAsContact": "Cuenta como contacto",
+    "typeCountsAsContactDesc": "Completar una tarea de este tipo actualiza la fecha de último contacto del candidato."
   },
   "taskDisplay": {
     "title": "Vista de tabla",
@@ -1844,7 +1875,15 @@
     "title": "Tipos de documento — {{entity}}",
     "subtitle": "Categorías, colores e iconos para documentos de esta sección.",
     "add": "Añadir tipo",
-    "icon": "Icono"
+    "icon": "Icono",
+    "requiresExpiry": "Tiene fecha de caducidad",
+    "requiresExpiryDesc": "Los documentos de este tipo reciben una fecha de caducidad, calculada a partir de la validez predeterminada de abajo (o definida por documento si no hay ninguna).",
+    "defaultValidityMonths": "Validez predeterminada (meses)",
+    "validityMonthsSuffix": "meses",
+    "expiringAlertDaysTitle": "Ventana de aviso de caducidad",
+    "expiringAlertDaysHint": "Cuántos días antes de la fecha de caducidad de un documento del candidato se activa la automatización de aviso de caducidad.",
+    "expiringAlertDaysLabel": "Días (1-365)",
+    "expiringAlertDaysSaveFailed": "No se pudo guardar la ventana de aviso de caducidad."
   },
   "requiredFields": {
     "title": "Campos obligatorios",
@@ -2594,7 +2633,9 @@
     "title": "Nacionalidades",
     "subtitle": "Gestiona las nacionalidades que los candidatos pueden elegir.",
     "add": "Añadir nacionalidad",
-    "countryCode": "País"
+    "countryCode": "País",
+    "isEu": "UE/EEE",
+    "isEuDesc": "A los candidatos con esta nacionalidad no se les solicitan los campos de permiso de trabajo."
   },
   "escalationReasons": {
     "title": "Motivos de escalada",
@@ -2660,5 +2701,10 @@
         "unit": "días"
       }
     }
+  },
+  "educationLevels": {
+    "title": "Niveles educativos",
+    "subtitle": "Niveles para el desplegable de formación del candidato.",
+    "add": "Añadir nivel"
   }
 }

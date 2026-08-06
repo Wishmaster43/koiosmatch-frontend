@@ -5,6 +5,7 @@ import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { ExperienceTab as ExperienceTabJs, EducationTab as EducationTabJs, CertificationsTab as CertificationsTabJs, SkillsTab as SkillsTabJs } from './SectionTabs'
 import LanguagesSection from './LanguagesSection'
+import ReferencesTab from './ReferencesTab'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import type { Candidate } from '@/types/candidate'
 
@@ -49,6 +50,9 @@ const TO_API: Record<string, (v: RelItem) => Record<string, unknown>> = {
     end_date: v.end, in_progress: !!v.inProgress, description: v.desc, issue_date: v.inProgress ? null : v.issued,
     // DOC-EDU-1: the "Koppelen aan" picker's select value — '' (nothing chosen) means unlink.
     document_id: v.document_id || null,
+    // NIVEAU-1: the education-level pick (id reference; '' = none) — without this
+    // line the picker was a fake affordance (the whitelist dropped it on save).
+    level_id: v.level_id || null,
   }),
   certifications: v => ({
     name: v.name, organisation: v.org, issue_date: v.issued,
@@ -57,6 +61,11 @@ const TO_API: Record<string, (v: RelItem) => Record<string, unknown>> = {
     document_id: v.document_id || null,
   }),
   skills: v => ({ name: v.name, level: v.level }),
+  // KAND-REFERENTIES-1: candidate_references columns, no FE→BE renaming needed.
+  references: v => ({
+    name: v.name, relation: v.relation, employer: v.employer,
+    phone: v.phone, email: v.email, note: v.note,
+  }),
 }
 
 export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate; onEditSave?: (v: Record<string, unknown>) => void; onJump?: (tab: string) => void }) {
@@ -66,6 +75,13 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
   // Candidate.skills is string[] from the mapper, but the SkillsTab edits them as
   // { name, level } objects (it renders both) — widen to the relation-item shape.
   const [skills,      setSkills]       = useState<RelItem[]>((c.skills ?? []) as unknown as RelItem[])
+  // KAND-REFERENTIES-1: `references` isn't on the Candidate type/mapper yet (out
+  // of scope for this change — flagged to the manager) even though the backend
+  // already nests it on GET /candidates/{id}; read it defensively so this tab
+  // starts working the moment the mapper catches up, without another edit here.
+  const [references,  setReferences]   = useState<RelItem[]>(
+    ((c as unknown as { references?: RelItem[] }).references ?? []) as RelItem[],
+  )
   // 'common' stays the default ns (bare t('actionFailed') below); candidates:
   // strings (the sub-tab labels) use the explicit prefix.
   const { t, i18n } = useTranslation(['common', 'candidates'])
@@ -82,6 +98,7 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
     educations:     v => (v.inProgress ? { ...v, issued: null } : v),
     certifications: v => (v.noExpiry ? { ...v, expires: null } : v),
     skills:         v => v,
+    references:     v => v,
   }
 
   // add / edit-at-index / remove-at-index for a relation, with optimistic persistence.
@@ -131,6 +148,18 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
     },
   })
 
+  // KAND-REFERENTIES-1: verify is a one-way server stamp (verified_at/verified_by
+  // are NOT fillable client fields — see CandidateReferenceController::verify), so
+  // this waits for the real response instead of optimistically guessing it, then
+  // merges the returned row (which carries the stamp) into state.
+  const verifyReference = (i: number) => {
+    const id = references[i]?.id
+    if (!isPersisted(id)) return
+    api.post(`/candidates/${c.id}/references/${id}/verify`)
+      .then(r => { const it = unwrap<RelItem>(r); if (it) setReferences(p => p.map(x => x.id === id ? { ...x, ...it } : x)) })
+      .catch(() => notifyError(t('actionFailed')))
+  }
+
   // House sub-tab bar (Danny kandidaten-ronde-2, punt B): one sub-tab per section
   // instead of five stacked blocks. Order is ALPHABETICAL BY TRANSLATED LABEL —
   // computed at render time, not hardcoded, so the tab order still reads correctly
@@ -143,6 +172,10 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
     { id: 'experience',     label: t('candidates:sections.experience') },
     { id: 'education',      label: t('candidates:sections.education') },
     { id: 'languages',      label: t('candidates:sections.languages') },
+    // KAND-REFERENTIES-1: the defaultValue keeps the tab labelled before the
+    // manager applies the reported key to the locale files (see AddableSection's
+    // identical t(key, { defaultValue }) convention for 'edit'/'remove').
+    { id: 'references',     label: t('candidates:sections.references', { defaultValue: 'Referenties' }) },
     { id: 'skills',         label: t('candidates:sections.skills') },
   ].sort((a, b) => a.label.localeCompare(b.label, i18n.language))
   const [subTab, setSubTab] = useState('experience')
@@ -157,6 +190,10 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
       {subTab === 'education'      && <EducationTab      items={educations}  documents={c.documents ?? []} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} {...ops('educations', educations, setEducations)} />}
       {subTab === 'certifications' && <CertificationsTab items={certs}       documents={c.documents ?? []} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} {...ops('certifications', certs, setCerts)} />}
       {subTab === 'skills'         && <SkillsTab         items={skills}      {...ops('skills', skills, setSkills)} />}
+      {/* KAND-REFERENTIES-1: onVerify is the one action outside the generic add/edit/
+          remove ops() shape — it stamps server-only fields, so it stays a dedicated
+          handler in this container instead of squeezing into TO_API/NORMALIZE. */}
+      {subTab === 'references'     && <ReferencesTab      items={references}  onVerify={verifyReference} {...ops('references', references, setReferences)} />}
       {/* Talen already lived on this tab (moved here from Profiel earlier) — now its
           own sub-tab instead of a stacked block; persists via the drawer's onUpdate. */}
       {subTab === 'languages'      && <LanguagesSection c={c} onEditSave={onEditSave} />}

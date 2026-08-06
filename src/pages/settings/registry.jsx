@@ -17,7 +17,7 @@
  */
 import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays, Car,
-  ClipboardList, Clock, CreditCard, Download, EyeOff, Factory, FileText, Flag, Hash, History, Key, LayoutGrid,
+  ClipboardList, Clock, CreditCard, Download, EyeOff, Factory, FileText, Flag, GraduationCap, Hash, History, Key, LayoutGrid,
   ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Megaphone, Package, Palette, Percent, Phone, Scale, Shield, SlidersHorizontal, Sparkles, Star,
   Boxes, Globe, Store, Tags, Target, Upload, UserCheck, Users, Webhook, XCircle,
   ShieldOff, AlertTriangle, ListTree, CheckCircle,
@@ -63,6 +63,7 @@ import { MatchStatusSettings, ContractTypesSettings, MatchStopReasonSettings } f
 import { AppointmentTypeSettings } from './sections/AppointmentTypeSettings'
 import { AppointmentLocationSettings } from './sections/AppointmentLocationSettings'
 import { SkillLevelSettings } from './sections/SkillLevelSettings'
+import EducationLevelsSettings from './sections/EducationLevelsSettings'
 import { OutreachStatusSettings, OutreachOutcomeSettings } from './sections/OutreachSettings'
 import RejectionSettings from './sections/RejectionSettings'
 import ProposalSettings from './sections/ProposalSettings'
@@ -205,6 +206,10 @@ export const NAV_GROUPS = [
       // drawer's vacancySearch tab — see CandidateVacancyTabSettings + vacancyTabVisibility.ts.
       { id: 'candidate_vacancy_tab', icon: Briefcase, component: CandidateVacancyTabSettings },
       { id: 'candidate_skill_levels', icon: BarChart2, component: SkillLevelSettings },
+      // Education level lookup (KAND-NIVEAU-1) — dropdown for candidate_educations.level_id,
+      // sibling to the skill-level lookup above; distinct from the unrelated
+      // vacancy_education item (a separate vacancy-side education REQUIREMENT lookup).
+      { id: 'candidate_education_levels', icon: GraduationCap, component: EducationLevelsSettings },
       // Candidate custom fields moved to the shared "Eigen velden" group below
       // (§3B custom-fields wave) — one CRUD implementation for every entity.
       { id: 'candidate_required_fields', icon: Flag, component: CandidateRequiredFieldsSettings },
@@ -584,11 +589,16 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    // Notifications — its own menu (per context).
+    // Notifications — its own menu (per context). NOTIF-KANDIDAAT-1 (api Notifier.php,
+    // 2026-08-05): candidate.x / match.x / task.x now resolve through the same
+    // TYPE_CONTEXT_MAP gate as application/vacancy/invoice, so they get the same rows.
     key: 'notifications', icon: Bell,
     items: [
       { id: 'notif_sollicitaties', icon: Bell, render: () => <NotificationsSettings context="sollicitaties" /> },
       { id: 'notif_vacatures', icon: Bell, render: () => <NotificationsSettings context="vacatures" /> },
+      { id: 'notif_kandidaten', icon: Bell, render: () => <NotificationsSettings context="kandidaten" /> },
+      { id: 'notif_matches', icon: Bell, render: () => <NotificationsSettings context="matches" /> },
+      { id: 'notif_taken', icon: Bell, render: () => <NotificationsSettings context="taken" /> },
       { id: 'notif_facturering', icon: Bell, render: () => <NotificationsSettings context="facturering" /> },
     ],
   },

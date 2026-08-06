@@ -46,6 +46,7 @@ import error_commit      from './error_commit'
 import error_rollback    from './error_rollback'
 import whatsapp_send     from './whatsapp_send'
 import ai_agent          from './ai_agent'
+import interview_start   from './interview_start'
 import knowledge_search  from './knowledge_search'
 import router            from './router'
 import filter            from './filter'
@@ -126,6 +127,7 @@ const MODULES: ModuleDef[] = [
   error_rollback,
   whatsapp_send,
   ai_agent,
+  interview_start,
   knowledge_search,
   router,
   filter,

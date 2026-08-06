@@ -183,7 +183,8 @@
     "facebook_send": "Retour Facebook",
     "candidates_fetch": "Candidats Koios Match",
     "pdok_geocode": "Géocoder l’adresse (PDOK)",
-    "backoffice_sync": "Lier au backoffice"
+    "backoffice_sync": "Lier au backoffice",
+    "interview_start": "Démarrer l'entretien IA"
   },
   "status": {
     "active": "Actif",
@@ -997,7 +998,17 @@
       "candidate_phase_changed": "Phase du candidat modifiée",
       "candidate_status_changed": "Statut du candidat modifié",
       "candidate_type_changed": "Type de contrat du candidat modifié",
-      "contract_signed": "Contrat signé"
+      "contract_signed": "Contrat signé",
+      "application_created": "Candidature créée",
+      "vacancy_status_changed": "Statut de l'offre modifié",
+      "candidate_availability_changed": "Disponibilité du candidat modifiée",
+      "candidate_no_contact": "Candidat non contacté",
+      "candidate_document_expiring": "Document du candidat expire",
+      "match_expiring": "Match expire",
+      "match_terminated": "Match terminé",
+      "appointment_created": "Rendez-vous créé",
+      "whatsapp_connection_down": "Connexion WhatsApp interrompue",
+      "whatsapp_connection_restored": "Connexion WhatsApp rétablie"
     }
   }
 }

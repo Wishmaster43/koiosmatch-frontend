@@ -329,8 +329,9 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const hasFormatError = (Object.keys(FORMAT_VALIDATORS) as Array<keyof FormState>).some(liveInvalid)
   const canSubmit       = !!status && requiredForm.every(k => String(form[k] ?? '').trim()) && !hasFormatError
   const statusLabel     = selectedStatus?.label ?? ''
-  // Both parse routes are gated on candidates.update (measured, candidates.php:56-57).
-  const canParseCv     = hasPermission?.('candidates.update') ?? false
+  // RECHTEN-DETAIL-1: both parse routes gate on candidates.create now
+  // (routes/api/tenant/candidates.php:60-61, re-measured 06-08).
+  const canParseCv     = hasPermission?.('candidates.create') ?? false
 
   // Gender options come from the /genders tenant lookup (CFG-1), not hardcoded.
   const genderOptions = genders.map(g => ({ value: g.value, label: g.label }))

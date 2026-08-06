@@ -111,9 +111,15 @@ const SUB_PAGE_GATES: Record<string, string> = {
   'shiftmanager.details':    'whatsapp',
 }
 
-// Pages that can additionally be restricted at the user/role level via page.* permissions.
+// Pages that can additionally be restricted at the user/role level via page.*
+// permissions — this MUST list every page id the backend seeds a page.<id>
+// permission for (RoleAndPermissionSeeder), otherwise that toggle looks real in
+// the Roles UI but never actually gates navigation: a fake affordance (§3, RECHTEN-
+// UI-1 #2 — only 5 of the 15 seeded page.* ids were nav-effective before this fix).
 const PAGE_RESTRICTABLE = [
-  'candidates', 'customers', 'locations', 'departments', 'details',
+  'settings', 'users', 'candidates', 'vacancies', 'customers', 'locations',
+  'departments', 'details', 'opportunities', 'tasks', 'outreach', 'planning',
+  'whatsapp', 'aiagents', 'workflows',
 ]
 
 // Module pages shown in the "Modules" nav group. Driven by accessible_pages.

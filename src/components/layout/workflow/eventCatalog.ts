@@ -31,6 +31,23 @@ export const WORKFLOW_EVENT_KEYS = [
   'candidate.status_changed',
   'candidate.type_changed',
   'contract.signed',
+  // EINDAUDIT-BUILDER-1 (CMBE 2026-08-06): ten more dispatch sites that were
+  // already live server-side but never pickable here — re-verified 2026-08-06
+  // against TriggerModule::configSchema() + each dispatcher call site
+  // (Application::171/179, Vacancy::161-162, MatchTerminationService::77-78,
+  // DispatchExpiringMatchAlerts::171/181-182, CandidateAvailability::52-53,
+  // DispatchExpiringDocumentAlerts::114-115, DispatchNoContactDueEvents::116-117,
+  // Appointment::102, WhatsAppConnectionMonitor::100/118).
+  'application.created',
+  'vacancy.status_changed',
+  'candidate.availability_changed',
+  'candidate.no_contact',
+  'candidate.document_expiring',
+  'match.expiring',
+  'match.terminated',
+  'appointment.created',
+  'whatsapp.connection_down',
+  'whatsapp.connection_restored',
 ] as const
 
 export type WorkflowEventKey = (typeof WORKFLOW_EVENT_KEYS)[number]

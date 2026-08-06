@@ -187,7 +187,8 @@
     "facebook_send": "Facebook feedback",
     "candidates_fetch": "Koios Match candidates",
     "pdok_geocode": "Geocode address (PDOK)",
-    "backoffice_sync": "Link to backoffice"
+    "backoffice_sync": "Link to backoffice",
+    "interview_start": "Start AI interview"
   },
   "status": {
     "active": "Active",
@@ -997,7 +998,17 @@
       "candidate_phase_changed": "Candidate phase changed",
       "candidate_status_changed": "Candidate status changed",
       "candidate_type_changed": "Candidate contract type changed",
-      "contract_signed": "Contract signed"
+      "contract_signed": "Contract signed",
+      "application_created": "Application created",
+      "vacancy_status_changed": "Vacancy status changed",
+      "candidate_availability_changed": "Candidate availability changed",
+      "candidate_no_contact": "Candidate not contacted",
+      "candidate_document_expiring": "Candidate document expiring",
+      "match_expiring": "Match expiring",
+      "match_terminated": "Match terminated",
+      "appointment_created": "Appointment created",
+      "whatsapp_connection_down": "WhatsApp connection down",
+      "whatsapp_connection_restored": "WhatsApp connection restored"
     }
   }
 }

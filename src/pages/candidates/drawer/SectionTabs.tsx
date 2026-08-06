@@ -17,10 +17,12 @@ import { useTranslation } from 'react-i18next'
 import { Eye, Download, ArrowRight } from 'lucide-react'
 import AddableSectionJs from '@/components/forms/AddableSection'
 import SafeHtml from '@/components/ui/SafeHtml'
+import SoftChip from '@/components/ui/SoftChip'
 import DrawerAddButton from './DrawerAddButton'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import { useDateFormat } from '@/lib/datetime'
 import { useSkillLevels } from '@/lib/useSkillLevels'
+import { useEducationLevels } from '@/lib/useEducationLevels'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import type { Id } from '@/types/common'
 
@@ -186,10 +188,22 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
   // "Koppelen aan" picker options — every candidate document, labeled by its own
   // name (mirrors the upload-flow picker in DocumentsSection; same source list).
   const documentOptions = documents.map(d => ({ value: String(d.id ?? ''), label: (d.name as string) ?? (d.file_name as string) ?? '' }))
+  // KAND-NIVEAU-1: the tenant education-level lookup (id-based — level_id on
+  // candidate_educations, never the name, so a tenant rename never breaks a row).
+  const { levels } = useEducationLevels()
+  const levelOptions = levels.map(l => ({ value: l.id, label: l.label }))
   // Compact layout: diploma+school and start+end each pair; description (richtext) goes last.
   const fields = [
     { key: 'title',     label: t('addFields.diploma'),     half: true },
     { key: 'school',    label: t('addFields.institution'), half: true },
+    // KAND-NIVEAU-1: a pick-only dropdown (own row, full width) — AddForm's plain
+    // `options` field renders a native <select> today; the punchlist's "searchable
+    // CreatableSelect" ask needs a small AddForm.tsx extension outside this
+    // change's owned files (flagged in the handover with the exact snippet).
+    // `defaultValue`: the key isn't in the locale files yet (reported, not applied
+    // here) — mirrors the identical KAND-REFERENTIES-1 pattern a few lines up the
+    // call chain in BackgroundTab.tsx.
+    { key: 'level_id',  label: t('addFields.educationLevel', { defaultValue: 'Niveau' }), options: levelOptions },
     { key: 'start',     label: t('addFields.startDate'), half: true, date: true },
     { key: 'end',       label: t('addFields.endDate'),   half: true, date: true,
       altLabel: t('addFields.expectedEnd'), altLabelWhen: 'inProgress' },
@@ -211,8 +225,14 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
       // date (C-12): the read view fell back to the diploma date, the form didn't.
       editInitial={(it: RelItem) => ({ ...it, inProgress: Boolean((it as { inProgress?: unknown; in_progress?: unknown }).inProgress ?? (it as { in_progress?: unknown }).in_progress), start: resolveEducationStartDate(it) })}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
-        const o = raw as { id?: Id; title?: string; education?: string; school?: string; institution?: string; start?: string; start_date?: string; end?: string; end_date?: string; inProgress?: boolean; in_progress?: boolean; issued?: string; issue_date?: string; period?: string; year?: string }
+        const o = raw as { id?: Id; title?: string; education?: string; school?: string; institution?: string; start?: string; start_date?: string; end?: string; end_date?: string; inProgress?: boolean; in_progress?: boolean; issued?: string; issue_date?: string; period?: string; year?: string; level_id?: string; level?: { id?: string; name?: string; color?: string } }
         const start = o.start ?? o.start_date, end = o.end ?? o.end_date
+        // KAND-NIVEAU-1: the nested {id,name,color} the API returns wins (no extra
+        // lookup); a row just added/edited in THIS session (before the server echoes
+        // it back) falls back to resolving the picked id against the loaded lookup.
+        const localLevel = o.level_id ? levels.find(l => l.id === o.level_id) : undefined
+        const levelName = o.level?.name ?? localLevel?.label
+        const levelColor = o.level?.color ?? localLevel?.color
         const inProgress = o.inProgress ?? o.in_progress
         // In progress: "start – heden" (issue date doubles as start on old rows;
         // Danny 14/7), else "Nog in opleiding" — never a dangling dash. Done:
@@ -233,7 +253,11 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
           <div key={o.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0, marginTop: 5 }} />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{o.title ?? o.education}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{o.title ?? o.education}</div>
+                {/* KAND-NIVEAU-1: the picked education level as a soft chip (§4 convention). */}
+                {levelName && <SoftChip label={levelName} color={levelColor} />}
+              </div>
               {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}
               <ProseField value={(o as { desc?: string }).desc} />
               {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => setPreviewDoc(linkedDoc)} onJump={onJumpToDocuments} />}

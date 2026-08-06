@@ -7,9 +7,19 @@
  * here — mirrors src/pages/customers/drawer/EditableRichTextField.test.tsx).
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ExperienceTab, EducationTab, CertificationsTab, resolveEducationStartDate, resolveLinkedDocument } from './SectionTabs'
+
+// KAND-NIVEAU-1: EducationTab now also fires useEducationLevels' GET (built on the
+// shared useCachedLookup) — resolve it with an empty list so no real network call
+// fires and the hook's fallback seed renders (mirrors BackgroundTab.test.tsx's
+// identical mock, added there for the same reason with useSkillLevels).
+vi.mock('@/lib/api', () => ({
+  default: { get: vi.fn(() => Promise.resolve({ data: { data: [] } })) },
+  unwrap: (r: unknown) => r,
+  unwrapList: (r: { data?: { data?: unknown[] } }) => ({ rows: r?.data?.data ?? [] }),
+}))
 
 vi.mock('@/components/ui/RichTextEditor', () => ({
   default: ({ value, onChange }: { value?: string; onChange: (v: string) => void }) => (
@@ -25,6 +35,7 @@ vi.mock('@/components/drawer/DocPreviewModal', () => ({
 // Asserted as a REQUEST-shaped call (§13: url + name), never just "a click fired".
 vi.mock('@/lib/downloadFiles', () => ({ downloadFilesSequentially: vi.fn() }))
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
+import api from '@/lib/api'
 
 describe('resolveEducationStartDate (C-12 mapping)', () => {
   it('uses the explicit camelCase start date when present', () => {
@@ -88,6 +99,45 @@ describe('EducationTab · "Nog in opleiding" checkbox label (C-11 regression gua
     expect(screen.getByText('Nog in opleiding')).toBeInTheDocument()
     await user.click(checkbox)
     expect(screen.getByText('Nog in opleiding')).toBeInTheDocument()
+  })
+})
+
+describe('EducationTab · education level (KAND-NIVEAU-1)', () => {
+  it('offers the tenant education levels (GET /education-levels) as a pick-only dropdown, and the save payload carries the picked level_id', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/education-levels'
+        ? Promise.resolve({ data: { data: [{ id: 'lvl-1', name: 'MBO-4' }, { id: 'lvl-2', name: 'HBO' }] } })
+        : Promise.resolve({ data: { data: [] } }),
+    )
+    const user = userEvent.setup()
+    const onAdd = vi.fn()
+    render(<EducationTab items={[]} onAdd={onAdd} />)
+    await user.click(screen.getByRole('button', { name: /Toevoegen/ }))
+    // Two comboboxes render (level_id + the always-present document_id picker,
+    // even with zero documents) — level_id is FIRST in the field list. Wait for
+    // the lookup GET to resolve and its options to render.
+    const levelSelect = (await screen.findAllByRole('combobox'))[0]
+    await within(levelSelect).findByText('HBO')
+    await user.selectOptions(levelSelect, 'lvl-2')
+    await user.click(screen.getByTitle('Opslaan'))
+    // §13: assert the save PAYLOAD carries the picked level_id.
+    expect(onAdd).toHaveBeenCalledWith(expect.objectContaining({ level_id: 'lvl-2' }))
+  })
+
+  it('shows the picked education level as a soft chip next to the diploma title', () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+    // Nested {id,name,color} shape (EducationResource) — resolves without a second lookup.
+    // eslint-disable-next-line no-restricted-syntax -- DATA fixture (a tenant lookup's own colour), not a UI colour choice
+    const item = { id: 'e1', title: 'Verpleegkunde', school: 'ROC', level_id: 'lvl-1', level: { id: 'lvl-1', name: 'MBO-4', color: '#2563EB' } }
+    render(<EducationTab items={[item]} />)
+    expect(screen.getByText('MBO-4')).toBeInTheDocument()
+  })
+
+  it('renders no level chip when the entry has no level set', () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+    const item = { id: 'e1', title: 'Verpleegkunde', school: 'ROC' }
+    render(<EducationTab items={[item]} />)
+    expect(screen.queryByText('MBO-4')).toBeNull()
   })
 })
 
@@ -271,9 +321,10 @@ describe('EducationTab · DOC-EDU-1 linked-document icons + edit-form picker', (
     const item = { id: 'e1', title: 'Verpleegkunde', school: 'ROC' }
     render(<EducationTab items={[item]} onEdit={onEdit} documents={documents} />)
     await user.click(screen.getByTitle('Bewerken'))
-    // The document_id select is the ONLY combobox in this row's edit form (every
-    // other field is a text/date/checkbox/richtext input).
-    await user.selectOptions(screen.getByRole('combobox'), 'doc2')
+    // KAND-NIVEAU-1 added a second combobox (level_id, rendered BEFORE document_id
+    // in the field list) — pick the LAST combobox, the document_id picker.
+    const comboboxes = screen.getAllByRole('combobox')
+    await user.selectOptions(comboboxes[comboboxes.length - 1], 'doc2')
     await user.click(screen.getByTitle('Opslaan'))
     // §13: assert the save PAYLOAD carries the picked document_id.
     expect(onEdit).toHaveBeenCalledWith(0, expect.objectContaining({ document_id: 'doc2' }))

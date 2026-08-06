@@ -57,7 +57,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   // Contact channels (last_contact_types) — picking one on a note stamps last_contact_at/_type/_by.
   const { types: channels } = useLastContactTypes()
   // Notes persist via the API (G-1) — add/edit/delete hit /candidates/{id}/notes.
-  const { notes, addNote, editNote } = useCandidateNotes(c.id, { onContactStamped: () => onRefresh?.(c.id) })
+  const { notes, addNote, editNote, deleteNote } = useCandidateNotes(c.id, { onContactStamped: () => onRefresh?.(c.id) })
 
   // SYSTEM notes (status/phase changes, BE-written) are EVENTS, not notes (Danny
   // 2026-07-13): they render in the Tijdlijn, never in the Notities thread. Keep the
@@ -68,6 +68,9 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   const systemNotes = indexed.filter(isSystem)
   const editUserNote = (fi: number, payload: { type: string; title: string; body: string; channel?: string }) =>
     editNote(userNotes[fi].__idx, payload)
+  // RECHTEN-NOTES-1: same filtered-index remap as edit — NotesTab hands the USER-list
+  // index, the hook wants the full-thread index.
+  const deleteUserNote = (fi: number) => deleteNote(userNotes[fi].__idx)
   // Active sub-tab — notes is the daily surface, consent/tasks/timeline one click away.
   // Deep-link default: an unknown/stale target falls back to Notities rather than
   // blanking the tab — this component is the sub-tab validator.
@@ -142,7 +145,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
 
   // Shared NotesTab props — each sub-tab renders exactly one of its sections.
   const notesProps = {
-    notes: userNotes, onAddNote: addNote, onEditNote: editUserNote,
+    notes: userNotes, onAddNote: addNote, onEditNote: editUserNote, onDeleteNote: deleteUserNote,
     timeline: c.timeline ?? [], systemNotes,
     noteTypes: writableTypes, chipTypes: allNoteTypes, channels, authorInitials: c.ownerInitials, timelineName: c.name,
     timelineInitials: c.initials,
@@ -158,6 +161,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
       // show (they're the empty-state copy, not a title).
       notes: '',
       newNote: t('communication.newNote'),
+      deleteNote: t('communication.deleteNote'), deleteConfirm: t('communication.deleteConfirm'),
       type: t('communication.type'),
       channel: t('communication.channel'),
       channelNone: t('communication.channelNone'),
