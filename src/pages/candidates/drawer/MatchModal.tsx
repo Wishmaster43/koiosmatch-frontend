@@ -37,15 +37,24 @@
  * is its OWN card, left column, stacked under Contract — Financieel (the tallest
  * section) sits alone on the right so the two columns balance visually (Danny
  * 24-07 layout point).
+ *
+ * VACANCY-PREFILL-1 (Danny's ten-point round): picking a vacancy prefills the
+ * Relaties/Contract fields it knows (useVacancyPrefillApply), the recruiter/owner
+ * defaults from the candidate's own owner (RECRUITER-DEFAULT-1), and a calm
+ * duplicate/overlap banner (`MatchConflictBanners`, points 5/6) warns — never
+ * blocks — on the candidate's own existing matches, right under the AXIS-MATRIX
+ * preflight so it's visible before the recruiter fills in the rest.
  */
 import { X } from 'lucide-react'
 import { RateDeviationWarning } from './RateProposalNotice'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useDateFormat } from '@/lib/datetime'
 import { ActionRuleBanner } from '@/components/actionrules'
 import { useMatchForm } from './match/useMatchForm'
 import RelationsSection from './match/RelationsSection'
 import ContractSection from './match/ContractSection'
 import FinancialSection from './match/FinancialSection'
+import MatchConflictBanners from './match/MatchConflictBanners'
 // COLLAPSIBLE-TEXT-1 (Danny 02-08): RemarksSection moved to a shared, entity-
 // agnostic component (components/ui) so candidate/customer/location/department
 // create modals get the same collapsed-ghost prose block — see its own docblock.
@@ -57,6 +66,7 @@ import type { Id } from '@/types/common'
 export default function MatchModal({
   candidateId: fixedCandidateId, editMatchId, onClose, onCreated,
   initialCustomerId, initialCustomerLocationId, initialCustomerDepartmentId,
+  candidateOwnerId,
 }: {
   // Fixed when opened from a candidate's Match tab; absent on the Matches page —
   // then a candidate picker appears at the top of RELATIES (Danny 2026-07-13).
@@ -72,16 +82,23 @@ export default function MatchModal({
   initialCustomerId?: Id
   initialCustomerLocationId?: Id
   initialCustomerDepartmentId?: Id
+  // RECRUITER-DEFAULT-1 (point 3): the candidate's own owner, passed down from an
+  // already-loaded drawer record (WorkTab's `c.ownerId`) — mirrors
+  // AddApplicationModal/PlanIntakeModal's identical prop, never refetched.
+  candidateOwnerId?: Id | null
 }) {
   // All state, effects, submit + 422-mapping live in the hook — this component
   // only wires it to the shared chrome and the three section components below.
   const form = useMatchForm({
     candidateId: fixedCandidateId, editMatchId, onClose, onCreated,
     initialCustomerId, initialCustomerLocationId, initialCustomerDepartmentId,
+    candidateOwnerId,
   })
   const { t, editing } = form
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const title = t(editing ? 'placement.editTitle' : 'placement.title')
+  // DD-MM-YYYY everywhere (§3B) — used only for the overlap banner's period text.
+  const { formatDate } = useDateFormat()
 
   return (
     <>
@@ -96,6 +113,10 @@ export default function MatchModal({
         {form.matchRuleDecision && form.matchRuleDecision.effect !== 'allow' && (
           <div style={{ marginBottom: 10 }}><ActionRuleBanner decision={form.matchRuleDecision} /></div>
         )}
+
+        {/* Duplicate + overlap preflight (points 5/6, Danny's ten-point round) —
+            calm, non-blocking heads-up over the candidate's OWN existing matches. */}
+        <MatchConflictBanners duplicateMatch={form.duplicateMatch} overlappingMatches={form.overlappingMatches} formatDate={formatDate} />
 
         {/* ── Titled cards (Danny 24-07 point 3) — the addmodal card idiom: an
             11px uppercase muted heading above a bordered surface, mirroring the

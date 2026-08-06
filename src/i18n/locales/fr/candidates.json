@@ -1028,7 +1028,10 @@
       "deviationCancel": "Ajuster les tarifs"
     },
     "candidate": "Candidat",
-    "pickCandidate": "Choisir un candidat..."
+    "pickCandidate": "Choisir un candidat...",
+    "duplicateMatchWarning": "Un match existe déjà ({{label}}) pour ce candidat chez ce client — voulez-vous créer un renouvellement ?",
+    "overlapWarning": "La période saisie chevauche un match actif chez {{label}} ({{period}}).",
+    "overlapOngoing": "depuis {{start}}"
   },
   "merge": {
     "title": "Fusionner le candidat",

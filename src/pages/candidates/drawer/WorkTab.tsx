@@ -284,12 +284,17 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
       {/* RECRUITER-DEFAULT-1 (Danny 05-08): same candidate owner, threaded so the
           intake modal's recruiter picker can prefer it over the logged-in-user fallback. */}
       {modal === 'intake' && <PlanIntakeModal     candidateId={c.id} candidateOwnerId={c.ownerId} onClose={() => setModal(null)} onCreated={reload} defaultVacancyId={soleVacancyId} />}
-      {modal === 'match'  && <MatchModal candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
+      {/* RECRUITER-DEFAULT-1 (point 3, Danny's ten-point round): same candidate
+          owner, threaded so the match form's recruiter picker can prefer it over
+          the logged-in-user fallback — mirrors the intake modal one line above. */}
+      {modal === 'match'  && <MatchModal candidateId={c.id} candidateOwnerId={c.ownerId} onClose={() => setModal(null)} onCreated={reload} />}
       {editAppt && <PlanIntakeModal candidateId={c.id} existing={editAppt} onClose={() => setEditAppt(null)} onCreated={reload} />}
       {/* Pencil on a MatchesTab row (point 2) — same modal, in EDIT mode: prefills
           from GET /matches/{id} (the candidate's own embedded row is thin) and
-          PATCHes instead of POSTing. */}
-      {editMatchId != null && <MatchModal candidateId={c.id} editMatchId={editMatchId} onClose={() => setEditMatchId(null)} onCreated={reload} />}
+          PATCHes instead of POSTing. candidateOwnerId is irrelevant here (edit mode
+          never runs RECRUITER-DEFAULT-1, see useRecruiterDefault) but passed anyway
+          for consistency with the create-mode call above. */}
+      {editMatchId != null && <MatchModal candidateId={c.id} candidateOwnerId={c.ownerId} editMatchId={editMatchId} onClose={() => setEditMatchId(null)} onCreated={reload} />}
     </div>
   )
 }

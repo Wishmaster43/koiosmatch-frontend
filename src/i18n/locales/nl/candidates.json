@@ -1028,7 +1028,10 @@
       "deviationCancel": "Tarieven aanpassen"
     },
     "candidate": "Kandidaat",
-    "pickCandidate": "Kies een kandidaat..."
+    "pickCandidate": "Kies een kandidaat...",
+    "duplicateMatchWarning": "Er bestaat al een match ({{label}}) voor deze kandidaat bij deze klant — wil je een verlenging maken?",
+    "overlapWarning": "De opgegeven periode overlapt met een actieve match bij {{label}} ({{period}}).",
+    "overlapOngoing": "vanaf {{start}}"
   },
   "merge": {
     "title": "Kandidaat samenvoegen",

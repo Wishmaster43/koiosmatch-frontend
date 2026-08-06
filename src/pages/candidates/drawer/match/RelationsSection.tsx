@@ -204,8 +204,14 @@ export default function RelationsSection({
         </F>
       ) : (
         <F label={t('placement.vacancyOptional')} error={errors.vacancyId}>
+          {/* CLEAR (point 1.8.4, Danny's ten-point round: "een misklik moet
+              herstelbaar zijn") — the shared CreatableSelect's own opt-in `clearable`
+              X (VAC-CLEAR-1), never a hand-rolled button (CLAUDE.md §11: reuse, don't
+              duplicate). Both a fresh pick AND this X funnel through the SAME
+              `onChange`/`setVacancyId`, which reverts whatever the PREVIOUS vacancy
+              auto-filled and is still untouched (useVacancyPrefillApply). */}
           <CreatableSelect value={vacancyId || null} onChange={setVacancyId} allowCreate={false}
-            placeholder={t('placement.noVacancy')} menuWidth={340}
+            placeholder={t('placement.noVacancy')} menuWidth={340} clearable clearLabel={t('work.vacancy')}
             options={vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))} />
         </F>
       )}

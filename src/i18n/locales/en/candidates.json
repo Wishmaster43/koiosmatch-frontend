@@ -1028,7 +1028,10 @@
       "deviationCancel": "Adjust rates"
     },
     "candidate": "Candidate",
-    "pickCandidate": "Pick a candidate..."
+    "pickCandidate": "Pick a candidate...",
+    "duplicateMatchWarning": "A match already exists ({{label}}) for this candidate at this customer — do you want to create a renewal?",
+    "overlapWarning": "The entered period overlaps with an active match at {{label}} ({{period}}).",
+    "overlapOngoing": "from {{start}}"
   },
   "merge": {
     "title": "Merge candidate",

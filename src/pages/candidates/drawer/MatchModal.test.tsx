@@ -108,6 +108,13 @@ vi.mock('@/lib/useLocations', () => ({
 // Read-only recruiter branch fallback (ME-BRANCHES-1) — empty here so the
 // customer's own branch (mockCustomer.branch_id) is the proposal under test.
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1', branch_ids: [] } }) }))
+// `@/lib/datetime` (MatchModal's own useDateFormat, VACANCY-PREFILL-1's overlap
+// banner) transitively imports the REAL i18n bootstrap (`src/i18n/index.ts`'s
+// module-scope `i18n.use(initReactI18next).init(...)`) — the module every OTHER
+// candidate test piggybacks a real i18n init on, poisoning every `t()` call in
+// this same test process from "return the raw key" to real Dutch strings
+// (mirrors WorkTab.test.tsx's identical mock, same reason).
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => `fmt(${v})`, locale: 'nl-NL' }) }))
 vi.mock('../hooks/useRateProposal', () => ({
   useRateProposal: () => ({ proposal: null, deviatesFromProposal: false, confirmDeviation: false, setConfirmDeviation: vi.fn() }),
 }))
@@ -490,11 +497,16 @@ describe('MatchModal · Contractsoort/Vestiging/CAO/Recruiter are searchable (Da
     const user = userEvent.setup()
     render(<MatchModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
     const ownerField = screen.getByText('placement.owner').parentElement as HTMLElement
-    // Searchable: typing narrows the two-user fixture down to one.
+    // RECRUITER-DEFAULT-1 (point 3, VACANCY-PREFILL-1): the field opens
+    // PRE-FILLED with the logged-in user (Piet Recruiter, this fixture's `me`) —
+    // its own TRIGGER button keeps that name while the dropdown is open, so the
+    // "Sanne" search narrowing the LIST OPTIONS to just her is asserted as
+    // exactly one remaining match (the trigger), not a second one from a
+    // still-listed Piet Recruiter option.
     await user.click(within(ownerField).getByRole('button'))
     await user.type(screen.getByPlaceholderText('placement.optional'), 'Sanne')
     expect(screen.getByRole('button', { name: 'Sanne Planner' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Piet Recruiter' })).toBeNull()
+    expect(screen.getAllByRole('button', { name: 'Piet Recruiter' })).toHaveLength(1)
     await user.click(screen.getByRole('button', { name: 'Sanne Planner' }))
 
     // Optional: left untouched, no owner_id rides the body at all.

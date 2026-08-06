@@ -38,6 +38,17 @@
  * don't accept those two, mirroring the backend docblock — so the vacancy field
  * renders read-only while editing (RelationsSection's `editing` prop) instead of a
  * silently-dropped edit (§3: no fake affordances).
+ *
+ * VACANCY-PREFILL-1 (points 1/2/3/4, Danny's ten-point round): picking a vacancy
+ * proposes klant/klantlocatie/afdeling/contactpersoon/vestiging/data/uren as
+ * EDITABLE values (never a lock), the recruiter/owner defaults from the
+ * candidate's own owner (RECRUITER-DEFAULT-1, mirrors usePlanIntakeForm), and a
+ * client-side duplicate/overlap preflight warns (never blocks) on the candidate's
+ * OWN existing matches. All four sit in their own sibling hooks
+ * (useVacancyPrefillApply / useRecruiterDefault / useMatchConflicts) for the same
+ * reason as the other propose-but-freeze concerns above — see each hook's own
+ * docblock for the exact contract (which vacancy fields are real vs. missing/
+ * mismatched-vocabulary, verified against the backend).
  */
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -59,6 +70,9 @@ import { useBranchMismatch } from './useBranchMismatch'
 import { useCascadeDefaults } from './useCascadeDefaults'
 import { useBranchDefault } from './useBranchDefault'
 import { useEndDateProposal } from './useEndDateProposal'
+import { useVacancyPrefillApply } from './useVacancyPrefillApply'
+import { useRecruiterDefault } from './useRecruiterDefault'
+import { useMatchConflicts } from './useMatchConflicts'
 import { API_TO_FORM, todayISO, findDuplicateContact } from './helpers'
 import type { CascadeOption } from '@/hooks/useCustomerCascade'
 import type { Id } from '@/types/common'
@@ -84,6 +98,7 @@ interface MatchEditDetail {
 export function useMatchForm({
   candidateId: fixedCandidateId, editMatchId, onClose, onCreated,
   initialCustomerId, initialCustomerLocationId, initialCustomerDepartmentId,
+  candidateOwnerId,
 }: {
   // Fixed when opened from a candidate's Match tab; absent on the Matches page —
   // then a candidate picker appears at the top of RELATIES (Danny 2026-07-13).
@@ -99,6 +114,10 @@ export function useMatchForm({
   initialCustomerId?: Id
   initialCustomerLocationId?: Id
   initialCustomerDepartmentId?: Id
+  // RECRUITER-DEFAULT-1 (point 3, Danny's ten-point round): the candidate's own
+  // owner, passed down from an already-loaded drawer record (WorkTab's `c.ownerId`)
+  // — mirrors AddApplicationModal/PlanIntakeModal's candidateOwnerId, never refetched.
+  candidateOwnerId?: Id | null
 }) {
   const editing = Boolean(editMatchId)
   const { t } = useTranslation(['candidates', 'common'])
@@ -137,30 +156,34 @@ export function useMatchForm({
 
   // ── Relaties ── customer drives the location/department/contact cascade —
   // ONE shared implementation (audit R1 item 2; used to be its own inline
-  // GET /customers/{id} effect here, duplicated in opportunities/vacancies).
-  const [customerId, setCustomerId] = useState(initialCustomerId != null ? String(initialCustomerId) : '')
+  // GET /customers/{id} effect here, duplicated in opportunities/vacancies). The
+  // Raw setters below are the plain useState setters — VACANCY-PREFILL-1 wraps its
+  // OWN touched-aware versions further down (`setCustomerId` etc., what the JSX
+  // actually receives); every OTHER internal effect in this file keeps using Raw.
+  const [customerId, setCustomerIdRaw] = useState(initialCustomerId != null ? String(initialCustomerId) : '')
   const { detail, locations, contacts, refetch: refetchCustomer } = useCustomerCascade(customerId)
-  const [locationId, setLocationId] = useState(initialCustomerLocationId != null ? String(initialCustomerLocationId) : '')
-  const [departmentId, setDepartmentId] = useState(initialCustomerDepartmentId != null ? String(initialCustomerDepartmentId) : '')
-  const [contactId, setContactId] = useState('')
+  const [locationId, setLocationIdRaw] = useState(initialCustomerLocationId != null ? String(initialCustomerLocationId) : '')
+  const [departmentId, setDepartmentIdRaw] = useState(initialCustomerDepartmentId != null ? String(initialCustomerDepartmentId) : '')
+  const [contactId, setContactIdRaw] = useState('')
   // EDIT-MATCH-1: guards the reset below during the one-shot prefill (see the
   // prefill effect further down) — picking a NEW customer still clears location/
   // department/contact, but loading an existing match's own combination must not
   // be wiped the instant customerId itself is set from the fetched record. Point 1
-  // (Danny's ten-point round) reuses the SAME guard for its own one-shot seed: the
-  // mount-time run of the reset effect below must not immediately wipe the
-  // initialCustomerLocationId/initialCustomerDepartmentId prefill either.
+  // (Danny's ten-point round) reuses the SAME guard for its own one-shot seed, and
+  // VACANCY-PREFILL-1 reuses it a third time for the vacancy's own customer prefill
+  // (see useVacancyPrefillApply) — every case: the mount-time/programmatic run of
+  // the reset effect below must not immediately wipe a prefill it arrived together with.
   const skipCascadeResetRef = useRef(initialCustomerId != null)
-  // Picking a (new) customer resets the dependent picks — cascade integrity.
-  useEffect(() => {
-    if (!customerId) return
-    if (skipCascadeResetRef.current) { skipCascadeResetRef.current = false; return }
-    setLocationId(''); setDepartmentId(''); setContactId('')
-  }, [customerId])
   const departments = locations.find(l => String(l.id) === locationId)?.departments ?? []
   // Vestiging PROPOSAL (7.4): customer branch > recruiter's own branch > tenant
   // default — own sibling hook, freezes the moment the recruiter edits it by hand.
-  const { branchId, setBranchId, setBranchDirty } = useBranchDefault(detail, branchLocations)
+  const { branchId, setBranchId: setBranchIdRaw, setBranchDirty } = useBranchDefault(detail, branchLocations)
+
+  // Vestiging-mismatch (fase 3) + RECRUITER-DEFAULT-1's fallback owner (point 3) —
+  // own sibling hook (self-contained: loads the candidate's branch + owner once,
+  // flags a mismatch, owns the "keep vs also move" choice). Moved up from its
+  // original position so `candOwnerId`/`candBranch` are ready for the two hooks below.
+  const { candBranch, candOwnerId, mismatchChoice, setMismatchChoice, branchMismatch } = useBranchMismatch(candidateId, detail)
 
   // Inline contact-create (Danny): when a customer has no matching contact, add one
   // and couple it to the picked location right here (POST /customers/{id}/contacts).
@@ -174,8 +197,10 @@ export function useMatchForm({
   // for this customer; null once cleared (cancel, or a fresh non-duplicate attempt).
   const [duplicateContact, setDuplicateContact] = useState<CascadeOption | null>(null)
   const [func, setFunc] = useState('')
-  const [vacancyId, setVacancyId] = useState('')
-  const [ownerId, setOwnerId] = useState('')
+  const [vacancyId, setVacancyIdRaw] = useState('')
+  // RECRUITER-DEFAULT-1 (point 3): candidate's own owner > logged-in user, seeded
+  // once — own sibling hook, mirrors usePlanIntakeForm's identical pattern.
+  const { ownerId, setOwnerId } = useRecruiterDefault({ editing, candidateOwnerId, candOwnerId, users })
 
   // ── Contract ──
   const [contractType, setContractType] = useState('')
@@ -204,12 +229,49 @@ export function useMatchForm({
     if (label && label !== contractType) setContractType(label)
   }, [contractTypeOptions, contractType])
   // Proposal, not a hard default — the recruiter can freely change it (job 19).
-  const [startDate, setStartDate] = useState(todayISO)
+  const [startDate, setStartDateRaw] = useState(todayISO)
   // End-date PROPOSAL (7.1): from the picked contract type's default duration —
   // own sibling hook, honest no-op until the BE column exists.
-  const { endDate, setEndDate, setEndDateDirty } = useEndDateProposal({ contractType, startDate, options: contractTypeOptions })
-  const [hours, setHours] = useState('')
+  const { endDate, setEndDate: setEndDateRaw, setEndDateDirty } = useEndDateProposal({ contractType, startDate, options: contractTypeOptions })
+  const [hours, setHoursRaw] = useState('')
   const [cao, setCao] = useState('')
+
+  // VACANCY-PREFILL-1 (points 1/2/4): applies the picked vacancy's real fields
+  // (customer/location/department/contact/branch/dates/hours) onto the state
+  // above, ONLY while untouched, and owns the touched-aware setters the JSX
+  // actually receives (`setCustomerId` etc. below) plus the ONE `setVacancyId`
+  // that both switches and clears (point 1.8.4). See its own docblock for the
+  // full contract — this call must sit AFTER every raw setter/dirty-flag it wraps.
+  const { setVacancyId, markTouched, resetTouched } = useVacancyPrefillApply({
+    editing, vacancyId, setVacancyIdRaw,
+    customerId, setCustomerIdRaw, skipCascadeResetRef,
+    setLocationIdRaw, setDepartmentIdRaw, setContactIdRaw,
+    setBranchIdRaw, setBranchDirty,
+    setStartDateRaw, setEndDateRaw, setEndDateDirty,
+    setHoursRaw,
+    candBranchId: candBranch?.id,
+  })
+  // Picking a (new) customer BY HAND resets the dependent picks — cascade
+  // integrity. `resetTouched` un-freezes location/department/contact for a LATER
+  // vacancy prefill too: this reset is automatic bookkeeping, not a user edit.
+  useEffect(() => {
+    if (!customerId) return
+    if (skipCascadeResetRef.current) { skipCascadeResetRef.current = false; return }
+    setLocationIdRaw(''); setDepartmentIdRaw(''); setContactIdRaw('')
+    resetTouched(['locationId', 'departmentId', 'contactId'])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- resetTouched is a stable closure from a sibling hook, not a reactive trigger
+  }, [customerId])
+  // Touched-aware setters (point 4: "prefill never overwrites a field the
+  // recruiter already touched") — the ONLY versions RelationsSection/ContractSection
+  // ever see; every internal effect above/below keeps using the Raw ones.
+  const setCustomerId = (v: string) => { markTouched('customerId'); setCustomerIdRaw(v) }
+  const setLocationId = (v: string) => { markTouched('locationId'); setLocationIdRaw(v) }
+  const setDepartmentId = (v: string) => { markTouched('departmentId'); setDepartmentIdRaw(v) }
+  const setContactId = (v: string) => { markTouched('contactId'); setContactIdRaw(v) }
+  const setBranchId = (v: string) => { markTouched('branchId'); setBranchIdRaw(v) }
+  const setStartDate = (v: string) => { markTouched('startDate'); setStartDateRaw(v) }
+  const setEndDate = (v: string) => { markTouched('endDate'); setEndDateRaw(v) }
+  const setHours = (v: string) => { markTouched('hours'); setHoursRaw(v) }
 
   // ── Financieel ──
   const [scale, setScale] = useState('')
@@ -240,10 +302,11 @@ export function useMatchForm({
   const { proposal, deviatesFromProposal, confirmDeviation, setConfirmDeviation } =
     useRateProposal({ customerId, functionTitle: func, cao, scale, step, purchase, sell, setPurchase, setSell })
 
-  // Vestiging-mismatch (fase 3): the candidate's own branch vs the customer's —
-  // own sibling hook (self-contained: loads the candidate's branch, flags a
-  // mismatch, owns the "keep vs also move" choice).
-  const { candBranch, mismatchChoice, setMismatchChoice, branchMismatch } = useBranchMismatch(candidateId, detail)
+  // Duplicate + overlap preflight (points 5/6, 1.10/1.11) — own sibling hook,
+  // client-side over the candidate's own already-fetched matches. WARN only.
+  const { duplicateMatch, overlappingMatches } = useMatchConflicts({
+    candidateId: String(candidateId || ''), editMatchId, customerId, locationId, departmentId, startDate, endDate,
+  })
 
   // Margin = sell − purchase, shown live (never entered).
   const margin = (Number(sell) || 0) - (Number(purchase) || 0)
@@ -265,21 +328,24 @@ export function useMatchForm({
   // right after its value is set so the sibling "propose" hooks (branch/end-date/
   // cost-centre/billing-email) never recompute over the loaded value; skipCascadeResetRef
   // stops the customerId-change reset above from wiping location/department/contact.
+  // Uses the RAW setters throughout (never the touched-aware ones): an edit-mode
+  // prefill is not a vacancy prefill, and the vacancy field itself is read-only
+  // while editing (RelationsSection), so touched-tracking is simply irrelevant here.
   useEffect(() => {
     if (!editDetail) return
     skipCascadeResetRef.current = true
-    setCustomerId(editDetail.customer_id != null ? String(editDetail.customer_id) : '')
-    setLocationId(editDetail.customer_location_id != null ? String(editDetail.customer_location_id) : '')
-    setDepartmentId(editDetail.customer_department_id != null ? String(editDetail.customer_department_id) : '')
-    setContactId(editDetail.contact_id != null ? String(editDetail.contact_id) : '')
-    setBranchId(editDetail.branch_id != null ? String(editDetail.branch_id) : ''); setBranchDirty(true)
-    setVacancyId(editDetail.vacancy_id != null ? String(editDetail.vacancy_id) : '')
+    setCustomerIdRaw(editDetail.customer_id != null ? String(editDetail.customer_id) : '')
+    setLocationIdRaw(editDetail.customer_location_id != null ? String(editDetail.customer_location_id) : '')
+    setDepartmentIdRaw(editDetail.customer_department_id != null ? String(editDetail.customer_department_id) : '')
+    setContactIdRaw(editDetail.contact_id != null ? String(editDetail.contact_id) : '')
+    setBranchIdRaw(editDetail.branch_id != null ? String(editDetail.branch_id) : ''); setBranchDirty(true)
+    setVacancyIdRaw(editDetail.vacancy_id != null ? String(editDetail.vacancy_id) : '')
     setOwnerId(editDetail.owner?.id != null ? String(editDetail.owner.id) : '')
     setFunc(editDetail.function_title ?? '')
     setContractType(editDetail.contract_type ?? '')
-    setStartDate(editDetail.start_date ?? '')
-    setEndDate(editDetail.end_date ?? ''); setEndDateDirty(true)
-    setHours(editDetail.hours_per_week != null ? String(editDetail.hours_per_week) : '')
+    setStartDateRaw(editDetail.start_date ?? '')
+    setEndDateRaw(editDetail.end_date ?? ''); setEndDateDirty(true)
+    setHoursRaw(editDetail.hours_per_week != null ? String(editDetail.hours_per_week) : '')
     setCao(editDetail.cao ?? '')
     setScale(editDetail.scale ?? '')
     setStep(editDetail.step ?? '')
@@ -421,6 +487,8 @@ export function useMatchForm({
     remarks, setRemarks, remarksExpanded, setRemarksExpanded, remarksEditing, setRemarksEditing,
     margin, hasRates,
     proposal, deviatesFromProposal, confirmDeviation, setConfirmDeviation,
+    // VACANCY-PREFILL-1 (points 5/6): the duplicate/overlap warnings for MatchModal's banners.
+    duplicateMatch, overlappingMatches,
     saving, errors, submitErr, handleSubmitClick,
   }
 }
