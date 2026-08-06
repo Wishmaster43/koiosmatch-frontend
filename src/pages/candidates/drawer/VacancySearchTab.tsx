@@ -11,6 +11,8 @@ import EntityLink from '@/components/ui/EntityLink'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import SearchSelect from '@/components/ui/SearchSelect'
 import StatusPill from '@/components/ui/StatusPill'
+import DrawerAddButton from './DrawerAddButton'
+import AddApplicationModal from './AddApplicationModal'
 import api, { unwrap } from '@/lib/api'
 import { useVacancySearch } from '../hooks/useVacancySearch'
 import { useFunctions } from '@/lib/useFunctions'
@@ -75,6 +77,12 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   // Reset the selection on a candidate switch (adjust-during-render, mirrors the hook's idiom).
   const [prevCandidateId, setPrevCandidateId] = useState(candidate.id)
   if (candidate.id !== prevCandidateId) { setPrevCandidateId(candidate.id); setSelectedId(null) }
+
+  // "Solliciteren" (Danny 06-08 screenshot): opens AddApplicationModal for THIS
+  // candidate with the open panel's vacancy prefilled. Closed on any selection
+  // change so browsing prev/next never leaves a stale modal pinned to the old row.
+  const [showApply, setShowApply] = useState(false)
+  useEffect(() => { setShowApply(false) }, [selectedId])
 
   // Lazily fetch a short description snippet for the SELECTED vacancy only, once
   // per selection — abortable so a fast re-select never lets a stale response win.
@@ -216,6 +224,9 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{[selectedRow.customer, selectedRow.city].filter(Boolean).join(' · ') || '—'}</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          {/* Solliciteren (Danny 06-08): the primary action for this open score panel —
+              opens the shared AddApplicationModal with this vacancy prefilled. */}
+          <DrawerAddButton onClick={() => setShowApply(true)} label={t('vacancySearch.apply')} />
           {/* Browse through the current result list (Danny 05-08, point 3) — same
               corner as every other detail pager (ContactDetail/LocationDetail). */}
           <DrillPager index={selectedIndex + 1} total={rows.length} onPrev={goPrev} onNext={goNext} />
@@ -314,5 +325,23 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
 
   const listPane: ReactNode = <div>{summaryCard}{listBody}</div>
 
-  return <MatchExplorerLayout filters={filtersRow} map={mapPane} list={listPane} />
+  return (
+    <>
+      <MatchExplorerLayout filters={filtersRow} map={mapPane} list={listPane} />
+      {/* Solliciteren modal — only reachable while a vacancy is selected (the button
+          itself lives inside summaryCard, so selectedRow is always set here too).
+          onCreated re-triggers the same hook `retry` the error state already uses —
+          no new refetch contract, just the existing reload path. */}
+      {showApply && selectedRow && (
+        <AddApplicationModal
+          candidateId={candidate.id}
+          candidateOwnerId={candidate.ownerId}
+          candidateOwnerName={candidate.owner}
+          initialVacancyId={selectedRow.id}
+          onClose={() => setShowApply(false)}
+          onCreated={retry}
+        />
+      )}
+    </>
+  )
 }

@@ -29,6 +29,11 @@
  * owner (VacancyListResource already resolves it on the same /vacancies row
  * useVacancyOptions reads — no extra fetch), an inline warning names who owns
  * what; Create stays enabled either way.
+ *
+ * VACANCY-PREFILL-1 (Danny 06-08, "Solliciteren" from the vacancy-search score
+ * panel): `initialVacancyId` seeds the vacancy picker once on mount — a soft
+ * prefill, not a lock, so a misklik stays recoverable via the same searchable
+ * combobox.
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -57,12 +62,15 @@ const fieldFootprint: React.CSSProperties = { padding: '8px 11px', borderRadius:
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = { candidate_id: 'candidateId', vacancy_id: 'vacancyId', owner_id: 'ownerId', application_stage_id: 'phase' }
 
-export default function AddApplicationModal({ candidateId, candidateOwnerId, candidateOwnerName, onClose, onCreated }: {
+export default function AddApplicationModal({ candidateId, candidateOwnerId, candidateOwnerName, initialVacancyId, onClose, onCreated }: {
   candidateId: Id
   // OWNER-DEVIATION-1: the candidate's own owner, passed down from the already-
   // loaded drawer record (WorkTab's `c.ownerId`/`c.owner`) — never refetched.
   candidateOwnerId?: Id | null
   candidateOwnerName?: string
+  // VACANCY-PREFILL-1: a vacancy already chosen by the caller (e.g. the score panel
+  // in VacancySearchTab) — seeds the picker once, still freely changeable.
+  initialVacancyId?: Id
   onClose: () => void
   onCreated: () => void
 }) {
@@ -91,7 +99,9 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
   const { decision: appRuleDecision } = useActionRulePreflight('application.create', { candidateId: String(candidateId || '') })
   const appRuleBlocked = appRuleDecision?.effect === 'block'
 
-  const [vacancyId, setVacancyId] = useState('')
+  // VACANCY-PREFILL-1: seed once from the caller's prop (a lazy initializer, read
+  // only at mount) — the picker still lets the recruiter pick a different vacancy.
+  const [vacancyId, setVacancyId] = useState(() => (initialVacancyId != null ? String(initialVacancyId) : ''))
   // Default to the tenant's flagged start stage (APP-CREATE-STAGE-1), falling back to the first.
   const [phaseId, setPhaseId] = useState(() => defaultStage?.id ?? '')
   const [saving, setSaving] = useState(false)

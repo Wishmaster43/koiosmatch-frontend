@@ -443,7 +443,8 @@
     "expectedEnd": "Expected end date",
     "present": "present",
     "alwaysValid": "Always valid (no expiry)",
-    "diplomaDate": "Diploma / issue date"
+    "diplomaDate": "Diploma / issue date",
+    "linkedDocument": "Linked document"
   },
   "work": {
     "client": "Client",
@@ -767,7 +768,10 @@
       "vog": "VOG",
       "certificate": "Certificate",
       "other": "Other"
-    }
+    },
+    "linkTo": "Link to",
+    "linkToFor": "Link to for {{name}}",
+    "jumpToDocuments": "Go to documents"
   },
   "ai": {
     "title": "Koios AI advises",
@@ -903,7 +907,8 @@
     "hoursMinPlaceholder": "Min",
     "hoursMaxPlaceholder": "Max",
     "availableFromFilter": "Deployable from",
-    "functionNotInLookup": "Function '{{title}}' is not in the function list — all functions will be searched."
+    "functionNotInLookup": "Function '{{title}}' is not in the function list — all functions will be searched.",
+    "apply": "Apply"
   },
   "erase": {
     "trashView": "Trash",

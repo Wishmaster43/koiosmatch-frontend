@@ -25,8 +25,9 @@ import api from '@/lib/api'
 import nl from '@/i18n/locales/nl/candidates.json'
 import type { Candidate } from '@/types/candidate'
 
-// The three new filter keys (contractForm/hoursPerWeek/…/functionNotInLookup, Danny
-// 06-08) are reported separately for the five shipped locale files (house rule: this
+// The new filter keys (contractForm/hoursPerWeek/…/functionNotInLookup, Danny
+// 06-08) plus the new "apply" key (Danny 06-08 screenshot, "Solliciteren" button)
+// are reported separately for the five shipped locale files (house rule: this
 // task never edits src/i18n/locales/**) — injected here IN-MEMORY only, so this suite
 // exercises the real t() pipeline instead of asserting a raw key-path fallback string.
 // No file on disk is touched; this only patches the running i18next instance.
@@ -38,15 +39,41 @@ i18n.addResourceBundle('nl', 'candidates', {
     hoursMaxPlaceholder: 'Max',
     availableFromFilter: 'Inzetbaar vanaf',
     functionNotInLookup: "Functie '{{title}}' staat niet in de functielijst — alle functies worden doorzocht.",
+    apply: 'Solliciteren',
   },
 }, true, true)
 
 // Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
+// `post` is added for the AddApplicationModal submit exercised below (Solliciteren).
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn() } }
+  return { ...actual, default: { get: vi.fn(), post: vi.fn(() => Promise.resolve({ data: { data: {} } })) } }
 })
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
+const mockPost = api.post as unknown as ReturnType<typeof vi.fn>
+
+// AddApplicationModal's own dependencies (Solliciteren, Danny 06-08) — mirrors
+// AddApplicationModal.test.tsx's own stub shapes so the modal it opens renders exactly
+// as it does when reached from WorkTab.
+vi.mock('../hooks/useVacancyOptions', () => ({
+  useVacancyOptions: () => [
+    { value: 'v1', label: 'Verzorgende IG | Amersfoort', client: 'Zorggroep B' },
+    { value: 'v2', label: 'Verpleegkundige | Utrecht', client: 'Zorggroep A' },
+  ],
+}))
+vi.mock('@/hooks/useApplicationStages', () => ({
+  useApplicationStages: () => ({
+    stages: [{ id: 'stage-applied', value: 'applied', label: 'Gesolliciteerd', is_default: true }],
+    defaultStage: { id: 'stage-applied', value: 'applied', label: 'Gesolliciteerd', is_default: true },
+  }),
+}))
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [{ id: 'u1', name: 'Piet Recruiter' }] }) }))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1', name: 'Piet Recruiter' } }) }))
+vi.mock('@/components/actionrules', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/components/actionrules')>()),
+  useActionRulePreflight: () => ({ decision: null, loading: false, error: false }),
+}))
 
 // Stub the map — Leaflet cannot run under jsdom; assert the props it receives instead.
 vi.mock('@/components/map/RadiusMapPanel', () => ({
@@ -637,5 +664,59 @@ describe('VacancySearchTab · function-not-in-lookup hint (Danny 06-08 live feed
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
     expect(screen.queryByText(/staat niet in de functielijst/)).not.toBeInTheDocument()
+  })
+})
+
+describe('VacancySearchTab · "Solliciteren" action (Danny 06-08 screenshot)', () => {
+  it('renders no Solliciteren button while no vacancy is selected', async () => {
+    stubApi({ matches: () => Promise.resolve({ data: { data: rawMatchRows } }) })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+
+    await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
+    expect(screen.queryByRole('button', { name: 'Solliciteren' })).not.toBeInTheDocument()
+  })
+
+  it('shows the button once a vacancy is selected, and opens AddApplicationModal for it', async () => {
+    stubApi({ matches: () => Promise.resolve({ data: { data: rawMatchRows } }) })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+
+    await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
+    await userEvent.click(screen.getByText('Zorggroep B · Amersfoort'))
+
+    expect(screen.getByRole('button', { name: 'Solliciteren' })).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Solliciteren' }))
+    // The modal opened — its own title proves it mounted (mirrors AddApplicationModal.test.tsx).
+    expect(screen.getByRole('dialog', { name: 'Solliciteren' })).toBeInTheDocument()
+  })
+
+  it('submits with the OPEN PANEL\'s vacancy_id + this candidate_id prefilled (§13: assert the request)', async () => {
+    stubApi({ matches: () => Promise.resolve({ data: { data: rawMatchRows } }) })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+
+    await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
+    // Select v1's row, open the modal, submit without touching the vacancy picker —
+    // proving the prefill (not a manual re-pick) is what lands in the request body.
+    await userEvent.click(screen.getByText('Zorggroep B · Amersfoort'))
+    await userEvent.click(screen.getByRole('button', { name: 'Solliciteren' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Sollicitatie aanmaken' }))
+
+    expect(mockPost).toHaveBeenCalledWith('/applications', {
+      candidate_id: 'cand1', vacancy_id: 'v1', owner_id: 'u1', application_stage_id: 'stage-applied',
+    })
+  })
+
+  it('prefills the NEXT vacancy after paging with DrillPager, never the stale first one', async () => {
+    stubApi({ matches: () => Promise.resolve({ data: { data: rawMatchRows } }) })
+    render(<VacancySearchTab candidate={candidateWithLocation} />)
+
+    await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
+    await userEvent.click(screen.getByText('Zorggroep B · Amersfoort'))
+    await userEvent.click(screen.getByRole('button', { name: 'Volgende' }))
+    await waitFor(() => expect(screen.getAllByText('Verpleegkundige | Utrecht')).toHaveLength(1))
+
+    await userEvent.click(screen.getByRole('button', { name: 'Solliciteren' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Sollicitatie aanmaken' }))
+
+    expect(mockPost).toHaveBeenCalledWith('/applications', expect.objectContaining({ vacancy_id: 'v2' }))
   })
 })

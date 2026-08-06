@@ -443,7 +443,8 @@
     "expectedEnd": "Verwachte einddatum",
     "present": "heden",
     "alwaysValid": "Altijd geldig (geen einddatum)",
-    "diplomaDate": "Diploma-/afgiftedatum"
+    "diplomaDate": "Diploma-/afgiftedatum",
+    "linkedDocument": "Gekoppeld document"
   },
   "work": {
     "client": "Klant",
@@ -767,7 +768,10 @@
       "vog": "VOG",
       "certificate": "Certificaat",
       "other": "Overig"
-    }
+    },
+    "linkTo": "Koppelen aan",
+    "linkToFor": "Koppelen aan voor {{name}}",
+    "jumpToDocuments": "Naar documenten"
   },
   "ai": {
     "title": "Koios AI adviseert",
@@ -903,7 +907,8 @@
     "hoursMinPlaceholder": "Min",
     "hoursMaxPlaceholder": "Max",
     "availableFromFilter": "Inzetbaar vanaf",
-    "functionNotInLookup": "Functie '{{title}}' staat niet in de functielijst — alle functies worden doorzocht."
+    "functionNotInLookup": "Functie '{{title}}' staat niet in de functielijst — alle functies worden doorzocht.",
+    "apply": "Solliciteren"
   },
   "erase": {
     "trashView": "Prullenbak",

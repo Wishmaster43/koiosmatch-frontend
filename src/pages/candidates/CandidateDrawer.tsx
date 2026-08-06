@@ -187,7 +187,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     const mergedC = { ...c, ...(profileEdits ?? {}) }
     switch (activeTab) {
       case 'profile':        return <ProfilePanel c={mergedC} autoEditSignal={profileEditSignal} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
-      case 'background':     return <BackgroundTab c={mergedC} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
+      case 'background':     return <BackgroundTab c={mergedC} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} onJump={setTab} />
       case 'work':           return <WorkTab c={c} onRefresh={() => onRefresh?.(c.id)} initialSubTab={deepLink?.tab === 'work' ? deepLink.sub : undefined} />
       case 'vacancySearch':  return <VacancySearchTab candidate={c} />
       case 'planning':       return <PlanningPanel c={c} />
@@ -210,7 +210,10 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         onRefresh={onRefresh}
         onEditStatusEvent={status.canEditStatusReason ? status.openStatusEdit : undefined}
         initialSubTab={deepLink?.tab === 'communication' ? deepLink.sub : undefined} />
-      case 'documents':      return <DocumentsSection c={c} />
+      // DOC-ENTRY-LINK-1: onRefresh re-pulls the whole candidate after an upload+link,
+      // so a later Achtergrond-tab mount (tabs remount fresh — EntityDrawer only ever
+      // renders the ACTIVE tab) shows the new document_id instead of stale props.
+      case 'documents':      return <DocumentsSection c={c} onRefresh={() => onRefresh?.(c.id)} />
       // onUpdate lets the PDOK refresh push fresh lat/lng/provenance into the page
       // record (pure local merge — buildCandidatePatch maps none of those fields,
       // so patchCandidate skips the API call): no CMD+R needed (Danny 22-07).

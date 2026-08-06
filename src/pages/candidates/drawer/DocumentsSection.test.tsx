@@ -307,3 +307,101 @@ describe('DocumentsSection · delete puts the row back on a FAILED request', () 
     expect(notifyError).toHaveBeenCalledWith('Verwijderen mislukt')
   })
 })
+
+/**
+ * DOC-ENTRY-LINK-1: the OPTIONAL "Koppelen aan" picker in the upload queue —
+ * on a successful upload with a pick, PATCHes the chosen education/certification
+ * with the freshly uploaded document's id. Asserts the REQUEST (§13): route +
+ * body, not merely that a callback fired.
+ */
+describe('DocumentsSection · DOC-ENTRY-LINK-1 upload + link', () => {
+  const withLinkables = (): Candidate => ({
+    id: 'c1',
+    documents: [],
+    educations: [{ id: 'e1', title: 'Verpleegkunde' }],
+    certifications: [{ id: 'cert1', name: 'VCA Basis' }],
+  } as unknown as Candidate)
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal('URL', { createObjectURL: vi.fn((f: File) => `blob:${f.name}`), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('hides the "Koppelen aan" picker entirely when the candidate has no education/certification to link', () => {
+    const { container } = render(<DocumentsSection c={candidate()} />)
+    fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
+    // Only the doc-type select — no fake affordance offering nothing to pick.
+    expect(screen.getAllByRole('combobox')).toHaveLength(1)
+  })
+
+  it('shows the grouped "Koppelen aan" picker (education + certification) when the candidate has both', () => {
+    const { container } = render(<DocumentsSection c={withLinkables()} />)
+    fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
+    // Doc type + "Koppelen aan" = two comboboxes for this one queued file.
+    expect(screen.getAllByRole('combobox')).toHaveLength(2)
+  })
+
+  it('PATCHes the picked EDUCATION with the new document id after a successful upload', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<DocumentsSection c={withLinkables()} />)
+    fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
+    const selects = screen.getAllByRole('combobox')
+    await user.selectOptions(selects[1], 'education:e1')
+    // Two "common:add" buttons exist here: the persistent header "+" trigger and
+    // this queue's own upload button — the queue's is always the LAST in the DOM.
+    await user.click(screen.getAllByRole('button', { name: 'common:add' }).at(-1)!)
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/candidates/c1/educations/e1', { document_id: 101 }))
+  })
+
+  it('PATCHes the picked CERTIFICATION with the new document id after a successful upload', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<DocumentsSection c={withLinkables()} />)
+    fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
+    const selects = screen.getAllByRole('combobox')
+    await user.selectOptions(selects[1], 'certification:cert1')
+    // Two "common:add" buttons exist here: the persistent header "+" trigger and
+    // this queue's own upload button — the queue's is always the LAST in the DOM.
+    await user.click(screen.getAllByRole('button', { name: 'common:add' }).at(-1)!)
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/candidates/c1/certifications/cert1', { document_id: 101 }))
+  })
+
+  it('never fires the link PATCH when nothing was picked (plain upload)', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<DocumentsSection c={withLinkables()} />)
+    fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
+    // Two "common:add" buttons exist here: the persistent header "+" trigger and
+    // this queue's own upload button — the queue's is always the LAST in the DOM.
+    await user.click(screen.getAllByRole('button', { name: 'common:add' }).at(-1)!)
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    expect(api.patch).not.toHaveBeenCalled()
+  })
+
+  it('calls onRefresh after a successful link PATCH, so the Achtergrond tab remounts with the fresh link', async () => {
+    const user = userEvent.setup()
+    const onRefresh = vi.fn()
+    const { container } = render(<DocumentsSection c={withLinkables()} onRefresh={onRefresh} />)
+    fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
+    const selects = screen.getAllByRole('combobox')
+    await user.selectOptions(selects[1], 'education:e1')
+    // Two "common:add" buttons exist here: the persistent header "+" trigger and
+    // this queue's own upload button — the queue's is always the LAST in the DOM.
+    await user.click(screen.getAllByRole('button', { name: 'common:add' }).at(-1)!)
+    await waitFor(() => expect(onRefresh).toHaveBeenCalledTimes(1))
+  })
+
+  it('surfaces the server error and never calls onRefresh when the link PATCH is rejected', async () => {
+    vi.mocked(api.patch).mockRejectedValueOnce({ response: { data: { message: 'Koppelen mislukt' } } })
+    const user = userEvent.setup()
+    const onRefresh = vi.fn()
+    const { container } = render(<DocumentsSection c={withLinkables()} onRefresh={onRefresh} />)
+    fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
+    const selects = screen.getAllByRole('combobox')
+    await user.selectOptions(selects[1], 'education:e1')
+    // Two "common:add" buttons exist here: the persistent header "+" trigger and
+    // this queue's own upload button — the queue's is always the LAST in the DOM.
+    await user.click(screen.getAllByRole('button', { name: 'common:add' }).at(-1)!)
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('Koppelen mislukt'))
+    expect(onRefresh).not.toHaveBeenCalled()
+  })
+})

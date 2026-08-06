@@ -11,13 +11,17 @@
  * `title` is falsy but still renders its `action` ("+ Toevoegen"), so the calm
  * content starts directly with the add-button row.
  */
+import { useState } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Eye, Download, ArrowRight } from 'lucide-react'
 import AddableSectionJs from '@/components/forms/AddableSection'
 import SafeHtml from '@/components/ui/SafeHtml'
 import DrawerAddButton from './DrawerAddButton'
+import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import { useDateFormat } from '@/lib/datetime'
 import { useSkillLevels } from '@/lib/useSkillLevels'
+import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import type { Id } from '@/types/common'
 
 // One shared render-prop: the "+ Toevoegen" trigger for every Achtergrond
@@ -35,9 +39,63 @@ interface RelTabProps {
   onAdd?: (v: RelItem) => void
   onEdit?: (i: number, v: RelItem) => void
   onRemove?: (i: number) => void
+  // DOC-ENTRY-LINK-1 (education/certification ↔ document): the candidate's own
+  // documents (for the "Koppelen aan" edit-form picker + icon resolution) and a
+  // callback that switches the drawer to the Documenten tab (Education/
+  // Certifications only — Experience/Skills ignore both, harmlessly unused).
+  documents?: RelItem[]
+  onJumpToDocuments?: () => void
 }
 type AnyProps = Record<string, unknown>
 const AddableSection = AddableSectionJs as unknown as ComponentType<AnyProps>
+
+/**
+ * DOC-ENTRY-LINK-1 (CMFE): resolve the proof document (if any) linked to an
+ * education/certification entry. DOC-EDU-1/DOC-GELDIGHEID-1 both PATCH a plain
+ * `document_id` onto the entry — resolved here by cross-referencing the
+ * candidate's already-loaded documents list first (the authoritative, fully
+ * normalised source: url/download_url/name/type all come from mapCandidate).
+ * The education resource additionally NESTS the full document object (no
+ * second fetch needed), and a document also carries the reverse link
+ * (education_id/certification_id) — both are tried as fallbacks so whichever
+ * shape a given payload actually carries still resolves to the same document.
+ */
+export function resolveLinkedDocument(
+  entry: RelItem,
+  documents: RelItem[],
+  reverseKey: 'education_id' | 'certification_id',
+): RelItem | undefined {
+  const docId = entry.document_id
+  if (docId != null) {
+    const byId = documents.find(d => String(d.id) === String(docId))
+    if (byId) return byId
+  }
+  const nested = entry.document
+  if (nested && typeof nested === 'object') return nested as RelItem
+  return documents.find(d => d[reverseKey] != null && String(d[reverseKey]) === String(entry.id))
+}
+
+/**
+ * Three subtle icon-buttons for an entry's linked proof document — same muted
+ * style as AddableSection's own pencil/trash controls (§3A: reuse, never
+ * duplicate). Only ever mounted once a linked document was resolved (calm by
+ * default — no icons, no link).
+ */
+function DocEntryLinks({ doc, onPreview, onJump }: { doc: RelItem; onPreview: () => void; onJump?: () => void }) {
+  const { t } = useTranslation('candidates')
+  const iconBtn = { background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' } as const
+  // Same download mechanics as DocumentsSection's own row action (one shared helper).
+  const download = () => { downloadFilesSequentially([{ url: (doc.url as string) ?? (doc.download_url as string), name: (doc.name as string) ?? '' }]) }
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginTop: 6 }}>
+      <button type="button" aria-label={t('documents.preview')} title={t('documents.preview')} onClick={onPreview} style={iconBtn}><Eye size={12} /></button>
+      <button type="button" aria-label={t('documents.download')} title={t('documents.download')} onClick={download} style={iconBtn}><Download size={12} /></button>
+      {onJump && (
+        <button type="button" aria-label={t('documents.jumpToDocuments')} title={t('documents.jumpToDocuments')} onClick={onJump} style={iconBtn}><ArrowRight size={12} /></button>
+      )}
+    </div>
+  )
+}
 
 // Resolves the education "start" date for BOTH the read line and the edit form:
 // the real start date first, else — only for an in-progress row — the issue/diploma
@@ -118,10 +176,16 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }: RelTabPro
   )
 }
 
-export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProps) {
+export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments }: RelTabProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const fmt = (d?: string) => (d ? formatDate(d) : '')
+  // DOC-EDU-1: preview overlay for a row's linked proof document — the shared
+  // house DocPreviewModal (never a fork).
+  const [previewDoc, setPreviewDoc] = useState<RelItem | null>(null)
+  // "Koppelen aan" picker options — every candidate document, labeled by its own
+  // name (mirrors the upload-flow picker in DocumentsSection; same source list).
+  const documentOptions = documents.map(d => ({ value: String(d.id ?? ''), label: (d.name as string) ?? (d.file_name as string) ?? '' }))
   // Compact layout: diploma+school and start+end each pair; description (richtext) goes last.
   const fields = [
     { key: 'title',     label: t('addFields.diploma'),     half: true },
@@ -131,11 +195,14 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProp
       altLabel: t('addFields.expectedEnd'), altLabelWhen: 'inProgress' },
     { key: 'inProgress', label: t('addFields.inProgress'), checkbox: true },
     { key: 'issued',    label: t('addFields.diplomaDate'), date: true, hideWhen: 'inProgress' },
+    // DOC-EDU-1: optionally link an already-uploaded proof document to this entry.
+    { key: 'document_id', label: t('addFields.linkedDocument'), options: documentOptions },
     // Description renders as a `richtext` field in this same form, mirroring
     // Experience/Certifications — one pencil per entry (Danny 05-08).
     { key: 'desc',      label: t('addFields.description'), richtext: true },
   ]
   return (
+    <>
     <AddableSection title={null} emptyText={t('sections.educationEmpty')} renderAddButton={renderAddButton}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       // Mirror the read line's own fallback (resolveEducationStartDate) into the edit
@@ -160,6 +227,8 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProp
         const issued = inProgress ? '' : fmt(o.issued ?? o.issue_date)
         // Compact secondary line: school · period · issue-date on one muted row (like Experience).
         const secondary = [o.school ?? o.institution, range, issued ? `${t('addFields.issueDate')}: ${issued}` : null].filter(Boolean).join(' · ')
+        // DOC-EDU-1: resolve the linked proof document, if any — icons render only when found.
+        const linkedDoc = resolveLinkedDocument(raw, documents, 'education_id')
         return (
           <div key={o.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0, marginTop: 5 }} />
@@ -167,17 +236,26 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProp
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{o.title ?? o.education}</div>
               {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}
               <ProseField value={(o as { desc?: string }).desc} />
+              {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => setPreviewDoc(linkedDoc)} onJump={onJumpToDocuments} />}
             </div>
           </div>
         )
       }} />
+    {previewDoc && <DocPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
+    </>
   )
 }
 
-export function CertificationsTab({ items = [], onAdd, onEdit, onRemove }: RelTabProps) {
+export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments }: RelTabProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const fmt = (d?: string) => (d ? formatDate(d) : '')
+  // DOC-GELDIGHEID-1: preview overlay for a row's linked proof document — the
+  // shared house DocPreviewModal (never a fork).
+  const [previewDoc, setPreviewDoc] = useState<RelItem | null>(null)
+  // "Koppelen aan" picker options — every candidate document, labeled by its own
+  // name (mirrors the upload-flow picker in DocumentsSection; same source list).
+  const documentOptions = documents.map(d => ({ value: String(d.id ?? ''), label: (d.name as string) ?? (d.file_name as string) ?? '' }))
   // Compact layout: name+org pair; issued–expires stay a "tot" pair (separator).
   // The description renders as a `richtext` field in this same form (one
   // pencil per entry, Danny 05-08) — see ProseField (view-only) below.
@@ -188,9 +266,12 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove }: RelTa
     { key: 'expires', label: t('addFields.expiryDate'), date: true, disabledWhen: 'noExpiry' },
     { key: 'noExpiry', label: t('addFields.alwaysValid'), checkbox: true },
     { key: 'license', label: t('addFields.licenseNumber') },
+    // DOC-GELDIGHEID-1: optionally link an already-uploaded proof document to this entry.
+    { key: 'document_id', label: t('addFields.linkedDocument'), options: documentOptions },
     { key: 'desc',    label: t('addFields.description'), richtext: true },
   ]
   return (
+    <>
     <AddableSection title={null} emptyText={t('sections.certificationsEmpty')} renderAddButton={renderAddButton}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       editInitial={(it: RelItem) => ({ ...it, noExpiry: !(it as { expires?: unknown }).expires })}
@@ -200,6 +281,8 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove }: RelTa
         // Experience/Education; organisation no longer wraps onto its own line (C-13a).
         const dateRange = [cert.issued && `${t('certified.issued')}: ${fmt(cert.issued)}`, cert.expires && `${t('certified.expires')}: ${fmt(cert.expires)}`].filter(Boolean).join(' · ')
         const secondary = [cert.org, dateRange].filter(Boolean).join(' · ')
+        // DOC-GELDIGHEID-1: resolve the linked proof document, if any — icons render only when found.
+        const linkedDoc = resolveLinkedDocument(raw, documents, 'certification_id')
         return (
           <div key={cert.id ?? i} style={{ display: 'flex', gap: 8, padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-violet)', flexShrink: 0, marginTop: 4 }} />
@@ -209,10 +292,13 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove }: RelTa
               {/* Licence number (C-13b) — a code/ID, so JetBrains Mono per §4. */}
               {cert.license && <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>{t('addFields.licenseNumber')}: {cert.license}</div>}
               <ProseField value={cert.desc} />
+              {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => setPreviewDoc(linkedDoc)} onJump={onJumpToDocuments} />}
             </div>
           </div>
         )
       }} />
+    {previewDoc && <DocPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
+    </>
   )
 }
 

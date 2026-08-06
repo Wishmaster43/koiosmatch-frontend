@@ -152,3 +152,61 @@ describe('BackgroundTab · ops() optimistic-revert (onAdd/onEdit/onRemove)', () 
     expect(notifyError).toHaveBeenCalled()
   })
 })
+
+/**
+ * DOC-ENTRY-LINK-1: the "Koppelen aan" edit-form picker (BackgroundTab's own
+ * TO_API mapping) round-trips document_id into the real PATCH body — §13:
+ * assert the REQUEST, not merely that onEdit-style state updated.
+ */
+describe('BackgroundTab · DOC-ENTRY-LINK-1 document_id round-trips through the entry PATCH', () => {
+  beforeEach(() => {
+    vi.mocked(api.patch).mockReset()
+    vi.mocked(api.patch).mockResolvedValue({ data: { data: {} } })
+  })
+
+  it('education: relinking to a different document PATCHes the education route with the new document_id', async () => {
+    const user = userEvent.setup()
+    const c = {
+      ...candidate(),
+      educations: [{ id: 'e1', title: 'Verpleegkunde', school: 'ROC', document_id: 'doc1' }],
+      documents: [{ id: 'doc1', name: 'oud.pdf' }, { id: 'doc2', name: 'nieuw.pdf' }],
+    } as unknown as Candidate
+    render(<BackgroundTab c={c} />)
+    await user.click(screen.getByRole('tab', { name: 'Opleiding' }))
+    await user.click(screen.getByTitle('Bewerken'))
+    // The document_id select is the ONLY combobox in the education edit form.
+    await user.selectOptions(screen.getByRole('combobox'), 'doc2')
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(api.patch).toHaveBeenCalledWith('/candidates/1/educations/e1', expect.objectContaining({ document_id: 'doc2' }))
+  })
+
+  it('certification: relinking PATCHes the certification route with the new document_id', async () => {
+    const user = userEvent.setup()
+    const c = {
+      ...candidate(),
+      certifications: [{ id: 'c1', name: 'VCA Basis', document_id: 'doc1' }],
+      documents: [{ id: 'doc1', name: 'oud.pdf' }, { id: 'doc2', name: 'nieuw.pdf' }],
+    } as unknown as Candidate
+    render(<BackgroundTab c={c} />)
+    await user.click(screen.getByRole('tab', { name: 'Certificeringen' }))
+    await user.click(screen.getByTitle('Bewerken'))
+    await user.selectOptions(screen.getByRole('combobox'), 'doc2')
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(api.patch).toHaveBeenCalledWith('/candidates/1/certifications/c1', expect.objectContaining({ document_id: 'doc2' }))
+  })
+
+  it('unlinking (picking the empty option) PATCHes document_id: null, never an empty string', async () => {
+    const user = userEvent.setup()
+    const c = {
+      ...candidate(),
+      educations: [{ id: 'e1', title: 'Verpleegkunde', document_id: 'doc1' }],
+      documents: [{ id: 'doc1', name: 'oud.pdf' }],
+    } as unknown as Candidate
+    render(<BackgroundTab c={c} />)
+    await user.click(screen.getByRole('tab', { name: 'Opleiding' }))
+    await user.click(screen.getByTitle('Bewerken'))
+    await user.selectOptions(screen.getByRole('combobox'), '')
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(api.patch).toHaveBeenCalledWith('/candidates/1/educations/e1', expect.objectContaining({ document_id: null }))
+  })
+})

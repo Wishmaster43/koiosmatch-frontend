@@ -9,7 +9,11 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 import type { Candidate } from '@/types/candidate'
 
 type RelItem = Record<string, unknown>
-type RelTabProps = { items?: RelItem[]; onAdd?: (v: RelItem) => void; onEdit?: (i: number, v: RelItem) => void; onRemove?: (i: number) => void }
+type RelTabProps = {
+  items?: RelItem[]; onAdd?: (v: RelItem) => void; onEdit?: (i: number, v: RelItem) => void; onRemove?: (i: number) => void
+  // DOC-ENTRY-LINK-1: Education/Certifications only — Experience/Skills ignore both.
+  documents?: RelItem[]; onJumpToDocuments?: () => void
+}
 
 // SectionTabs is still untyped JS — declare the relation-list props used here.
 const ExperienceTab     = ExperienceTabJs     as ComponentType<RelTabProps>
@@ -43,15 +47,19 @@ const TO_API: Record<string, (v: RelItem) => Record<string, unknown>> = {
   educations: v => ({
     title: v.title, school: v.school, start_date: v.start,
     end_date: v.end, in_progress: !!v.inProgress, description: v.desc, issue_date: v.inProgress ? null : v.issued,
+    // DOC-EDU-1: the "Koppelen aan" picker's select value — '' (nothing chosen) means unlink.
+    document_id: v.document_id || null,
   }),
   certifications: v => ({
     name: v.name, organisation: v.org, issue_date: v.issued,
     expiry_date: v.noExpiry ? null : v.expires, license_number: v.license, description: v.desc,
+    // DOC-GELDIGHEID-1: mirrors the education mapping exactly.
+    document_id: v.document_id || null,
   }),
   skills: v => ({ name: v.name, level: v.level }),
 }
 
-export default function BackgroundTab({ c, onEditSave }: { c: Candidate; onEditSave?: (v: Record<string, unknown>) => void }) {
+export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate; onEditSave?: (v: Record<string, unknown>) => void; onJump?: (tab: string) => void }) {
   const [experiences, setExperiences] = useState<RelItem[]>(c.experiences ?? [])
   const [educations,  setEducations]  = useState<RelItem[]>(c.educations ?? [])
   const [certs,       setCerts]        = useState<RelItem[]>(c.certifications ?? [])
@@ -143,8 +151,11 @@ export default function BackgroundTab({ c, onEditSave }: { c: Candidate; onEditS
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
       {subTab === 'experience'     && <ExperienceTab     items={experiences} {...ops('experiences', experiences, setExperiences)} />}
-      {subTab === 'education'      && <EducationTab      items={educations}  {...ops('educations', educations, setEducations)} />}
-      {subTab === 'certifications' && <CertificationsTab items={certs}       {...ops('certifications', certs, setCerts)} />}
+      {/* DOC-ENTRY-LINK-1: candidate.documents feeds both the "Koppelen aan" edit-form
+          picker and the 3 read-only link icons; onJumpToDocuments switches the drawer
+          to the Documenten tab (thin passthrough — CandidateDrawer owns tab state). */}
+      {subTab === 'education'      && <EducationTab      items={educations}  documents={c.documents ?? []} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} {...ops('educations', educations, setEducations)} />}
+      {subTab === 'certifications' && <CertificationsTab items={certs}       documents={c.documents ?? []} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} {...ops('certifications', certs, setCerts)} />}
       {subTab === 'skills'         && <SkillsTab         items={skills}      {...ops('skills', skills, setSkills)} />}
       {/* Talen already lived on this tab (moved here from Profiel earlier) — now its
           own sub-tab instead of a stacked block; persists via the drawer's onUpdate. */}

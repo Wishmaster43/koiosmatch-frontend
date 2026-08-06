@@ -11,6 +11,8 @@ import { useDateFormat } from '@/lib/datetime'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
 import DrawerAddButton from './DrawerAddButton'
+import PendingUploadQueue from './PendingUploadQueue'
+import type { PendingItem } from './PendingUploadQueue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -31,10 +33,6 @@ interface DocItem {
 
 // Split a filename into base + extension so rename never touches the extension.
 const splitExt = (fn: string) => { const m = fn.match(/\.[^./\\]+$/); return { base: m ? fn.slice(0, -m[0].length) : fn, ext: m ? m[0] : '' } }
-// A queued-but-not-yet-uploaded file, each with its own document type (BUGFIX
-// 23-07: a multi-file pick used to collapse to a single pending slot, so picking
-// 5 files silently uploaded only 1 — now every picked file gets its own queue entry).
-interface PendingItem { file: File; objectUrl: string; name: string; size: string; type: string }
 
 // Stable per-row selection key: the real id, or the row index for not-yet-persisted rows.
 const docKey = (d: DocItem, i: number): string => String(d.id ?? 'idx-' + i)
@@ -50,12 +48,16 @@ const DOC_GRID_COLUMNS = '18px 1fr 80px 100px'
 /** Documents section — owns its own docs state, upload, rename, search and preview.
  * Persists to /candidates/{id}/documents (multipart upload, PATCH rename, DELETE).
  * New rows keep their local blob preview until the server doc (with url) returns. */
-export default function DocumentsSection({ c }: { c: Candidate }) {
+export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRefresh?: () => void }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   // Document types + colours + icons from the tenant lookup (seed fallback until /document-types lands).
   // Candidate documents: this entity's types plus the global ones (see DocumentsTab).
   const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes('candidate')
+  // DOC-ENTRY-LINK-1: the candidate's own educations/certifications feed the
+  // "Koppelen aan" grouped picker below (DocumentLinkPicker self-hides when empty).
+  const educationsForLink = (c.educations ?? []) as Array<{ id?: Id; title?: string }>
+  const certificationsForLink = (c.certifications ?? []) as Array<{ id?: Id; name?: string }>
   const [docs,        setDocs]        = useState<DocItem[]>(c.documents ?? [])
   const [pending,      setPending]     = useState<PendingItem[]>([])
   const [renamingDoc, setRenamingDoc] = useState<number | null>(null)
@@ -94,6 +96,18 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
     setSelected(new Set())
   }
 
+  // DOC-ENTRY-LINK-1: PATCH the chosen education/certification with the freshly
+  // uploaded document's id, parsing the "Koppelen aan" select's "kind:id" value.
+  // onRefresh (if provided) re-pulls the whole candidate afterwards — Education/
+  // Certifications live on a DIFFERENT drawer tab that only remounts from fresh
+  // props, so this is what keeps that tab's icons from opening a stale/missing link.
+  const linkDocumentToEntry = (linkTo: string, documentId: Id) => {
+    const [kind, entryId] = linkTo.split(':')
+    const relation = kind === 'education' ? 'educations' : 'certifications'
+    api.patch(`/candidates/${c.id}/${relation}/${entryId}`, { document_id: documentId })
+      .then(() => onRefresh?.())
+      .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
+  }
   // Upload every queued file (multipart), each with its OWN doc type — one optimistic
   // row + POST per item, so a 5-file pick uploads all 5, not just the first.
   const uploadAll = () => {
@@ -108,7 +122,15 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
       const fd = new FormData()
       fd.append('file', p.file); fd.append('type', p.type); fd.append('name', p.name)
       api.post(`/candidates/${c.id}/documents`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
-        .then(r => { const it = unwrap<DocItem>(r); if (it?.id) setDocs(d => d.map(x => x.id === tmpId ? { ...optimistic, ...it } : x)) })
+        .then(r => {
+          const it = unwrap<DocItem>(r)
+          if (it?.id) {
+            setDocs(d => d.map(x => x.id === tmpId ? { ...optimistic, ...it } : x))
+            // DOC-ENTRY-LINK-1: only when this file actually had a pick — never
+            // fires an empty/no-op PATCH.
+            if (p.linkTo) linkDocumentToEntry(p.linkTo, it.id)
+          }
+        })
         // OPTIMISTIC-REVERT-1: a refused upload (too large, wrong type, permission)
         // must not leave a row claiming the file is stored — drop the optimistic row
         // again and surface the server's own reason, which is what tells the recruiter
@@ -123,6 +145,8 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
   const setItemType = (idx: number, type: string) => setPending(items => items.map((it, i) => (i === idx ? { ...it, type } : it)))
   // Apply-to-all chip: set the SAME type on every queued item at once.
   const setAllTypes = (type: string) => setPending(items => items.map(it => ({ ...it, type })))
+  // DOC-ENTRY-LINK-1: set one item's "Koppelen aan" pick without touching the others.
+  const setItemLink = (idx: number, linkTo: string) => setPending(items => items.map((it, i) => (i === idx ? { ...it, linkTo } : it)))
   // Drop one queued item and revoke its blob preview URL so it never leaks.
   const removePending = (idx: number) => setPending(items => {
     const target = items[idx]
@@ -230,56 +254,10 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
         </div>
       </div>
       <div style={sectionBlock}>
-      {pending.length > 0 && (
-        <div style={{ border: '1px solid var(--color-primary)', borderRadius: 10, padding: 12, marginBottom: 10, background: 'var(--color-primary-bg)' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>
-            {/* Single file keeps the old name+size header; a multi-pick shows a count instead. */}
-            {pending.length === 1
-              ? <>{pending[0].name} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({pending[0].size})</span></>
-              : t('documents.pendingCount', { count: pending.length })}
-          </div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>
-            {pending.length > 1 ? t('documents.applyTypeToAll') : t('documents.docType')}
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
-            {/* §4 soft-tint (audit r4): active = tinted, never a solid primary fill.
-                A chip is "active" only when EVERY queued item already shares that type. */}
-            {docTypes.map(dt => {
-              const active = pending.length > 0 && pending.every(p => p.type === dt.value)
-              return (
-                <button key={dt.value} onClick={() => setAllTypes(dt.value)}
-                  style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer', fontWeight: active ? 600 : 400,
-                    border: `1px solid ${active ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}`,
-                    background: active ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'var(--surface)',
-                    color: active ? 'var(--color-primary)' : 'var(--text)' }}>{dt.label}</button>
-              )
-            })}
-          </div>
-          {/* One compact row per queued file — its own type select + remove. */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
-            {pending.map((item, idx) => (
-              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{item.size}</span>
-                <select aria-label={t('documents.docTypeFor', { name: item.name })} value={item.type} onChange={e => setItemType(idx, e.target.value)}
-                  style={{ fontSize: 11, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)' }}>
-                  {docTypes.map(dt => <option key={dt.value} value={dt.value}>{dt.label}</option>)}
-                </select>
-                <button onClick={() => removePending(idx)} aria-label={t('common:remove')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex', flexShrink: 0 }}><X size={12} /></button>
-              </div>
-            ))}
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={uploadAll}
-              style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--text)', color: 'white', border: 'none', cursor: 'pointer' }}>
-              {pending.length > 1 ? t('documents.addAll', { count: pending.length }) : t('common:add')}
-            </button>
-            <button onClick={cancelPending}
-              style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'none', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
-          </div>
-        </div>
-      )}
+      {/* DOC-ENTRY-LINK-1: the "Koppelen aan" picker lives inside this queue (per file). */}
+      <PendingUploadQueue pending={pending} docTypes={docTypes} educations={educationsForLink} certifications={certificationsForLink}
+        onSetType={setItemType} onSetAllTypes={setAllTypes} onSetLink={setItemLink} onRemove={removePending}
+        onUploadAll={uploadAll} onCancel={cancelPending} />
       {docs.length === 0 && pending.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('sections.documentsEmpty')}</div>}
       {docs.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: DOC_GRID_COLUMNS, alignItems: 'center', padding: '4px 10px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 4 }}>
@@ -350,7 +328,7 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
           if (!files.length) return
           const items: PendingItem[] = files.map(file => ({
             file, objectUrl: URL.createObjectURL(file), name: file.name,
-            size: Math.round(file.size / 1024) + ' KB', type: 'CV',
+            size: Math.round(file.size / 1024) + ' KB', type: 'CV', linkTo: '',
           }))
           setPending(prev => [...prev, ...items])
           e.target.value = ''

@@ -421,7 +421,8 @@
     "expectedEnd": "Voraussichtliches Enddatum",
     "present": "heute",
     "alwaysValid": "Immer gültig (kein Ablauf)",
-    "diplomaDate": "Diplom-/Ausstellungsdatum"
+    "diplomaDate": "Diplom-/Ausstellungsdatum",
+    "linkedDocument": "Verknüpftes Dokument"
   },
   "work": {
     "client": "Kunde",
@@ -745,7 +746,10 @@
       "vog": "VOG",
       "certificate": "Zertifikat",
       "other": "Sonstige"
-    }
+    },
+    "linkTo": "Verknüpfen mit",
+    "linkToFor": "Verknüpfen mit für {{name}}",
+    "jumpToDocuments": "Zu Dokumenten"
   },
   "ai": {
     "title": "Koios AI empfiehlt",
@@ -903,7 +907,8 @@
     "hoursMinPlaceholder": "Min",
     "hoursMaxPlaceholder": "Max",
     "availableFromFilter": "Einsetzbar ab",
-    "functionNotInLookup": "Funktion '{{title}}' steht nicht in der Funktionsliste — es werden alle Funktionen durchsucht."
+    "functionNotInLookup": "Funktion '{{title}}' steht nicht in der Funktionsliste — es werden alle Funktionen durchsucht.",
+    "apply": "Bewerben"
   },
   "erase": {
     "trashView": "Papierkorb",
