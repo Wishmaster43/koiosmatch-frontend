@@ -1,7 +1,10 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import NotesTab from './NotesTab'
+// NOTE-AUTHOR-SHAPE-2: imported directly (not through the applications wrapper)
+// for the ownership-gating tests below — see that describe block's header comment.
+import SharedNotesTab from '@/components/drawer/tabs/NotesTab'
 import type { ApplicationDetail } from '@/types/application'
 
 // useNoteTypes fetches /note-types on mount; addNote POSTs → stub both api methods.
@@ -84,5 +87,63 @@ describe('applications NotesTab (shared reuse)', () => {
     expect(screen.queryByText(/Bente de Jong/)).toBeNull()
     // The real request still goes to the application notes route (§13: assert the REQUEST).
     expect(mockPost).toHaveBeenCalledWith('/applications/1/notes', expect.objectContaining({ type: expect.any(String) }))
+  })
+})
+
+// NOTE-AUTHOR-SHAPE-2 (verified live 2026-08-07, CMBE 5961c673): a fetched/seeded
+// application note now carries a real `author_id` (mapApplication/useApplicationNotes
+// thread it through as `authorId`/`author_id`) instead of always dropping the key —
+// the precondition the shared NotesTab's canManageNote() rights gate needs to engage
+// at all (an absent key stays permissively "not migrated", see that file's RIGHTS
+// comment). Exercised against the REAL shared component directly (not through this
+// page's `NotesTab` wrapper): applications have no PATCH/DELETE note route yet
+// (routes/api/tenant/applications-matches.php: only POST), so the wrapper correctly
+// never wires onEditNote/onDeleteNote (§3 no fake affordance) — these tests prove the
+// DATA is now gate-ready for the day that route ships, using the note shape this
+// lane's fix produces.
+describe('note ownership gating — shared NotesTab, key-present path (NOTE-AUTHOR-SHAPE-2)', () => {
+  afterEach(() => { mockUseAuth.mockReturnValue({ user: { id: 'u9', name: 'Kelly Recruiter' } }) })
+
+  it("hides edit/delete for another user's note when the viewer lacks notes.manage_all", () => {
+    render(
+      <SharedNotesTab
+        notes={[{ text: 'Note from a colleague', author_id: 'other-user' }]}
+        onEditNote={vi.fn()} onDeleteNote={vi.fn()}
+        labels={{ edit: 'notes.edit', deleteNote: 'notes.delete' }}
+        showTimeline={false} showConversations={false}
+      />,
+    )
+    expect(screen.queryByRole('button', { name: 'notes.edit' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'notes.delete' })).toBeNull()
+  })
+
+  it('still allows managing your OWN note (author_id matches the logged-in user)', () => {
+    render(
+      <SharedNotesTab
+        notes={[{ text: 'My own note', author_id: 'u9' }]}
+        onEditNote={vi.fn()} onDeleteNote={vi.fn()}
+        labels={{ edit: 'notes.edit', deleteNote: 'notes.delete' }}
+        showTimeline={false} showConversations={false}
+      />,
+    )
+    expect(screen.getByRole('button', { name: 'notes.edit' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'notes.delete' })).toBeInTheDocument()
+  })
+
+  it("allows managing another user's note once the viewer holds notes.manage_all", () => {
+    mockUseAuth.mockReturnValue({
+      user: { id: 'u9', name: 'Kelly Recruiter' },
+      hasPermission: (p: string) => p === 'candidates.notes.manage_all',
+    } as never)
+    render(
+      <SharedNotesTab
+        notes={[{ text: 'Note from a colleague', author_id: 'other-user' }]}
+        onEditNote={vi.fn()} onDeleteNote={vi.fn()}
+        labels={{ edit: 'notes.edit', deleteNote: 'notes.delete' }}
+        showTimeline={false} showConversations={false}
+      />,
+    )
+    expect(screen.getByRole('button', { name: 'notes.edit' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'notes.delete' })).toBeInTheDocument()
   })
 })

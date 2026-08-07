@@ -333,36 +333,46 @@ describe('mapApplicationDetail · notes (W10)', () => {
       }],
     })
     expect(detail.notes).toEqual([{
-      id: 'n1', author: 'Bente de Jong', type: 'call', title: 'Belafspraak',
+      id: 'n1', author: 'Bente de Jong', authorId: null, type: 'call', title: 'Belafspraak',
       text: 'Gebeld over intake', language: 'nl', time: '2026-08-06T10:00:00Z',
     }])
   })
 
   it('defaults type/title/language to empty strings when the resource omits them', () => {
     const detail = mapApplicationDetail({ id: 24, notes: [{ id: 'n2', author: 'Bente de Jong', text: 'Kort' }] })
-    expect(detail.notes).toEqual([{ id: 'n2', author: 'Bente de Jong', type: '', title: '', text: 'Kort', language: '', time: '' }])
+    expect(detail.notes).toEqual([{ id: 'n2', author: 'Bente de Jong', authorId: null, type: '', title: '', text: 'Kort', language: '', time: '' }])
   })
 
   it('defaults to an empty array when the application has no notes', () => {
     expect(mapApplicationDetail({ id: 25 }).notes).toEqual([])
   })
+
+  // NOTE-AUTHOR-SHAPE-2 (verified live 2026-08-07, CMBE 5961c673): the resource now
+  // sends `author_id` on every note (previously never emitted) — the mapper must
+  // thread it through as `authorId`, the key the shared NotesTab's rights gate reads.
+  it('maps author_id through to authorId (NOTE-AUTHOR-SHAPE-2)', () => {
+    const detail = mapApplicationDetail({
+      id: 26,
+      notes: [{ id: 'n3', author: 'Kelly Recruiter', author_id: 'u9', text: 'Eigen notitie', created_at: '2026-08-07T09:00:00Z' }],
+    })
+    expect(detail.notes[0].authorId).toBe('u9')
+  })
 })
 
-// W31 (verified live 07-08): MATCH-VOCABULAIRE-1 — the resource sends BOTH
-// `match_*` (current) and `placement_*` (deprecated alias, kept for one release).
-// The mapper used to read ONLY the deprecated pair; it now prefers `match_*`.
-describe('mapMatchSummary · match_start/match_end (W31)', () => {
-  it('prefers the current match_start/match_end pair', () => {
-    const summary = mapMatchSummary({
-      id: 'm1', match_start: '2026-08-01', match_end: '2026-09-01',
-      placement_start: '1999-01-01', placement_end: '1999-02-01',
-    } as never)
+// PLACEMENT-REMOVED-1 (verified live 2026-08-07, CMBE 5961c673): the deprecated
+// `placement_*` alias (MATCH-VOCABULAIRE-1) is REMOVED from the Match block —
+// ApplicationDetailResource::matchLink() only ever sends `match_start`/`match_end`
+// now. The mapper's fallback read is pruned; this pins that a stray `placement_*`
+// (e.g. an old cached payload) is never surfaced as if it were a real date.
+describe('mapMatchSummary · match_start/match_end (PLACEMENT-REMOVED-1)', () => {
+  it('maps the match_start/match_end pair', () => {
+    const summary = mapMatchSummary({ id: 'm1', match_start: '2026-08-01', match_end: '2026-09-01' } as never)
     expect(summary).toMatchObject({ matchStart: '2026-08-01', matchEnd: '2026-09-01' })
   })
 
-  it('falls back to the deprecated placement_start/placement_end when match_* is absent', () => {
+  it('ignores a stray deprecated placement_start/placement_end pair — it is no longer read', () => {
     const summary = mapMatchSummary({ id: 'm2', placement_start: '2026-08-01', placement_end: '2026-09-01' } as never)
-    expect(summary).toMatchObject({ matchStart: '2026-08-01', matchEnd: '2026-09-01' })
+    expect(summary).toMatchObject({ matchStart: null, matchEnd: null })
   })
 
   it('leaves both null when neither pair is present', () => {

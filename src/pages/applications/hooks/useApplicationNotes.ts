@@ -18,13 +18,20 @@
  * AUTHOR-1 (07-08): the optimistic note used to credit `application.owner` (the
  * ASSIGNED RECRUITER) instead of the person actually typing the note — fixed to
  * use the LOGGED-IN user (useAuth), the same rule useCandidateNotes follows.
- * `author_id` is set from the logged-in user for shape-parity with the candidate/
- * customer note contract, though verified live (07-08) the backend never returns
- * `author_id` on a fetched application note — only `id/type/title/author/text/
- * language/created_at` (ApplicationDetailResource::applicationNotes()). Its own
- * `author` resolution is ALSO broken server-side (`ownerNames` is referenced but
- * never populated by the controller, so a saved note's `author` reads back null
- * even for a real user) — filed for backend, out of scope for this repo.
+ * `author_id` is set from the logged-in user on the optimistic entry.
+ *
+ * NOTE-AUTHOR-SHAPE-2 (verified live 2026-08-07, CMBE 5961c673): a FETCHED/seeded
+ * note now carries a real `author_id` too — the backend's `ownerNames` map
+ * (previously referenced but never filled, so `author` always read back null) is
+ * populated, and the resource emits `author_id` on every note. Seeding below reads
+ * it off `mapApplicationDetail`'s `authorId` field, so every note in `notes` — not
+ * just the optimistic one — carries a real key, which is what lets the shared
+ * NotesTab's canManageNote() rights gate engage (an explicit id, not `undefined`,
+ * is required for the gate to run at all — see that file's RIGHTS doc comment).
+ * No edit/delete route exists for application notes yet (only POST — verified in
+ * routes/api/tenant/applications-matches.php), so no fake affordance is added
+ * here (§3): the data is now correct and gate-ready, but nothing renders the
+ * edit/delete buttons that would exercise it until that route ships.
  */
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -42,10 +49,11 @@ export interface ApplicationNote {
   type?: string
   title?: string
   author?: string
-  // Present only on the OPTIMISTIC entry (see AUTHOR-1 above) — undefined on any
-  // note that came back from the server, which is what keeps the shared NotesTab's
-  // canManageNote() permissive for fetched notes (no BE edit/delete route exists
-  // yet, so nothing should ever appear manageable there).
+  // NOTE-AUTHOR-SHAPE-2: present on BOTH the optimistic entry (the logged-in user)
+  // and every seeded/fetched note (the backend's resolved author_id) — see the
+  // header doc comment above. A real value here (never left undefined) is what
+  // makes the shared NotesTab's canManageNote() rights gate engage instead of
+  // falling back to its permissive "not migrated" default.
   author_id?: Id | null
   text?: string
   language?: string
@@ -61,8 +69,13 @@ interface NotePayload { type: string; title: string; body: string; language?: st
 export function useApplicationNotes(applicationId: Id | undefined, initialNotes: ApplicationDetail['notes']) {
   const { t } = useTranslation()
   const { user } = useAuth() ?? {}
+  // NOTE-AUTHOR-SHAPE-2: authorId (mapApplicationDetail's key) re-keys to author_id
+  // here too — the shared NotesTab's NoteItem reads `author_id`, not `authorId`.
   const [notes, setNotes] = useState<ApplicationNote[]>(
-    initialNotes.map(n => ({ id: n.id, type: n.type, title: n.title, author: n.author, text: n.text, language: n.language, created_at: n.time })),
+    initialNotes.map(n => ({
+      id: n.id, type: n.type, title: n.title, author: n.author, author_id: n.authorId ?? null,
+      text: n.text, language: n.language, created_at: n.time,
+    })),
   )
 
   // Optimistic prepend credited to the LOGGED-IN user, then a real POST. On

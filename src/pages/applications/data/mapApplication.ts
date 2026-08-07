@@ -122,7 +122,7 @@ export function mapApplication(a: ApiApplication = {}, funnelTypes: LookupItem[]
     referenceNumber: a.reference_number ?? '',
     // W31 (verified live 07-08 against ApplicationDetailResource::matchLink()): the
     // nested `match.overall` fallback is dead — that array never carried an `overall`
-    // key (only id/reference_number/status_label/status_color/match_*/placement_*).
+    // key (only id/reference_number/status_label/status_color/match_*).
     score: a.score ?? a.match_score ?? null,
     task: a.task ?? a.ai_task ?? a.ai?.task ?? '',
     phaseKey,
@@ -182,11 +182,13 @@ export function mapMatchSummary(raw?: ApiApplication['match']): ApplicationMatch
     referenceNumber: raw.reference_number ?? '',
     statusLabel: raw.status_label ?? '',
     statusColor: raw.status_color ?? 'var(--text-muted)',
-    // W31 (verified live 07-08): reads the CURRENT `match_*` pair first — the mapper was
-    // still reading the deprecated `placement_*` alias only (MATCH-VOCABULAIRE-1). Both
-    // are still sent today, so `placement_*` stays as a fallback until the backend drops it.
-    matchStart: raw.match_start ?? raw.placement_start ?? null,
-    matchEnd: raw.match_end ?? raw.placement_end ?? null,
+    // PLACEMENT-REMOVED-1 (verified live 2026-08-07, CMBE 5961c673): the deprecated
+    // `placement_*` alias (MATCH-VOCABULAIRE-1) is gone from ApplicationDetailResource
+    // ::matchLink() now — `match_start`/`match_end` is the only pair the backend ever
+    // sends. The fallback read is pruned; a stray `placement_*` on an old cached
+    // payload is simply ignored, never surfaced as a real date.
+    matchStart: raw.match_start ?? null,
+    matchEnd: raw.match_end ?? null,
   }
 }
 
@@ -256,8 +258,12 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     // W10 (verified live 07-08): `type`/`language` now map through — they used to be
     // dropped here, so a re-fetched note lost its type chip and spellcheck language
     // even though ApplicationDetailResource::applicationNotes() always sends both.
+    // NOTE-AUTHOR-SHAPE-2 (verified live 2026-08-07, CMBE 5961c673): `author_id` now
+    // maps through too — a fetched note used to always drop this key, which kept the
+    // shared NotesTab's canManageNote() permissive by omission (`undefined` = "not
+    // migrated") for every application note regardless of who actually wrote it.
     notes: (raw.notes ?? []).map(n => ({
-      id: n.id, author: n.author ?? '', type: n.type ?? '', title: n.title ?? '',
+      id: n.id, author: n.author ?? '', authorId: n.author_id ?? null, type: n.type ?? '', title: n.title ?? '',
       text: n.text ?? '', language: n.language ?? '', time: n.created_at ?? '',
     })),
     // Match SCORE = the fit on the application (flat fields; "match" the noun is a

@@ -334,7 +334,9 @@
         "email": "You don't have permission to perform this action for the candidate.",
         "appointment": "You don't have permission to perform this action for the candidate.",
         "notification": "You don't have permission to perform this action."
-      }
+      },
+      "draftMessage": "Draft message",
+      "proposedTime": "Proposed time"
     },
     "koiosMode": {
       "title": "Koios mode",

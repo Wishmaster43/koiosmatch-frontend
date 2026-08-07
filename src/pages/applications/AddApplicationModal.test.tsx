@@ -18,11 +18,14 @@
  * `search` GET param, mirrors tasks/drawer/LinksTab's identical picker) — covered by
  * the "server-side search" block. The create POST also gained `custom_fields` (the
  * tenant's active application custom-field defs, StoreApplicationRequest DOES accept
- * this field) — covered by the "custom fields (Extra section)" block. `source` is
- * NOT added: StoreApplicationRequest hard-codes `source` to 'manual' server-side and
- * accepts no client value on create (verified against the backend request class) —
- * offering a picker for it would be a fake affordance, so none exists; no test
- * asserts its presence for the same reason a missing feature needs no regression test.
+ * this field) — covered by the "custom fields (Extra section)" block.
+ *
+ * CMBE 5961c673 (superseding the earlier W30 note): StoreApplicationRequest NOW
+ * accepts an optional `source` (verified against the backend request class), so a
+ * free-text field was added (no tenant-CRUD lookup exists for this axis anywhere in
+ * the app — mirrors the drawer's own Bron `<input>`) — covered by the "source" block
+ * below. `application_stage_id`'s pre-existing omit-when-empty tests (untouched) also
+ * double as regression coverage that `source` stays absent from those same bodies.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -387,5 +390,47 @@ describe('AddApplicationModal · W30 custom fields (Extra section)', () => {
     render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
     expect(document.querySelectorAll('select').length).toBe(1)
     expect(screen.getByLabelText('Channel').tagName).toBe('SELECT')
+  })
+})
+
+describe('AddApplicationModal · source (CMBE 5961c673)', () => {
+  it('renders a free-text source field (no picker — no tenant lookup backs this axis)', () => {
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+    const sourceInput = screen.getByLabelText('drawer.source')
+    expect(sourceInput.tagName).toBe('INPUT')
+    expect(sourceInput).toHaveAttribute('maxlength', '64')
+  })
+
+  it('POSTs the typed source, trimmed', async () => {
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+    await user.type(screen.getByLabelText('drawer.source'), '  Website  ')
+    await pickCandidateAndVacancy(user)
+    await user.click(screen.getByRole('button', { name: 'add.create' }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/applications', expect.objectContaining({
+      source: 'Website',
+    })))
+  })
+
+  it('omits source from the POST body when left empty (mirrors application_stage_id)', async () => {
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+    await pickCandidateAndVacancy(user)
+    await user.click(screen.getByRole('button', { name: 'add.create' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
+    expect(body).not.toHaveProperty('source')
+  })
+
+  it('omits a whitespace-only source from the POST body', async () => {
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+    await user.type(screen.getByLabelText('drawer.source'), '   ')
+    await pickCandidateAndVacancy(user)
+    await user.click(screen.getByRole('button', { name: 'add.create' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
+    expect(body).not.toHaveProperty('source')
   })
 })

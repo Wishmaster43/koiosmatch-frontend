@@ -140,16 +140,19 @@ describe('useApplicationFilters — multi-select array filters (W27)', () => {
     expect(result.current.filterParams.owner_id).toEqual(['u1', 'u2'])
   })
 
-  it('does NOT send owner_id when the "No owner" sentinel is picked (no IS-NULL support server-side)', () => {
+  // OWNER-NONE-SENTINEL-1 (verified live 2026-08-07, CMBE 5961c673): owner_id[]
+  // now has a real IS-NULL sentinel — the client-only OWNER_NONE constant sends
+  // as the wire value 'none' and narrows server-side, same as a real id.
+  it('sends owner_id=[\'none\'] when the "No owner" sentinel is picked', () => {
     const { result } = renderHook(() => useApplicationFilters())
     act(() => { result.current.setSelectedOwner(['__none']) })
-    expect(result.current.filterParams.owner_id).toBeUndefined()
+    expect(result.current.filterParams.owner_id).toEqual(['none'])
   })
 
-  it('drops owner_id entirely once "No owner" is mixed in with real ids too', () => {
+  it('combines "No owner" with real ids in the same owner_id array', () => {
     const { result } = renderHook(() => useApplicationFilters())
     act(() => { result.current.setSelectedOwner(['u1', '__none']) })
-    expect(result.current.filterParams.owner_id).toBeUndefined()
+    expect(result.current.filterParams.owner_id).toEqual(['u1', 'none'])
   })
 })
 

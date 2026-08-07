@@ -334,7 +334,9 @@
         "email": "Je hebt geen rechten om deze actie namens de kandidaat uit te voeren.",
         "appointment": "Je hebt geen rechten om deze actie namens de kandidaat uit te voeren.",
         "notification": "Je hebt geen rechten om deze actie uit te voeren."
-      }
+      },
+      "draftMessage": "Conceptbericht",
+      "proposedTime": "Voorgestelde tijd"
     },
     "koiosMode": {
       "title": "Koios-modus",

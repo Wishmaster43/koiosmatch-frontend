@@ -16,6 +16,13 @@ export interface AssistActionItem {
   type: AssistActionType
   due_date: string | null
   note_excerpt: string | null
+  // CMBE 5961c673 (verified live 2026-08-07, KoiosNoteAssistController::actionsResponse):
+  // a draft text for whatsapp/email items, and a proposed start date-time for
+  // appointment items — both always present on a fresh assist response but kept
+  // OPTIONAL here (never required) so the many existing sibling fixtures across
+  // this folder that predate this field keep compiling unchanged.
+  message?: string | null
+  start?: string | null
 }
 // Dutch fallback label per action-item type (DEFAULT-VALUE-1 — the
 // common:notesAssist.actionTypes.* keys are reported, not yet shipped). ONE

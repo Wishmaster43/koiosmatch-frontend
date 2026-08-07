@@ -168,7 +168,11 @@ export interface ApplicationDetail extends Application {
   // ApplicationDetailResource::applicationNotes() sends both (type = note_types slug,
   // language = the note's own spellcheck/output language) — the composer's chosen
   // type/language silently vanished the moment a note round-tripped through a fetch.
-  notes: Array<{ id: Id | undefined; author: string; type: string; title: string; text: string; language: string; time: string }>
+  // NOTE-AUTHOR-SHAPE-2 (verified live 2026-08-07, CMBE 5961c673): `authorId` is the
+  // note's OWNER user id (resolved from `author_id`) — the shared NotesTab's
+  // canManageNote() rights gate reads this to tell "note is mine" from "note is a
+  // colleague's" (a null/omitted key stays permissive; a real id engages the gate).
+  notes: Array<{ id: Id | undefined; author: string; authorId: Id | null; type: string; title: string; text: string; language: string; time: string }>
   matchCriteria: unknown[]
   matchSummary: string
   matchSource: string
@@ -357,11 +361,11 @@ export interface ApiApplication {
   timeline?: Array<{ id?: Id; author?: string; author_initials?: string; description?: string; ai?: unknown; created_at?: string; time?: string }>
   // W10 (verified live 07-08 against ApplicationDetailResource::applicationNotes()):
   // the resource sends `type`/`title`/`language` alongside author/text/created_at.
-  // `author_id` is NOT in this list — the resource never emits it (only used
-  // internally to resolve `author`, and that resolution itself is currently broken
-  // server-side: `ownerNames` is referenced but never populated by the controller,
-  // so `author` reads null even for a real user — filed for backend, out of scope here).
-  notes?: Array<{ id?: Id; author?: string; type?: string; title?: string | null; text?: string; language?: string | null; created_at?: string }>
+  // NOTE-AUTHOR-SHAPE-2 (verified live 2026-08-07, CMBE 5961c673): `author_id` now
+  // ships on every note too, and `author` resolves to a real name — the controller's
+  // `ownerNames` map (previously referenced but never filled) is populated from a
+  // single central-connection lookup before the resource serializes.
+  notes?: Array<{ id?: Id; author?: string; author_id?: Id | null; type?: string; title?: string | null; text?: string; language?: string | null; created_at?: string }>
   match_criteria?: unknown[]
   match_summary?: string
   match_score_source?: string

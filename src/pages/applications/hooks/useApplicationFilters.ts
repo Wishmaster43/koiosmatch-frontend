@@ -8,10 +8,15 @@
  * W27 (verified 2026-08-07 against ApplicationQuery.php): `phase_key`,
  * `vacancy_id`, `owner_id`, `source`, `customer_id` and `candidate_ids` are ALL
  * real backend ARRAY_FILTERS now (ApplicationQuery.php:34) — every multi-select
- * here goes server-side, none of it is a client-only refine anymore. The one
- * remaining gap: `owner_id[]` has no IS-NULL support (`owner_id.*` => uuid, no
- * "no owner" value) — picking the OWNER_NONE sentinel still narrows client-side
- * via matchesFilters, a documented, narrow BE limitation (not fixable here).
+ * here goes server-side, none of it is a client-only refine anymore.
+ * OWNER-NONE-SENTINEL-1 (verified live 2026-08-07, CMBE 5961c673): `owner_id[]`
+ * now carries a REAL IS-NULL sentinel too (`owner_id.*` accepts `none` or a
+ * uuid; `ApplicationQuery::filtered` widens the set with owner-less rows via an
+ * `orWhereNull`) — the OWNER_NONE pick sends the wire value `'none'` and narrows
+ * server-side exactly like a real id, combinable in the same array. matchesFilters
+ * still re-applies the owner check client-side, same as every other dimension
+ * here (the board view re-filters the wide, bucket-less fetch), not because of
+ * any remaining BE gap.
  * NUMMER-1 (mirrors useCandidateFilters): a well-formed reference number
  * ("S-00123") sends an exact `?ref=` lookup instead of the fuzzy `?search=` —
  * `ref` takes precedence over EVERY other filter server-side (bucket, phase,
@@ -143,11 +148,10 @@ export function useApplicationFilters() {
     if (selectedVac.length)    p.vacancy_id  = selectedVac
     if (selectedClient.length) p.customer_id = selectedClient
     if (selectedSource.length) p.source      = selectedSource
-    // owner_id[] has no IS-NULL support (ApplicationQuery.php: 'owner_id.*' => uuid) —
-    // a real-id pick narrows server-side; a "No owner" pick (alone or mixed in) stays a
-    // client-only refine (matchesFilters), a documented BE gap, not fixable here.
-    const realOwnerIds = selectedOwner.filter(o => o !== OWNER_NONE)
-    if (realOwnerIds.length && !selectedOwner.includes(OWNER_NONE)) p.owner_id = realOwnerIds
+    // OWNER-NONE-SENTINEL-1: owner_id[] now has a real IS-NULL sentinel server-side —
+    // translate the client-only OWNER_NONE constant to the wire value 'none' so a
+    // "No owner" pick (alone or mixed with real ids) narrows server-side too.
+    if (selectedOwner.length) p.owner_id = selectedOwner.map(o => (o === OWNER_NONE ? 'none' : o))
     // NUMMER-1: a well-formed reference number does an exact server-side `?ref=`
     // lookup instead of the normal free-text search; the server ignores every other
     // filter for it (see the header comment / matchesFilters' refMode).

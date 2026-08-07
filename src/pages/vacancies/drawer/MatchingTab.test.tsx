@@ -25,9 +25,16 @@ vi.mock('@/lib/api', async () => {
 })
 
 const TEMPLATE_WEIGHTS = { qualifications: 5, technical_fit: 5, soft_skills: 2, cultural_alignment: 3, career_aspirations: 2, location: 1 }
+// A second template (V18) so the search-box test below has something real to
+// filter OUT — a single-option list would pass a filter test even without a
+// working filter.
+const JUNIOR_WEIGHTS = { qualifications: 2, technical_fit: 2, soft_skills: 4, cultural_alignment: 4, career_aspirations: 4, location: 3 }
 vi.mock('../hooks/useMatchWeightTemplates', () => ({
   useMatchWeightTemplates: () => ({
-    templates: [{ id: 't1', name: 'Senior profile', weights: TEMPLATE_WEIGHTS, linkedVacanciesCount: 2 }],
+    templates: [
+      { id: 't1', name: 'Senior profile', weights: TEMPLATE_WEIGHTS, linkedVacanciesCount: 2 },
+      { id: 't2', name: 'Junior profile', weights: JUNIOR_WEIGHTS, linkedVacanciesCount: 1 },
+    ],
     loading: false, error: false,
   }),
 }))
@@ -150,5 +157,26 @@ describe('MatchingTab · template pick → weights preview + PATCH payload', () 
     // both equal for equal sliders AND sum to 100, so it read as "wrong").
     expect(screen.getByText('5/5')).toBeInTheDocument()
     expect(screen.getAllByText('3/5')).toHaveLength(5)
+  })
+})
+
+// V18 (VACATURES-100): the earlier tests above only prove open→click-an-option,
+// which a non-searchable dropdown would pass too. This proves the box is a REAL
+// client-side filter (CreatableSelect's own search input) — typing narrows the
+// visible options instead of just decorating the trigger.
+describe('MatchingTab · V18 template picker is searchable (client-side filter)', () => {
+  it('typing in the search box narrows the option list to matching templates only', async () => {
+    mockGet.mockResolvedValue({ data: { data: rawDetail() } })
+    render(<Harness />)
+    await waitFor(() => screen.getByText('matching.profile'))
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: 'matching.custom' }))
+    expect(screen.getByRole('button', { name: 'Senior profile' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Junior profile' })).toBeInTheDocument()
+
+    await user.type(screen.getByPlaceholderText('matching.custom'), 'senior')
+    expect(screen.getByRole('button', { name: 'Senior profile' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Junior profile' })).not.toBeInTheDocument()
   })
 })

@@ -12,6 +12,15 @@ import NoteActionsResultsPanel from './NoteActionsResultsPanel'
 import { executeNoteActions, fetchWorkflowRun } from './noteActionsExecuteApi'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }) }))
+// NoteActionItemCard (rendered by this panel) now calls useDateFormat for the
+// appointment start preview. useDateFormat (@/lib/datetime) imports `@/i18n`,
+// which needs a REAL react-i18next (initReactI18next) to initialise — stub
+// the whole hook (repo precedent: RejectionSummary.test.tsx) so nothing here
+// touches the real singleton.
+vi.mock('@/lib/datetime', () => ({
+  useDateFormat: () => ({ formatDate: (d: unknown) => (d ? String(d) : '—'), formatDateTime: (d: unknown) => (d ? String(d) : '—') }),
+  useLocale: () => 'nl-NL',
+}))
 vi.mock('./noteActionsExecuteApi', async (importOriginal) => {
   const actual = await importOriginal<typeof import('./noteActionsExecuteApi')>()
   return { ...actual, executeNoteActions: vi.fn(), fetchWorkflowRun: vi.fn() }
@@ -73,8 +82,8 @@ describe('NoteActionsResultsPanel · Uitvoeren', () => {
 
     expect(executeNoteActions).toHaveBeenCalledWith(
       [
-        { title: 'Bel terug', type: 'task', due_date: null, note_excerpt: null },
-        { title: 'Stuur bevestiging', type: 'whatsapp', due_date: null, note_excerpt: null },
+        { title: 'Bel terug', type: 'task', due_date: null, note_excerpt: null, message: null, start: null },
+        { title: 'Stuur bevestiging', type: 'whatsapp', due_date: null, note_excerpt: null, message: null, start: null },
       ],
       { note_id: 'note-1' },
     )
@@ -93,7 +102,7 @@ describe('NoteActionsResultsPanel · Uitvoeren', () => {
     await user.click(screen.getByText('Bevestigen'))
 
     expect(executeNoteActions).toHaveBeenLastCalledWith(
-      [{ title: 'Bel terug', type: 'task', due_date: null, note_excerpt: null, confirmed: true }],
+      [{ title: 'Bel terug', type: 'task', due_date: null, note_excerpt: null, message: null, start: null, confirmed: true }],
       { note_id: 'note-1' },
     )
     expect(await screen.findByText('Uitgevoerd')).toBeInTheDocument()
@@ -108,6 +117,47 @@ describe('NoteActionsResultsPanel · Uitvoeren', () => {
     const forbidden = await screen.findByText('Geen rechten')
     expect(forbidden.closest('span')).toHaveAttribute('title', expect.stringContaining('WhatsApp'))
     expect(screen.queryByText('Bevestigen')).not.toBeInTheDocument()
+  })
+
+  // CMBE 5961c673: a server-supplied reason wins over the FE's static fallback.
+  it('a forbidden item with a server reason shows THAT reason, not the static fallback', async () => {
+    vi.mocked(executeNoteActions).mockResolvedValue([
+      { title: 'Stuur bevestiging', type: 'whatsapp', status: 'forbidden', reason: 'Deze actie is uitgeschakeld voor jouw rol.' },
+    ])
+    const user = userEvent.setup()
+    render(<NoteActionsResultsPanel items={[items[1]]} noteId="note-1" onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
+    await user.click(screen.getByText('Uitvoeren'))
+
+    const forbidden = await screen.findByText('Geen rechten')
+    expect(forbidden.closest('span')).toHaveAttribute('title', 'Deze actie is uitgeschakeld voor jouw rol.')
+  })
+
+  // wizard_required is a K3 selection-decision status not reachable from a
+  // note's own item types today — handled defensively for forward compat,
+  // mirrored on the 'unsupported' test below.
+  it('a wizard_required item carries its server reason as a tooltip, and still shows Bevestigen', async () => {
+    vi.mocked(executeNoteActions).mockResolvedValue([
+      { title: 'Bel terug', type: 'task', status: 'wizard_required', reason: 'Selectiebeslissing — bevestiging per item is verplicht (AI-verordening).' },
+    ])
+    const user = userEvent.setup()
+    render(<NoteActionsResultsPanel items={[items[0]]} noteId="note-1" onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
+    await user.click(screen.getByText('Uitvoeren'))
+
+    const confirmBtn = await screen.findByText('Bevestigen')
+    expect(confirmBtn.closest('span')).toHaveAttribute('title', expect.stringContaining('Selectiebeslissing'))
+  })
+
+  // Draft message (whatsapp/email) rides through from assist into the card as
+  // a one-line preview, full text reachable via the title tooltip.
+  it('a whatsapp item with a draft message shows a one-line preview with the full text as its tooltip', async () => {
+    const draftItem = { title: 'Stuur bevestiging', type: 'whatsapp' as const, due_date: null, note_excerpt: null, message: 'Hoi, hierbij een korte update over je sollicitatie.' }
+    vi.mocked(executeNoteActions).mockResolvedValue([{ ...draftItem, status: 'pending' }])
+    const user = userEvent.setup()
+    render(<NoteActionsResultsPanel items={[draftItem]} noteId="note-1" onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
+    await user.click(screen.getByText('Uitvoeren'))
+
+    const draft = await screen.findByText('Hoi, hierbij een korte update over je sollicitatie.')
+    expect(draft).toHaveAttribute('title', 'Hoi, hierbij een korte update over je sollicitatie.')
   })
 
   it('an unsupported item renders an honest muted label, no confirm button', async () => {

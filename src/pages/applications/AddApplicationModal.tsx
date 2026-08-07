@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo, useId, useRef } from 'react'
 import type { ComponentType, ReactNode, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown } from 'lucide-react'
-import api, { unwrap, unwrapList } from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { extractApiError } from '@/lib/extractApiError'
 import { useUsers } from '@/lib/queries'
 import { useAuth } from '@/context/AuthContext'
@@ -13,36 +12,30 @@ import { useLookups } from '@/context/LookupsContext'
 // cross-page import — moving it to src/hooks/ is a separate, repo-wide change.
 import { useApplicationStages } from '@/hooks/useApplicationStages'
 import { useCustomFields } from '@/lib/useCustomFields'
-import type { CustomFieldDef } from '@/lib/useCustomFields'
 import { mapApplication } from './data/mapApplication'
 import { BTN_H } from '@/config/buttonMetrics'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
-import SearchSelectJs from '@/components/ui/SearchSelect'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 import { isUuid } from '@/lib/uuid'
+// §0.3 split: server-searched picker field/hook + the tenant custom-field
+// control now live in their own folder (mirrors the candidate addmodal/ folder).
+import SearchPickField from './addmodal/SearchPickField'
+import { useSearchOptions } from './addmodal/useSearchOptions'
+import CustomFieldInput from './addmodal/CustomFieldInput'
+import type { PickOption, RawPickRow } from './addmodal/types'
 
 type AnyProps = Record<string, unknown>
 const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
-const SearchSelect = SearchSelectJs as unknown as ComponentType<AnyProps>
+
+interface AppUser { id: Id; name?: string }
 
 // ownerId/ownerName (APP-OWNER-1): both /candidates and /vacancies already carry
 // an `owner` object (CandidateListResource / VacancyListResource) — captured here
 // so the owner-derivation chain below can read it straight off the picked option,
 // no extra fetch for either the candidate or the non-locked vacancy pick.
-interface PickOption { value: Id; label: string; client?: string; ownerId?: Id; ownerName?: string }
-interface AppUser { id: Id; name?: string }
-
-// The generic /candidates + /vacancies row shape (only the fields either mapper
-// reads; the other entity's own fields simply stay undefined — same tolerant
-// read the rest of this file already relies on for API rows).
-interface RawPickRow {
-  id?: Id; name?: string; first_name?: string; last_name?: string
-  title?: string; titel?: string; client_name?: string; client?: string
-  owner?: { id?: Id; name?: string } | null
-}
 const mapCandidateRow = (c: RawPickRow): PickOption => ({
   value: c.id ?? '', label: c.name ?? [c.first_name, c.last_name].filter(Boolean).join(' '),
   ownerId: c.owner?.id, ownerName: c.owner?.name,
@@ -51,12 +44,6 @@ const mapVacancyRow = (v: RawPickRow): PickOption => ({
   value: v.id ?? '', label: v.title ?? v.titel ?? '', client: v.client_name ?? v.client,
   ownerId: v.owner?.id, ownerName: v.owner?.name,
 })
-
-// W30: the candidate/vacancy page size per server search round-trip — mirrors the
-// backend's own default (CandidateProfileController::index / VacancyController::index
-// both default per_page to 25); typing narrows the ACTUAL tenant table via `search`
-// instead of ever pulling the first 100 rows and filtering that stale local slice.
-const SEARCH_PAGE_SIZE = 25
 
 // 422 field-error keys are snake_case; map them back to this form's field names
 // (C-18 — there is no free-text field to highlight here, only pickers, so this
@@ -94,105 +81,6 @@ function PickField({ label, style, value, ...rest }: { label: ReactNode; style?:
   )
 }
 
-// W30: field label + a SERVER-SEARCHED single-select (SearchSelect) — the candidate
-// and vacancy pickers only. The old CreatableSelect pair filtered ONE client-fetched
-// page of 100 rows locally, with no way to reach row 101; SearchSelect's own
-// `onSearch` (already debounced 250ms inside the component — the house idiom, mirrors
-// tasks/drawer/LinksTab's identical candidate/vacancy/… picker) drives a REAL server
-// round-trip per edit instead, so typing reaches the whole tenant table. The trigger
-// is hand-styled to match PickField/CreatableSelect exactly (label-prefixed button +
-// chevron), so all four pickers on this form stay visually identical (§4).
-function SearchPickField({ label, placeholder, value, options, onPick, onSearch, error, searchError, onRetry }: {
-  label: ReactNode; placeholder?: string; value: PickOption | null; options: PickOption[]
-  onPick: (opt: PickOption) => void; onSearch: (query: string) => void
-  error?: boolean; searchError?: boolean; onRetry: () => void
-}) {
-  const { t } = useTranslation('applications')
-  const labelId = useId()
-  const triggerId = useId()
-  return (
-    <div>
-      <div id={labelId} style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{label}</div>
-      <SearchSelect
-        width={320}
-        options={options.map(o => ({ value: String(o.value), label: o.label }))}
-        selected={value ? [String(value.value)] : []}
-        onSearch={onSearch}
-        closeOnToggle
-        onToggle={(v: string) => { const opt = options.find(o => String(o.value) === v); if (opt) onPick(opt) }}
-        renderTrigger={(toggle: () => void) => (
-          <button type="button" id={triggerId} onClick={toggle} aria-labelledby={`${labelId} ${triggerId}`}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', width: '100%',
-              boxSizing: 'border-box', border: `1px solid ${error ? 'var(--color-danger)' : 'var(--border)'}`,
-              borderRadius: 6, background: 'var(--surface)', cursor: 'pointer' }}>
-            <span style={{ fontSize: 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden',
-              textOverflow: 'ellipsis', color: value ? 'var(--text)' : 'var(--text-muted)' }}>
-              {value?.label ?? placeholder}
-            </span>
-            <ChevronDown size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-          </button>
-        )}
-      />
-      {/* Search failure — a real state (§3), never a silent empty list: unlike the old
-          one-shot mount fetch, a query now fires on every edit, so a transient failure
-          is more likely and needs its own recovery path (retry re-issues the SAME query,
-          which an unchanged search box would otherwise never re-trigger). */}
-      {searchError && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, fontSize: 11, color: 'var(--color-danger)' }}>
-          <span>{t('add.searchError')}</span>
-          <button type="button" onClick={onRetry}
-            style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6, padding: '1px 6px', cursor: 'pointer', color: 'var(--text)' }}>
-            {t('common:error.retry')}
-          </button>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// W30: one entity's server-searched picker options — re-fetches on every search-box
-// edit instead of the old single 100-row mount fetch (mirrors tasks/drawer/LinksTab's
-// identical candidate/vacancy/… picker fetch). A `requestId` freshness guard (that
-// same idiom, not an AbortController) drops a superseded response instead of letting a
-// slow earlier query overwrite a faster later one (§9 alive-guard). `skip` short-
-// circuits entirely for the locked-vacancy path (data minimisation, §8/§9).
-function useSearchOptions(url: string, mapRow: (row: RawPickRow) => PickOption, skip: boolean) {
-  const [query, setQuery]           = useState('')
-  const [options, setOptions]       = useState<PickOption[]>([])
-  const [error, setError]           = useState(false)
-  const [reloadTick, setReloadTick] = useState(0)
-  const requestIdRef = useRef(0)
-  useEffect(() => {
-    if (skip) return
-    const requestId = ++requestIdRef.current
-    setError(false)
-    api.get(url, { params: { search: query, per_page: SEARCH_PAGE_SIZE } })
-      .then(r => { if (requestIdRef.current === requestId) setOptions(unwrapList<RawPickRow>(r).rows.map(mapRow)) })
-      .catch(() => { if (requestIdRef.current === requestId) setError(true) })
-  }, [url, query, skip, mapRow, reloadTick])
-  return { query, setQuery, options, error, retry: () => setReloadTick(t => t + 1) }
-}
-
-// One simple-typed tenant custom field's edit control (text/number/date/boolean/
-// select) — mirrors CustomFieldsTab's own FieldInput rendering convention so the
-// create-time "Extra" section and the drawer's later Extra tab render identically.
-// `id` ties the control to its <label htmlFor> in the caller (§6 — every input
-// needs an associated label, not just a nearby, unconnected div).
-function CustomFieldInput({ id, def, value, onChange }: { id: string; def: CustomFieldDef; value: unknown; onChange: (v: unknown) => void }) {
-  const inputStyle: CSSProperties = { width: '100%', padding: '6px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box' }
-  if (def.type === 'boolean') return <input id={id} type="checkbox" checked={Boolean(value)} onChange={e => onChange(e.target.checked)} />
-  if (def.type === 'select') return (
-    <select id={id} value={String(value ?? '')} onChange={e => onChange(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-      <option value="">—</option>
-      {(def.options ?? []).map(o => <option key={o} value={o}>{o}</option>)}
-    </select>
-  )
-  return (
-    <input id={id} type={def.type === 'number' ? 'number' : def.type === 'date' ? 'date' : 'text'}
-      value={String(value ?? '')} onChange={e => onChange(e.target.value)} style={inputStyle} />
-  )
-}
-
 /**
  * AddApplicationModal — create a new application by linking an existing candidate
  * to a vacancy. Pickers load from /candidates and /vacancies. Persists to
@@ -224,13 +112,20 @@ function CustomFieldInput({ id, def, value, onChange }: { id: string; def: Custo
  * search results, since a later search edit legitimately replaces those results
  * and must never lose the earlier pick's label or owner-chain data.
  *
- * `source` (W30): StoreApplicationRequest does NOT accept a `source` field —
- * verified against the backend request class, which hard-codes 'source' => 'manual'
- * in ApplicationController::store(). Only the PATCH path (UpdateApplicationRequest)
- * accepts it (S7, already shipped). Offering a source picker here would be a fake
- * affordance (§3 — its value would silently never reach the server), so none is
- * added; this is a backend gap, not a missed frontend wire-up (docs/WORKLIST.md S7
- * only closed the PATCH half of the ticket).
+ * `source` (CMBE 5961c673, superseding the earlier W30 note below): StoreApplicationRequest
+ * NOW accepts an optional `source` (sometimes|nullable|string|max:64) — the controller
+ * defaults to 'manual' server-side only when the field is omitted, mirroring
+ * `application_stage_id`'s own omit-to-default contract. A free-text field (not a
+ * picker) is deliberate: unlike Contractvorm/funnel/phase, "source" has no tenant-CRUD
+ * lookup behind it anywhere in the app — the applications page's own source FILTER
+ * (ApplicationsPage → applicationInsights.buildSourceDataFromStats) builds its option
+ * list by aggregating the DISTINCT values already on `/applications/stats`, and the
+ * drawer's own edit control (ApplicationDetailsCard) is the exact same plain `<input>`
+ * this field mirrors byte-for-byte. Fetching `/applications/stats` just for create-time
+ * suggestions would be a heavier round-trip than this lightweight modal warrants for a
+ * field that is genuinely open text server-side; the free-text input is the honest,
+ * consistent choice, not a fake affordance. Omitted (not sent) when empty, exactly like
+ * `application_stage_id` above — the server's own 'manual' fallback decides then.
  */
 export default function AddApplicationModal({ onClose, onCreated, lockedVacancy }: {
   onClose: () => void
@@ -321,9 +216,14 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
     setPhaseId(defaultStageId)
   }, [defaultStageId, stageOptions, phaseId])
 
+  // Acquisition source (CMBE 5961c673) — free text, mirrors ApplicationDetailsCard's
+  // own edit control byte-for-byte (see the file doc comment for why no picker exists).
+  const [source, setSource] = useState('')
+  const sourceFieldId = useId()
+
   // W30: the tenant's active custom-field defs for applications — StoreApplicationRequest
-  // DOES accept `custom_fields` (ValidCustomFields('application')), unlike `source` (see
-  // the file doc comment). The section only renders once ≥1 active def exists (§3A(f)).
+  // also accepts `custom_fields` (ValidCustomFields('application')). The section only
+  // renders once ≥1 active def exists (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('application')
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, unknown>>({})
   const setCustomField = (key: string, v: unknown) => setCustomFieldValues(p => ({ ...p, [key]: v }))
@@ -344,12 +244,14 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
     try {
       // application_stage_id is omitted (not null-ed) when unset so the backend's own
       // `?? ApplicationStage::defaultStageId()` fallback decides the start stage.
-      // custom_fields only rides along once the recruiter actually filled something in
-      // (an empty {} is indistinguishable from "not asked" server-side, so it's omitted
-      // exactly like application_stage_id above).
+      // source is omitted the same way — an empty field means "let the server default
+      // to 'manual'", never an explicit empty-string value. custom_fields only rides
+      // along once the recruiter actually filled something in (an empty {} is
+      // indistinguishable from "not asked" server-side, so it's omitted too).
       const res = await api.post('/applications', {
         candidate_id: candidateId, vacancy_id: vacancyId, owner_id: ownerId || null,
         ...(phaseId ? { application_stage_id: phaseId } : {}),
+        ...(source.trim() ? { source: source.trim() } : {}),
         ...(Object.keys(customFieldValues).length ? { custom_fields: customFieldValues } : {}),
       })
       onCreated(mapApplication(unwrap(res), funnelTypes))
@@ -416,9 +318,20 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
             </div>
           ) : ownerField}
 
+          {/* Acquisition source — free text (see the file doc comment for why: no
+              tenant lookup exists behind this field anywhere in the app). Mirrors
+              ApplicationDetailsCard's own Bron input byte-for-byte; maxLength mirrors
+              the backend's own `max:64` rule (client-side hint only, §7 — the server
+              re-validates). Own full-width row, same style as the pickers above. */}
+          <div>
+            <label htmlFor={sourceFieldId} style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('drawer.source')}</label>
+            <input id={sourceFieldId} value={source} onChange={e => setSource(e.target.value)} maxLength={64}
+              placeholder={t('drawer.source')}
+              style={{ width: '100%', padding: '6px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box' }} />
+          </div>
+
           {/* W30 / §3A(f): the "Extra" section — tenant custom fields for applications,
-              rendered only once ≥1 active def exists. custom_fields IS accepted by
-              StoreApplicationRequest (unlike source, see the file doc comment). */}
+              rendered only once ≥1 active def exists. */}
           {customFieldDefs.length > 0 && (
             <div style={errors.custom_fields ? { border: '1px solid var(--color-danger)', borderRadius: 8, padding: 10 } : undefined}>
               <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 8 }}>

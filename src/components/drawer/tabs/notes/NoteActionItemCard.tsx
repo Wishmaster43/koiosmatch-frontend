@@ -6,10 +6,19 @@
  * not a chat pending_action id+expiry), so this is its own small component
  * rather than bending KoiosPendingActionCard's props to fit; the shared LOOK
  * is copied on purpose, never re-derived ad hoc.
+ *
+ * CMBE 5961c673: a non-executed item now carries a server `reason` — shown
+ * via a native title tooltip on forbidden/unsupported/wizard_required, the
+ * static per-type map staying only as the fallback when it is absent. A
+ * whatsapp/email item's AI-drafted `message`, and an appointment's proposed
+ * `start`, render as a calm one-line preview (§4) — full text reachable via
+ * the same title tooltip plus an aria-label (screen readers get the whole
+ * text even though the line is visually truncated).
  */
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckSquare, MessageCircle, Mail, CalendarClock, Bell, Check, Clock, ShieldAlert, HelpCircle, ExternalLink, Loader2 } from 'lucide-react'
+import { useDateFormat } from '@/lib/datetime'
 import { ACTION_TYPE_LABEL_NL } from './noteAssistApi'
 import type { AssistActionType } from './noteAssistApi'
 import type { ExecItem } from './useNoteActionsExecute'
@@ -40,6 +49,11 @@ const confirmBtn: CSSProperties = {
   padding: '4px 9px', borderRadius: 6, cursor: 'pointer', border: 'none',
   background: 'var(--color-primary)', color: '#fff', flexShrink: 0,
 }
+// One-line collapsed draft preview (whatsapp/email message) — never italic,
+// this is real data (§4), not placeholder text.
+const draftStyle: CSSProperties = {
+  fontSize: 10, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+}
 
 interface NoteActionItemCardProps {
   item: ExecItem
@@ -51,8 +65,14 @@ interface NoteActionItemCardProps {
 
 export default function NoteActionItemCard({ item, onConfirm, onViewRun }: NoteActionItemCardProps) {
   const { t } = useTranslation('common')
+  const { formatDateTime } = useDateFormat()
   const Icon = TYPE_ICON[item.type]
   const typeLabel = t(`notesAssist.actionTypes.${item.type}`, { defaultValue: ACTION_TYPE_LABEL_NL[item.type] })
+  // Only whatsapp/email items carry a draft message; only appointment items
+  // carry a proposed start — both optional (older/synthetic items lack them).
+  const isMessageType = item.type === 'whatsapp' || item.type === 'email'
+  const draftLabel = t('notesAssist.execute.draftMessage', { defaultValue: 'Draft message' })
+  const proposedTimeLabel = t('notesAssist.execute.proposedTime', { defaultValue: 'Proposed time' })
 
   return (
     <div style={cardStyle}>
@@ -63,7 +83,13 @@ export default function NoteActionItemCard({ item, onConfirm, onViewRun }: NoteA
         </div>
         <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
           {typeLabel}{item.due_date ? ` · ${item.due_date}` : ''}
+          {item.type === 'appointment' && item.start ? ` · ${proposedTimeLabel}: ${formatDateTime(item.start)}` : ''}
         </div>
+        {isMessageType && item.message && (
+          <div style={draftStyle} title={item.message} aria-label={`${draftLabel}: ${item.message}`}>
+            {item.message}
+          </div>
+        )}
       </div>
 
       {/* Executed — success + a real link to the run this action started. */}
@@ -83,9 +109,13 @@ export default function NoteActionItemCard({ item, onConfirm, onViewRun }: NoteA
 
       {/* Pending / wizard_required — both need an explicit per-item confirm
           (wizard_required is a K3 selection-decision status not reachable from
-          a note's own item types today, handled identically for forward compat). */}
+          a note's own item types today, handled identically for forward compat).
+          wizard_required's server reason ("Selectiebeslissing — …") rides on the
+          wrapper as a title tooltip; plain pending has no extra reason surfaced —
+          the button itself already says what to do. */}
       {(item.status === 'pending' || item.status === 'wizard_required') && (
-        <>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          title={item.status === 'wizard_required' ? item.reason : undefined}>
           {item.confirmError && (
             <span style={{ fontSize: 10, color: 'var(--color-danger)' }}>
               {t('notesAssist.execute.confirmFailed', { defaultValue: 'Bevestigen mislukt' })}
@@ -95,13 +125,14 @@ export default function NoteActionItemCard({ item, onConfirm, onViewRun }: NoteA
             {item.confirming ? <Loader2 size={12} className="animate-spin" /> : <Clock size={12} />}
             {t('notesAssist.execute.confirm', { defaultValue: 'Bevestigen' })}
           </button>
-        </>
+        </span>
       )}
 
-      {/* Forbidden — the rights matrix blocked it; an honest why-tooltip, no
-          fake retry button (retrying would 403 again). */}
+      {/* Forbidden — the rights matrix blocked it; an honest why-tooltip (the
+          server's own exception message when present, the static per-type map
+          only as fallback), no fake retry button (retrying would 403 again). */}
       {item.status === 'forbidden' && (
-        <span title={t(`notesAssist.execute.forbiddenReason.${item.type}`, { defaultValue: FORBIDDEN_REASON_NL[item.type] })}
+        <span title={item.reason ?? t(`notesAssist.execute.forbiddenReason.${item.type}`, { defaultValue: FORBIDDEN_REASON_NL[item.type] })}
           style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-danger)', cursor: 'help' }}>
           <ShieldAlert size={13} /> {t('notesAssist.execute.forbidden', { defaultValue: 'Geen rechten' })}
         </span>
@@ -109,9 +140,12 @@ export default function NoteActionItemCard({ item, onConfirm, onViewRun }: NoteA
 
       {/* Unsupported — documented by the K0 contract but not yet reachable per
           item (an unknown type currently fails the whole request instead);
-          rendered honestly in case the backend starts emitting it. */}
+          rendered honestly in case the backend starts emitting it, with its
+          server reason as a tooltip when present (no static fallback exists
+          for this status — there was never a reason to show before now). */}
       {item.status === 'unsupported' && (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+        <span title={item.reason}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
           <HelpCircle size={13} /> {t('notesAssist.execute.unsupported', { defaultValue: 'Nog niet ondersteund' })}
         </span>
       )}

@@ -23,6 +23,9 @@ export interface ExecItem extends AssistActionItem {
   status?: ExecuteItemStatus
   run_id?: string
   template_key?: string
+  // Server-supplied explanation for a non-executed status (CMBE 5961c673) —
+  // spread in from the execute response, rendered by NoteActionItemCard.
+  reason?: string
   confirming?: boolean
   confirmError?: boolean
 }

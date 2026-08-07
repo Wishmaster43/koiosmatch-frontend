@@ -10,26 +10,30 @@ interface Props { vacancy: VacancyDetail; location: LocationSection }
 
 /**
  * DetailsLocationTab — Locatie sub-tab (VAC-DETAILS-SPLIT-1): structured
- * address (street/houseNumber+suffix/postalCode/city) + country→province
- * cascade (VAC-COUNTRY-1). Its OWN pencil/save/cancel (`location.*` from the
- * hook) — flipping it never touches Algemeen/Eisen/Voorwaarden's drafts.
+ * address (street/houseNumber/houseNumberSuffix/postalCode/city, each its own
+ * row — V9: mirrors the candidate ProfileAddressTab canon exactly) + country→
+ * province cascade (VAC-COUNTRY-1). Its OWN pencil/save/cancel (`location.*`
+ * from the hook) — flipping it never touches Algemeen/Eisen/Voorwaarden's drafts.
  */
 export default function DetailsLocationTab({ vacancy: v, location }: Props) {
   const { t, i18n } = useTranslation('vacancies')
   const { editing, setEditing, form, setF, save, cancel, provinces } = location
-  const { text, twoInputs } = makeFieldHelpers(form, setF, t)
+  const { text } = makeFieldHelpers(form, setF, t)
   // VAC-COUNTRY-1 (Danny 22-07, punt 2): fixed ISO-3166 code list, localized to the
   // current UI language — never a tenant lookup (mirrors the candidate's country field).
   const countryOptions = getCountryOptions(i18n.language)
 
   return card(t('details.groups.location'), <>
-    {/* V9: address — each field its own labelled row when editing (mirrors the
-        candidate ProfileTab's address convention), instead of three inputs
-        crammed onto one "Adres" row; read mode still shows one composed line. */}
+    {/* V9: address — each field its OWN labelled row when editing, mirroring the
+        candidate ProfileAddressTab canon exactly (street / houseNumber /
+        houseNumberSuffix / postalCode / city as five separate rows, never a
+        houseNumber+suffix pair squeezed onto one row); read mode still shows
+        one composed line (street+no-suffix, postcode+city). */}
     {editing ? (
       <>
         {row(t('details.street'), null, text('street'), editing)}
-        {row(`${t('details.houseNumber')} / ${t('details.houseNumberSuffix')}`, null, twoInputs('houseNumber', 'houseNumberSuffix', t('details.houseNumber'), t('details.houseNumberSuffix')), editing)}
+        {row(t('details.houseNumber'), null, text('houseNumber'), editing)}
+        {row(t('details.houseNumberSuffix'), null, text('houseNumberSuffix'), editing)}
         {row(t('details.postalCode'), null, text('postalCode'), editing)}
         {row(t('details.city'), null, text('city'), editing)}
       </>

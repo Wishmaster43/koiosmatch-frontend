@@ -334,7 +334,9 @@
         "email": "Vous n'avez pas le droit d'effectuer cette action pour le candidat.",
         "appointment": "Vous n'avez pas le droit d'effectuer cette action pour le candidat.",
         "notification": "Vous n'avez pas le droit d'effectuer cette action."
-      }
+      },
+      "draftMessage": "Brouillon de message",
+      "proposedTime": "Heure proposée"
     },
     "koiosMode": {
       "title": "Mode Koios",

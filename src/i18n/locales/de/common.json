@@ -334,7 +334,9 @@
         "email": "Du hast keine Berechtigung, diese Aktion für den Kandidaten auszuführen.",
         "appointment": "Du hast keine Berechtigung, diese Aktion für den Kandidaten auszuführen.",
         "notification": "Du hast keine Berechtigung, diese Aktion auszuführen."
-      }
+      },
+      "draftMessage": "Nachrichtenentwurf",
+      "proposedTime": "Vorgeschlagene Zeit"
     },
     "koiosMode": {
       "title": "Koios-Modus",

@@ -64,10 +64,33 @@ describe('useApplicationNotes · addNote author (AUTHOR-1)', () => {
 describe('useApplicationNotes · seeding (TIMESTAMP-1)', () => {
   it('re-keys `time` to `created_at` for every seeded note', () => {
     const initial: ApplicationDetail['notes'] = [
-      { id: 'n1', author: 'Bente de Jong', type: 'general', title: '', text: 'Eerder', language: '', time: '2026-08-01T09:00:00Z' },
+      { id: 'n1', author: 'Bente de Jong', authorId: null, type: 'general', title: '', text: 'Eerder', language: '', time: '2026-08-01T09:00:00Z' },
     ]
     const { result } = renderHook(() => useApplicationNotes('app1', initial))
     expect(result.current.notes[0].created_at).toBe('2026-08-01T09:00:00Z')
     expect(result.current.notes[0].author).toBe('Bente de Jong')
+  })
+})
+
+// NOTE-AUTHOR-SHAPE-2 (verified live 2026-08-07, CMBE 5961c673): a fetched note now
+// carries a real `authorId` (mapApplicationDetail) — seeding must re-key it to
+// `author_id`, the key the shared NotesTab's canManageNote() rights gate reads. It
+// used to be dropped entirely here, which left every seeded note's `author_id`
+// `undefined` — the gate's permissive "not migrated" default, engaging for nobody.
+describe('useApplicationNotes · seeding thread the real author_id (NOTE-AUTHOR-SHAPE-2)', () => {
+  it('re-keys `authorId` to `author_id` for a seeded note authored by someone else', () => {
+    const initial: ApplicationDetail['notes'] = [
+      { id: 'n2', author: 'Bente de Jong', authorId: 'u1', type: 'general', title: '', text: 'Collega-notitie', language: '', time: '2026-08-06T09:00:00Z' },
+    ]
+    const { result } = renderHook(() => useApplicationNotes('app1', initial))
+    expect(result.current.notes[0].author_id).toBe('u1')
+  })
+
+  it('seeds author_id as null (never undefined) when the resource sent no author at all', () => {
+    const initial: ApplicationDetail['notes'] = [
+      { id: 'n3', author: '', authorId: null, type: 'general', title: '', text: 'Legacy', language: '', time: '2026-08-06T09:00:00Z' },
+    ]
+    const { result } = renderHook(() => useApplicationNotes('app1', initial))
+    expect(result.current.notes[0].author_id).toBeNull()
   })
 })

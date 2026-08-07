@@ -40,13 +40,24 @@ describe('useNoteActionsExecute', () => {
 
     expect(executeNoteActions).toHaveBeenCalledWith(
       [
-        { title: 'Bel terug', type: 'task', due_date: null, note_excerpt: null, confirmed: undefined },
-        { title: 'Stuur update', type: 'whatsapp', due_date: null, note_excerpt: null, confirmed: undefined },
+        { title: 'Bel terug', type: 'task', due_date: null, note_excerpt: null, message: null, start: null, confirmed: undefined },
+        { title: 'Stuur update', type: 'whatsapp', due_date: null, note_excerpt: null, message: null, start: null, confirmed: undefined },
       ],
       { note_id: 'note-1' },
     )
     expect(result.current.status).toBe('success')
     expect(result.current.items?.[0].status).toBe('pending')
+  })
+
+  // CMBE 5961c673: the server's per-item reason (e.g. "Wacht op jouw
+  // bevestiging.") flows straight through into the item's own `reason`.
+  it('preview() spreads the server reason onto a non-executed item', async () => {
+    vi.mocked(executeNoteActions).mockResolvedValue([
+      { title: 'Bel terug', type: 'task', status: 'pending', reason: 'Wacht op jouw bevestiging.' },
+    ])
+    const { result } = renderHook(() => useNoteActionsExecute('note-1'))
+    await act(async () => { await result.current.preview([suggested[0]]) })
+    expect(result.current.items?.[0].reason).toBe('Wacht op jouw bevestiging.')
   })
 
   it('preview() omits source entirely for a new, unsaved note (no noteId)', async () => {
@@ -69,7 +80,7 @@ describe('useNoteActionsExecute', () => {
 
     // Only item index 1 is in the confirm request — index 0 (already executed) never rides along.
     expect(executeNoteActions).toHaveBeenLastCalledWith(
-      [{ title: 'Stuur update', type: 'whatsapp', due_date: null, note_excerpt: null, confirmed: true }],
+      [{ title: 'Stuur update', type: 'whatsapp', due_date: null, note_excerpt: null, message: null, start: null, confirmed: true }],
       { note_id: 'note-1' },
     )
     expect(result.current.items?.[1].status).toBe('executed')

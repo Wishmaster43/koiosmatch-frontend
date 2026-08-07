@@ -334,7 +334,9 @@
         "email": "No tienes permisos para realizar esta acción para el candidato.",
         "appointment": "No tienes permisos para realizar esta acción para el candidato.",
         "notification": "No tienes permisos para realizar esta acción."
-      }
+      },
+      "draftMessage": "Borrador del mensaje",
+      "proposedTime": "Hora propuesta"
     },
     "koiosMode": {
       "title": "Modo Koios",

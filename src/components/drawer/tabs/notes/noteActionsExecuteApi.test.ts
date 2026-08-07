@@ -15,26 +15,62 @@ afterEach(() => vi.clearAllMocks())
 describe('toExecuteItem', () => {
   it('narrows an AssistActionItem down to the execute fields, confirmed omitted by default', () => {
     const item = { title: 'Bel terug', type: 'task' as const, due_date: '2026-08-10', note_excerpt: 'call me' }
-    expect(toExecuteItem(item)).toEqual({ title: 'Bel terug', type: 'task', due_date: '2026-08-10', note_excerpt: 'call me', confirmed: undefined })
+    expect(toExecuteItem(item)).toEqual({
+      title: 'Bel terug', type: 'task', due_date: '2026-08-10', note_excerpt: 'call me',
+      message: null, start: null, confirmed: undefined,
+    })
   })
 
   it('carries confirmed:true when the caller passes it', () => {
     const item = { title: 'Bel terug', type: 'task' as const, due_date: null, note_excerpt: null }
-    expect(toExecuteItem(item, true)).toEqual({ title: 'Bel terug', type: 'task', due_date: null, note_excerpt: null, confirmed: true })
+    expect(toExecuteItem(item, true)).toEqual({
+      title: 'Bel terug', type: 'task', due_date: null, note_excerpt: null,
+      message: null, start: null, confirmed: true,
+    })
+  })
+
+  // CMBE 5961c673: the assist response's draft message/start ride straight
+  // into the execute body — never dropped on the way to confirm.
+  it('forwards message (whatsapp/email draft) and start (appointment) when present', () => {
+    const messageItem = { title: 'Stuur update', type: 'whatsapp' as const, due_date: null, note_excerpt: null, message: 'Hoi, even een update.', start: null }
+    expect(toExecuteItem(messageItem)).toEqual({
+      title: 'Stuur update', type: 'whatsapp', due_date: null, note_excerpt: null,
+      message: 'Hoi, even een update.', start: null, confirmed: undefined,
+    })
+
+    const appointmentItem = { title: 'Intake plannen', type: 'appointment' as const, due_date: null, note_excerpt: null, message: null, start: '2026-08-10 10:00' }
+    expect(toExecuteItem(appointmentItem, true)).toEqual({
+      title: 'Intake plannen', type: 'appointment', due_date: null, note_excerpt: null,
+      message: null, start: '2026-08-10 10:00', confirmed: true,
+    })
   })
 })
 
 describe('executeNoteActions', () => {
   it('POSTs /ai/koios/notes/actions/execute with items + source, per-item confirmed (never a batch-level flag)', async () => {
     vi.mocked(api.post).mockResolvedValue({ data: { items: [{ title: 'Bel terug', type: 'task', status: 'pending' }] } })
-    const items = [{ title: 'Bel terug', type: 'task' as const, due_date: null, note_excerpt: null }]
+    const items = [{ title: 'Bel terug', type: 'task' as const, due_date: null, note_excerpt: null, message: null, start: null }]
 
     await executeNoteActions(items, { note_id: 'note-1' })
 
     expect(api.post).toHaveBeenCalledWith(
       '/ai/koios/notes/actions/execute',
-      { items: [{ title: 'Bel terug', type: 'task', due_date: null, note_excerpt: null }], source: { note_id: 'note-1' } },
+      { items: [{ title: 'Bel terug', type: 'task', due_date: null, note_excerpt: null, message: null, start: null }], source: { note_id: 'note-1' } },
       expect.objectContaining({ signal: undefined }),
+    )
+  })
+
+  // CMBE 5961c673: message/start ride in the execute POST body untouched.
+  it('POSTs message (whatsapp/email draft) and start (appointment) through to the request body', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { items: [{ title: 'Stuur update', type: 'whatsapp', status: 'executed' }] } })
+    const items = [{ title: 'Stuur update', type: 'whatsapp' as const, due_date: null, note_excerpt: null, message: 'Hoi, even een update.', start: null }]
+
+    await executeNoteActions(items, { note_id: 'note-1' })
+
+    expect(api.post).toHaveBeenCalledWith(
+      '/ai/koios/notes/actions/execute',
+      { items: [{ title: 'Stuur update', type: 'whatsapp', due_date: null, note_excerpt: null, message: 'Hoi, even een update.', start: null }], source: { note_id: 'note-1' } },
+      expect.anything(),
     )
   })
 
@@ -46,7 +82,7 @@ describe('executeNoteActions', () => {
 
     expect(api.post).toHaveBeenCalledWith(
       '/ai/koios/notes/actions/execute',
-      { items: [{ title: 'Bel terug', type: 'task', due_date: null, note_excerpt: null, confirmed: true }], source: { note_id: 'note-1' } },
+      { items: [{ title: 'Bel terug', type: 'task', due_date: null, note_excerpt: null, message: null, start: null, confirmed: true }], source: { note_id: 'note-1' } },
       expect.anything(),
     )
   })

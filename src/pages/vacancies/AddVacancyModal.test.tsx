@@ -58,8 +58,23 @@ vi.mock('@/lib/useLocations', () => ({ useLocations: () => [{ value: 'branch-1',
 vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: ['Zuid-Holland', 'Utrecht'] }) }))
 // The cascade fetch itself — stubbed so only useCascadePickers' own pick/reset
 // logic is under test (no live fetch, mirrors useCascadePickers.test.tsx).
+// V3-6: keyed by customer id (default empty per id) — the narrowing describe
+// block below fills `cascadeState.byCustomer` per test so a customer SWITCH can
+// be proven to actually change what the location/department pickers offer; every
+// OTHER test keeps the previous always-empty behaviour untouched.
+const { cascadeState } = vi.hoisted(() => ({
+  cascadeState: {
+    byCustomer: {} as Record<string, {
+      locations: Array<{ id: string; name: string; departments?: Array<{ id: string; name: string }> }>
+      contacts: Array<{ id: string; name: string }>
+    }>,
+  },
+}))
 vi.mock('@/hooks/useCustomerCascade', () => ({
-  useCustomerCascade: () => ({ detail: null, locations: [], contacts: [], refetch: vi.fn() }),
+  useCustomerCascade: (customerId: string) => {
+    const data = cascadeState.byCustomer[customerId] ?? { locations: [], contacts: [] }
+    return { detail: null, locations: data.locations, contacts: data.contacts, refetch: vi.fn() }
+  },
 }))
 // Hoisted, mutable auth state — defaults to no module/no permission (both
 // SLICE-2 gates stay closed), so the SLICE-1 base-body tests never see
@@ -148,6 +163,7 @@ beforeEach(() => {
   matchTemplatesState.templates = []
   attachmentsState.hasPending = false
   attachmentsState.runSequence = async () => {}
+  cascadeState.byCustomer = {}
   mockPost.mockReset()
   mockPost.mockResolvedValue({ data: { data: { id: 'v-new', title: 'Verpleegkundige' } } })
 })
@@ -307,6 +323,94 @@ describe('AddVacancyModal · klant cascade (punt 6)', () => {
     expect(screen.getByText('Rivas Zorggroep')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'modal.fields.client' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'details.customerLocation' })).toBeInTheDocument()
+  })
+})
+
+describe('AddVacancyModal · cascade narrowing (V3-6, VACATURES-100)', () => {
+  // Two customers, each with its OWN sites (nested afdelingen) and contacts —
+  // proves a customer SWITCH actually narrows what the deeper pickers offer,
+  // never just the same (possibly empty) list reused across ids.
+  beforeEach(() => {
+    cascadeState.byCustomer = {
+      c1: {
+        locations: [
+          { id: 'loc-1', name: 'Rivas Noord', departments: [{ id: 'dep-1', name: 'ICU' }] },
+          { id: 'loc-2', name: 'Rivas Zuid', departments: [{ id: 'dep-2', name: 'Kraamzorg' }] },
+        ],
+        contacts: [{ id: 'con-1', name: 'Jan Jansen' }],
+      },
+      c2: {
+        locations: [{ id: 'loc-3', name: 'Yesway Centrum' }],
+        contacts: [{ id: 'con-2', name: 'Eva Bos' }],
+      },
+    }
+  })
+
+  // Pick a customer via the unlocked Klant picker (open -> click the option).
+  async function pickCustomer(user: ReturnType<typeof userEvent.setup>, label: string) {
+    await user.click(screen.getByRole('button', { name: 'modal.fields.client' }))
+    await user.click(screen.getByRole('button', { name: label }))
+  }
+
+  it('narrows the location picker to the picked customer\'s own sites', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await pickCustomer(user, 'Rivas Zorggroep')
+    await user.click(screen.getByRole('button', { name: 'details.customerLocation' }))
+    expect(screen.getByRole('button', { name: 'Rivas Noord' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Rivas Zuid' })).toBeInTheDocument()
+    // Yesway's own site must never leak into Rivas's cascade.
+    expect(screen.queryByRole('button', { name: 'Yesway Centrum' })).not.toBeInTheDocument()
+  })
+
+  it('narrows the department picker to the picked location\'s own afdelingen', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await pickCustomer(user, 'Rivas Zorggroep')
+    await user.click(screen.getByRole('button', { name: 'details.customerLocation' }))
+    await user.click(screen.getByRole('button', { name: 'Rivas Noord' }))
+    await user.click(screen.getByRole('button', { name: 'details.customerDepartment' }))
+    expect(screen.getByRole('button', { name: 'ICU' })).toBeInTheDocument()
+    // Rivas Zuid's own afdeling must not show once Rivas Noord narrowed the list.
+    expect(screen.queryByRole('button', { name: 'Kraamzorg' })).not.toBeInTheDocument()
+  })
+
+  it('rides the interactively-picked location/department/contact ids on the create body', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await pickCustomer(user, 'Rivas Zorggroep')
+    await user.click(screen.getByRole('button', { name: 'details.customerLocation' }))
+    await user.click(screen.getByRole('button', { name: 'Rivas Noord' }))
+    await user.click(screen.getByRole('button', { name: 'details.customerDepartment' }))
+    await user.click(screen.getByRole('button', { name: 'ICU' }))
+    await user.click(screen.getByRole('button', { name: 'details.contactPerson' }))
+    await user.click(screen.getByRole('button', { name: 'Jan Jansen' }))
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({
+      customer_id: 'c1', customer_location_id: 'loc-1', customer_department_id: 'dep-1', contact_id: 'con-1',
+    }))
+  })
+
+  it('changing the customer clears the previously picked location/department/contact — never a stale id on the body', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await pickCustomer(user, 'Rivas Zorggroep')
+    await user.click(screen.getByRole('button', { name: 'details.customerLocation' }))
+    await user.click(screen.getByRole('button', { name: 'Rivas Noord' }))
+    await user.click(screen.getByRole('button', { name: 'details.customerDepartment' }))
+    await user.click(screen.getByRole('button', { name: 'ICU' }))
+    await user.click(screen.getByRole('button', { name: 'details.contactPerson' }))
+    await user.click(screen.getByRole('button', { name: 'Jan Jansen' }))
+
+    // Switch to a different customer — Rivas's now-invalid picks must not survive.
+    await pickCustomer(user, 'Yesway Zorg')
+    await fillTitleAndSubmit(user)
+
+    const [, body] = mockPost.mock.calls[0] as [string, Record<string, unknown>]
+    expect(body).toMatchObject({ customer_id: 'c2' })
+    expect(body).not.toHaveProperty('customer_location_id')
+    expect(body).not.toHaveProperty('customer_department_id')
+    expect(body).not.toHaveProperty('contact_id')
   })
 })
 

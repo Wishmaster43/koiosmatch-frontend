@@ -24,6 +24,16 @@
  *   reported — see the task's final report). Still rendered honestly if it
  *   ever appears.
  * - `run_id`/`template_key` are present only once `status === 'executed'`.
+ * - CMBE 5961c673 (verified live 2026-08-07): every non-`executed` item now
+ *   also carries a `reason` string (`pending`/`wizard_required`/`forbidden`) —
+ *   e.g. "Wacht op jouw bevestiging." or the rights-matrix exception message.
+ *   These are plain server strings (not run through the tenant's i18n locale),
+ *   shown as-is by the caller; the FE's own static per-type fallback covers
+ *   only the case where `reason` is absent.
+ * - The request body also accepts `items[].message` (whatsapp/email draft
+ *   text) and `items[].start` (appointment date-time) — both verified live to
+ *   round-trip through `execute` unrejected; `toExecuteItem` forwards them
+ *   from the assist-suggested item so a confirm never drops the AI's draft.
  */
 import api from '@/lib/api'
 import type { AssistActionItem, AssistActionType } from './noteAssistApi'
@@ -38,6 +48,10 @@ export interface ExecuteRequestItem {
   type: AssistActionType
   due_date: string | null
   note_excerpt: string | null
+  // Always sent explicitly (null when the item carries none), mirroring the
+  // due_date/note_excerpt convention — never omitted for a "maybe" shape.
+  message: string | null
+  start: string | null
   confirmed?: boolean
 }
 
@@ -47,6 +61,9 @@ export interface ExecuteResultItem {
   status: ExecuteItemStatus
   run_id?: string
   template_key?: string
+  // Present on every non-'executed' status (pending/wizard_required/forbidden);
+  // a raw server string, shown as-is — see the CONTRACT note above.
+  reason?: string
 }
 
 export interface ExecuteSource {
@@ -57,8 +74,13 @@ export interface ExecuteSource {
 
 // Narrow an AssistActionItem down to exactly the fields the execute endpoint
 // validates — never forward extra local UI state into the request body.
+// message/start default to null (never undefined) so a pre-CMBE fixture that
+// lacks them still produces the same explicit shape the endpoint expects.
 export function toExecuteItem(item: AssistActionItem, confirmed?: boolean): ExecuteRequestItem {
-  return { title: item.title, type: item.type, due_date: item.due_date, note_excerpt: item.note_excerpt, confirmed }
+  return {
+    title: item.title, type: item.type, due_date: item.due_date, note_excerpt: item.note_excerpt,
+    message: item.message ?? null, start: item.start ?? null, confirmed,
+  }
 }
 
 /**
