@@ -25,6 +25,9 @@ vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ candidateTypes
 vi.mock('@/context/VacancyLookupsContext', () => ({ useVacancyLookups: () => lookups }))
 vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: [] }) }))
 vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [] }) }))
+// VACANCY-CONTRACT-FIELD-1: not under test here, stubbed like every other lookup.
+vi.mock('@/lib/useContractTypes', () => ({ useContractTypes: () => ({ types: [], options: [] }) }))
+vi.mock('@/lib/useCao', () => ({ useCao: () => ({ types: [], labelOf: (v: string) => v, colorOf: () => undefined }) }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (d: string) => d }) }))
 vi.mock('./useCustomerOptions', () => ({ useCustomerOptions: () => [] }))
 vi.mock('./useCascadePickers', () => ({ useCascadePickers: () => ({ locationPicker: null, departmentPicker: null, contactPicker: null }) }))
@@ -36,6 +39,7 @@ const vacancy = (over: Partial<VacancyDetail> = {}): VacancyDetail => ({
   category: '', industry: '', street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', city: '',
   experienceMin: '', experienceMax: '', seniorityValue: '', educationValue: '',
   salaryMin: '', salaryMax: '', hoursMin: '', hoursMax: '', startDate: '', endDate: '',
+  contractType: '', cao: '',
   clientId: null, clientName: '', contractTypes: [], skills: [],
   customerLocationId: '', customerLocationName: '', customerDepartmentId: '', customerDepartmentName: '',
   contactId: '', contactName: '',

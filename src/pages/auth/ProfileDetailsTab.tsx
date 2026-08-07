@@ -48,11 +48,11 @@ export default function ProfileDetailsTab({ form, onField, onSave, saving, saved
               style={inputStyle} placeholder={t('profile.lastName')} aria-label={t('profile.lastName')} />
           </Field>
         </div>
-        <Field label={t('profile.email')}>
+        <Field label={t('profile.emailLabel')}>
           <div style={{ position: 'relative' }}>
             <Mail size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input value={form.email} onChange={onField('email')} type="email"
-              style={{ ...inputStyle, paddingLeft: 30 }} placeholder={t('profile.emailPlaceholder')} aria-label={t('profile.email')} />
+              style={{ ...inputStyle, paddingLeft: 30 }} placeholder={t('profile.emailPlaceholder')} aria-label={t('profile.emailLabel')} />
           </div>
         </Field>
         <Field label={t('profile.phone')}>

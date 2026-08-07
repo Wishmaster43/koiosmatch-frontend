@@ -12,7 +12,11 @@ const insights = [
 describe('KoiosAdviceBlock', () => {
   it('renders the heading and keeps insight text collapsed by default', () => {
     render(<KoiosAdviceBlock namespace="candidates" insights={insights} />)
-    expect(screen.getByTitle('Koios AI')).toBeInTheDocument()
+    // AI-ACT-1: the mark now carries the AI-Act disclosure hint as its title
+    // (defaultValue fallback, §5) instead of the generic "Koios AI" default —
+    // the heading text already names "Koios AI adviseert" (ai.title), so the
+    // mark's tooltip is the one place left to add without a double badge.
+    expect(screen.getByTitle('Door Koios AI gegenereerd — controleer voor gebruik.')).toBeInTheDocument()
     expect(screen.getByText('Completeness')).toBeInTheDocument()
     expect(screen.getByText('Engagement')).toBeInTheDocument()
     expect(screen.queryByText('Profile is 40% complete.')).toBeNull()

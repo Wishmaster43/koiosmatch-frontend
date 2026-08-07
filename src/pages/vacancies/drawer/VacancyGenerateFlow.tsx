@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import type { CSSProperties } from 'react'
 import { Loader2, Sparkles, X, Check } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import { useVacancyGenerate } from '../hooks/useVacancyGenerate'
 import type { VacancyDetail } from '@/types/vacancy'
 
@@ -104,7 +105,11 @@ export default function VacancyGenerateFlow({ vacancy, onApply }: VacancyGenerat
 
       {status === 'success' && (
         <>
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>{t('generate.previewLabel')}</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>{t('generate.previewLabel')}</span>
+            {/* AI-Act disclosure (AI-ACT-1): the concept below is Koios-generated content. */}
+            <AiGeneratedLabel />
+          </div>
           {/* Plain text (the backend returns prose, not HTML) — rendered as text
               content, never dangerouslySetInnerHTML (§7): no HTML injection
               surface exists here at all. */}

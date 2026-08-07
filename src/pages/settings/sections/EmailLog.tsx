@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { X } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
+import { useDateFormat } from '@/lib/datetime'
 import LogView from '@/components/ui/LogView'
 import type { LogExportCol } from '@/components/ui/LogView'
 import { DirectionPill, StatusPill, isInbound } from '@/components/ui/logChips'
@@ -27,18 +28,14 @@ interface EmailLogEntry {
   [k: string]: unknown
 }
 
-// Locale-aware short date-time.
-const fmt = (iso?: string) => {
-  if (!iso) return '—'
-  const d = new Date(iso)
-  return isNaN(d.getTime()) ? '—' : d.toLocaleString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-}
 const entityText = (e: EmailLogEntry, t: TFunction<'settings'>) =>
   e.entity_label ?? (e.entity_type ? t(`audit.entity.${e.entity_type.split('\\').pop()?.toLowerCase()}`, { defaultValue: e.entity_type }) : '—')
 
 // Detail panel for one logged e-mail.
 function EmailLogDrawer({ entry, onClose }: { entry: EmailLogEntry; onClose: () => void }) {
   const { t } = useTranslation('settings')
+  // App-wide active locale (§5) — formatDateTime replaces the old hardcoded 'nl-NL' fmt().
+  const { formatDateTime } = useDateFormat()
   const rows: Array<[string, string]> = [
     [t('log.direction'), isInbound(entry.direction) ? t('log.in') : t('log.out')],
     [t('emailLog.from'), entry.from ?? '—'],
@@ -46,7 +43,7 @@ function EmailLogDrawer({ entry, onClose }: { entry: EmailLogEntry; onClose: () 
     [t('emailLog.subject'), entry.subject ?? '—'],
     [t('audit.colEntity'), entityText(entry, t)],
     [t('log.status'), entry.status ?? '—'],
-    [t('log.date'), fmt(entry.created_at)],
+    [t('log.date'), formatDateTime(entry.created_at)],
   ]
   return (
     <>
@@ -78,6 +75,8 @@ function EmailLogDrawer({ entry, onClose }: { entry: EmailLogEntry; onClose: () 
 
 export default function EmailLog() {
   const { t } = useTranslation('settings')
+  // App-wide active locale (§5) — formatDateTime replaces the old hardcoded 'nl-NL' fmt().
+  const { formatDateTime } = useDateFormat()
   const [rows, setRows] = useState<EmailLogEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -108,7 +107,7 @@ export default function EmailLog() {
     { key: 'subject', header: t('emailLog.subject'), render: r => r.subject ?? '—' },
     { key: 'entity', header: t('audit.colEntity'), render: r => entityText(r, t) },
     { key: 'status', header: t('log.status'), width: 120, render: r => <StatusPill status={r.status} /> },
-    { key: 'created_at', header: t('log.date'), width: 150, nowrap: true, render: r => fmt(r.created_at) },
+    { key: 'created_at', header: t('log.date'), width: 150, nowrap: true, render: r => formatDateTime(r.created_at) },
   ]
 
   const filterGroups = useMemo(() => [
@@ -127,7 +126,7 @@ export default function EmailLog() {
     { header: t('emailLog.subject'), value: r => r.subject ?? '' },
     { header: t('audit.colEntity'), value: r => entityText(r, t) },
     { header: t('log.status'), value: r => r.status ?? '' },
-    { header: t('log.date'), value: r => fmt(r.created_at) },
+    { header: t('log.date'), value: r => formatDateTime(r.created_at) },
   ]
 
   return (

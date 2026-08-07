@@ -38,6 +38,9 @@ function Host({ onOpen, ...props }: PanelProps & { onOpen?: (id: Id | null) => v
 vi.mock('@/lib/api', () => ({
   default: { get: vi.fn(() => Promise.resolve({ data: { data: [] } })), post: vi.fn(), patch: vi.fn(), put: vi.fn(), delete: vi.fn() },
   unwrap: (r: { data?: unknown }) => r?.data, unwrapList: () => ({ rows: [], total: 0 }),
+  // The real (unmocked) useAllSettings module reads this to tenant-scope its cache —
+  // this file relies on the REAL module (see invalidateAllSettingsCache import above).
+  getActiveTenantId: vi.fn(() => null),
 }))
 vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [] }) }))
 vi.mock('@/lib/useContactFunctions', () => ({ useContactFunctions: () => ({ contactFunctions: [], allowFreeEntry: false }) }))

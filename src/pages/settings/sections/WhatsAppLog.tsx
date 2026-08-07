@@ -14,6 +14,7 @@
  */
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useDateFormat } from '@/lib/datetime'
 import LogView from '@/components/ui/LogView'
 import type { LogExportCol } from '@/components/ui/LogView'
 import { DirectionPill, StatusPill, isInbound } from '@/components/ui/logChips'
@@ -68,16 +69,13 @@ function ConversationMemoryField() {
   )
 }
 
-const fmt = (iso?: string) => {
-  if (!iso) return '—'
-  const d = new Date(iso)
-  return isNaN(d.getTime()) ? '—' : d.toLocaleString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-}
 const contactOf = (m: WaMessage) => [m.candidate?.first_name, m.candidate?.last_name].filter(Boolean).join(' ') || '—'
 
 export default function WhatsAppLog() {
   const { t } = useTranslation('settings')
   const { messages, loading } = useWhatsAppData()
+  // App-wide active locale (§5) — formatDateTime replaces the old hardcoded 'nl-NL' fmt().
+  const { formatDateTime } = useDateFormat()
   const [search, setSearch] = useState('')
   const [selectedDir, setSelectedDir] = useState<string[]>([])
   const [selectedStatus, setSelectedStatus] = useState<string[]>([])
@@ -100,7 +98,7 @@ export default function WhatsAppLog() {
     { key: 'contact', header: t('waLog.contact'), width: 180, render: m => contactOf(m) },
     { key: 'body', header: t('waLog.message'), render: m => <span style={{ display: 'block', maxWidth: 460, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.body ?? '—'}</span> },
     { key: 'status', header: t('log.status'), width: 120, render: m => <StatusPill status={m.status} /> },
-    { key: 'sent_at', header: t('log.date'), width: 150, nowrap: true, render: m => fmt(m.sent_at) },
+    { key: 'sent_at', header: t('log.date'), width: 150, nowrap: true, render: m => formatDateTime(m.sent_at) },
   ]
 
   const filterGroups = useMemo(() => [
@@ -121,7 +119,7 @@ export default function WhatsAppLog() {
     { header: t('waLog.contact'), value: m => contactOf(m) },
     { header: t('waLog.message'), value: m => m.body ?? '' },
     { header: t('log.status'), value: m => m.status ?? '' },
-    { header: t('log.date'), value: m => fmt(m.sent_at) },
+    { header: t('log.date'), value: m => formatDateTime(m.sent_at) },
   ]
 
   return (

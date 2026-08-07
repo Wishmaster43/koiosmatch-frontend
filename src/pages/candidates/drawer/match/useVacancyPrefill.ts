@@ -20,13 +20,18 @@
  *    working_hours_from/to) — never a single "hours per week". Only prefilled
  *    when that range collapses to one number (min === max); a genuine range is
  *    left blank rather than guessed (§3, no fake affordances).
- *  - contract type / CAO: DELIBERATELY not read here. The vacancy's own
- *    `contract_types` is a DIFFERENT tenant lookup (Contractvorm/candidate-type,
- *    multi) from the match's `contract_type` (the Fase/ZZP lookup behind
- *    /contract-types, single) — the vocabularies don't line up, so prefilling one
- *    from the other would silently write the wrong slug. CAO has no column on
- *    `vacancies` at all. Both are real backend gaps if Danny wants them wired —
- *    flagged as CMBE follow-ups in the delivering PR notes, not silently guessed.
+ *  - contract_type / cao (VACANCY-CONTRACT-FIELD-1, migration
+ *    2026_06_15_000030_create_vacancy_table): a SEPARATE pair of singular columns
+ *    from the vacancy's own MULTI-value `contract_types` (Contractvorm) above —
+ *    these two mirror the match's own `contract_type`/`cao` fields byte-for-byte,
+ *    same lookup tables (`contract_types.value` / `collective_labour_agreements.
+ *    value`, confirmed via the shared `App\Support\MatchRules::LOOKUPS`, which
+ *    both StoreVacancyRequest AND Store/UpdateMatchRequest validate through —
+ *    the vocabulary-mismatch gap this docblock used to flag is closed). RE-
+ *    VERIFIED LIVE 2026-08-06 (tenant `yesway`, GET+PATCH /vacancies/{id}
+ *    against the running dev API): both keys are always present in the response
+ *    (null on an unconfigured row) and a PATCH round-trips a real value — so
+ *    both are read and proposed here now, no guessing involved.
  */
 import { useState, useEffect } from 'react'
 import api, { unwrap } from '@/lib/api'
@@ -42,11 +47,15 @@ export interface VacancyPrefillDetail {
   endDate: string
   // '' when the vacancy carries no single, unambiguous hours value (a real range).
   hours: string
+  // VACANCY-CONTRACT-FIELD-1: the vacancy's own singular contract-kind/CAO slugs
+  // (see the docblock above) — '' when the vacancy never set them.
+  contractType: string
+  cao: string
 }
 
 const EMPTY_DETAIL: VacancyPrefillDetail = {
   customerId: '', customerLocationId: '', customerDepartmentId: '', contactId: '',
-  branchId: '', startDate: '', endDate: '', hours: '',
+  branchId: '', startDate: '', endDate: '', hours: '', contractType: '', cao: '',
 }
 
 // The raw GET /vacancies/{id} shape this hook reads — only the fields it uses.
@@ -60,6 +69,9 @@ interface RawVacancyDetail {
   end_date?: string | null
   hours_min?: number | string | null
   hours_max?: number | string | null
+  // VACANCY-CONTRACT-FIELD-1: plain slug strings, same shape as the match's own.
+  contract_type?: string | null
+  cao?: string | null
 }
 
 export function useVacancyPrefill(vacancyId: string): VacancyPrefillDetail | null {
@@ -85,6 +97,9 @@ export function useVacancyPrefill(vacancyId: string): VacancyPrefillDetail | nul
           endDate: d?.end_date ?? '',
           // Only unambiguous (a fixed number, not a real min≠max range) — never guessed.
           hours: (hMin != null && hMax != null && hMin === hMax) ? String(hMin) : '',
+          // VACANCY-CONTRACT-FIELD-1: same vocabulary as the match's own fields — read straight through.
+          contractType: d?.contract_type ?? '',
+          cao: d?.cao ?? '',
         })
       })
       .catch(() => { if (alive) setDetail(EMPTY_DETAIL) })

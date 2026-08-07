@@ -193,7 +193,7 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 10px', borderBottom: '1px solid var(--border)' }}>
               <Search size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
               <input value={query} onChange={e => setQuery(e.target.value)} placeholder={listNode.searchPlaceholder ?? t('search')}
-                style={{ width: '100%', border: 'none', outline: 'none', fontSize: 12, background: 'none', color: 'var(--text)' }} />
+                style={{ width: '100%', border: 'none', fontSize: 12, background: 'none', color: 'var(--text)' }} />
             </div>
           )}
 
@@ -202,11 +202,11 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
             <div style={{ padding: 10 }}>
               <textarea value={query} onChange={e => setQuery(e.target.value)} rows={4} placeholder={inputNode.placeholder ?? ''}
                 style={{ width: '100%', resize: 'vertical', border: '1px solid var(--border)', borderRadius: 7, padding: '8px 10px',
-                  fontSize: 12, color: 'var(--text)', background: 'var(--surface)', outline: 'none', boxSizing: 'border-box' }} />
+                  fontSize: 12, color: 'var(--text)', background: 'var(--surface)', boxSizing: 'border-box' }} />
               <button type="button" disabled={!query.trim()}
                 onClick={() => { const v = query.trim(); if (v) { inputNode.onSubmit?.(v); close() } }}
                 style={{ marginTop: 8, width: '100%', padding: '8px 10px', fontSize: 12, fontWeight: 500, border: 'none', borderRadius: 7,
-                  background: 'var(--color-primary)', color: '#fff', cursor: query.trim() ? 'pointer' : 'not-allowed', opacity: query.trim() ? 1 : 0.5 }}>
+                  background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: query.trim() ? 'pointer' : 'not-allowed', opacity: query.trim() ? 1 : 0.5 }}>
                 {inputNode.submitLabel ?? t('save')}
               </button>
             </div>
@@ -246,7 +246,7 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
                   onClick={() => toggleMulti(o.value)} style={rowStyle(false)} onMouseEnter={hoverOn} onMouseLeave={hoverOff}>
                   <span style={{ width: 15, height: 15, borderRadius: 4, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     border: `1.5px solid ${on ? 'var(--color-primary)' : 'var(--border)'}`, background: on ? 'var(--color-primary)' : 'transparent' }}>
-                    {on && <Check size={10} color="#fff" />}
+                    {on && <Check size={10} color="var(--color-on-accent)" />}
                   </span>
                   {o.color && <span style={{ width: 8, height: 8, borderRadius: '50%', background: o.color, flexShrink: 0 }} />}
                   <span style={{ flex: 1 }}>{o.label}</span>
@@ -260,7 +260,7 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
             <div style={{ padding: 10, borderTop: '1px solid var(--border)' }}>
               <button type="button" onClick={() => { multiNode.onSubmit?.(multiValues); close() }}
                 style={{ width: '100%', padding: '8px 10px', fontSize: 12, fontWeight: 500, border: 'none', borderRadius: 7,
-                  background: 'var(--color-primary)', color: '#fff', cursor: 'pointer' }}>
+                  background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: 'pointer' }}>
                 {(multiNode.submitLabel ?? t('save'))}{multiValues.length ? ` (${multiValues.length})` : ''}
               </button>
             </div>

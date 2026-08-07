@@ -185,6 +185,12 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
     educationValue: valueOf(raw.education),
     // Contract forms (multi) — same lookup as the candidate.
     contractTypes: Array.isArray(raw.contract_types) ? raw.contract_types.map(String) : [],
+    // VACANCY-CONTRACT-FIELD-1: singular contract-kind/CAO slugs (Voorwaarden
+    // sub-tab) — raw values, resolved to a display label client-side via
+    // useContractTypes/useCao in the tab itself (the backend sends the bare
+    // slug, unlike seniority/education which arrive pre-resolved).
+    contractType: raw.contract_type ?? '',
+    cao: raw.cao ?? '',
     // Structured address for the in-place editor.
     street: raw.street ?? '',
     houseNumber: raw.house_number ?? '',

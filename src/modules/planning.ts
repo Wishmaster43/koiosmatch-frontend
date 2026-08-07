@@ -11,8 +11,8 @@ export default makeEntityModule({
   // Native planning node — gated on the 'plan' billing module (picker hides it when off).
   module:   'plan',
   Icon:     CalendarDays,
-  color:    '#0F6E56',
-  bg:       '#E1F5EE',
+  color:    'var(--module-teal-strong)',
+  bg:       'color-mix(in srgb, var(--module-teal-strong) 10%, transparent)',
   filterFields: [
     { value: 'status',     label: 'Status' },
     { value: 'client',     label: 'Klant' },

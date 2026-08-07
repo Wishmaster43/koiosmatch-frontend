@@ -116,6 +116,13 @@ export interface VacancyDetail extends Vacancy {
   educationValue: string
   // Contract forms this vacancy offers — same lookup as the candidate (multi-value).
   contractTypes: string[]
+  // VACANCY-CONTRACT-FIELD-1: the vacancy's own SINGULAR contract-kind/CAO slugs
+  // (Voorwaarden sub-tab) — a separate pair of columns from the multi-value
+  // `contractTypes` above; same lookup vocabulary as the match's own fields
+  // (contract_types.value / collective_labour_agreements.value), resolved to a
+  // display label client-side (mirrors how `contractTypes` above is resolved).
+  contractType: string
+  cao: string
   // Structured address (edited as separate fields, shown as one composed line).
   street: string
   houseNumber: string
@@ -237,6 +244,9 @@ export interface ApiVacancy {
   employment_type?: unknown
   employment_type_label?: string
   contract_types?: string[]
+  // VACANCY-CONTRACT-FIELD-1: singular contract-kind/CAO slugs (see VacancyDetail).
+  contract_type?: string | null
+  cao?: string | null
   street?: string
   house_number?: string
   house_number_suffix?: string

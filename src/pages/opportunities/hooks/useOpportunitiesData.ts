@@ -122,7 +122,7 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
   const clearSelection = () => setSelectedIds(new Set())
 
   // Load customers once for the drawer/modal pickers. per_page:100 so the
-  // searchable client picker (AddOpportunityModal, KlantTab) has the full set to
+  // searchable client picker (AddOpportunityModal, CustomerTab) has the full set to
   // type-filter over, not just the backend's small default page.
   useEffect(() => {
     const ctrl = new AbortController()
@@ -202,7 +202,7 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
     if ('endDate'        in patch) body.end_date          = patch.endDate || null
     if ('serviceTypeId'   in patch) body.service_type_id   = patch.serviceTypeId ?? null
     if ('agreementTypeId' in patch) body.agreement_type_id = patch.agreementTypeId ?? null
-    // Org hierarchy (klant tab, C-42/OPP-LOC-1): department/contact/customer_location_id
+    // Org hierarchy (customer tab, C-42/OPP-LOC-1): department/contact/customer_location_id
     // all map to real, validated columns (customer_departments/customer_locations/
     // customer_contacts — see OpportunityRequest). The API's `location_id` (unrelated
     // to `locationId` here) is a DIFFERENT concept — the TENANT's own branch (mirrors

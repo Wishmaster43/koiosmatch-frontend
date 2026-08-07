@@ -1,24 +1,35 @@
 /**
  * useCustomFields — regression test for the generic per-entity custom-fields hook
  * (§3B "Eigen velden" wave): active-language label pick, active+visible_in_ui
- * filtering (worklist #44 — API-only fields), the per-entity-type session cache
- * (one fetch per entity type, not one global fetch), and invalidate() scoping to
- * a single entity type.
+ * filtering (worklist #44 — API-only fields), the per-tenant+entity-type session
+ * cache (one fetch per tenant+entity type, not one global fetch), invalidate()
+ * scoping to a single entity type, and (below) tenant-scoping — a bureau switch
+ * must never serve a PREVIOUS tenant's custom-field defs (bijvangst fix, 2026-08,
+ * same class of gap fixed on useCachedLookup — see its test file).
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import '@/i18n'
 import { useCustomFields } from './useCustomFields'
-import api from '@/lib/api'
+import api, { getActiveTenantId } from '@/lib/api'
 
-// Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
+// Keep the real unwrap/unwrapList (importActual) — only the default client and
+// getActiveTenantId are stubbed (the latter overridden per-call below to simulate
+// a bureau switch mid-session).
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn() } }
+  return { ...actual, default: { get: vi.fn() }, getActiveTenantId: vi.fn(() => null) }
 })
 const mockedGet = vi.mocked(api.get)
+const mockedTenantId = vi.mocked(getActiveTenantId)
 
-afterEach(() => vi.clearAllMocks())
+// clearAllMocks() clears call history but NOT a mockReturnValue set inside a test
+// (that's mockReset) — restore the "no tenant" default explicitly so a tenant
+// override in one test never leaks into the next.
+afterEach(() => {
+  vi.clearAllMocks()
+  mockedTenantId.mockReturnValue(null)
+})
 
 describe('useCustomFields', () => {
   it('picks the active-language label and normalises active/in_use', async () => {
@@ -128,5 +139,71 @@ describe('useCustomFields', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.fields).toHaveLength(0)
     expect(result.current.allFields).toHaveLength(2)
+  })
+})
+
+// Tenant-scoping regression (bijvangst fix, 2026-08): the module-scope cacheByEntity
+// Map used to key purely on entityType, so a super-admin switching bureaus mid-session
+// could read the PREVIOUS tenant's custom-field defs from cache. Each test below uses
+// its own tenant id (even where the entity type repeats) so the module-scope cache
+// never leaks state between tests, mirroring useCachedLookup.test.ts's convention.
+describe('useCustomFields · tenant scoping', () => {
+  // (i) Same tenant, same entity type, second mount: one GET, cache reused —
+  // unchanged behaviour, asserted explicitly so the tenant key never regresses the dedupe.
+  it('reuses the cache when the tenant is unchanged', async () => {
+    mockedTenantId.mockReturnValue('tenant-cf-same')
+    mockedGet.mockResolvedValue({ data: { data: [{ id: '1', key: 'a_field', type: 'text', active: true }] } })
+
+    const first = renderHook(() => useCustomFields('candidate'))
+    await waitFor(() => expect(first.result.current.loading).toBe(false))
+    expect(mockedGet).toHaveBeenCalledTimes(1)
+
+    const second = renderHook(() => useCustomFields('candidate'))
+    expect(second.result.current.loading).toBe(false)
+    expect(second.result.current.allFields[0].key).toBe('a_field')
+    expect(mockedGet).toHaveBeenCalledTimes(1) // still just the one GET
+  })
+
+  // (j) Same entity type, DIFFERENT active tenant: must refetch and must NOT hand
+  // back tenant A's cached defs to tenant B — this is the actual vulnerability.
+  it('refetches (and never leaks the previous tenant\'s defs) after a tenant switch', async () => {
+    mockedTenantId.mockReturnValue('tenant-cf-switch-a')
+    mockedGet.mockResolvedValue({ data: { data: [{ id: '1', key: 'field_a', type: 'text', active: true }] } })
+
+    const forTenantA = renderHook(() => useCustomFields('application'))
+    await waitFor(() => expect(forTenantA.result.current.loading).toBe(false))
+    expect(forTenantA.result.current.allFields.map(f => f.key)).toEqual(['field_a'])
+    expect(mockedGet).toHaveBeenCalledTimes(1)
+
+    // Simulate the switch: X-Tenant now resolves to a different tenant.
+    mockedTenantId.mockReturnValue('tenant-cf-switch-b')
+    mockedGet.mockResolvedValue({ data: { data: [{ id: '2', key: 'field_b', type: 'text', active: true }] } })
+
+    const forTenantB = renderHook(() => useCustomFields('application'))
+    await waitFor(() => expect(forTenantB.result.current.loading).toBe(false))
+    expect(forTenantB.result.current.allFields.map(f => f.key)).toEqual(['field_b'])
+    expect(mockedGet).toHaveBeenCalledTimes(2) // a real second GET, not a cache hit
+  })
+
+  // (k) invalidate() only clears the CURRENT tenant's slot — switching back to
+  // tenant A afterwards must still find A's entry cached (untouched by B's call).
+  it('invalidate() only clears the active tenant\'s cache slot, not other tenants\'', async () => {
+    mockedTenantId.mockReturnValue('tenant-cf-inv-a')
+    mockedGet.mockResolvedValue({ data: { data: [{ id: '1', key: 'inv_a', type: 'text', active: true }] } })
+
+    const forTenantA = renderHook(() => useCustomFields('candidate'))
+    await waitFor(() => expect(forTenantA.result.current.loading).toBe(false))
+    expect(mockedGet).toHaveBeenCalledTimes(1)
+
+    mockedTenantId.mockReturnValue('tenant-cf-inv-b')
+    mockedGet.mockResolvedValue({ data: { data: [{ id: '2', key: 'inv_b', type: 'text', active: true }] } })
+    const forTenantB = renderHook(() => useCustomFields('candidate'))
+    await waitFor(() => expect(forTenantB.result.current.loading).toBe(false))
+    forTenantB.result.current.invalidate() // clears only tenant-b's slot
+
+    mockedTenantId.mockReturnValue('tenant-cf-inv-a')
+    const backToTenantA = renderHook(() => useCustomFields('candidate'))
+    expect(backToTenantA.result.current.allFields.map(f => f.key)).toEqual(['inv_a']) // still cached, no 3rd GET
+    expect(mockedGet).toHaveBeenCalledTimes(2)
   })
 })

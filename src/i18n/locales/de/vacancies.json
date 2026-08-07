@@ -223,7 +223,9 @@
     "customerLocation": "Kundenstandort",
     "customerDepartment": "Abteilung",
     "contactPerson": "Ansprechpartner",
-    "pickClientFirst": "Zuerst einen Kunden wählen"
+    "pickClientFirst": "Zuerst einen Kunden wählen",
+    "matchContractType": "Vorgeschlagene Vertragsart",
+    "matchCao": "Vorgeschlagener Tarifvertrag"
   },
   "aiagent": {
     "pickerLabel": "KI-Agent",

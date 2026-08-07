@@ -9,7 +9,7 @@ export default {
   category: 'Triggers',
   label: 'Sollicitatie-event',
   Icon:  Zap,
-  color: '#0369A1',
+  color: 'var(--module-info)',
   bg:    'var(--color-info-bg)',
   schema: [
     { key: 'event',            label: 'Gebeurtenis',          type: 'select', options: ['afgewezen', 'aangenomen', 'nieuwe sollicitatie', 'fase gewijzigd'] },

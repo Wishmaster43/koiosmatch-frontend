@@ -7,8 +7,8 @@ export default {
   label: 'Filter',
   Icon:  Filter,
   color: 'var(--color-violet)',
-  // eslint-disable-next-line no-restricted-syntax -- deliberately lighter than --color-violet-bg to visually separate "Flow beheer" nodes from the parser family
-  bg:    '#F5F3FF',
+  // Lighter mix than --color-violet-bg (~14%) so "Flow beheer" nodes visually separate from the parser family.
+  bg:    'color-mix(in srgb, var(--color-violet) 6%, transparent)',
   schema: [
     { key: 'field',    label: 'Veld',     type: 'text',   placeholder: 'status' },
     { key: 'operator', label: 'Operator', type: 'select', options: ['gelijk aan','niet gelijk aan','groter dan','kleiner dan','bevat'] },

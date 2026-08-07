@@ -417,6 +417,73 @@ describe('DocumentsSection · DOC-ENTRY-LINK-1 upload + link', () => {
 })
 
 /**
+ * DOC-LANG-SKILL-LINK-1: the same OPTIONAL "Koppelen aan" picker, extended to
+ * languages/skills (BE landed document_id on candidate_languages/candidate_skills).
+ * Mirrors the DOC-ENTRY-LINK-1 describe block above exactly — asserts the REQUEST
+ * (§13): route + body, not merely that a callback fired.
+ */
+describe('DocumentsSection · DOC-LANG-SKILL-LINK-1 upload + link (languages/skills)', () => {
+  const withLinkables = (): Candidate => ({
+    id: 'c1',
+    documents: [],
+    languages: [{ id: 'lang1', language: 'Engels' }],
+    skills: [{ id: 'skill1', name: 'Heftruck rijden' }],
+  } as unknown as Candidate)
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal('URL', { createObjectURL: vi.fn((f: File) => `blob:${f.name}`), revokeObjectURL: vi.fn() })
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('shows the grouped "Koppelen aan" picker (language + skill) when the candidate has both', () => {
+    const { container } = render(<DocumentsSection c={withLinkables()} />)
+    fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
+    // Doc type + "Koppelen aan" = two comboboxes for this one queued file.
+    expect(screen.getAllByRole('combobox')).toHaveLength(2)
+  })
+
+  it('a legacy skill entry with no id is never offered as a link target (no fake affordance)', () => {
+    const noIdSkill: Candidate = { id: 'c1', documents: [], skills: ['Heftruck rijden'] } as unknown as Candidate
+    const { container } = render(<DocumentsSection c={noIdSkill} />)
+    fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
+    // Only the doc-type select — the plain-string legacy skill has nothing a PATCH could target.
+    expect(screen.getAllByRole('combobox')).toHaveLength(1)
+  })
+
+  it('PATCHes the picked LANGUAGE with the new document id after a successful upload', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<DocumentsSection c={withLinkables()} />)
+    fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
+    const selects = screen.getAllByRole('combobox')
+    await user.selectOptions(selects[1], 'language:lang1')
+    await user.click(screen.getAllByRole('button', { name: 'common:add' }).at(-1)!)
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/candidates/c1/languages/lang1', { document_id: 101 }))
+  })
+
+  it('PATCHes the picked SKILL with the new document id after a successful upload', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<DocumentsSection c={withLinkables()} />)
+    fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
+    const selects = screen.getAllByRole('combobox')
+    await user.selectOptions(selects[1], 'skill:skill1')
+    await user.click(screen.getAllByRole('button', { name: 'common:add' }).at(-1)!)
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/candidates/c1/skills/skill1', { document_id: 101 }))
+  })
+
+  it('calls onRefresh after a successful language link PATCH, so the Achtergrond tab remounts with the fresh link', async () => {
+    const user = userEvent.setup()
+    const onRefresh = vi.fn()
+    const { container } = render(<DocumentsSection c={withLinkables()} onRefresh={onRefresh} />)
+    fireEvent.change(getFileInput(container), { target: { files: [fileA] } })
+    const selects = screen.getAllByRole('combobox')
+    await user.selectOptions(selects[1], 'skill:skill1')
+    await user.click(screen.getAllByRole('button', { name: 'common:add' }).at(-1)!)
+    await waitFor(() => expect(onRefresh).toHaveBeenCalledTimes(1))
+  })
+})
+
+/**
  * Documents punchlist point 1 (DOC-EXPIRY-1): a document carrying `expires_at`
  * shows a danger chip once past due, a warning chip inside the 30-day window
  * (mirrors pages/matches/matchExpiry.ts's own window), and no chip otherwise.

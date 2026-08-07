@@ -21,6 +21,14 @@ vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ candidateTypes
 vi.mock('@/context/VacancyLookupsContext', () => ({ useVacancyLookups: () => ({ seniorityLevels: [], educationLevels: [] }) }))
 vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: [] }) }))
 vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [] }) }))
+// VACANCY-CONTRACT-FIELD-1: the Voorwaarden sub-tab's own contract-type/CAO
+// lookups — same tenant lookups the match's own ContractSection reads.
+vi.mock('@/lib/useContractTypes', () => ({
+  useContractTypes: () => ({ types: ['Bepaalde tijd'], options: [{ value: 'bepaalde_tijd', label: 'Bepaalde tijd', default_duration_days: null, is_default: false }] }),
+}))
+vi.mock('@/lib/useCao', () => ({
+  useCao: () => ({ types: [{ value: 'vvt', label: 'CAO VVT' }], labelOf: (v: string) => v, colorOf: () => undefined }),
+}))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (d: string) => d }) }))
 vi.mock('./useCustomerOptions', () => ({ useCustomerOptions: () => [] }))
 vi.mock('./useCascadePickers', () => ({ useCascadePickers: () => ({ locationPicker: null, departmentPicker: null, contactPicker: null }) }))
@@ -39,6 +47,8 @@ const vacancy = (over: Partial<VacancyDetail> = {}): VacancyDetail => ({
   category: '', industry: '', street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', city: '',
   experienceMin: '', experienceMax: '', seniorityValue: '', educationValue: '',
   salaryMin: '', salaryMax: '', hoursMin: '', hoursMax: '', startDate: '', endDate: '',
+  // VACANCY-CONTRACT-FIELD-1: the Voorwaarden sub-tab's own singular fields.
+  contractType: '', cao: '',
   clientId: null, clientName: '', contractTypes: [], skills: [],
   customerLocationId: '', customerLocationName: '', customerDepartmentId: '', customerDepartmentName: '',
   contactId: '', contactName: '',
@@ -138,6 +148,25 @@ describe('useVacancyDetailsForm · sections are independent (VAC-DETAILS-SPLIT-1
     expect(patch).toEqual(expect.objectContaining({ salaryMin: '2000', salaryMax: '2500', salary: '2000 – 2500' }))
     expect(patch).not.toHaveProperty('experienceMin')
     expect(patch).not.toHaveProperty('category')
+  })
+
+  // VACANCY-CONTRACT-FIELD-1: the Voorwaarden sub-tab's own contract-type/CAO —
+  // same fields the +Match modal proposes onto a new match (useVacancyPrefill).
+  it('conditions save also PATCHes the vacancy\'s own contract type/CAO', () => {
+    const onUpdate = vi.fn()
+    const { result } = renderHook(() => useVacancyDetailsForm(vacancy({ contractType: '', cao: '' }), onUpdate))
+    act(() => { result.current.conditions.setF('contractType', 'bepaalde_tijd') })
+    act(() => { result.current.conditions.setF('cao', 'vvt') })
+    act(() => { result.current.conditions.save() })
+    const [id, patch] = onUpdate.mock.calls[0]
+    expect(id).toBe('v1')
+    expect(patch).toEqual(expect.objectContaining({ contractType: 'bepaalde_tijd', cao: 'vvt' }))
+  })
+
+  it('exposes the same tenant lookups the +Match modal reads (contractTypeOptions/caoOptions)', () => {
+    const { result } = renderHook(() => useVacancyDetailsForm(vacancy()))
+    expect(result.current.contractTypeOptions).toEqual(expect.arrayContaining([expect.objectContaining({ value: 'bepaalde_tijd' })]))
+    expect(result.current.caoOptions).toEqual(expect.arrayContaining([expect.objectContaining({ value: 'vvt' })]))
   })
 
   it('cancelling one section resets only its own form and closes only its own pencil', () => {

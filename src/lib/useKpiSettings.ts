@@ -2,9 +2,13 @@
  * useKpiSettings — loads tenant KPI/target settings from /settings (cached) and
  * exposes them to components, falling back to SETTING_DEFAULTS. Also provides
  * invalidateKpiCache() so SettingsPage can force a reload after saving.
+ *
+ * TENANT SCOPING: the cache is a Map keyed by `${tenantId}` (mirrors useCachedLookup's
+ * tenantCacheKey), not a single module-level blob — a super-admin switching bureaus
+ * mid-session must never be served the PREVIOUS tenant's KPI targets from here.
  */
 import { useState, useEffect } from 'react'
-import api from './api'
+import api, { getActiveTenantId } from './api'
 
 export const SETTING_DEFAULTS: Record<string, number> = {
   // KPI targets
@@ -20,13 +24,21 @@ export const SETTING_DEFAULTS: Record<string, number> = {
   activity_log_limit:      200,
 }
 
-let cache: Record<string, number> | null = null
+// One cache slot per tenant.
+const cacheByTenant = new Map<string, Record<string, number>>()
+
+// Reads localStorage fresh on every call (never memoized) so it always reflects
+// the CURRENT tenant, mirroring useCachedLookup's tenantCacheKey.
+const activeTenantKey = (): string => getActiveTenantId() ?? 'none'
 
 export function useKpiSettings() {
-  const [settings, setSettings] = useState<Record<string, number>>(cache ?? SETTING_DEFAULTS)
+  const [settings, setSettings] = useState<Record<string, number>>(
+    cacheByTenant.get(activeTenantKey()) ?? SETTING_DEFAULTS,
+  )
 
   useEffect(() => {
-    if (cache) return
+    const key = activeTenantKey()
+    if (cacheByTenant.has(key)) return
     api.get('/settings')
       .then(res => {
         const raw = (res.data ?? {}) as Record<string, unknown>
@@ -34,7 +46,7 @@ export function useKpiSettings() {
         Object.keys(SETTING_DEFAULTS).forEach(k => {
           parsed[k] = raw[k] !== undefined ? Number(raw[k]) : SETTING_DEFAULTS[k]
         })
-        cache = parsed
+        cacheByTenant.set(key, parsed)
         setSettings(parsed)
       })
       .catch(() => {})
@@ -43,7 +55,9 @@ export function useKpiSettings() {
   return settings
 }
 
-// Invalidate the cache after saving so all components pick up the new values.
+// Invalidate the ACTIVE tenant's cache slot only, so all components mounted for
+// that tenant pick up the new values on their next fetch — other tenants' cached
+// settings stay untouched.
 export function invalidateKpiCache() {
-  cache = null
+  cacheByTenant.delete(activeTenantKey())
 }

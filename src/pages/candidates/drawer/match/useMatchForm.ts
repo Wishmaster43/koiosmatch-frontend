@@ -9,8 +9,9 @@
  * billing-email takeover-default proposals are their own sibling hooks too
  * (useBranchMismatch, useCascadeDefaults — each a self-contained concern). This
  * hook owns what's left: candidate/relations/contract/financial state, the
- * rate proposal (useRateProposal), inline contact creation, and the POST
- * /matches submit + 422 field mapping. The Vestiging default (useBranchDefault,
+ * rate proposal (useRateProposal), and inline contact creation. The match
+ * record's own submit/edit-prefill network I/O now lives in `useMatchSubmit`
+ * (see the §3 SIZE SPLIT note below). The Vestiging default (useBranchDefault,
  * 7.4) and the end-date proposal from contract type (useEndDateProposal, 7.1)
  * are their own sibling hooks too — same reason as useCascadeDefaults/
  * useBranchMismatch: each a self-contained propose-but-freeze-on-edit concern.
@@ -49,12 +50,17 @@
  * reason as the other propose-but-freeze concerns above — see each hook's own
  * docblock for the exact contract (which vacancy fields are real vs. missing/
  * mismatched-vocabulary, verified against the backend).
+ *
+ * §3 SIZE SPLIT: the match record's own network I/O — the GET /matches/{id}
+ * edit-prefill and the POST/PATCH /matches submit + 422 mapping — now lives in
+ * its own sibling `useMatchSubmit` (this file had grown past the 400-line split
+ * trigger). This hook still ASSEMBLES every value that submit persists; the
+ * sibling only reads/writes them, mirroring the propose-but-freeze siblings above.
  */
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
-import { extractApiError } from '@/lib/extractApiError'
 import { useUsers } from '@/lib/queries'
 import { useCustomerOptions } from '@/pages/vacancies/hooks/useCustomerOptions'
 import { useVacancyOptions } from '@/pages/candidates/hooks/useVacancyOptions'
@@ -73,27 +79,12 @@ import { useEndDateProposal } from './useEndDateProposal'
 import { useVacancyPrefillApply } from './useVacancyPrefillApply'
 import { useRecruiterDefault } from './useRecruiterDefault'
 import { useMatchConflicts } from './useMatchConflicts'
-import { API_TO_FORM, todayISO, findDuplicateContact } from './helpers'
+import { useMatchSubmit } from './useMatchSubmit'
+import { todayISO, findDuplicateContact } from './helpers'
 import type { CascadeOption } from '@/hooks/useCustomerCascade'
 import type { Id } from '@/types/common'
 
 interface UserLike { id?: Id; name?: string }
-
-// The GET /matches/{id} shape this hook prefills from (MatchDetailResource — the
-// list row's fields plus the full block that resource builds). That method is still
-// called placement() on the backend: the vocabulary rename of 31-07 covers our side,
-// theirs follows in MATCH-VOCABULAIRE-1. Naming it match() here would point the next
-// reader at a symbol that does not exist over there.
-interface MatchEditDetail {
-  customer_id?: Id | null; customer_location_id?: Id | null; customer_department_id?: Id | null
-  contact_id?: Id | null; branch_id?: Id | null; vacancy_id?: Id | null
-  owner?: { id?: Id; name?: string } | null
-  function_title?: string | null; contract_type?: string | null
-  start_date?: string | null; end_date?: string | null; hours_per_week?: number | string | null
-  cao?: string | null; scale?: string | null; step?: string | null
-  purchase_rate?: number | string | null; sell_rate?: number | string | null
-  cost_center?: string | null; billing_emails?: string[] | null; remarks?: string | null
-}
 
 export function useMatchForm({
   candidateId: fixedCandidateId, editMatchId, onClose, onCreated,
@@ -203,7 +194,11 @@ export function useMatchForm({
   const { ownerId, setOwnerId } = useRecruiterDefault({ editing, candidateOwnerId, candOwnerId, users })
 
   // ── Contract ──
-  const [contractType, setContractType] = useState('')
+  // VACANCY-CONTRACT-FIELD-1: contractType/cao now also get a vacancy-prefill
+  // overlay (below), so — like every other prefillable field in this hook — the
+  // state holds a RAW setter here; the touched-aware wrapper the JSX/submit body
+  // actually use is defined once useVacancyPrefillApply hands back `markTouched`.
+  const [contractType, setContractTypeRaw] = useState('')
   // Default contract-type PROPOSAL (Danny 24-07 point 4): a tenant can mark ONE
   // contract type as its default (`is_default`, a real backend singleton flag —
   // see useContractTypes for the verified contract). CREATE ONLY: proposing into an
@@ -215,7 +210,7 @@ export function useMatchForm({
     const def = contractTypeOptions.find(o => o.is_default)
     if (!def) return
     contractTypeProposedRef.current = true
-    setContractType(def.label)
+    setContractTypeRaw(def.label)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the options list resolving, never to the recruiter's own pick
   }, [contractTypeOptions])
   // Show the tenant's wording, not the stored slug. A match reads back
@@ -226,7 +221,7 @@ export function useMatchForm({
   useEffect(() => {
     if (!contractType) return
     const label = contractTypeOptions.find(o => o.value === contractType)?.label
-    if (label && label !== contractType) setContractType(label)
+    if (label && label !== contractType) setContractTypeRaw(label)
   }, [contractTypeOptions, contractType])
   // Proposal, not a hard default — the recruiter can freely change it (job 19).
   const [startDate, setStartDateRaw] = useState(todayISO)
@@ -234,7 +229,7 @@ export function useMatchForm({
   // own sibling hook, honest no-op until the BE column exists.
   const { endDate, setEndDate: setEndDateRaw, setEndDateDirty } = useEndDateProposal({ contractType, startDate, options: contractTypeOptions })
   const [hours, setHoursRaw] = useState('')
-  const [cao, setCao] = useState('')
+  const [cao, setCaoRaw] = useState('')
 
   // VACANCY-PREFILL-1 (points 1/2/4): applies the picked vacancy's real fields
   // (customer/location/department/contact/branch/dates/hours) onto the state
@@ -249,6 +244,8 @@ export function useMatchForm({
     setBranchIdRaw, setBranchDirty,
     setStartDateRaw, setEndDateRaw, setEndDateDirty,
     setHoursRaw,
+    // VACANCY-CONTRACT-FIELD-1: the vacancy's own contract_type/cao, same overlay contract.
+    setContractTypeRaw, setCaoRaw,
     candBranchId: candBranch?.id,
   })
   // Picking a (new) customer BY HAND resets the dependent picks — cascade
@@ -272,6 +269,10 @@ export function useMatchForm({
   const setStartDate = (v: string) => { markTouched('startDate'); setStartDateRaw(v) }
   const setEndDate = (v: string) => { markTouched('endDate'); setEndDateRaw(v) }
   const setHours = (v: string) => { markTouched('hours'); setHoursRaw(v) }
+  // VACANCY-CONTRACT-FIELD-1: same touched-freeze contract as every field above —
+  // ContractSection's picker/CreatableSelect calls THESE, never the raw setters.
+  const setContractType = (v: string) => { markTouched('contractType'); setContractTypeRaw(v) }
+  const setCao = (v: string) => { markTouched('cao'); setCaoRaw(v) }
 
   // ── Financieel ──
   const [scale, setScale] = useState('')
@@ -290,11 +291,6 @@ export function useMatchForm({
   // pencil-to-edit idiom (ProfileTab/DescriptionTab), simplified to a one-way
   // reveal since a fresh create-form field has no prior saved value to preview.
   const [remarksEditing, setRemarksEditing] = useState(false)
-  const [saving, setSaving] = useState(false)
-  // 422 field errors (house pattern, mirrors AddCandidateModal/AddCustomerModal) +
-  // a non-field fallback banner — replaces the old generic-toast-only handling.
-  const [errors, setErrors] = useState<Record<string, boolean>>({})
-  const [submitErr, setSubmitErr] = useState<string | null>(null)
 
   // Rate proposal (MATCH-PLACEMENT-2): debounced lookup keyed on customer + function
   // (+ optional cao/scale/step). Prefills empty rate fields + drives the deviation
@@ -312,131 +308,27 @@ export function useMatchForm({
   const margin = (Number(sell) || 0) - (Number(purchase) || 0)
   const hasRates = purchase !== '' && sell !== ''
 
-  // EDIT-MATCH-1: fetch the full record once — the candidate's embedded `matches`
-  // row (MATCH-EMBED-1) carries none of the match/contract/financial fields.
-  const [editDetail, setEditDetail] = useState<MatchEditDetail | null>(null)
-  useEffect(() => {
-    if (!editMatchId) return
-    let alive = true
-    api.get(`/matches/${editMatchId}`)
-      .then(r => { if (alive) setEditDetail((unwrap(r)) as MatchEditDetail) })
-      .catch(() => { if (alive) setSubmitErr(t('common:errorGeneric')) })
-    return () => { alive = false }
-  }, [editMatchId]) // eslint-disable-line react-hooks/exhaustive-deps -- t is stable (i18n)
-
-  // One-shot prefill once the record arrives — every *Dirty flag is forced true
-  // right after its value is set so the sibling "propose" hooks (branch/end-date/
-  // cost-centre/billing-email) never recompute over the loaded value; skipCascadeResetRef
-  // stops the customerId-change reset above from wiping location/department/contact.
-  // Uses the RAW setters throughout (never the touched-aware ones): an edit-mode
-  // prefill is not a vacancy prefill, and the vacancy field itself is read-only
-  // while editing (RelationsSection), so touched-tracking is simply irrelevant here.
-  useEffect(() => {
-    if (!editDetail) return
-    skipCascadeResetRef.current = true
-    setCustomerIdRaw(editDetail.customer_id != null ? String(editDetail.customer_id) : '')
-    setLocationIdRaw(editDetail.customer_location_id != null ? String(editDetail.customer_location_id) : '')
-    setDepartmentIdRaw(editDetail.customer_department_id != null ? String(editDetail.customer_department_id) : '')
-    setContactIdRaw(editDetail.contact_id != null ? String(editDetail.contact_id) : '')
-    setBranchIdRaw(editDetail.branch_id != null ? String(editDetail.branch_id) : ''); setBranchDirty(true)
-    setVacancyIdRaw(editDetail.vacancy_id != null ? String(editDetail.vacancy_id) : '')
-    setOwnerId(editDetail.owner?.id != null ? String(editDetail.owner.id) : '')
-    setFunc(editDetail.function_title ?? '')
-    setContractType(editDetail.contract_type ?? '')
-    setStartDateRaw(editDetail.start_date ?? '')
-    setEndDateRaw(editDetail.end_date ?? ''); setEndDateDirty(true)
-    setHoursRaw(editDetail.hours_per_week != null ? String(editDetail.hours_per_week) : '')
-    setCao(editDetail.cao ?? '')
-    setScale(editDetail.scale ?? '')
-    setStep(editDetail.step ?? '')
-    setPurchase(editDetail.purchase_rate != null ? String(editDetail.purchase_rate) : '')
-    setSell(editDetail.sell_rate != null ? String(editDetail.sell_rate) : '')
-    setCostCenter(editDetail.cost_center ?? ''); setCostCenterDirty(true)
-    setBillingEmails(editDetail.billing_emails?.length ? editDetail.billing_emails : [''])
-    setBillingDirty(true)
-    setRemarks(editDetail.remarks ?? '')
-    // Every setter above is a stable useState/sibling-hook setter — only react to a NEW record.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editDetail])
-
-  // POST (create) or PATCH (edit) the match. vacancy_id + department are
-  // optional; the rest form the contract layer. Identity (candidate/vacancy) is
-  // NOT accepted by UpdateMatchRequest (mirrors the backend docblock) — the PATCH
-  // body below deliberately omits both, RelationsSection renders vacancy read-only
-  // while editing so the UI never implies an edit that silently drops (§3).
-  const submit = async () => {
-    if (!candidateId || !customerId || !func) return
-    setSaving(true)
-    setErrors({}); setSubmitErr(null)
-    const match = {
-      customer_id: customerId,
-      customer_location_id: locationId || null,
-      customer_department_id: departmentId || null,
-      contact_id: contactId || null,
-      branch_id: branchId || null,
-      function_title: func,
-      contract_type: contractType || null,
-      start_date: startDate || null,
-      end_date: endDate || null,
-      hours_per_week: hours ? Number(hours) : null,
-      cao: cao || null,
-      scale: scale || null,
-      step: step || null,
-      purchase_rate: purchase ? Number(purchase) : null,
-      sell_rate: sell ? Number(sell) : null,
-      cost_center: costCenter || null,
-      billing_emails: billingEmails.map(e => e.trim()).filter(Boolean),
-      remarks: remarks || null,
-      ...(ownerId ? { owner_id: ownerId } : {}),
-    }
-    const body: Record<string, unknown> = editing
-      ? match // PATCH — no candidate_id/vacancy_id (identity stays fixed).
-      : { candidate_id: candidateId, ...match, ...(vacancyId ? { vacancy_id: vacancyId } : {}) }
-    try {
-      if (editing) await api.patch(`/matches/${editMatchId}`, body)
-      else         await api.post('/matches', body)
-
-      // MATCH-EXPERIENCE-AUTO-1 (CMBE, 2026-07-25): the backend's MatchMaker now
-      // writes the work-experience entry itself on every match create — with and
-      // without a vacancy — and is idempotent on employer+start date per candidate.
-      // The frontend must NOT post one anymore (the old interim bridge is removed).
-
-      // Mismatch resolution: recruiter chose to move the candidate's branch along.
-      // Best-effort AFTER the match — its failure must NOT roll back or lose
-      // the match that was just created, so this stays a separate, non-fatal call.
-      // BUG CLASS FIX: it used to end in `.catch(() => {})` — a fully silent
-      // best-effort write, so the recruiter believed the branch moved when it
-      // hadn't. It still doesn't throw (the match creation above already
-      // succeeded and must be reported as such), but it now tells the user with
-      // its own specific message instead of saying nothing.
-      if (branchMismatch && mismatchChoice === 'candidate' && detail?.branch_id) {
-        await api.patch(`/candidates/${candidateId}`, { location_id: detail.branch_id })
-          .catch(() => notifyError(t('placement.branchMoveFailed')))
-      }
-      notifySuccess(t(editing ? 'placement.updated' : 'placement.created'))
-      onCreated(); onClose()
-    } catch (err) {
-      // Show field-level errors from 422 validation responses; fall back to the
-      // server's message (or a generic one, via the shared extractApiError) so
-      // the user isn't left guessing.
-      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
-      const apiErrors = e?.response?.data?.errors
-      if (apiErrors) {
-        const e2: Record<string, boolean> = {}
-        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
-        setErrors(e2)
-      } else {
-        setSubmitErr(extractApiError(err, t('common:errorGeneric')))
-      }
-    } finally { setSaving(false) }
-  }
-
-  // First click on a deviating submit shows the inline confirm instead of posting;
-  // the second click (confirm already true) goes through — "one extra click", no hard block.
-  const handleSubmitClick = () => {
-    if (deviatesFromProposal && !confirmDeviation) { setConfirmDeviation(true); return }
-    submit()
-  }
+  // §3 split: the match record's own network I/O (edit-prefill fetch + POST/PATCH
+  // submit + 422 mapping) — own sibling hook, fed every value it needs to
+  // assemble the request body and every RAW setter it needs for the one-shot
+  // edit prefill (never the touched-aware ones, see its own docblock).
+  const { saving, errors, submitErr, handleSubmitClick } = useMatchSubmit({
+    editing, editMatchId, candidateId, t, onClose, onCreated,
+    customerId, locationId, departmentId, contactId, branchId,
+    func, contractType, startDate, endDate, hours, cao, scale, step,
+    purchase, sell, costCenter, billingEmails, remarks, ownerId, vacancyId,
+    branchMismatch, mismatchChoice, detail,
+    deviatesFromProposal, confirmDeviation, setConfirmDeviation,
+    skipCascadeResetRef,
+    setCustomerIdRaw, setLocationIdRaw, setDepartmentIdRaw, setContactIdRaw,
+    setBranchIdRaw, setBranchDirty, setVacancyIdRaw, setOwnerId, setFunc,
+    // VACANCY-CONTRACT-FIELD-1: the edit-mode one-shot prefill needs the RAW
+    // setters too (mirrors every other field here) — never the touched-aware
+    // wrappers, so loading an existing match never freezes a later vacancy pick.
+    setContractType: setContractTypeRaw, setStartDateRaw, setEndDateRaw, setEndDateDirty, setHoursRaw,
+    setCao: setCaoRaw, setScale, setStep, setPurchase, setSell,
+    setCostCenter, setCostCenterDirty, setBillingEmails, setBillingDirty, setRemarks,
+  })
 
   // Create a contact for the current customer, coupled to the picked location, then
   // refetch the cascade (shared hook) and select the new contact.

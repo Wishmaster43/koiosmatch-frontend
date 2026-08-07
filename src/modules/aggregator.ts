@@ -6,7 +6,7 @@ export default {
   category: 'Flow beheer',
   label: 'Aggregator',
   Icon:  Combine,
-  color: '#0369A1',
+  color: 'var(--module-info)',
   bg:    'var(--color-info-bg)',
   schema: [
     {

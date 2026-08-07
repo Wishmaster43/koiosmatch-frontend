@@ -8,8 +8,8 @@ export default {
   label: 'Berichtstatus',
   Icon:  MessageCircle,
   color: 'var(--color-success)',
-  // eslint-disable-next-line no-restricted-syntax -- module-palette tint, no matching --color-success-bg hue close enough; tracked as a token-set follow-up
-  bg:    '#EAF7EE',
+  // Own tint % (lighter than --color-success-bg) so the module keeps its own soft-green swatch.
+  bg:    'color-mix(in srgb, var(--color-success) 9%, transparent)',
   schema: [
     { key: 'message_category', label: 'Berichtcategorie', type: 'text', placeholder: 'shifts_offered' },
   ],

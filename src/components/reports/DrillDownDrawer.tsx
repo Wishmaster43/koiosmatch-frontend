@@ -9,6 +9,7 @@ import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useDateFormat } from '@/lib/datetime'
 import DrillTabs from '@/components/ui/DrillTabs'
 import { navigateToPage } from '@/lib/navigate'
 import type { ReportCandidate } from '@/types/reports'
@@ -36,9 +37,11 @@ function StatusBadge({ status }: { status?: string }) {
   )
 }
 
-function formatDate(dateStr?: string | null) {
+// Null (not '—') for empty input so InfoRow below hides the whole row instead of
+// showing "Label: —"; locale is passed in from the caller's useDateFormat().locale.
+function formatDate(dateStr: string | null | undefined, locale: string) {
   if (!dateStr) return null
-  return new Date(dateStr).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })
+  return new Date(dateStr).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 function InfoRow({ icon: Icon, label, value, highlight }: { icon: LucideIcon; label: ReactNode; value?: ReactNode; highlight?: boolean }) {
@@ -59,6 +62,8 @@ function InfoRow({ icon: Icon, label, value, highlight }: { icon: LucideIcon; la
 export default function DrillDownDrawer({ title, subtitle, candidates = [], onClose, tabs, initialTab }: { title?: ReactNode; subtitle?: ReactNode; candidates?: ReportCandidate[]; onClose: () => void; tabs?: { key: string; label: ReactNode; candidates: ReportCandidate[]; title?: string }[]; initialTab?: string }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')
+  // App-wide active locale (§5) — fed into formatDate below instead of a hardcoded 'nl-NL'.
+  const { locale } = useDateFormat()
   const [search, setSearch] = useState('')
   // Widen the panel to a two-column-friendly size (same affordance as the candidate drawer).
   const [expanded, setExpanded] = useState(false)
@@ -181,15 +186,15 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
                         <InfoRow icon={Briefcase}    label={t('drilldown.fields.position')}     value={c.position} />
                         <InfoRow icon={Phone}        label={t('drilldown.fields.mobile')}       value={c.mobile} />
                         <InfoRow icon={Mail}         label={t('drilldown.fields.email')}        value={c.email} />
-                        <InfoRow icon={Calendar}     label={t('drilldown.fields.registered')}   value={formatDate(c.registration_date)} />
-                        <InfoRow icon={Clock}        label={t('drilldown.fields.lastLogin')}    value={formatDate(c.last_login_at)} />
+                        <InfoRow icon={Calendar}     label={t('drilldown.fields.registered')}   value={formatDate(c.registration_date, locale)} />
+                        <InfoRow icon={Clock}        label={t('drilldown.fields.lastLogin')}    value={formatDate(c.last_login_at, locale)} />
                         <InfoRow
                           icon={CalendarCheck}
                           label={t('drilldown.fields.plannedOn')}
-                          value={c.last_planned_shift ? formatDate(c.last_planned_shift) : t('drilldown.notPlanned')}
+                          value={c.last_planned_shift ? formatDate(c.last_planned_shift, locale) : t('drilldown.notPlanned')}
                           highlight={!isPlannedFuture}
                         />
-                        <InfoRow icon={CalendarCheck} label={t('drilldown.fields.lastShift')}    value={formatDate(c.last_worked_shift)} />
+                        <InfoRow icon={CalendarCheck} label={t('drilldown.fields.lastShift')}    value={formatDate(c.last_worked_shift, locale)} />
                         <InfoRow icon={Clock}         label={t('drilldown.fields.shiftsWorked')} value={c.number_of_times_worked ?? null} />
                         {(c.no_show_count ?? 0) > 0 && (
                           <InfoRow icon={Clock} label={t('drilldown.fields.noShows')} value={c.no_show_count} highlight />

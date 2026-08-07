@@ -9,8 +9,8 @@ export default {
   category: 'Communicatie',
   label: 'Bericht naar sollicitant',
   Icon:  Send,
-  color: '#3B6D11',
-  bg:    '#EAF3DE',
+  color: 'var(--module-green)',
+  bg:    'color-mix(in srgb, var(--module-green) 12%, transparent)',
   schema: [
     { key: 'channel',             label: 'Kanaal',             type: 'select',   options: ['e-mail', 'whatsapp zakelijk', 'whatsapp privé (nummer eigenaar)'] },
     { key: 'subject',             label: 'Onderwerp (e-mail)', type: 'text',     placeholder: 'Je sollicitatie bij {vacature.titel}' },

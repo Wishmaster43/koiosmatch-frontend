@@ -32,6 +32,8 @@ const baseSection = (extra: Record<string, unknown> = {}) => ({
 const makeHookReturn = (overrides: { general?: object; location?: object; requirements?: object; conditions?: object } = {}) => ({
   candidateTypes: [], typeMeta: () => ({ label: '', color: '#000' }),
   seniorityLevels: [], educationLevels: [], industries: [], formatDate: (d: string) => d, fnOptions: [],
+  // VACANCY-CONTRACT-FIELD-1: Voorwaarden's own contract-type/CAO lookups.
+  contractTypeOptions: [], caoOptions: [],
   general: baseSection({
     clientId: '', handleClientChange: vi.fn(), customerOptions: [],
     cascade: { locationName: '', departmentName: '', contactName: '' },

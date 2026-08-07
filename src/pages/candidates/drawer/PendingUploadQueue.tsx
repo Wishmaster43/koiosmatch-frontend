@@ -15,6 +15,10 @@ interface PendingUploadQueueProps {
   docTypes: LookupOption[]
   educations: Array<{ id?: Id; title?: string }>
   certifications: Array<{ id?: Id; name?: string }>
+  // DOC-LANG-SKILL-LINK-1: same "Koppelen aan" mechanic, extended to languages/skills
+  // — threaded straight through to DocumentLinkPicker (mirrors educations/certifications).
+  languages: Array<{ id?: Id; language?: string; name?: string }>
+  skills: Array<{ id?: Id; name?: string }>
   onSetType: (idx: number, type: string) => void
   onSetAllTypes: (type: string) => void
   onSetLink: (idx: number, linkTo: string) => void
@@ -26,12 +30,12 @@ interface PendingUploadQueueProps {
 /**
  * PendingUploadQueue — the staged, not-yet-uploaded file list shown above the
  * documents table: per-file type + optional "Koppelen aan" link picker
- * (DOC-ENTRY-LINK-1), an "apply to all" type shortcut, and Add/Cancel. Split
- * out of DocumentsSection (§3 size discipline) — purely presentational, all
- * state lives in the parent.
+ * (DOC-ENTRY-LINK-1 / DOC-LANG-SKILL-LINK-1), an "apply to all" type shortcut,
+ * and Add/Cancel. Split out of DocumentsSection (§3 size discipline) — purely
+ * presentational, all state lives in the parent.
  */
 export default function PendingUploadQueue({
-  pending, docTypes, educations, certifications, onSetType, onSetAllTypes, onSetLink, onRemove, onUploadAll, onCancel,
+  pending, docTypes, educations, certifications, languages, skills, onSetType, onSetAllTypes, onSetLink, onRemove, onUploadAll, onCancel,
 }: PendingUploadQueueProps) {
   const { t } = useTranslation('candidates')
   if (pending.length === 0) return null
@@ -70,9 +74,10 @@ export default function PendingUploadQueue({
               style={{ fontSize: 11, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)' }}>
               {docTypes.map(dt => <option key={dt.value} value={dt.value}>{dt.label}</option>)}
             </select>
-            {/* DOC-ENTRY-LINK-1: OPTIONAL "Koppelen aan" — grouped by education/certification. */}
+            {/* DOC-ENTRY-LINK-1 / DOC-LANG-SKILL-LINK-1: OPTIONAL "Koppelen aan" —
+                grouped by education/certification/language/skill. */}
             <DocumentLinkPicker ariaLabel={t('documents.linkToFor', { name: item.name })} value={item.linkTo} onChange={v => onSetLink(idx, v)}
-              educations={educations} certifications={certifications} />
+              educations={educations} certifications={certifications} languages={languages} skills={skills} />
             <button onClick={() => onRemove(idx)} aria-label={t('common:remove')}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex', flexShrink: 0 }}><X size={12} /></button>
           </div>

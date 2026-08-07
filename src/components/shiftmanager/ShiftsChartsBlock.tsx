@@ -30,6 +30,7 @@ import InsightsRow from "@/components/insights/InsightsRow"
 import type { KpiSpec, DonutSpec } from "@/components/insights/InsightsRow"
 import type { ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
 import { formatNumber } from '@/lib/formatters'
+import { useDateFormat } from '@/lib/datetime'
 
 export default function ShiftsChartsBlock({
   filterKey         = 'shifts-charts',
@@ -51,6 +52,9 @@ export default function ShiftsChartsBlock({
   leadingDonuts?: DonutSpec[]
 }) {
   const { t } = useTranslation('shiftmanager')
+  // App-wide active locale (§5) — feeds the "last sync" timestamp below instead
+  // of a hardcoded 'nl-NL' toLocaleString.
+  const { formatDate } = useDateFormat()
   // Stable series-label resolver (memoised so derived bars don't recompute each render).
   const seriesLabel = useCallback((key: string) => t(`charts.series.${key}`, { defaultValue: key }), [t])
 
@@ -242,7 +246,7 @@ export default function ShiftsChartsBlock({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 0 8px', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                {lastSync && t('charts.lastSync', { time: new Date(lastSync).toLocaleString('nl-NL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) })}
+                {lastSync && t('charts.lastSync', { time: formatDate(lastSync, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) })}
               </span>
               <SmSyncButton />
             </div>

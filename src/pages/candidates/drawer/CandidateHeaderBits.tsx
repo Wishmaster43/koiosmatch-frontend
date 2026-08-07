@@ -20,7 +20,7 @@ import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 import type { HeaderForm } from '../hooks/useCandidateHeaderEdit'
 
-const inputBase = { width: '100%', minWidth: 0, boxSizing: 'border-box' as const, padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border)', outline: 'none' }
+const inputBase = { width: '100%', minWidth: 0, boxSizing: 'border-box' as const, padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border)' }
 const iconBtn = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 } as const
 
 // Title block: name + phase badge, or the name/function edit form. The status
@@ -94,19 +94,19 @@ export function CandidateHeaderActions({ c, isEntryPhase, nextPhase, converting,
           button — this was the exact "Converteer naar Kandidaat" vs "+ Kandidaat" mismatch Danny flagged. */}
       {(isEntryPhase && nextPhase) ? (
         <button onClick={onConvert}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, height: BTN_H, padding: '0 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'white' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 4, height: BTN_H, padding: '0 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'var(--color-on-accent)' }}>
           <UserCheck size={11} />{t('drawer.convertTo', { phase: nextPhase.label })}
         </button>
       ) : (
         <button disabled={cvGenerating || converting} onClick={downloadCv}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, height: BTN_H, padding: '0 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: (cvGenerating || converting) ? 'not-allowed' : 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'white', opacity: (cvGenerating || converting) ? 0.7 : 1 }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 4, height: BTN_H, padding: '0 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: (cvGenerating || converting) ? 'not-allowed' : 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'var(--color-on-accent)', opacity: (cvGenerating || converting) ? 0.7 : 1 }}>
           <Download size={11} />{cvGenerating ? t('drawer.generating') : t('drawer.downloadCv')}
         </button>
       )}
       {headerEditing ? (
         <>
           <button onClick={onSaveEdit} title={t('common:save')}
-            style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}>
+            style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}>
             <Save size={14} />
           </button>
           <button onClick={onCancelEdit} title={t('common:cancel')}
@@ -162,7 +162,7 @@ export function ArchivedBanner({ c, canHardDelete, onRestore, onMarkDeletion, on
       {inTrash && onHardDelete && canHardDelete && (
         <button onClick={() => onHardDelete(c.id)}
           title={t('drawer.hardDelete')} aria-label={t('drawer.hardDelete')}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'var(--color-danger)', border: 'none', borderRadius: 6, cursor: 'pointer', padding: '3px 8px', color: '#fff', fontSize: 11, fontWeight: 600 }}>
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'var(--color-danger)', border: 'none', borderRadius: 6, cursor: 'pointer', padding: '3px 8px', color: 'var(--color-on-accent)', fontSize: 11, fontWeight: 600 }}>
           <Trash2 size={12} /> {t('erase.deleteForever')}
         </button>
       )}

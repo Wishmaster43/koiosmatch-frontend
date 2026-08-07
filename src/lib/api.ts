@@ -64,6 +64,17 @@ for (const key of ['auth_token', 'auth_user', 'accessible_pages', 'token', 'user
 }
 
 /**
+ * Reads the active tenant id (same localStorage key AuthContext writes on
+ * login/switch). Exported so tenant-scoped client caches — React Query keys
+ * (lib/queries.ts), the useCachedLookup module cache — can key off the SAME
+ * source the X-Tenant header below uses, instead of relying solely on the
+ * hard-reload AuthContext.setActiveTenant does on a bureau switch.
+ */
+export function getActiveTenantId(): string | null {
+  return localStorage.getItem('active_tenant')
+}
+
+/**
  * Request interceptor — attaches the auth-mode + active-tenant headers.
  *
  * SECURITY: X-Tenant is browser-controlled. The BACKEND must verify the
@@ -76,7 +87,7 @@ for (const key of ['auth_token', 'auth_user', 'accessible_pages', 'token', 'user
 const SLOW_PATHS = /\/(sm_reports|sm_sync|reports|workflows\/[^/]+\/(run|execute)|ai\/|exports?|imports?|documents|avatar)/
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const tenant = localStorage.getItem('active_tenant')
+  const tenant = getActiveTenantId()
   // X-Auth-Mode tells the backend to return token:null on login (no bearer
   // credential over the wire at all — D1 aftercare, agreed with BE 2026-07-04).
   config.headers['X-Auth-Mode'] = 'cookie'

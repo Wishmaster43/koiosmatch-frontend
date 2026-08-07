@@ -243,7 +243,8 @@
     "redo": "Opnieuw",
     "expand": "Vergroten",
     "collapse": "Verkleinen",
-    "html": "HTML-bron"
+    "html": "HTML-bron",
+    "language": "Taal"
   },
   "changelog": "Wijzigingslog",
   "backofficeLinks": {
@@ -295,5 +296,31 @@
     "prevAt": "Vorige ({{index}} van {{total}})",
     "nextAt": "Volgende ({{index}} van {{total}})"
   },
-  "new": "Nieuw"
+  "new": "Nieuw",
+  "aiGenerated": "AI-gegenereerd",
+  "aiGeneratedHint": "Door Koios AI gegenereerd — controleer voor gebruik.",
+  "notesAssist": {
+    "title": "Koios assistent",
+    "needsText": "Voeg eerst tekst toe",
+    "improve": "Verbeteren",
+    "summarize": "Samenvatten",
+    "actions": "Actiepunten",
+    "noItems": "Geen actiepunten gevonden",
+    "apply": "Overnemen",
+    "discard": "Verwerpen",
+    "error": "Koios AI-assistent is niet beschikbaar. Probeer het opnieuw.",
+    "actionTypes": {
+      "task": "Taak",
+      "whatsapp": "WhatsApp",
+      "email": "E-mail",
+      "appointment": "Afspraak",
+      "notification": "Melding"
+    }
+  },
+  "ai": {
+    "title": "Koios AI adviseert",
+    "beta": "Beta",
+    "refresh": "Vernieuwen",
+    "analyzing": "Analyseren…"
+  }
 }

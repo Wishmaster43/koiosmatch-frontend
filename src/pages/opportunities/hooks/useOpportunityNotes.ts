@@ -16,6 +16,8 @@ export interface OpportunityNote {
   body?: string
   type?: string
   created_at?: string
+  // NOTE-TAAL-1: the note's own spellcheck/output language — null/absent = tenant default.
+  language?: string
   [k: string]: unknown
 }
 
@@ -57,7 +59,8 @@ export function useOpportunityNotes(id?: Id) {
   // (optimistic prepend with a temp id), reload for the server-resolved id/author on
   // success, and on failure remove that exact temp note + surface the server's own
   // reason — never leave a failed note lingering as if it had saved.
-  const addNote = useCallback((payload: { type: string; body: string }) => {
+  // NOTE-TAAL-1: `language` is optional and forwarded to the API as-is (undefined = tenant default).
+  const addNote = useCallback((payload: { type: string; body: string; language?: string }) => {
     if (!id || !payload.body.trim()) return
     const temp: OpportunityNote = { id: `tmp-${Date.now()}`, type: payload.type, body: payload.body, created_at: new Date().toISOString() }
     setItems(prev => [temp, ...prev])

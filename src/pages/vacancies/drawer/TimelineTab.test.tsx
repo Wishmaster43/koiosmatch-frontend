@@ -92,6 +92,21 @@ describe('TimelineTab', () => {
   })
 })
 
+// AI-ACT-1: an `ai` entry used to render only a bare KoiosAiMark icon with no
+// visible text — replaced by the shared AiGeneratedLabel so the disclosure is
+// icon+text, never colour/icon-only (§6).
+describe('TimelineTab · AI-generated disclosure (AI-ACT-1)', () => {
+  it('shows the AI-generated label on an ai-flagged event', () => {
+    renderTab([event({ id: `note-${UUID}`, ai: true })])
+    expect(screen.getByText('AI-gegenereerd')).toBeInTheDocument()
+  })
+
+  it('shows nothing extra on a human-authored event', () => {
+    renderTab([event({ id: `note-${UUID}`, ai: false })])
+    expect(screen.queryByText('AI-gegenereerd')).toBeNull()
+  })
+})
+
 // Danny 05-08: raw ISO strings + isolated dots without a connecting line, on
 // this Tijdlijn tab specifically (screenshot was the applications one, but the
 // same fix applies here too).

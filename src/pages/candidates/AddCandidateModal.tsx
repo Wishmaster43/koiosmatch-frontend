@@ -10,14 +10,15 @@
  *
  * Thin container (refactor 2026-07-20): each titled card is a presentational
  * component under `addmodal/` (props in, callbacks out); this file owns state,
- * validation and the submit/422 logic.
+ * validation and the submit/422 logic. Live field validation and the required-
+ * fields resolution moved into their own `addmodal/` hooks (§3 size discipline,
+ * split 2026-08-06) — this file still gates submit on what they report, it no
+ * longer computes it inline.
  */
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { UserPlus } from 'lucide-react'
 import { useLookups } from '@/context/LookupsContext'
 import { useNavigation } from '@/context/NavigationContext'
-import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { useUsers } from '@/lib/queries'
 import { useGenders } from '@/lib/useGenders'
 import { useAuth } from '@/context/AuthContext'
@@ -25,15 +26,15 @@ import { useCreateCandidate } from './hooks/useCandidateMutations'
 import { useLocations } from '@/lib/useLocations'
 import { useFunctions } from '@/lib/useFunctions'
 import { useProvinces } from '@/hooks/useProvinces'
-import { BTN_H } from '@/config/buttonMetrics'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { modalColumns } from '@/components/ui/modalCards'
 import { toLinkedinSlug } from '@/components/drawer/contactLinks'
-import { isValidEmailFormat, isValidPhoneFormat, isValidLinkedinFormat } from './lib/contactFieldValidation'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 import ModalHeader from './addmodal/ModalHeader'
+import ModalFooter from './addmodal/ModalFooter'
+import NoStatusNotice from './addmodal/NoStatusNotice'
 import DuplicateNotice from './addmodal/DuplicateNotice'
 import { useRestoreDuplicate } from './addmodal/useDuplicateProbe'
 import type { DuplicateMatch } from './addmodal/useDuplicateProbe'
@@ -46,6 +47,8 @@ import BranchesCard from './addmodal/BranchesCard'
 import CvUploadCard from './addmodal/CvUploadCard'
 import { CvFilledContext } from './addmodal/cvFilledContext'
 import { useCvPrefill } from './addmodal/useCvPrefill'
+import { useLiveFieldValidation } from './addmodal/useLiveFieldValidation'
+import { useRequiredFields } from './addmodal/useRequiredFields'
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
@@ -57,16 +60,6 @@ const API_TO_FORM: Record<string, string> = {
   city: 'city', province: 'province', country: 'country', owner_id: 'ownerId',
   // CONTACT-LINKEDIN-1: the backend validation rule/column is `linkedin_slug`.
   linkedin_slug: 'linkedin',
-}
-
-// VALIDATIE-LIVE-1 (Danny 06-08): the ZZP-tab pattern becomes the standard — live,
-// on-blur/typing format checks (mirroring the backend rules 1:1, see
-// contactFieldValidation.ts) for the same fields ProfileContactTab validates.
-const FORMAT_VALIDATORS: Partial<Record<keyof FormState, (v: string) => boolean>> = {
-  email: isValidEmailFormat, phone: isValidPhoneFormat, mobile: isValidPhoneFormat, linkedin: isValidLinkedinFormat,
-}
-const FORMAT_ERROR_KEY: Partial<Record<keyof FormState, string>> = {
-  email: 'validation.emailFormat', phone: 'validation.phoneFormat', mobile: 'validation.phoneFormat', linkedin: 'validation.linkedinFormat',
 }
 
 // Lifecycle states that make sense when CREATING a candidate (not matched/inactive/etc.).
@@ -105,7 +98,6 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
     user: { id?: Id; branch_ids?: Array<string | number> } | null
     hasPermission?: (perm: string) => boolean
   }
-  const settings = useAllSettings()
   const { genders } = useGenders()
   // Zoekbare comboboxen (Danny r2): functietitel uit de functies-lookup (free-entry-
   // toggle bepaalt of typen een nieuwe waarde mag opleveren), provincies uit de lookup.
@@ -125,11 +117,6 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const [status,    setStatus]    = useState(defaultStatus)
   const [errors,    setErrors]    = useState<Record<string, boolean>>({})
   const [submitErr, setSubmitErr] = useState<string | null>(null)
-  // VALIDATIE-LIVE-1: the server's own per-field message (422), and which fields
-  // the user has already left (blurred) — a live format error only renders once
-  // the field is touched, never on the very first keystroke.
-  const [fieldMessages, setFieldMessages] = useState<Record<string, string>>({})
-  const [touched, setTouched] = useState<Record<string, boolean>>({})
   // C-29: the duplicate the server REFUSED the create on (409 `existing`), kept so
   // the user gets a real panel instead of the raw server sentence.
   const [dupBlock,  setDupBlock]  = useState<DuplicateMatch | null>(null)
@@ -173,33 +160,23 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
     setErrors({})
   }, [])
   const { cv, cvFilled, summary: cvSummary, clearMark } = useCvPrefill(form, applyCvPatch)
+  // VALIDATIE-LIVE-1 (§3 size split): live format checks + the 422 field message
+  // resolution — own sibling hook, fed the live form so a message always reflects
+  // the value currently on screen.
+  const { setFieldMessages, markTouched, fieldMessage, clearFieldMessage, touchInvalidFields, hasFormatError } =
+    useLiveFieldValidation(form, t)
 
   const set = (k: keyof FormState, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
     // A fresh edit invalidates any server 422 message shown for this field.
-    if (fieldMessages[k]) setFieldMessages(m => ({ ...m, [k]: '' }))
+    clearFieldMessage(k)
     setSubmitErr(null)
     // Editing a CV-prefilled field means the recruiter checked it — drop the mark.
     clearMark(k)
     // Editing anything invalidates the refused-create verdict; the next submit re-asks
     // the server (which stays the only authority on what is a duplicate).
     setDupBlock(null)
-  }
-  // VALIDATIE-LIVE-1: mark a field touched on blur, and whether its CURRENT value
-  // fails its own format check (empty is always valid — required-ness is separate).
-  const markTouched = (k: keyof FormState) => setTouched(prevT => ({ ...prevT, [k]: true }))
-  const liveInvalid = (k: keyof FormState): boolean => {
-    const check = FORMAT_VALIDATORS[k]
-    return !!check && !check(String(form[k] ?? ''))
-  }
-  // The message to show under a field: the server's own 422 text wins (it is the
-  // authoritative source and the value the user still sees must match it — never
-  // wiped, §house rule); otherwise a live format problem, only once touched.
-  const fieldMessage = (k: keyof FormState): string | undefined => {
-    if (fieldMessages[k]) return fieldMessages[k]
-    if (touched[k] && liveInvalid(k)) return t(FORMAT_ERROR_KEY[k] as string)
-    return undefined
   }
 
   // The duplicate panel is driven by the create 409 alone. A live "warn while you
@@ -217,29 +194,18 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   // the UI and re-checked by the backend (§7).
   const restoreAndOpen = async (id: Id) => { if (await restore(id)) openExisting(id) }
 
-  // Required fields for the chosen phase (Settings → Verplichte velden), with a
-  // sensible fallback. Maps the backend field keys to this form's field names.
-  const REQ_FIELD_MAP: Record<string, keyof FormState> = {
-    first_name: 'firstName', last_name: 'lastName', email: 'email', phone: 'phone',
-    function_title: 'functionTitle', date_of_birth: 'dateOfBirth', gender: 'gender',
-    street: 'street', postal_code: 'postalCode', city: 'city',
-  }
-  const requiredCfg = getJsonSetting<Record<string, string[]>>(settings, 'candidate_required_fields',
-    // Fallback mirrors CandidateRequiredFieldsSettings' DEFAULTS (email/phone not required by default — Danny punt 3).
-    { lead: ['first_name', 'last_name'], candidate: ['first_name', 'last_name', 'function_title'] })
-  const requiredForm = (requiredCfg[status] ?? requiredCfg.lead ?? []).map(k => REQ_FIELD_MAP[k]).filter(Boolean) as Array<keyof FormState>
-  const isReq = (k: keyof FormState) => requiredForm.includes(k)
-
+  // Required fields for the chosen phase (Settings → Verplichte velden) — own
+  // sibling hook (§3 size split), fed the current phase.
+  const { requiredForm, isReq } = useRequiredFields(status)
 
   const handleSubmit = async () => {
     const e: Record<string, boolean> = {}
     requiredForm.forEach(k => { if (!String(form[k] ?? '').trim()) e[k] = true })
     // VALIDATIE-LIVE-1: block on a live format failure too — mirrors the required
     // check above, keeps every typed value in place and never fires the request.
-    const invalidKeys = (Object.keys(FORMAT_VALIDATORS) as Array<keyof FormState>).filter(liveInvalid)
+    const invalidKeys = touchInvalidFields()
     if (Object.keys(e).length || invalidKeys.length) {
       setErrors(e)
-      if (invalidKeys.length) setTouched(prevT => { const next = { ...prevT }; invalidKeys.forEach(k => { next[k] = true }); return next })
       return
     }
 
@@ -326,7 +292,6 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   }
 
   const selectedStatus = phases.find(s => s.value === status)
-  const hasFormatError = (Object.keys(FORMAT_VALIDATORS) as Array<keyof FormState>).some(liveInvalid)
   const canSubmit       = !!status && requiredForm.every(k => String(form[k] ?? '').trim()) && !hasFormatError
   const statusLabel     = selectedStatus?.label ?? ''
   // RECHTEN-DETAIL-1: both parse routes gate on candidates.create now
@@ -362,17 +327,7 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
 
           <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
             {!status ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                height: '100%', gap: 12, color: 'var(--text-muted)', textAlign: 'center', padding: '60px 0' }}>
-                <div style={{ width: 48, height: 48, borderRadius: 12, background: 'var(--hover-bg)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <UserPlus size={22} color="var(--text-muted)" />
-                </div>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 500 }}>{t('modal.noTypeSelected')}</div>
-                  <div style={{ fontSize: 12, marginTop: 4 }}>{t('modal.chooseType')}</div>
-                </div>
-              </div>
+              <NoStatusNotice />
             ) : (
               // Two-column grid of titled cards (Optie A) — Persoonlijk/Adres span both
               // columns (their paired rows need the width); Contact/Werk, and now
@@ -419,22 +374,8 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
             </div>
           )}
 
-          {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-          <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
-            display: 'flex', justifyContent: 'flex-end', gap: 8, background: 'var(--bg)' }}>
-            <button onClick={onClose}
-              style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8,
-                border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
-              {t('common:cancel')}
-            </button>
-            <button onClick={handleSubmit} disabled={!canSubmit || saving}
-              style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-                background: (canSubmit && !saving) ? 'var(--color-primary)' : 'var(--border)',
-                color: (canSubmit && !saving) ? 'white' : 'var(--text-muted)',
-                cursor: (canSubmit && !saving) ? 'pointer' : 'not-allowed', transition: 'all 0.15s' }}>
-              {saving ? t('common:saving', 'Opslaan…') : selectedStatus ? t('modal.create', { type: statusLabel }) : t('modal.createGeneric')}
-            </button>
-          </div>
+          <ModalFooter onClose={onClose} onSubmit={handleSubmit} canSubmit={canSubmit} saving={saving}
+            hasType={!!selectedStatus} statusLabel={statusLabel} />
     </FloatingPanel>
   )
 }

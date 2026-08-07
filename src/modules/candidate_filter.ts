@@ -8,8 +8,8 @@ export default {
   category: 'Shiftmanager',
   label: 'Kandidaten ophalen',
   Icon:  ShiftManagerMark,
-  color: '#E11D2A',
-  bg:    '#FDECEC',
+  color: 'var(--module-shiftmanager)',
+  bg:    'color-mix(in srgb, var(--module-shiftmanager) 8%, transparent)',
   schema: [
     { key: 'status', label: 'Status', type: 'select', options: ['actief', 'nietactief'], default: 'actief' },
   ],

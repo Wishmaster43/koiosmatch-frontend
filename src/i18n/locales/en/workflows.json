@@ -396,7 +396,8 @@
     "displayAsTime": "Time (H:i)",
     "displayAsDate": "Date (d-m-Y)",
     "displayAsDay": "Day (Mon/Tue/…)",
-    "displayAsDayTime": "Day + time"
+    "displayAsDayTime": "Day + time",
+    "unknownModule": "Unknown module"
   },
   "picker": {
     "title": "Choose a module",
@@ -1010,5 +1011,16 @@
       "whatsapp_connection_down": "WhatsApp connection down",
       "whatsapp_connection_restored": "WhatsApp connection restored"
     }
+  },
+  "templateLibrary": {
+    "title": "Template library",
+    "subtitle": "Start a new workflow from a ready-made template.",
+    "allTemplates": "All templates",
+    "koiosAiFolder": "Koios AI",
+    "koiosAiHint": "Ready-made action templates Koios AI can run for you.",
+    "loading": "Loading templates…",
+    "error": "Couldn't load the templates.",
+    "empty": "No templates in this category yet.",
+    "useTemplate": "Use template"
   }
 }

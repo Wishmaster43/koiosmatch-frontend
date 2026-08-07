@@ -15,7 +15,7 @@ import type { Id } from '@/types/common'
 type AnyProps = Record<string, unknown>
 const DetailTable = DetailTableJs as unknown as ComponentType<AnyProps>
 
-interface KlantCustomer { id: Id; name: string }
+interface CustomerOption { id: Id; name: string }
 type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 
 // Titled card wrapper (consistent with the Details tab). `clip` stays true for the
@@ -45,8 +45,9 @@ function F({ label, children }: { label: ReactNode; children: ReactNode }) {
 const iconBtn: React.CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
 
 /**
- * KlantTab — the customer this opportunity is linked to (klant → locatie → afdeling →
- * contactpersoon). Read-only by default (values hyperlink to the customer record —
+ * CustomerRelationTab (renamed from KlantTab/CustomerTab — canon Dutch-identifier
+ * sweep) — the customer this opportunity is linked to (customer → location →
+ * department → contact). Read-only by default (values hyperlink to the customer record —
  * §3A cross-entity links); the pencil opens the same searchable customer picker +
  * dependent location/department/contact cascade the create modal uses
  * (useCustomerCascade), so re-pointing the deal at a different client/location is a
@@ -60,8 +61,8 @@ const iconBtn: React.CSSProperties = { width: 26, height: 26, display: 'flex', a
  * Contactpersoon already showed correctly) — and picking a department directly
  * auto-fills its parent location for a consistent pair.
  */
-export default function KlantTab({ opportunity: o, customers = [], onUpdate }: {
-  opportunity: Opportunity; customers?: KlantCustomer[]; onUpdate?: UpdateFn
+export default function CustomerRelationTab({ opportunity: o, customers = [], onUpdate }: {
+  opportunity: Opportunity; customers?: CustomerOption[]; onUpdate?: UpdateFn
 }) {
   const { t } = useTranslation('opportunities')
   const [editing, setEditing] = useState(false)
@@ -155,7 +156,7 @@ export default function KlantTab({ opportunity: o, customers = [], onUpdate }: {
         ))}
       </div>
 
-      <Card title={t('drawer.tabs.klant')} clip={!editing}>
+      <Card title={t('drawer.tabs.customer')} clip={!editing}>
         {editing ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: 12 }}>
             <F label={t('details.client')}>

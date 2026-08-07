@@ -9,8 +9,8 @@ export default {
   category: 'Shiftmanager',
   label: 'Open diensten per kandidaat',
   Icon:  ShiftManagerMark,
-  color: '#E11D2A',
-  bg:    '#FDECEC',
+  color: 'var(--module-shiftmanager)',
+  bg:    'color-mix(in srgb, var(--module-shiftmanager) 8%, transparent)',
   schema: [
     { key: 'max_distance', label: 'Maximale afstand (km)', type: 'number', default: 35, placeholder: '35' },
   ],

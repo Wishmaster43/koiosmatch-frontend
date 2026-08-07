@@ -1,7 +1,9 @@
 /**
  * ProfileDisplayTab — the "Weergave" tab: default table page size, light/dark
- * theme toggle and the UI language picker. Owns only its own dropdown-open
- * state; the persisted values live in ProfilePage / ThemeContext.
+ * theme toggle, the UI language picker, and the Koios AI mode (Wizard/Auto).
+ * Owns only its own dropdown-open state; the display values persist via
+ * ProfilePage / ThemeContext, the Koios mode via its own hook (own GET/PUT
+ * resource, K0 contract — separate from the /auth/me profile PUT).
  */
 import { useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
@@ -10,6 +12,8 @@ import { Sun, Moon, Globe, Check } from 'lucide-react'
 import { PAGE_SIZE_OPTIONS } from '@/components/ui/PaginationBar'
 import { Section, Field, inputStyle, LANGUAGES } from './profileParts'
 import type { ProfileFormData } from './profileParts'
+import { useMyKoiosMode } from './useMyKoiosMode'
+import type { KoiosMode } from './useMyKoiosMode'
 
 interface ProfileDisplayTabProps {
   form: ProfileFormData
@@ -27,7 +31,11 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
   // Autonym lookup — each language names itself (see profileParts.LANGUAGES comment).
   const langLabel = (code: string) => t(`languageNames.${code}`)
 
+  // Koios AI mode (K0) — own GET/PUT resource, loaded + saved by its own hook.
+  const koios = useMyKoiosMode()
+
   return (
+    <>
     <Section title={t('profile.display')}>
       {/* Default table page size */}
       <Field label={t('profile.defaultPageSize')}>
@@ -118,5 +126,53 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
         </div>
       </Field>
     </Section>
+
+    {/* Koios AI mode — Wizard (confirm every action) vs Auto (act immediately);
+        auto_messages only makes sense once Auto is picked (§0 no fake affordances:
+        disable rather than hide, so the relationship stays visible). */}
+    <Section title={t('profile.koiosMode.title')}>
+      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: -10, marginBottom: 18 }}>
+        {t('profile.koiosMode.desc')}
+      </p>
+
+      {koios.loading && <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('profile.koiosMode.loading')}</p>}
+      {koios.error && <p style={{ fontSize: 13, color: 'var(--color-danger)' }}>{t('profile.koiosMode.loadError')}</p>}
+
+      {!koios.loading && (
+        <>
+          <Field label={t('profile.koiosMode.title')}>
+            <div style={{ display: 'flex', gap: 10 }}>
+              {([
+                { value: 'wizard' as KoiosMode, label: t('profile.koiosMode.wizard') },
+                { value: 'auto' as KoiosMode,   label: t('profile.koiosMode.auto') },
+              ]).map(opt => (
+                <button key={opt.value} onClick={() => koios.setMode(opt.value)}
+                  aria-pressed={koios.mode === opt.value}
+                  style={{
+                    flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 500,
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    border: `1.5px solid ${koios.mode === opt.value ? 'var(--color-primary)' : 'var(--border)'}`,
+                    background: koios.mode === opt.value ? 'var(--color-primary-bg)' : 'var(--input-bg)',
+                    color: koios.mode === opt.value ? 'var(--color-primary)' : 'var(--text-muted)',
+                    transition: 'all 0.15s',
+                  }}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </Field>
+
+          <Field label={t('profile.koiosMode.autoMessages')}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8,
+                            opacity: koios.mode === 'auto' ? 1 : 0.5, cursor: koios.mode === 'auto' ? 'pointer' : 'default' }}>
+              <input type="checkbox" checked={koios.autoMessages} disabled={koios.mode !== 'auto'}
+                onChange={e => koios.setAutoMessages(e.target.checked)} />
+              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('profile.koiosMode.autoMessagesHint')}</span>
+            </label>
+          </Field>
+        </>
+      )}
+    </Section>
+    </>
   )
 }

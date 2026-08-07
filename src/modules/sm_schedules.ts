@@ -10,8 +10,8 @@ export default {
   category: 'Shiftmanager',
   label: 'Ingeplande diensten',
   Icon:  ShiftManagerMark,
-  color: '#E11D2A',
-  bg:    '#FDECEC',
+  color: 'var(--module-shiftmanager)',
+  bg:    'color-mix(in srgb, var(--module-shiftmanager) 8%, transparent)',
   schema: [
     { key: 'connection_id', label: 'Shiftmanager-account', type: 'lookup_select', endpoint: '/planning-connections' },
     // Window in days relative to the run day: 0 = vandaag, 1 = morgen, enz.

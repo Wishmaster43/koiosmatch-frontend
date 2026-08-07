@@ -14,7 +14,7 @@ import { mapOpportunity } from './data/mapOpportunity'
 
 // Heavy tab bodies are out of scope for this title-row test — stub them out.
 vi.mock('./drawer/DetailsTab', () => ({ default: () => null }))
-vi.mock('./drawer/KlantTab', () => ({ default: () => null }))
+vi.mock('./drawer/CustomerRelationTab', () => ({ default: () => null }))
 vi.mock('./drawer/NotesTab', () => ({ default: () => null }))
 vi.mock('./drawer/TasksTab', () => ({ default: () => null }))
 vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [] }) }))

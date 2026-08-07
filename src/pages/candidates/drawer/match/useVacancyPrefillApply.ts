@@ -1,7 +1,8 @@
 /**
  * useVacancyPrefillApply — applies `useVacancyPrefill`'s real vacancy fields onto
- * the rest of the match form (points 1/2/4/1.8.4, Danny's ten-point round): klant/
- * klantlocatie/afdeling/contactpersoon/vestiging/dates/uren, ONLY the ones the
+ * the rest of the match form (points 1/2/4/1.8.4, Danny's ten-point round, plus
+ * the VACANCY-CONTRACT-FIELD-1 follow-up): klant/klantlocatie/afdeling/
+ * contactpersoon/vestiging/dates/uren/contractvorm/cao, ONLY the ones the
  * recruiter hasn't already edited by hand, and fully reversible (the vacancy
  * field's own ✕ / the shared `CreatableSelect`'s `clearable` X both funnel through
  * the ONE `setVacancyId` this hook returns).
@@ -39,6 +40,7 @@ export function useVacancyPrefillApply({
   setBranchIdRaw, setBranchDirty,
   setStartDateRaw, setEndDateRaw, setEndDateDirty,
   setHoursRaw,
+  setContractTypeRaw, setCaoRaw,
   candBranchId,
 }: {
   editing: boolean
@@ -55,6 +57,9 @@ export function useVacancyPrefillApply({
   setStartDateRaw: (v: string) => void
   setEndDateRaw: (v: string) => void; setEndDateDirty: (v: boolean) => void
   setHoursRaw: (v: string) => void
+  // VACANCY-CONTRACT-FIELD-1: same overlay contract as every field above.
+  setContractTypeRaw: (v: string) => void
+  setCaoRaw: (v: string) => void
   // Point 2: vestiging inherits from the vacancy when set, else the candidate's own.
   candBranchId?: Id | null
 }) {
@@ -94,6 +99,9 @@ export function useVacancyPrefillApply({
     if (vacancyDetail.startDate && !touched.startDate) { setStartDateRaw(vacancyDetail.startDate); markAuto('startDate') }
     if (vacancyDetail.endDate && !touched.endDate) { setEndDateRaw(vacancyDetail.endDate); setEndDateDirty(true); markAuto('endDate') }
     if (vacancyDetail.hours && !touched.hours) { setHoursRaw(vacancyDetail.hours); markAuto('hours') }
+    // VACANCY-CONTRACT-FIELD-1: same overlay contract as every field above.
+    if (vacancyDetail.contractType && !touched.contractType) { setContractTypeRaw(vacancyDetail.contractType); markAuto('contractType') }
+    if (vacancyDetail.cao && !touched.cao) { setCaoRaw(vacancyDetail.cao); markAuto('cao') }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- touched/customerId read at apply-time only; re-triggering on THEIR own change would fight the freeze this effect exists to create (mirrors the file's other propose-but-freeze effects)
   }, [vacancyDetail, candBranchId, editing])
 
@@ -112,6 +120,9 @@ export function useVacancyPrefillApply({
     if (auto.startDate && !touched.startDate) setStartDateRaw('')
     if (auto.endDate && !touched.endDate) { setEndDateRaw(''); setEndDateDirty(false) }
     if (auto.hours && !touched.hours) setHoursRaw('')
+    // VACANCY-CONTRACT-FIELD-1: same overlay contract as every field above.
+    if (auto.contractType && !touched.contractType) setContractTypeRaw('')
+    if (auto.cao && !touched.cao) setCaoRaw('')
     setAuto({})
     setVacancyIdRaw(v)
   }

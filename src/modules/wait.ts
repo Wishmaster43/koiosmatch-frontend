@@ -6,8 +6,8 @@ export default {
   category: 'Flow beheer',
   label: 'Wachten tot datum',
   Icon:  Hourglass,
-  color: '#5F5E5A',
-  bg:    '#F1EFE8',
+  color: 'var(--module-warmgrey)',
+  bg:    'color-mix(in srgb, var(--module-warmgrey) 11%, transparent)',
   schema: [
     { key: 'until_field', label: 'Wachten tot veld', type: 'text',   placeholder: 'available_again_date' },
     { key: 'days',        label: 'Of: aantal dagen',  type: 'number', placeholder: '0' },

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import Avatar from '@/components/ui/Avatar'
 import EntityLink from '@/components/ui/EntityLink'
-import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import TimelineRail from '@/components/ui/TimelineRail'
 import { useDateFormat } from '@/lib/datetime'
 import type { VacancyDetail } from '@/types/vacancy'
@@ -19,7 +19,8 @@ const OPEN_LABEL_KEY: Record<string, string> = {
  * applications received, matches made — VacancyTimeline.php). Events that point
  * at a record we can open render their description as an EntityLink: the text
  * opens the record in-app, its trailing icon opens it in a new tab. Notes have
- * no own page and stay plain text. AI-generated entries carry the Koios mark.
+ * no own page and stay plain text. AI-generated entries carry the shared
+ * AiGeneratedLabel (AI-ACT-1: icon+text, never a bare mark, §6).
  * A TimelineRail connects the dots (Danny 05-08: isolated bolletjes, no line) and
  * `time` renders through the house DD-MM-YYYY HH:mm formatter, never the
  * mapper's raw ISO value.
@@ -48,7 +49,7 @@ export default function TimelineTab({ vacancy: v }: { vacancy: VacancyDetail }) 
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{ev.author || '—'}</span>
-                {ev.ai && <KoiosAiMark size={14} />}
+                {ev.ai && <AiGeneratedLabel size={10} />}
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>{formatDateTime(ev.time)}</span>
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>

@@ -8,8 +8,8 @@ export default makeEntityModule({
   label:    'Taken',
   category: 'Taken',
   Icon:     ListChecks,
-  color:    '#6E8FD6',
-  bg:       '#E6EDF9',
+  color:    'var(--module-periwinkle)',
+  bg:       'color-mix(in srgb, var(--module-periwinkle) 16%, transparent)',
   filterFields: [
     { value: 'status',   label: 'Status' },
     { value: 'type',     label: 'Soort' },

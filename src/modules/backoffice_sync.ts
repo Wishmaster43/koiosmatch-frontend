@@ -10,8 +10,8 @@ export default {
   label:    'Backoffice koppelen',
   category: 'Kandidaten',
   Icon:     Link2,
-  color:    '#0E7490',
-  bg:       '#E0F2FE',
+  color:    'var(--module-cyan)',
+  bg:       'var(--color-info-bg)',
   // Visible when EITHER connector app is on (MODULE_APP_MAP is any-of).
   app:      ['hf', 'shiftmanager'],
   schema: [

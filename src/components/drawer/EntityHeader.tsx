@@ -111,7 +111,7 @@ function TagRow({ items = [], onAdd, onRemove, addLabel }: { items?: string[]; o
         <input key={tag} ref={editRef} value={editValue} onChange={e => setEditValue(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') { setEditing(null); setEditValue('') } }}
           onBlur={commitEdit} aria-label={tag}
-          style={{ fontSize: 11, padding: '3px 8px', borderRadius: 99, border: '1px solid var(--color-primary)', outline: 'none', color: 'var(--text)', width: Math.max(70, tag.length * 7 + 30) }} />
+          style={{ fontSize: 11, padding: '3px 8px', borderRadius: 99, border: '1px solid var(--color-primary)', color: 'var(--text)', width: Math.max(70, tag.length * 7 + 30) }} />
       ) : (
         <span key={tag} style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, padding: '3px 8px', borderRadius: 99,
           border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
@@ -126,7 +126,7 @@ function TagRow({ items = [], onAdd, onRemove, addLabel }: { items?: string[]; o
         <input ref={inputRef} value={value} onChange={e => setValue(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setValue(''); setAdding(false) } }}
           onBlur={commit} placeholder={addLabel} aria-label={addLabel}
-          style={{ fontSize: 11, padding: '3px 8px', borderRadius: 99, border: '1px solid var(--color-primary)', outline: 'none', color: 'var(--text)', width: 110 }} />
+          style={{ fontSize: 11, padding: '3px 8px', borderRadius: 99, border: '1px solid var(--color-primary)', color: 'var(--text)', width: 110 }} />
       ) : (
         <button onClick={() => setAdding(true)}
           style={{ fontSize: 11, padding: '3px 8px', borderRadius: 99, border: '1px dashed var(--border)', background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>+</button>

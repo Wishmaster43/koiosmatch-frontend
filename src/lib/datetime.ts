@@ -12,7 +12,10 @@ type DateInput = string | number | Date | null | undefined
 
 export function useLocale(): string {
   const { i18n } = useTranslation()
-  return (LOCALE_BY_LANG as Record<string, string>)[i18n.language] ?? 'nl-NL'
+  // Optional chaining: some tests stub react-i18next with a bare `{ t }` (no
+  // `i18n`) — this keeps the house locale hook safe under those mocks instead
+  // of throwing, falling back to the same nl-NL default as an unresolved language.
+  return (LOCALE_BY_LANG as Record<string, string>)[i18n?.language ?? ''] ?? 'nl-NL'
 }
 
 export function useDateFormat() {
@@ -32,7 +35,15 @@ export function useDateFormat() {
     return isNaN(d.getTime()) ? String(value)
       : d.toLocaleString(locale, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
   }, [locale])
-  return useMemo(() => ({ locale, formatDate, formatDateTime }), [locale, formatDate, formatDateTime])
+  // HH:mm only — for cells that already show the date separately (e.g. a date/time
+  // split across two lines). Empty string (not '—') for missing/unparseable input,
+  // matching every call site's own pre-existing fallback (never a visible change).
+  const formatTime = useCallback((value: DateInput): string => {
+    if (!value) return ''
+    const d = new Date(value)
+    return isNaN(d.getTime()) ? '' : d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
+  }, [locale])
+  return useMemo(() => ({ locale, formatDate, formatDateTime, formatTime }), [locale, formatDate, formatDateTime, formatTime])
 }
 
 // Age in whole years from a birthdate; accounts for whether the birthday already

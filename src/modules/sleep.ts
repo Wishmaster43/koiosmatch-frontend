@@ -6,8 +6,8 @@ export default {
   category: 'Flow beheer',
   label:    'Wachten',
   Icon:     Timer,
-  color:    '#6B7280',
-  bg:       '#F3F4F6',
+  color:    'var(--module-neutral)',
+  bg:       'color-mix(in srgb, var(--module-neutral) 8%, transparent)',
   schema: [
     { key: 'delay', label: 'Wachttijd (seconden)', type: 'number', placeholder: '5', help: 'Aantal seconden om te wachten voor de volgende module start.' },
   ],

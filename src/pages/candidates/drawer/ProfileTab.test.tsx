@@ -5,7 +5,8 @@ import ProfileTab from './ProfileTab'
 import { useIsNonEuNationality } from './useIsNonEuNationality'
 import type { Candidate } from '@/types/candidate'
 
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => Promise.reject({ response: { status: 404 } })) } }))
+vi.mock('@/lib/api', () => ({
+  getActiveTenantId: () => 'demo', default: { get: vi.fn(() => Promise.reject({ response: { status: 404 } })) } }))
 vi.mock('@/lib/useGenders', () => ({ useGenders: () => ({ genders: [{ value: 'male', label: 'Man' }, { value: 'female', label: 'Vrouw' }] }) }))
 vi.mock('@/lib/useNationalities', () => ({ useNationalities: () => ({ nationalities: ['Nederlands', 'Belgisch'] }) }))
 vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: ['Utrecht', 'Zuid-Holland'] }) }))

@@ -431,7 +431,8 @@
     "displayAsTime": "Tijd (H:i)",
     "displayAsDate": "Datum (d-m-Y)",
     "displayAsDay": "Dag (Ma/Di/…)",
-    "displayAsDayTime": "Dag + tijd"
+    "displayAsDayTime": "Dag + tijd",
+    "unknownModule": "Onbekende module"
   },
   "picker": {
     "title": "Module kiezen",
@@ -1010,5 +1011,16 @@
       "whatsapp_connection_down": "WhatsApp-verbinding verbroken",
       "whatsapp_connection_restored": "WhatsApp-verbinding hersteld"
     }
+  },
+  "templateLibrary": {
+    "title": "Templatebibliotheek",
+    "subtitle": "Start een nieuwe workflow vanuit een kant-en-klare template.",
+    "allTemplates": "Alle templates",
+    "koiosAiFolder": "Koios AI",
+    "koiosAiHint": "Kant-en-klare actietemplates die Koios AI voor je kan draaien.",
+    "loading": "Templates laden…",
+    "error": "Templates laden is mislukt.",
+    "empty": "Nog geen templates in deze categorie.",
+    "useTemplate": "Gebruik template"
   }
 }

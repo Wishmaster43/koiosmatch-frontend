@@ -33,7 +33,9 @@ interface KoiosAdviceBlockProps {
  * extend by passing more `insights`, never fork the look.
  */
 export default function KoiosAdviceBlock({ namespace, insights, onRefresh }: KoiosAdviceBlockProps) {
-  const { t } = useTranslation(namespace)
+  // 'common' alongside the feature namespace — the AI-Act disclosure hint
+  // (AI-ACT-1) is shared copy, not per-entity.
+  const { t } = useTranslation([namespace, 'common'])
   const [loading, setLoading] = useState(false)
   // Which insight is expanded (null = all collapsed, the default).
   const [openIdx, setOpenIdx] = useState<number | null>(null)
@@ -54,9 +56,12 @@ export default function KoiosAdviceBlock({ namespace, insights, onRefresh }: Koi
 
   return (
     <div>
-      {/* Heading outside the block — icon + grey title (like the other sections) + beta + refresh */}
+      {/* Heading outside the block — icon + grey title (like the other sections) + beta + refresh.
+          AI-ACT-1: the heading already names "Koios AI adviseert" in visible text, so this is
+          NOT a bare icon (§6) — the mark only gains the AI-Act disclosure hint as a tooltip,
+          never a second stacked label next to an already-explicit heading. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-        <KoiosAiMark size={16} />
+        <KoiosAiMark size={16} title={t('common:aiGeneratedHint', { defaultValue: 'Door Koios AI gegenereerd — controleer voor gebruik.' })} />
         <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', flex: 1 }}>{t('ai.title')}</span>
         <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 99, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontWeight: 600 }}>{t('ai.beta')}</span>
         <button onClick={handleRefresh}

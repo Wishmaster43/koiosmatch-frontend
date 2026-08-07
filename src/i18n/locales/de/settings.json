@@ -227,7 +227,8 @@
     "candidate_education_levels": "Bildungsniveaus",
     "notif_kandidaten": "Kandidaten",
     "notif_matches": "Matches",
-    "notif_taken": "Aufgaben"
+    "notif_taken": "Aufgaben",
+    "koios_advice": "Hinweis-Schwellenwerte"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -763,6 +764,29 @@
       "daily": {
         "title": "Tägliche Nutzung",
         "notice": "Eine Tagesübersicht pro Kategorie (Gesamt · KI · Leads · Telefonate · WhatsApp) ist noch nicht verfügbar — das Backend liefert derzeit nur Summen pro Zeitraum, keine Tageswerte."
+      },
+      "koios": {
+        "title": "Koios-KI-Abrechnung",
+        "subtitle": "Rechnungsfertige Summen für Claude-Tokens und Workflow-Token-Ausführungen.",
+        "monthLabel": "Monat",
+        "loadError": "Koios-Abrechnung konnte nicht geladen werden.",
+        "unavailable": "Sie haben keine Berechtigung, dies anzusehen.",
+        "empty": "Noch keine Koios-Nutzung in diesem Monat.",
+        "claude": {
+          "tokensIn": "Tokens ein",
+          "tokensOut": "Tokens aus",
+          "cost": "Selbstkosten",
+          "freeAllowance": "Freikontingent (Tokens)",
+          "margin": "Marge",
+          "billable": "Abrechenbare Claude-Kosten"
+        },
+        "workflow": {
+          "line": "{{n}} Workflow-Modulausführung(en)",
+          "colModule": "Modul",
+          "colRuns": "Ausführungen",
+          "colAmount": "Betrag"
+        },
+        "total": "Gesamt"
       }
     },
     "invoices": {
@@ -2706,5 +2730,17 @@
     "title": "Bildungsniveaus",
     "subtitle": "Stufen für das Bildungs-Dropdown des Kandidaten.",
     "add": "Stufe hinzufügen"
+  },
+  "koiosAdvice": {
+    "title": "Koios-Hinweisschwellenwerte",
+    "subtitle": "Die Tagesfenster hinter der Koios-Aufmerksamkeitsmarkierung bei Vakaturen und Matches.",
+    "vacancyStaleTitle": "Vakatur-Veralterung",
+    "vacancyStaleHint": "Nach wie vielen Tagen ohne Bewerbung eine veröffentlichte Vakatur von Koios als Aufmerksamkeitspunkt markiert wird.",
+    "vacancyStaleLabel": "Tage (1-365)",
+    "vacancyStaleSaveFailed": "Speichern des Vakatur-Veralterungsfensters fehlgeschlagen.",
+    "matchRenewTitle": "Match-Verlängerungsfenster",
+    "matchRenewHint": "Wie viele Tage vor (oder nach) dem Enddatum eines Matches Koios eine Verlängerung vorschlägt.",
+    "matchRenewLabel": "Tage (1-365)",
+    "matchRenewSaveFailed": "Speichern des Match-Verlängerungsfensters fehlgeschlagen."
   }
 }

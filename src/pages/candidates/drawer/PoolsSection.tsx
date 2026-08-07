@@ -43,7 +43,7 @@ export default function PoolsSection({ c }: { c: Candidate }) {
               boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden' }}>
               <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--border)' }}>
                 <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('common:search')} autoFocus
-                  style={{ width: '100%', border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none' }} />
+                  style={{ width: '100%', border: 'none', fontSize: 12, color: 'var(--text)', background: 'none' }} />
               </div>
               <div style={{ maxHeight: 200, overflowY: 'auto' }}>
                 {allPools.length === 0 && (
@@ -54,11 +54,9 @@ export default function PoolsSection({ c }: { c: Candidate }) {
                   .map((p, i) => {
                     const id = p.id ?? p.name
                     const selected = has(id)
-                    // Fallback swatch colour, consumed below via hex+alpha string
-                    // concatenation (soft-chip convention) — cannot become a CSS
-                    // var without restructuring that string-based alpha suffix.
-                    // eslint-disable-next-line no-restricted-syntax -- fallback swatch hex, consumed as hex+alpha string concat below
-                    const color = p.color || '#6B7280'
+                    // Fallback swatch colour when no tenant colour is set — a solid dot
+                    // fill here (no alpha maths), so the token applies directly (§4).
+                    const color = p.color || 'var(--text-muted)'
                     return (
                       <button key={p.id ?? p.name ?? i} onClick={() => toggle(p)}
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -86,16 +84,20 @@ export default function PoolsSection({ c }: { c: Candidate }) {
           : (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {pools.map((p, i) => {
-                // Fallback swatch colour, consumed below via hex+alpha string
-                // concatenation (soft-chip convention) — cannot become a CSS
-                // var without restructuring that string-based alpha suffix.
-                // eslint-disable-next-line no-restricted-syntax -- fallback swatch hex, consumed as hex+alpha string concat below
-                const color = p.color || '#6B7280'
+                // Fallback swatch colour when no tenant colour is set — a design
+                // token (§4), resolved via the same isHex/color-mix split Avatar's
+                // soft variant uses, since real tenant colours (hex) still need the
+                // cheap alpha-suffix concat below, which a bare var() can't take.
+                const color = p.color || 'var(--text-muted)'
+                const isHex = color.startsWith('#')
                 const ai = p.source === 'koios'
                 return (
                   <span key={p.id ?? p.name ?? i} title={ai ? t('sections.poolKoios') : undefined}
                     style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, padding: '3px 8px',
-                      borderRadius: 99, border: `1px solid ${color}55`, background: color + '1A', color }}>
+                      borderRadius: 99,
+                      border: `1px solid ${isHex ? color + '55' : `color-mix(in srgb, ${color} 40%, transparent)`}`,
+                      background: isHex ? color + '1A' : `color-mix(in srgb, ${color} 12%, transparent)`,
+                      color }}>
                     {ai && <Sparkles size={10} />}
                     {p.name}
                     <button onClick={() => toggle(p)}

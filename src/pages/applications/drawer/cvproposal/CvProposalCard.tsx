@@ -85,9 +85,13 @@ export default function CvProposalCard({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {/* Header — who produced this and when, plus the decision state. */}
+      {/* Header — who produced this and when, plus the decision state. AI-ACT-1:
+          the pending state's `cvProposal.intro` line below already names "Koios AI"
+          explicitly in visible text, but that line only shows while pending — the
+          header mark carries the disclosure hint always, so a decided proposal
+          (no intro line) still discloses its AI origin on hover. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <KoiosAiMark size={22} />
+        <KoiosAiMark size={22} title={t('common:aiGeneratedHint', { defaultValue: 'Door Koios AI gegenereerd — controleer voor gebruik.' })} />
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('cvProposal.cardTitle')}</span>
         <SoftChip label={t(`cvProposal.status.${proposal.status}`)} color={STATUS_COLOR[proposal.status]} />
         {proposal.createdAt && (

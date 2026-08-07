@@ -23,6 +23,8 @@ import { useLookups } from '@/context/LookupsContext'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useIndustries } from '@/lib/useIndustries'
 import { useFunctions } from '@/lib/useFunctions'
+import { useContractTypes } from '@/lib/useContractTypes'
+import { useCao } from '@/lib/useCao'
 import { useDateFormat } from '@/lib/datetime'
 import { useProvinces } from '@/hooks/useProvinces'
 import { useCustomerOptions } from './useCustomerOptions'
@@ -37,7 +39,8 @@ type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 export type GeneralKey = 'category' | 'industry' | 'startDate' | 'endDate'
 export type LocationKey = 'street' | 'houseNumber' | 'houseNumberSuffix' | 'postalCode' | 'city' | 'province' | 'country'
 export type RequirementsKey = 'experienceMin' | 'experienceMax' | 'seniority' | 'education'
-export type ConditionsKey = 'salaryMin' | 'salaryMax' | 'hoursMin' | 'hoursMax'
+// VACANCY-CONTRACT-FIELD-1: the vacancy's own singular contract-kind/CAO slugs.
+export type ConditionsKey = 'salaryMin' | 'salaryMax' | 'hoursMin' | 'hoursMax' | 'contractType' | 'cao'
 
 type GeneralForm = Record<GeneralKey, string>
 type LocationForm = Record<LocationKey, string>
@@ -108,6 +111,11 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
   const { seniorityLevels, educationLevels, defaultSeniority, defaultEducation } = useVacancyLookups()
   const { industries } = useIndustries()
   const { functions } = useFunctions() as { functions: Array<string | { value: string; label?: string }> }
+  // VACANCY-CONTRACT-FIELD-1: the SAME tenant lookups the match's own Contract
+  // section reads (contract_types.value / collective_labour_agreements.value) —
+  // `.options` (not `.types`) so the Voorwaarden select binds by real slug value.
+  const { options: contractTypeOptions } = useContractTypes()
+  const { types: caoOptions } = useCao()
   const { formatDate } = useDateFormat()
   const fnOptions = functions.map(f => (typeof f === 'string' ? { value: f, label: f } : { value: f.value, label: f.label ?? f.value }))
 
@@ -242,8 +250,11 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     requirementsForm.setEditing(false)
   }
 
-  // ---- Voorwaarden: salary/hours ----
-  const seedConditions = (): ConditionsForm => ({ salaryMin: v.salaryMin, salaryMax: v.salaryMax, hoursMin: v.hoursMin, hoursMax: v.hoursMax })
+  // ---- Voorwaarden: salary/hours + the match-vocabulary contract type/CAO ----
+  const seedConditions = (): ConditionsForm => ({
+    salaryMin: v.salaryMin, salaryMax: v.salaryMax, hoursMin: v.hoursMin, hoursMax: v.hoursMax,
+    contractType: v.contractType, cao: v.cao,
+  })
   const conditionsForm = useEditableForm(seedConditions)
   const saveConditions = () => {
     const salary = [conditionsForm.form.salaryMin, conditionsForm.form.salaryMax].filter(Boolean).join(' – ')
@@ -251,6 +262,8 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     onUpdate?.(v.id, {
       salaryMin: conditionsForm.form.salaryMin, salaryMax: conditionsForm.form.salaryMax,
       hoursMin: conditionsForm.form.hoursMin, hoursMax: conditionsForm.form.hoursMax, salary, hours,
+      // VACANCY-CONTRACT-FIELD-1: same lookup vocabulary as the match's own fields.
+      contractType: conditionsForm.form.contractType, cao: conditionsForm.form.cao,
     })
     conditionsForm.setEditing(false)
   }
@@ -259,6 +272,9 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
   return {
     // Lookups the sub-tab components read directly.
     candidateTypes, typeMeta, seniorityLevels, educationLevels, industries, formatDate, fnOptions,
+    // VACANCY-CONTRACT-FIELD-1: same tenant lookups the match's own Contract
+    // section reads — Voorwaarden's contract-type/CAO selects bind to these.
+    contractTypeOptions, caoOptions,
     // One independent section per sub-tab (VAC-DETAILS-SPLIT-1).
     general: {
       editing: generalForm.editing, setEditing: generalForm.setEditing, form: generalForm.form, setF: generalForm.setF,

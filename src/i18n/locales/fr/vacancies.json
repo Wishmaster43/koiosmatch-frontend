@@ -223,7 +223,9 @@
     "customerLocation": "Site du client",
     "customerDepartment": "Service",
     "contactPerson": "Contact",
-    "pickClientFirst": "Choisissez d'abord un client"
+    "pickClientFirst": "Choisissez d'abord un client",
+    "matchContractType": "Type de contrat proposé",
+    "matchCao": "CCT proposée"
   },
   "aiagent": {
     "pickerLabel": "Agent IA",

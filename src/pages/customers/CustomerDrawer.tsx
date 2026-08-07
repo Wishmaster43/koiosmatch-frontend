@@ -81,7 +81,8 @@ const TABS = [
 ]
 
 interface DrawerUser { id: Id; name: string; avatar_color?: string }
-type NotePayload = { type: string; title: string; body: string }
+// NOTE-TAAL-1: optional per-note language, forwarded unchanged to useCustomerRecord's addNote.
+type NotePayload = { type: string; title: string; body: string; language?: string }
 
 interface CustomerDrawerProps {
   customer: Customer | null

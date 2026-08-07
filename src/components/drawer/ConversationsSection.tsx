@@ -99,12 +99,16 @@ function DeliveryTicks({ sentAt, deliveredAt, readAt }: { sentAt?: string | null
   return <Icon size={12} style={{ color, flexShrink: 0 }} role="img" aria-label={t(`conversations.delivery.${state}`)} />
 }
 
-// WA-SEND-TRANSPORT-1 (measured 06-08): POST /conversations/{id}/messages writes a
-// message ROW but never hands it to WhatsApp (no sender call in MessageController::
-// store) — a "sent" bubble that never reaches the candidate is worse than no
-// composer (§3). The composer therefore stays OFF until CMBE wires the transport;
-// tests exercise it via the prop, callers keep the default.
-const SESSION_COMPOSER_ENABLED = false
+// WA-SEND-TRANSPORT-1 (landed 06-08, verified by reading MessageController::store /
+// sendSessionReply, read-only reference in koiosmatch-api): an outbound POST
+// /conversations/{id}/messages WITHOUT a wamid now runs through the real
+// WhatsAppBundleSender pipeline (24h window, Governor, consent, dedup — Meta FIRST,
+// the row only after) instead of writing a "sent" bubble nobody received. The
+// controller answers 201 once Meta actually accepted it, 409 when the sender itself
+// declined (window closed / governor cap / opt-out / dedup — its own Dutch reason),
+// and 502 when Meta/the gateway is unreachable. A "sent" bubble now really reaches
+// the candidate, so the composer is ON for every caller.
+const SESSION_COMPOSER_ENABLED = true
 
 export default function ConversationsSection({ threadsUrl, threadsParams, headerAction, composerEnabled = SESSION_COMPOSER_ENABLED }: {
   // The list request the caller wants — candidate scope passes '/conversations' +
@@ -133,6 +137,9 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
   // single shared slot is enough since the accordion only ever has one open thread.
   const [composerText, setComposerText] = useState('')
   const [sendingMsg, setSendingMsg] = useState(false)
+  // WA-SEND-TRANSPORT-1: the 409/502 inline explanation shown next to the composer —
+  // never a toast, so it survives on screen next to the draft the recruiter can retry.
+  const [sendError, setSendError] = useState<string | null>(null)
 
   // Serialize the caller's params so a fresh object literal each render doesn't
   // retrigger the fetch — only the actual VALUES (e.g. candidate_id) matter.
@@ -176,26 +183,47 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
   }, [openId])
 
   // A newly opened thread starts with a clean draft — never leaks the previous
-  // thread's unsent text into the one now expanded.
-  useEffect(() => { setComposerText('') }, [openId])
+  // thread's unsent text (or its stale send error) into the one now expanded.
+  useEffect(() => { setComposerText(''); setSendError(null) }, [openId])
 
-  // WHATSAPP-COMPOSE-1: free-text send INSIDE the open 24h session (WhatsApp rule:
-  // outside the window only a template may open one) — the same
-  // /conversations/{id}/messages route the backend itself gates session sends on.
-  // Appends the server's own returned row (never an optimistic guess at the shape).
+  // WHATSAPP-COMPOSE-1 / WA-SEND-TRANSPORT-1: free-text send INSIDE the open 24h
+  // session, through the same /conversations/{id}/messages route the backend gates
+  // real session sends on. 201 appends the server's own returned row (never an
+  // optimistic guess) and refreshes the thread list so last_message_at/is_active
+  // reflect the server's own state. 409 (sender declined: window/governor/opt-out/
+  // dedup) and 502 (Meta/gateway unreachable) are NOT sent — both render inline next
+  // to the still-there draft instead of a toast, so a retry is just hitting send again.
   const sendMessage = useCallback((id: Id) => {
     const text = composerText.trim()
     if (!text) return
     setSendingMsg(true)
+    setSendError(null)
     api.post(`/conversations/${id}/messages`, { direction: 'outbound', message_content: text })
       .then(r => {
         const msg = (r as { data?: MessageRow }).data
         if (msg) setMessages(m => ({ ...m, [String(id)]: [...(m[String(id)] ?? []), msg] }))
         setComposerText('')
+        // Refresh this dossier's threads after a real send — last_message_at/is_active
+        // now come from the server, never a locally guessed bump.
+        api.get(threadsUrl, { params: threadsParams })
+          .then(rr => setRows(unwrapList<ConversationRow>(rr).rows))
+          .catch(() => {})
       })
-      .catch(err => notifyError(extractApiError(err, t('conversations.composerSendFailed'))))
+      .catch(err => {
+        const status = (err as { response?: { status?: number } })?.response?.status
+        if (status === 409) {
+          // Not sent: the sender itself declined — its own Dutch reason is the accurate
+          // explanation (§9: readable sentence, only carries ids).
+          setSendError(extractApiError(err, t('conversations.composerSendFailed')))
+        } else if (status === 502) {
+          // Meta/the gateway itself unreachable — an honest, translated retry notice.
+          setSendError(t('conversations.composerUnavailable'))
+        } else {
+          notifyError(extractApiError(err, t('conversations.composerSendFailed')))
+        }
+      })
       .finally(() => setSendingMsg(false))
-  }, [composerText, t])
+  }, [composerText, t, threadsUrl, threadsParams])
 
   // Active-window badge (setting `conversation_active_weeks`) — green when active, muted otherwise.
   const activeBadge = (active?: boolean) => (
@@ -287,19 +315,29 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                     opened session gets an honest explanation instead of a silently
                     missing input. */}
                 {composerEnabled && (isSessionOpen(row.last_inbound_at) ? (
-                  <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
-                    <input value={composerText} onChange={e => setComposerText(e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(row.id) } }}
-                      placeholder={t('conversations.composerPlaceholder')} aria-label={t('conversations.composerPlaceholder')}
-                      style={{ flex: 1, minWidth: 0, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: 12, color: 'var(--text)' }} />
-                    <button onClick={() => sendMessage(row.id)} disabled={!composerText.trim() || sendingMsg}
-                      aria-label={t('common:send')} title={t('common:send')}
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, borderRadius: 8, border: 'none',
-                        background: 'var(--color-primary)', color: '#fff', flexShrink: 0,
-                        cursor: composerText.trim() ? 'pointer' : 'default', opacity: composerText.trim() ? 1 : 0.5 }}>
-                      <Send size={13} />
-                    </button>
-                  </div>
+                  <>
+                    <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+                      <input value={composerText} onChange={e => setComposerText(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(row.id) } }}
+                        placeholder={t('conversations.composerPlaceholder')} aria-label={t('conversations.composerPlaceholder')}
+                        style={{ flex: 1, minWidth: 0, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: 12, color: 'var(--text)' }} />
+                      <button onClick={() => sendMessage(row.id)} disabled={!composerText.trim() || sendingMsg}
+                        aria-label={t('common:send')} title={t('common:send')}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, borderRadius: 8, border: 'none',
+                          background: 'var(--color-primary)', color: '#fff', flexShrink: 0,
+                          cursor: composerText.trim() ? 'pointer' : 'default', opacity: composerText.trim() ? 1 : 0.5 }}>
+                        <Send size={13} />
+                      </button>
+                    </div>
+                    {/* WA-SEND-TRANSPORT-1: the 409/502 inline explanation — role="alert" so
+                        assistive tech announces it, icon + text so colour is never the only cue. */}
+                    {sendError && (
+                      <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, fontSize: 11, color: 'var(--color-danger)' }}>
+                        <AlertTriangle size={11} style={{ flexShrink: 0 }} />
+                        {sendError}
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('conversations.sessionClosedHint')}</div>
                 ))}

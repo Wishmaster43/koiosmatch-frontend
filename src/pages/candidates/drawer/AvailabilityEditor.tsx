@@ -37,7 +37,7 @@ export default function AvailabilityEditor({ candidateId }: { candidateId?: Id }
   // Newest date first.
   const sorted = [...entries].sort((a, b) => (a.date < b.date ? 1 : -1))
 
-  const input = { padding: '5px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--bg)', color: 'var(--text)' } as const
+  const input = { padding: '5px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)' } as const
   // Soft-tint pill (§4) — never a solid fill; shared with roles/pools/open-shift filters.
   const pill = (active: boolean) => ({ padding: '5px 12px', fontSize: 12, borderRadius: 99, cursor: 'pointer', ...softPill(active) })
 
@@ -71,7 +71,7 @@ export default function AvailabilityEditor({ candidateId }: { candidateId?: Id }
           <input value={reason} onChange={e => setReason(e.target.value)} placeholder={t('planning.reasonPlaceholder')} style={{ ...input, flex: 1, minWidth: 120 }} />
           <button onClick={submit} disabled={!date}
             style={{ padding: '5px 12px', fontSize: 12, fontWeight: 600, borderRadius: 7, border: 'none',
-              background: 'var(--color-primary)', color: '#fff', cursor: date ? 'pointer' : 'not-allowed', opacity: date ? 1 : 0.5 }}>
+              background: 'var(--color-primary)', color: 'var(--color-on-accent)', cursor: date ? 'pointer' : 'not-allowed', opacity: date ? 1 : 0.5 }}>
             {t('common:add')}
           </button>
           <button onClick={reset} aria-label={t('common:cancel')}

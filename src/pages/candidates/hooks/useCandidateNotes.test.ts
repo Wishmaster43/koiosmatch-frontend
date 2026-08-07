@@ -45,6 +45,32 @@ describe('useCandidateNotes · onContactStamped (LAST-CONTACT-REFRESH-1)', () =>
   })
 })
 
+// NOTE-TAAL-1 (06-08): the composer's picked language rides along on both
+// writes — §13, assert the REQUEST body, never only that the call fired.
+describe('useCandidateNotes · language (NOTE-TAAL-1)', () => {
+  it('carries the picked language on addNote', async () => {
+    const { result } = renderHook(() => useCandidateNotes('c1'))
+    act(() => { result.current.addNote({ type: 'general', title: '', body: 'Notitie', language: 'en' }) })
+    expect(api.post).toHaveBeenCalledWith('/candidates/c1/notes', { type: 'general', text: 'Notitie', channel: undefined, language: 'en' })
+  })
+
+  it('carries the picked language on editNote', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [{ id: 'n1', body: 'First' }] } })
+    vi.mocked(api.patch).mockResolvedValueOnce({})
+    const { result } = renderHook(() => useCandidateNotes('c1'))
+    await waitFor(() => expect(result.current.notes).toHaveLength(1))
+    act(() => { result.current.editNote(0, { type: 'general', title: '', body: 'Updated', language: 'de' }) })
+    expect(api.patch).toHaveBeenCalledWith('/candidates/c1/notes/n1', { text: 'Updated', type: 'general', channel: undefined, language: 'de' })
+  })
+
+  it('omits language (undefined) when the recruiter never touched the picker', async () => {
+    const { result } = renderHook(() => useCandidateNotes('c1'))
+    act(() => { result.current.addNote({ type: 'general', title: '', body: 'Notitie' }) })
+    // No `language` key set → the backend keeps its own tenant default.
+    expect(api.post).toHaveBeenCalledWith('/candidates/c1/notes', expect.not.objectContaining({ language: expect.anything() }))
+  })
+})
+
 // RECHTEN-DETAIL-1 (Danny 06-08 "notitie-eigenaarschap"): author_id is threaded
 // through unchanged so the shared NotesTab can gate edit/delete on it (canManageNote).
 describe('useCandidateNotes · author_id threading (RECHTEN-DETAIL-1)', () => {

@@ -396,7 +396,8 @@
     "displayAsTime": "Heure (H:i)",
     "displayAsDate": "Date (d-m-Y)",
     "displayAsDay": "Jour (Lun/Mar/…)",
-    "displayAsDayTime": "Jour + heure"
+    "displayAsDayTime": "Jour + heure",
+    "unknownModule": "Module inconnu"
   },
   "picker": {
     "title": "Choisir un module",
@@ -1010,5 +1011,16 @@
       "whatsapp_connection_down": "Connexion WhatsApp interrompue",
       "whatsapp_connection_restored": "Connexion WhatsApp rétablie"
     }
+  },
+  "templateLibrary": {
+    "title": "Bibliothèque de modèles",
+    "subtitle": "Démarrez un nouveau workflow à partir d'un modèle prêt à l'emploi.",
+    "allTemplates": "Tous les modèles",
+    "koiosAiFolder": "Koios AI",
+    "koiosAiHint": "Modèles d'action prêts à l'emploi que Koios IA peut exécuter pour vous.",
+    "loading": "Chargement des modèles…",
+    "error": "Impossible de charger les modèles.",
+    "empty": "Aucun modèle dans cette catégorie pour le moment.",
+    "useTemplate": "Utiliser le modèle"
   }
 }

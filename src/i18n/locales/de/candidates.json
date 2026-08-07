@@ -1161,7 +1161,10 @@
     "started": "Unterhaltung gestartet",
     "composerPlaceholder": "Nachricht eingeben…",
     "composerSendFailed": "Nachricht konnte nicht gesendet werden",
-    "sessionClosedHint": "Das 24-Stunden-Fenster ist geschlossen — starten Sie eine neue Unterhaltung mit einer Vorlage, um es wieder zu öffnen."
+    "sessionClosedHint": "Das 24-Stunden-Fenster ist geschlossen — starten Sie eine neue Unterhaltung mit einer Vorlage, um es wieder zu öffnen.",
+    "composerUnavailable": "WhatsApp ist gerade nicht erreichbar — es wurde nichts gesendet. Bitte versuchen Sie es später erneut.",
+    "pickAgent": "KI-Agent (optional)",
+    "agentPlaceholder": "KI-Agent wählen…"
   },
   "advice": {
     "reason": {

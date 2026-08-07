@@ -34,6 +34,21 @@ describe('Timeline · date formatting', () => {
   })
 })
 
+// AI-ACT-1: an `ai` entry used to render only a bare KoiosAiMark icon with no
+// visible text — replaced by the shared AiGeneratedLabel so the disclosure is
+// icon+text, never colour/icon-only (§6).
+describe('Timeline · AI-generated disclosure (AI-ACT-1)', () => {
+  it('shows the AI-generated label on an ai-flagged item', () => {
+    render(<Timeline items={[item({ ai: true })]} />)
+    expect(screen.getByText('AI-gegenereerd')).toBeInTheDocument()
+  })
+
+  it('shows nothing extra on a human-authored item', () => {
+    render(<Timeline items={[item({ ai: false })]} />)
+    expect(screen.queryByText('AI-gegenereerd')).toBeNull()
+  })
+})
+
 describe('Timeline · connector rail', () => {
   it('draws no dangling connector after a single item', () => {
     render(<Timeline items={[item()]} />)

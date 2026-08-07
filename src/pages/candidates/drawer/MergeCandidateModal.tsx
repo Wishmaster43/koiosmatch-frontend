@@ -86,7 +86,7 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
     }
   }
 
-  const inputStyle: CSSProperties = { width: '100%', height: 34, padding: '0 10px 0 30px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--input-bg)', color: 'var(--text)', outline: 'none', boxSizing: 'border-box' }
+  const inputStyle: CSSProperties = { width: '100%', height: 34, padding: '0 10px 0 30px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box' }
 
   // One selectable "which record remains" card per side.
   const survivorCard = (c: LiteCandidate, isCurrent: boolean) => {
@@ -166,7 +166,7 @@ export default function MergeCandidateModal({ current, onClose, onMerged, initia
             </button>
             <button type="button" onClick={confirm} disabled={!other || merging}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 8,
-                background: 'var(--color-danger)', color: '#fff', cursor: !other || merging ? 'not-allowed' : 'pointer', opacity: !other || merging ? 0.5 : 1 }}>
+                background: 'var(--color-danger)', color: 'var(--color-on-accent)', cursor: !other || merging ? 'not-allowed' : 'pointer', opacity: !other || merging ? 0.5 : 1 }}>
               {merging ? <Loader2 size={13} className="animate-spin" /> : <GitMerge size={13} />} {t('merge.confirm')}
             </button>
           </div>

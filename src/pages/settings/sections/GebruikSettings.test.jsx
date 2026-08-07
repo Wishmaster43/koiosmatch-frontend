@@ -1,16 +1,17 @@
 /**
  * GebruikSettings (billing_usage, USAGE-LIMITS-1) — asserts the REAL usage
  * requests (route + params), per §13: a mutation/read test must prove the seam,
- * never only that a callback fired. Covers the AI usage period toggle (the one
- * piece of the reference screenshot the backend actually supports today) and the
- * WhatsApp usage fetch, plus the two honest "not built yet" notices for the
+ * never only that a callback fired. Covers the AI usage period toggle, the
+ * WhatsApp usage fetch, the K0 Koios AI billing block (month param + clickable
+ * per_module breakdown), and the two honest "not built yet" notices for the
  * plan/credits and daily-breakdown pieces that have no backend behind them.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
+import { formatNumber } from '@/lib/formatters'
 import GebruikSettings from './GebruikSettings'
 
 vi.mock('@/lib/api', async () => {
@@ -40,15 +41,27 @@ const messagingCosts = (over = {}) => ({
   ...over,
 })
 
-// Same Intl call the component uses (§5 — never hardcode a locale-formatted string).
+// K0 billing contract: GET /ai/koios/usage/billing?month=YYYY-MM -- invoice-ready
+// Claude + workflow-token totals (koiosmatch-api COORDINATION-LOG 2026-08-06).
+const koiosBilling = (over = {}) => ({
+  month: '2026-08',
+  claude: { tokens_in: 12000, tokens_out: 4000, cost: 3.2, free_allowance: 10000, margin_pct: 60, billable_cost: 5.12 },
+  workflow: { total_module_runs: 6000, per_module: { whatsapp_send: 2100, pdok_geocode: 1800 }, price_cents_per_run: 1, amount: 60 },
+  total_amount: 65.12,
+  currency: 'EUR',
+  ...over,
+})
+
+// Same Intl call the component uses (§5 -- never hardcode a locale-formatted string).
 // RTL's default normalizer collapses the non-breaking space Intl inserts after "€"
 // into a regular space before matching, so do the same here.
 const eur = (v) => new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(v).replace(/\u00A0/g, ' ')
 
-function mockApi({ ai = aiUsage(), wa = messagingCosts() } = {}) {
+function mockApi({ ai = aiUsage(), wa = messagingCosts(), billing = koiosBilling() } = {}) {
   api.get.mockImplementation((url) => {
     if (url === '/ai/koios/usage') return Promise.resolve({ data: ai })
     if (url === '/settings/messaging-costs') return Promise.resolve({ data: { data: wa } })
+    if (url === '/ai/koios/usage/billing') return Promise.resolve({ data: billing })
     return Promise.resolve({ data: {} })
   })
 }
@@ -89,6 +102,59 @@ describe('GebruikSettings — WhatsApp usage', () => {
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/settings/messaging-costs'))
     expect(await screen.findByText('340')).toBeInTheDocument()
+  })
+})
+
+describe('GebruikSettings — Koios AI billing (K0)', () => {
+  it('GETs /ai/koios/usage/billing with the current month by default and renders the Claude + total figures', async () => {
+    mockApi()
+    render(<GebruikSettings />)
+
+    // Default month must be a real 'YYYY-MM' key — never hardcode "now" in the assertion,
+    // it would drift the day this test runs in a different month than it was written.
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/ai/koios/usage/billing', { params: { month: expect.stringMatching(/^\d{4}-\d{2}$/) } }))
+    expect(await screen.findByText(eur(5.12))).toBeInTheDocument()  // claude.billable_cost
+    expect(screen.getByText(eur(65.12))).toBeInTheDocument()        // total_amount
+    expect(screen.getByText(formatNumber(12000))).toBeInTheDocument() // claude.tokens_in
+  })
+
+  it('refetches with the picked month when the month input changes', async () => {
+    mockApi()
+    render(<GebruikSettings />)
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/ai/koios/usage/billing', expect.anything()))
+
+    // fireEvent.change (not userEvent.type) — `<input type="month">` is a picker
+    // widget userEvent can't type character-by-character; a direct value swap
+    // mirrors how a real month-picker commits a selection.
+    fireEvent.change(screen.getByLabelText(t('billing.usage.koios.monthLabel')), { target: { value: '2026-05' } })
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/ai/koios/usage/billing', { params: { month: '2026-05' } }))
+  })
+
+  it('reveals the per_module breakdown only after clicking the workflow line (clickable, not always-on)', async () => {
+    mockApi()
+    render(<GebruikSettings />)
+    await screen.findByText(eur(65.12))
+
+    // Collapsed by default — the per-module module keys are not in the document yet.
+    expect(screen.queryByText('whatsapp_send')).not.toBeInTheDocument()
+
+    const workflowLineName = t('billing.usage.koios.workflow.line', { n: formatNumber(6000) })
+    await userEvent.click(screen.getByRole('button', { name: workflowLineName }))
+
+    expect(await screen.findByText('whatsapp_send')).toBeInTheDocument()
+    expect(screen.getByText(formatNumber(2100))).toBeInTheDocument()
+
+    // Clicking again collapses it.
+    await userEvent.click(screen.getByRole('button', { name: workflowLineName }))
+    expect(screen.queryByText('whatsapp_send')).not.toBeInTheDocument()
+  })
+
+  it('shows the empty state when there is no Koios usage yet this month', async () => {
+    mockApi({ billing: koiosBilling({ claude: { tokens_in: 0, tokens_out: 0, cost: 0, free_allowance: 10000, margin_pct: 60, billable_cost: 0 }, workflow: { total_module_runs: 0, per_module: {}, price_cents_per_run: 1, amount: 0 }, total_amount: 0 }) })
+    render(<GebruikSettings />)
+
+    expect(await screen.findByText(t('billing.usage.koios.empty'))).toBeInTheDocument()
   })
 })
 

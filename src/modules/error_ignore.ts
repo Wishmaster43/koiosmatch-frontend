@@ -6,8 +6,8 @@ export default {
   category: 'Flow beheer',
   label:    'Negeren',
   Icon:     EyeOff,
-  color:    '#6B7280',
-  bg:       '#F3F4F6',
+  color:    'var(--module-neutral)',
+  bg:       'color-mix(in srgb, var(--module-neutral) 8%, transparent)',
   schema: [
     { key: 'info', label: 'Werking', type: 'textarea', placeholder: 'De fout wordt genegeerd en de uitvoering gaat door met de volgende bundle.' },
   ],

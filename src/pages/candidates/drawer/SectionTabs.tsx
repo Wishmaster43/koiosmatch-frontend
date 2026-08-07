@@ -53,19 +53,21 @@ const AddableSection = AddableSectionJs as unknown as ComponentType<AnyProps>
 
 /**
  * DOC-ENTRY-LINK-1 (CMFE): resolve the proof document (if any) linked to an
- * education/certification entry. DOC-EDU-1/DOC-GELDIGHEID-1 both PATCH a plain
- * `document_id` onto the entry — resolved here by cross-referencing the
- * candidate's already-loaded documents list first (the authoritative, fully
- * normalised source: url/download_url/name/type all come from mapCandidate).
- * The education resource additionally NESTS the full document object (no
- * second fetch needed), and a document also carries the reverse link
- * (education_id/certification_id) — both are tried as fallbacks so whichever
- * shape a given payload actually carries still resolves to the same document.
+ * education/certification/language/skill entry. DOC-EDU-1/DOC-GELDIGHEID-1/
+ * DOC-LANG-SKILL-LINK-1 all PATCH a plain `document_id` onto the entry —
+ * resolved here by cross-referencing the candidate's already-loaded documents
+ * list first (the authoritative, fully normalised source: url/download_url/
+ * name/type all come from mapCandidate). The education/language/skill
+ * resources additionally NEST the full document object (no second fetch
+ * needed), and a document also carries the reverse link (education_id/
+ * certification_id/language_id/skill_id) — both are tried as fallbacks so
+ * whichever shape a given payload actually carries still resolves to the
+ * same document.
  */
 export function resolveLinkedDocument(
   entry: RelItem,
   documents: RelItem[],
-  reverseKey: 'education_id' | 'certification_id',
+  reverseKey: 'education_id' | 'certification_id' | 'language_id' | 'skill_id',
 ): RelItem | undefined {
   const docId = entry.document_id
   if (docId != null) {
@@ -326,30 +328,49 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documen
   )
 }
 
-export function SkillsTab({ items = [], onAdd, onEdit, onRemove }: RelTabProps) {
+export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments }: RelTabProps) {
   const { t } = useTranslation('candidates')
   // Level is a tenant lookup dropdown (SKILL-LVL-1), mirroring the languages editor.
   const { levels } = useSkillLevels()
+  // DOC-LANG-SKILL-LINK-1: preview overlay for a row's linked proof document — the
+  // shared house DocPreviewModal (never a fork), mirrors Education/Certifications.
+  const [previewDoc, setPreviewDoc] = useState<RelItem | null>(null)
+  // "Koppelen aan" picker options — every candidate document, labeled by its own
+  // name (mirrors the upload-flow picker in DocumentsSection; same source list).
+  const documentOptions = documents.map(d => ({ value: String(d.id ?? ''), label: (d.name as string) ?? (d.file_name as string) ?? '' }))
   const fields = [
     { key: 'name',  label: t('addFields.skill') },
     { key: 'level', label: t('addFields.skillLevel'), options: levels },
+    // DOC-LANG-SKILL-LINK-1: optionally link an already-uploaded proof document to this entry.
+    { key: 'document_id', label: t('addFields.linkedDocument'), options: documentOptions },
   ]
   // Skills render as a vertical list (one per row) so edit/remove read clearly.
   return (
+    <>
     <AddableSection title={null} emptyText={t('sections.skillsEmpty')} renderAddButton={renderAddButton}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
         const v = raw as { id?: Id; name?: string; skill?: string; level?: string }
         const name  = typeof raw === 'string' ? raw : (v.name ?? v.skill ?? '')
         const level = typeof raw === 'string' ? '' : (v.level ?? '')
+        // DOC-LANG-SKILL-LINK-1: resolve the linked proof document, if any — icons
+        // render only when found. A legacy plain-string skill has no id to link by.
+        const linkedDoc = typeof raw === 'string' ? undefined : resolveLinkedDocument(raw, documents, 'skill_id')
         return (
-          <div key={v.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 0', paddingRight: 56,
+          <div key={v.id ?? i} style={{ display: 'flex', gap: 8, padding: '8px 0', paddingRight: 56,
             borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-primary)', flexShrink: 0 }} />
-            <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{name}</span>
-            {level && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>· {level}</span>}
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-primary)', flexShrink: 0, marginTop: 6 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{name}</span>
+                {level && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>· {level}</span>}
+              </div>
+              {linkedDoc && <DocEntryLinks doc={linkedDoc} onPreview={() => setPreviewDoc(linkedDoc)} onJump={onJumpToDocuments} />}
+            </div>
           </div>
         )
       }} />
+    {previewDoc && <DocPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
+    </>
   )
 }

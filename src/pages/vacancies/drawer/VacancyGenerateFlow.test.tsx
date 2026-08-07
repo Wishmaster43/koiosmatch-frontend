@@ -96,6 +96,10 @@ describe('VacancyGenerateFlow · success — review before apply', () => {
     expect(screen.getByText('Wij zoeken een verpleegkundige…')).toBeInTheDocument()
     // No auto-apply just because a concept is present.
     expect(onApply).not.toHaveBeenCalled()
+    // AI-ACT-1: the generated concept carries the shared AI-generated disclosure
+    // label (common:aiGenerated has no entry yet, so it falls back to its Dutch
+    // defaultValue — see AiGeneratedLabel).
+    expect(screen.getByText('AI-gegenereerd')).toBeInTheDocument()
 
     await userEvent.click(screen.getByRole('button', { name: nl.generate.apply }))
     expect(onApply).toHaveBeenCalledWith('Wij zoeken een verpleegkundige…')

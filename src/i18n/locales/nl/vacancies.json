@@ -223,7 +223,9 @@
     "pickClientFirst": "Kies eerst een klant",
     "skills": "Vereiste vaardigheden",
     "addSkill": "Vaardigheid toevoegen",
-    "description": "Vacaturetekst"
+    "description": "Vacaturetekst",
+    "matchContractType": "Voorgestelde contractsoort",
+    "matchCao": "Voorgestelde CAO"
   },
   "aiagent": {
     "pickerLabel": "AI-agent",

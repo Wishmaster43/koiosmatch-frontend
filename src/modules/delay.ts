@@ -6,8 +6,8 @@ export default {
   category: 'Flow beheer',
   label: 'Wachttijd',
   Icon:  Clock,
-  color: '#5F5E5A',
-  bg:    '#F1EFE8',
+  color: 'var(--module-warmgrey)',
+  bg:    'color-mix(in srgb, var(--module-warmgrey) 11%, transparent)',
   schema: [
     { key: 'hours',         label: 'Wachten (uren)',    type: 'number',  placeholder: '24' },
     { key: 'skip_weekends', label: 'Weekend overslaan', type: 'boolean' },

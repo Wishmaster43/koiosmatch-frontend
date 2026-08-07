@@ -6,8 +6,8 @@ export default {
   category: 'Flow beheer',
   label: 'Voorwaarde / vertakking',
   Icon:  GitBranch,
-  color: '#5FB0AC',
-  bg:    '#E5F4F2',
+  color: 'var(--module-teal)',
+  bg:    'color-mix(in srgb, var(--module-teal) 15%, transparent)',
   schema: [
     { key: 'field',    label: 'Veld',     type: 'text',   placeholder: 'status' },
     { key: 'operator', label: 'Operator', type: 'select', options: ['eq', 'neq', 'gt', 'lt', 'in'] },

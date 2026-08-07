@@ -34,6 +34,39 @@
   --color-archive:       #B45309;
   --color-trash:         #64748B;
   --color-map:           #2563EB;
+
+  /* ── Module registry categorical palette (workflow builder canvas, §5 audit) ──
+     One swatch per module family in src/modules/*.ts (`color` = node icon/border,
+     `bg` = node circle tint). Foreground stays fixed across themes like the
+     --color-* set above; each module computes its own bg inline via
+     `color-mix(in srgb, var(--module-*) N%, transparent)` (§4 soft-tint formula)
+     instead of a second frozen light-only hex, so dark mode needs no override
+     block here — the mix blends against whatever surface renders behind it.
+     Modules that reuse an EXISTING --color-* token at a bespoke N% (to stay
+     visually distinct from a sibling category — e.g. ai_agent/filter/vacancies)
+     don't need a new token at all; the % lives as a comment at the call site. */
+  --module-info:         #0369A1; /* Flow beheer data ops — aggregator/get-variable(s)/webhook family */
+  --module-mauve:        #C98BBA; /* AI candidate suggestions (ai_match) */
+  --module-green:        #3B6D11; /* WhatsApp/communication brand green */
+  --module-cyan:         #0E7490; /* Backoffice link (backoffice_sync) */
+  --module-shiftmanager: #E11D2A; /* Shiftmanager brand red (sm_*, candidate_filter, shift_fetch/score) */
+  --module-teal:         #5FB0AC; /* Flow beheer condition/branch */
+  --module-slate:        #475569; /* Customers + generic data input (feeder) */
+  --module-warmgrey:     #5F5E5A; /* Delay / wait-until */
+  --module-brown:        #854F0B; /* Send email */
+  --module-neutral:      #6B7280; /* Sleep / ignore-error */
+  --module-purple:       #6D28D9; /* Iterator / repeater loops */
+  --module-helloflex:    #3E7C8C; /* HelloFlex brand teal */
+  --module-intus:        #0E3A53; /* Intus brand navy */
+  --module-teal-strong:  #0F6E56; /* Knowledge search, Planning/shifts, Set status */
+  --module-pink:         #DB2777; /* Matches */
+  --module-geo:          #1B4C8C; /* PDOK geocode */
+  --module-periwinkle:   #6E8FD6; /* Tasks */
+
+  /* Text/icon colour for content painted on a FILLED accent surface (primary/danger
+     buttons, filled badges, …) — same white in light and dark mode since a saturated
+     fill stays lit either way, so one definition covers both themes (§4 audit). */
+  --color-on-accent:     #FFFFFF;
   --sidebar-bg: #FFFFFF;
   --sidebar-text: #111827;
   --sidebar-muted: #9CA3AF;
@@ -131,6 +164,17 @@ body {
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 2px; }
+
+/* WCAG 2.2 §6 — ONE global, token-based focus ring for every interactive control
+   (inputs/buttons/selects/links/[tabindex]). `:focus-visible` (not `:focus`) so the
+   ring only appears for keyboard navigation, never on a mouse click. Components must
+   NOT re-suppress this locally with an inline `outline: 'none'` — an inline style
+   always wins over a stylesheet rule, so any local suppression permanently hides
+   this ring for that control; remove the inline override instead (audit 2026-08). */
+:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+  outline-offset: 1px;
+}
 /* Tiptap editor */
 .ProseMirror { outline: none; min-height: inherit; }
 /* Fill mode — editor body grows to fill a stretched parent, keeping the whole area clickable. */

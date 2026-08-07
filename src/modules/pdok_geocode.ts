@@ -13,8 +13,8 @@ export default {
   label:    'Adres geocoderen (PDOK)',
   category: 'Kandidaten',
   Icon:     PdokMark,
-  color:    '#1B4C8C',
-  bg:       '#E8F0FA',
+  color:    'var(--module-geo)',
+  bg:       'color-mix(in srgb, var(--module-geo) 8%, transparent)',
   schema: [
     // Single-candidate path: the trigger supplies the candidate; bulk leaves this
     // empty. NO placeholder (Danny 23-07 ×2): grey example text reads as a set

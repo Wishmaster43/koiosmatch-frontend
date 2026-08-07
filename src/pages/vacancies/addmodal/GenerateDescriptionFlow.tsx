@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import type { CSSProperties } from 'react'
 import { Loader2, Sparkles, X, Check } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import { useGenerateDescription } from './useGenerateDescription'
 import type { GenerateFormFields } from './useGenerateDescription'
 
@@ -100,7 +101,11 @@ export default function GenerateDescriptionFlow({ fields, onApply }: GenerateDes
 
       {status === 'success' && (
         <>
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>{t('generate.previewLabel')}</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>{t('generate.previewLabel')}</span>
+            {/* AI-Act disclosure (AI-ACT-1): the concept below is Koios-generated content. */}
+            <AiGeneratedLabel />
+          </div>
           {/* Plain text (the backend returns prose, not HTML) — rendered as text
               content, never dangerouslySetInnerHTML (§7). */}
           <div style={{ whiteSpace: 'pre-wrap', fontSize: 12, color: 'var(--text)', lineHeight: 1.5, maxHeight: 200, overflow: 'auto',

@@ -1161,7 +1161,10 @@
     "started": "Conversation démarrée",
     "composerPlaceholder": "Écrire un message…",
     "composerSendFailed": "Impossible d'envoyer le message",
-    "sessionClosedHint": "La fenêtre de 24 heures est fermée — démarrez une nouvelle conversation avec un modèle pour la rouvrir."
+    "sessionClosedHint": "La fenêtre de 24 heures est fermée — démarrez une nouvelle conversation avec un modèle pour la rouvrir.",
+    "composerUnavailable": "WhatsApp est actuellement injoignable — rien n'a été envoyé. Réessayez dans quelques instants.",
+    "pickAgent": "Agent IA (facultatif)",
+    "agentPlaceholder": "Choisir un agent IA…"
   },
   "advice": {
     "reason": {

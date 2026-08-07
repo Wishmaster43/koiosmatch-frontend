@@ -9,6 +9,7 @@ import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import { useRightPanel }      from '@/context/RightPanelContext'
+import { useDateFormat }      from '@/lib/datetime'
 import PaginationBar          from '../ui/PaginationBar'
 import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
 import { useReportList }      from './useReportList'
@@ -38,6 +39,8 @@ export default function MessagesTable() {
   const COLS = COL_KEYS.map(c => ({ ...c, label: t(`messages.cols.${c.tKey}`) }))
   // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
   const { rows, loading } = useReportList<MessageRow>('/messages')
+  // App-wide active locale (§5) — never a hardcoded 'nl-NL' toLocale*String call.
+  const { formatDate, formatTime } = useDateFormat()
   const [search,  setSearch]  = useState('')
   const [drill,   setDrill]   = useState<MessageRow | null>(null)
   const [sort,    setSort]    = useState<SortState>({ key: 'sent_at', dir: 'desc' })
@@ -207,14 +210,10 @@ export default function MessagesTable() {
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                     <td style={{ ...TD, fontSize: 12, whiteSpace: 'nowrap' }}>
                       <div style={{ fontWeight: 500, color: 'var(--text)' }}>
-                        {(r.sent_at ?? r.created_at)
-                          ? new Date((r.sent_at ?? r.created_at) as string).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' })
-                          : '—'}
+                        {formatDate(r.sent_at ?? r.created_at)}
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                        {(r.sent_at ?? r.created_at)
-                          ? new Date((r.sent_at ?? r.created_at) as string).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
-                          : ''}
+                        {formatTime(r.sent_at ?? r.created_at)}
                       </div>
                     </td>
                     <td style={TD}>

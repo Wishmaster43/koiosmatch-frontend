@@ -227,7 +227,8 @@
     "candidate_education_levels": "Niveles educativos",
     "notif_kandidaten": "Candidatos",
     "notif_matches": "Coincidencias",
-    "notif_taken": "Tareas"
+    "notif_taken": "Tareas",
+    "koios_advice": "Umbrales de aviso"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -763,6 +764,29 @@
       "daily": {
         "title": "Uso diario",
         "notice": "Un gráfico diario por categoría (Total · IA · Leads · Llamadas telefónicas · WhatsApp) aún no está disponible — el backend solo devuelve totales por periodo, sin cifras por día."
+      },
+      "koios": {
+        "title": "Facturación de Koios IA",
+        "subtitle": "Totales listos para facturar de los tokens de Claude y las ejecuciones de tokens de flujo de trabajo.",
+        "monthLabel": "Mes",
+        "loadError": "Error al cargar la facturación de Koios.",
+        "unavailable": "No tienes permiso para ver esto.",
+        "empty": "Todavía no hay uso de Koios este mes.",
+        "claude": {
+          "tokensIn": "Tokens de entrada",
+          "tokensOut": "Tokens de salida",
+          "cost": "Coste bruto",
+          "freeAllowance": "Cuota gratuita (tokens)",
+          "margin": "Margen",
+          "billable": "Coste facturable de Claude"
+        },
+        "workflow": {
+          "line": "{{n}} ejecución(es) de módulo de flujo de trabajo",
+          "colModule": "Módulo",
+          "colRuns": "Ejecuciones",
+          "colAmount": "Importe"
+        },
+        "total": "Total"
       }
     },
     "invoices": {
@@ -2706,5 +2730,17 @@
     "title": "Niveles educativos",
     "subtitle": "Niveles para el desplegable de formación del candidato.",
     "add": "Añadir nivel"
+  },
+  "koiosAdvice": {
+    "title": "Umbrales de aviso de Koios",
+    "subtitle": "Las ventanas de días detrás de la marca de atención de Koios en vacantes y matches.",
+    "vacancyStaleTitle": "Antigüedad de la vacante",
+    "vacancyStaleHint": "Después de cuántos días sin solicitudes una vacante publicada es marcada por Koios para atención.",
+    "vacancyStaleLabel": "Días (1-365)",
+    "vacancyStaleSaveFailed": "No se pudo guardar la ventana de antigüedad de la vacante.",
+    "matchRenewTitle": "Ventana de renovación del match",
+    "matchRenewHint": "Cuántos días antes (o después) de la fecha de fin de un match Koios sugiere renovarlo.",
+    "matchRenewLabel": "Días (1-365)",
+    "matchRenewSaveFailed": "No se pudo guardar la ventana de renovación del match."
   }
 }

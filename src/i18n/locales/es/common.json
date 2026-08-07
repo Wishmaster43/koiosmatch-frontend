@@ -243,7 +243,8 @@
     "redo": "Rehacer",
     "expand": "Ampliar",
     "collapse": "Reducir",
-    "html": "Código HTML"
+    "html": "Código HTML",
+    "language": "Idioma"
   },
   "changelog": "Registro de cambios",
   "backofficeLinks": {
@@ -295,5 +296,31 @@
     "prevAt": "Anterior ({{index}} de {{total}})",
     "nextAt": "Siguiente ({{index}} de {{total}})"
   },
-  "new": "Nuevo"
+  "new": "Nuevo",
+  "aiGenerated": "Generado por IA",
+  "aiGeneratedHint": "Generado por Koios AI — revisar antes de usar.",
+  "notesAssist": {
+    "title": "Asistente Koios",
+    "needsText": "Añade texto primero",
+    "improve": "Mejorar",
+    "summarize": "Resumir",
+    "actions": "Puntos de acción",
+    "noItems": "No se encontraron puntos de acción",
+    "apply": "Aplicar",
+    "discard": "Descartar",
+    "error": "El asistente de IA Koios no está disponible. Inténtalo de nuevo.",
+    "actionTypes": {
+      "task": "Tarea",
+      "whatsapp": "WhatsApp",
+      "email": "Correo electrónico",
+      "appointment": "Cita",
+      "notification": "Notificación"
+    }
+  },
+  "ai": {
+    "title": "Koios AI aconseja",
+    "beta": "Beta",
+    "refresh": "Actualizar",
+    "analyzing": "Analizando…"
+  }
 }

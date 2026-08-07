@@ -24,7 +24,11 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
   return { ...actual, useAllSettings: () => blobRef.current }
 })
 const postMock = vi.hoisted(() => vi.fn(() => Promise.resolve({ data: {} })))
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => new Promise(() => {})), post: postMock } }))
+// getActiveTenantId is the real (unmocked) useAllSettings module's tenant-scope key.
+vi.mock('@/lib/api', () => ({
+  default: { get: vi.fn(() => new Promise(() => {})), post: postMock },
+  getActiveTenantId: vi.fn(() => null),
+}))
 
 // One fixed deployability-status + contract-form lookup (mirrors
 // CandidateSearchTab.test.tsx's mocking shape) — this screen's own vacancy

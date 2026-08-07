@@ -7,7 +7,7 @@ export default {
   label:    'Hervatten (Resume)',
   Icon:     PlayCircle,
   color:    'var(--color-success)',
-  bg:       '#F0FDF4',
+  bg:       'var(--color-success-bg)',
   schema: [
     { key: 'fallback_value', label: 'Vervangwaarde', type: 'text', placeholder: 'Waarde die de foutieve output vervangt', help: 'De uitvoering gaat door alsof de module deze waarde heeft teruggegeven.' },
   ],

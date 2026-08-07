@@ -26,10 +26,12 @@ const mockCustomer = {
 
 // vac-1: every real, prefillable field present (point 1) — a single fixed hours
 // value (min === max), so the honest hours-prefill guard applies it.
+// VACANCY-CONTRACT-FIELD-1: contract_type/cao ride along too — same lookup
+// vocabulary as the match's own fields (verified live 2026-08-06).
 const vacancyWithEverything = {
   customer: { id: 'cust-1' }, customer_location_id: 'loc-1', customer_department_id: 'dep-1',
   contact_id: 'con-1', location_id: 'branch-vac', start_date: '2026-03-01', end_date: '2026-09-01',
-  hours_min: 32, hours_max: 32,
+  hours_min: 32, hours_max: 32, contract_type: 'bepaalde_tijd', cao: 'vvt',
 }
 // vac-branchless: no vestiging of its own — point 2's "else the candidate's own" fallback.
 const vacancyNoBranch = { customer: { id: 'cust-1' }, location_id: null }
@@ -85,6 +87,9 @@ describe('useMatchForm · vacancy prefill (points 1/2/4/1.8.4)', () => {
     expect(result.current.startDate).toBe('2026-03-01')
     expect(result.current.endDate).toBe('2026-09-01')
     expect(result.current.hours).toBe('32')
+    // VACANCY-CONTRACT-FIELD-1: contract_type/cao prefill exactly like every other field.
+    expect(result.current.contractType).toBe('bepaalde_tijd')
+    expect(result.current.cao).toBe('vvt')
 
     act(() => { result.current.setFunc('Verzorgende IG') })
     act(() => { result.current.handleSubmitClick() })
@@ -92,6 +97,7 @@ describe('useMatchForm · vacancy prefill (points 1/2/4/1.8.4)', () => {
       customer_id: 'cust-1', customer_location_id: 'loc-1', customer_department_id: 'dep-1',
       contact_id: 'con-1', branch_id: 'branch-vac', start_date: '2026-03-01', end_date: '2026-09-01',
       hours_per_week: 32, vacancy_id: 'vac-everything',
+      contract_type: 'bepaalde_tijd', cao: 'vvt',
     })))
   })
 
@@ -117,16 +123,19 @@ describe('useMatchForm · vacancy prefill (points 1/2/4/1.8.4)', () => {
 
   it('never overwrites a field the recruiter already touched by hand — field by field (point 4)', async () => {
     const { result } = renderHook(() => useMatchForm({ candidateId: 'cand-1', onClose: vi.fn(), onCreated: vi.fn() }))
-    // Recruiter picks a customer BEFORE ever touching the vacancy field.
+    // Recruiter picks a customer AND a contract type BEFORE ever touching the vacancy field.
     act(() => { result.current.setCustomerId('cust-manual') })
+    act(() => { result.current.setContractType('ZZP Flex') })
     expect(result.current.customerId).toBe('cust-manual')
 
     act(() => { result.current.setVacancyId('vac-everything') })
     // Untouched fields still prefill from the vacancy...
     await waitFor(() => expect(result.current.locationId).toBe('loc-1'))
     expect(result.current.hours).toBe('32')
-    // ...but the manually-picked customer survives untouched by the same prefill.
+    expect(result.current.cao).toBe('vvt')
+    // ...but the manually-picked customer/contract type survive untouched by the same prefill.
     expect(result.current.customerId).toBe('cust-manual')
+    expect(result.current.contractType).toBe('ZZP Flex')
   })
 
   it('clearing the vacancy reverts ONLY the still-untouched auto-filled values — a touched one stays (point 1.8.4)', async () => {
@@ -135,6 +144,8 @@ describe('useMatchForm · vacancy prefill (points 1/2/4/1.8.4)', () => {
     await waitFor(() => expect(result.current.customerId).toBe('cust-1'))
     expect(result.current.locationId).toBe('loc-1')
     expect(result.current.hours).toBe('32')
+    expect(result.current.contractType).toBe('bepaalde_tijd')
+    expect(result.current.cao).toBe('vvt')
 
     // Recruiter overrides ONE of the auto-filled fields by hand.
     act(() => { result.current.setLocationId('loc-manual-override') })
@@ -151,6 +162,9 @@ describe('useMatchForm · vacancy prefill (points 1/2/4/1.8.4)', () => {
     expect(result.current.startDate).toBe('')
     expect(result.current.endDate).toBe('')
     expect(result.current.hours).toBe('')
+    // VACANCY-CONTRACT-FIELD-1: same clear semantics as every other prefilled field.
+    expect(result.current.contractType).toBe('')
+    expect(result.current.cao).toBe('')
     // ...but the recruiter's own hand-typed value is never touched by the clear.
     expect(result.current.locationId).toBe('loc-manual-override')
   })

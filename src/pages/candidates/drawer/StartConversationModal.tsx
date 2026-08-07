@@ -19,6 +19,14 @@
  * `variables: []` (no substitution UI exists for a cold start), so showing the
  * literal placeholder is the accurate preview — a filled-in mock value would lie
  * about what the candidate actually receives.
+ *
+ * CONV-START-AGENT-1: an OPTIONAL AI-agent picker pins who answers INBOUND replies
+ * on this thread (`agent_id`, ConversationStartController — validated against THIS
+ * tenant's own `ai_agents`, verified read-only in koiosmatch-api). A fetch hiccup on
+ * /ai/agents degrades to an empty list rather than blocking the whole modal — the
+ * picker has nothing to do with whether the template itself can send. An unknown or
+ * another tenant's agent id comes back as a 422 field error (`errors.agent_id`),
+ * shown next to the picker, never folded into the generic failure toast.
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -29,9 +37,12 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { templateTexts, type WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
 import type { Id } from '@/types/common'
+import type { AiAgent } from '@/types/ai'
 
 // GET /whatsapp-phone-numbers option shape — the tenant's active WhatsApp senders.
 interface PhoneNumberOption { value: string; label: string }
+// GET /ai/agents mapped to the same {value,label} shape as every other picker here.
+interface AgentOption { value: string; label: string }
 
 const fieldLabel: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }
 // Consistent searchable-menu footprint (mirrors AddApplicationModal's pickers).
@@ -47,22 +58,29 @@ export default function StartConversationModal({ candidateId, onClose, onStarted
   const { t } = useTranslation('candidates')
   const [templates, setTemplates] = useState<WaTemplateOption[]>([])
   const [numbers, setNumbers] = useState<PhoneNumberOption[]>([])
+  const [agents, setAgents] = useState<AgentOption[]>([])
   const [loading, setLoading] = useState(true)
   const [templateName, setTemplateName] = useState('')
   const [phoneNumberId, setPhoneNumberId] = useState('')
+  const [agentId, setAgentId] = useState('')
+  const [agentError, setAgentError] = useState<string | null>(null)
   const [sending, setSending] = useState(false)
 
   // Load the tenant's approved templates + active sender numbers once — the exact
   // lookups the workflow builder's WhatsApp step reads (never a second source).
+  // CONV-START-AGENT-1: the AI-agent list rides along but is self-catching — a
+  // hiccup there degrades to an empty (optional) picker, never blocks the modal.
   useEffect(() => {
     let alive = true
     Promise.all([
       api.get('/whatsapp-templates').then(r => unwrapList<WaTemplateOption>(r).rows),
       api.get('/whatsapp-phone-numbers').then(r => unwrapList<PhoneNumberOption>(r).rows),
-    ]).then(([tpls, nums]) => {
+      api.get('/ai/agents').then(r => unwrapList<AiAgent>(r).rows).catch(() => [] as AiAgent[]),
+    ]).then(([tpls, nums, ags]) => {
       if (!alive) return
       setTemplates(tpls)
       setNumbers(nums)
+      setAgents(ags.map(a => ({ value: String(a.id ?? ''), label: a.name ?? '' })))
       // Exactly one active sender → pick it silently, nothing to ask the recruiter.
       if (nums.length === 1) setPhoneNumberId(nums[0].value)
     }).catch(() => {}).finally(() => { if (alive) setLoading(false) })
@@ -76,20 +94,31 @@ export default function StartConversationModal({ candidateId, onClose, onStarted
 
   // Send the opening template — the server validates it against the synced+approved
   // set and only writes the thread once the send itself succeeded (CONV-START-1).
+  // agent_id rides along only when actually picked (backend field is `sometimes`).
   const submit = async () => {
     if (!canSend) return
     setSending(true)
+    setAgentError(null)
     try {
       await api.post('/conversations/start', {
         candidate_id: candidateId, phone_number_id: phoneNumberId, template_name: templateName,
         language: selected?.language,
+        ...(agentId ? { agent_id: agentId } : {}),
       })
       notifySuccess(t('conversations.started'))
       onStarted(); onClose()
     } catch (err) {
-      // The server's own message is pointable (template rejected / governor skip /
-      // no connection) — never collapse it to one generic string.
-      notifyError(extractApiError(err, t('conversations.startFailed')))
+      // CONV-START-AGENT-1: an unknown/foreign agent id is its OWN 422 field error
+      // (Laravel's exists:ai_agents,id) — shown next to the picker, never folded into
+      // the generic toast so the recruiter knows exactly which choice to redo.
+      const fieldErrors = (err as { response?: { data?: { errors?: Record<string, string[]> } } })?.response?.data?.errors
+      if (fieldErrors?.agent_id) {
+        setAgentError(fieldErrors.agent_id[0])
+      } else {
+        // The server's own message is pointable (template rejected / governor skip /
+        // no connection) — never collapse it to one generic string.
+        notifyError(extractApiError(err, t('conversations.startFailed')))
+      }
     } finally { setSending(false) }
   }
 
@@ -123,6 +152,16 @@ export default function StartConversationModal({ candidateId, onClose, onStarted
               </div>
             )}
             {numbers.length === 0 && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginBottom: 14 }}>{t('conversations.numbersEmpty')}</div>}
+
+            {/* CONV-START-AGENT-1: optional — pins who answers inbound replies on this
+                thread. Never required: a plain start with no agent stays fully supported. */}
+            <div style={{ marginBottom: 14 }}>
+              <div style={fieldLabel}>{t('conversations.pickAgent')}</div>
+              <CreatableSelect value={agentId || null} onChange={v => { setAgentId(v); setAgentError(null) }}
+                placeholder={t('conversations.agentPlaceholder')} allowCreate={false} clearable menuWidth={pickerMenuWidth}
+                style={fieldFootprint} options={agents} />
+              {agentError && <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{agentError}</div>}
+            </div>
 
             {/* Read-only preview of the picked template's own text — see the file
                 comment on why unfilled {{n}} slots are shown as-is. */}

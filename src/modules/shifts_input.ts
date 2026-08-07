@@ -7,7 +7,7 @@ export default {
   category: 'Planning',
   label: 'Diensten Plakken',
   Icon:  ClipboardList,
-  color: '#B45309',
+  color: 'var(--color-archive)',
   bg:    'var(--color-warning-bg)',
   schema: [
     {

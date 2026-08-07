@@ -19,6 +19,7 @@ import AttentionCandidates from './blocks/AttentionCandidates'
 import type { DashStats, DashOpp, DashData } from '@/types/dashboard'
 import { useAllSettings, getJsonSetting, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useNumberFormat } from '@/lib/formatters'
+import { useDateFormat } from '@/lib/datetime'
 import type { DashboardType } from './templates'
 
 // Recent lists, AI runs and conversations are now live (GET /dashboard, C-30/C-31).
@@ -28,6 +29,9 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   const { t } = useTranslation('dashboard')
   // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
   const { formatNumber } = useNumberFormat()
+  // App-wide active locale (§5) — feeds the sync-sources timestamp below instead
+  // of a hardcoded 'nl-NL' toLocaleString.
+  const { formatDate } = useDateFormat()
   const auth = useAuth()
   const { activeTenant } = auth ?? {}
   // The active view/type is chosen in the topbar switcher (DashboardLayout); fall
@@ -120,7 +124,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
               {(dash?.sync_sources ?? []).filter(s => s.system !== 'shiftmanager').map(s => (
                 <span key={s.system} style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                   {t('lastSync', { source: s.label })}: {s.last_synced_at
-                    ? new Date(s.last_synced_at).toLocaleString('nl-NL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+                    ? formatDate(s.last_synced_at, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
                     : t('neverSynced')}
                 </span>
               ))}

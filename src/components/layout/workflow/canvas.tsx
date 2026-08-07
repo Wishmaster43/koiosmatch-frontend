@@ -29,14 +29,20 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   const [dropOver, setDropOver] = useState(false)
   const dragRef = useRef(false)
   const { t } = useTranslation('workflows')
-  // Unknown module type → grey fallback node, NEVER null: an unrendered node has
+  const rawType = data.type as string | undefined
+  const knownMeta = rawType ? MODULE_META[rawType] : undefined
+  // Unknown module type → neutral fallback node, NEVER null: an unrendered node has
   // no handles, so ReactFlow drops every touching edge (the error#008 spam) and
-  // the step becomes invisible/uneditable.
-  const meta = (data.type ? MODULE_META[data.type] : undefined)
-    // eslint-disable-next-line no-restricted-syntax -- DATA: mirrors the module registry's colour/bg swatch shape (src/modules/*.ts), a fixed neutral for an unrecognised module type, not a themeable UI colour
-    ?? { label: data.type ?? 'Onbekend', Icon: HelpCircle, color: '#64748B', bg: '#F1F5F9', category: 'Onbekend' }
+  // the step becomes invisible/uneditable. --module-neutral (index.css) instead of
+  // raw hex, so the fallback swatch stays theme-aware too.
+  const meta = knownMeta
+    ?? { label: rawType ?? '', Icon: HelpCircle, color: 'var(--module-neutral)', bg: 'color-mix(in srgb, var(--module-neutral) 8%, transparent)', category: 'Overig' }
   // The registry types Icon narrowly (size only); lucide icons also take `color`.
   const Icon = meta.Icon as unknown as LucideIcon
+  // Node label — translated via the shared `modules.*` keys (§5), same mechanism
+  // as ConfigPanel/ModulePicker; an unrecognised type shows a translated notice
+  // instead of the raw Dutch registry fallback.
+  const nodeLabel = knownMeta ? t('modules.' + rawType, { defaultValue: knownMeta.label }) : t('canvas.unknownModule', { defaultValue: 'Unknown module' })
   // WF-R3 live per-step status → node ring + badge colour.
   const status = data.status as string | undefined
   const failed = status === 'failed'
@@ -208,7 +214,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
         )}
       </div>
       <div style={{ textAlign: 'center', width: NODE_W }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', lineHeight: 1.3 }}>{meta.label}</div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', lineHeight: 1.3 }}>{nodeLabel}</div>
         {!!data.output && (
           <div style={{ fontSize: 9, color: 'var(--color-success)', marginTop: 1 }}>
             {Array.isArray(data.output) ? `${data.output.length} records` : 'Klaar'}

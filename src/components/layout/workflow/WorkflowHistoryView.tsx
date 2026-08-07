@@ -9,6 +9,7 @@ import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Loader2, History, Play, Clock as ClockIcon } from 'lucide-react'
 import { useReportList } from '@/components/reports/useReportList'
+import { useDateFormat } from '@/lib/datetime'
 import { formatDuration, StatusBadge } from '@/components/reports/runFormat'
 import RunDetailDrawer from '@/components/reports/RunDetailDrawer'
 import type { RunRow } from '@/types/reports'
@@ -29,6 +30,8 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
   const { t } = useTranslation('reports')
   // Runs are scoped to this workflow; the drawer opens above the editor overlay.
   const { rows, loading } = useReportList<RunRow>(workflowId != null ? `/workflows/${workflowId}/runs` : '/workflow-runs')
+  // App-wide active locale (§5) — never a hardcoded 'nl-NL' toLocale*String call.
+  const { formatDate, formatTime } = useDateFormat()
   const [drill, setDrill] = useState<RunRow | null>(null)
 
   // LOGS-DRILL-1: open the requested run exactly once per jump (object identity).
@@ -94,12 +97,8 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                     <td style={{ ...TD, whiteSpace: 'nowrap' }}>
-                      <div style={{ fontWeight: 500 }}>
-                        {r.started_at ? new Date(r.started_at).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}
-                      </div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                        {r.started_at ? new Date(r.started_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) : ''}
-                      </div>
+                      <div style={{ fontWeight: 500 }}>{formatDate(r.started_at)}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatTime(r.started_at)}</div>
                     </td>
                     <td style={{ ...TD, fontSize: 12, color: 'var(--text-muted)' }}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>

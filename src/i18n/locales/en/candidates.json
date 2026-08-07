@@ -1161,7 +1161,10 @@
     "started": "Conversation started",
     "composerPlaceholder": "Type a message…",
     "composerSendFailed": "Could not send the message",
-    "sessionClosedHint": "The 24-hour window is closed — start a new conversation with a template to reopen it."
+    "sessionClosedHint": "The 24-hour window is closed — start a new conversation with a template to reopen it.",
+    "composerUnavailable": "WhatsApp is unreachable right now — nothing was sent. Please try again shortly.",
+    "pickAgent": "AI agent (optional)",
+    "agentPlaceholder": "Choose an AI agent…"
   },
   "advice": {
     "reason": {

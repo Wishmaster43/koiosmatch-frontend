@@ -44,6 +44,9 @@ vi.mock('../hooks/useCustomerDrawerData', () => ({
 vi.mock('@/lib/api', () => ({
   default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
   unwrapList: (r: { data?: { data?: unknown[] } }) => ({ rows: r?.data?.data ?? [], total: 0 }),
+  // The real (unmocked) useAllSettings module reads this to tenant-scope its cache —
+  // this file relies on the REAL module (see invalidateAllSettingsCache import above).
+  getActiveTenantId: vi.fn(() => null),
 }))
 
 const VACANCY_STATUSES = [

@@ -13,6 +13,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, Zap } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
+import { useDateFormat } from '@/lib/datetime'
 import DataTable from '../ui/DataTable'
 import type { Column } from '../ui/DataTable'
 import { useReportList } from './useReportList'
@@ -24,6 +25,8 @@ export default function RunsTable() {
   const { t } = useTranslation('reports')
   // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
   const { rows, loading } = useReportList<RunRow>('/workflow-runs')
+  // App-wide active locale (§5) — never a hardcoded 'nl-NL' toLocale*String call.
+  const { formatDate, formatTime } = useDateFormat()
   const [search,  setSearch]  = useState('')
   const [drill,   setDrill]   = useState<RunRow | null>(null)
   const [selectedStatuses,   setSelectedStatuses]   = useState<Array<string | number>>([])
@@ -66,12 +69,8 @@ export default function RunsTable() {
       sortValue: r => r.started_at ? new Date(r.started_at).getTime() : null,
       render: r => (
         <div>
-          <div style={{ fontWeight: 500, color: 'var(--text)' }}>
-            {r.started_at ? new Date(r.started_at).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}
-          </div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-            {r.started_at ? new Date(r.started_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) : ''}
-          </div>
+          <div style={{ fontWeight: 500, color: 'var(--text)' }}>{formatDate(r.started_at)}</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatTime(r.started_at)}</div>
         </div>
       ),
     },
@@ -104,7 +103,7 @@ export default function RunsTable() {
       key: 'trigger', header: t('runs.cols.trigger'),
       render: r => <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{r.trigger ?? r.trigger_type ?? <span style={{ color: 'var(--border)' }}>—</span>}</span>,
     },
-  ], [t])
+  ], [t, formatDate, formatTime])
 
   const filterGroups = useMemo(() => {
     const groups: ReportFilterGroup[] = []

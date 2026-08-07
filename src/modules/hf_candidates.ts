@@ -8,8 +8,8 @@ export default {
   category: 'HelloFlex',
   label: 'Kandidaten',
   Icon:  HelloFlexMark,
-  color: '#3E7C8C',
-  bg:    '#E4EFF2',
+  color: 'var(--module-helloflex)',
+  bg:    'color-mix(in srgb, var(--module-helloflex) 12%, transparent)',
   schema: [
     { key: 'search',   label: 'Zoeken',           type: 'text',   placeholder: 'naam of e-mail' },
     { key: 'status',   label: 'Status',           type: 'select', options: ['alle', 'actief', 'inactief', 'beschikbaar'] },

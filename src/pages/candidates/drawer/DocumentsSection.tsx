@@ -20,6 +20,10 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
+// DOC-ENTRY-LINK-1 / DOC-LANG-SKILL-LINK-1: maps the "Koppelen aan" picker's
+// "kind:id" prefix to its API relation segment — module scope, never rebuilt per render.
+const RELATION_BY_LINK_KIND: Record<string, string> = { education: 'educations', certification: 'certifications', language: 'languages', skill: 'skills' }
+
 /** Documents section — owns its own docs state, upload, rename, search and preview.
  * Persists to /candidates/{id}/documents (multipart upload, PATCH rename, DELETE,
  * POST .../replace). New rows keep their local blob preview until the server doc
@@ -38,6 +42,12 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
   // "Koppelen aan" grouped picker below (DocumentLinkPicker self-hides when empty).
   const educationsForLink = (c.educations ?? []) as Array<{ id?: Id; title?: string }>
   const certificationsForLink = (c.certifications ?? []) as Array<{ id?: Id; name?: string }>
+  // DOC-LANG-SKILL-LINK-1: same picker, extended to languages/skills (BE landed
+  // document_id on candidate_languages + candidate_skills, mirrors DOC-EDU-1
+  // exactly). Filtered to entries with a real id — a legacy plain-string skill
+  // or a not-yet-persisted row has nothing a PATCH could target.
+  const languagesForLink = ((c.languages ?? []) as Array<{ id?: Id; language?: string; name?: string }>).filter(l => l.id != null)
+  const skillsForLink = (((c.skills ?? []) as unknown) as Array<{ id?: Id; name?: string }>).filter(s => s?.id != null)
   const [docs,        setDocs]        = useState<DocItem[]>(c.documents ?? [])
   const [pending,      setPending]     = useState<PendingItem[]>([])
   const [renamingDoc, setRenamingDoc] = useState<number | null>(null)
@@ -80,14 +90,16 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
     setSelected(new Set())
   }
 
-  // DOC-ENTRY-LINK-1: PATCH the chosen education/certification with the freshly
-  // uploaded document's id, parsing the "Koppelen aan" select's "kind:id" value.
-  // onRefresh (if provided) re-pulls the whole candidate afterwards — Education/
-  // Certifications live on a DIFFERENT drawer tab that only remounts from fresh
-  // props, so this is what keeps that tab's icons from opening a stale/missing link.
+  // DOC-ENTRY-LINK-1 / DOC-LANG-SKILL-LINK-1: PATCH the chosen education/
+  // certification/language/skill with the freshly uploaded document's id,
+  // parsing the "Koppelen aan" select's "kind:id" value. onRefresh (if provided)
+  // re-pulls the whole candidate afterwards — Education/Certifications/Languages/
+  // Skills all live on a DIFFERENT drawer tab that only remounts from fresh props,
+  // so this is what keeps that tab's icons from opening a stale/missing link.
   const linkDocumentToEntry = (linkTo: string, documentId: Id) => {
     const [kind, entryId] = linkTo.split(':')
-    const relation = kind === 'education' ? 'educations' : 'certifications'
+    const relation = RELATION_BY_LINK_KIND[kind]
+    if (!relation) return
     api.patch(`/candidates/${c.id}/${relation}/${entryId}`, { document_id: documentId })
       .then(() => onRefresh?.())
       .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
@@ -258,8 +270,9 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
         </div>
       </div>
       <div style={sectionBlock}>
-      {/* DOC-ENTRY-LINK-1: the "Koppelen aan" picker lives inside this queue (per file). */}
+      {/* DOC-ENTRY-LINK-1 / DOC-LANG-SKILL-LINK-1: the "Koppelen aan" picker lives inside this queue (per file). */}
       <PendingUploadQueue pending={pending} docTypes={docTypes} educations={educationsForLink} certifications={certificationsForLink}
+        languages={languagesForLink} skills={skillsForLink}
         onSetType={setItemType} onSetAllTypes={setAllTypes} onSetLink={setItemLink} onRemove={removePending}
         onUploadAll={uploadAll} onCancel={cancelPending} />
       {docs.length === 0 && pending.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('sections.documentsEmpty')}</div>}

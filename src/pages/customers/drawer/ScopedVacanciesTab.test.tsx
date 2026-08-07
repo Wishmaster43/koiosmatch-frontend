@@ -39,6 +39,9 @@ vi.mock('@/pages/vacancies/AddVacancyModal', () => ({
 vi.mock('@/lib/api', () => ({
   default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
   unwrapList: (r: { data?: { data?: unknown[] } }) => ({ rows: r?.data?.data ?? [], total: 0 }),
+  // The real (unmocked) useAllSettings module reads this to tenant-scope its cache —
+  // ScopedVacanciesTab mounts it transitively (status filter defaults).
+  getActiveTenantId: vi.fn(() => null),
 }))
 const VACANCY_STATUSES = [
   { id: 'open', name: 'Open', active: true },

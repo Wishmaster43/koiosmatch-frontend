@@ -9,7 +9,7 @@ import type { CSSProperties, ReactNode } from 'react'
  */
 export const sectionBlock: CSSProperties = {
   border: '1px solid var(--border)', borderRadius: 10,
-  padding: '10px 14px', background: 'var(--surface)',
+  padding: '6px 12px', background: 'var(--surface)',
 }
 // Uniform section heading: grey, uppercase, sits OUTSIDE the block (above it).
 export const sectionTitle: CSSProperties = {

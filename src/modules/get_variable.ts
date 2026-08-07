@@ -6,7 +6,7 @@ export default {
   category: 'Flow beheer',
   label:    'Variabele ophalen',
   Icon:     BookMarked,
-  color:    '#0369A1',
+  color:    'var(--module-info)',
   bg:       'var(--color-info-bg)',
   schema: [
     { key: 'variable_name', label: 'Variabelenaam', type: 'text', placeholder: 'mijn_variabele' },

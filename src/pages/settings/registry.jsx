@@ -24,6 +24,7 @@ import {
 } from 'lucide-react'
 import CustomFieldsSettings from './sections/CustomFieldsSettings'
 import VacancyGenerationSettings from './sections/VacancyGenerationSettings'
+import KoiosAdviceSettings from './sections/KoiosAdviceSettings'
 
 import UsersPage from '../users/UsersPage'
 import ViewConfigEditor from '@/components/settings/ViewConfigEditor'
@@ -157,6 +158,11 @@ export const NAV_GROUPS = [
       { id: 'koios', icon: Sparkles, component: KoiosSettings },
       { id: 'memory', icon: BookOpen, component: MemorySettings },
       { id: 'vacancy_generation', icon: Sparkles, component: VacancyGenerationSettings },
+      // Koios advice thresholds (old open Danny item): the stale-vacancy and
+      // match-renewal day windows behind the "Koios" attention column on the
+      // vacancies/matches tables — cross-entity Koios-rule config, so it sits
+      // here rather than forcing a fit into either entity's display schema.
+      { id: 'koios_advice', icon: Clock, component: KoiosAdviceSettings },
     ],
   },
   {

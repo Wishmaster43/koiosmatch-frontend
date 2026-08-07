@@ -74,7 +74,7 @@ export default function PaginationBar({ page, totalPages, totalRows, pageSize, o
           style={{
             fontSize: 12, padding: '3px 6px', borderRadius: 6,
             border: '1px solid var(--border)', background: 'var(--surface)',
-            color: 'var(--text)', cursor: 'pointer', outline: 'none',
+            color: 'var(--text)', cursor: 'pointer',
           }}>
           {pageSizeOptions.map(n => <option key={n} value={n}>{n}</option>)}
         </select>

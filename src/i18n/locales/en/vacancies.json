@@ -223,7 +223,9 @@
     "pickClientFirst": "Pick a client first",
     "skills": "Required skills",
     "addSkill": "Add skill",
-    "description": "Vacancy text"
+    "description": "Vacancy text",
+    "matchContractType": "Proposed contract type",
+    "matchCao": "Proposed CBA"
   },
   "aiagent": {
     "pickerLabel": "AI agent",

@@ -8,8 +8,8 @@ export default makeEntityModule({
   label:    'Sollicitaties',
   category: 'Sollicitaties',
   Icon:     ClipboardList,
-  color:    '#2563EB',
-  bg:       '#E6EEFE',
+  color:    'var(--color-map)',
+  bg:       'color-mix(in srgb, var(--color-map) 9%, transparent)',
   filterFields: [
     { value: 'funnel_stage',     label: 'Funnelfase' },
     { value: 'rejection_reason', label: 'Afwijsreden' },

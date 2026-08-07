@@ -8,8 +8,8 @@ export default makeEntityModule({
   label:    'Klanten',
   category: 'Klanten',
   Icon:     Building2,
-  color:    '#475569',
-  bg:       '#EEF1F5',
+  color:    'var(--module-slate)',
+  bg:       'color-mix(in srgb, var(--module-slate) 8%, transparent)',
   filterFields: [
     { value: 'status',   label: 'Status' },
     { value: 'industry', label: 'Branche' },

@@ -40,10 +40,11 @@ export default function ScopedNotesTab({ scope, id, customerId }: {
 
   // Pinned to THIS level — writes through the SAME endpoint the customer-level
   // composer uses (CustomerController::addNote), just with the level field fixed.
-  const addNote = (payload: { type: string; title: string; body: string }) => {
+  // NOTE-TAAL-1: `language` rides along optionally, same as the customer-level composer.
+  const addNote = (payload: { type: string; title: string; body: string; language?: string }) => {
     if (!customerId) return
     api.post(`/customers/${customerId}/notes`, {
-      type: payload.type, title: payload.title, text: payload.body,
+      type: payload.type, title: payload.title, text: payload.body, language: payload.language,
       ...(scope === 'location' ? { customer_location_id: id } : { customer_department_id: id }),
     }).then(reload)
       .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))

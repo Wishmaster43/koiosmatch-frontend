@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, ChevronUp, Pencil, Save, X } from 'lucide-react'
 import Slider from '@/components/ui/Slider'
+import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 
 export interface Criterion { key?: string; label?: string; hard?: boolean; score: number; weight?: number; note?: string }
 
@@ -121,7 +122,7 @@ interface MatchScoreBlockProps {
  * The AI's own score (aiScore) is kept and shown when overridden.
  */
 export default function MatchScoreBlock({ score, criteria = [], summary, onSave, source, aiScore, showOverall = true }: MatchScoreBlockProps) {
-  const { t } = useTranslation('applications')
+  const { t } = useTranslation(['applications', 'common'])
   const [editing, setEditing]   = useState(false)
   const [draftScore, setDraftScore]       = useState(0)
   const [draftCriteria, setDraftCriteria] = useState<Criterion[]>([])
@@ -144,6 +145,12 @@ export default function MatchScoreBlock({ score, criteria = [], summary, onSave,
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {/* AI-Act disclosure (AI-ACT-1): the score/criteria/summary below are
+          Koios AI output unless a human already overrode them (source ===
+          'manual') — hidden mid-edit since the recruiter is about to become
+          the source themselves. */}
+      {!editing && source !== 'manual' && <AiGeneratedLabel />}
+
       {summary && !editing && <p style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.55, margin: 0 }}>{summary}</p>}
 
       {/* Overall + edit controls */}

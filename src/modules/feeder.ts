@@ -6,8 +6,8 @@ export default {
   category: 'Flow beheer',
   label: 'Data Invoer',
   Icon:  Database,
-  color: '#475569',
-  bg:    '#F1F5F9',
+  color: 'var(--module-slate)',
+  bg:    'color-mix(in srgb, var(--module-slate) 8%, transparent)',
   schema: [
     {
       key:         'data',

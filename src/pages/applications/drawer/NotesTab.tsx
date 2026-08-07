@@ -29,8 +29,9 @@ export default function NotesTab({ application: a }: { application: ApplicationD
   // end in `.catch(() => {})`, silently keeping the optimistic note on screen forever —
   // a recruiter who believes a note was recorded will not write it twice. On failure the
   // exact optimistic object (reference match, safe even if more notes were added meanwhile)
-  // is removed again and the server's own message is surfaced.
-  const addNote = (payload: { type: string; title: string; body: string }) => {
+  // is removed again and the server's own message is surfaced. NOTE-TAAL-1: `payload`
+  // is forwarded to the API AS-IS, so the optional `language` field rides along for free.
+  const addNote = (payload: { type: string; title: string; body: string; language?: string }) => {
     const local: Note = { ...payload, text: payload.body, author: a.owner?.name ?? 'Koios',
       created_at: new Date().toISOString(), ago: t('common:justNow', { defaultValue: 'zojuist' }) }
     setNotes(prev => [local, ...prev])

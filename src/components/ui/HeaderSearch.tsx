@@ -43,7 +43,7 @@ export default function HeaderSearch({
       <Search size={13} color="var(--text-muted)" aria-hidden />
       <input value={value} autoFocus={autoFocus} placeholder={ph} aria-label={ariaLabel ?? ph}
         onChange={e => setValue(e.target.value)}
-        style={{ flex: 1, minWidth: 0, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
+        style={{ flex: 1, minWidth: 0, border: 'none', background: 'transparent', fontSize: 12, color: 'var(--text)' }} />
       {value && (
         <button type="button" onClick={() => setValue('')} aria-label={t('clear')}
           style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0 }}>

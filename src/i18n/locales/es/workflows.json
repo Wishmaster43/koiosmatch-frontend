@@ -396,7 +396,8 @@
     "displayAsTime": "Hora (H:i)",
     "displayAsDate": "Fecha (d-m-Y)",
     "displayAsDay": "Día (Lun/Mar/…)",
-    "displayAsDayTime": "Día + hora"
+    "displayAsDayTime": "Día + hora",
+    "unknownModule": "Módulo desconocido"
   },
   "picker": {
     "title": "Elegir un módulo",
@@ -1010,5 +1011,16 @@
       "whatsapp_connection_down": "Conexión de WhatsApp caída",
       "whatsapp_connection_restored": "Conexión de WhatsApp restablecida"
     }
+  },
+  "templateLibrary": {
+    "title": "Biblioteca de plantillas",
+    "subtitle": "Inicia un nuevo flujo de trabajo a partir de una plantilla lista para usar.",
+    "allTemplates": "Todas las plantillas",
+    "koiosAiFolder": "Koios AI",
+    "koiosAiHint": "Plantillas de acción listas para usar que Koios IA puede ejecutar por ti.",
+    "loading": "Cargando plantillas…",
+    "error": "No se pudieron cargar las plantillas.",
+    "empty": "Todavía no hay plantillas en esta categoría.",
+    "useTemplate": "Usar plantilla"
   }
 }

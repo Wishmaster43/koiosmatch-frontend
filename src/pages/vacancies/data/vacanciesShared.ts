@@ -88,6 +88,10 @@ export const buildVacancyPatch = (patch: Record<string, unknown>): Record<string
   if ('matchWeightTemplateId' in patch) body.match_weight_template_id = patch.matchWeightTemplateId
   // Details tab fields — contract forms, lookup slugs, structured address/salary/hours.
   if ('contractTypes'   in patch) body.contract_types     = patch.contractTypes
+  // VACANCY-CONTRACT-FIELD-1: singular contract-kind/CAO — Voorwaarden sub-tab,
+  // validated backend-side by the same lookup guard as the match's own fields.
+  if ('contractType'    in patch) body.contract_type      = patch.contractType
+  if ('cao'             in patch) body.cao                = patch.cao
   if ('seniorityValue'  in patch) body.seniority          = patch.seniorityValue
   if ('educationValue'  in patch) body.education          = patch.educationValue
   if ('industry'        in patch) body.industry           = patch.industry

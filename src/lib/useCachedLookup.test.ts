@@ -11,7 +11,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { AxiosResponse } from 'axios'
-import api from './api'
+import api, { getActiveTenantId } from './api'
 import { useCachedLookup } from './useCachedLookup'
 
 // This project's tsconfig has no @types/node (browser-only lib/types); Node's real
@@ -22,16 +22,24 @@ declare const process: {
   off(event: 'unhandledRejection', listener: (reason: unknown) => void): void
 }
 
-// Only the default client is stubbed — no unwrap/unwrapList needed, this hook
-// receives the raw axios response and hands it straight to the caller's mapFn.
-vi.mock('./api', () => ({ default: { get: vi.fn() } }))
+// The default client is stubbed (no unwrap/unwrapList needed, this hook receives
+// the raw axios response), plus getActiveTenantId — TENANT-SCOPE tests below
+// override its return value per-call to simulate a bureau switch mid-session.
+vi.mock('./api', () => ({ default: { get: vi.fn() }, getActiveTenantId: vi.fn(() => null) }))
 const mockedGet = vi.mocked(api.get)
+const mockedTenantId = vi.mocked(getActiveTenantId)
 
 // Simple mapFn used by most tests below: pulls `value` off the response body,
 // returning null when absent (mirrors every real hook's "nothing usable" guard).
 const mapValue = (res: AxiosResponse): string | null => (res.data as { value: string | null }).value ?? null
 
-afterEach(() => vi.clearAllMocks())
+// clearAllMocks() clears call history but NOT a mockReturnValue set inside a test
+// (that's mockReset) — restore the "no tenant" default explicitly so a tenant
+// override in one test never leaks into the next.
+afterEach(() => {
+  vi.clearAllMocks()
+  mockedTenantId.mockReturnValue(null)
+})
 
 describe('useCachedLookup', () => {
   // (a) Two mounts firing in the same tick must dedupe onto ONE in-flight GET —
@@ -122,6 +130,73 @@ describe('useCachedLookup', () => {
 
     const second = renderHook(() => useCachedLookup(url, mapValue, 'fallback'))
     await waitFor(() => expect(second.result.current.data).toBe('v2'))
+    expect(mockedGet).toHaveBeenCalledTimes(2)
+  })
+})
+
+// Tenant-scoping regression (bijvangst fix, 2026-08): the module-scope cache/
+// inFlight maps used to key purely on `url`, so a super-admin switching bureaus
+// mid-session could read the PREVIOUS tenant's lookup values (genders, functions,
+// note-types, …) from cache — the same class of gap fixed on useUsers' React
+// Query key (lib/queries.ts, see queries.test.ts).
+describe('useCachedLookup · tenant scoping', () => {
+  // (f) Same tenant, same url, second mount: one GET, cache reused — unchanged
+  // behaviour, asserted explicitly so the tenant key never regresses the dedupe.
+  it('reuses the cache when the tenant is unchanged', async () => {
+    const url = '/test-lookup-tenant-same'
+    mockedTenantId.mockReturnValue('tenant-a')
+    mockedGet.mockResolvedValue({ data: { value: 'a-value' } } as AxiosResponse)
+
+    const first = renderHook(() => useCachedLookup(url, mapValue, 'fallback'))
+    await waitFor(() => expect(first.result.current.data).toBe('a-value'))
+    expect(mockedGet).toHaveBeenCalledTimes(1)
+
+    const second = renderHook(() => useCachedLookup(url, mapValue, 'fallback'))
+    expect(second.result.current.data).toBe('a-value')
+    expect(mockedGet).toHaveBeenCalledTimes(1) // still just the one GET
+  })
+
+  // (g) Same url, DIFFERENT active tenant: must refetch and must NOT hand back
+  // tenant A's cached value to tenant B — this is the actual vulnerability.
+  it('refetches (and never leaks the previous tenant\'s value) after a tenant switch', async () => {
+    const url = '/test-lookup-tenant-switch'
+    mockedTenantId.mockReturnValue('tenant-a')
+    mockedGet.mockResolvedValue({ data: { value: 'a-value' } } as AxiosResponse)
+
+    const forTenantA = renderHook(() => useCachedLookup(url, mapValue, 'fallback'))
+    await waitFor(() => expect(forTenantA.result.current.data).toBe('a-value'))
+    expect(mockedGet).toHaveBeenCalledTimes(1)
+
+    // Simulate the switch: X-Tenant now resolves to a different tenant.
+    mockedTenantId.mockReturnValue('tenant-b')
+    mockedGet.mockResolvedValue({ data: { value: 'b-value' } } as AxiosResponse)
+
+    const forTenantB = renderHook(() => useCachedLookup(url, mapValue, 'fallback'))
+    await waitFor(() => expect(forTenantB.result.current.data).toBe('b-value'))
+    expect(mockedGet).toHaveBeenCalledTimes(2) // a real second GET, not a cache hit
+    expect(forTenantB.result.current.data).not.toBe('a-value')
+  })
+
+  // (h) invalidate() only clears the CURRENT tenant's slot — switching back to
+  // tenant A afterwards must still find A's entry cached (untouched by B's call).
+  it('invalidate() only clears the active tenant\'s cache slot, not other tenants\'', async () => {
+    const url = '/test-lookup-tenant-invalidate'
+    mockedTenantId.mockReturnValue('tenant-a')
+    mockedGet.mockResolvedValue({ data: { value: 'a-value' } } as AxiosResponse)
+
+    const forTenantA = renderHook(() => useCachedLookup(url, mapValue, 'fallback'))
+    await waitFor(() => expect(forTenantA.result.current.data).toBe('a-value'))
+    expect(mockedGet).toHaveBeenCalledTimes(1)
+
+    mockedTenantId.mockReturnValue('tenant-b')
+    mockedGet.mockResolvedValue({ data: { value: 'b-value' } } as AxiosResponse)
+    const forTenantB = renderHook(() => useCachedLookup(url, mapValue, 'fallback'))
+    await waitFor(() => expect(forTenantB.result.current.data).toBe('b-value'))
+    forTenantB.result.current.invalidate() // clears only tenant-b's slot
+
+    mockedTenantId.mockReturnValue('tenant-a')
+    const backToTenantA = renderHook(() => useCachedLookup(url, mapValue, 'fallback'))
+    expect(backToTenantA.result.current.data).toBe('a-value') // still cached, no 3rd GET
     expect(mockedGet).toHaveBeenCalledTimes(2)
   })
 })

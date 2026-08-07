@@ -5,7 +5,13 @@ import NotesTab from './NotesTab'
 import type { ApplicationDetail } from '@/types/application'
 
 // useNoteTypes fetches /note-types on mount; addNote POSTs → stub both api methods.
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => Promise.resolve({ data: [] })), post: vi.fn() } }))
+// Keep the real named exports (importActual) — useCachedLookup's tenant-scoped
+// cache key needs the real getActiveTenantId, only the default client is stubbed
+// (mirrors matches/tasks NotesTab.test.tsx).
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
+  return { ...actual, default: { get: vi.fn(() => Promise.resolve({ data: [] })), post: vi.fn() } }
+})
 // Stub useDateFormat so the shared NotesTab doesn't transitively init i18n (t() → keys).
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, locale: 'nl-NL' }) }))
 // OPTIMISTIC-REVERT-1 (audit 2026-07-27): mock notify so a failed save's error toast is assertable.

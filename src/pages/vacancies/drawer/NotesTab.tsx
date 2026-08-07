@@ -29,8 +29,9 @@ export default function NotesTab({ vacancy: v }: { vacancy: VacancyDetail }) {
 
   // Optimistic add, then persist. OPTIMISTIC-REVERT-1 pattern (mirrors applications):
   // on failure the exact optimistic object is removed again and the server's own
-  // message surfaced — never a silently-stuck fake note.
-  const addNote = (payload: { type: string; title: string; body: string }) => {
+  // message surfaced — never a silently-stuck fake note. NOTE-TAAL-1: `payload` is
+  // forwarded to the API AS-IS, so the optional `language` field rides along for free.
+  const addNote = (payload: { type: string; title: string; body: string; language?: string }) => {
     const local: Note = { ...payload, text: payload.body, author: v.owner?.name ?? 'Koios', created_at: new Date().toISOString() }
     setNotes(prev => [local, ...prev])
     if (v.id != null) {

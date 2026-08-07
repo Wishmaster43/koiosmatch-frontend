@@ -7,8 +7,8 @@ export default {
   category: 'AI',
   label: 'Kennisbank Zoeken',
   Icon:  BookOpen,
-  color: '#0F6E56',
-  bg:    '#E1F5EE',
+  color: 'var(--module-teal-strong)',
+  bg:    'color-mix(in srgb, var(--module-teal-strong) 10%, transparent)',
   schema: [
     { key: 'query',       label: 'Zoekopdracht',    type: 'text',   placeholder: '{{vraag van kandidaat}}' },
     { key: 'limit',       label: 'Max. resultaten', type: 'number', placeholder: '50' },

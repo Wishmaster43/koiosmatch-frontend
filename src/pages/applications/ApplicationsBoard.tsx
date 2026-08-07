@@ -18,6 +18,9 @@ function BoardCard({ app, onDragStart, onClick, selected }: {
   app: Application; onDragStart: (e: DragEvent<HTMLDivElement>, id: Id | undefined) => void; onClick: (app: Application) => void; selected: boolean
 }) {
   const { formatDate } = useDateFormat()
+  // AI-Act disclosure hint (AI-ACT-1) for the AI-task mark below — 'common' only,
+  // this card has no other translated strings.
+  const { t } = useTranslation('common')
   return (
     <div draggable onDragStart={e => onDragStart(e, app.id)} onClick={() => onClick(app)}
       style={{ background: 'var(--surface)', borderRadius: 10, padding: '12px 14px', marginBottom: 8,
@@ -43,11 +46,14 @@ function BoardCard({ app, onDragStart, onClick, selected }: {
         {app.vacancyTitle}
       </div>
 
-      {/* AI task */}
+      {/* AI task — the mark alone is icon-only; the surrounding "AI task" label already
+          exists as a code comment but not as user-facing text, so the mark carries the
+          AI-Act disclosure hint (AI-ACT-1) as its tooltip rather than a second stacked
+          label in this already-compact card. */}
       {app.task && (
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, background: 'var(--color-primary-bg)',
           borderRadius: 6, padding: '5px 8px', marginBottom: 8 }}>
-          <KoiosAiMark size={16} />
+          <KoiosAiMark size={16} title={t('aiGeneratedHint', { defaultValue: 'Door Koios AI gegenereerd — controleer voor gebruik.' })} />
           <span style={{ fontSize: 11, color: 'var(--color-primary)', fontWeight: 500,
             display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
             {app.task}

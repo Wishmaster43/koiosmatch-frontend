@@ -8,8 +8,8 @@ export default makeEntityModule({
   label:    'Matches',
   category: 'Matches',
   Icon:     Handshake,
-  color:    '#DB2777',
-  bg:       '#FCE7F2',
+  color:    'var(--module-pink)',
+  bg:       'color-mix(in srgb, var(--module-pink) 10%, transparent)',
   filterFields: [
     { value: 'status',    label: 'Status' },
     { value: 'candidate', label: 'Kandidaat' },

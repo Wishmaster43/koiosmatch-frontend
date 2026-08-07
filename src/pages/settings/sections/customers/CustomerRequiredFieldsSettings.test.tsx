@@ -28,7 +28,12 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
   return { ...actual, useAllSettings: () => blobRef.current }
 })
 const postMock = vi.hoisted(() => vi.fn(() => Promise.resolve({ data: {} })))
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => new Promise(() => {})), post: postMock } }))
+// getActiveTenantId is the real (unmocked, via importActual above) useAllSettings
+// module's tenant-scope key — saves go through the real saveSettingsKeys.
+vi.mock('@/lib/api', () => ({
+  default: { get: vi.fn(() => new Promise(() => {})), post: postMock },
+  getActiveTenantId: vi.fn(() => null),
+}))
 
 // Two named tenant phases — never the hardcoded Prospect/Klant seed.
 /* eslint-disable no-restricted-syntax -- DATA: mock lookup colours mirroring AddCustomerModal.test.tsx's own phase mock, not a UI colour choice */

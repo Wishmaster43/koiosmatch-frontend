@@ -8,7 +8,7 @@ export default {
   category: 'Triggers',
   label: 'Webhook Trigger',
   Icon:  Webhook,
-  color: '#0369A1',
+  color: 'var(--module-info)',
   bg:    'var(--color-info-bg)',
   schema: [
     { key: 'webhook_id',  label: 'Webhook',         type: 'webhook_select',

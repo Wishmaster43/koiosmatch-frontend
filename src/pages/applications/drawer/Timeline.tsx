@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import Avatar from '@/components/ui/Avatar'
-import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import TimelineRail from '@/components/ui/TimelineRail'
 import { useDateFormat } from '@/lib/datetime'
 import type { Id } from '@/types/common'
@@ -9,10 +9,12 @@ export interface TimelineItem { id?: Id; initials?: string; author?: string; tim
 
 /**
  * Timeline — the application drawer's Tijdlijn tab: a vertical activity list
- * (connector rail + author avatar + description bubble + optional Koios AI mark +
- * time). `time` is the mapper's raw value (created_at, an ISO string) — formatted
- * here via the house DD-MM-YYYY HH:mm, never rendered as a raw ISO string
- * (Danny 05-08: "Datum en tijd staat niet goed").
+ * (connector rail + author avatar + description bubble + optional AI-generated
+ * disclosure label + time). `time` is the mapper's raw value (created_at, an ISO
+ * string) — formatted here via the house DD-MM-YYYY HH:mm, never rendered as a
+ * raw ISO string (Danny 05-08: "Datum en tijd staat niet goed"). AI-ACT-1: an
+ * `ai` entry used to carry only a bare KoiosAiMark icon (no visible text) — the
+ * shared AiGeneratedLabel replaces it so the disclosure is icon+text (§6).
  */
 export default function Timeline({ items = [], emptyText }: { items?: TimelineItem[]; emptyText?: ReactNode }) {
   const { formatDateTime } = useDateFormat()
@@ -34,7 +36,7 @@ export default function Timeline({ items = [], emptyText }: { items?: TimelineIt
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg)',
               border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px' }}>
               <span style={{ flex: 1, fontSize: 12, color: 'var(--text)', lineHeight: 1.45 }}>{ev.description}</span>
-              {ev.ai && <KoiosAiMark size={16} />}
+              {ev.ai && <AiGeneratedLabel size={10} />}
             </div>
           </div>
         </div>

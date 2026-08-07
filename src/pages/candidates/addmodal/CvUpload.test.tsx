@@ -145,6 +145,10 @@ describe('CV upload · prefill', () => {
     // Seven fields filled ⇒ seven "from CV, check me" badges.
     expect(screen.getAllByText('modal.cv.badge')).toHaveLength(7)
     expect(screen.getByText('modal.cv.checkNotice')).toBeInTheDocument()
+    // AI-ACT-1: the prefilled fields carry the shared AI-generated disclosure
+    // label (icon + text, §6) — i18next is uninitialised here, so the label
+    // falls back to its Dutch defaultValue rather than a raw key.
+    expect(screen.getByText('AI-gegenereerd')).toBeInTheDocument()
   })
 
   it('drops the mark on a field once the recruiter edits it', async () => {

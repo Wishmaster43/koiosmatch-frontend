@@ -35,6 +35,8 @@ vi.mock('@/lib/api', () => ({
     get: vi.fn((url) => (url === '/settings' ? Promise.resolve({ data: {} }) : new Promise(() => {}))),
     post: vi.fn(() => Promise.resolve({ data: {} })),
   },
+  // The real (unmocked) useAllSettings module reads this to tenant-scope its cache.
+  getActiveTenantId: vi.fn(() => null),
 }))
 
 afterEach(() => vi.clearAllMocks())

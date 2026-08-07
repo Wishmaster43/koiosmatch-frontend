@@ -1161,7 +1161,10 @@
     "started": "Conversatie gestart",
     "composerPlaceholder": "Typ een bericht…",
     "composerSendFailed": "Kon het bericht niet versturen",
-    "sessionClosedHint": "Het 24-uursvenster is gesloten — start een nieuwe conversatie met een template om opnieuw te openen."
+    "sessionClosedHint": "Het 24-uursvenster is gesloten — start een nieuwe conversatie met een template om opnieuw te openen.",
+    "composerUnavailable": "WhatsApp is nu niet bereikbaar — er is niets verzonden. Probeer het straks opnieuw.",
+    "pickAgent": "AI-agent (optioneel)",
+    "agentPlaceholder": "Kies een AI-agent…"
   },
   "advice": {
     "reason": {

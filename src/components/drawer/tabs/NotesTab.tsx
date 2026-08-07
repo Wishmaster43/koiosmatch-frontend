@@ -23,14 +23,22 @@
  * which is not self-claimable and needs managePermission like a colleague's note).
  * System notes never get these buttons regardless — see systemRow, which never
  * renders them.
+ *
+ * POPUP-SLEEP-1 / NOTE-ASSIST-1 / NOTE-TAAL-1 (Danny 06-08 "geen popup, geen
+ * spellingchecker, geen vak voor de Koios AI verbeteringen"): the add/edit
+ * composer moved out of this file into `notes/NoteComposer.tsx` — a FloatingPanel
+ * popup (draggable/resizable) carrying the type/channel pickers, the RichText
+ * editor (language picker + native spellcheck, TAAL-SPELL-1), and the Koios AI
+ * assist section (`notes/NoteAssistSection.tsx`). This file keeps owning WHICH
+ * note is being composed (`adding`/`editingIdx`) and the save/delete wiring —
+ * everything about HOW the composer looks/behaves lives in `notes/`.
  */
-import { useState, useEffect } from 'react'
-import type { CSSProperties, ReactNode, ComponentType } from 'react'
+import { useState } from 'react'
+import type { ReactNode } from 'react'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
-import { Edit2, Save, X, Mail, PhoneCall, MessageCircle, Building2, Video, FileText, History, Search, Trash2 } from 'lucide-react'
+import { Edit2, History, Search, Trash2 } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import SafeHtml from '@/components/ui/SafeHtml'
-import RichTextEditor from '@/components/ui/RichTextEditor'
 import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
 import TimelineRail from '@/components/ui/TimelineRail'
 import { useAuth } from '@/context/AuthContext'
@@ -38,18 +46,23 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
 import { SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
+import NoteComposer from './notes/NoteComposer'
+import { NoteTypeChip, NoteChannelChip } from './notes/NoteChips'
 
 // Strip tags for search matching only (display still goes through SafeHtml) —
 // a raw substring match against the stored HTML would miss/false-match on markup.
 const stripHtml = (html: string) => html.replace(/<[^>]*>/g, ' ')
 
-interface NoteType { value: string; label: string; color?: string }
+// Exported: NoteComposer (notes/) reads these — one shared shape, never a
+// second hand-copied type for the popup.
+export interface NoteType { value: string; label: string; color?: string }
 // author_id (RECHTEN-DETAIL-1): the note creator's user id, present only on hosts that
 // implement the rights model — undefined (key absent) vs. explicit null are DIFFERENT
-// states, see the RIGHTS comment above.
-interface NoteItem { type?: string; channel?: string; title?: string; author?: string; author_name?: string; author_id?: string | number | null; created_by?: string | { name?: string }; updated_by?: string | { name?: string }; edited_by?: string; text?: string; body?: string; ago?: string; created_at?: string; updated_at?: string; [k: string]: unknown }
+// states, see the RIGHTS comment above. `language` (NOTE-TAAL-1): the note's own
+// spellcheck/output language, optional — null/absent = tenant default.
+export interface NoteItem { type?: string; channel?: string; title?: string; author?: string; author_name?: string; author_id?: string | number | null; created_by?: string | { name?: string }; updated_by?: string | { name?: string }; edited_by?: string; text?: string; body?: string; ago?: string; created_at?: string; updated_at?: string; language?: string; [k: string]: unknown }
 interface TimelineItem { time?: string; created_at?: string; text?: string; description?: string; [k: string]: unknown }
-interface NotesLabels {
+export interface NotesLabels {
   notes?: ReactNode; newNote?: ReactNode; type?: ReactNode; channel?: ReactNode; channelNone?: ReactNode; save?: string; cancel?: string; edit?: string; openChangelog?: string
   notesEmpty?: ReactNode; timeline?: ReactNode; timelineEmpty?: ReactNode
   conversations?: ReactNode; conversationsEmpty?: ReactNode
@@ -72,13 +85,10 @@ interface NotesLabels {
   loadError?: ReactNode
   retry?: ReactNode
 }
-interface NotePayload { type: string; title: string; body: string; channel?: string }
-
-// Icon per contact-channel slug — shown on the picker + the chip (mirrors CandidatesTable).
-const CHANNEL_ICON: Record<string, ComponentType<{ size?: number }>> = {
-  email: Mail, phone: PhoneCall, call: PhoneCall, whatsapp: MessageCircle,
-  whatsapp_private: MessageCircle, appointment: Building2, meet: Video, note: FileText,
-}
+// NOTE-TAAL-1: `language` rides along on save/edit — optional, undefined means
+// "let the backend default to the tenant language" (never force a value the
+// recruiter never picked).
+export interface NotePayload { type: string; title: string; body: string; channel?: string; language?: string }
 
 interface NotesTabProps {
   notes?: NoteItem[]
@@ -149,22 +159,12 @@ export default function NotesTab({
   showNotes = true, showTimeline = true, showConversations = true, onEditStatusEvent, renderTimelineContent,
   error, onRetry, composerExtra,
 }: NotesTabProps) {
+  // POPUP-SLEEP-1: this file only tracks WHICH note is being composed — the
+  // composer's own fields (type/channel/title/body/language) now live inside
+  // NoteComposer (notes/), mounted fresh per open so they always start from the
+  // right note (see that file's docblock).
   const [adding, setAdding]   = useState(false)
   const [editingIdx, setEditingIdx] = useState<number | null>(null)   // null = new; index = editing
-  const [body, setBody]       = useState('')
-  const [title, setTitle]     = useState('')
-  const [type, setType]       = useState(noteTypes[0]?.value ?? '')
-  // Resync when the host swaps the writable type list mid-compose (the customer tab's
-  // link-level picker switches scope INSIDE the composer since 05-08 — a stale type
-  // from the previous scope would 422 on save). Loop-safe: after the reset the guard
-  // no-ops; mirrors usePlanIntakeForm's default-resync pattern.
-  useEffect(() => {
-    if (noteTypes.length === 0 || noteTypes.some(nt => nt.value === type)) return
-    setType(noteTypes[0].value)
-  }, [noteTypes, type])
-  // Optional contact channel — empty = internal note (no contact moment).
-  const [channel, setChannel] = useState('')
-  const [expanded, setExpanded] = useState(false)
   // Notes search (Danny 03-08) — client-side over the already-loaded `notes` prop.
   const [search, setSearch] = useState('')
   const { formatDate, formatDateTime } = useDateFormat()
@@ -223,47 +223,23 @@ export default function NotesTab({
   // no avatar, no edit pencil, just the "Statuswissel" chip + who/when (N-1-FE).
   const isSystemNote = (n: NoteItem) => Boolean(n.is_system) || SYSTEM_NOTE_TYPES.has(String(n.type ?? ''))
 
-  const reset = () => { setAdding(false); setEditingIdx(null); setBody(''); setTitle(''); setType(noteTypes[0]?.value ?? ''); setChannel(''); setExpanded(false) }
-  const openEdit = (i: number) => {
-    const n = notes[i]
-    setType(n.type ?? noteTypes[0]?.value ?? ''); setChannel(n.channel ?? ''); setTitle(n.title ?? ''); setBody(n.text ?? n.body ?? '')
-    setEditingIdx(i); setAdding(true)
-  }
-  const save = () => {
-    const payload: NotePayload = { type, title, body, channel: channel || undefined }
+  // Close the popup — NoteComposer owns its own field state, so this is just "not
+  // composing anything" again (mirrors the previous reset(), minus the field resets).
+  const closeComposer = () => { setAdding(false); setEditingIdx(null) }
+  const openEdit = (i: number) => { setEditingIdx(i); setAdding(true) }
+  // NoteComposer hands back the finished payload; this is the only place that
+  // still decides add-vs-edit (the index into the FULL `notes` array).
+  const handleSave = (payload: NotePayload) => {
     if (editingIdx == null) onAddNote?.(payload)
     else onEditNote?.(editingIdx, payload)
-    reset()
+    closeComposer()
   }
   // Delete — staged behind the shared confirm dialog; index mirrors openEdit/onEditNote.
   const requestDelete = (i: number) => confirm(labels.deleteConfirm ?? '', () => onDeleteNote?.(i), { danger: true })
-  const typeLabel = noteTypes.find(n => n.value === type)?.label ?? ''
-  const iconBtn: CSSProperties = { width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, cursor: 'pointer' }
 
   // Note-type chip: resolves value→label against ALL types (chipTypes) — the
   // composer list excludes system types, which made the chip fall back to the
   // raw slug ("status_change" instead of "Statuswissel", Danny 13/7).
-  const renderTypeChip = (value: string) => {
-    const nt = (chipTypes ?? noteTypes).find(n => n.value === value || n.label === value)
-    const col = nt?.color
-    const soft: CSSProperties = col
-      ? { background: col + '1A', color: col, border: `1px solid ${col}55` }
-      : { background: 'var(--color-primary-bg)', color: 'var(--color-primary)' }
-    return <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 99, marginRight: 6, ...soft }}>{nt?.label ?? value}</span>
-  }
-
-  // Channel chip — resolves value→label from the contact-channel lookup; soft tint.
-  const renderChannelChip = (value: string) => {
-    const ch = channels.find(c => c.value === value || c.label === value)
-    const col = ch?.color ?? 'var(--color-secondary)'
-    const isHex = typeof col === 'string' && col.startsWith('#')
-    const soft: CSSProperties = isHex
-      ? { background: col + '1A', color: col, border: `1px solid ${col}55` }
-      : { background: `color-mix(in srgb, ${col} 12%, transparent)`, color: col, border: `1px solid color-mix(in srgb, ${col} 40%, transparent)` }
-    const Icon = CHANNEL_ICON[value]
-    return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 99, marginRight: 6, ...soft }}>{Icon && <Icon size={10} />}{ch?.label ?? value}</span>
-  }
-
   // Calm one-line system-event row (status/phase change): History icon, chip, no pencil
   // by default. The icon is a BUTTON that opens the record changelog (Danny 13/7) —
   // decoupled via a window event so this shared tab needs no drawer-specific wiring.
@@ -281,7 +257,7 @@ export default function NotesTab({
           <History size={13} />
         </button>
         <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 10px' }}>
-          {n.type && renderTypeChip(n.type)}
+          {n.type && <NoteTypeChip value={n.type} types={chipTypes ?? noteTypes} />}
           <SafeHtml style={{ fontSize: 12, color: 'var(--text)', flex: 1, minWidth: 0 }} html={n.text ?? n.body ?? ''} />
           <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{who ? `${who} · ` : ''}{noteWhen(n)}</span>
         </div>
@@ -313,67 +289,20 @@ export default function NotesTab({
           {/* Shared reference-style add button (Danny 20-07: notitie-knop had geen
               achtergrondkleur) — one look on every entity's notes tab. Short text
               (DRAWER-ADD-SHORT-1, Danny 05-08): this always renders inside a
-              drawer sub-tab, never a full page. */}
+              drawer sub-tab, never a full page. Opens the POPUP composer now
+              (POPUP-SLEEP-1) instead of an inline block. */}
           {!adding && <DrawerAddButton onClick={() => setAdding(true)} label={labels.newNote} short />}
         </div>
+        {/* POPUP-SLEEP-1: the add/edit composer — see notes/NoteComposer.tsx. Mounted
+            unconditionally; FloatingPanel itself only renders while `open`. */}
+        <NoteComposer
+          open={adding}
+          initialNote={editingIdx != null ? notes[editingIdx] : null}
+          noteTypes={noteTypes} channels={channels} labels={labels} editorLabels={editorLabels}
+          composerExtra={composerExtra}
+          onSave={handleSave} onCancel={closeComposer}
+        />
         <div style={sectionBlock}>
-        {adding && (
-          <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 14, marginBottom: 14, background: 'var(--bg)', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {/* Host-supplied composer row (e.g. the customer tab's link-level picker) —
-                sits ABOVE the type row because the picked scope drives the type list. */}
-            {editingIdx === null && composerExtra}
-            <div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{labels.type}</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {/* §4 soft-tint (audit r4): mirrors the channel pills below — active is
-                    tinted (never a solid fill), inactive uses the surface token (the old
-                    literal 'white' was invisible-on-dark). */}
-                {noteTypes.map(nt => (
-                  <button key={nt.value} onClick={() => setType(nt.value)}
-                    style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer',
-                      border: `1px solid ${type === nt.value ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}`,
-                      background: type === nt.value ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'var(--surface)',
-                      color: type === nt.value ? 'var(--color-primary)' : 'var(--text)', fontWeight: type === nt.value ? 600 : 400 }}>
-                    {nt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {/* Contact channel — optional; picking one marks this note a contact moment.
-                No "internal" button: no channel selected = internal note (that's the note TYPE).
-                Soft-chip toggle (§4) with an icon; click a selected channel again to clear it. */}
-            {channels.length > 0 && (
-              <div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{labels.channel}</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {channels.map(ch => {
-                    const active = channel === ch.value
-                    const col = ch.color ?? 'var(--color-primary)'
-                    const Icon = CHANNEL_ICON[ch.value]
-                    return (
-                      <button key={ch.value} type="button" onClick={() => setChannel(active ? '' : ch.value)}
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', fontSize: 11,
-                          fontWeight: active ? 600 : 500, borderRadius: 99, cursor: 'pointer', color: col,
-                          background: `color-mix(in srgb, ${col} ${active ? 16 : 8}%, transparent)`,
-                          border: `1px solid color-mix(in srgb, ${col} ${active ? 50 : 28}%, transparent)` }}>
-                        {Icon && <Icon size={12} />} {ch.label}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-            <input value={title} onChange={e => setTitle(e.target.value)} placeholder={labels.notePlaceholder?.(typeLabel)}
-              style={{ width: '100%', padding: '8px 12px', fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)', background: 'white', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }} />
-            <RichTextEditor value={body} onChange={setBody} expanded={expanded} onToggleExpand={() => setExpanded(e => !e)} labels={editorLabels} />
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
-              <button onClick={save} title={labels.save}
-                style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={15} /></button>
-              <button onClick={reset} title={labels.cancel}
-                style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={15} /></button>
-            </div>
-          </div>
-        )}
         {visibleNotes.length === 0 && !adding
           ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{labels.notesEmpty}</div>
           : visibleNotes.map(({ n, i }) => {
@@ -386,8 +315,8 @@ export default function NotesTab({
                 <div style={{ flex: 1, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
                     <div style={{ flex: 1 }}>
-                      {n.type && renderTypeChip(n.type)}
-                      {n.channel && renderChannelChip(n.channel)}
+                      {n.type && <NoteTypeChip value={n.type} types={chipTypes ?? noteTypes} />}
+                      {n.channel && <NoteChannelChip value={n.channel} channels={channels} />}
                       <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{n.title ?? who}</span>
                     </div>
                     {/* "By whom · when" (always) + "edited by X" once the backend logs it (NOTES-2b). */}

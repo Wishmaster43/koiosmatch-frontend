@@ -37,7 +37,12 @@ vi.mock('../hooks/useCustomerDrawerData', () => ({
 }))
 // The customer drawer's own tenant-settings blob — only the colour toggle below
 // needs to control it; every other test relies on the default (colour ON, fallback true).
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => Promise.resolve({ data: {} })), delete: vi.fn(() => Promise.resolve({})) } }))
+// getActiveTenantId is the real (unmocked) useAllSettings module's tenant-scope key —
+// this file relies on it via `invalidateAllSettingsCache` above.
+vi.mock('@/lib/api', () => ({
+  default: { get: vi.fn(() => Promise.resolve({ data: {} })), delete: vi.fn(() => Promise.resolve({})) },
+  getActiveTenantId: vi.fn(() => null),
+}))
 /* eslint-disable no-restricted-syntax -- fixture DATA mirroring the seed stage colours, not UI styling */
 vi.mock('@/lib/useOpportunityStages', () => ({
   useOpportunityStages: () => ({ stages: [

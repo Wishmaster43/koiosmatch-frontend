@@ -27,6 +27,7 @@ type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: UpdateFn }) {
   const { t } = useTranslation('vacancies')
   const { candidateTypes, typeMeta, seniorityLevels, educationLevels, industries, formatDate, fnOptions,
+    contractTypeOptions, caoOptions,
     general, location, requirements, conditions } = useVacancyDetailsForm(v, onUpdate)
 
   // Sub-tab strip — reuses the four EXISTING group labels (details.groups.*),
@@ -55,7 +56,9 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
       {subTab === 'requirements' && (
         <DetailsRequirementsTab vacancy={v} requirements={requirements} seniorityLevels={seniorityLevels} educationLevels={educationLevels} />
       )}
-      {subTab === 'conditions' && <DetailsConditionsTab vacancy={v} conditions={conditions} />}
+      {subTab === 'conditions' && (
+        <DetailsConditionsTab vacancy={v} conditions={conditions} contractTypeOptions={contractTypeOptions} caoOptions={caoOptions} />
+      )}
     </div>
   )
 }

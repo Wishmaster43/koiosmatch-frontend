@@ -9,8 +9,8 @@ export default {
   category: 'Shiftmanager',
   label: 'Diensten scoren',
   Icon:  ShiftManagerMark,
-  color: '#E11D2A',
-  bg:    '#FDECEC',
+  color: 'var(--module-shiftmanager)',
+  bg:    'color-mix(in srgb, var(--module-shiftmanager) 8%, transparent)',
   schema: [
     { key: 'top_totaal', label: 'Maximaal aantal diensten', type: 'number', default: 7 },
     { key: 'min_duur',   label: 'Minimale dienstduur (uren)', type: 'number', default: 6 },

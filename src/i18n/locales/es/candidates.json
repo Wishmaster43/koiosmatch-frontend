@@ -1161,7 +1161,10 @@
     "started": "Conversación iniciada",
     "composerPlaceholder": "Escribe un mensaje…",
     "composerSendFailed": "No se pudo enviar el mensaje",
-    "sessionClosedHint": "La ventana de 24 horas está cerrada — inicia una nueva conversación con una plantilla para reabrirla."
+    "sessionClosedHint": "La ventana de 24 horas está cerrada — inicia una nueva conversación con una plantilla para reabrirla.",
+    "composerUnavailable": "WhatsApp no está disponible en este momento — no se envió nada. Inténtalo de nuevo en unos instantes.",
+    "pickAgent": "Agente de IA (opcional)",
+    "agentPlaceholder": "Elegir un agente de IA…"
   },
   "advice": {
     "reason": {

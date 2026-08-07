@@ -24,6 +24,10 @@ vi.mock('@/lib/settings/useAllSettings', () => ({
   getBoolSetting: (_s: unknown, _k: string, def: boolean) => def,
 }))
 vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => String(n) }) }))
+// Same stub approach as useNumberFormat above — sync_sources is empty in every
+// case here so the formatter is never actually invoked, this only keeps the
+// real @/lib/datetime module (and its @/i18n side-effect import) out of the tree.
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: unknown) => String(v) }) }))
 vi.mock('./hooks/useDashboardFilterState', () => ({
   useDashboardFilterState: () => ({
     selPeriode: 'month', setSelPeriode: vi.fn(), selVestiging: null, setSelVestiging: vi.fn(),

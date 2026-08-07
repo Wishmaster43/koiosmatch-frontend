@@ -227,7 +227,8 @@
     "candidate_education_levels": "Education levels",
     "notif_kandidaten": "Candidates",
     "notif_matches": "Matches",
-    "notif_taken": "Tasks"
+    "notif_taken": "Tasks",
+    "koios_advice": "Advice thresholds"
   },
   "kpis": {
     "title": "KPI settings",
@@ -995,6 +996,29 @@
       "daily": {
         "title": "Daily usage",
         "notice": "A daily breakdown per category (Total · AI · Leads · Phone calls · WhatsApp) is not available yet — the backend currently only returns period totals, no per-day figures."
+      },
+      "koios": {
+        "title": "Koios AI billing",
+        "subtitle": "Invoice-ready totals for Claude tokens and workflow token runs.",
+        "monthLabel": "Month",
+        "loadError": "Failed to load Koios billing.",
+        "unavailable": "You don't have permission to view this.",
+        "empty": "No Koios usage yet in this month.",
+        "claude": {
+          "tokensIn": "Tokens in",
+          "tokensOut": "Tokens out",
+          "cost": "Raw cost",
+          "freeAllowance": "Free allowance (tokens)",
+          "margin": "Margin",
+          "billable": "Billable Claude cost"
+        },
+        "workflow": {
+          "line": "{{n}} workflow module runs",
+          "colModule": "Module",
+          "colRuns": "Runs",
+          "colAmount": "Amount"
+        },
+        "total": "Total"
       }
     },
     "invoices": {
@@ -2706,5 +2730,17 @@
     "title": "Education levels",
     "subtitle": "Levels for the candidate's education dropdown.",
     "add": "Add level"
+  },
+  "koiosAdvice": {
+    "title": "Koios advice thresholds",
+    "subtitle": "The day windows behind the Koios attention flag on vacancies and matches.",
+    "vacancyStaleTitle": "Vacancy staleness",
+    "vacancyStaleHint": "How many days a published vacancy can go without an application before Koios flags it for attention.",
+    "vacancyStaleLabel": "Days (1-365)",
+    "vacancyStaleSaveFailed": "Saving the vacancy staleness window failed.",
+    "matchRenewTitle": "Match renewal window",
+    "matchRenewHint": "How many days before (or past) a match's end date Koios suggests renewing it.",
+    "matchRenewLabel": "Days (1-365)",
+    "matchRenewSaveFailed": "Saving the match renewal window failed."
   }
 }

@@ -63,11 +63,11 @@
     "expectedCloseOn": "Expected to close on {{date}}",
     "tabs": {
       "details": "Details",
-      "klant": "Client",
       "notes": "Notes",
       "tasks": "Tasks",
       "changelog": "Changelog",
-      "extra": "Extra"
+      "extra": "Extra",
+      "customer": "Client"
     },
     "tags": "Tags"
   },

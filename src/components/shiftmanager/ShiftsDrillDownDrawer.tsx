@@ -9,6 +9,7 @@ import type { LucideIcon } from 'lucide-react'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useDateFormat } from '@/lib/datetime'
 import { useDrillDownShifts } from './hooks/useDrillDownShifts'
 import DrillTabs from '@/components/ui/DrillTabs'
 import ShiftsDrillDownTotals from './ShiftsDrillDownTotals'
@@ -53,25 +54,30 @@ function Row({ icon: Icon, label, value, mono }: { icon: LucideIcon; label: Reac
   )
 }
 
-function formatDateTime(iso?: string | null) {
+// Locale is passed in by the caller (useDateFormat().locale below) — never
+// hardcoded. Returns null (not '—') for empty input so the <Row> above hides the
+// whole row instead of showing "Label: —".
+function formatDateTime(iso: string | null | undefined, locale: string) {
   if (!iso) return null
-  return new Date(iso).toLocaleString('nl-NL', {
+  return new Date(iso).toLocaleString(locale, {
     day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
   })
 }
 
-function formatTime(iso?: string | null) {
+function formatTime(iso: string | null | undefined, locale: string) {
   if (!iso) return null
-  return new Date(iso).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+  return new Date(iso).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
 }
 
-function formatDate(iso?: string | null) {
+function formatDate(iso: string | null | undefined, locale: string) {
   if (!iso) return null
-  return new Date(iso).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })
+  return new Date(iso).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 function CandidateBlock({ invite }: { invite: ShiftInvite }) {
   const { t } = useTranslation('shiftmanager')
+  // App-wide active locale (§5) — fed into formatDateTime below instead of a hardcoded 'nl-NL'.
+  const { locale } = useDateFormat()
   const c   = (invite.candidate ?? {}) as Record<string, unknown>
   // Tolerant name: accept first_name/last_name OR firstname/lastname; fall back to the
   // email local-part so a nameless mirror row no longer reads "Onbekend".
@@ -98,7 +104,7 @@ function CandidateBlock({ invite }: { invite: ShiftInvite }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3, paddingLeft: 31 }}>
         {email       && <Row icon={User}         label={t('shiftsDrawer.fields.email')}       value={email} />}
         {typeof c.mobile === 'string' && c.mobile && <Row icon={User} label={t('shiftsDrawer.fields.mobile')} value={c.mobile} />}
-        {invite.scheduled_at     && <Row icon={CalendarCheck} label={t('shiftsDrawer.fields.scheduled')}   value={formatDateTime(invite.scheduled_at)} />}
+        {invite.scheduled_at     && <Row icon={CalendarCheck} label={t('shiftsDrawer.fields.scheduled')}   value={formatDateTime(invite.scheduled_at, locale)} />}
         {invite.total_time_worked && <Row icon={Timer}        label={t('shiftsDrawer.fields.workedHours')} value={t('shiftsDrawer.hoursUnit', { n: invite.total_time_worked })} />}
         {invite.contract_type    && <Row icon={Hash}          label={t('shiftsDrawer.fields.contract')}    value={invite.contract_type} />}
       </div>
@@ -120,6 +126,8 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
 }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('shiftmanager')
+  // App-wide active locale (§5) — fed into formatTime/formatDate below instead of a hardcoded 'nl-NL'.
+  const { locale } = useDateFormat()
   const [search, setSearch] = useState('')
   // Default to grouped totals (Danny: "geen orderlijsten maar totalen"); Details stays reachable.
   const [view, setView] = useState<'totals' | 'details'>('totals')
@@ -247,9 +255,9 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
             const loc     = shift.order?.customer_location
             const planned = ['in_process', 'completed'].includes(shift.own_status ?? '')
             const invites = shift.invites ?? []
-            const start   = formatTime(shift.start_time)
-            const end     = formatTime(shift.end_time)
-            const date    = formatDate(shift.start_time)
+            const start   = formatTime(shift.start_time, locale)
+            const end     = formatTime(shift.end_time, locale)
+            const date    = formatDate(shift.start_time, locale)
 
             return (
               <div key={shift.id ?? i}

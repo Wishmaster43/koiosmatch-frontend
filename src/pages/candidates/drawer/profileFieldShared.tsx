@@ -15,7 +15,7 @@ import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 export const inputStyle: CSSProperties = {
   width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6,
   border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)',
-  boxSizing: 'border-box', outline: 'none',
+  boxSizing: 'border-box',
 }
 
 // Shared square icon-button sizing for the pencil/save/cancel controls.
@@ -78,7 +78,7 @@ export function EditControls({ editing, onSave, onCancel, onStart }: {
   )
   return (
     <div style={{ display: 'flex', gap: 4 }}>
-      <button onClick={onSave} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}>
+      <button onClick={onSave} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}>
         <Save size={13} />
       </button>
       <button onClick={onCancel} title={t('common:cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>

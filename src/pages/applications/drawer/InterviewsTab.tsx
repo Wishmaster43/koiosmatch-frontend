@@ -169,7 +169,7 @@ export default function InterviewsTab({ application: a }: { application: Applica
           <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t('interview.empty')}</div>
         </div>
       ) : interviews.map(iv => (
-        <div key={iv.id} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div key={iv.id} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {/* Header — WhatsApp affordance in the success token (F6: mirrors ProfileTab's
               waDigits() hover colour) rather than the brand's literal hex green. */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

@@ -18,17 +18,23 @@
  * 1.1.4 (creditor number, ZZP-CREDITOR-SEQ-1) — CREDITOR-AUTO-1: the field
  * becomes READ-ONLY once the tenant's own numbering sequence owns it
  * (Settings → Nummering, `useNumberingEntities`, entity key `zzp_creditor`).
- * That entity does not exist in the numbering-entities list yet (confirmed
- * live 2026-08 — the backend hasn't wired it up there), so the FE genuinely
- * cannot assert "on auto" today; the field stays EDITABLE with a muted
- * "auto-assigned if left empty" hint instead of guessing. The check itself
- * stays live so the day the backend adds that entity, this tab reacts with
- * zero further FE change. Separately: the backend auto-fills a BLANK creditor
- * number on save (its own numbering sequence) — the optimistic onUpdate above
- * only echoes back what was TYPED, so a still-empty field would keep showing
- * blank until the drawer is reopened. This tab re-reads the record itself in
- * that one case (fetchDetail) and shows the fresh number locally until the
- * parent's own state catches up.
+ * RE-VERIFIED LIVE 2026-08-07 (tenant `yesway`, GET /numbering-entities against
+ * the running dev API): the entity now DOES exist there (`CR`, pad 3) — the
+ * 2026-08 gap this comment used to describe is closed, so `creditorAutoNumbered`
+ * below now resolves true and the field renders as the read-only row further
+ * down (never the editable one). Cross-checked against the write side too:
+ * `CandidateFreelanceProfile::booted()` (koiosmatch-api) allocates the next
+ * `CR-xxx` via `ReferenceNumberAllocator` on every save where the column is
+ * still blank — platform-wide config (`config/numbering.php`), not a
+ * per-tenant toggle, so this reads the same for every tenant. The check stays
+ * LIVE (never hardcoded to true) so a future config change is still honoured
+ * with zero FE edit — exactly the contract this tab always had, just now
+ * resolving to "yes" instead of "unknown". Separately: the backend auto-fills
+ * a BLANK creditor number on save (its own numbering sequence) — the
+ * optimistic onUpdate above only echoes back what was TYPED, so a still-empty
+ * field would keep showing blank until the drawer is reopened. This tab
+ * re-reads the record itself in that one case (fetchDetail) and shows the
+ * fresh number locally until the parent's own state catches up.
  */
 import { useEffect, useRef, useState } from 'react'
 import type { ComponentType } from 'react'
@@ -210,9 +216,11 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
         </div>
       )}
       <EditableFieldTable key={`invoicing-${invoicingEpoch}`} title={t('zzp.groupInvoicing')} fields={blockFields(t('zzp.groupInvoicing'))} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveInvoicing} />
-      {/* Honest fallback (CREDITOR-AUTO-1): the FE cannot confirm the tenant's
-          numbering state yet (see file header), so the field stays editable and
-          this is the whole story — no guessing at a mode that isn't exposed. */}
+      {/* Defensive fallback (CREDITOR-AUTO-1): the numbering-entities read IS live
+          now (see file header, re-verified 2026-08-07) and resolves true for every
+          tenant today — this branch is dead in practice, kept only so a future
+          config change (the entity ever removed) still degrades honestly to an
+          editable field + hint instead of a silently-blank row. */}
       {!creditorAutoNumbered && !value.crediteur && (
         <div style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)', padding: '0 12px' }}>{t('zzp.creditorAutoHint')}</div>
       )}

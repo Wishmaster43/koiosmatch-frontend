@@ -14,10 +14,12 @@ import { rememberReturnTab } from './constants'
 import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
 
-// The card's inner block, overriding SectionCard's default padding/layout with
-// the candidate ProfileTab's calm-card shape (CANON-BOX, fieldRowCanon):
-// tighter padding, rows stacked with gap 2 instead of a loose grid.
-const calmCardStyle = { padding: '6px 12px', display: 'flex', flexDirection: 'column' as const, gap: 2, overflow: 'hidden' as const }
+// The card's inner block, overriding SectionCard's default layout with the
+// candidate ProfileTab's calm-card shape (CANON-BOX, fieldRowCanon): rows
+// stacked with gap 2 instead of a loose grid. Padding now matches SectionCard's
+// own canon default ('6px 12px', §3A spacing residue) so it no longer needs
+// overriding here.
+const calmCardStyle = { display: 'flex', flexDirection: 'column' as const, gap: 2, overflow: 'hidden' as const }
 
 // One label-LEFT field row (fieldRowCanon): fixed 120px muted label, value at
 // 12px filling the rest — mirrors the candidate drawer's FieldRow byte-for-byte

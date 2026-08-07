@@ -61,10 +61,10 @@
     "tabs": {
       "details": "Details",
       "changelog": "Änderungen",
-      "klant": "Kunde",
       "notes": "Notizen",
       "tasks": "Aufgaben",
-      "extra": "Extra"
+      "extra": "Extra",
+      "customer": "Kunde"
     },
     "markWon": "Gewonnen",
     "markLost": "Verloren",

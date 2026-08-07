@@ -22,6 +22,9 @@ const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'c
 vi.mock('@/lib/api', () => ({
   default: { get: vi.fn(() => Promise.resolve({ data: { data: [] } })), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
   unwrap: (r: { data?: unknown }) => r?.data, unwrapList: () => ({ rows: [], total: 0 }),
+  // The real (unmocked) useAllSettings module reads this to tenant-scope its cache —
+  // this file relies on the REAL module (see invalidateAllSettingsCache import above).
+  getActiveTenantId: vi.fn(() => null),
 }))
 vi.mock('@/lib/useCustomFields', () => ({
   useCustomFields: () => ({ fields: [], allFields: [], loading: false, invalidate: () => {} }),

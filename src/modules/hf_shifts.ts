@@ -8,8 +8,8 @@ export default {
   category: 'HelloFlex',
   label: 'Diensten',
   Icon:  HelloFlexMark,
-  color: '#3E7C8C',
-  bg:    '#E4EFF2',
+  color: 'var(--module-helloflex)',
+  bg:    'color-mix(in srgb, var(--module-helloflex) 12%, transparent)',
   schema: [
     { key: 'client',    label: 'Klant',         type: 'text',   placeholder: 'bijv. Yesway' },
     { key: 'status',    label: 'Status',        type: 'select', options: ['alle', 'open', 'bezet', 'geannuleerd', 'voltooid'] },

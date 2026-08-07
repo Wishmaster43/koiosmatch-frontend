@@ -7,8 +7,8 @@ export default {
   category: 'Communicatie',
   label: 'WhatsApp Sturen',
   Icon:  MessageCircle,
-  color: '#3B6D11',
-  bg:    '#EAF3DE',
+  color: 'var(--module-green)',
+  bg:    'color-mix(in srgb, var(--module-green) 12%, transparent)',
   schema: [
     // WhatsApp send FORMAT; key stays as the BE contract expects.
     // 'session' = free-form text, only delivered inside Meta's 24h customer-service

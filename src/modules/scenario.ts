@@ -8,8 +8,8 @@ export default {
   category: 'Communicatie',
   label: 'Scenario / Situatie',
   Icon:  GitBranch,
-  color: '#3B6D11',
-  bg:    '#EAF3DE',
+  color: 'var(--module-green)',
+  bg:    'color-mix(in srgb, var(--module-green) 12%, transparent)',
   schema: [
     { key: 'conditions', label: 'Condities', type: 'filters' },
   ],

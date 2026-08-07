@@ -227,7 +227,8 @@
     "candidate_education_levels": "Niveaux d'études",
     "notif_kandidaten": "Candidats",
     "notif_matches": "Matchs",
-    "notif_taken": "Tâches"
+    "notif_taken": "Tâches",
+    "koios_advice": "Seuils de conseils"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -763,6 +764,29 @@
       "daily": {
         "title": "Utilisation quotidienne",
         "notice": "Un graphique quotidien par catégorie (Total · IA · Leads · Appels téléphoniques · WhatsApp) n'est pas encore disponible — le backend ne renvoie actuellement que des totaux par période, pas de chiffres par jour."
+      },
+      "koios": {
+        "title": "Facturation Koios IA",
+        "subtitle": "Totaux prêts à facturer pour les jetons Claude et les exécutions de jetons de workflow.",
+        "monthLabel": "Mois",
+        "loadError": "Échec du chargement de la facturation Koios.",
+        "unavailable": "Vous n'avez pas les droits pour consulter ceci.",
+        "empty": "Aucune utilisation Koios ce mois-ci.",
+        "claude": {
+          "tokensIn": "Jetons entrants",
+          "tokensOut": "Jetons sortants",
+          "cost": "Coût brut",
+          "freeAllowance": "Quota gratuit (jetons)",
+          "margin": "Marge",
+          "billable": "Coût Claude facturable"
+        },
+        "workflow": {
+          "line": "{{n}} exécution(s) de module de workflow",
+          "colModule": "Module",
+          "colRuns": "Exécutions",
+          "colAmount": "Montant"
+        },
+        "total": "Total"
       }
     },
     "invoices": {
@@ -2706,5 +2730,17 @@
     "title": "Niveaux d'études",
     "subtitle": "Niveaux pour la liste déroulante des formations du candidat.",
     "add": "Ajouter un niveau"
+  },
+  "koiosAdvice": {
+    "title": "Seuils des conseils Koios",
+    "subtitle": "Les fenêtres en jours derrière le signal d'attention Koios sur les vacatures et les matches.",
+    "vacancyStaleTitle": "Ancienneté de la vacature",
+    "vacancyStaleHint": "Au bout de combien de jours sans candidature une vacature publiée est signalée par Koios pour attention.",
+    "vacancyStaleLabel": "Jours (1-365)",
+    "vacancyStaleSaveFailed": "Échec de l'enregistrement de la fenêtre d'ancienneté de la vacature.",
+    "matchRenewTitle": "Fenêtre de renouvellement du match",
+    "matchRenewHint": "Combien de jours avant (ou après) la date de fin d'un match Koios suggère de le renouveler.",
+    "matchRenewLabel": "Jours (1-365)",
+    "matchRenewSaveFailed": "Échec de l’enregistrement de la fenêtre de renouvellement du match."
   }
 }

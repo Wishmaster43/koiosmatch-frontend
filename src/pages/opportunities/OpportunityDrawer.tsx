@@ -11,7 +11,7 @@ import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
 import DetailsTab from './drawer/DetailsTab'
-import KlantTab from './drawer/KlantTab'
+import CustomerRelationTab from './drawer/CustomerRelationTab'
 import NotesTab from './drawer/NotesTab'
 import TasksTab from './drawer/TasksTab'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
@@ -46,9 +46,9 @@ const hdrPrimary: CSSProperties = { ...hdrBtn, background: 'var(--color-primary)
 /**
  * OpportunityDrawer — thin container mirroring the candidate drawer: a calm header
  * (colour-coded phase BADGE next to the title, a changelog ICON, one owner + one
- * phase picker — no wall of pickers), and config tabs (Details · Klant · Notities ·
- * Taken). The customer lives in its own tab; record history is the changelog icon,
- * not a tab. Outcome (Gewonnen/Verloren) is read from the phase, not a separate button.
+ * phase picker — no wall of pickers), and config tabs (Details · Customer · Notes ·
+ * Tasks). The customer lives in its own tab; record history is the changelog icon,
+ * not a tab. Outcome (Won/Lost) is read from the phase, not a separate button.
  */
 export default function OpportunityDrawer({
   opportunity: o, onClose, expanded, onToggleExpand, onUpdate, stages = [], users = [], customers = [],
@@ -85,7 +85,7 @@ export default function OpportunityDrawer({
 
   const tabs = [
     { id: 'details', label: t('drawer.tabs.details'), render: () => <DetailsTab opportunity={o} onUpdate={onUpdate} /> },
-    { id: 'klant',   label: t('drawer.tabs.klant'),   render: () => <KlantTab opportunity={o} customers={customers} onUpdate={onUpdate} /> },
+    { id: 'customer', label: t('drawer.tabs.customer'), render: () => <CustomerRelationTab opportunity={o} customers={customers} onUpdate={onUpdate} /> },
     { id: 'notes',   label: t('drawer.tabs.notes'),   render: () => <NotesTab opportunity={o} /> },
     { id: 'tasks',   label: t('drawer.tabs.tasks'),   render: () => <TasksTab opportunity={o} /> },
     ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra'), render: () => (

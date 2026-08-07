@@ -63,11 +63,11 @@
     "expectedCloseOn": "Verwacht te sluiten op {{date}}",
     "tabs": {
       "details": "Details",
-      "klant": "Klant",
       "notes": "Notities",
       "tasks": "Taken",
       "changelog": "Wijzigingen",
-      "extra": "Extra"
+      "extra": "Extra",
+      "customer": "Klant"
     },
     "tags": "Tags"
   },

@@ -60,7 +60,7 @@ export default function ApplicationTab({ application: a, onAdjustScore, onLinkVa
   const { formatDateTime } = useDateFormat()
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {/* Rejection outcome — read-only, shown on the FIRST drill-down screen
           (Danny 25-07); the reject FORM itself moved to a footer button +
           confirm modal (RejectionModal), opened from the drawer. */}

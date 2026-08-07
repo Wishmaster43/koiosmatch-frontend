@@ -396,7 +396,8 @@
     "displayAsTime": "Uhrzeit (H:i)",
     "displayAsDate": "Datum (d-m-Y)",
     "displayAsDay": "Tag (Mo/Di/…)",
-    "displayAsDayTime": "Tag + Uhrzeit"
+    "displayAsDayTime": "Tag + Uhrzeit",
+    "unknownModule": "Unbekanntes Modul"
   },
   "picker": {
     "title": "Modul auswählen",
@@ -1010,5 +1011,16 @@
       "whatsapp_connection_down": "WhatsApp-Verbindung unterbrochen",
       "whatsapp_connection_restored": "WhatsApp-Verbindung wiederhergestellt"
     }
+  },
+  "templateLibrary": {
+    "title": "Vorlagenbibliothek",
+    "subtitle": "Starten Sie einen neuen Workflow mit einer fertigen Vorlage.",
+    "allTemplates": "Alle Vorlagen",
+    "koiosAiFolder": "Koios AI",
+    "koiosAiHint": "Fertige Aktionsvorlagen, die Koios AI für Sie ausführen kann.",
+    "loading": "Vorlagen werden geladen…",
+    "error": "Vorlagen konnten nicht geladen werden.",
+    "empty": "Noch keine Vorlagen in dieser Kategorie.",
+    "useTemplate": "Vorlage verwenden"
   }
 }

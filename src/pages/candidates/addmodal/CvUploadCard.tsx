@@ -18,6 +18,7 @@ import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileUp, Loader2, CheckCircle2, AlertTriangle, RotateCcw } from 'lucide-react'
 import { BTN_H } from '@/config/buttonMetrics'
+import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import { CV_ACCEPT_MIME } from './useCvParse'
 import type { CvPhase } from './useCvParse'
 import type { CvPrefillResult } from './cvPrefill'
@@ -110,7 +111,12 @@ export default function CvUploadCard({ phase, errorKey, fileName, summary, onFil
               </button>
             </div>
             {summary.filled.length > 0 && (
-              <div style={{ fontSize: 11, color: 'var(--color-primary)', fontWeight: 600 }}>{t('modal.cv.checkNotice')}</div>
+              <>
+                <div style={{ fontSize: 11, color: 'var(--color-primary)', fontWeight: 600 }}>{t('modal.cv.checkNotice')}</div>
+                {/* AI-Act disclosure (AI-ACT-1): the fields above were read/filled
+                    by Koios AI from the cv, not typed by the recruiter. */}
+                <AiGeneratedLabel />
+              </>
             )}
             {summary.skipped.length > 0 && (
               <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('modal.cv.skipped', { count: summary.skipped.length })}</div>

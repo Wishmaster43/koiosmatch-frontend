@@ -17,6 +17,7 @@ import type { Candidate } from '@/types/candidate'
 // request promise — a rejection there surfaces as an unhandled rejection warning
 // unrelated to anything under test here.
 vi.mock('@/lib/api', () => ({
+  getActiveTenantId: () => 'demo',
   default: { get: vi.fn(() => Promise.resolve({ data: { data: [] } })), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
   unwrap: (r: unknown) => r,
   unwrapList: (r: { data?: { data?: unknown[] } }) => ({ rows: r?.data?.data ?? [] }),

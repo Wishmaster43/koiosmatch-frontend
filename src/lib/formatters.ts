@@ -36,13 +36,24 @@ export function formatNumberCompact(value: NumberInput, locale: string = 'nl-NL'
   return new Intl.NumberFormat(locale, { notation: 'compact', maximumFractionDigits: 1 }).format(n)
 }
 
-// React hook: binds both formatters to the app's active locale (see useLocale in
-// datetime.ts) so components never hardcode 'nl-NL'.
+// Locale-aware currency — e.g. 5.12 → "€ 5,12" (nl-NL) / "€5.12" (en-GB). The ONE
+// place billing screens format money (K0 billing block) so they never hand-roll
+// their own `new Intl.NumberFormat(locale, { style: 'currency', ... })` call.
+// Defaults to EUR since every backend money field falls back to it (mirrors
+// KoiosPricingCard/GebruikSettings' prior inline helpers).
+export function formatCurrency(value: NumberInput, currency: string = 'EUR', locale: string = 'nl-NL'): string {
+  const n = toFiniteNumber(value)
+  return n === null ? '—' : new Intl.NumberFormat(locale, { style: 'currency', currency }).format(n)
+}
+
+// React hook: binds all three formatters to the app's active locale (see useLocale
+// in datetime.ts) so components never hardcode 'nl-NL'.
 export function useNumberFormat() {
   const locale = useLocale()
   return {
     locale,
     formatNumber: (value: NumberInput) => formatNumber(value, locale),
     formatNumberCompact: (value: NumberInput, threshold?: number) => formatNumberCompact(value, locale, threshold),
+    formatCurrency: (value: NumberInput, currency?: string) => formatCurrency(value, currency, locale),
   }
 }

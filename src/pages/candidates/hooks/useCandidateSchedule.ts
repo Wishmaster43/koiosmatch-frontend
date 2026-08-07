@@ -8,6 +8,7 @@
  */
 import { useEffect, useState } from 'react'
 import api from '@/lib/api'
+import { useLocale } from '@/lib/datetime'
 import type { Id } from '@/types/common'
 import type { OpenShift, RosterShift } from '../drawer/planningTypes'
 
@@ -21,11 +22,13 @@ interface RawOpen { id?: Id; status?: string; shift_type?: string; start_time?: 
 const PALETTE = ['#1B60A9', '#8B5CF6', '#16A34A', '#F59E0B', '#0EA5E9', '#DB2777']
 const colorFor = (s: string) => PALETTE[[...s].reduce((a, c) => a + c.charCodeAt(0), 0) % PALETTE.length]
 
-// ISO → "ma 16 jun" (locale-aware short weekday + day + month).
-const fmtDate = (iso?: string) => (iso ? new Date(iso).toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' }) : '')
+// ISO → "ma 16 jun" (locale-aware short weekday + day + month) — locale is passed
+// in by the hook below (useLocale()), never hardcoded.
+const fmtDate = (iso: string | undefined, locale: string) =>
+  (iso ? new Date(iso).toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' }) : '')
 // ISO start + end → "07:00–15:00".
-const fmtTime = (a?: string, b?: string) => {
-  const t = (x?: string) => (x ? new Date(x).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) : '')
+const fmtTime = (a: string | undefined, b: string | undefined, locale: string) => {
+  const t = (x?: string) => (x ? new Date(x).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) : '')
   return [t(a), t(b)].filter(Boolean).join('–')
 }
 
@@ -38,6 +41,9 @@ export function useCandidateSchedule(candidateId?: Id) {
   const [roster,     setRoster]     = useState<RosterShift[]>([])
   const [openShifts, setOpenShifts] = useState<OpenShift[]>([])
   const [loading,    setLoading]    = useState(true)
+  // App-wide active locale (§5) — fed into the date/time formatters below instead
+  // of a hardcoded 'nl-NL'.
+  const locale = useLocale()
 
   // Load the real agenda + open shifts once per candidate; each soft-fails to empty.
   useEffect(() => {
@@ -47,13 +53,13 @@ export function useCandidateSchedule(candidateId?: Id) {
     Promise.all([
       api.get(`/candidates/${candidateId}/agenda`, { signal: ctrl.signal })
         .then(r => (unwrapRows(r) as RawAgenda[]).map<RosterShift>(s => ({
-          date: fmtDate(s.start_time), time: fmtTime(s.start_time, s.end_time),
+          date: fmtDate(s.start_time, locale), time: fmtTime(s.start_time, s.end_time, locale),
           client: s.customer ?? '—', function: s.function, location: s.location ?? '',
           color: colorFor(s.customer ?? ''), workedBefore: 0, favorite: false,
         }))).catch(() => [] as RosterShift[]),
       api.get(`/candidates/${candidateId}/open-shifts`, { signal: ctrl.signal })
         .then(r => (unwrapRows(r) as RawOpen[]).map<OpenShift>(s => ({
-          id: s.id as Id, date: fmtDate(s.start_time), time: fmtTime(s.start_time, s.end_time),
+          id: s.id as Id, date: fmtDate(s.start_time, locale), time: fmtTime(s.start_time, s.end_time, locale),
           client: s.customer ?? '—', function: s.function ?? '', location: s.location ?? '',
           color: colorFor(s.customer ?? ''), distance: 0, level: 0,
           shiftType: s.shift_type ?? '', openSpots: s.number_persons ?? 1, pool: '',
@@ -62,7 +68,7 @@ export function useCandidateSchedule(candidateId?: Id) {
       .then(([r, o]) => { if (!ctrl.signal.aborted) { setRoster(r); setOpenShifts(o) } })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
-  }, [candidateId])
+  }, [candidateId, locale])
 
   return { roster, openShifts, loading }
 }

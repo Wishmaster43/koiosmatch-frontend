@@ -6,7 +6,7 @@ export default {
   category: 'Flow beheer',
   label:    'Numeriek samenvoegen',
   Icon:     Calculator,
-  color:    '#0369A1',
+  color:    'var(--module-info)',
   bg:       'var(--color-info-bg)',
   schema: [
     { key: 'source_module', label: 'Bronmodule', type: 'text', placeholder: 'automatisch ingevuld' },

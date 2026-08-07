@@ -25,7 +25,7 @@ export default function NotesTab({ opportunity: o }: { opportunity: Opportunity 
   return (
     <SharedNotesTab
       notes={notes}
-      onAddNote={(p: { type: string; body: string }) => addNote({ type: p.type, body: p.body })}
+      onAddNote={(p: { type: string; body: string; language?: string }) => addNote({ type: p.type, body: p.body, language: p.language })}
       noteTypes={noteTypes}
      
       showTimeline={false}

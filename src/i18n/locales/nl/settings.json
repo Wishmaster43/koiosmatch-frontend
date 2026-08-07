@@ -227,7 +227,8 @@
     "candidate_education_levels": "Opleidingsniveaus",
     "notif_kandidaten": "Kandidaten",
     "notif_matches": "Matches",
-    "notif_taken": "Taken"
+    "notif_taken": "Taken",
+    "koios_advice": "Advies-drempels"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -995,6 +996,29 @@
       "daily": {
         "title": "Dagelijks verbruik",
         "notice": "Een daggrafiek per categorie (Totaal · AI · Leads · Telefoongesprekken · WhatsApp) is nog niet beschikbaar — de backend levert nu alleen totalen per periode, geen cijfers per dag."
+      },
+      "koios": {
+        "title": "Koios AI-facturatie",
+        "subtitle": "Factuurklare totalen voor Claude-tokens en workflow-tokenruns.",
+        "monthLabel": "Maand",
+        "loadError": "Koios-facturatie laden is mislukt.",
+        "unavailable": "Je hebt geen rechten om dit te bekijken.",
+        "empty": "Nog geen Koios-verbruik in deze maand.",
+        "claude": {
+          "tokensIn": "Tokens in",
+          "tokensOut": "Tokens uit",
+          "cost": "Kostprijs",
+          "freeAllowance": "Gratis voet (tokens)",
+          "margin": "Marge",
+          "billable": "Factureerbare Claude-kosten"
+        },
+        "workflow": {
+          "line": "{{n}} workflow-modulerun(s)",
+          "colModule": "Module",
+          "colRuns": "Runs",
+          "colAmount": "Bedrag"
+        },
+        "total": "Totaal"
       }
     },
     "invoices": {
@@ -2706,5 +2730,17 @@
     "title": "Opleidingsniveaus",
     "subtitle": "Niveaus voor het opleidingen-dropdown bij de kandidaat.",
     "add": "Niveau toevoegen"
+  },
+  "koiosAdvice": {
+    "title": "Koios-adviesdrempels",
+    "subtitle": "De dagvensters achter de Koios-aandachtsvlag op vacatures en matches.",
+    "vacancyStaleTitle": "Vacature-veroudering",
+    "vacancyStaleHint": "Na hoeveel dagen zonder sollicitatie een gepubliceerde vacature door Koios als aandachtspunt wordt gemarkeerd.",
+    "vacancyStaleLabel": "Dagen (1-365)",
+    "vacancyStaleSaveFailed": "Opslaan van het vacature-verouderingsvenster is mislukt.",
+    "matchRenewTitle": "Match-verlengingsvenster",
+    "matchRenewHint": "Hoeveel dagen vóór (of na) de einddatum van een match Koios voorstelt om deze te verlengen.",
+    "matchRenewLabel": "Dagen (1-365)",
+    "matchRenewSaveFailed": "Opslaan van het match-verlengingsvenster is mislukt."
   }
 }

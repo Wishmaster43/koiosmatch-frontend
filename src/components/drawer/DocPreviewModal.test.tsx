@@ -7,6 +7,8 @@ import DocPreviewModal from './DocPreviewModal'
 vi.mock('@/lib/api', () => ({
   default: { get: vi.fn(() => Promise.resolve({ data: { data: [] } })) },
   unwrapList: () => ({ rows: [] }),
+  // Tenant-scoped caches read this named export now — a wholesale mock must keep it.
+  getActiveTenantId: () => 'demo',
 }))
 
 // `pdfjs-dist` is lazy-loaded inside PdfPreview via a dynamic `import()` — mock it

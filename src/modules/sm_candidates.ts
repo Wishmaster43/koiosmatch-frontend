@@ -8,8 +8,8 @@ export default {
   category: 'Shiftmanager',
   label: 'Kandidaten',
   Icon:  ShiftManagerMark,
-  color: '#E11D2A',
-  bg:    '#FDECEC',
+  color: 'var(--module-shiftmanager)',
+  bg:    'color-mix(in srgb, var(--module-shiftmanager) 8%, transparent)',
   schema: [
     // Which Shiftmanager link to sync from (tenant-scoped options from the API).
     { key: 'connection_id', label: 'Shiftmanager-account', type: 'lookup_select', endpoint: '/planning-connections' },

@@ -6,10 +6,12 @@
  * add/edit/delete that reconcile against the server so a note actually persists.
  *
  * Contract (mirror of the other entities' note endpoints):
- *   GET    /candidates/{id}/notes          → { data: [ { id, type, channel, body, author, author_id, created_at } ] } (newest first)
- *   POST   /candidates/{id}/notes          { text, type?, channel? } → 201 { …note }
- *   PATCH  /candidates/{id}/notes/{note}   { text?, type?, channel? } → 200 { …note }
+ *   GET    /candidates/{id}/notes          → { data: [ { id, type, channel, body, author, author_id, language, created_at } ] } (newest first)
+ *   POST   /candidates/{id}/notes          { text, type?, channel?, language? } → 201 { …note }
+ *   PATCH  /candidates/{id}/notes/{note}   { text?, type?, channel?, language? } → 200 { …note }
  *   DELETE /candidates/{id}/notes/{note}   → 204
+ * NOTE-TAAL-1 (06-08): `language` is optional on both writes — omitted/undefined
+ * means "keep the tenant default", never forced by the FE.
  * author is set server-side (logged-in user); body is encrypted-at-rest (plain text
  * over the wire); type is a value from /note-types. `channel` is a value from
  * /last-contact-types — when present the backend stamps the candidate's
@@ -39,11 +41,13 @@ export interface CandidateNote {
   // RECHTEN-DETAIL-1: creator's user id — null = system/legacy note (not self-claimable).
   author_id?: string | number | null
   created_at?: string
+  // NOTE-TAAL-1: the note's own spellcheck/output language — null/absent = tenant default.
+  language?: string
   [k: string]: unknown
 }
 
 // NotesTab hands back the editor payload on save (both add and edit).
-interface NotePayload { type: string; title: string; body: string; channel?: string }
+interface NotePayload { type: string; title: string; body: string; channel?: string; language?: string }
 
 // LAST-CONTACT-REFRESH-1 (Danny 05-08): a channel-note stamps last_contact server-side
 // (CandidateNote::booted → recordContact, live-proven) but the drawer kept showing the
@@ -72,7 +76,7 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
       id: `tmp-${Date.now()}`, type: payload.type, channel: payload.channel, body: payload.body, created_at: new Date().toISOString(),
     }
     setNotes(prev => [temp, ...prev])
-    api.post(`/candidates/${candidateId}/notes`, { type: payload.type, text: payload.body, channel: payload.channel })
+    api.post(`/candidates/${candidateId}/notes`, { type: payload.type, text: payload.body, channel: payload.channel, language: payload.language })
       .then(() => { load(); if (payload.channel) opts?.onContactStamped?.() })
       .catch(() => { setNotes(prev => prev.filter(n => n.id !== temp.id)); notifyError(t('common:actionFailed')) })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- opts is a caller-literal; the callback identity must not retrigger
@@ -84,8 +88,8 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
     const target = notes[index]
     if (!target) return
     const snapshot = notes
-    setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, channel: payload.channel, body: payload.body } : n)))
-    api.patch(`/candidates/${candidateId}/notes/${target.id}`, { text: payload.body, type: payload.type, channel: payload.channel })
+    setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, channel: payload.channel, body: payload.body, language: payload.language } : n)))
+    api.patch(`/candidates/${candidateId}/notes/${target.id}`, { text: payload.body, type: payload.type, channel: payload.channel, language: payload.language })
       .then(() => load())
       .catch(() => { setNotes(snapshot); notifyError(t('common:actionFailed')) })
   }, [candidateId, notes, load, t])

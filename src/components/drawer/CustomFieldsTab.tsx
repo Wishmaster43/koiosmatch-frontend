@@ -15,7 +15,7 @@ import SafeHtml from '@/components/ui/SafeHtml'
 // no title above it — that read as out of tone next to those sibling cards.
 import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
 
-const inputStyle: CSSProperties = { width: '100%', padding: '6px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', outline: 'none', boxSizing: 'border-box' }
+const inputStyle: CSSProperties = { width: '100%', padding: '6px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box' }
 const iconBtn: CSSProperties = { width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
 const labelStyle: CSSProperties = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 3 }
 
@@ -61,7 +61,7 @@ function RichTextField({ def, value, onSave }: { def: CustomFieldDef; value: unk
         <span style={labelStyle}>{def.label}</span>
         {editing ? (
           <div style={{ display: 'flex', gap: 4 }}>
-            <button onClick={save} title={t('save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={12} /></button>
+            <button onClick={save} title={t('save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={12} /></button>
             <button onClick={cancel} title={t('cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={12} /></button>
           </div>
         ) : (
@@ -128,7 +128,7 @@ export default function CustomFieldsTab({ entityType, values, onSave }: Props) {
           title={t('customFieldsCard.title')}
           action={editing ? (
             <div style={{ display: 'flex', gap: 4 }}>
-              <button onClick={save} title={t('save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+              <button onClick={save} title={t('save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }}><Save size={13} /></button>
               <button onClick={cancel} title={t('cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
             </div>
           ) : (

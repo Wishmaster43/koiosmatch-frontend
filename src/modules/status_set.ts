@@ -6,8 +6,8 @@ export default {
   category: 'Kandidaten',
   label: 'Status zetten',
   Icon:  UserCheck,
-  color: '#0F766E',
-  bg:    '#F0FDFA',
+  color: 'var(--module-teal-strong)',
+  bg:    'color-mix(in srgb, var(--module-teal-strong) 4%, transparent)',
   schema: [
     { key: 'status', label: 'Nieuwe status', type: 'lookup_select', endpoint: '/candidate-statuses' },
   ],

@@ -223,7 +223,9 @@
     "customerLocation": "Sede del cliente",
     "customerDepartment": "Departamento",
     "contactPerson": "Persona de contacto",
-    "pickClientFirst": "Elige primero un cliente"
+    "pickClientFirst": "Elige primero un cliente",
+    "matchContractType": "Tipo de contrato propuesto",
+    "matchCao": "Convenio propuesto"
   },
   "aiagent": {
     "pickerLabel": "Agente IA",

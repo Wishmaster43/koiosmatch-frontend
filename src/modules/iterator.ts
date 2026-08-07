@@ -6,8 +6,8 @@ export default {
   category: 'Flow beheer',
   label: 'Iterator',
   Icon:  Repeat,
-  color: '#6D28D9',
-  bg:    '#EDE9FE',
+  color: 'var(--module-purple)',
+  bg:    'var(--color-violet-bg)',
   schema: [
     {
       key:   'source_field',

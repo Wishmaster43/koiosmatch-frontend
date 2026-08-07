@@ -26,8 +26,10 @@ interface AppUser { id: Id; name: string; avatar_color?: string }
 // NOTES-LOC-DEPT-1: the OPTIONAL deeper link — a note may instead hang off one
 // location or one department of this customer. The composer (CustomerNotesTab)
 // sends exactly ONE of the three ids, never more than one.
+// NOTE-TAAL-1 (06-08): `language` rides along optionally — undefined lets the
+// backend keep its own tenant default, never forced by the FE.
 type NotePayload = {
-  type: string; title: string; body: string
+  type: string; title: string; body: string; language?: string
   customer_contact_id?: Id; customer_location_id?: Id; customer_department_id?: Id
 }
 // The create form's full shape. Everything past `city` is optional (the backend's
@@ -226,7 +228,7 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
     // optimistic entry again (by reference, so notes added meanwhile survive) and surface
     // the server's own message.
     api.post(`/customers/${id}/notes`, {
-      type: payload.type, title: payload.title, text: payload.body,
+      type: payload.type, title: payload.title, text: payload.body, language: payload.language,
       customer_contact_id: payload.customer_contact_id,
       customer_location_id: payload.customer_location_id,
       customer_department_id: payload.customer_department_id,

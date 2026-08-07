@@ -1,16 +1,21 @@
 /**
  * useCustomFields — tenant-defined field definitions for ANY entity, from the
  * unified custom-fields surface (G-13 / AP-CO10): GET /custom-fields?entity_type=X.
- * One session cache PER entity type (a Map, not a single module-level list) — a
- * page that opens several drawers (e.g. a task AND a customer) fetches each
+ * One session cache PER TENANT+entity type (a Map, not a single module-level list) —
+ * a page that opens several drawers (e.g. a task AND a customer) fetches each
  * entity's defs once, never refetching one entity because another was cached.
  * Every entity-specific wrapper (useCandidateCustomFields, useVacancyCustomFields)
  * is a thin re-export of this one fetch+normalise path (§0.4 — one implementation,
  * zero duplicated fetch logic) — see those files' docblocks.
+ *
+ * TENANT SCOPING: cache keys are `${tenantId}:${entityType}`, not the bare entity
+ * type (mirrors useCachedLookup's tenantCacheKey) — a super-admin switching bureaus
+ * mid-session must never be served the PREVIOUS tenant's custom-field defs from this
+ * module-scope cache.
  */
 import { useEffect, useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import api, { unwrapList } from '@/lib/api'
+import api, { unwrapList, getActiveTenantId } from '@/lib/api'
 
 export type CustomFieldType = 'text' | 'number' | 'date' | 'boolean' | 'select' | 'textarea'
 
@@ -46,8 +51,13 @@ interface RawDef {
   visible_in_ui?: boolean
 }
 
-// One session cache per entity type.
-const cacheByEntity = new Map<CustomFieldEntityType, RawDef[]>()
+// One session cache per tenant+entity type — keys are `${tenantId}:${entityType}`.
+const cacheByEntity = new Map<string, RawDef[]>()
+
+// Reads localStorage fresh on every call (never memoized) so it always reflects
+// the CURRENT tenant, mirroring useCachedLookup's tenantCacheKey.
+const tenantEntityKey = (entityType: CustomFieldEntityType): string =>
+  `${getActiveTenantId() ?? 'none'}:${entityType}`
 
 // Pick a label for the active language, falling back lang-base → en → nl → any → key.
 function pickLabel(l: Record<string, string> | undefined, lang: string, key: string): string {
@@ -57,18 +67,21 @@ function pickLabel(l: Record<string, string> | undefined, lang: string, key: str
 
 export function useCustomFields(entityType: CustomFieldEntityType) {
   const { i18n } = useTranslation()
-  const cached = cacheByEntity.get(entityType)
+  const cached = cacheByEntity.get(tenantEntityKey(entityType))
   const [raw,     setRaw]     = useState<RawDef[]>(cached ?? [])
   const [loading, setLoading] = useState(!cached)
 
-  // Fetch once per entity type; a cache hit (from an earlier hook instance —
-  // settings editor + drawer both mount this) skips the request entirely.
+  // Fetch once per tenant+entity type; a cache hit (from an earlier hook instance —
+  // settings editor + drawer both mount this) skips the request entirely. The key
+  // is recomputed from the CURRENT tenant on every run (a tenant switch reloads the
+  // app per AuthContext, so a fresh mount always resolves the right slot).
   useEffect(() => {
-    const hit = cacheByEntity.get(entityType)
+    const key = tenantEntityKey(entityType)
+    const hit = cacheByEntity.get(key)
     if (hit) { setRaw(hit); setLoading(false); return }
     setLoading(true)
     api.get('/custom-fields', { params: { entity_type: entityType } })
-      .then(r => { const list = (unwrapList(r).rows) as RawDef[]; cacheByEntity.set(entityType, list); setRaw(list) })
+      .then(r => { const list = (unwrapList(r).rows) as RawDef[]; cacheByEntity.set(key, list); setRaw(list) })
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [entityType])
@@ -87,9 +100,10 @@ export function useCustomFields(entityType: CustomFieldEntityType) {
     }))
     .filter(f => f.key), [raw, i18n.language])
 
-  // Invalidate the cache for THIS entity type only — a settings-editor mutation
-  // (create/update/delete/reorder) refetches on the next mount, other entities untouched.
-  const invalidate = () => { cacheByEntity.delete(entityType) }
+  // Invalidate the cache for THIS tenant+entity type only — a settings-editor
+  // mutation (create/update/delete/reorder) refetches on the next mount, other
+  // entities/tenants untouched.
+  const invalidate = () => { cacheByEntity.delete(tenantEntityKey(entityType)) }
 
   // fields = what the entity's Extra tab renders and gates on: active AND
   // visible_in_ui. A field kept active-but-API-only stays reachable via the API/

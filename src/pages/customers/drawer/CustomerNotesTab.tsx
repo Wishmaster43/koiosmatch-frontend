@@ -75,8 +75,9 @@ interface Props {
   // always assignable where the narrower one is expected).
   // NOTES-LOC-DEPT-1: `customer_location_id`/`customer_department_id` widen it
   // further — same assignability reasoning, exactly one of the three ever set.
+  // NOTE-TAAL-1: `language` rides along too — optional, undefined = tenant default.
   onAddNote?: (payload: {
-    type: string; title: string; body: string
+    type: string; title: string; body: string; language?: string
     customer_contact_id?: Id; customer_location_id?: Id; customer_department_id?: Id
   }) => void
   // The record itself + its save path, for the Vacature-zichtbaarheid sub-tab (it edits
@@ -140,7 +141,7 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
   // Carries the picked link along with the composer's own payload (exactly ONE of
   // the three ids, per the picked level), then resets the picker to "Klant" — a
   // fresh note starts unlinked unless a level is picked again.
-  const handleAddNote = (payload: { type: string; title: string; body: string }) => {
+  const handleAddNote = (payload: { type: string; title: string; body: string; language?: string }) => {
     onAddNote?.({
       ...payload,
       customer_contact_id: pendingKind === 'contact' ? pendingRecordId : undefined,

@@ -8,8 +8,8 @@ export default {
   category: 'Shiftmanager',
   label: 'Klanten',
   Icon:  ShiftManagerMark,
-  color: '#E11D2A',
-  bg:    '#FDECEC',
+  color: 'var(--module-shiftmanager)',
+  bg:    'color-mix(in srgb, var(--module-shiftmanager) 8%, transparent)',
   // Only fields the sync actually reads (search/status were dead leftovers).
   schema: [
     { key: 'connection_id', label: 'Shiftmanager-account', type: 'lookup_select', endpoint: '/planning-connections' },

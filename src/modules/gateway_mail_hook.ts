@@ -7,7 +7,7 @@ export default {
   category: 'Triggers',
   label:    'Mail Hook',
   Icon:     Mail,
-  color:    '#0369A1',
+  color:    'var(--module-info)',
   bg:       'var(--color-info-bg)',
   schema: [
     {

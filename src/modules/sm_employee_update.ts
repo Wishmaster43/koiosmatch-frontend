@@ -8,8 +8,8 @@ export default {
   category: 'Shiftmanager',
   label: 'SM status bijwerken',
   Icon:  ShiftManagerMark,
-  color: '#E11D2A',
-  bg:    '#FDECEC',
+  color: 'var(--module-shiftmanager)',
+  bg:    'color-mix(in srgb, var(--module-shiftmanager) 8%, transparent)',
   schema: [
     { key: 'connection_id', label: 'Shiftmanager-account', type: 'lookup_select', endpoint: '/planning-connections' },
     // BE whitelist for the target status (contract 2026-07-09; being widened BE-side).

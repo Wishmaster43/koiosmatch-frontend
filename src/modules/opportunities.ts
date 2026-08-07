@@ -9,8 +9,8 @@ export default makeEntityModule({
   category: 'Kansen',
   Icon:     Target,
   color:    'var(--color-warning)',
-  // eslint-disable-next-line no-restricted-syntax -- module-palette tint, kept distinct from --color-warning-bg (shared by router/shifts_input) so the Kansen entity stays visually distinguishable
-  bg:       '#FEF1E2',
+  // Own tint % — kept distinct from --color-warning-bg (shared by router/shifts_input) so the Kansen entity stays visually distinguishable.
+  bg:       'color-mix(in srgb, var(--color-warning) 9%, transparent)',
   filterFields: [
     { value: 'status',   label: 'Status' },
     { value: 'customer', label: 'Klant' },

@@ -8,8 +8,8 @@ export default {
   category: 'Intus',
   label: 'Kandidaten',
   Icon:  IntusMark,
-  color: '#0E3A53',
-  bg:    '#E7EEF3',
+  color: 'var(--module-intus)',
+  bg:    'color-mix(in srgb, var(--module-intus) 9%, transparent)',
   schema: [
     { key: 'url',    label: 'URL',    type: 'text',   placeholder: 'https://api.intus.example/candidates', required: true },
     { key: 'method', label: 'Method', type: 'select', options: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'], required: true },

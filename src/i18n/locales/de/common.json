@@ -243,7 +243,8 @@
     "redo": "Wiederholen",
     "expand": "Vergrößern",
     "collapse": "Verkleinern",
-    "html": "HTML-Quelle"
+    "html": "HTML-Quelle",
+    "language": "Sprache"
   },
   "changelog": "Änderungsprotokoll",
   "backofficeLinks": {
@@ -295,5 +296,31 @@
     "prevAt": "Zurück ({{index}} von {{total}})",
     "nextAt": "Weiter ({{index}} von {{total}})"
   },
-  "new": "Neu"
+  "new": "Neu",
+  "aiGenerated": "KI-generiert",
+  "aiGeneratedHint": "Von Koios AI generiert — vor Verwendung prüfen.",
+  "notesAssist": {
+    "title": "Koios-Assistent",
+    "needsText": "Zuerst Text hinzufügen",
+    "improve": "Verbessern",
+    "summarize": "Zusammenfassen",
+    "actions": "Aktionspunkte",
+    "noItems": "Keine Aktionspunkte gefunden",
+    "apply": "Übernehmen",
+    "discard": "Verwerfen",
+    "error": "Koios-KI-Assistent ist nicht verfügbar. Bitte versuche es erneut.",
+    "actionTypes": {
+      "task": "Aufgabe",
+      "whatsapp": "WhatsApp",
+      "email": "E-Mail",
+      "appointment": "Termin",
+      "notification": "Benachrichtigung"
+    }
+  },
+  "ai": {
+    "title": "Koios AI empfiehlt",
+    "beta": "Beta",
+    "refresh": "Aktualisieren",
+    "analyzing": "Analysieren…"
+  }
 }

@@ -34,7 +34,9 @@ const rowSub   = (r: DrillRow) => {
 }
 
 export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec | null; onClose: () => void }) {
-  const { t } = useTranslation('analytics')
+  // 'common' alongside the feature namespace — the AI-Act disclosure hint
+  // (AI-ACT-1) is shared copy, not per-report.
+  const { t } = useTranslation(['analytics', 'common'])
   // Data layer: the underlying records + Koios advice for the open drill (§3).
   const { rows, rowsLoading, advice, adviceLoading } = useReportDrill(drill)
 
@@ -92,10 +94,13 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
         </section>
       )}
 
-      {/* Koios AI advice — always present so the AI angle is part of every drill */}
+      {/* Koios AI advice — always present so the AI angle is part of every drill.
+          AI-ACT-1: the heading already names "Koios AI-advies" in visible text
+          (drill.koios), so the mark only gains the disclosure hint as a tooltip —
+          no second stacked label next to an already-explicit heading. */}
       <section>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-          <KoiosAiMark size={22} />
+          <KoiosAiMark size={22} title={t('common:aiGeneratedHint', { defaultValue: 'Door Koios AI gegenereerd — controleer voor gebruik.' })} />
           <h4 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>{t('drill.koios')}</h4>
         </div>
         <div style={{ background: 'var(--color-primary-bg)', borderRadius: 10, padding: '12px 14px',

@@ -15,7 +15,7 @@ export function mapOpportunity(o: ApiOpportunity): Opportunity {
   const agr = (o.agreement_type && typeof o.agreement_type === 'object') ? o.agreement_type : null
   // OPP-LOC-1: the customer's OWN location/site (`customer_location`) — distinct
   // from `location`, which is the TENANT's own branch (C-41, mirrors Match.branch_id).
-  // The Klant tab's cascade (customer → location → department → contact) reads
+  // The Customer tab's cascade (customer → location → department → contact) reads
   // customer_location, never `location` — reading the wrong one silently prefilled
   // an empty/mismatched pick in the drawer's edit mode (Danny, 2026-07-14).
   const loc = (o.customer_location && typeof o.customer_location === 'object') ? o.customer_location : null

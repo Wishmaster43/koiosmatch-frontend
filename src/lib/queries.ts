@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import api, { unwrapList } from './api'
+import api, { getActiveTenantId, unwrapList } from './api'
 
 /**
  * Shared query hooks.
@@ -14,10 +14,19 @@ import api, { unwrapList } from './api'
 // feeding memo/effect chains that loop setState (see useCandidatesData / RightPanelContext).
 const EMPTY_USERS: unknown[] = []
 
-/** Tenant users (owners/assignees). Cached + deduped app-wide. */
+/**
+ * Tenant users (owners/assignees). Cached + deduped app-wide.
+ *
+ * Keyed by the active tenant id: without it, a super-admin switching bureaus
+ * mid-session could get served the PREVIOUS tenant's user list from cache in
+ * every owner/recruiter picker (setActiveTenant already clears+reloads, but the
+ * key itself must be tenant-scoped so this holds even if that safety net ever
+ * changes — same reasoning as useCandidateCount below).
+ */
 export function useUsers() {
+  const tenantId = getActiveTenantId() ?? 'none'
   return useQuery({
-    queryKey: ['users'],
+    queryKey: ['users', tenantId],
     queryFn: async ({ signal }) => unwrapList(await api.get('/users', { signal })).rows,
     placeholderData: EMPTY_USERS,
   })

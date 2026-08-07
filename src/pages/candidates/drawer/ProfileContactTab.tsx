@@ -76,8 +76,11 @@ export default function ProfileContactTab({ c, onSave, autoEditSignal }: {
   }
   const cancel = () => { setForm(emptyForm()); setErrors({}); setTouched({}); setEditing(false) }
 
-  const renderInput = (key: ContactKey) => (
+  // aria-label mirrors the visible FieldRow label — this input has no <label> element,
+  // so screen-reader users otherwise get an unnamed textbox (§6 audit 2026-08).
+  const renderInput = (key: ContactKey, label: string) => (
     <input value={form[key]} onChange={e => setF(key, e.target.value)} onBlur={() => markTouched(key)} style={inputStyle}
+      aria-label={label}
       placeholder={key === 'linkedin' ? t('profile.linkedinPlaceholder') : undefined} />
   )
 
@@ -156,7 +159,7 @@ export default function ProfileContactTab({ c, onSave, autoEditSignal }: {
 
   const field = (key: ContactKey, label: string, icon?: ReactNode) => (
     <FieldRow key={key} label={label} labelIcon={icon} required={isReq(key)} errorText={fieldErrorText(key)}>
-      {editing ? renderInput(key) : renderValue(key)}
+      {editing ? renderInput(key, label) : renderValue(key)}
     </FieldRow>
   )
 

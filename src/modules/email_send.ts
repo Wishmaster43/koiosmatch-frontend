@@ -6,8 +6,8 @@ export default {
   category: 'Communicatie',
   label: 'E-mail Sturen',
   Icon:  Mail,
-  color: '#854F0B',
-  bg:    '#FAEEDA',
+  color: 'var(--module-brown)',
+  bg:    'color-mix(in srgb, var(--module-brown) 10%, transparent)',
   schema: [
     { key: 'to',      label: 'Aan',       type: 'text',   placeholder: 'flex@yesway.nu' },
     { key: 'subject', label: 'Onderwerp', type: 'text',   placeholder: 'Dienst overzicht' },
