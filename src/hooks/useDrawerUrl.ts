@@ -18,6 +18,16 @@
  * would stack two entries (bare page + its opened id) for what feels like one
  * action, and a single "back" would only strip the id instead of returning to
  * the previous page.
+ *
+ * SUB-TAB (NOTITIE-POPOUT-1 F5): `tab`/`setTab` are OPTIONAL and BACKWARD-
+ * COMPATIBLE — every existing caller omits them and behaves exactly as before.
+ * When supplied, the hook also mirrors the drawer's active sub-tab in `&tab=<id>`
+ * ALONGSIDE `open` (never on its own — a `tab` with no open id is meaningless and
+ * gets dropped), so a deep link like `?open=<id>&tab=notes` can reopen a drawer
+ * straight onto one sub-tab (first use: the notes second-screen popout). A
+ * tab-only change (the record stays open, only the sub-tab switches) REPLACES
+ * rather than pushes — switching tabs must never spam the back-button history;
+ * only opening/closing a record does that.
  */
 import { useEffect, useRef } from 'react'
 import type { Id } from '@/types/common'
@@ -42,6 +52,28 @@ export function setOpenIdInHash(hash: string, id: string | null): string {
   return `#${path}${query ? `?${query}` : ''}`
 }
 
+// Pure: read the `tab` param out of a hash string — mirrors getOpenIdFromHash
+// (NOTITIE-POPOUT-1 F5's sub-tab deep-link, see the file comment).
+export function getTabFromHash(hash: string): string | null {
+  const raw = hash.replace(/^#/, '')
+  const qIdx = raw.indexOf('?')
+  if (qIdx === -1) return null
+  return new URLSearchParams(raw.slice(qIdx + 1)).get('tab')
+}
+
+// Pure: rewrite a hash string's `tab` param, keeping everything else untouched —
+// mirrors setOpenIdInHash.
+export function setTabInHash(hash: string, tab: string | null): string {
+  const raw = hash.replace(/^#/, '')
+  const qIdx = raw.indexOf('?')
+  const path = qIdx === -1 ? raw : raw.slice(0, qIdx)
+  const params = new URLSearchParams(qIdx === -1 ? '' : raw.slice(qIdx + 1))
+  if (tab != null) params.set('tab', tab)
+  else params.delete('tab')
+  const query = params.toString()
+  return `#${path}${query ? `?${query}` : ''}`
+}
+
 // Pure: decide push vs replace for a state→URL write — see the file comment.
 export function resolveWriteMode(curId: string | null, intentOpenId: Id | null | undefined): 'push' | 'replace' {
   return curId != null && intentOpenId != null && String(intentOpenId) === curId ? 'replace' : 'push'
@@ -49,8 +81,13 @@ export function resolveWriteMode(curId: string | null, intentOpenId: Id | null |
 
 // Impure wrappers around the pure helpers above — the only spots touching `window`.
 const readOpenId = (): string | null => getOpenIdFromHash(window.location.hash)
-const writeOpenId = (id: string | null, push: boolean) => {
-  const next = setOpenIdInHash(window.location.hash, id)
+const readTab = (): string | null => getTabFromHash(window.location.hash)
+// `tab` rides ALONGSIDE `id` in one write: null id always forces tab to null too
+// (closing a drawer must never strand a `tab=` param), regardless of what the
+// caller's own tab state still holds (NOTITIE-POPOUT-1 F5 — see the file comment).
+const writeOpenId = (id: string | null, tab: string | null, push: boolean) => {
+  let next = setOpenIdInHash(window.location.hash, id)
+  next = setTabInHash(next, id != null ? tab : null)
   // `kmPage` mirrors DashboardLayout's own history state shape (see goTo) so its
   // popstate handler can read the page name straight from state, same as a
   // page-switch entry, instead of only via the hash-parsing fallback.
@@ -72,45 +109,70 @@ export interface UseDrawerUrlArgs {
   // any — lets the hook tell that first, automatic open apart from an
   // interactive one (see the push-vs-replace choice above).
   intent?: unknown
+  // NOTITIE-POPOUT-1 F5, both OPTIONAL — the page's own "active sub-tab" state +
+  // setter. Omitted (every existing caller) → behaves exactly as before; supplied
+  // → the sub-tab mirrors into `&tab=<id>` alongside `open` (see file comment).
+  tab?: string | null
+  setTab?: (tab: string | null) => void
 }
 
-// Bi-directional sync between `selectedId` (React state) and the URL's `open`
-// param. `lastSynced` is the single source of truth for "what did we last agree
-// with the URL" — comparing against it (not re-deriving from scratch) is the
-// echo guard: it stops a URL-driven write from re-triggering a state-driven
-// write, and vice versa, so the two effects below never loop.
-export function useDrawerUrl({ selectedId, openById, close, intent }: UseDrawerUrlArgs) {
+// Bi-directional sync between `selectedId`/`tab` (React state) and the URL's
+// `open`/`tab` params. `lastSynced`/`lastSyncedTab` are the single source of truth
+// for "what did we last agree with the URL" — comparing against them (not
+// re-deriving from scratch) is the echo guard: it stops a URL-driven write from
+// re-triggering a state-driven write, and vice versa, so the effects below never loop.
+export function useDrawerUrl({ selectedId, openById, close, intent, tab, setTab }: UseDrawerUrlArgs) {
   // Seeded from the incoming state, NOT the URL: a deep-linked `?open=<id>` must
   // still trigger the URL→state effect below to actually call `openById` — if
   // this started from the URL instead, a fresh mount would see them "already
   // equal" and skip opening the record it was supposed to restore.
   const lastSynced = useRef<string | null>(selectedId != null ? String(selectedId) : null)
+  const lastSyncedTab = useRef<string | null>(tab ?? null)
   // Refs must not be written during render (react-hooks/refs) — kept current via
   // its own effect below so the popstate handler can read the latest value.
   const selectedIdRef = useRef(selectedId)
   useEffect(() => { selectedIdRef.current = selectedId }, [selectedId])
+  const tabRef = useRef(tab)
+  useEffect(() => { tabRef.current = tab }, [tab])
 
-  // React state → URL: the user opened/closed/switched the drawer in this page.
+  // React state → URL: the user opened/closed/switched the drawer, OR (F5) only
+  // switched its sub-tab, in this page. A tab-only change (id unchanged) always
+  // REPLACES — only an id change ever pushes a new back-button stop, mirroring
+  // the existing push/replace choice for `open` alone.
   useEffect(() => {
     const curId = selectedId != null ? String(selectedId) : null
-    if (curId === lastSynced.current) return
+    const curTab = curId != null ? (tab ?? null) : null
+    if (curId === lastSynced.current && curTab === lastSyncedTab.current) return
+    const idChanged = curId !== lastSynced.current
     const intentOpenId = (intent as { open?: Id } | null | undefined)?.open
-    writeOpenId(curId, resolveWriteMode(curId, intentOpenId) === 'push')
+    const push = idChanged && resolveWriteMode(curId, intentOpenId) === 'push'
+    writeOpenId(curId, curTab, push)
     lastSynced.current = curId
-  }, [selectedId, intent])
+    lastSyncedTab.current = curTab
+  }, [selectedId, tab, intent])
 
   // URL → React state: back/forward, plus once on mount — covers a fresh deep
-  // link (?open=<id> pasted in a new tab) and a page that remounted because
-  // "back" landed on it with its own `?open=` still set (source-page restore).
+  // link (?open=<id>&tab=<tab> pasted in a new tab, F5's second-screen popout) and
+  // a page that remounted because "back" landed on it with its own `?open=` still
+  // set (source-page restore). Tab is read/applied alongside id, but a tab-only
+  // URL difference (id already correct) still calls `setTab` on its own.
   useEffect(() => {
     const sync = () => {
       const urlId = readOpenId()
-      if (urlId === lastSynced.current) return
+      const urlTab = readTab()
+      if (urlId === lastSynced.current && urlTab === lastSyncedTab.current) return
       lastSynced.current = urlId
+      lastSyncedTab.current = urlTab
       const curId = selectedIdRef.current != null ? String(selectedIdRef.current) : null
-      if (urlId === curId) return // already showing the right record
-      if (urlId != null) openById(urlId)
-      else close()
+      const curTab = tabRef.current ?? null
+      if (urlId === curId && urlTab === curTab) return // already showing the right record+tab
+      if (urlId != null) {
+        if (urlId !== curId) openById(urlId)
+        setTab?.(urlTab)
+      } else {
+        close()
+        setTab?.(null)
+      }
     }
     sync()
     window.addEventListener('popstate', sync)

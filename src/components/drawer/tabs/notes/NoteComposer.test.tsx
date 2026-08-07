@@ -16,8 +16,8 @@
  * flex:1 — the exact same contract already proven in the 11 other FloatingPanel
  * modals with a pinned footer (AddTaskModal etc.).
  */
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import NoteComposer from './NoteComposer'
 
@@ -36,6 +36,23 @@ vi.mock('./NoteAssistSection', () => ({ default: () => <div data-testid="assist-
 
 const labels = { newNote: 'Nieuwe notitie', edit: 'Bewerken', type: 'Type', channel: 'Kanaal', save: 'Save', cancel: 'Cancel' }
 const noteTypes = [{ value: 'general', label: 'Algemeen' }, { value: 'call', label: 'Bellen' }]
+
+// NOTITIE-VOICE-1: a minimal Web Speech API double — mirrors
+// KoiosVoiceButton.test.tsx's own mock (jsdom ships neither the real API nor
+// the vendor-prefixed one). Local to this file: each test file owns its mock.
+interface MockResultEvent { resultIndex: number; results: Array<Array<{ transcript: string }>> }
+class MockSpeechRecognition {
+  static lastInstance: MockSpeechRecognition | null = null
+  continuous = false
+  interimResults = false
+  lang = ''
+  onresult: ((e: MockResultEvent) => void) | null = null
+  onerror: (() => void) | null = null
+  onend: (() => void) | null = null
+  start = vi.fn()
+  stop = vi.fn()
+  constructor() { MockSpeechRecognition.lastInstance = this }
+}
 
 describe('NoteComposer · popup lifecycle', () => {
   it('renders nothing while closed', () => {
@@ -130,5 +147,56 @@ describe('NoteComposer · save payload (NOTE-TAAL-1)', () => {
     await user.type(screen.getByLabelText('body'), 'Klant gebeld')
     await user.click(screen.getByTitle('Save'))
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ type: 'call', body: 'Klant gebeld' }))
+  })
+})
+
+describe('NoteComposer · dictation mic (NOTITIE-VOICE-1)', () => {
+  afterEach(() => {
+    delete (window as { SpeechRecognition?: unknown }).SpeechRecognition
+  })
+
+  // The mic button lives in the row directly above the RichTextEditor wrapper —
+  // located by DOM position, never by its translated title (no i18next instance
+  // in this test tree, mirrors KoiosVoiceButton.test.tsx's own t stub concern).
+  const micButton = () => screen.getByTestId('rte-wrapper').previousElementSibling?.querySelector('button') ?? null
+
+  it('renders no mic on an unsupported browser (the shared HONEST GATE, inherited unchanged)', () => {
+    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
+    expect(micButton()).toBeNull()
+  })
+
+  it('appends a dictated chunk to the body as an escaped paragraph, never overwriting existing text', async () => {
+    window.SpeechRecognition = MockSpeechRecognition as unknown as typeof window.SpeechRecognition
+    const user = userEvent.setup()
+    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
+
+    await user.type(screen.getByLabelText('body'), 'Klant gebeld.')
+    await user.click(micButton()!)
+    expect(MockSpeechRecognition.lastInstance?.start).toHaveBeenCalledTimes(1)
+    act(() => { MockSpeechRecognition.lastInstance?.onresult?.({ resultIndex: 0, results: [[{ transcript: '<script>alert(1)</script>' }]] }) })
+
+    // Escaped (never raw HTML — §7) and appended, the typed text is still there.
+    expect(screen.getByLabelText('body')).toHaveValue(
+      'Klant gebeld.<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>',
+    )
+  })
+
+  it('dictates in the CONTROLLED editor language, not a fixed/UI default', async () => {
+    window.SpeechRecognition = MockSpeechRecognition as unknown as typeof window.SpeechRecognition
+    const user = userEvent.setup()
+    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
+
+    // Pick German via the stand-in language control (mirrors the save-payload test above).
+    await user.click(screen.getByRole('button', { name: 'pick-german' }))
+    await user.click(micButton()!)
+    expect(MockSpeechRecognition.lastInstance?.lang).toBe('de-DE')
+  })
+
+  it('prefills the mic\'s dictation language from the note being edited', async () => {
+    window.SpeechRecognition = MockSpeechRecognition as unknown as typeof window.SpeechRecognition
+    const user = userEvent.setup()
+    render(<NoteComposer open initialNote={{ type: 'general', text: 'Existing', language: 'fr' }} noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
+    await user.click(micButton()!)
+    expect(MockSpeechRecognition.lastInstance?.lang).toBe('fr-FR')
   })
 })

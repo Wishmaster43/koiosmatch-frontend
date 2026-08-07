@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LayoutList, Kanban, Plus, Archive, MessageCircle, Users, X } from 'lucide-react'
+import { LayoutList, Kanban, Plus, Archive, MessageCircle, Pause, Users, X } from 'lucide-react'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
@@ -29,7 +29,8 @@ import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { BTN_H } from '@/config/buttonMetrics'
 import {
-  buildPhaseData, buildOwnerData, buildSourceData, buildVacOptions, asOptions,
+  buildPhaseData, buildOwnerData, buildSourceData, buildOwnerDataFromStats, buildSourceDataFromStats,
+  buildVacOptions, buildClientOptions, asOptions,
   bucketCount, computeAvgScore, computeAiTaskCount, buildApplicationInsights,
 } from './data/applicationInsights'
 import type { Application } from '@/types/application'
@@ -82,24 +83,27 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const {
     bucket, setBucket, selectedPhase, setSelectedPhase, attention, setAttention,
     selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
-    selectedVac, setSelectedVac, showArchived, setShowArchived, query, setQuery,
-    interviewBusy, setInterviewBusy,
+    selectedVac, setSelectedVac, selectedClient, setSelectedClient,
+    showArchived, setShowArchived, query, setQuery,
+    interviewBusy, setInterviewBusy, interviewPaused, setInterviewPaused, refMode,
     selectedBranch, setSelectedBranch,
     selectedCandidateIds, setSelectedCandidateIds,
     anyFilterActive, clearAllFilters, searchEpoch, matchesFilters,
     filterParams, bucketParam,
   } = useApplicationFilters()
-  // ── Data layer (F-6): server-paginated table page + a wide (≤200, bucket-less)
-  // sample that feeds the board and the owner/source/avgScore/aiTasks figures —
-  // see useApplicationsData's header comment for the BE-gap rationale.
+  // ── Data layer (F-6, W27): server-paginated table page + the server-wide stats
+  // (real by_owner/by_source/avg_score/attention) + a wide (bucket-less) sample
+  // that feeds the board and — only when stats itself failed — the same figures'
+  // fallback. See useApplicationsData's header comment for the verified contract.
   const { applications, setApplications, loading, error, total, setTotal, lastPage,
-    wideRows, wideLoading, wideError, wideIsPartial, stats } =
+    wideRows, wideLoading, wideError, wideIsPartial, stats, statsFailed } =
     useApplicationsData({ view, filterParams, bucketParam, page, pageSize, funnelTypes })
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
 
   // Clear the selection whenever the visible set changes (bucket/filters/paging).
   useEffect(() => { setSelectedIds(new Set()) },
-    [bucket, showArchived, interviewBusy, page, pageSize, selectedPhase, selectedOwner, selectedSource, selectedVac, query])
+    [bucket, showArchived, interviewBusy, interviewPaused, page, pageSize,
+      selectedPhase, selectedOwner, selectedSource, selectedVac, selectedClient, query])
 
   // Board columns = the funnel lookup, normalised to { key, label, color }.
   const phases = useMemo<BoardPhase[]>(() => funnelTypes.map(f => ({ key: f.value, label: f.label, color: f.color })), [funnelTypes])
@@ -120,22 +124,33 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     useApplicationBulkActions({ applications, setApplications, setTotal, selectedIds, setSelectedIds, funnelTypes, t })
 
   // ── Donut data (phase / recruiter / source) + filter option lists — pure
-  // aggregate builders (F1, audit R1: data/applicationInsights.ts).
+  // aggregate builders (F1, audit R1: data/applicationInsights.ts). W27: owner/
+  // source prefer the REAL server-wide stats; only fall back to the wide sample
+  // when stats itself hasn't loaded (mirrors phaseCount/bucketCount's own
+  // per-field fallback, already established above).
   const phaseData  = useMemo(() => buildPhaseData(phases, stats, wideRows), [phases, stats, wideRows])
-  const ownerData  = useMemo(() => buildOwnerData(wideRows, t('insights.noOwner'), OWNER_NONE), [wideRows, t])
-  const sourceData = useMemo(() => buildSourceData(wideRows), [wideRows])
+  const ownerData  = useMemo(() => stats?.by_owner
+    ? buildOwnerDataFromStats(stats.by_owner, t('insights.noOwner'), OWNER_NONE)
+    : buildOwnerData(wideRows, t('insights.noOwner'), OWNER_NONE), [stats, wideRows, t])
+  const sourceData = useMemo(() => stats?.by_source
+    ? buildSourceDataFromStats(stats.by_source)
+    : buildSourceData(wideRows), [stats, wideRows])
   const vacOptions = useMemo(() => buildVacOptions(wideRows), [wideRows])
+  // W27: customer/client filter options — new dimension (customer_id[]).
+  const clientOptions = useMemo(() => buildClientOptions(wideRows), [wideRows])
 
-  // Register the right-panel filters (phase + recruiter + source + vacancy).
+  // Register the right-panel filters (phase + recruiter + source + vacancy + client).
   const filterGroups = useMemo(() => [
     { key: 'phase',   label: t('insights.phase'),  selected: selectedPhase,  options: asOptions(phaseData),  onToggle: tog(setSelectedPhase) },
     { key: 'owner',   label: t('insights.owner'),  selected: selectedOwner,  options: asOptions(ownerData),  onToggle: tog(setSelectedOwner) },
     { key: 'source',  label: t('insights.source'), selected: selectedSource, options: asOptions(sourceData), onToggle: tog(setSelectedSource) },
     { key: 'vacancy', label: t('cols.vacancy'),    selected: selectedVac,    options: vacOptions,            onToggle: tog(setSelectedVac) },
+    { key: 'client',  label: t('cols.client'),     selected: selectedClient, options: clientOptions,         onToggle: tog(setSelectedClient) },
     // VESTIGING-2: inherited from the candidate; values limited to the user's own
     // branch scope (measured above) — never a widening.
     { key: 'branch',  label: t('common:filters.branch'), selected: selectedBranch, options: branchOptions, onToggle: tog(setSelectedBranch) },
-  ], [t, selectedPhase, selectedOwner, selectedSource, selectedVac, selectedBranch, phaseData, ownerData, sourceData, vacOptions, branchOptions])
+  ], [t, selectedPhase, selectedOwner, selectedSource, selectedVac, selectedClient, selectedBranch,
+    phaseData, ownerData, sourceData, vacOptions, clientOptions, branchOptions])
 
   useEffect(() => {
     registerFilters('applications-page', filterGroups)
@@ -143,20 +158,25 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // Reset to the first page whenever the bucket or any filter changes.
-  useEffect(() => { setPage(1) }, [bucket, attention, selectedPhase, selectedOwner, selectedSource, selectedVac, showArchived, interviewBusy, query, selectedCandidateIds])
+  useEffect(() => { setPage(1) }, [bucket, attention, selectedPhase, selectedOwner, selectedSource, selectedVac,
+    selectedClient, showArchived, interviewBusy, interviewPaused, query, selectedCandidateIds])
 
-  // TABLE rows: the server's page (already narrowed by bucket/phase_key/vacancy_id/
-  // search/include_archived where unambiguous — see useApplicationFilters), refined
-  // client-side for the dimensions the backend can't filter yet (owner/source/
-  // attention/'allActive'/multi-select on phase or vacancy). Search is skipped here
-  // (ignoreQuery) — the server already ran it on a richer field set.
-  const tableRows = useMemo(() => applications.filter(a => matchesFilters(a, { ignoreQuery: true })).map(decorate),
-    [applications, matchesFilters, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
+  // TABLE rows: the server's page — W27: now narrowed server-side by every filter
+  // (bucket/phase_key/vacancy_id/owner_id/source/customer_id/search-or-ref/
+  // include_archived/interview_status/branch_id/candidate_ids, see
+  // useApplicationFilters). The client refine left below only covers the ONE
+  // documented BE gap (the "No owner" sentinel, no IS-NULL support) and the
+  // 'allActive' bucket union (spans two server buckets in one client-side OR).
+  // Search is skipped here (ignoreQuery) — the server already ran it on a richer
+  // field set; refMode additionally bypasses every other dimension, mirroring the
+  // backend's own `ref` precedence (see matchesFilters' header comment).
+  const tableRows = useMemo(() => applications.filter(a => matchesFilters(a, { ignoreQuery: true, refMode })).map(decorate),
+    [applications, matchesFilters, refMode, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // BOARD rows: the wide (≤200, bucket-less) sample — the board shows the WHOLE
-  // funnel regardless of the bucket tab (Danny 13/7), same client refine otherwise.
-  const boardRows = useMemo(() => wideRows.filter(a => matchesFilters(a, { ignoreBucket: true, ignoreQuery: true })).map(decorate),
-    [wideRows, matchesFilters, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
+  // BOARD rows: the wide (bucket-less) sample — the board shows the WHOLE funnel
+  // regardless of the bucket tab (Danny 13/7), same client refine otherwise.
+  const boardRows = useMemo(() => wideRows.filter(a => matchesFilters(a, { ignoreBucket: true, ignoreQuery: true, refMode })).map(decorate),
+    [wideRows, matchesFilters, refMode, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Open an application drawer when arriving via a cross-entity link (intent).
   useOpenFromIntent(intent, (id) => selectApplication({ id } as Application))
@@ -190,14 +210,18 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   }
 
   // ── Insights strip: 3 donuts (filterable) + 6 KPI cards, equal footprint —
-  // figures computed here, assembled by the pure builder (F1, audit R1).
-  const avgScore = useMemo(() => computeAvgScore(wideRows), [wideRows])
-  const aiTaskCount = useMemo(() => computeAiTaskCount(wideRows), [wideRows])
+  // figures computed here, assembled by the pure builder (F1, audit R1). W27:
+  // avgScore/aiTasks/new prefer the real server-wide `stats.attention`/`avg_score`;
+  // only fall back to the wide sample when stats itself hasn't loaded.
+  const avgScore = useMemo(() => stats
+    ? (stats.avg_score != null ? Math.round(stats.avg_score) + '%' : '—')
+    : computeAvgScore(wideRows), [stats, wideRows])
+  const aiTaskCount = useMemo(() => stats ? (stats.attention?.ai_tasks ?? 0) : computeAiTaskCount(wideRows), [stats, wideRows])
   const counts = useMemo(() => ({
     active: bucketCount(stats, wideRows, 'active'),
     matched: bucketCount(stats, wideRows, 'matched'),
     rejected: bucketCount(stats, wideRows, 'rejected'),
-    new: wideRows.filter(a => a.isNew && a.bucket === 'active').length,
+    new: stats ? (stats.attention?.new ?? 0) : wideRows.filter(a => a.isNew && a.bucket === 'active').length,
   }), [stats, wideRows])
   const { donuts: insightDonuts, kpis: insightKpis } = buildApplicationInsights({
     t, phaseData, ownerData, sourceData,
@@ -212,12 +236,13 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
 
         {/* Insights strip (donuts + KPIs) */}
         <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')}
-          // Data honesty (BE gap): owner/source/avgScore/aiTasks have no server-wide
-          // aggregate and fall back to the ≤200-row wide sample — label it once that
-          // sample doesn't cover every matching application (mirrors CandidatesPage).
+          // Data honesty (STATS-OOM-1, mirrors CandidatesPage): owner/source/avgScore/
+          // aiTasks are real server-wide totals now (W27) — the notice only fires when
+          // `/applications/stats` itself failed AND the wideRows fallback it's using
+          // instead is itself an incomplete sample (statsFailed && wideIsPartial).
           // VESTIGING-2: an explicit branch filter EXCLUDES applications with no
           // branch yet — a resulting empty list must say so, not read as "nothing here".
-          notice={wideIsPartial ? t('insights.pageScopeNotice')
+          notice={(statsFailed && wideIsPartial) ? t('insights.pageScopeNotice')
             : (selectedBranch.length > 0 && total === 0 ? t('common:filters.branchExcludesUnassigned') : undefined)} />
 
         {/* Tab bar — add + buckets + view toggle */}
@@ -267,10 +292,16 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
           {/* Archived (detached) view — shared quick-view toggle (§4). */}
           <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
             label={t('archived.toggle')} color="var(--color-archive)" icon={Archive} />
-          {/* INTERVIEW-PHASE-1 v1 filter: a simple "In interview" quick-view onto the
-              universal 'busy' category — the shared toggle (§4), never hand-rolled. */}
-          <QuickViewToggle active={interviewBusy} onToggle={() => setInterviewBusy(v => !v)}
+          {/* INTERVIEW-PHASE-1 quick-views onto the universal category filter — the
+              shared toggle (§4), never hand-rolled. Mutually exclusive: each toggle
+              clears its sibling before flipping on (matches the server's single-value
+              interview_status; both narrow to interview_status=busy|paused). */}
+          <QuickViewToggle active={interviewBusy} onToggle={() => { setInterviewPaused(false); setInterviewBusy(v => !v) }}
             label={t('interview.filterBusy')} color="var(--color-info)" icon={MessageCircle} />
+          {/* W27: "Paused" — was missing entirely (no client or server filter for it);
+              now a real server-side interview_status=paused quick-view. */}
+          <QuickViewToggle active={interviewPaused} onToggle={() => { setInterviewBusy(false); setInterviewPaused(v => !v) }}
+            label={t('interview.category.paused')} color="var(--color-info)" icon={Pause} />
           {/* Table/board switcher — shared soft-tint component (§4), never a solid fill. */}
           <ViewModeToggle value={view} onChange={setView} options={[
             { id: 'table', icon: LayoutList, label: t('view.table') },

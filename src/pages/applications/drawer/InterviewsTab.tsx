@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MessageCircle, CheckCircle2, FileText } from 'lucide-react'
-import Avatar from '@/components/ui/Avatar'
+import { MessageCircle, FileText } from 'lucide-react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import StatusPill from '@/components/ui/StatusPill'
 import { sectionTitle } from '@/components/ui/SectionCard'
 import { useAuth } from '@/context/AuthContext'
 import api, { unwrap } from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { useDateFormat } from '@/lib/datetime'
 import { BTN_H } from '@/config/buttonMetrics'
 import { useAiAgents } from '../hooks/useAiAgents'
 import InterviewStatusCard from './InterviewStatusCard'
@@ -28,19 +29,33 @@ type StartInterviewReason = (typeof START_INTERVIEW_REASONS)[number]
 const isStartInterviewReason = (v: unknown): v is StartInterviewReason =>
   typeof v === 'string' && (START_INTERVIEW_REASONS as readonly string[]).includes(v)
 
-// A single transcript message (recruiter = out, candidate = in).
-function Message({ msg }: { msg: TranscriptMsg }) {
-  const isOut = msg.side === 'out'
+// W7: soft-chip colour per interview-session outcome (§4 semantic tokens, never ad-hoc
+// hex). This is the REAL history contract's `status` (completed/failed/running) — a
+// different axis from InterviewStatusCard's LIVE `category` (busy/completed/disqualified/
+// paused), so it is its own small map rather than reusing interviewCategoryColor.
+const HISTORY_STATUS_COLOR: Record<string, string> = {
+  completed: 'var(--color-success)',
+  failed: 'var(--color-danger)',
+  running: 'var(--color-info)',
+}
+
+// W7: one transcript bubble, aligned by `direction` (outbound = us, right; inbound =
+// candidate, left) — mirrors ConversationsSection's WhatsApp bubble convention. The real
+// contract carries no author identity (data minimisation §9), so direction is the only
+// signal; sent_at renders via the shared useDateFormat, never a raw ISO string.
+function TranscriptBubble({ msg }: { msg: TranscriptMsg }) {
+  const { formatDateTime } = useDateFormat()
+  const isOut = msg.direction === 'outbound'
+  const color = isOut ? 'var(--color-primary)' : 'var(--color-success)'
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, background: 'var(--bg)',
-      border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Avatar initials={(msg.author?.[0] ?? '?').toUpperCase()} size={22} color={isOut ? 'var(--color-primary)' : undefined} />
-        <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{msg.author}</span>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{msg.time}</span>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: isOut ? 'flex-end' : 'flex-start', gap: 3 }}>
       {/* Canon (05-08): body text 12px, matching the candidate profile/notes prose convention. */}
-      <div style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.45, paddingLeft: 30 }}>{msg.text}</div>
+      <div style={{ maxWidth: '85%', padding: '8px 12px', borderRadius: 10, fontSize: 12, color: 'var(--text)', lineHeight: 1.45,
+        background: `color-mix(in srgb, ${color} 10%, transparent)`,
+        border: `1px solid color-mix(in srgb, ${color} 32%, transparent)` }}>
+        {msg.body || '—'}
+      </div>
+      {msg.sentAt && <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{formatDateTime(msg.sentAt)}</span>}
     </div>
   )
 }
@@ -134,11 +149,13 @@ function StartInterviewAction({ applicationId, onStarted }: { applicationId: Id 
 }
 
 /**
- * InterviewsTab — the AI/WhatsApp interview(s) for an application: header,
- * summary and the full transcript. Empty state when there are none.
+ * InterviewsTab — the AI/WhatsApp interview(s) for an application: one card per
+ * REAL InterviewSession (APP-INTERVIEW-HISTORY-1), with its outcome chip and the
+ * full transcript. Empty state when there are none.
  */
 export default function InterviewsTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('applications')
+  const { formatDateTime } = useDateFormat()
   const interviews = a.interviews ?? []
   // Local override once a Flow-B "start interview" POST succeeds — the drawer's
   // own application object won't reflect it until the next fetch, so the status
@@ -179,31 +196,27 @@ export default function InterviewsTab({ application: a }: { application: Applica
             </span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('interview.title')}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{iv.date} · {iv.time}</div>
+              {/* W7: started/finished from the real session columns — a range once
+                  finished, "Started …" while still running (mirrors the drawer.placementPeriod
+                  en-dash convention). */}
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                {iv.finishedAt
+                  ? t('interview.history.period', { start: formatDateTime(iv.startedAt), end: formatDateTime(iv.finishedAt) })
+                  : t('interview.history.startedAt', { date: formatDateTime(iv.startedAt) })}
+              </div>
             </div>
-            {iv.status === 'done' && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500,
-                padding: '3px 10px', borderRadius: 99, background: 'var(--color-success-bg)', color: 'var(--color-success)' }}>
-                <CheckCircle2 size={12} /> {t('interview.done')}
-              </span>
-            )}
+            {/* W7: the session OUTCOME as a soft chip in its own colour — never a plain
+                "done" badge, since the real contract's `status` is always one of
+                completed/failed/running (never a boolean-ish "done"). */}
+            {iv.status && <StatusPill label={t(`interview.history.status.${iv.status}`)} color={HISTORY_STATUS_COLOR[iv.status]} />}
           </div>
 
-          {/* Summary — canon (05-08): shared sectionTitle (11px muted uppercase), reused
-              rather than a hand-rolled 13px heading; body text 12px prose convention. */}
-          {iv.summary && (
-            <div>
-              <div style={{ ...sectionTitle, marginBottom: 8 }}>{t('interview.summary')}</div>
-              <p style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.55, margin: 0 }}>{iv.summary}</p>
-            </div>
-          )}
-
-          {/* Transcript */}
+          {/* Transcript — canon (05-08): shared sectionTitle (11px muted uppercase). */}
           {iv.transcript.length > 0 && (
             <div>
               <div style={{ ...sectionTitle, marginBottom: 8 }}>{t('interview.transcript')}</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {iv.transcript.map((m, i) => <Message key={i} msg={m} />)}
+                {iv.transcript.map((m, i) => <TranscriptBubble key={i} msg={m} />)}
               </div>
             </div>
           )}

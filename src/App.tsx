@@ -22,6 +22,9 @@ import './index.css'
 
 // Lazy: only users blocked by tenant-wide MFA enforcement ever load this screen.
 const MfaEnrollmentGate = lazy(() => import('./pages/auth/MfaEnrollmentGate'))
+// Lazy: NOTITIE-POPOUT-1 F5 — the standalone second-screen notes window, only
+// loaded when a recruiter actually opens one (route-level code splitting, §9).
+const NotesPopoutPage = lazy(() => import('./pages/popout/NotesPopoutPage'))
 
 // Boot loader — shown while the auth context resolves (and as Suspense fallback).
 function BootLoader() {
@@ -78,6 +81,17 @@ export default function App() {
           <ErrorBoundary>
             <Routes>
               <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+              {/* NOTITIE-POPOUT-1 F5 (Trap B): a slim, id-driven second-screen window —
+                  auth-guarded like every other route, but rendered OUTSIDE DashboardLayout
+                  (no sidebar/topbar/Koios panel) so it's a bare full-viewport page a
+                  recruiter can drag to a second monitor. */}
+              <Route path="/popout/notes/:candidateId" element={
+                <ProtectedRoute>
+                  <Suspense fallback={<BootLoader />}>
+                    <NotesPopoutPage />
+                  </Suspense>
+                </ProtectedRoute>
+              } />
               <Route path="/*"     element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>} />
             </Routes>
           </ErrorBoundary>

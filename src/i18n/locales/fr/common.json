@@ -315,6 +315,33 @@
       "email": "E-mail",
       "appointment": "Rendez-vous",
       "notification": "Notification"
+    },
+    "execute": {
+      "run": "Exécuter",
+      "applyAsText": "Ajouter comme texte",
+      "done": "Terminé",
+      "loadingRun": "Chargement de l'exécution…",
+      "error": "Koios n'a pas pu démarrer les actions.",
+      "executed": "Exécutée",
+      "viewRun": "Voir l'exécution du workflow",
+      "confirm": "Confirmer",
+      "confirmFailed": "Échec de la confirmation",
+      "forbidden": "Aucun droit",
+      "unsupported": "Pas encore pris en charge",
+      "forbiddenReason": {
+        "task": "Vous n'avez pas le droit de créer des tâches.",
+        "whatsapp": "Vous n'avez pas le droit d'envoyer des messages WhatsApp.",
+        "email": "Vous n'avez pas le droit d'effectuer cette action pour le candidat.",
+        "appointment": "Vous n'avez pas le droit d'effectuer cette action pour le candidat.",
+        "notification": "Vous n'avez pas le droit d'effectuer cette action."
+      }
+    },
+    "koiosMode": {
+      "title": "Mode Koios",
+      "wizard": "Assistant",
+      "auto": "Auto",
+      "wizardHint": "Confirmer chaque action d'abord",
+      "autoHint": "Exécuter les actions immédiatement (les messages attendent une confirmation sauf si activé dans votre profil)"
     }
   },
   "ai": {
@@ -322,5 +349,7 @@
     "beta": "Bêta",
     "refresh": "Actualiser",
     "analyzing": "Analyse…"
-  }
+  },
+  "openSecondScreen": "Ouvrir sur un second écran",
+  "popupBlocked": "Votre navigateur a bloqué la fenêtre détachée. Veuillez autoriser les fenêtres pop-up pour ce site."
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { bucketOfPhase } from './applicationsShared'
+import { bucketOfPhase, interviewCategoryColor } from './applicationsShared'
 import type { LookupItem } from '@/context/LookupsContext'
 
 // A tenant that renamed the funnel: 'hired' → 'aangenomen' (is_match) and
@@ -31,5 +31,22 @@ describe('bucketOfPhase', () => {
     expect(bucketOfPhase('hired')).toBe('matched')
     expect(bucketOfPhase('rejected')).toBe('rejected')
     expect(bucketOfPhase('applied')).toBe('active')
+  })
+})
+
+// W31 (07-08): 'paused' used to fall through to the `default` case, so a
+// recruiter-took-over chip rendered the SAME info tint as a live 'busy' session —
+// it now gets its own warning token, distinct from every other category.
+describe('interviewCategoryColor', () => {
+  it('gives paused its own warning tint, distinct from busy', () => {
+    expect(interviewCategoryColor('paused')).toBe('var(--color-warning)')
+    expect(interviewCategoryColor('paused')).not.toBe(interviewCategoryColor('busy'))
+  })
+
+  it('keeps the existing completed/disqualified/busy tokens unchanged', () => {
+    expect(interviewCategoryColor('completed')).toBe('var(--color-success)')
+    expect(interviewCategoryColor('disqualified')).toBe('var(--color-danger)')
+    expect(interviewCategoryColor('busy')).toBe('var(--color-info)')
+    expect(interviewCategoryColor('anything-unknown')).toBe('var(--color-info)')
   })
 })

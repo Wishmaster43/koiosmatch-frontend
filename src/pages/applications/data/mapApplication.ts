@@ -1,6 +1,6 @@
 import { bucketOfPhase } from './applicationsShared'
 import { initialsOf } from '@/lib/initials'
-import type { Id, Loose } from '@/types/common'
+import type { Id } from '@/types/common'
 import type { LookupItem } from '@/context/LookupsContext'
 import type {
   ApiApplication, Application, ApplicationDetail, ApiAppCandidate, ApiAppVacancy, ApplicationInterview,
@@ -120,7 +120,10 @@ export function mapApplication(a: ApiApplication = {}, funnelTypes: LookupItem[]
     customerId: a.customer_id ?? null,
     // S5: the application's own display number (e.g. "S-00123").
     referenceNumber: a.reference_number ?? '',
-    score: a.score ?? a.match_score ?? a.match?.overall ?? null,
+    // W31 (verified live 07-08 against ApplicationDetailResource::matchLink()): the
+    // nested `match.overall` fallback is dead — that array never carried an `overall`
+    // key (only id/reference_number/status_label/status_color/match_*/placement_*).
+    score: a.score ?? a.match_score ?? null,
     task: a.task ?? a.ai_task ?? a.ai?.task ?? '',
     phaseKey,
     bucket: a.bucket ?? bucketOfPhase(phaseKey, funnelTypes),
@@ -179,8 +182,11 @@ export function mapMatchSummary(raw?: ApiApplication['match']): ApplicationMatch
     referenceNumber: raw.reference_number ?? '',
     statusLabel: raw.status_label ?? '',
     statusColor: raw.status_color ?? 'var(--text-muted)',
-    matchStart: raw.placement_start ?? null,
-    matchEnd: raw.placement_end ?? null,
+    // W31 (verified live 07-08): reads the CURRENT `match_*` pair first — the mapper was
+    // still reading the deprecated `placement_*` alias only (MATCH-VOCABULAIRE-1). Both
+    // are still sent today, so `placement_*` stays as a fallback until the backend drops it.
+    matchStart: raw.match_start ?? raw.placement_start ?? null,
+    matchEnd: raw.match_end ?? raw.placement_end ?? null,
   }
 }
 
@@ -220,11 +226,16 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
       branch: vac.branch ?? vac.industry ?? '', category: vac.category ?? '',
       skills: vac.skills ?? [], tags: vac.tags ?? [],
     },
+    // W7 (measured 07-08 in ApplicationDetailResource::interviews): the previous mapping
+    // read `channel`/`created_at`/`time`/`summary` and transcript `author`/`side`/`time`/
+    // `text` — none of those keys exist on the resource, so this tab rendered blank/garbage
+    // fields. The real shape is `status`/`started_at`/`finished_at` and, per transcript
+    // entry, `direction`/`body`/`sent_at` only (no author identity — data minimisation §9).
     interviews: (raw.interviews ?? []).map(iv => ({
-      id: iv.id, channel: iv.channel ?? 'whatsapp', status: iv.status ?? '',
-      date: iv.created_at ?? '', time: iv.time ?? '', summary: iv.summary ?? '',
+      id: iv.id, status: iv.status ?? '',
+      startedAt: iv.started_at ?? null, finishedAt: iv.finished_at ?? null,
       transcript: (iv.transcript ?? []).map(m => ({
-        author: m.author ?? '', side: m.side ?? 'in', time: m.time ?? '', text: m.text ?? '',
+        direction: m.direction ?? '', body: m.body ?? '', sentAt: m.sent_at ?? null,
       })),
     })),
     // `when` stays the RAW scheduled_at (no pre-formatting) — the card formats it with the
@@ -240,13 +251,14 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
       id: ev.id, author: ev.author ?? '', initials: ev.author_initials ?? '',
       description: ev.description ?? '', ai: Boolean(ev.ai), time: ev.created_at ?? ev.time ?? '',
     })),
-    // S15: `title` carries e.g. the detach reason's "Sollicitatie ontkoppeld"
-    // heading (ApplicationDetailResource always sends it, but the ApiApplication
-    // type's notes shape doesn't declare it yet — read it defensively, mirrors
-    // mapVacancy's `(n as Loose).body` for the same "field exists, type is behind"
-    // situation). The shared NotesTab renders it above the body when present.
+    // S15: `title` carries e.g. the detach reason's "Sollicitatie ontkoppeld" heading.
+    // The shared NotesTab renders it above the body when present.
+    // W10 (verified live 07-08): `type`/`language` now map through — they used to be
+    // dropped here, so a re-fetched note lost its type chip and spellcheck language
+    // even though ApplicationDetailResource::applicationNotes() always sends both.
     notes: (raw.notes ?? []).map(n => ({
-      id: n.id, author: n.author ?? '', title: (n as Loose).title ?? '', text: n.text ?? '', time: n.created_at ?? '',
+      id: n.id, author: n.author ?? '', type: n.type ?? '', title: n.title ?? '',
+      text: n.text ?? '', language: n.language ?? '', time: n.created_at ?? '',
     })),
     // Match SCORE = the fit on the application (flat fields; "match" the noun is a
     // separate entity). `score` (overall) comes from mapApplication (match_score).

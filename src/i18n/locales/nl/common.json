@@ -315,6 +315,33 @@
       "email": "E-mail",
       "appointment": "Afspraak",
       "notification": "Melding"
+    },
+    "execute": {
+      "run": "Uitvoeren",
+      "applyAsText": "Als tekst toevoegen",
+      "done": "Klaar",
+      "loadingRun": "Run laden…",
+      "error": "Koios kon de acties niet starten.",
+      "executed": "Uitgevoerd",
+      "viewRun": "Bekijk workflow-run",
+      "confirm": "Bevestigen",
+      "confirmFailed": "Bevestigen mislukt",
+      "forbidden": "Geen rechten",
+      "unsupported": "Nog niet ondersteund",
+      "forbiddenReason": {
+        "task": "Je hebt geen rechten om taken aan te maken.",
+        "whatsapp": "Je hebt geen rechten om WhatsApp-berichten te versturen.",
+        "email": "Je hebt geen rechten om deze actie namens de kandidaat uit te voeren.",
+        "appointment": "Je hebt geen rechten om deze actie namens de kandidaat uit te voeren.",
+        "notification": "Je hebt geen rechten om deze actie uit te voeren."
+      }
+    },
+    "koiosMode": {
+      "title": "Koios-modus",
+      "wizard": "Wizard",
+      "auto": "Auto",
+      "wizardHint": "Elke actie eerst bevestigen",
+      "autoHint": "Acties direct uitvoeren (berichten blijven wachten op bevestiging tenzij aangezet in je profiel)"
     }
   },
   "ai": {
@@ -322,5 +349,7 @@
     "beta": "Beta",
     "refresh": "Vernieuwen",
     "analyzing": "Analyseren…"
-  }
+  },
+  "openSecondScreen": "Open op tweede scherm",
+  "popupBlocked": "Je browser heeft het pop-outvenster geblokkeerd. Sta pop-ups toe voor deze site."
 }

@@ -1,9 +1,18 @@
 /**
- * KoiosVoiceButton — dictation mic for the Koios composer (SPEECH-1, Danny
- * 05-08: "Voice icon in Koios AI??"). Wraps the browser's Web Speech API
- * (SpeechRecognition ?? webkitSpeechRecognition) to turn spoken words into
- * draft text — the host (KoiosPanel) owns the textarea state, this component
- * only emits recognized chunks via `onText`; the caller appends + refocuses.
+ * KoiosVoiceButton — dictation mic (SPEECH-1, Danny 05-08: "Voice icon in
+ * Koios AI??"). Wraps the browser's Web Speech API (SpeechRecognition ??
+ * webkitSpeechRecognition) to turn spoken words into draft text — the host
+ * owns the destination text state, this component only emits recognized
+ * chunks via `onText`; the caller appends + refocuses.
+ *
+ * TWO call sites share this ONE component (§11 one source; NOTITIE-VOICE-1
+ * 06-08 — "de bouwsteen is er al, herbruik hem"): the Koios chat composer
+ * (KoiosPanel, dictation language follows the active UI locale — its call
+ * passes no `lang`, so this generalisation leaves it byte-identical) and the
+ * note editor's mic (NoteComposer, dictation language follows the EDITOR's
+ * OWN language picker via the `lang` prop — "dictatietaal = editortaal").
+ * The mic+speech STATE MACHINE lives in `useSpeechDictation` below (§3: logic
+ * in hooks) so both renders are driven by the exact same logic.
  *
  * HONEST GATE: renders nothing when neither constructor exists on `window`
  * (Firefox, Safari <14.1 today) — never a dead mic icon that does nothing on
@@ -52,36 +61,34 @@ declare global {
 
 // i18n language → recognition locale. A dedicated table (not lib/i18n's
 // LOCALE_BY_LANG, which maps 'en' to 'en-GB' for UI date formatting) — the
-// spec asks for the US English acoustic/language model for dictation.
+// spec asks for the US English acoustic/language model for dictation. Shared
+// by both call sites — see the `lang` prop below for who supplies the key.
 const RECOGNITION_LANG: Record<string, string> = {
   nl: 'nl-NL', en: 'en-US', de: 'de-DE', fr: 'fr-FR', es: 'es-ES',
 }
 
-interface KoiosVoiceButtonProps {
-  // Called with each newly recognized text chunk. This component holds no
-  // draft state — the host decides how to merge/append it and refocus.
-  onText: (text: string) => void
-  t: TFn
-}
-
-export default function KoiosVoiceButton({ onText, t }: KoiosVoiceButtonProps) {
+/**
+ * useSpeechDictation — the mic+speech STATE MACHINE, extracted so every call
+ * site renders off the exact same logic (§11 one source; §3 logic in hooks).
+ * Feature-detects the Web Speech API once, owns listening/denied state, and
+ * exposes `toggle()`. `lang` (2-letter code) overrides the recognition
+ * language derived from the active UI locale — omit it to keep the original
+ * chat behaviour.
+ */
+function useSpeechDictation({ onText, lang }: { onText: (text: string) => void; lang?: string }) {
   const { i18n } = useTranslation()
   const [listening, setListening] = useState(false)
   const [denied, setDenied] = useState(false)
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
 
   // Feature-detect once — the HONEST GATE. `undefined` means neither
-  // constructor exists in this browser, so render() returns null below.
+  // constructor exists in this browser, so the caller renders nothing.
   const Ctor = typeof window !== 'undefined' ? (window.SpeechRecognition ?? window.webkitSpeechRecognition) : undefined
 
-  // Never leave the mic hot: stop any live session on unmount (panel closed).
+  // Never leave the mic hot: stop any live session on unmount (panel/popup closed).
   useEffect(() => {
     return () => { recognitionRef.current?.stop() }
   }, [])
-
-  // Rules of hooks: every hook above runs unconditionally; only the render
-  // output is gated on browser support.
-  if (!Ctor) return null
 
   // Stop the current session (user click or the effect cleanup) — idempotent.
   const stopListening = () => {
@@ -93,11 +100,14 @@ export default function KoiosVoiceButton({ onText, t }: KoiosVoiceButtonProps) {
   // Start a new single-utterance session: interim results stream in for a
   // live feel, `continuous: false` lets the browser auto-stop on silence.
   const startListening = () => {
+    if (!Ctor) return
     setDenied(false)
     const recognition = new Ctor()
     recognition.continuous = false
     recognition.interimResults = true
-    recognition.lang = RECOGNITION_LANG[i18n.language] ?? 'en-US'
+    // Caller-supplied language wins (e.g. the note editor's picker); else the
+    // app's active UI locale — the chat composer's original behaviour.
+    recognition.lang = RECOGNITION_LANG[lang ?? i18n.language] ?? 'en-US'
 
     // Only replay the segments THIS event changed (resultIndex..end) — replaying
     // the whole session on every interim revision would duplicate already-sent words.
@@ -122,6 +132,28 @@ export default function KoiosVoiceButton({ onText, t }: KoiosVoiceButtonProps) {
   }
 
   const toggle = () => { if (listening) stopListening(); else startListening() }
+
+  return { supported: Boolean(Ctor), listening, denied, toggle }
+}
+
+interface KoiosVoiceButtonProps {
+  // Called with each newly recognized text chunk. This component holds no
+  // draft state — the host decides how to merge/append it and refocus.
+  onText: (text: string) => void
+  t: TFn
+  // Recognition language override (2-letter code: 'nl'/'en'/'de'/'fr'/'es').
+  // Omit to follow the active UI locale (the chat composer's original,
+  // unchanged behaviour) — NoteComposer passes its OWN language-picker value.
+  lang?: string
+}
+
+export default function KoiosVoiceButton({ onText, t, lang }: KoiosVoiceButtonProps) {
+  const { supported, listening, denied, toggle } = useSpeechDictation({ onText, lang })
+
+  // Rules of hooks: every hook runs inside useSpeechDictation unconditionally;
+  // only the render output is gated on browser support.
+  if (!supported) return null
+
   const title = denied ? t('voice.denied', { ns: 'koios' })
     : listening ? t('voice.stop', { ns: 'koios' }) : t('voice.start', { ns: 'koios' })
 

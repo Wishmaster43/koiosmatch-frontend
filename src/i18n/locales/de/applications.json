@@ -25,7 +25,8 @@
     "ownerPlaceholder": "Recruiter auswählen",
     "search": "Suchen…",
     "create": "Erstellen",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "searchError": "Suche fehlgeschlagen"
   },
   "pagination": {
     "perPage": "Ergebnisse pro Seite",
@@ -68,7 +69,7 @@
     "source": "Quelle",
     "clearFilter": "Filter zurücksetzen",
     "noOwner": "Kein Eigentümer",
-    "pageScopeNotice": "Recruiter/Quelle, durchschn. Matchscore und KI-Aufgaben basieren auf einer Stichprobe von bis zu 200 Bewerbungen — nicht auf der Gesamtzahl."
+    "pageScopeNotice": "Serverweite Gesamtzahlen sind vorübergehend nicht verfügbar — diese Zahlen basieren nur auf einer teilweisen Stichprobe."
   },
   "drawer": {
     "label": "Bewerbung",
@@ -286,6 +287,15 @@
       "resumeFailed": "Fortsetzen ist fehlgeschlagen.",
       "noRunningSession": "Für diese Bewerbung läuft kein Interview (mehr).",
       "notAllowed": "Sie haben keine Berechtigung, dieses Interview zu steuern."
+    },
+    "history": {
+      "status": {
+        "completed": "Abgeschlossen",
+        "failed": "Fehlgeschlagen",
+        "running": "Läuft"
+      },
+      "startedAt": "Gestartet {{date}}",
+      "period": "{{start}} – {{end}}"
     }
   },
   "appointments": {
@@ -350,7 +360,11 @@
       "phone": "Telefon",
       "letter": "Brief"
     },
-    "noRecord": "Abgelehnt ohne erfassten Grund."
+    "noRecord": "Abgelehnt ohne erfassten Grund.",
+    "correctAction": "Ablehnung korrigieren",
+    "correctModalTitle": "Ablehnung korrigieren",
+    "saveCorrection": "Korrektur speichern",
+    "correctionDone": "Ablehnung korrigiert"
   },
   "motivation": {
     "title": "Motivationsschreiben"
@@ -469,7 +483,9 @@
     "phase": "Phase",
     "inPhase": "{{days}} Tage in {{phase}}",
     "phaseSince": "seit {{date}}",
-    "phaseUnknown": "Phasenverlauf noch nicht erfasst"
+    "phaseUnknown": "Phasenverlauf noch nicht erfasst",
+    "recalculateScore": "Match-Score neu berechnen",
+    "recalculateDone": "Match-Score neu berechnet"
   },
   "competition": {
     "title": "Andere Bewerber",

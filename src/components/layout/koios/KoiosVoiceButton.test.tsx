@@ -80,6 +80,23 @@ describe('KoiosVoiceButton', () => {
       expect(MockSpeechRecognition.lastInstance?.lang).toBe('en-US')
     })
 
+    // NOTITIE-VOICE-1: the note editor's mic must dictate in the EDITOR's own
+    // language, not the UI locale — the optional `lang` prop overrides the table
+    // lookup. The chat composer never passes it, so its own behaviour (above) stays.
+    it('honours an explicit `lang` override over the active i18n locale', async () => {
+      const user = userEvent.setup()
+      render(<KoiosVoiceButton onText={vi.fn()} t={t} lang="nl" />)
+      await user.click(screen.getByRole('button'))
+      expect(MockSpeechRecognition.lastInstance?.lang).toBe('nl-NL')
+    })
+
+    it('falls back to en-US for an unmapped `lang` override', async () => {
+      const user = userEvent.setup()
+      render(<KoiosVoiceButton onText={vi.fn()} t={t} lang="xx" />)
+      await user.click(screen.getByRole('button'))
+      expect(MockSpeechRecognition.lastInstance?.lang).toBe('en-US')
+    })
+
     it('stops quietly on a no-speech error, without the denied title', async () => {
       const user = userEvent.setup()
       render(<KoiosVoiceButton onText={vi.fn()} t={t} />)

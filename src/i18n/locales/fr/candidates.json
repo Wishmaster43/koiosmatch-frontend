@@ -1182,5 +1182,9 @@
     "emailFormat": "Saisissez une adresse e-mail valide.",
     "phoneFormat": "Saisissez un numéro de téléphone valide (8 à 15 chiffres, par ex. 0612345678 ou +31612345678).",
     "linkedinFormat": "Utilisez uniquement le nom d'utilisateur LinkedIn, sans espaces ni barres obliques (par ex. jan-jansen-12345)."
+  },
+  "popout": {
+    "windowTitle": "Notes — {{name}}",
+    "loadError": "Ce candidat n'a pas pu être chargé."
   }
 }

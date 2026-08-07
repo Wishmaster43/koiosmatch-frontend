@@ -1,9 +1,13 @@
 /**
- * useApplicationFilters — server filterParams (F-6). Focused on the
- * include_archived/bucket wiring: the "Gearchiveerd" quick-view must ask the
- * server to REVEAL detached rows (?include_archived=1) and must not be
- * narrowed by the bucket param while doing so (matchesFilters isolates the
- * archived view client-side instead, see the hook's own header comment).
+ * useApplicationFilters — server filterParams (F-6, W27). Covers: the
+ * include_archived/bucket wiring (the "Gearchiveerd" quick-view must ask the
+ * server to REVEAL detached rows and must not be narrowed by the bucket param
+ * while doing so — matchesFilters isolates the archived view client-side
+ * instead); the interview busy/paused quick-views; the W27 multi-select array
+ * filters (phase/vacancy/owner/source/customer, verified against
+ * ApplicationQuery.php); the NUMMER-1 reference-number fast path; the
+ * candidate_ids deep-link scope; and the branch filter. §13: every assertion
+ * below checks the REQUEST SHAPE (filterParams), never just that a setter fired.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
@@ -75,9 +79,112 @@ describe('useApplicationFilters — interview quick-view (INTERVIEW-PHASE-1)', (
   })
 })
 
+// INTERVIEW-PHASE-1 / W27: the new "Paused" quick-view — a second, independent
+// server-side category filter (mutual exclusivity is enforced by the PAGE's
+// click handlers, not the hook — see ApplicationsPage — so this hook just
+// verifies its own precedence when both happen to be true).
+describe('useApplicationFilters — interview paused quick-view (W27)', () => {
+  it('sends interview_status=paused once the paused quick-view is toggled on', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setInterviewPaused(true) })
+    expect(result.current.filterParams.interview_status).toBe('paused')
+    expect(result.current.anyFilterActive).toBe(true)
+  })
+
+  it('busy wins if both flags are somehow true at once', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setInterviewBusy(true); result.current.setInterviewPaused(true) })
+    expect(result.current.filterParams.interview_status).toBe('busy')
+  })
+
+  it('clearAllFilters resets the paused quick-view', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setInterviewPaused(true) })
+    act(() => { result.current.clearAllFilters() })
+    expect(result.current.interviewPaused).toBe(false)
+    expect(result.current.filterParams.interview_status).toBeUndefined()
+  })
+})
+
+// W27 (verified 2026-08-07 against ApplicationQuery.php): phase_key/vacancy_id/
+// owner_id/source/customer_id are real ARRAY_FILTERS on the backend now — every
+// multi-select sends the FULL array, not just a single value (the old BE gap).
+describe('useApplicationFilters — multi-select array filters (W27)', () => {
+  it('sends phase_key as the full array, even with more than one value', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setSelectedPhase(['applied', 'interview']) })
+    expect(result.current.filterParams.phase_key).toEqual(['applied', 'interview'])
+  })
+
+  it('sends vacancy_id as the full array', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setSelectedVac(['v1', 'v2']) })
+    expect(result.current.filterParams.vacancy_id).toEqual(['v1', 'v2'])
+  })
+
+  it('sends source as the full array', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setSelectedSource(['website', 'referral']) })
+    expect(result.current.filterParams.source).toEqual(['website', 'referral'])
+  })
+
+  it('sends customer_id (client filter, new dimension) as the full array', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setSelectedClient(['c1', 'c2']) })
+    expect(result.current.filterParams.customer_id).toEqual(['c1', 'c2'])
+  })
+
+  it('sends owner_id for real owner ids, server-side', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setSelectedOwner(['u1', 'u2']) })
+    expect(result.current.filterParams.owner_id).toEqual(['u1', 'u2'])
+  })
+
+  it('does NOT send owner_id when the "No owner" sentinel is picked (no IS-NULL support server-side)', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setSelectedOwner(['__none']) })
+    expect(result.current.filterParams.owner_id).toBeUndefined()
+  })
+
+  it('drops owner_id entirely once "No owner" is mixed in with real ids too', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setSelectedOwner(['u1', '__none']) })
+    expect(result.current.filterParams.owner_id).toBeUndefined()
+  })
+})
+
+// NUMMER-1 (mirrors useCandidateFilters): a well-formed reference number does an
+// exact server-side `?ref=` lookup instead of the fuzzy `?search=`.
+describe('useApplicationFilters — reference-number fast path (NUMMER-1)', () => {
+  it('sends `search` for an ordinary free-text query', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setQuery('jane doe') })
+    expect(result.current.filterParams.search).toBe('jane doe')
+    expect(result.current.filterParams.ref).toBeUndefined()
+    expect(result.current.refMode).toBe(false)
+  })
+
+  it('sends `ref` (not `search`) for a well-formed reference number', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setQuery('S-00123') })
+    expect(result.current.filterParams.ref).toBe('S-00123')
+    expect(result.current.filterParams.search).toBeUndefined()
+    expect(result.current.refMode).toBe(true)
+  })
+
+  it('refMode short-circuits matchesFilters past every other dimension (mirrors the backend\'s own ref precedence)', () => {
+    const { result } = renderHook(() => useApplicationFilters())
+    act(() => { result.current.setBucket('active'); result.current.setSelectedPhase(['rejected']) })
+    // A row that matches NEITHER the active bucket nor the selected phase still
+    // passes once refMode is set — the exact ref lookup already found it server-side.
+    expect(result.current.matchesFilters({ bucket: 'matched', phaseKey: 'hired' }, { refMode: true })).toBe(true)
+  })
+})
+
 // 11.1: the candidates-bulk "manage per application" deep-link scope — sent to
-// the server as `candidate_ids` (forward-compat; the BE doesn't honour it yet,
-// see the hook's header comment), flips anyFilterActive, and is clearable.
+// the server as `candidate_ids`, a real, working ApplicationQuery array filter
+// (verified 2026-08-07 — ApplicationQuery.php:96-99/194), flips anyFilterActive,
+// and is clearable.
 describe('useApplicationFilters — candidate_ids deep-link scope (11.1)', () => {
   it('sends no candidate_ids by default', () => {
     const { result } = renderHook(() => useApplicationFilters())

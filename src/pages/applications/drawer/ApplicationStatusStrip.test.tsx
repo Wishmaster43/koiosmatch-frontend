@@ -2,11 +2,13 @@
  * ApplicationStatusStrip — covers the four cells' empty states, the
  * APP-STAGE-DURATIONS-1 fallback chain (real stage_durations entry ->
  * currentStageEnteredAt -> "in behandeling since created" -> phaseUnknown,
- * never conflating days-since-created with days-in-phase) and that a future
- * appointment wins over a past one.
+ * never conflating days-since-created with days-in-phase), that a future
+ * appointment wins over a past one, and (W29) the self-contained recalculate-
+ * score trigger: the REQUEST it fires, its auth gate, in-flight/failure states
+ * and that a fresher prop always wins over a locally recalculated value.
  */
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ApplicationStatusStrip from './ApplicationStatusStrip'
 import type { ApplicationDetail } from '@/types/application'
@@ -23,6 +25,24 @@ vi.mock('@/lib/datetime', () => ({
   useLocale: () => 'nl-NL',
 }))
 
+// W29 mocks (mirrors InterviewStatusCard.test.tsx's own auth/api/notify seam).
+const mockUseAuth = vi.fn()
+const mockPost = vi.fn()
+const mockNotifySuccess = vi.fn()
+const mockNotifyError = vi.fn()
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
+// `unwrap` mirrors the real implementation (data → data.data) so the assertions
+// exercise the same envelope handling the app does.
+vi.mock('@/lib/api', () => ({
+  default: { post: (...args: unknown[]) => mockPost(...args) },
+  unwrap: (res: unknown) => {
+    const body = (res as { data?: unknown })?.data ?? res
+    if (body && typeof body === 'object' && !Array.isArray(body) && 'data' in body) return (body as { data: unknown }).data
+    return body
+  },
+}))
+vi.mock('@/lib/notify', () => ({ notifySuccess: (...a: unknown[]) => mockNotifySuccess(...a), notifyError: (...a: unknown[]) => mockNotifyError(...a) }))
+
 const app = (over: Partial<ApplicationDetail> = {}) => ({
   id: 1, phaseKey: 'applied', phaseLabel: 'Applied',
   // eslint-disable-next-line no-restricted-syntax -- DATA fixture (a tenant lookup colour), not a UI colour choice
@@ -31,6 +51,13 @@ const app = (over: Partial<ApplicationDetail> = {}) => ({
   stageDurations: [], currentStageEnteredAt: null,
   ...over,
 } as unknown as ApplicationDetail)
+
+beforeEach(() => {
+  // resetAllMocks (not clearAllMocks): also drops leftover `…Once` queues, so a
+  // test whose request never fires cannot hand its canned response to the next one.
+  vi.resetAllMocks()
+  mockUseAuth.mockReturnValue({ hasPermission: () => true })
+})
 
 describe('ApplicationStatusStrip', () => {
   it('renders a calm empty state for every cell when there is no data at all', () => {
@@ -136,5 +163,77 @@ describe('ApplicationStatusStrip', () => {
       appointments: [{ id: 1, type: 'Intake', title: 'Intake gesprek', when: future, with: 'Bram', status: 'planned', durationMin: null, modality: '', ownerId: null, locationName: '' }],
     })} />)
     expect(screen.getByText(/Intake gesprek/).closest('button')).toBeNull()
+  })
+})
+
+// W29: verified live — POST /applications/{id}/score exists (ApplicationController::
+// score) and returns the full detail; only match_score is asserted here.
+describe('ApplicationStatusStrip · recalculate score (W29)', () => {
+  it('POSTs /applications/{id}/score and renders the fresh percentage from the response', async () => {
+    mockPost.mockResolvedValueOnce({ data: { data: { id: 1, match_score: 91 } } })
+    render(<ApplicationStatusStrip application={app({ score: 40 })} />)
+    expect(screen.getByText('40%')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'status.recalculateScore' }))
+    expect(mockPost).toHaveBeenCalledWith('/applications/1/score')
+    await waitFor(() => expect(screen.getByText('91%')).toBeInTheDocument())
+    expect(screen.queryByText('40%')).toBeNull()
+    expect(mockNotifySuccess).toHaveBeenCalledWith('status.recalculateDone')
+  })
+
+  it('still POSTs when the application was never scored, replacing the "not scored" placeholder', async () => {
+    mockPost.mockResolvedValueOnce({ data: { data: { id: 1, match_score: 63 } } })
+    render(<ApplicationStatusStrip application={app({ score: null })} />)
+    expect(screen.getByText('status.notScored')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'status.recalculateScore' }))
+    await waitFor(() => expect(screen.getByText('63%')).toBeInTheDocument())
+    expect(screen.queryByText('status.notScored')).toBeNull()
+  })
+
+  it('hides the recalculate trigger entirely without applications.update', () => {
+    mockUseAuth.mockReturnValue({ hasPermission: () => false })
+    render(<ApplicationStatusStrip application={app({ score: 40 })} />)
+    expect(screen.queryByRole('button', { name: 'status.recalculateScore' })).toBeNull()
+  })
+
+  it('checks the same permission string the route middleware requires', () => {
+    const hasPermission = vi.fn().mockReturnValue(true)
+    mockUseAuth.mockReturnValue({ hasPermission })
+    render(<ApplicationStatusStrip application={app({ score: 40 })} />)
+    expect(hasPermission).toHaveBeenCalledWith('applications.update')
+  })
+
+  it('disables the trigger while the recalculation is in flight, and re-enables after it resolves', async () => {
+    let resolvePost: (v: unknown) => void = () => {}
+    mockPost.mockImplementationOnce(() => new Promise(resolve => { resolvePost = resolve }))
+    render(<ApplicationStatusStrip application={app({ score: 40 })} />)
+    const btn = screen.getByRole('button', { name: 'status.recalculateScore' })
+    await userEvent.click(btn)
+    expect(btn).toBeDisabled()
+    resolvePost({ data: { data: { id: 1, match_score: 77 } } })
+    await waitFor(() => expect(btn).not.toBeDisabled())
+    expect(screen.getByText('77%')).toBeInTheDocument()
+  })
+
+  it('surfaces a failed recalculation via extractApiError and keeps the trigger retryable', async () => {
+    mockPost.mockRejectedValueOnce({ response: { status: 500, data: { message: 'Scoring engine unavailable' } } })
+    render(<ApplicationStatusStrip application={app({ score: 40 })} />)
+    const btn = screen.getByRole('button', { name: 'status.recalculateScore' })
+    await userEvent.click(btn)
+    await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Scoring engine unavailable'))
+    expect(btn).not.toBeDisabled()
+    // The score shown is UNCHANGED — a failed recalculation must never fake a result.
+    expect(screen.getByText('40%')).toBeInTheDocument()
+  })
+
+  it('drops the locally recalculated score once a fresher score prop arrives (fresh prop wins)', async () => {
+    mockPost.mockResolvedValueOnce({ data: { data: { id: 1, match_score: 91 } } })
+    const { rerender } = render(<ApplicationStatusStrip application={app({ score: 40 })} />)
+    await userEvent.click(screen.getByRole('button', { name: 'status.recalculateScore' }))
+    await waitFor(() => expect(screen.getByText('91%')).toBeInTheDocument())
+    // A newer prop (e.g. the drawer's own refetch, or a manual override saved
+    // elsewhere on this application) is the fresher truth and must not be shadowed.
+    rerender(<ApplicationStatusStrip application={app({ score: 60 })} />)
+    await waitFor(() => expect(screen.getByText('60%')).toBeInTheDocument())
+    expect(screen.queryByText('91%')).toBeNull()
   })
 })

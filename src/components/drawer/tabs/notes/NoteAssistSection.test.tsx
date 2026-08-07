@@ -14,6 +14,12 @@
  * Vitest version misattributes the rejection as an unhandled test failure
  * (reproduced in isolation; the component itself is correct — see the apply/
  * failure assertions below, which pass once the mock reset moves inline).
+ *
+ * K0-B: the header's NoteKoiosModeToggle and a non-empty 'actions' result's
+ * NoteActionsResultsPanel are stubbed here — both have their OWN dedicated
+ * test files (mirrors how NoteComposer.test.tsx stubs THIS section as a
+ * child); this file stays focused on the improve/summarize request+apply
+ * behaviour it already covered before K0-B landed.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -25,6 +31,8 @@ vi.mock('./noteAssistApi', async (importOriginal) => {
   const actual = await importOriginal<typeof import('./noteAssistApi')>()
   return { ...actual, assistNote: vi.fn() }
 })
+vi.mock('./NoteKoiosModeToggle', () => ({ default: () => <div data-testid="mode-toggle-stub" /> }))
+vi.mock('./NoteActionsResultsPanel', () => ({ default: () => <div data-testid="actions-panel-stub" /> }))
 
 describe('NoteAssistSection · request per mode', () => {
   it('POSTs {text, language, mode: "improve"} when Verbeteren is clicked', async () => {
@@ -52,6 +60,12 @@ describe('NoteAssistSection · request per mode', () => {
     render(<NoteAssistSection body="<p>Original</p>" onApply={vi.fn()} />)
     await user.click(screen.getByRole('button', { name: 'Actiepunten' }))
     expect(assistNote).toHaveBeenCalledWith(expect.objectContaining({ mode: 'actions' }), expect.anything())
+  })
+
+  it('always renders the K0 Wizard/Auto mode switch in the header, even before any assist run', () => {
+    vi.mocked(assistNote).mockReset()
+    render(<NoteAssistSection body="" onApply={vi.fn()} />)
+    expect(screen.getByTestId('mode-toggle-stub')).toBeInTheDocument()
   })
 
   it('is genuinely enabled the moment the note has text — no hidden gate beyond hasText', () => {
@@ -113,7 +127,7 @@ describe('NoteAssistSection · Overnemen (apply) semantics', () => {
     expect(screen.queryByRole('button', { name: 'Overnemen' })).toBeNull()
   })
 
-  it('an actions result lists each item\'s Dutch type label + due date', async () => {
+  it('a NON-empty actions result hands off to NoteActionsResultsPanel (K0-B execute flow), not the plain Overnemen list', async () => {
     vi.mocked(assistNote).mockReset()
     const user = userEvent.setup()
     vi.mocked(assistNote).mockResolvedValue({
@@ -122,8 +136,9 @@ describe('NoteAssistSection · Overnemen (apply) semantics', () => {
     })
     render(<NoteAssistSection body="<p>Original</p>" onApply={vi.fn()} />)
     await user.click(screen.getByRole('button', { name: 'Actiepunten' }))
-    expect(await screen.findByText('Bel terug')).toBeInTheDocument()
-    expect(screen.getByText('(Taak · 2026-08-10)')).toBeInTheDocument()
+    expect(await screen.findByTestId('actions-panel-stub')).toBeInTheDocument()
+    // The plain review-list idiom (Overnemen button) is improve/summarize-only now.
+    expect(screen.queryByRole('button', { name: 'Overnemen' })).not.toBeInTheDocument()
   })
 })
 

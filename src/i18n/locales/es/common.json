@@ -315,6 +315,33 @@
       "email": "Correo electrónico",
       "appointment": "Cita",
       "notification": "Notificación"
+    },
+    "execute": {
+      "run": "Ejecutar",
+      "applyAsText": "Añadir como texto",
+      "done": "Listo",
+      "loadingRun": "Cargando ejecución…",
+      "error": "Koios no pudo iniciar las acciones.",
+      "executed": "Ejecutada",
+      "viewRun": "Ver ejecución del workflow",
+      "confirm": "Confirmar",
+      "confirmFailed": "Error al confirmar",
+      "forbidden": "Sin permisos",
+      "unsupported": "Aún no compatible",
+      "forbiddenReason": {
+        "task": "No tienes permisos para crear tareas.",
+        "whatsapp": "No tienes permisos para enviar mensajes de WhatsApp.",
+        "email": "No tienes permisos para realizar esta acción para el candidato.",
+        "appointment": "No tienes permisos para realizar esta acción para el candidato.",
+        "notification": "No tienes permisos para realizar esta acción."
+      }
+    },
+    "koiosMode": {
+      "title": "Modo Koios",
+      "wizard": "Asistente",
+      "auto": "Auto",
+      "wizardHint": "Confirmar cada acción primero",
+      "autoHint": "Ejecutar acciones de inmediato (los mensajes siguen esperando confirmación salvo que lo actives en tu perfil)"
     }
   },
   "ai": {
@@ -322,5 +349,7 @@
     "beta": "Beta",
     "refresh": "Actualizar",
     "analyzing": "Analizando…"
-  }
+  },
+  "openSecondScreen": "Abrir en la segunda pantalla",
+  "popupBlocked": "Tu navegador bloqueó la ventana emergente. Permite las ventanas emergentes para este sitio."
 }

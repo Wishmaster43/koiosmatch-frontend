@@ -26,14 +26,29 @@
  * the panel — type/channel/title stay their natural height, the footer stays
  * pinned outside the scroll area, and the whole content area still scrolls
  * (never clips) if the panel is smaller than everything put together.
+ *
+ * NOTITIE-VOICE-1 (Danny 06-08 "dictatietaal = editortaal"): a mic button sits
+ * directly above the editor, right-aligned — near its own language picker
+ * (RichTextEditor's toolbar is out of this file's scope, so the mic lives just
+ * outside it rather than inside that shared component). Reuses the SAME
+ * `KoiosVoiceButton` the chat composer uses (generalised for reuse, §11 one
+ * source) — its `lang` prop is fed the CONTROLLED `language` state above, so
+ * dictation always follows the editor's own picked language, never the app's
+ * UI locale. Honest states (unsupported browser hidden, denied-mic title) are
+ * inherited from the shared component — nothing extra to build here. Each
+ * recognized chunk is escaped and appended as a new paragraph (never
+ * dangerouslySetInnerHTML with raw speech text, §7).
  */
 import { useEffect, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Save, X } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import RichTextEditor from '@/components/ui/RichTextEditor'
+import KoiosVoiceButton from '@/components/layout/koios/KoiosVoiceButton'
 import NoteAssistSection from './NoteAssistSection'
 import { CHANNEL_ICON } from './channelIcons'
+import { escapeHtml } from './noteAssistApply'
 import type { NoteItem, NoteType, NotePayload, NotesLabels } from '../NotesTab'
 
 interface NoteComposerProps {
@@ -47,14 +62,23 @@ interface NoteComposerProps {
   // Host-supplied composer row (customer tab's link picker) — NEW notes only,
   // mirrors the previous inline composer's `editingIdx === null` gate.
   composerExtra?: ReactNode
+  // F5 second-screen: host-supplied pop-out handler — forwarded to FloatingPanel's
+  // header button. Only candidate hosts pass it today (the popout window is
+  // candidate-only); the popout window itself never does (no recursion).
+  onPopOut?: () => void
   onSave: (payload: NotePayload) => void
   onCancel: () => void
 }
 
 const iconBtn: CSSProperties = { width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, cursor: 'pointer' }
 
-export default function NoteComposer({ open, initialNote, noteTypes, channels, labels, editorLabels, composerExtra, onSave, onCancel }: NoteComposerProps) {
+export default function NoteComposer({ open, initialNote, noteTypes, channels, labels, editorLabels, composerExtra, onPopOut, onSave, onCancel }: NoteComposerProps) {
+  const { t } = useTranslation()
   const isNew = initialNote == null
+  // Existing note's own id (K0-B execute source) — a NoteItem's index signature
+  // carries it at runtime even though the shared type doesn't declare it
+  // (mirrors author_id's optional-field convention in NotesTab.tsx).
+  const noteId = initialNote && typeof initialNote.id === 'string' ? initialNote.id : undefined
   const [type, setType] = useState(initialNote?.type ?? noteTypes[0]?.value ?? '')
   const [channel, setChannel] = useState(initialNote?.channel ?? '')
   const [title, setTitle] = useState(initialNote?.title ?? '')
@@ -75,6 +99,11 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
 
   const typeLabel = noteTypes.find(n => n.value === type)?.label ?? ''
   const save = () => onSave({ type, title, body, channel: channel || undefined, language: language || undefined })
+  // NOTITIE-VOICE-1: append a dictated chunk as its own escaped paragraph —
+  // never splice raw speech text into the existing HTML (§7), and never lose
+  // whatever the recruiter already wrote (append-only, mirrors the chat mic's
+  // own "always append" idiom, KoiosPanel's appendVoiceText).
+  const appendVoiceText = (chunk: string) => setBody(prev => `${prev}<p>${escapeHtml(chunk)}</p>`)
   // FloatingPanel wants a plain string; every host's newNote/edit label is one
   // in practice (ReactNode on the type only because DrawerAddButton's `label`
   // slot accepts richer content elsewhere) — coerce defensively, never throw.
@@ -83,7 +112,7 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
 
   return (
     <FloatingPanel open={open} onClose={onCancel} title={panelTitle} ariaLabel={panelTitle}
-      persistKey="notes-composer" width={640} maxWidth="92vw" scrollBody={false}>
+      persistKey="notes-composer" width={640} maxWidth="92vw" scrollBody={false} onPopOut={onPopOut}>
       {/* Scrollable content — RichTextEditor (fill) is the ONE growing item, so
           dragging the panel bigger grows the WRITING space, never empty
           whitespace below a stuck-size editor. `overflow: auto` is the safety
@@ -133,6 +162,14 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
         )}
         <input value={title} onChange={e => setTitle(e.target.value)} placeholder={labels.notePlaceholder?.(typeLabel)}
           style={{ width: '100%', padding: '8px 12px', fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none', flexShrink: 0 }} />
+        {/* NOTITIE-VOICE-1: dictation mic, right next to where the editor's own
+            language picker renders below it — the picked `language` state drives
+            BOTH the editor's spellcheck AND the mic's recognition locale, so
+            they always agree. Renders nothing on an unsupported browser (the
+            shared component's own HONEST GATE). */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: -4 }}>
+          <KoiosVoiceButton onText={appendVoiceText} lang={language} t={t} />
+        </div>
         {/* TAAL-SPELL-1: language/onLanguageChange controlled here so the pick rides
             into the save payload; showLanguage defaults true on RichTextEditor, so
             the picker (and native browser spellcheck) is visible with no opt-in.
@@ -142,7 +179,7 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
           labels={editorLabels} language={language} onLanguageChange={setLanguage} fill minHeight={160} />
 
         {/* NOTE-ASSIST-1: Koios AI assist — always visible under the editor. */}
-        <NoteAssistSection body={body} onApply={setBody} language={language} />
+        <NoteAssistSection body={body} onApply={setBody} language={language} noteId={noteId} />
       </div>
 
       {/* Pinned footer — OUTSIDE the scroll area (mirrors AddTaskModal's

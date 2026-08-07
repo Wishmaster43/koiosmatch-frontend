@@ -8,7 +8,8 @@
  * (useFocusTrap needs a fresh mount — house rule, mirrors ConfirmDialog).
  */
 import { type CSSProperties, type ReactNode, useState } from 'react'
-import { X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { ExternalLink, X } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useDraggablePanel } from '@/hooks/useDraggablePanel'
 import { nextFloatingZ } from '@/lib/zIndexScale'
@@ -40,9 +41,18 @@ export interface FloatingPanelProps {
    * (flex column) — for migrated modals with their own scroll area + pinned footer.
    */
   scrollBody?: boolean
+  /**
+   * NOTITIE-POPOUT-1 F5: when supplied, renders one extra header icon button that
+   * opens this panel's content as a REAL second browser window (Trap B — a
+   * draggable in-window panel can never reach a second monitor). Omitted (every
+   * panel today) → no button at all, zero behaviour change. The panel itself never
+   * decides WHAT opens; the caller wires the actual `window.open` (see lib/secondScreen.ts).
+   */
+  onPopOut?: () => void
 }
 
-function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, persistKey, resizable, zIndex, bodyStyle, hideClose, scrollBody = true }: Omit<FloatingPanelProps, 'open'>) {
+function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, persistKey, resizable, zIndex, bodyStyle, hideClose, scrollBody = true, onPopOut }: Omit<FloatingPanelProps, 'open'>) {
+  const { t } = useTranslation('common')
   const panelTrapRef = useFocusTrap<HTMLDivElement>(onClose)
   const { panelRef, placement, onDragPointerDown, onResizePointerDown, onDragHandleDoubleClick } = useDraggablePanel(persistKey, resizable !== false)
   // Claim a fresh slot in the floating band once per mount; pointerdown re-claims
@@ -76,8 +86,18 @@ function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, p
             cursor: 'move', userSelect: 'none', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           {header ?? <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{title}</div>}
           {header && <div style={{ flex: 1 }} />}
+          {/* Pop-out to a second browser window (NOTITIE-POPOUT-1 F5) — sits before the
+              close X, same 26x26 bordered icon-button footprint as the other header buttons. */}
+          {onPopOut && (
+            <button onClick={onPopOut} type="button" aria-label={t('openSecondScreen')} title={t('openSecondScreen')}
+              style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                borderRadius: 6, background: 'var(--bg)', border: '1px solid var(--border)',
+                color: 'var(--text-muted)', cursor: 'pointer', flexShrink: 0 }}>
+              <ExternalLink size={13} />
+            </button>
+          )}
           {!hideClose && (
-            <button onClick={onClose} aria-label="Sluiten"
+            <button onClick={onClose} aria-label={t('close')}
               style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)',
                 display: 'inline-flex', padding: 4, borderRadius: 6 }}>
               <X size={16} />

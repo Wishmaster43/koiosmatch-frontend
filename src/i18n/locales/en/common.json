@@ -315,6 +315,33 @@
       "email": "Email",
       "appointment": "Appointment",
       "notification": "Notification"
+    },
+    "execute": {
+      "run": "Run",
+      "applyAsText": "Add as text",
+      "done": "Done",
+      "loadingRun": "Loading run…",
+      "error": "Koios couldn't start the actions.",
+      "executed": "Executed",
+      "viewRun": "View workflow run",
+      "confirm": "Confirm",
+      "confirmFailed": "Confirmation failed",
+      "forbidden": "No permission",
+      "unsupported": "Not supported yet",
+      "forbiddenReason": {
+        "task": "You don't have permission to create tasks.",
+        "whatsapp": "You don't have permission to send WhatsApp messages.",
+        "email": "You don't have permission to perform this action for the candidate.",
+        "appointment": "You don't have permission to perform this action for the candidate.",
+        "notification": "You don't have permission to perform this action."
+      }
+    },
+    "koiosMode": {
+      "title": "Koios mode",
+      "wizard": "Wizard",
+      "auto": "Auto",
+      "wizardHint": "Confirm every action first",
+      "autoHint": "Run actions immediately (messages still wait for confirmation unless enabled in your profile)"
     }
   },
   "ai": {
@@ -322,5 +349,7 @@
     "beta": "Beta",
     "refresh": "Refresh",
     "analyzing": "Analysing…"
-  }
+  },
+  "openSecondScreen": "Open on second screen",
+  "popupBlocked": "Your browser blocked the pop-out window. Please allow pop-ups for this site."
 }

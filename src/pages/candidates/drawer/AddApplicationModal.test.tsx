@@ -118,6 +118,24 @@ describe('AddApplicationModal · submits application_stage_id (S24b bug fix)', (
   })
 })
 
+describe('AddApplicationModal · APP-VACANCY-OPTIONAL-1 (open application)', () => {
+  it('submits WITHOUT a vacancy — vacancy_id null in the POST body, button never gated on the picker', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { data: {} } })
+    const user = userEvent.setup()
+    render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+
+    // The label honestly says the vacancy is optional now.
+    expect(screen.getByText('work.vacancyOptional')).toBeInTheDocument()
+    const create = screen.getByRole('button', { name: 'work.createApplication' })
+    expect(create).toBeEnabled()
+    await user.click(create)
+
+    expect(api.post).toHaveBeenCalledWith('/applications', {
+      candidate_id: 'cand-1', vacancy_id: null, owner_id: 'u1', application_stage_id: 'stage-applied',
+    })
+  })
+})
+
 describe('AddApplicationModal · AXIS-MATRIX-2 preflight (CMFE audit R1)', () => {
   it('renders nothing extra when the decision is allow (or still loading)', () => {
     vi.mocked(useActionRulePreflight).mockReturnValue({ decision: null, loading: false, error: false })

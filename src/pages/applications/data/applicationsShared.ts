@@ -18,12 +18,16 @@ export const bucketOfPhase = (key: string, funnelTypes: LookupItem[] = []): stri
 }
 
 // INTERVIEW-PHASE-1: token colour per UNIVERSAL interview category — never a
-// hardcoded hex (§4). Same three semantic tokens used everywhere else for an
-// in-progress/success/danger outcome.
+// hardcoded hex (§4). Same semantic tokens used everywhere else for an
+// in-progress/success/warning/danger outcome.
+// W31 (07-08): 'paused' fell through to the `default` info tint — the exact same
+// colour as a live 'busy' session, so a recruiter-took-over chip read identically
+// to "AI still going". Paused now gets its own warning tint (§4 semantic tokens).
 export const interviewCategoryColor = (category: string): string => {
   switch (category) {
     case 'completed':    return 'var(--color-success)'
     case 'disqualified': return 'var(--color-danger)'
+    case 'paused':        return 'var(--color-warning)'
     default:              return 'var(--color-info)' // 'busy'
   }
 }

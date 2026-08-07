@@ -1,0 +1,86 @@
+/**
+ * useNoteActionsExecute — state machine for the note composer's "Actiepunten"
+ * execute flow (K0-B, F4). Two explicit user actions only, never automatic:
+ * `preview()` (the "Uitvoeren" button) sends every suggested item unconfirmed
+ * and lets the server decide per item (executed now / pending / forbidden,
+ * from the caller's Wizard/Auto mode + the rights matrix); `confirm(index)`
+ * (a card's own "Bevestigen" button) re-sends ONLY that one item with
+ * `confirmed: true` — never the whole batch, so an already-executed sibling
+ * is never re-run (§0 no fake affordances, no surprise re-execution).
+ */
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { extractApiError } from '@/lib/extractApiError'
+import { executeNoteActions, toExecuteItem } from './noteActionsExecuteApi'
+import type { ExecuteItemStatus, ExecuteSource } from './noteActionsExecuteApi'
+import type { AssistActionItem } from './noteAssistApi'
+
+export type PreviewStatus = 'idle' | 'loading' | 'success' | 'error'
+
+// One suggested item + its latest execute outcome (undefined until the first
+// preview response arrives) + local in-flight/failure flags for its own card.
+export interface ExecItem extends AssistActionItem {
+  status?: ExecuteItemStatus
+  run_id?: string
+  template_key?: string
+  confirming?: boolean
+  confirmError?: boolean
+}
+
+export function useNoteActionsExecute(noteId?: string) {
+  const { t } = useTranslation('common')
+  const [items, setItems] = useState<ExecItem[] | null>(null)
+  const [status, setStatus] = useState<PreviewStatus>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
+
+  // Alive guard (§9): the popup can close mid-request — never set state after
+  // unmount. Re-armed in SETUP (StrictMode runs setup→cleanup→setup in dev).
+  const aliveRef = useRef(true)
+  useEffect(() => {
+    aliveRef.current = true
+    return () => { aliveRef.current = false }
+  }, [])
+
+  const source: ExecuteSource = noteId ? { note_id: noteId } : {}
+
+  // First pass: send every suggested item, unconfirmed. Only ever called from
+  // the "Uitvoeren" button click — nothing runs on its own.
+  const preview = useCallback(async (suggested: AssistActionItem[]) => {
+    setStatus('loading'); setErrorMessage('')
+    try {
+      const results = await executeNoteActions(suggested.map(it => toExecuteItem(it)), source)
+      if (!aliveRef.current) return
+      setItems(suggested.map((it, i) => ({ ...it, ...results[i] })))
+      setStatus('success')
+    } catch (err) {
+      if (!aliveRef.current) return
+      setErrorMessage(extractApiError(err, t('notesAssist.execute.error', { defaultValue: 'Koios kon de acties niet starten.' })))
+      setStatus('error')
+    }
+    // source is rebuilt every render from a primitive (noteId) — safe to omit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t, noteId])
+
+  // Per-item confirm — re-sends ONLY that one item with confirmed:true, so an
+  // already-executed/forbidden sibling in the same batch is never re-run.
+  const confirm = useCallback(async (index: number) => {
+    setItems(prev => prev?.map((it, i) => i === index ? { ...it, confirming: true, confirmError: false } : it) ?? null)
+    const target = items?.[index]
+    if (!target) return
+    try {
+      const [result] = await executeNoteActions([toExecuteItem(target, true)], source)
+      if (!aliveRef.current) return
+      setItems(prev => prev?.map((it, i) => i === index ? { ...it, ...result, confirming: false } : it) ?? null)
+    } catch {
+      if (!aliveRef.current) return
+      setItems(prev => prev?.map((it, i) => i === index ? { ...it, confirming: false, confirmError: true } : it) ?? null)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, noteId])
+
+  // Back to idle — the "Klaar" close on the results panel; a fresh "Uitvoeren"
+  // click starts a new preview from scratch.
+  const reset = useCallback(() => { setItems(null); setStatus('idle'); setErrorMessage('') }, [])
+
+  return { items, status, errorMessage, preview, confirm, reset }
+}

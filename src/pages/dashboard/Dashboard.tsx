@@ -16,6 +16,7 @@ import ActivityListsRow from './blocks/ActivityListsRow'
 import ShiftsSummary from './blocks/ShiftsSummary'
 import TouchpointsFeed from './blocks/TouchpointsFeed'
 import AttentionCandidates from './blocks/AttentionCandidates'
+import KoiosForYouCard from './KoiosForYouCard'
 import type { DashStats, DashOpp, DashData } from '@/types/dashboard'
 import { useAllSettings, getJsonSetting, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useNumberFormat } from '@/lib/formatters'
@@ -135,6 +136,10 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
           <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
             {kpis.map(k => <KpiCard key={k.label} {...k} />)}
           </div>
+
+          {/* "Koios deed dit voor jou" (K0-D noordster) — self-contained card, own
+              loading/error/empty/success handling; fetches its own 7/30-day report. */}
+          <KoiosForYouCard />
 
           <DistributionCharts vis={vis} statusData={statusData} funnelData={funnelData} recruiterData={recruiterData} oppStageData={oppStageData} opp={opp} onNavigate={onNavigate} />
 

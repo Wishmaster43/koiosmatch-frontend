@@ -127,5 +127,24 @@
       "kwartaal": "Dit kwartaal",
       "jaar": "Dit jaar"
     }
+  },
+  "koiosForYou": {
+    "title": "Koios deed dit voor jou",
+    "periodLabel": "Periode",
+    "period": {
+      "7": "7 dagen",
+      "30": "30 dagen"
+    },
+    "heroLabel": "Acties",
+    "breakdownTitle": "Per actie",
+    "latestTitle": "Laatste acties",
+    "empty": "Koios heeft nog niets voor je gedaan",
+    "emptySub": "Acties die Koios voor je uitvoert, verschijnen hier.",
+    "loadError": "Kon Koios-activiteit niet laden.",
+    "source": {
+      "note": "Vanuit een notitie",
+      "conversation": "Vanuit een gesprek",
+      "chat": "Vanuit chat"
+    }
   }
 }

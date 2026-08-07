@@ -11,10 +11,11 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import type { Application } from '@/types/application'
 import type { BoardPhase } from '../ApplicationsBoard'
+// W27: one shared stats shape (was hand-duplicated here before) — see
+// useApplicationsData's own header comment for the verified server contract.
+import type { AppStats } from '../hooks/useApplicationsData'
 
 export interface Aggregate { name: string; key: string; color?: string; value: number }
-
-interface AppStats { by_phase?: Array<{ phase_key?: string; key?: string; value?: string; count?: number }>; by_bucket?: Record<string, number> }
 
 // Teal accent for the "AI tasks" KPI card — no dedicated design token exists for
 // this hue yet (§4 gap, tracked); kept as one documented constant instead of a
@@ -44,18 +45,21 @@ export const buildPhaseData = (phases: BoardPhase[], stats: AppStats | null, wid
   phases.map(p => ({ name: p.label, key: p.key, color: p.color, value: phaseCount(stats, wideRows, p.key) }))
     .filter(d => d.value > 0)
 
-// Owner/source have NO server-wide aggregate (BE gap — see useApplicationsData's
-// header comment), so they derive from the wide (≤200) sample; wideIsPartial
-// (computed by the data hook) flags when that sample doesn't cover every
-// matching application.
+// W27 (verified 2026-08-07): the wide-sample builders below are now the FALLBACK
+// path only — `ApplicationQuery::stats()` returns real server-wide by_owner/
+// by_source, used whenever `stats` loaded (see buildOwnerDataFromStats/
+// buildSourceDataFromStats). ApplicationsPage picks whichever is available;
+// wideIsPartial (from the data hook) flags when this fallback sample is itself
+// incomplete. Keyed by owner ID (not name, W27 — drives the server's owner_id[]
+// filter directly, see useApplicationFilters).
 export const buildOwnerData = (wideRows: Application[], noOwnerLabel: string, ownerNoneKey: string): Aggregate[] => {
   // owner_id is legitimately nullable (imports, API-created, pre-assignment):
   // unowned rows form an explicit "No owner" slice instead of being dropped.
   const m: Record<string, Aggregate> = {}
   wideRows.forEach(a => {
-    const n = a.owner?.name
-    const key = n || ownerNoneKey
-    ;(m[key] ??= { name: n || noOwnerLabel, key, color: n ? (a.owner?.color ?? undefined) : 'var(--text-muted)', value: 0 }).value++
+    const id = a.owner?.id != null ? String(a.owner.id) : null
+    const key = id ?? ownerNoneKey
+    ;(m[key] ??= { name: a.owner?.name || noOwnerLabel, key, color: id ? (a.owner?.color ?? undefined) : 'var(--text-muted)', value: 0 }).value++
   })
   return Object.values(m)
 }
@@ -65,21 +69,51 @@ export const buildSourceData = (wideRows: Application[]): Aggregate[] => {
   return Object.values(m)
 }
 
+// W27: the REAL server-wide owner/source distributions — preferred over the
+// wide-sample builders above whenever `/applications/stats` loaded. No per-owner
+// avatar colour rides along in the aggregate (the backend's ownerDistribution()
+// doesn't carry one) — MiniDonut's own palette fallback covers it, matches the
+// pre-existing behaviour for any owner whose avatar_color was already null.
+export const buildOwnerDataFromStats = (
+  byOwner: NonNullable<AppStats['by_owner']>, noOwnerLabel: string, ownerNoneKey: string,
+): Aggregate[] =>
+  byOwner.filter(o => (o.count ?? 0) > 0).map(o => ({
+    // The backend's own null-owner label ('Niet toegewezen') is untranslated Dutch
+    // content (out of scope, backend repo) — substitute the FE's own i18n label
+    // for that ONE bucket instead of rendering it; a resolved owner's real NAME
+    // is not translatable content, so it passes through as-is.
+    name: o.owner_id ? (o.name ?? '') : noOwnerLabel,
+    key: o.owner_id ? String(o.owner_id) : ownerNoneKey,
+    value: o.count ?? 0,
+  }))
+export const buildSourceDataFromStats = (bySource: NonNullable<AppStats['by_source']>): Aggregate[] =>
+  bySource.filter((s): s is { source: string; count?: number } => Boolean(s.source))
+    .map(s => ({ name: s.source, key: s.source, value: s.count ?? 0 }))
+
 // Filter option lists (value/label/count) reuse the donut aggregates.
 export const buildVacOptions = (wideRows: Application[]): Array<{ value: string; label: string; count: number }> => {
   const m: Record<string, { value: string; label: string; count: number }> = {}
   wideRows.forEach(a => { if (a.vacancyId) { const k = String(a.vacancyId); (m[k] ??= { value: k, label: a.vacancyTitle, count: 0 }).count++ } })
   return Object.values(m)
 }
+// W27: customer/client filter options — new dimension, backed by the now-verified
+// customer_id[] array filter (ApplicationQuery.php:88-89).
+export const buildClientOptions = (wideRows: Application[]): Array<{ value: string; label: string; count: number }> => {
+  const m: Record<string, { value: string; label: string; count: number }> = {}
+  wideRows.forEach(a => { if (a.customerId) { const k = String(a.customerId); (m[k] ??= { value: k, label: a.client, count: 0 }).count++ } })
+  return Object.values(m)
+}
 export const asOptions = (data: Aggregate[]) => data.map(d => ({ value: d.key, label: d.name, count: d.value }))
 
 // Average match score across non-rejected applications (KPI, "—" when none scored).
-// No server-wide aggregate (BE gap) — derived from the wide (≤200) sample.
+// W27: FALLBACK only now — `stats.avg_score` is the real server-wide figure; this
+// derives the same number from the wide sample when stats itself failed to load.
 export const computeAvgScore = (wideRows: Application[]): string => {
   const scored = wideRows.filter(a => a.bucket !== 'rejected' && typeof a.score === 'number')
   return scored.length ? Math.round(scored.reduce((s, a) => s + (a.score as number), 0) / scored.length) + '%' : '—'
 }
-// Active applications that still carry an AI task (attention KPI); same wide sample.
+// Active applications that still carry an AI task (attention KPI). W27: FALLBACK
+// only — `stats.attention.ai_tasks` is the real server-wide figure.
 export const computeAiTaskCount = (wideRows: Application[]): number =>
   wideRows.filter(a => a.task && a.bucket === 'active').length
 

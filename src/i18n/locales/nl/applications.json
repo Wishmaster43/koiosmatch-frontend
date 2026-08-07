@@ -25,7 +25,8 @@
     "ownerPlaceholder": "Selecteer een recruiter",
     "search": "Zoeken…",
     "create": "Aanmaken",
-    "cancel": "Annuleren"
+    "cancel": "Annuleren",
+    "searchError": "Zoeken mislukt"
   },
   "pagination": {
     "perPage": "Resultaten per pagina",
@@ -68,7 +69,7 @@
     "source": "Bron",
     "noOwner": "Geen eigenaar",
     "clearFilter": "Filter wissen",
-    "pageScopeNotice": "Recruiter/bron, gem. matchscore en AI-taken zijn gebaseerd op een steekproef van maximaal 200 sollicitaties — niet op het volledige aantal."
+    "pageScopeNotice": "Serverbrede totalen zijn tijdelijk niet beschikbaar — deze cijfers zijn gebaseerd op een gedeeltelijke steekproef."
   },
   "drawer": {
     "label": "Sollicitatie",
@@ -286,6 +287,15 @@
       "resumeFailed": "Hervatten is mislukt.",
       "noRunningSession": "Er loopt geen interview (meer) voor deze sollicitatie.",
       "notAllowed": "Je hebt geen rechten om dit interview te bedienen."
+    },
+    "history": {
+      "status": {
+        "completed": "Afgerond",
+        "failed": "Mislukt",
+        "running": "Bezig"
+      },
+      "startedAt": "Gestart {{date}}",
+      "period": "{{start}} – {{end}}"
     }
   },
   "appointments": {
@@ -361,7 +371,11 @@
       "phone": "telefoon",
       "letter": "brief"
     },
-    "noRecord": "Afgewezen zonder vastgelegde reden."
+    "noRecord": "Afgewezen zonder vastgelegde reden.",
+    "correctAction": "Afwijzing corrigeren",
+    "correctModalTitle": "Afwijzing corrigeren",
+    "saveCorrection": "Correctie opslaan",
+    "correctionDone": "Afwijzing gecorrigeerd"
   },
   "motivation": {
     "title": "Motivatie"
@@ -469,7 +483,9 @@
     "phase": "Fase",
     "inPhase": "{{days}} dagen in {{phase}}",
     "phaseSince": "sinds {{date}}",
-    "phaseUnknown": "Faseverloop nog niet vastgelegd"
+    "phaseUnknown": "Faseverloop nog niet vastgelegd",
+    "recalculateScore": "Matchscore herberekenen",
+    "recalculateDone": "Matchscore herberekend"
   },
   "competition": {
     "title": "Andere sollicitanten",

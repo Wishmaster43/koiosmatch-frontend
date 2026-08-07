@@ -25,7 +25,8 @@
     "ownerPlaceholder": "Selecciona un reclutador",
     "search": "Buscar…",
     "create": "Crear",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "searchError": "Error al buscar"
   },
   "pagination": {
     "perPage": "Resultados por página",
@@ -68,7 +69,7 @@
     "source": "Origen",
     "clearFilter": "Borrar filtro",
     "noOwner": "Sin propietario",
-    "pageScopeNotice": "Reclutador/origen, puntuación media de coincidencia y tareas de IA se basan en una muestra de hasta 200 solicitudes, no en el total real."
+    "pageScopeNotice": "Los totales globales no están disponibles temporalmente — estas cifras se basan únicamente en una muestra parcial."
   },
   "drawer": {
     "label": "Candidatura",
@@ -286,6 +287,15 @@
       "resumeFailed": "No se pudo reanudar la conversación.",
       "noRunningSession": "Ya no hay ninguna entrevista en curso para esta solicitud.",
       "notAllowed": "No tienes permiso para controlar esta entrevista."
+    },
+    "history": {
+      "status": {
+        "completed": "Completado",
+        "failed": "Fallido",
+        "running": "En curso"
+      },
+      "startedAt": "Iniciado {{date}}",
+      "period": "{{start}} – {{end}}"
     }
   },
   "appointments": {
@@ -350,7 +360,11 @@
       "phone": "teléfono",
       "letter": "carta"
     },
-    "noRecord": "Rechazada sin motivo registrado."
+    "noRecord": "Rechazada sin motivo registrado.",
+    "correctAction": "Corregir el rechazo",
+    "correctModalTitle": "Corregir el rechazo",
+    "saveCorrection": "Guardar corrección",
+    "correctionDone": "Rechazo corregido"
   },
   "motivation": {
     "title": "Carta de motivación"
@@ -469,7 +483,9 @@
     "phase": "Fase",
     "inPhase": "{{days}} días en {{phase}}",
     "phaseSince": "desde {{date}}",
-    "phaseUnknown": "Historial de fase aún no registrado"
+    "phaseUnknown": "Historial de fase aún no registrado",
+    "recalculateScore": "Recalcular puntuación de match",
+    "recalculateDone": "Puntuación de match recalculada"
   },
   "competition": {
     "title": "Otros solicitantes",

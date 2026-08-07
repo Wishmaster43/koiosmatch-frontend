@@ -315,6 +315,33 @@
       "email": "E-Mail",
       "appointment": "Termin",
       "notification": "Benachrichtigung"
+    },
+    "execute": {
+      "run": "Ausführen",
+      "applyAsText": "Als Text hinzufügen",
+      "done": "Fertig",
+      "loadingRun": "Lauf wird geladen…",
+      "error": "Koios konnte die Aktionen nicht starten.",
+      "executed": "Ausgeführt",
+      "viewRun": "Workflow-Lauf ansehen",
+      "confirm": "Bestätigen",
+      "confirmFailed": "Bestätigung fehlgeschlagen",
+      "forbidden": "Keine Berechtigung",
+      "unsupported": "Noch nicht unterstützt",
+      "forbiddenReason": {
+        "task": "Du hast keine Berechtigung, Aufgaben zu erstellen.",
+        "whatsapp": "Du hast keine Berechtigung, WhatsApp-Nachrichten zu senden.",
+        "email": "Du hast keine Berechtigung, diese Aktion für den Kandidaten auszuführen.",
+        "appointment": "Du hast keine Berechtigung, diese Aktion für den Kandidaten auszuführen.",
+        "notification": "Du hast keine Berechtigung, diese Aktion auszuführen."
+      }
+    },
+    "koiosMode": {
+      "title": "Koios-Modus",
+      "wizard": "Wizard",
+      "auto": "Auto",
+      "wizardHint": "Jede Aktion zuerst bestätigen",
+      "autoHint": "Aktionen sofort ausführen (Nachrichten warten weiterhin auf Bestätigung, sofern nicht im Profil aktiviert)"
     }
   },
   "ai": {
@@ -322,5 +349,7 @@
     "beta": "Beta",
     "refresh": "Aktualisieren",
     "analyzing": "Analysieren…"
-  }
+  },
+  "openSecondScreen": "Auf zweitem Bildschirm öffnen",
+  "popupBlocked": "Ihr Browser hat das Pop-out-Fenster blockiert. Bitte lassen Sie Pop-ups für diese Website zu."
 }

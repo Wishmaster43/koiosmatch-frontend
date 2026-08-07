@@ -23,6 +23,16 @@ interface Props {
   onCancel: () => void
   onConfirm: (payload: RejectPayload) => void
   submitting?: boolean
+  // APP-REJECTION-EDIT-1: 'correct' reuses this exact form to PATCH the reason/
+  // note of an ALREADY rejected application (RejectionSummary's pencil) instead
+  // of POSTing a brand-new reject — the caller's own onConfirm decides which
+  // request fires, this component only changes its copy/prefill. Default 'reject'
+  // keeps every existing caller (the footer button flow) unchanged.
+  mode?: 'reject' | 'correct'
+  // Correction-mode prefill — the existing reason/note being corrected. Ignored
+  // in 'reject' mode (a fresh rejection always starts blank).
+  initialReasonId?: string
+  initialNote?: string
 }
 
 /**
@@ -33,16 +43,24 @@ interface Props {
  * CreatableSelect — S8) + an optional rich-text toelichting (S9), then confirm.
  * The rejection MESSAGE (channel + template) is sent by a workflow that fires
  * on rejection — so no channel picker/preview here.
+ *
+ * APP-REJECTION-EDIT-1 (verified live: PATCH /applications/{id}/rejection
+ * exists): `mode="correct"` reuses this same reason+note form, prefilled from
+ * the existing rejection, to CORRECT it — the AI-advice block (a decision aid
+ * for the ORIGINAL reject) is hidden, and the confirm button reads "save
+ * correction" instead of "reject". The caller's onConfirm still receives the
+ * exact same payload shape; only ITS request differs (PATCH vs POST).
  */
-export default function RejectionModal({ application: a, onCancel, onConfirm, submitting }: Props) {
+export default function RejectionModal({ application: a, onCancel, onConfirm, submitting, mode = 'reject', initialReasonId, initialNote }: Props) {
   const { t } = useTranslation(['applications', 'common'])
   const aliveRef = useRef(true)
+  const isCorrection = mode === 'correct'
   const [reasons, setReasons] = useState<RejectionReason[]>([])
-  const [reasonId, setReasonId] = useState('')
+  const [reasonId, setReasonId] = useState(initialReasonId ?? '')
   // `note` is the confirmed value submitted on Afwijzen; `draftNote` is the
   // in-progress edit, only committed to `note` on Save (mirrors the old
   // RejectionBlock's summary/cancel-to-source pattern).
-  const [note, setNote] = useState('')
+  const [note, setNote] = useState(initialNote ?? '')
   const [draftNote, setDraftNote] = useState('')
   const [noteEditing, setNoteEditing] = useState(false)
   const [noteExpanded, setNoteExpanded] = useState(false)
@@ -72,19 +90,22 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
   return (
     // POPUP-SLEEP-1: shell swapped onto the shared FloatingPanel (draggable/
     // resizable, remembered position) — body/footer and flows unchanged.
-    <FloatingPanel open onClose={onCancel} ariaLabel={t('rejection.modalTitle')}
+    <FloatingPanel open onClose={onCancel} ariaLabel={isCorrection ? t('rejection.correctModalTitle') : t('rejection.modalTitle')}
       persistKey="application-rejection" width={520} maxWidth="92vw"
       bodyStyle={{ padding: 20 }}
       header={
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center',
             background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}><XCircle size={16} /></span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('rejection.modalTitle')}</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>
+            {isCorrection ? t('rejection.correctModalTitle') : t('rejection.modalTitle')}
+          </span>
         </span>
       }>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {/* AI advice */}
-          {a.ai?.advice === 'reject' && (
+          {/* AI advice — a decision aid for the ORIGINAL reject only; irrelevant
+              once already rejected, so correction mode never shows it. */}
+          {!isCorrection && a.ai?.advice === 'reject' && (
             <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', background: 'var(--color-primary-bg)', borderRadius: 8, padding: '8px 10px' }}>
               <KoiosAiMark size={18} />
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -142,11 +163,14 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
             borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
             {t('common:cancel')}
           </button>
+          {/* Correction is a plain SAVE (primary), never the danger-red "Reject"
+              button — no candidate-facing message goes out on this path. */}
           <button onClick={submit} disabled={!reasonId || submitting}
             style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8,
-              background: 'var(--color-danger)', color: '#fff', cursor: (!reasonId || submitting) ? 'not-allowed' : 'pointer',
+              background: isCorrection ? 'var(--color-primary)' : 'var(--color-danger)', color: '#fff',
+              cursor: (!reasonId || submitting) ? 'not-allowed' : 'pointer',
               opacity: (!reasonId || submitting) ? 0.6 : 1 }}>
-            {t('rejection.confirm')}
+            {isCorrection ? t('rejection.saveCorrection') : t('rejection.confirm')}
           </button>
         </div>
     </FloatingPanel>

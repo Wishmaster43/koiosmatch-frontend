@@ -1,5 +1,11 @@
+import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { RefreshCw } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
+import api, { unwrap } from '@/lib/api'
+import { notifyError, notifySuccess } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import { useDateFormat } from '@/lib/datetime'
 import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
@@ -19,6 +25,12 @@ function Cell({ label, children }: { label: ReactNode; children: ReactNode }) {
 
 const mutedItalic: CSSProperties = { color: 'var(--text-muted)', fontStyle: 'italic' }
 const mutedLine: CSSProperties = { fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }
+// Ghost icon-only trigger (mirrors GeocodeButton's 'ghost' variant, §3A reuse —
+// the one subtle refresh-style affordance shape, never a bespoke button per page).
+const recalcBtn = (busy: boolean): CSSProperties => ({
+  background: 'none', border: 'none', padding: 2, display: 'flex',
+  color: 'var(--text-muted)', opacity: busy ? 0.5 : 0.8, cursor: busy ? 'not-allowed' : 'pointer',
+})
 
 // Whole days between an ISO date and now; null when the date is missing/unparseable.
 function daysSince(iso: string | undefined, now: Date = new Date()): number | null {
@@ -75,10 +87,53 @@ function TabLink({ onClick, children }: { onClick: () => void; children: ReactNo
  * mogelijk relevante informatie kunnen zien") with four cells: phase, match score,
  * next appointment and interview progress. Every cell honest-gates on its own data
  * and shows a muted italic fallback rather than a blank cell.
+ *
+ * W29 (verified live: POST /applications/{id}/score exists, ApplicationController::
+ * score): the match-score cell carries a self-contained recalculate trigger that
+ * (re)runs the deterministic scoring engine and renders the fresh percentage from
+ * the response — no separate wiring needed from the drawer/page layer above.
  */
 export default function ApplicationStatusStrip({ application: a, onNavigateTab }: ApplicationStatusStripProps) {
   const { t } = useTranslation(['applications', 'common'])
   const { formatDate, formatDateTime } = useDateFormat()
+  // W29: gated on the same permission the POST /applications/{id}/score route
+  // requires (applications.update) — self-contained like InterviewStatusCard's
+  // own auth gate, hidden entirely (not disabled) for a user who may not trigger it.
+  const auth = useAuth()
+  const canManage = auth?.hasPermission?.('applications.update') ?? false
+  const [recalculating, setRecalculating] = useState(false)
+  // The freshly recalculated score, once the POST resolves — null until then.
+  const [recalculated, setRecalculated] = useState<number | null>(null)
+
+  // Alive guard, re-armed in SETUP (§9: StrictMode's double mount leaves a
+  // cleanup-only ref permanently false and silently kills a later setState).
+  const alive = useRef(true)
+  useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
+  // A fresh prop (the drawer's own refetch, or a manual override saved elsewhere
+  // on this same application) is the newer truth and must not be shadowed by a
+  // stale locally recalculated value (mirrors InterviewStatusCard's own guard).
+  useEffect(() => { setRecalculated(null) }, [a.score])
+
+  const score = recalculated ?? a.score
+
+  // POST /applications/{id}/score — (re)runs the deterministic scoring engine
+  // server-side and returns the full detail; only match_score is read here (the
+  // criteria breakdown lives in MatchScoreBlock, a different owned surface).
+  const recalculateScore = async () => {
+    if (recalculating || a.id == null) return
+    setRecalculating(true)
+    try {
+      const res = await api.post(`/applications/${a.id}/score`)
+      const body = unwrap<{ match_score?: number | null }>(res)
+      if (!alive.current) return
+      setRecalculated(body?.match_score ?? null)
+      notifySuccess(t('status.recalculateDone'))
+    } catch (err) {
+      if (alive.current) notifyError(extractApiError(err, t('common:actionFailed')))
+    } finally {
+      if (alive.current) setRecalculating(false)
+    }
+  }
 
   // APP-STAGE-DURATIONS-1 (landed): the CURRENT stage's real entry timestamp,
   // read off the chronological stage_durations array (leftAt === null marks
@@ -114,11 +169,22 @@ export default function ApplicationStatusStrip({ application: a, onNavigateTab }
           )}
         </Cell>
 
-        {/* Match score — same thresholds/colours as MatchScoreBlock. */}
+        {/* Match score — same thresholds/colours as MatchScoreBlock. W29: a
+            subtle recalculate trigger sits next to the value/placeholder alike,
+            so a never-scored application can still be scored from here. */}
         <Cell label={t('status.matchScore')}>
-          {a.score != null
-            ? <span style={{ fontWeight: 600, color: scoreColor(a.score) }}>{a.score}%</span>
-            : <span style={mutedItalic}>{t('status.notScored')}</span>}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {score != null
+              ? <span style={{ fontWeight: 600, color: scoreColor(score) }}>{score}%</span>
+              : <span style={mutedItalic}>{t('status.notScored')}</span>}
+            {canManage && (
+              <button type="button" onClick={recalculateScore} disabled={recalculating}
+                title={t('status.recalculateScore')} aria-label={t('status.recalculateScore')}
+                style={recalcBtn(recalculating)}>
+                <RefreshCw size={12} className={recalculating ? 'animate-spin' : ''} />
+              </button>
+            )}
+          </div>
         </Cell>
 
         {/* Next appointment — the first upcoming one, owner on a muted second

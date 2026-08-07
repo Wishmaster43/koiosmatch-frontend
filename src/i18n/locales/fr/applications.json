@@ -25,7 +25,8 @@
     "ownerPlaceholder": "Sélectionner un recruteur",
     "search": "Rechercher…",
     "create": "Créer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "searchError": "Échec de la recherche"
   },
   "pagination": {
     "perPage": "Résultats par page",
@@ -68,7 +69,7 @@
     "source": "Source",
     "clearFilter": "Effacer le filtre",
     "noOwner": "Aucun propriétaire",
-    "pageScopeNotice": "Recruteur/source, score de correspondance moyen et tâches IA reposent sur un échantillon de 200 candidatures maximum — pas sur le total réel."
+    "pageScopeNotice": "Les totaux globaux sont temporairement indisponibles — ces chiffres reposent uniquement sur un échantillon partiel."
   },
   "drawer": {
     "label": "Candidature",
@@ -286,6 +287,15 @@
       "resumeFailed": "La reprise a échoué.",
       "noRunningSession": "Aucun entretien n'est (plus) en cours pour cette candidature.",
       "notAllowed": "Vous n'avez pas l'autorisation de piloter cet entretien."
+    },
+    "history": {
+      "status": {
+        "completed": "Terminé",
+        "failed": "Échoué",
+        "running": "En cours"
+      },
+      "startedAt": "Démarré {{date}}",
+      "period": "{{start}} – {{end}}"
     }
   },
   "appointments": {
@@ -350,7 +360,11 @@
       "phone": "téléphone",
       "letter": "courrier"
     },
-    "noRecord": "Rejeté sans motif enregistré."
+    "noRecord": "Rejeté sans motif enregistré.",
+    "correctAction": "Corriger le refus",
+    "correctModalTitle": "Corriger le refus",
+    "saveCorrection": "Enregistrer la correction",
+    "correctionDone": "Refus corrigé"
   },
   "motivation": {
     "title": "Lettre de motivation"
@@ -469,7 +483,9 @@
     "phase": "Phase",
     "inPhase": "{{days}} jours en {{phase}}",
     "phaseSince": "depuis le {{date}}",
-    "phaseUnknown": "Historique de phase pas encore enregistré"
+    "phaseUnknown": "Historique de phase pas encore enregistré",
+    "recalculateScore": "Recalculer le score de match",
+    "recalculateDone": "Score de match recalculé"
   },
   "competition": {
     "title": "Autres candidats",

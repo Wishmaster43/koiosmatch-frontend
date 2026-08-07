@@ -1,9 +1,11 @@
 /**
  * AddApplicationModal — "+ Solliciteren" from the candidate Match tab: couple the
- * candidate to a vacancy in a chosen funnel phase. vacancy_id is REQUIRED by the
- * backend (a vacancy-less application is created via the intake flow instead), so
- * the save button stays disabled until a vacancy is picked. On success the host
- * reloads the applications list.
+ * candidate to a vacancy in a chosen funnel phase. APP-VACANCY-OPTIONAL-1 (CMBE
+ * 2e72cb1e): vacancy_id is nullable server-side — an OPEN application (no vacancy
+ * yet, coupled later via PATCH) is a real flow, so the picker is optional and the
+ * save button no longer waits for it. Picking "hired" without a vacancy is refused
+ * by the backend with a Dutch 422 message, surfaced by the existing error handler.
+ * On success the host reloads the applications list.
  *
  * S24b (Danny 16-07): vacancy + phase are both searchable pickers (CreatableSelect,
  * allowCreate=false — a vacancy/stage is a real relational id, never free text); the
@@ -164,14 +166,13 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
     setPhaseId(defaultStage.id)
   }, [defaultStage, stages, phaseId])
 
-  // Couple to the vacancy via the canonical POST /applications (vacancy_id required).
+  // Create via the canonical POST /applications — vacancy_id may be null (open application).
   const submit = async () => {
-    if (!vacancyId) return
     setSaving(true)
     setErrors({})
     try {
       await api.post('/applications', {
-        candidate_id: candidateId, vacancy_id: vacancyId, owner_id: ownerId || null,
+        candidate_id: candidateId, vacancy_id: vacancyId || null, owner_id: ownerId || null,
         application_stage_id: phaseId || undefined,
       })
       notifySuccess(t('work.applicationCreated'))
@@ -202,10 +203,12 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
         )}
 
         {/* Vacancy — searchable pick-only combobox (S24b), mirrors PlanIntakeModal.
+            APP-VACANCY-OPTIONAL-1: the label says "(optioneel)" honestly — an open
+            application without a vacancy is a real backend flow now.
             S24c (Danny 24-07): resized to the AddCandidateModal text-input footprint
             (padding '8px 11px' / fontSize 13) so every drawer combobox reads as one system. */}
         <div style={{ marginBottom: 14 }}>
-          <div style={fieldLabel}>{t('work.vacancy')}</div>
+          <div style={fieldLabel}>{t('work.vacancyOptional')}</div>
           <CreatableSelect value={vacancyId || null} onChange={setVacancyId} placeholder={t('work.pickVacancy')}
             allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint}
             options={vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))} />
@@ -253,8 +256,8 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
         )}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
-          <button onClick={submit} disabled={saving || !vacancyId || appRuleBlocked}
-            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: '#fff', cursor: (vacancyId && !appRuleBlocked) ? 'pointer' : 'default', opacity: (vacancyId && !appRuleBlocked) ? 1 : 0.4 }}>
+          <button onClick={submit} disabled={saving || appRuleBlocked}
+            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: '#fff', cursor: !appRuleBlocked ? 'pointer' : 'default', opacity: !appRuleBlocked ? 1 : 0.4 }}>
             {saving ? t('common:saving') : t('work.createApplication')}
           </button>
         </div>

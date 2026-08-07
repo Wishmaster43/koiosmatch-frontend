@@ -148,9 +148,15 @@ export interface ApplicationDetail extends Application {
     experience: string; seniority: string; education: string
     branch: string; category: string; skills: unknown[]; tags: unknown[]
   }
+  // W7 (measured 07-08 in ApplicationDetailResource::interviews — APP-INTERVIEW-HISTORY-1):
+  // one row per REAL InterviewSession, never the invented `channel`/`date`/`time`/`summary`
+  // shape a prior version guessed at (those keys do not exist on the resource). `status` is
+  // the session outcome (completed/failed/running); the transcript carries only
+  // direction/body/sent_at — no author identity, by data-minimisation design (§9).
   interviews: Array<{
-    id: Id | undefined; channel: string; status: string; date: string; time: string; summary: string
-    transcript: Array<{ author: string; side: string; time: string; text: string }>
+    id: Id | undefined; status: 'completed' | 'failed' | 'running' | ''
+    startedAt: string | null; finishedAt: string | null
+    transcript: Array<{ direction: 'inbound' | 'outbound' | ''; body: string; sentAt: string | null }>
   }>
   appointments: Array<{
     id: Id | undefined; type: string; title: string; when: string; with: string; status: string
@@ -158,7 +164,11 @@ export interface ApplicationDetail extends Application {
     durationMin: number | null; modality: string; ownerId: Id | null; locationName: string
   }>
   timeline: Array<{ id: Id | undefined; author: string; initials: string; description: string; ai: boolean; time: string }>
-  notes: Array<{ id: Id | undefined; author: string; text: string; time: string }>
+  // W10 (07-08): `type`/`language` used to be dropped on the floor here even though
+  // ApplicationDetailResource::applicationNotes() sends both (type = note_types slug,
+  // language = the note's own spellcheck/output language) — the composer's chosen
+  // type/language silently vanished the moment a note round-tripped through a fetch.
+  notes: Array<{ id: Id | undefined; author: string; type: string; title: string; text: string; language: string; time: string }>
   matchCriteria: unknown[]
   matchSummary: string
   matchSource: string
@@ -262,6 +272,12 @@ export interface ApiApplication {
   match?: {
     overall?: number | null; criteria?: unknown[]; summary?: string
     id?: Id; reference_number?: string; status_label?: string; status_color?: string
+    // MATCH-VOCABULAIRE-1 (verified live 07-08): the resource now sends BOTH pairs —
+    // `match_*` is the current field name, `placement_*` is the deprecated alias kept
+    // for one release (ApplicationDetailResource::matchLink() comment: "drop the old
+    // pair once CMFE reports it unused"). The mapper below now reads `match_*` first;
+    // `placement_*` stays typed only as a fallback until the backend confirms removal.
+    match_start?: string | null; match_end?: string | null
     placement_start?: string | null; placement_end?: string | null
   } | null
   // APP-STAGE-DURATIONS-1: chronological phase history (detail only); the list
@@ -323,9 +339,15 @@ export interface ApiApplication {
     paused_by?: Id | { id?: Id; name?: string } | null
     paused_by_name?: string | null
   } | null
+  // W7 (measured 07-08 in ApplicationDetailResource::interviews): the real per-session
+  // history row — `status` is one of completed/failed/running (session.completed_at /
+  // paused_at derived), `started_at`/`finished_at` are the real session columns (no
+  // `created_at`/`time`/`summary` on this resource), and each transcript entry is a
+  // conversation-message SLICE: direction/body/sent_at only.
   interviews?: Array<{
-    id?: Id; channel?: string; status?: string; created_at?: string; time?: string; summary?: string
-    transcript?: Array<{ author?: string; side?: string; time?: string; text?: string }>
+    id?: Id; status?: 'completed' | 'failed' | 'running'
+    started_at?: string | null; finished_at?: string | null
+    transcript?: Array<{ direction?: 'inbound' | 'outbound'; body?: string | null; sent_at?: string | null }>
   }>
   appointments?: Array<{
     id?: Id; type?: string; title?: string; scheduled_at?: string; when?: string
@@ -333,7 +355,13 @@ export interface ApiApplication {
     owner?: { id?: Id; name?: string }; with?: string; status?: string
   }>
   timeline?: Array<{ id?: Id; author?: string; author_initials?: string; description?: string; ai?: unknown; created_at?: string; time?: string }>
-  notes?: Array<{ id?: Id; author?: string; text?: string; created_at?: string }>
+  // W10 (verified live 07-08 against ApplicationDetailResource::applicationNotes()):
+  // the resource sends `type`/`title`/`language` alongside author/text/created_at.
+  // `author_id` is NOT in this list — the resource never emits it (only used
+  // internally to resolve `author`, and that resolution itself is currently broken
+  // server-side: `ownerNames` is referenced but never populated by the controller,
+  // so `author` reads null even for a real user — filed for backend, out of scope here).
+  notes?: Array<{ id?: Id; author?: string; type?: string; title?: string | null; text?: string; language?: string | null; created_at?: string }>
   match_criteria?: unknown[]
   match_summary?: string
   match_score_source?: string

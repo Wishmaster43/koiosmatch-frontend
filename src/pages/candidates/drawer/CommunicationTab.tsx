@@ -15,6 +15,8 @@ import StartConversationModal from './StartConversationModal'
 import { useNoteTypes, SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import { useCandidateNotes } from '@/pages/candidates/hooks/useCandidateNotes'
+import { openNotesPopout } from '@/lib/secondScreen'
+import { notifyError } from '@/lib/notify'
 import type { Candidate } from '@/types/candidate'
 
 type AnyProps = Record<string, unknown>
@@ -153,6 +155,10 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
     onEditStatusEvent,
     // Point 3 — see renderMatchTimeline above.
     renderTimelineContent: renderMatchTimeline,
+    // F5 second-screen: pop the candidate's notes into a real browser window
+    // (named window — reopening focuses the existing one); a blocked popup gets
+    // an honest Dutch notice instead of failing silently.
+    onPopOut: () => { if (!openNotesPopout(String(c.id))) notifyError(t('common:popupBlocked')) },
     labels: {
       // No section titles (Danny addendum 4): notes/timeline/conversations each
       // render as the SOLE visible NotesTab section for their own sub-tab, whose

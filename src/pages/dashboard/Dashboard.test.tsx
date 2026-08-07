@@ -50,6 +50,9 @@ vi.mock('./blocks/ActivityListsRow', () => ({ default: () => null }))
 vi.mock('./blocks/ShiftsSummary', () => ({ default: () => null }))
 vi.mock('./blocks/TouchpointsFeed', () => ({ default: () => null }))
 vi.mock('./blocks/AttentionCandidates', () => ({ default: () => null }))
+// Own useQuery call (own test file) — mocked here so this container test never
+// needs a QueryClientProvider in the tree.
+vi.mock('./KoiosForYouCard', () => ({ default: () => null }))
 
 const dashboardDataMock = vi.fn()
 vi.mock('./hooks/useDashboardData', () => ({ useDashboardData: (...args: unknown[]) => dashboardDataMock(...args) }))

@@ -1,28 +1,33 @@
 /**
  * useApplicationFilters — all list-filter state for the applications page
  * (§0.3 size split, mirrors useCandidateFilters). Owns the bucket tab, the
- * panel dimensions (phase/owner/source/vacancy), the attention KPI filter, the
- * search text and the archived toggle — plus the row predicate, clear-all and
- * the SERVER-side filterParams (F-6: /applications now supports pagination +
- * a subset of filters — bucket/phase_key/vacancy_id/search/include_archived,
- * all single-value; see ApplicationQuery.php, measured 2026-07-15). owner/source
- * and the attention KPIs have NO server equivalent (BE gap — ApplicationQuery
- * lacks the array-filter + by_owner/sources/attention support CandidateQuery has),
- * so they — and any MULTI-select on phase/vacancy — stay a client-side refine
- * over the fetched page via matchesFilters, exactly as before pagination.
- * INTERVIEW-PHASE-1: a v1 "In interview" quick-view sends the server's
- * `interview_status=busy` filter directly (a full category dropdown may follow
- * once there's demand — see the applications task note).
+ * panel dimensions (phase/owner/source/vacancy/client), the attention KPI
+ * filter, the search text and the archived toggle — plus the row predicate,
+ * clear-all and the SERVER-side filterParams.
+ *
+ * W27 (verified 2026-08-07 against ApplicationQuery.php): `phase_key`,
+ * `vacancy_id`, `owner_id`, `source`, `customer_id` and `candidate_ids` are ALL
+ * real backend ARRAY_FILTERS now (ApplicationQuery.php:34) — every multi-select
+ * here goes server-side, none of it is a client-only refine anymore. The one
+ * remaining gap: `owner_id[]` has no IS-NULL support (`owner_id.*` => uuid, no
+ * "no owner" value) — picking the OWNER_NONE sentinel still narrows client-side
+ * via matchesFilters, a documented, narrow BE limitation (not fixable here).
+ * NUMMER-1 (mirrors useCandidateFilters): a well-formed reference number
+ * ("S-00123") sends an exact `?ref=` lookup instead of the fuzzy `?search=` —
+ * `ref` takes precedence over EVERY other filter server-side (bucket, phase,
+ * owner, …), so `refMode` lets the row predicate skip those dimensions too
+ * (ApplicationsPage passes it through on both the table and board refine).
+ * INTERVIEW-PHASE-1: two mutually-exclusive quick-views (busy/paused) send the
+ * server's own universal category filter directly — exclusivity is enforced by
+ * the page's click handlers (each toggle clears its sibling), not here.
  * 11.1: `selectedCandidateIds` is the deep-link scope from the candidates bulk
  * "manage per application" action (NavigationContext intent, plain useState —
  * NOT persisted like the other filters, a deep-link seed shouldn't linger across
- * sessions). Sent to the server as `candidate_ids` for forward-compat; the BE
- * (ApplicationQuery) does not accept it yet, so today it has no narrowing effect
- * (honest — see ApplicationsPage's intent effect for why this stays server-only
- * rather than an unreliable client-side refine over a paginated, unfiltered set).
+ * sessions). Sent to the server as `candidate_ids` — a real, working filter.
  */
 import { useState, useCallback, useMemo } from 'react'
 import { usePageMemory } from '@/lib/usePageMemory'
+import { isReferenceQuery } from '@/lib/referenceNumber'
 import type { Id } from '@/types/common'
 
 // The owner facet key for unowned rows (kept identical to the donut slice key).
@@ -34,9 +39,10 @@ interface FilterableApplication {
   archived?: boolean
   bucket?: string
   phaseKey?: string
-  owner?: { name?: string } | null
+  owner?: { id?: string | number | null; name?: string } | null
   source?: string
   vacancyId?: string | number | null
+  customerId?: string | number | null
   isNew?: boolean
   score?: number | null
   task?: unknown
@@ -48,51 +54,75 @@ export function useApplicationFilters() {
   const [bucket,         setBucket]         = usePageMemory('apps.bucket', 'active')
   const [selectedPhase,  setSelectedPhase]  = usePageMemory<string[]>('apps.phase', [])
   const [attention,      setAttention]      = usePageMemory<string | null>('apps.attention', null)
+  // W27: holds owner IDs (or the OWNER_NONE sentinel) — was owner NAMES before,
+  // switched so the real ids can drive the server's owner_id[] filter directly.
   const [selectedOwner,  setSelectedOwner]  = usePageMemory<string[]>('apps.owner', [])
   const [selectedSource, setSelectedSource] = usePageMemory<string[]>('apps.source', [])
   const [selectedVac,    setSelectedVac]    = usePageMemory<string[]>('apps.vac', [])
+  // W27: customer/client filter — new dimension, enabled by the now-verified
+  // customer_id[] array filter (ApplicationQuery.php:88-89).
+  const [selectedClient, setSelectedClient] = usePageMemory<string[]>('apps.client', [])
   // VESTIGING-2: explicit branch filter (inherited from the candidate) — a
   // narrowing only; the server excludes applications with no branch, see the
   // ApplicationsPage empty-state notice.
   const [selectedBranch, setSelectedBranch] = usePageMemory<string[]>('apps.branch', [])
   const [showArchived,   setShowArchived]   = usePageMemory('apps.archived', false)
   const [query,          setQuery]          = usePageMemory('apps.search', '')
-  // INTERVIEW-PHASE-1: v1 quick-view — only the 'busy' universal category.
-  const [interviewBusy,  setInterviewBusy]  = usePageMemory('apps.interviewBusy', false)
+  // INTERVIEW-PHASE-1: two independent quick-views — the page's click handlers
+  // keep them mutually exclusive (each clears its sibling before toggling on).
+  const [interviewBusy,   setInterviewBusy]   = usePageMemory('apps.interviewBusy', false)
+  const [interviewPaused, setInterviewPaused] = usePageMemory('apps.interviewPaused', false)
   // 11.1: deep-link scope from the candidates bulk "manage per application"
   // action — transient (not usePageMemory), cleared via clearAllFilters or its
   // own dedicated chip (see ApplicationsPage).
   const [selectedCandidateIds, setSelectedCandidateIds] = useState<Id[]>([])
 
   // Anything narrowing the default view → the shared clear-button shows.
-  const anyFilterActive = Boolean(query.trim() || attention || showArchived || interviewBusy
+  const anyFilterActive = Boolean(query.trim() || attention || showArchived || interviewBusy || interviewPaused
     || (bucket !== 'active' && bucket !== 'allActive')
     || selectedPhase.length || selectedOwner.length || selectedSource.length || selectedVac.length
-    || selectedBranch.length || selectedCandidateIds.length)
+    || selectedClient.length || selectedBranch.length || selectedCandidateIds.length)
   // Remount the (self-stateful) search input on clear so the visible text resets too.
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setAttention(null); setShowArchived(false); setBucket('active')
     setSelectedPhase([]); setSelectedOwner([]); setSelectedSource([]); setSelectedVac([]); setInterviewBusy(false)
-    setSelectedBranch([]); setSelectedCandidateIds([])
+    setInterviewPaused(false); setSelectedClient([]); setSelectedBranch([]); setSelectedCandidateIds([])
   }
+
+  // NUMMER-1: is the CURRENT search text a well-formed reference number? Drives
+  // both filterParams (ref vs search below) and the row predicate's refMode.
+  const refMode = useMemo(() => isReferenceQuery(query.trim()), [query])
 
   // One row predicate for table + board (the page maps decorate over the result).
   // `ignoreQuery`: the server already ran `search` (a richer match — candidate email/
   // phone/city/function + vacancy code + remarks, not just name/title/source), so a
   // second client-side substring check on the narrower field set would wrongly HIDE a
   // legitimate server hit (e.g. found via email) — skip it once the server was asked.
-  const matchesFilters = useCallback((a: FilterableApplication, opts?: { ignoreBucket?: boolean; ignoreQuery?: boolean }): boolean => {
+  // `refMode`: an exact ?ref= lookup bypasses every other filter dimension SERVER-side
+  // (ApplicationQuery::filtered — `ref` returns immediately, before bucket/phase/owner/
+  // source/vacancy are even applied) — mirror that here too, or a pasted reference
+  // number would surface from the server then get dropped again by the client's own
+  // bucket/phase/owner/… check. Only archived-visibility still applies (matches the
+  // backend: include_archived is resolved before the ref shortcut).
+  const matchesFilters = useCallback((a: FilterableApplication, opts?: { ignoreBucket?: boolean; ignoreQuery?: boolean; refMode?: boolean }): boolean => {
     // Detached rows only surface in the dedicated archived view (any bucket).
     if (showArchived) return Boolean(a.archived)
     if (a.archived) return false
+    if (opts?.refMode) return true
     // 'allActive' (TOTAAL ACTIEF-kaart) spans the active + matched buckets together.
     // opts.ignoreBucket: the board view shows the whole funnel (all buckets).
     if (!opts?.ignoreBucket && (bucket === 'allActive' ? !['active', 'matched'].includes(a.bucket ?? '') : a.bucket !== bucket)) return false
     if (selectedPhase.length  && !selectedPhase.includes(a.phaseKey ?? ''))              return false
-    if (selectedOwner.length  && !selectedOwner.includes(a.owner?.name || OWNER_NONE))   return false
+    // Owner compares by ID now (W27) — falls back to OWNER_NONE for an unowned row,
+    // same sentinel the donut/filter options use (see buildOwnerData/buildOwnerDataFromStats).
+    if (selectedOwner.length) {
+      const ownerKey = a.owner?.id != null ? String(a.owner.id) : OWNER_NONE
+      if (!selectedOwner.includes(ownerKey)) return false
+    }
     if (selectedSource.length && !selectedSource.includes(a.source ?? ''))               return false
     if (selectedVac.length    && !selectedVac.includes(String(a.vacancyId)))             return false
+    if (selectedClient.length && !selectedClient.includes(String(a.customerId)))         return false
     // KPI attention filters (mirror the card definitions on the page).
     if (attention === 'new'     && !(a.isNew && a.bucket === 'active'))                          return false
     if (attention === 'scored'  && !(typeof a.score === 'number' && a.bucket !== 'rejected'))    return false
@@ -103,37 +133,44 @@ export function useApplicationFilters() {
       if (!`${a.candidateName ?? ''} ${a.vacancyTitle ?? ''} ${a.source ?? ''}`.toLowerCase().includes(q)) return false
     }
     return true
-  }, [bucket, showArchived, attention, selectedPhase, selectedOwner, selectedSource, selectedVac, query])
+  }, [bucket, showArchived, attention, selectedPhase, selectedOwner, selectedSource, selectedVac, selectedClient, query])
 
-  // ── Server-side filter params (F-6) ──────────────────────────────────────
-  // Shared base sent to BOTH the list and the stats endpoints (ApplicationQuery
-  // honours phase_key/vacancy_id/search/include_archived on the list; stats only
-  // honours vacancy_id/owner_id/search — bucket/phase_key are deliberately
-  // ignored there so the KPI strip keeps showing the full distribution to pick
-  // between). Single-value only: phase_key/vacancy_id 422 on an array (the
-  // backend, unlike CandidateQuery, has no ARRAY_FILTERS normalisation yet — BE
-  // gap) — so a multi-select on those dimensions is sent as NO server filter and
-  // finishes narrowing client-side via matchesFilters, exactly as pre-pagination.
+  // ── Server-side filter params (W27: every filter the backend supports goes
+  // here now — see ApplicationQuery.php's rules()/ARRAY_FILTERS, measured 2026-08-07). ──
   const filterParams = useMemo(() => {
     const p: Record<string, unknown> = {}
-    if (selectedPhase.length === 1) p.phase_key   = selectedPhase[0]
-    if (selectedVac.length === 1)   p.vacancy_id  = selectedVac[0]
-    if (query.trim())               p.search      = query.trim()
+    if (selectedPhase.length)  p.phase_key   = selectedPhase
+    if (selectedVac.length)    p.vacancy_id  = selectedVac
+    if (selectedClient.length) p.customer_id = selectedClient
+    if (selectedSource.length) p.source      = selectedSource
+    // owner_id[] has no IS-NULL support (ApplicationQuery.php: 'owner_id.*' => uuid) —
+    // a real-id pick narrows server-side; a "No owner" pick (alone or mixed in) stays a
+    // client-only refine (matchesFilters), a documented BE gap, not fixable here.
+    const realOwnerIds = selectedOwner.filter(o => o !== OWNER_NONE)
+    if (realOwnerIds.length && !selectedOwner.includes(OWNER_NONE)) p.owner_id = realOwnerIds
+    // NUMMER-1: a well-formed reference number does an exact server-side `?ref=`
+    // lookup instead of the normal free-text search; the server ignores every other
+    // filter for it (see the header comment / matchesFilters' refMode).
+    if (query.trim()) {
+      const q = query.trim()
+      if (isReferenceQuery(q)) p.ref = q
+      else p.search = q
+    }
     // include_archived REVEALS trashed rows alongside the active set (it does not
     // isolate them) — matchesFilters' `showArchived` branch still isolates client-side.
-    if (showArchived)               p.include_archived = 1
-    // INTERVIEW-PHASE-1: the v1 "In interview" quick-view maps straight onto the
-    // backend's universal category filter (busy/completed/disqualified/none).
-    if (interviewBusy)              p.interview_status = 'busy'
-    // 11.1: forward-compat filter for the candidates-bulk deep-link — sent so a
-    // future ApplicationQuery `candidate_ids` filter "just works"; see the header
-    // comment for why this has no client-side fallback narrowing today.
+    if (showArchived) p.include_archived = 1
+    // INTERVIEW-PHASE-1: the universal category filter — busy wins if somehow both
+    // are true (the page's click handlers keep them mutually exclusive already).
+    if (interviewBusy) p.interview_status = 'busy'
+    else if (interviewPaused) p.interview_status = 'paused'
+    // 11.1: the candidates-bulk deep-link scope — a real, working server filter.
     if (selectedCandidateIds.length) p.candidate_ids = selectedCandidateIds
     // VESTIGING-2: server-side ?branch_id[]= — a narrowing only, gated behind the
     // tenant's own branch_authz_enabled axis on the backend (off = no effect).
-    if (selectedBranch.length)      p.branch_id = selectedBranch
+    if (selectedBranch.length) p.branch_id = selectedBranch
     return p
-  }, [selectedPhase, selectedVac, query, showArchived, interviewBusy, selectedCandidateIds, selectedBranch])
+  }, [selectedPhase, selectedVac, selectedClient, selectedSource, selectedOwner, query, showArchived,
+    interviewBusy, interviewPaused, selectedCandidateIds, selectedBranch])
 
   // Bucket param — TABLE query only (never board/stats): 'allActive' has no server
   // equivalent (spans two buckets) and showArchived's reveal must not be narrowed by
@@ -145,8 +182,9 @@ export function useApplicationFilters() {
   return {
     bucket, setBucket, selectedPhase, setSelectedPhase, attention, setAttention,
     selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
-    selectedVac, setSelectedVac, showArchived, setShowArchived, query, setQuery,
-    interviewBusy, setInterviewBusy,
+    selectedVac, setSelectedVac, selectedClient, setSelectedClient,
+    showArchived, setShowArchived, query, setQuery,
+    interviewBusy, setInterviewBusy, interviewPaused, setInterviewPaused, refMode,
     selectedBranch, setSelectedBranch,
     selectedCandidateIds, setSelectedCandidateIds,
     anyFilterActive, clearAllFilters, searchEpoch, matchesFilters,

@@ -8,7 +8,10 @@
 import type { AssistActionItem, AssistMode, AssistResult } from './noteAssistApi'
 
 // Escape the handful of characters that would otherwise be parsed as markup.
-function escapeHtml(s: string): string {
+// Exported (§11 one source): the dictation mic (NOTITIE-VOICE-1) reuses this to
+// safely insert recognized speech into the note's HTML body — never a second
+// hand-copied escaper.
+export function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 

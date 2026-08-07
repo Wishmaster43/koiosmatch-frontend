@@ -8,6 +8,13 @@
  * in the composer, even mid-error — Danny explicitly wants to SEE the Koios
  * space exist even when there is no budget left this month.
  *
+ * K0-B (F4, 06-08): "Actiepunten" results now execute for REAL through
+ * `NoteActionsResultsPanel` (Uitvoeren → per-item execute/confirm cards,
+ * "Als tekst toevoegen" kept as the old append-as-list secondary option) —
+ * improve/summarize keep the original review→Overnemen/Verwerpen idiom
+ * unchanged below. The header also carries the compact Wizard/Auto switch
+ * (`NoteKoiosModeToggle`, same K0 setting as the profile "Weergave" tab).
+ *
  * DEFAULT-VALUE-1 (Danny 07-08, live popup feedback): the `common:notesAssist.*`
  * keys are reported to the locale owners but not yet landed in the shipped
  * JSON files (house rule: this lane never edits src/i18n/locales/**) — every
@@ -23,6 +30,9 @@ import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import CalloutBox from '@/components/ui/CalloutBox'
 import { useNoteAssist } from './useNoteAssist'
 import { applyAssistResult } from './noteAssistApply'
+import NoteActionsResultsPanel from './NoteActionsResultsPanel'
+import NoteKoiosModeToggle from './NoteKoiosModeToggle'
+import { ACTION_TYPE_LABEL_NL } from './noteAssistApi'
 import type { AssistMode, AssistActionType } from './noteAssistApi'
 
 interface NoteAssistSectionProps {
@@ -31,6 +41,9 @@ interface NoteAssistSectionProps {
   body: string
   onApply: (nextBody: string) => void
   language?: string
+  // Existing note being edited → its id, forwarded into the execute request's
+  // `source.note_id`; a new unsaved note omits this (no source sent).
+  noteId?: string
 }
 
 const actionBtn = (active: boolean, disabled: boolean): CSSProperties => ({
@@ -45,13 +58,10 @@ const primaryBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center'
 const ghostBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500,
   padding: '5px 11px', borderRadius: 7, cursor: 'pointer', background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }
 
-// Dutch fallback copy (DEFAULT-VALUE-1) — mode button label + the action-item
-// type label, keyed once so both the button row and the actions preview list
-// share the exact same word.
+// Dutch fallback copy (DEFAULT-VALUE-1) — mode button label. The action-item
+// type label (ACTION_TYPE_LABEL_NL) now lives in noteAssistApi.ts (§11 one
+// source — NoteActionsResultsPanel/NoteActionItemCard render the same items).
 const MODE_LABEL_NL: Record<AssistMode, string> = { improve: 'Verbeteren', summarize: 'Samenvatten', actions: 'Actiepunten' }
-const ACTION_TYPE_LABEL_NL: Record<AssistActionType, string> = {
-  task: 'Taak', whatsapp: 'WhatsApp', email: 'E-mail', appointment: 'Afspraak', notification: 'Melding',
-}
 
 // One row per mode — icon + i18n key share the mode name, so adding a fourth
 // mode later is one array entry, never a new hand-rolled button block.
@@ -61,7 +71,7 @@ const MODES: { mode: AssistMode; icon: typeof Wand2 }[] = [
   { mode: 'actions', icon: ListChecks },
 ]
 
-export default function NoteAssistSection({ body, onApply, language }: NoteAssistSectionProps) {
+export default function NoteAssistSection({ body, onApply, language, noteId }: NoteAssistSectionProps) {
   const { t } = useTranslation('common')
   const { mode, status, result, errorMessage, tone, run, discard } = useNoteAssist(language)
   const loading = status === 'loading'
@@ -86,6 +96,10 @@ export default function NoteAssistSection({ body, onApply, language }: NoteAssis
         <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
           {t('notesAssist.title', { defaultValue: 'Koios AI' })}
         </span>
+        <div style={{ flex: 1 }} />
+        {/* K0: the compact Wizard/Auto switch — "near the assist section" (same
+            setting as the profile "Weergave" tab, see NoteKoiosModeToggle). */}
+        <NoteKoiosModeToggle />
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginBottom: 4 }}>
         {MODES.map(({ mode: m, icon: Icon }) => (
@@ -115,30 +129,27 @@ export default function NoteAssistSection({ body, onApply, language }: NoteAssis
         </div>
       )}
 
-      {status === 'success' && result && (
+      {/* K0-B (F4): a non-empty 'actions' result hands off to the execute flow
+          (Uitvoeren → real per-item execute/confirm cards) — the plain
+          Overnemen/Verwerpen idiom below stays for improve/summarize/an EMPTY
+          actions result (nothing to execute). */}
+      {status === 'success' && result && result.kind === 'actions' && result.items.length > 0 && (
+        <NoteActionsResultsPanel items={result.items} noteId={noteId} onApplyAsText={handleApply} onDiscard={discard} />
+      )}
+
+      {status === 'success' && result && !(result.kind === 'actions' && result.items.length > 0) && (
         <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', background: 'var(--bg)', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {/* improve/summarize: plain prose preview (never dangerouslySetInnerHTML — the
               model's reply is rendered as TEXT content, §7, same as GenerateDescriptionFlow). */}
           {result.kind === 'text' ? (
             <div style={{ whiteSpace: 'pre-wrap', fontSize: 12, color: 'var(--text)', lineHeight: 1.5, maxHeight: 180, overflow: 'auto' }}>{result.text}</div>
-          ) : result.items.length === 0 ? (
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('notesAssist.noItems', { defaultValue: 'Geen actiepunten gevonden' })}</div>
           ) : (
-            // actions: a readable list — title + type + due date, per the FE-mal.
-            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: 'var(--text)', lineHeight: 1.6 }}>
-              {result.items.map((it, i) => (
-                <li key={i}>
-                  <strong>{it.title}</strong>{' '}
-                  <span style={{ color: 'var(--text-muted)' }}>
-                    ({t(`notesAssist.actionTypes.${it.type}`, { defaultValue: ACTION_TYPE_LABEL_NL[it.type] ?? it.type })}{it.due_date ? ` · ${it.due_date}` : ''})
-                  </span>
-                </li>
-              ))}
-            </ul>
+            // actions with zero items — nothing to run, calm empty notice.
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('notesAssist.noItems', { defaultValue: 'Geen actiepunten gevonden' })}</div>
           )}
           <div style={{ display: 'flex', gap: 8 }}>
             {/* No apply target when actions came back empty — nothing to overnemen. */}
-            {(result.kind === 'text' || result.items.length > 0) && (
+            {result.kind === 'text' && (
               <button type="button" onClick={handleApply} style={primaryBtn}><Check size={13} /> {t('notesAssist.apply', { defaultValue: 'Overnemen' })}</button>
             )}
             <button type="button" onClick={discard} style={ghostBtn}><X size={13} /> {t('notesAssist.discard', { defaultValue: 'Verwerpen' })}</button>

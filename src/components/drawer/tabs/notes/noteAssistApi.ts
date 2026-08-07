@@ -17,6 +17,14 @@ export interface AssistActionItem {
   due_date: string | null
   note_excerpt: string | null
 }
+// Dutch fallback label per action-item type (DEFAULT-VALUE-1 — the
+// common:notesAssist.actionTypes.* keys are reported, not yet shipped). ONE
+// source (§11): NoteAssistSection, NoteActionsResultsPanel and
+// NoteActionItemCard all render this same type, so they all key off this map
+// instead of three hand-copied duplicates.
+export const ACTION_TYPE_LABEL_NL: Record<AssistActionType, string> = {
+  task: 'Taak', whatsapp: 'WhatsApp', email: 'E-mail', appointment: 'Afspraak', notification: 'Melding',
+}
 // improve/summarize return prose; actions returns structured items — one
 // discriminated result so the caller never has to guess the shape by mode alone.
 export type AssistResult =

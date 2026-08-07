@@ -25,7 +25,8 @@
     "ownerPlaceholder": "Select a recruiter",
     "search": "Search…",
     "create": "Create",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "searchError": "Search failed"
   },
   "pagination": {
     "perPage": "Results per page",
@@ -68,7 +69,7 @@
     "source": "Source",
     "noOwner": "No owner",
     "clearFilter": "Clear filter",
-    "pageScopeNotice": "Owner/source, avg. match score and AI tasks are based on a sample of up to 200 applications — not the full total."
+    "pageScopeNotice": "Server-wide totals are temporarily unavailable — these figures are based on a partial sample only."
   },
   "drawer": {
     "label": "Application",
@@ -286,6 +287,15 @@
       "resumeFailed": "Resuming failed.",
       "noRunningSession": "There's no interview running for this application (any more).",
       "notAllowed": "You don't have permission to control this interview."
+    },
+    "history": {
+      "status": {
+        "completed": "Completed",
+        "failed": "Failed",
+        "running": "Running"
+      },
+      "startedAt": "Started {{date}}",
+      "period": "{{start}} – {{end}}"
     }
   },
   "appointments": {
@@ -361,7 +371,11 @@
       "phone": "phone",
       "letter": "letter"
     },
-    "noRecord": "Rejected without a recorded reason."
+    "noRecord": "Rejected without a recorded reason.",
+    "correctAction": "Correct rejection",
+    "correctModalTitle": "Correct rejection",
+    "saveCorrection": "Save correction",
+    "correctionDone": "Rejection corrected"
   },
   "motivation": {
     "title": "Motivation"
@@ -469,7 +483,9 @@
     "phase": "Phase",
     "inPhase": "{{days}} days in {{phase}}",
     "phaseSince": "since {{date}}",
-    "phaseUnknown": "Phase history not yet recorded"
+    "phaseUnknown": "Phase history not yet recorded",
+    "recalculateScore": "Recalculate match score",
+    "recalculateDone": "Match score recalculated"
   },
   "competition": {
     "title": "Other applicants",

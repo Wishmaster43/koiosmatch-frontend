@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mapApplication, mapApplicationDetail, mapInterview } from './mapApplication'
+import { mapApplication, mapApplicationDetail, mapInterview, mapMatchSummary } from './mapApplication'
 import type { LookupItem } from '@/context/LookupsContext'
 
 // A tenant that renamed the funnel: 'aangenomen' carries is_match — proves the
@@ -268,6 +268,106 @@ describe('mapApplicationDetail', () => {
       expect(mapApplicationDetail({ id: 15 }).contact).toBeNull()
       expect(mapApplicationDetail({ id: 16, contact: null }).contact).toBeNull()
     })
+  })
+
+  // W7 (measured 07-08 in ApplicationDetailResource::interviews — APP-INTERVIEW-HISTORY-1):
+  // the previous mapper read `channel`/`created_at`/`time`/`summary` and transcript
+  // `author`/`side`/`time`/`text` — none of those exist on the resource. Pins the REAL
+  // shape: status/started_at/finished_at, transcript direction/body/sent_at only.
+  describe('interviews (W7 — the real APP-INTERVIEW-HISTORY-1 contract)', () => {
+    it('maps status/started_at/finished_at and the transcript direction/body/sent_at', () => {
+      const detail = mapApplicationDetail({
+        id: 17,
+        interviews: [{
+          id: 'sess-1', status: 'completed', started_at: '2026-07-28T09:00:00Z', finished_at: '2026-08-01T11:30:00Z',
+          transcript: [
+            { direction: 'outbound', body: 'What is your availability?', sent_at: '2026-07-28T09:01:00Z' },
+            { direction: 'inbound', body: 'I can start Monday.', sent_at: '2026-07-28T09:05:00Z' },
+          ],
+        }],
+      })
+      expect(detail.interviews).toEqual([{
+        id: 'sess-1', status: 'completed', startedAt: '2026-07-28T09:00:00Z', finishedAt: '2026-08-01T11:30:00Z',
+        transcript: [
+          { direction: 'outbound', body: 'What is your availability?', sentAt: '2026-07-28T09:01:00Z' },
+          { direction: 'inbound', body: 'I can start Monday.', sentAt: '2026-07-28T09:05:00Z' },
+        ],
+      }])
+    })
+
+    it('defaults to an empty array when the application never ran an interview', () => {
+      expect(mapApplicationDetail({ id: 18 }).interviews).toEqual([])
+      expect(mapApplicationDetail({ id: 19, interviews: [] }).interviews).toEqual([])
+    })
+
+    it('defaults status to empty string, timestamps to null and transcript to [] when the row is bare', () => {
+      const detail = mapApplicationDetail({ id: 20, interviews: [{ id: 'sess-2' }] })
+      expect(detail.interviews).toEqual([{ id: 'sess-2', status: '', startedAt: null, finishedAt: null, transcript: [] }])
+    })
+
+    it('defaults a bare transcript entry to empty body/direction and null sentAt', () => {
+      const detail = mapApplicationDetail({ id: 21, interviews: [{ id: 'sess-3', transcript: [{}] }] })
+      expect(detail.interviews[0].transcript).toEqual([{ direction: '', body: '', sentAt: null }])
+    })
+
+    it('maps a still-running session (no finished_at) with a running status', () => {
+      const detail = mapApplicationDetail({
+        id: 22,
+        interviews: [{ id: 'sess-4', status: 'running', started_at: '2026-08-05T08:00:00Z', finished_at: null, transcript: [] }],
+      })
+      expect(detail.interviews).toEqual([{ id: 'sess-4', status: 'running', startedAt: '2026-08-05T08:00:00Z', finishedAt: null, transcript: [] }])
+    })
+  })
+})
+
+// W10 (verified live 07-08 against ApplicationDetailResource::applicationNotes()):
+// `type`/`title`/`language` used to be dropped on the floor — a fetched note lost
+// its type chip and spellcheck language even though the resource always sends them.
+describe('mapApplicationDetail · notes (W10)', () => {
+  it('maps type/title/language through, not just author/text/time', () => {
+    const detail = mapApplicationDetail({
+      id: 23,
+      notes: [{
+        id: 'n1', author: 'Bente de Jong', type: 'call', title: 'Belafspraak',
+        text: 'Gebeld over intake', language: 'nl', created_at: '2026-08-06T10:00:00Z',
+      }],
+    })
+    expect(detail.notes).toEqual([{
+      id: 'n1', author: 'Bente de Jong', type: 'call', title: 'Belafspraak',
+      text: 'Gebeld over intake', language: 'nl', time: '2026-08-06T10:00:00Z',
+    }])
+  })
+
+  it('defaults type/title/language to empty strings when the resource omits them', () => {
+    const detail = mapApplicationDetail({ id: 24, notes: [{ id: 'n2', author: 'Bente de Jong', text: 'Kort' }] })
+    expect(detail.notes).toEqual([{ id: 'n2', author: 'Bente de Jong', type: '', title: '', text: 'Kort', language: '', time: '' }])
+  })
+
+  it('defaults to an empty array when the application has no notes', () => {
+    expect(mapApplicationDetail({ id: 25 }).notes).toEqual([])
+  })
+})
+
+// W31 (verified live 07-08): MATCH-VOCABULAIRE-1 — the resource sends BOTH
+// `match_*` (current) and `placement_*` (deprecated alias, kept for one release).
+// The mapper used to read ONLY the deprecated pair; it now prefers `match_*`.
+describe('mapMatchSummary · match_start/match_end (W31)', () => {
+  it('prefers the current match_start/match_end pair', () => {
+    const summary = mapMatchSummary({
+      id: 'm1', match_start: '2026-08-01', match_end: '2026-09-01',
+      placement_start: '1999-01-01', placement_end: '1999-02-01',
+    } as never)
+    expect(summary).toMatchObject({ matchStart: '2026-08-01', matchEnd: '2026-09-01' })
+  })
+
+  it('falls back to the deprecated placement_start/placement_end when match_* is absent', () => {
+    const summary = mapMatchSummary({ id: 'm2', placement_start: '2026-08-01', placement_end: '2026-09-01' } as never)
+    expect(summary).toMatchObject({ matchStart: '2026-08-01', matchEnd: '2026-09-01' })
+  })
+
+  it('leaves both null when neither pair is present', () => {
+    const summary = mapMatchSummary({ id: 'm3' } as never)
+    expect(summary).toMatchObject({ matchStart: null, matchEnd: null })
   })
 })
 

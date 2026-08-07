@@ -125,6 +125,9 @@ interface NotesTabProps {
   // the customer tab's "link this note to …" picker belongs in the compose flow,
   // not as a standing toolbar row). Rendered only while composing a NEW note.
   composerExtra?: ReactNode
+  // F5 second-screen: forwarded to the composer's FloatingPanel pop-out button.
+  // Only candidate hosts pass it (the popout window is candidate-only for now).
+  onPopOut?: () => void
   showTimeline?: boolean
   showConversations?: boolean
   // Optional (Danny 2026-07-20, job A "potlood op de statuswissel"): when the host
@@ -157,7 +160,7 @@ export default function NotesTab({
   authorInitials, timelineName, timelineInitials, onAddNote, onEditNote, onDeleteNote,
   managePermission = 'candidates.notes.manage_all',
   showNotes = true, showTimeline = true, showConversations = true, onEditStatusEvent, renderTimelineContent,
-  error, onRetry, composerExtra,
+  error, onRetry, composerExtra, onPopOut,
 }: NotesTabProps) {
   // POPUP-SLEEP-1: this file only tracks WHICH note is being composed — the
   // composer's own fields (type/channel/title/body/language) now live inside
@@ -299,7 +302,7 @@ export default function NotesTab({
           open={adding}
           initialNote={editingIdx != null ? notes[editingIdx] : null}
           noteTypes={noteTypes} channels={channels} labels={labels} editorLabels={editorLabels}
-          composerExtra={composerExtra}
+          composerExtra={composerExtra} onPopOut={onPopOut}
           onSave={handleSave} onCancel={closeComposer}
         />
         <div style={sectionBlock}>

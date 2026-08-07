@@ -16,6 +16,11 @@ vi.mock('@/lib/api', async () => {
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, locale: 'nl-NL' }) }))
 // OPTIMISTIC-REVERT-1 (audit 2026-07-27): mock notify so a failed save's error toast is assertable.
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
+// AUTHOR-1 (07-08): useApplicationNotes reads the LOGGED-IN user off useAuth — a
+// controllable mock lets the regression test prove the optimistic note credits
+// this user, never the application's assigned owner.
+const mockUseAuth = vi.fn(() => ({ user: { id: 'u9', name: 'Kelly Recruiter' } }))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
@@ -62,5 +67,22 @@ describe('applications NotesTab (shared reuse)', () => {
     await waitFor(() => expect(notifyError).toHaveBeenCalled())
     expect(screen.getByText('notes.empty')).toBeInTheDocument()
     expect(notifyError).toHaveBeenCalledWith('Notitie opslaan mislukt')
+  })
+
+  // AUTHOR-1 (07-08): the optimistic note used to credit `application.owner` (the
+  // assigned recruiter, "Bente de Jong" here) instead of whoever is actually typing —
+  // it must show the LOGGED-IN user instead, and POST the real request body.
+  it('credits the optimistic note to the logged-in user, not the application owner', async () => {
+    mockPost.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    render(<NotesTab application={app()} />)
+    await user.click(screen.getByRole('button', { name: 'notes.new' }))
+    await user.click(screen.getByRole('button', { name: 'notes.save' }))
+
+    // The logged-in user's name renders on the note card; the assigned owner's does not.
+    await waitFor(() => expect(screen.getByText(/Kelly Recruiter/)).toBeInTheDocument())
+    expect(screen.queryByText(/Bente de Jong/)).toBeNull()
+    // The real request still goes to the application notes route (§13: assert the REQUEST).
+    expect(mockPost).toHaveBeenCalledWith('/applications/1/notes', expect.objectContaining({ type: expect.any(String) }))
   })
 })
